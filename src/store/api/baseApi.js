@@ -1,37 +1,37 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { setCredentials, logout } from "../slices/authSlice"
-import { setServerDown, setServerUp } from "../slices/serverStatusSlice"
-import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
-import { getBrowserTimeZone } from "@/shared/constants/timezones"
-import { defaultParamsSerializer } from "./utils/paramsSerializer"
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { setCredentials, logout } from "../slices/authSlice";
+import { setServerDown, setServerUp } from "../slices/serverStatusSlice";
+import { checkIsServerHealthy } from "@/shared/utils/healthCheck";
+import { getBrowserTimeZone } from "@/shared/constants/timezones";
+import { defaultParamsSerializer } from "./utils/paramsSerializer";
 import {
   savePendingAutoCrashReport,
   flushPendingAutoCrashReport,
-} from "@/shared/utils/telemetry/autoCrashSync"
+} from "@/shared/utils/telemetry/autoCrashSync";
 
 // ─── Helpers ────────────────────────────────────────────────────────
-const AUTH_LOG = "[Auth]"
+const AUTH_LOG = "[Auth]";
 
 /** Decode JWT payload without a library */
 function decodeJwtPayload(token) {
   try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")
-    return JSON.parse(atob(base64))
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(base64));
   } catch {
-    return null
+    return null;
   }
 }
 
 /** Seconds until the token expires (negative = already expired) */
 export function tokenSecondsRemaining(token) {
-  if (!token) return -1
-  const payload = decodeJwtPayload(token)
-  if (!payload?.exp) return -1
-  return payload.exp - Date.now() / 1000
+  if (!token) return -1;
+  const payload = decodeJwtPayload(token);
+  if (!payload?.exp) return -1;
+  return payload.exp - Date.now() / 1000;
 }
 
 // How many seconds before expiry we proactively refresh (300 = 5 minutes before expiry)
-export const PROACTIVE_REFRESH_BUFFER = 300
+export const PROACTIVE_REFRESH_BUFFER = 300;
 
 // ─── Base Query ─────────────────────────────────────────────────────
 const baseQuery = fetchBaseQuery({
@@ -39,90 +39,90 @@ const baseQuery = fetchBaseQuery({
   paramsSerializer: defaultParamsSerializer,
   prepareHeaders: (headers, { getState, extraOptions }) => {
     if (!extraOptions?.skipAuthHeader) {
-      const token = getState().auth.token
+      const token = getState().auth.token;
       if (token) {
-        headers.set("authorization", `Bearer ${token}`)
+        headers.set("authorization", `Bearer ${token}`);
       }
     }
 
     // Extract community language from URL (e.g., /zh/cat-speak/...)
-    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)
+    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
     if (match) {
-      headers.set("X-Community-Lang", match[1])
+      headers.set("X-Community-Lang", match[1]);
     }
 
     // Attach user timezone (e.g. "Asia/Ho_Chi_Minh")
-    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
-    headers.set("X-Time-Zone", userTz)
+    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone();
+    headers.set("X-Time-Zone", userTz);
 
     // Attach local timezone offset in minutes (JS returns negative for UTC+X, e.g. -420 for UTC+7)
     headers.set(
       "X-Timezone-Offset",
       (-new Date().getTimezoneOffset()).toString(),
-    )
+    );
 
-    return headers
+    return headers;
   },
-})
+});
 
 const instructorBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_INSTRUCTOR_API_BASE_URL || "/api",
   paramsSerializer: defaultParamsSerializer,
   prepareHeaders: (headers, { getState }) => {
-    const token = getState().auth.token
+    const token = getState().auth.token;
     if (token) {
-      headers.set("authorization", `Bearer ${token}`)
+      headers.set("authorization", `Bearer ${token}`);
     }
 
-    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)
+    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
     if (match) {
-      headers.set("X-Community-Lang", match[1])
+      headers.set("X-Community-Lang", match[1]);
     }
 
-    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
-    headers.set("X-Time-Zone", userTz)
+    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone();
+    headers.set("X-Time-Zone", userTz);
 
     headers.set(
       "X-Timezone-Offset",
       (-new Date().getTimezoneOffset()).toString(),
-    )
+    );
 
-    return headers
+    return headers;
   },
-})
+});
 
 const aiBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_AI_API_BASE_URL || "/api/ai",
   paramsSerializer: defaultParamsSerializer,
   prepareHeaders: (headers, { getState }) => {
-    const token = getState().auth.token
+    const token = getState().auth.token;
     if (token) {
-      headers.set("authorization", `Bearer ${token}`)
+      headers.set("authorization", `Bearer ${token}`);
     }
 
-    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)
+    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
     if (match) {
-      headers.set("X-Community-Lang", match[1])
+      headers.set("X-Community-Lang", match[1]);
     }
 
-    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
-    headers.set("X-Time-Zone", userTz)
+    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone();
+    headers.set("X-Time-Zone", userTz);
 
     headers.set(
       "X-Timezone-Offset",
       (-new Date().getTimezoneOffset()).toString(),
-    )
+    );
 
-    return headers
+    return headers;
   },
-})
+});
 
 // ─── Refresh logic ──────────────────────────────────────────────────
-let refreshPromise = null
+let refreshPromise = null;
 
 /** Expose the in-flight refresh promise so other modules (e.g. SignalR) can wait for it */
 export function getRefreshPromise() {
-  return refreshPromise
+  return refreshPromise;
 }
 
 /**
@@ -137,7 +137,7 @@ export async function ensureRefresh(
   reason,
   requestToken = null,
 ) {
-  const currentToken = api.getState?.().auth?.token
+  const currentToken = api.getState?.().auth?.token;
 
   // If this request failed with requestToken, but the store's token has ALREADY been updated
   // by another concurrent refresh call, skip initiating a second refresh call.
@@ -146,24 +146,25 @@ export async function ensureRefresh(
       AUTH_LOG,
       "Token already updated by another call — skipping duplicate refresh",
       { reason },
-    )
-    return true
+    );
+    return true;
   }
 
   if (refreshPromise) {
-    console.info(AUTH_LOG, "Refresh already in progress, waiting…", { reason })
-    return refreshPromise
+    console.info(AUTH_LOG, "Refresh already in progress, waiting…", { reason });
+    return refreshPromise;
   }
 
   // Snapshot the credentials RIGHT NOW — before any concurrent call can
   // update them — so we send a matched token + refreshToken pair.
-  const { token, refreshToken } = api.getState().auth
-  const lsToken = token || localStorage.getItem("token")
-  const lsRefreshToken = refreshToken || localStorage.getItem("refreshToken")
+  const { token, refreshToken } = api.getState().auth;
+  const lsToken = token || localStorage.getItem("token");
+  const lsRefreshToken = refreshToken || localStorage.getItem("refreshToken");
   const isInCall = Boolean(
     api.getState?.().videoCall?.isInCall ||
-    (typeof window !== "undefined" && window.location.pathname.includes("/meet/")),
-  )
+    (typeof window !== "undefined" &&
+      window.location.pathname.includes("/meet/")),
+  );
 
   if (!lsRefreshToken || !lsToken) {
     if (isInCall) {
@@ -171,12 +172,12 @@ export async function ensureRefresh(
         AUTH_LOG,
         "No refresh token available during active call — suppressing immediate logout",
         { reason },
-      )
-      return false
+      );
+      return false;
     }
-    console.warn(AUTH_LOG, "No refresh token available — logging out")
-    api.dispatch(logout())
-    return false
+    console.warn(AUTH_LOG, "No refresh token available — logging out");
+    api.dispatch(logout());
+    return false;
   }
 
   console.info(
@@ -184,11 +185,11 @@ export async function ensureRefresh(
     `Starting token refresh (reason: ${reason}, isInCall: ${isInCall})`,
     `token prefix: ${lsToken?.substring(0, 12)}...`,
     `refreshPrefix: ${lsRefreshToken?.substring(0, 12)}...`,
-  )
+  );
 
   refreshPromise = (async () => {
-    const MAX_RETRIES = 2
-    let attempt = 0
+    const MAX_RETRIES = 2;
+    let attempt = 0;
 
     while (attempt <= MAX_RETRIES) {
       try {
@@ -200,59 +201,67 @@ export async function ensureRefresh(
           },
           api,
           { ...extraOptions, skipAuthHeader: true },
-        )
+        );
 
         if (refreshResult.error) {
-          const status = refreshResult.error.status
-          const errData = refreshResult.error.data
+          const status = refreshResult.error.status;
+          const errData = refreshResult.error.data;
 
           const isServerError =
             status === "FETCH_ERROR" ||
-            (typeof status === "number" && status >= 500)
+            (typeof status === "number" && status >= 500);
 
           if (isServerError && attempt < MAX_RETRIES) {
-            attempt++
+            attempt++;
             console.warn(
               AUTH_LOG,
               `Refresh attempt ${attempt} failed with ${status}. Retrying in ${attempt * 1000}ms...`,
-            )
-            await new Promise((res) => setTimeout(res, attempt * 1000))
-            continue
+            );
+            await new Promise((res) => setTimeout(res, attempt * 1000));
+            continue;
           }
 
           if (isServerError) {
-            const isHealthy = await checkIsServerHealthy()
+            const isHealthy = await checkIsServerHealthy();
             if (!isHealthy) {
               console.warn(
                 AUTH_LOG,
                 `Refresh failed with server/network error (${status}) — server down, skipping logout`,
                 { reason },
-              )
-              api.dispatch(setServerDown())
-              return false
+              );
+              api.dispatch(setServerDown());
+              return false;
             }
 
             console.warn(
               AUTH_LOG,
               `Refresh failed with server error (${status}) but server is healthy`,
               { reason, isInCall },
-            )
-            if (isInCall || reason === "call-heartbeat" || reason === "proactive") {
-              return false
+            );
+            if (
+              isInCall ||
+              reason === "call-heartbeat" ||
+              reason === "proactive"
+            ) {
+              return false;
             }
-            api.dispatch(logout())
-            return false
+            api.dispatch(logout());
+            return false;
           }
 
-          const remaining = tokenSecondsRemaining(lsToken)
+          const remaining = tokenSecondsRemaining(lsToken);
           // If token is still valid or it's a proactive / heartbeat refresh, NEVER logout
-          if (reason === "proactive" || reason === "call-heartbeat" || remaining > 0) {
+          if (
+            reason === "proactive" ||
+            reason === "call-heartbeat" ||
+            remaining > 0
+          ) {
             console.warn(
               AUTH_LOG,
               `Refresh returned status ${status} during ${reason} check, but access token is still valid (${Math.round(remaining)}s remaining) — skipping premature logout`,
               { reason },
-            )
-            return false
+            );
+            return false;
           }
 
           // If in an active call, protect the call: do NOT logout unless fatal security reuse detected
@@ -261,74 +270,79 @@ export async function ensureRefresh(
             errData?.errorCode === "TokenReuseDetected" ||
             errData?.code === "AccountNotFound" ||
             errData?.errorCode === "AccountNotFound" ||
-            (typeof errData?.message === "string" && errData.message.includes("TokenReuseDetected"))
+            (typeof errData?.message === "string" &&
+              errData.message.includes("TokenReuseDetected"));
 
           if (isInCall && !isFatalRevocation) {
             console.warn(
               AUTH_LOG,
               `Refresh returned status ${status} while in active call — suppressing logout to protect call`,
               { reason, errData },
-            )
-            return false
+            );
+            return false;
           }
 
           console.error(
             AUTH_LOG,
             `Refresh failed with status ${status} — logging out`,
             { reason, errData },
-          )
-          api.dispatch(logout())
-          return false
+          );
+          api.dispatch(logout());
+          return false;
         }
 
-        const payload = refreshResult.data?.data || refreshResult.data
+        const payload = refreshResult.data?.data || refreshResult.data;
         if (payload?.token) {
-          api.dispatch(setCredentials(payload))
+          api.dispatch(setCredentials(payload));
           console.info(
             AUTH_LOG,
             "Token refresh successful — new credentials stored",
-          )
-          return true
+          );
+          return true;
         }
 
         console.error(AUTH_LOG, "Refresh returned no data", {
           reason,
           isInCall,
-        })
+        });
         if (!isInCall) {
-          api.dispatch(logout())
+          api.dispatch(logout());
         }
-        return false
+        return false;
       } catch (err) {
         if (attempt < MAX_RETRIES) {
-          attempt++
+          attempt++;
           console.warn(
             AUTH_LOG,
             `Refresh threw exception on attempt ${attempt}. Retrying in ${attempt * 1000}ms...`,
             err,
-          )
-          await new Promise((res) => setTimeout(res, attempt * 1000))
-          continue
+          );
+          await new Promise((res) => setTimeout(res, attempt * 1000));
+          continue;
         }
 
         console.error(AUTH_LOG, "Refresh threw an exception — logging out", {
           reason,
           err,
           isInCall,
-        })
-        if (!isInCall && reason !== "proactive" && reason !== "call-heartbeat") {
-          api.dispatch(logout())
+        });
+        if (
+          !isInCall &&
+          reason !== "proactive" &&
+          reason !== "call-heartbeat"
+        ) {
+          api.dispatch(logout());
         }
-        return false
+        return false;
       } finally {
-        refreshPromise = null
+        refreshPromise = null;
       }
     }
 
-    return false
-  })()
+    return false;
+  })();
 
-  return refreshPromise
+  return refreshPromise;
 }
 
 /**
@@ -337,9 +351,9 @@ export async function ensureRefresh(
  */
 export function createReauthBaseQuery(queryResolver) {
   return async (args, api, extraOptions) => {
-    const url = typeof args === "string" ? args : args?.url
+    const url = typeof args === "string" ? args : args?.url;
     const isAuthEndpoint =
-      url === "/Auth/refresh-token" || url === "/Auth/login"
+      url === "/Auth/refresh-token" || url === "/Auth/login";
     // Switch carries a refreshToken in its *body* that is captured at call
     // time. A proactive refresh right before the switch would rotate that
     // token (revoking the one in the body) and force the switch into the
@@ -347,33 +361,33 @@ export function createReauthBaseQuery(queryResolver) {
     // the Authorization header stay in sync — the 401 retry below (with
     // server-side grace handling) still recovers if the JWT was already
     // expired.
-    const isSwitchEndpoint = url === "/Auth/switch-account-type"
-    const shouldProactiveRefresh = !isAuthEndpoint && !isSwitchEndpoint
+    const isSwitchEndpoint = url === "/Auth/switch-account-type";
+    const shouldProactiveRefresh = !isAuthEndpoint && !isSwitchEndpoint;
 
-    const requestToken = api.getState().auth.token
+    const requestToken = api.getState().auth.token;
 
     // ── Proactive refresh: if token is close to expiring, refresh first ──
     if (shouldProactiveRefresh && requestToken) {
-      const remaining = tokenSecondsRemaining(requestToken)
+      const remaining = tokenSecondsRemaining(requestToken);
       if (remaining < PROACTIVE_REFRESH_BUFFER) {
         console.info(
           AUTH_LOG,
           `Token nearing expiry — proactively refreshing before ${url}`,
-        )
-        await ensureRefresh(api, extraOptions, "proactive", requestToken)
+        );
+        await ensureRefresh(api, extraOptions, "proactive", requestToken);
       }
     }
 
     // ── Execute the actual request ────────────────────────────────────
-    let result = await queryResolver(args, api, extraOptions)
+    let result = await queryResolver(args, api, extraOptions);
 
     // ── Handle 401 ────────────────────────────────────────────────────
     if (result.error?.status === 401) {
-      console.warn(AUTH_LOG, `401 on ${url}`)
+      console.warn(AUTH_LOG, `401 on ${url}`);
 
       // Never retry auth endpoints to avoid infinite loops
       if (isAuthEndpoint) {
-        return result
+        return result;
       }
 
       const success = await ensureRefresh(
@@ -381,41 +395,41 @@ export function createReauthBaseQuery(queryResolver) {
         extraOptions,
         `401 on ${url}`,
         requestToken,
-      )
+      );
 
       if (success) {
         // Retry the original request with the new token
-        result = await queryResolver(args, api, extraOptions)
+        result = await queryResolver(args, api, extraOptions);
         if (result.error) {
           console.error(
             AUTH_LOG,
             `Retry of ${url} still failed with status ${result.error.status}`,
-          )
+          );
         }
       }
     }
 
     // ── Handle server-down / network errors ─────────────────────────
-    const isAborted = api.signal.aborted || result.error?.name === "AbortError"
+    const isAborted = api.signal.aborted || result.error?.name === "AbortError";
 
-    const status = result.error?.status
+    const status = result.error?.status;
     const isServerError =
-      status === "FETCH_ERROR" || (typeof status === "number" && status >= 500)
+      status === "FETCH_ERROR" || (typeof status === "number" && status >= 500);
 
     if (!isAborted && isServerError) {
-      const isHealthy = await checkIsServerHealthy()
+      const isHealthy = await checkIsServerHealthy();
       if (!isHealthy) {
-        savePendingAutoCrashReport({ failedUrl: url, status })
+        savePendingAutoCrashReport({ failedUrl: url, status });
         console.warn(
           AUTH_LOG,
           `Server unreachable for ${url} (health check failed) — not an auth issue, skipping logout`,
-        )
-        api.dispatch(setServerDown())
+        );
+        api.dispatch(setServerDown());
       } else {
         console.warn(
           AUTH_LOG,
           `Fetch error on ${url} but server is healthy — not setting server down`,
-        )
+        );
       }
     }
 
@@ -424,15 +438,15 @@ export function createReauthBaseQuery(queryResolver) {
       console.info(
         AUTH_LOG,
         "Server is reachable again — clearing server-down flag",
-      )
-      api.dispatch(setServerUp())
-      flushPendingAutoCrashReport()
+      );
+      api.dispatch(setServerUp());
+      flushPendingAutoCrashReport();
     }
 
     // ── Global Data Normalization & Unwrapping ───────────────────────
     // Supports both Old API ({ data, additionalData }) and New API ({ success, data: { data, additionalData } })
     if (result.data && typeof result.data === "object") {
-      const res = result.data
+      const res = result.data;
 
       // New API (Double-nested: { success: true, data: { data: [...], additionalData: {...} } })
       if (
@@ -441,25 +455,25 @@ export function createReauthBaseQuery(queryResolver) {
         typeof res.data === "object" &&
         "data" in res.data
       ) {
-        result.data = res.data
+        result.data = res.data;
       }
       // Standard New API envelope ({ success: true, data: { ... } })
       else if (res.success && res.data !== undefined) {
-        result.data = res.data
+        result.data = res.data;
       }
       // Old API ({ data: [...], additionalData: {...} })
       // Keep result.data as-is without unwrapping so top-level additionalData is preserved!
     }
 
-    return result
-  }
+    return result;
+  };
 }
 
 // ─── Main base query with reauth ────────────────────────────────────
 const baseQueryWithReauth = createReauthBaseQuery(
   async (args, api, extraOptions) => {
-    const url = typeof args === "string" ? args : args?.url
-    const lowerUrl = url ? url.toLowerCase() : ""
+    const url = typeof args === "string" ? args : args?.url;
+    const lowerUrl = url ? url.toLowerCase() : "";
 
     const isAiRoute =
       lowerUrl &&
@@ -472,17 +486,29 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("v1/placement") ||
         lowerUrl.startsWith("/placement/") ||
         lowerUrl.startsWith("placement/") ||
+        // TASK-AI-15: buổi luyện nói (báo cáo, phát âm, vòng đời phiên) nằm trong ai-api.
+        lowerUrl.startsWith("/v1/flashcards") ||
+        lowerUrl.startsWith("v1/flashcards") ||
+        lowerUrl.startsWith("/flashcards") ||
+        lowerUrl.startsWith("flashcards") ||
+        lowerUrl.startsWith("/v1/speaking/") ||
+        lowerUrl.startsWith("v1/speaking/") ||
+        // TASK-AI-16: flashcard SRS (phiên ôn, danh mục deck) nằm trong ai-api.
+        lowerUrl.startsWith("/v1/flashcards") ||
+        lowerUrl.startsWith("v1/flashcards") ||
         lowerUrl.startsWith("/ai/") ||
         lowerUrl.startsWith("ai/") ||
         lowerUrl.startsWith("/v1/ai/") ||
-        lowerUrl.startsWith("v1/ai/"))
+        lowerUrl.startsWith("v1/ai/") ||
+        lowerUrl.startsWith("/speaking/") ||
+        lowerUrl.startsWith("speaking/") ||
+        lowerUrl.startsWith("speaking?"));
 
-
-    const cleanUrl = lowerUrl.replace(/^\/?(api\/)?/, "")
+    const cleanUrl = lowerUrl.replace(/^\/?(api\/)?/, "");
     const isStudentVoucherRoute =
       cleanUrl.startsWith("vouchers/templates") ||
       cleanUrl.startsWith("vouchers/redeem") ||
-      cleanUrl.startsWith("vouchers/inventory")
+      cleanUrl.startsWith("vouchers/inventory");
 
     const isCoursesRoute =
       !isStudentVoucherRoute &&
@@ -498,17 +524,17 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("/personal-materials") ||
         lowerUrl.startsWith("personal-materials") ||
         lowerUrl.startsWith("/vouchers") ||
-        lowerUrl.startsWith("vouchers"))
+        lowerUrl.startsWith("vouchers"));
 
     const activeQuery = isAiRoute
       ? aiBaseQuery
       : isCoursesRoute
         ? instructorBaseQuery
-        : baseQuery
+        : baseQuery;
 
-    return activeQuery(args, api, extraOptions)
+    return activeQuery(args, api, extraOptions);
   },
-)
+);
 
 // ─── Base API slice ─────────────────────────────────────────────────
 export const baseApi = createApi({
@@ -579,10 +605,12 @@ export const baseApi = createApi({
     "ExploreTeachers",
     "InstructorCompetency",
     "StudentDashboard",
+    "PlacementSession",
+    "PlacementResult",
     "LearningPath",
     "PlacementSession",
     "PlacementResult",
     "ClassRecordings",
   ],
   endpoints: () => ({}),
-})
+});

@@ -614,6 +614,60 @@ export const NOTIFICATION_TYPES = {
         .replace("{endDate}", m.endDate || ""),
     resolveUrl: () => "/pricing",
   },
+  friend_request: {
+    icon: UserPlus,
+    color: "text-blue-500",
+    resolveTitle: (m, t) =>
+      t?.notifications?.friend_request?.title || m.title || "Lời mời kết bạn mới",
+    resolveBody: (m, t) => {
+      const sender = m.senderName || m.userName || "Một người dùng";
+      return (
+        t?.notifications?.friend_request?.body?.replace("{senderName}", sender) ||
+        m.body ||
+        `${sender} đã gửi cho bạn một lời mời kết bạn.`
+      );
+    },
+    resolveUrl: (m) => {
+      const id = m.userId || m.userid || m.requesterId;
+      return id ? `/workspace/profile/${id}` : "/workspace/friends";
+    },
+  },
+  friend_acceptance: {
+    icon: UserCheck,
+    color: "text-green-500",
+    resolveTitle: (m, t) =>
+      t?.notifications?.friend_acceptance?.title || m.title || "Lời mời kết bạn được chấp nhận",
+    resolveBody: (m, t) => {
+      const sender = m.senderName || m.userName || "Một người dùng";
+      return (
+        t?.notifications?.friend_acceptance?.body?.replace("{senderName}", sender) ||
+        m.body ||
+        `${sender} đã chấp nhận lời mời kết bạn của bạn.`
+      );
+    },
+    resolveUrl: (m) => {
+      const id = m.userId || m.userid || m.responderId;
+      return id ? `/workspace/profile/${id}` : "/workspace/friends";
+    },
+  },
+  new_follower: {
+    icon: UserPlus,
+    color: "text-purple-500",
+    resolveTitle: (m, t) =>
+      t?.notifications?.new_follower?.title || m.title || "Người theo dõi mới",
+    resolveBody: (m, t) => {
+      const sender = m.senderName || m.userName || "Một người dùng";
+      return (
+        t?.notifications?.new_follower?.body?.replace("{senderName}", sender) ||
+        m.body ||
+        `${sender} đã bắt đầu theo dõi bạn.`
+      );
+    },
+    resolveUrl: (m) => {
+      const id = m.userId || m.userid || m.followerId;
+      return id ? `/workspace/profile/${id}` : "/workspace/friends";
+    },
+  },
 };
 
 export function resolveNotification(notif, t) {

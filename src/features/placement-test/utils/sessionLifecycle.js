@@ -40,7 +40,10 @@ export const getSessionLifecycle = ({
   const expiresAt = activityAt + Math.max(0, Number(windowMs) || 0)
   const remainingMs = Math.max(0, expiresAt - (Number.isFinite(nowMs) ? nowMs : 0))
   const turns = Array.isArray(session.turns) ? session.turns : []
-  const answeredCount = Math.min(turns.length, totalTurns)
+  const answeredTurns = turns.filter(
+    (t) => Boolean(t.answeredAt || t.submittedAt || (t.transcript && t.transcript.trim() !== ""))
+  )
+  const answeredCount = Math.min(answeredTurns.length, totalTurns)
   const nextOrder = Math.min(answeredCount + 1, totalTurns)
 
   return {

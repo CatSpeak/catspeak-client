@@ -6,4 +6,6 @@ export const SESSION_STATUS = {
   SCORING: "scoring",
   COMPLETED: "completed",
   EXPIRED: "expired",
+  CANCELLED: "cancelled",
 }
+

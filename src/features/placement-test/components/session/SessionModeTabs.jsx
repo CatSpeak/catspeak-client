@@ -4,20 +4,20 @@ import { TOTAL_TURNS } from "../../engine"
 import { formatTemplate } from "../../utils/format"
 
 const SessionModeTabs = ({ copy = {}, currentOrder = 1 }) => (
-  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-    <div className="inline-flex w-full items-center gap-1.5 rounded-xl bg-slate-100 p-1 lg:w-auto">
-      <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600 lg:flex-none">
+  <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+    <div className="inline-flex w-full min-w-0 items-center gap-1.5 rounded-xl bg-slate-100 p-1 xl:w-auto">
+      <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600 xl:flex-none">
         <MessagesSquare size={13} strokeWidth={2} className="text-orange-600" />
         {copy.casual}
       </span>
-      <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white px-4 py-1.5 text-xs font-extrabold text-cath-red-700 shadow-[0_2px_6px_rgba(153,0,17,0.14)] lg:flex-none">
+      <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white px-4 py-1.5 text-xs font-extrabold text-cath-red-700 shadow-[0_2px_6px_rgba(153,0,17,0.14)] xl:flex-none">
         <FileText size={13} strokeWidth={2} />
         {copy.placement}
       </span>
     </div>
 
-    <div className="flex items-center justify-end gap-2.5">
-      <span className="text-xs font-medium text-slate-600">
+    <div className="flex shrink-0 items-center justify-end gap-2.5">
+      <span className="whitespace-nowrap text-xs font-medium text-slate-600">
         {formatTemplate(copy.progress, {
           current: currentOrder,
           total: TOTAL_TURNS,

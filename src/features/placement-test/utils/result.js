@@ -49,6 +49,17 @@ export const getDimensionScores = (result = {}) =>
     (key) => result[key] !== null && result[key] !== undefined,
   ).map((key) => ({ key, score: clampScore(result[key]) }))
 
+/**
+ * Đủ 4 tiêu chí cho sc09 (FR-PT-010, BUG-PT-14). Tiêu chí chưa đo có
+ * `score: null` để màn hình ghi "Chưa đo được" thay vì vẽ thanh 0/100.
+ */
+export const getAllDimensionScores = (result = {}) =>
+  DIMENSION_KEYS.map((key) => {
+    const value = result[key]
+    const measured = value !== null && value !== undefined
+    return { key, score: measured ? clampScore(value) : null, measured }
+  })
+
 export const computeOverallScore = (result = {}) => {
   const scores = getDimensionScores(result)
   if (scores.length === 0) return 0
@@ -82,12 +93,16 @@ export const getTargetRoadmapBand = (band) => {
   return current >= 6 ? 6 : current + 1
 }
 
+// BUG-PT-15: ở HSK 1 không còn cấp để giảm, ở HSK 6 không còn cấp để tăng.
+// Lựa chọn đó vẫn trả về nhưng `disabled`, để màn sc10 hiện ghi chú lý do.
 export const buildAdjustOptions = (band) => {
   const current = clampHsk(band)
-  return ADJUST_OPTION_KEYS.map((key) => ({
-    key,
-    level: clampHsk(current + ADJUST_DELTAS[key]),
-  }))
+  return ADJUST_OPTION_KEYS.map((key) => {
+    const raw = current + ADJUST_DELTAS[key]
+    const option = { key, level: clampHsk(raw) }
+    if (key !== "keep" && clampHsk(raw) !== raw) option.disabled = true
+    return option
+  })
 }
 
 // ── Kết quả từ động cơ phía máy chủ ─────────────────────────────────────────

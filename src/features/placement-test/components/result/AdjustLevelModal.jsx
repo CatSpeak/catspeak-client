@@ -80,15 +80,23 @@ const AdjustLevelModal = ({
         {options.map((option) => {
           const isSelected = option.key === selected
           const isRecommended = option.key === "keep"
+          const isDisabled = Boolean(option.disabled)
+          const disabledNote =
+            option.key === "down"
+              ? copy.lowestNote || "HSK 1 là cấp thấp nhất"
+              : copy.highestNote || "HSK 6 là cấp cao nhất"
 
           return (
             <label
               key={option.key}
+              aria-disabled={isDisabled || undefined}
               className={cn(
-                "flex cursor-pointer items-center justify-between gap-3 rounded-[10px] border-[1.5px] px-4 py-3 transition-colors",
-                isSelected
-                  ? "border-cath-red-700 bg-[#FEF2F2]"
-                  : "border-[#E2E8F0] bg-[#F8FAFC] hover:bg-white",
+                "flex items-center justify-between gap-3 rounded-[10px] border-[1.5px] px-4 py-3 transition-colors",
+                isDisabled
+                  ? "cursor-not-allowed border-[#E2E8F0] bg-slate-100 opacity-60"
+                  : isSelected
+                    ? "cursor-pointer border-cath-red-700 bg-[#FEF2F2]"
+                    : "cursor-pointer border-[#E2E8F0] bg-[#F8FAFC] hover:bg-white",
               )}
             >
               <span className="flex flex-wrap items-center gap-1.5">
@@ -97,7 +105,8 @@ const AdjustLevelModal = ({
                   name="pt-adjust-level"
                   value={option.key}
                   checked={isSelected}
-                  onChange={() => onSelect?.(option.key)}
+                  disabled={isDisabled}
+                  onChange={() => !isDisabled && onSelect?.(option.key)}
                   className="sr-only"
                 />
                 <span
@@ -118,6 +127,11 @@ const AdjustLevelModal = ({
                 >
                   · {copy[OPTION_COPY_KEYS[option.key]]}
                 </span>
+                {isDisabled && (
+                  <span className="w-full text-[11px] font-medium leading-4 text-slate-500">
+                    {disabledNote}
+                  </span>
+                )}
                 {isRecommended && (
                   <span className="rounded-[4px] bg-[#FEE2E2] px-1.5 py-0.5 text-[10px] font-bold leading-4 text-cath-red-700">
                     {copy.recommended}

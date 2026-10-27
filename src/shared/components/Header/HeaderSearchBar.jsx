@@ -14,6 +14,14 @@ const HeaderSearchBar = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { lang } = useParams()
+  // Ở các trang Sổ tay từ vựng (flashcard), ô tìm kiếm là "Tìm từ vựng…" và tìm trong sổ.
+  const isVocabulary = /\/ai-tutor\/vocabulary-notebook(\/|$)/.test(location.pathname)
+  const isLearningPath = location.pathname.includes("/learning-path")
+  const placeholder = isVocabulary
+    ? "Tìm từ vựng…"
+    : isLearningPath
+      ? "Tìm chủ đề..."
+      : t.header?.searchPlaceholder || "Tìm kiếm phòng"
 
   // Sync state if URL changes externally
   React.useEffect(() => {
@@ -22,6 +30,12 @@ const HeaderSearchBar = () => {
 
   const handleSearch = () => {
     const trimmed = searchValue.trim()
+    if (isVocabulary) {
+      const base = `/${lang || "vi"}/ai-tutor/vocabulary-notebook/decks`
+      navigate(trimmed ? `${base}?search=${encodeURIComponent(trimmed)}` : base)
+      setIsExpanded(false)
+      return
+    }
     const newParams = new URLSearchParams(searchParams)
     if (trimmed) {
       newParams.set("search", trimmed)
@@ -48,14 +62,14 @@ const HeaderSearchBar = () => {
         <IconButton
           variant="filled"
           onClick={() => setIsExpanded(true)}
-          aria-label={t.header?.searchPlaceholder || "Search"}
+          aria-label={isVocabulary || isLearningPath ? placeholder : t.header?.searchPlaceholder || "Search"}
         >
           <Search size={20} strokeWidth={2} />
         </IconButton>
       </div>
 
       {/* Desktop Search Bar Input (Visible on lg screens and above) */}
-      <div className="hidden lg:flex relative items-center w-[200px] xl:w-[260px] shrink-0">
+      <div className="hidden lg:flex relative min-w-[150px] max-w-[260px] flex-1 items-center">
         <Search
           className="w-[17px] h-[17px] text-gray-500 absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer"
           strokeWidth={2.5}
@@ -70,11 +84,7 @@ const HeaderSearchBar = () => {
               handleSearch()
             }
           }}
-          placeholder={
-            location.pathname.includes("/learning-path")
-              ? "Tìm chủ đề..."
-              : t.header?.searchPlaceholder || "Tìm kiếm phòng"
-          }
+          placeholder={placeholder}
           className="w-full h-10 pl-11 pr-4 bg-primaryBg border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[14px] outline-none transition-all placeholder-gray-500"
         />
       </div>
@@ -113,7 +123,7 @@ const HeaderSearchBar = () => {
                     handleSearch()
                   }
                 }}
-                placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng"}
+                placeholder={placeholder}
                 className="w-full h-10 pl-11 pr-4 bg-primaryBg border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[15px] outline-none transition-all placeholder-gray-500"
               />
             </div>

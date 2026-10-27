@@ -60,21 +60,25 @@ export const createMicCapture = ({ deviceId } = {}) => {
     }
   }
 
+  // Không xét track.enabled: track bị tắt tiếng vẫn là stream đang sống.
   const isStreamActive = () =>
     Boolean(
       stream &&
         stream.getAudioTracks().length > 0 &&
-        stream.getAudioTracks().some((t) => t.readyState === "live" && t.enabled),
+        stream.getAudioTracks().some((t) => t.readyState === "live"),
     )
-
   const start = async () => {
     if (destroyed) return { ok: false, error: "destroyed" }
     if (isStreamActive()) return { ok: true }
     if (!isSupported()) return { ok: false, error: "unsupported" }
 
     try {
+      const audioConstraint =
+        !deviceId || deviceId === "default"
+          ? true
+          : { deviceId: { ideal: deviceId } }
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+        audio: audioConstraint,
       })
     } catch (error) {
       return { ok: false, error: error?.name || "getUserMedia" }

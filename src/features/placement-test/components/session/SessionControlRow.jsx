@@ -20,6 +20,8 @@ const SessionControlRow = ({
   phase,
   notice,
   isRecording = false,
+  aiSpeaking = false,
+  micLevel = 0,
   hasRecorded = false,
   recordedMs = 0,
   maxDurationMs = 45000,
@@ -51,14 +53,27 @@ const SessionControlRow = ({
   } else if (hasRecorded) {
     timerText = `${formatClock(recordedMs)} / ${formatClock(maxDurationMs)} • ${copy.recordedStatus || "Đã ghi âm"}`
   } else {
-    timerText = `00:00 / ${formatClock(maxDurationMs)} • ${copy.pressMicToRecord || "Nhấn mic để trả lời"}`
+    timerText = `00:00 / ${formatClock(maxDurationMs)} • ${
+      aiSpeaking
+        ? copy.timerAiSpeaking || "AI đang đọc câu hỏi"
+        : copy.autoRecordHint || "Tự ghi âm sau khi AI đọc xong"
+    }`
   }
 
+  // VAD tự mở ghi âm; bấm mic để dừng sớm (hoặc ghi lại), bấm Hoàn tất để nộp.
+  const micLabel = isRecording
+    ? copy.stopRecordCta || "Dừng ghi âm"
+    : hasRecorded
+      ? copy.reRecordCta || "Thu âm lại"
+      : copy.startRecordCta || "Bắt đầu nói"
+  const showLevelRing = isRecording
+
   return (
-    <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-between">
+    // Lưới 3 cột 1fr-auto-1fr: hai bên rộng hẹp khác nhau nhưng mic luôn nằm giữa thẻ.
+    <div className="flex w-full flex-col items-center gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
       <span
         className={cn(
-          "inline-flex h-10 items-center gap-2 rounded-full px-4 text-xs font-medium transition-colors",
+          "inline-flex h-10 items-center gap-2 rounded-full px-4 text-xs font-medium transition-colors sm:justify-self-start",
           waiting
             ? "bg-[#FFFBEB] text-[#B45309]"
             : isRecording
@@ -84,48 +99,54 @@ const SessionControlRow = ({
         {timerText}
       </span>
 
-      {/* Mic Button: Start / Stop / Re-record */}
-      <button
-        type="button"
-        onClick={onToggleRecord}
-        disabled={analyzing}
-        aria-label={
-          isRecording
-            ? copy.stopRecordCta || "Dừng ghi âm"
-            : hasRecorded
-              ? copy.reRecordCta || "Ghi âm lại"
-              : copy.startRecordCta || "Bắt đầu nói"
-        }
-        title={
-          isRecording
-            ? copy.stopRecordCta || "Dừng ghi âm"
-            : hasRecorded
-              ? copy.reRecordCta || "Ghi âm lại"
-              : copy.startRecordCta || "Bắt đầu nói"
-        }
-        className={cn(
-          "flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full text-white transition-all",
-          analyzing
-            ? "bg-slate-300 shadow-none cursor-not-allowed"
-            : isRecording
-              ? "bg-red-600 hover:bg-red-700 animate-pulse shadow-[0_6px_20px_rgba(220,38,38,0.5)] scale-105"
-              : hasRecorded
-                ? "bg-slate-700 hover:bg-slate-800 shadow-[0_4px_14px_rgba(51,65,85,0.3)]"
-                : "bg-cath-red-700 hover:bg-[#85000f] shadow-[0_6px_18px_rgba(153,0,17,0.33)] hover:scale-105",
+      {/* VAD tự ghi âm sau khi AI đọc xong; nút mic để dừng sớm hoặc ghi lại */}
+      <div className="relative flex items-center justify-center">
+        {showLevelRing && (
+          <>
+            <span
+              className="absolute -inset-1.5 rounded-full bg-red-500/30 border border-red-500/50 transition-all duration-100 ease-out pointer-events-none"
+              style={{
+                transform: `scale(${1 + Math.min(0.15, (micLevel || 0) * 0.4)})`,
+                opacity: Math.max(0.6, Math.min(1.0, 0.5 + (micLevel || 0) * 0.5)),
+              }}
+            />
+            <span
+              className="absolute -inset-3 rounded-full bg-red-500/20 border border-red-400/40 transition-all duration-150 ease-out pointer-events-none"
+              style={{
+                transform: `scale(${1 + Math.min(0.25, (micLevel || 0) * 0.6)})`,
+                opacity: Math.max(0.4, Math.min(0.9, 0.3 + (micLevel || 0) * 0.6)),
+              }}
+            />
+          </>
         )}
-      >
-        {analyzing ? (
-          <Loader2 size={22} className="animate-spin" />
-        ) : isRecording ? (
-          <Square size={20} className="fill-white" />
-        ) : hasRecorded ? (
-          <RotateCcw size={22} strokeWidth={2} />
-        ) : (
-          <Mic size={22} strokeWidth={2} />
-        )}
-      </button>
+        <button
+          type="button"
+          onClick={onToggleRecord}
+          disabled={analyzing}
+          aria-label={micLabel}
+          title={micLabel}
+          className={cn(
+            "relative flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full text-white transition-all",
+            analyzing
+              ? "bg-slate-300 shadow-none cursor-not-allowed"
+              : isRecording
+                ? "bg-[#E2443F] hover:bg-[#C9302B] shadow-[0_0_16px_rgba(240,90,87,0.45)]"
+                : "bg-[#F05A57] hover:bg-[#E2443F] shadow-[0_6px_18px_rgba(240,90,87,0.4)] hover:scale-105",
+          )}
+        >
+          {analyzing ? (
+            <Loader2 size={22} className="animate-spin" />
+          ) : isRecording ? (
+            <Square size={20} className="fill-white" />
+          ) : hasRecorded ? (
+            <RotateCcw size={22} strokeWidth={2} />
+          ) : (
+            <Mic size={22} strokeWidth={2} />
+          )}
+        </button>
+      </div>
 
-      <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
+      <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:justify-self-end">
         {canSkip && (
           <button
             type="button"

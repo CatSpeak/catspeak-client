@@ -63,8 +63,10 @@ const TranscriptCards = ({
   onStopUserAudio,
   showHanzi,
   showPinyin,
+  showMeaning,
   onToggleHanzi,
   onTogglePinyin,
+  onToggleMeaning,
   onReplay,
 }) => {
   const status = statusFor(copy, {
@@ -111,6 +113,11 @@ const TranscriptCards = ({
             {formatTemplate(copy.pinyinLabel, { pinyin: question.pinyin })}
           </p>
         )}
+        {showMeaning && question?.meaningVi && (
+          <p className="text-xs font-medium italic text-slate-500">
+            {question.meaningVi}
+          </p>
+        )}
 
         <div className="mt-0.5 flex items-center gap-1.5">
           <ScriptToggle
@@ -122,6 +129,11 @@ const TranscriptCards = ({
             active={showPinyin}
             label={copy.scriptPinyin}
             onClick={onTogglePinyin}
+          />
+          <ScriptToggle
+            active={showMeaning}
+            label={copy.scriptMeaning || "Tiếng Việt"}
+            onClick={onToggleMeaning}
           />
         </div>
       </div>

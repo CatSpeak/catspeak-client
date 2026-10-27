@@ -11,15 +11,15 @@ import {
 } from "../constants/routes"
 import {
   buildAdjustOptions,
+  getAllDimensionScores,
   computeOverallScore,
   getBandDescriptor,
-  getDimensionScores,
   getStrengthDimension,
   getTargetRoadmapBand,
   getWeaknessDimension,
 } from "../utils/result"
 import { formatTemplate } from "../utils/format"
-import { readActiveSession, readResult } from "../utils/sessionStorage"
+import { clearActiveSession, readActiveSession, readResult } from "../utils/sessionStorage"
 import ResultTopbar from "../components/result/ResultTopbar"
 import ResultHeroCard from "../components/result/ResultHeroCard"
 import ResultFeedbackCard from "../components/result/ResultFeedbackCard"
@@ -62,10 +62,12 @@ const PlacementResultPage = () => {
       weakness: hasWeakness ? getWeaknessDimension(result) : null,
       roadmapBand: getTargetRoadmapBand(result.band),
       options: buildAdjustOptions(result.band),
-      skills: getDimensionScores(result).map((item) => ({
+      skills: getAllDimensionScores(result).map((item) => ({
         ...item,
         label: copy.dimensions?.[item.key] || item.key,
-        scoreText: formatTemplate(copy.scoreOf, { score: item.score }),
+        scoreText: item.measured
+          ? formatTemplate(copy.scoreOf, { score: item.score })
+          : copy.notMeasured || "Chưa đo được",
       })),
     }
   }, [result, copy.scoreOf, copy.dimensions])

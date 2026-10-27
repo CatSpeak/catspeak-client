@@ -12,14 +12,39 @@ const FEATURE_ICON_TONES = [
   "bg-emerald-50 text-emerald-600",
 ]
 
-const ConsentStep = ({ copy, onStart, requesting }) => {
+const ConsentStep = ({
+  copy,
+  onStart,
+  onRequestPermission,
+  onPermissionDenied,
+  requesting,
+}) => {
   const [agreed, setAgreed] = useState(false)
   const consent = copy?.consent || {}
   const features = consent.features || []
 
+  const handleCheckboxChange = async () => {
+    if (agreed) {
+      setAgreed(false)
+      return
+    }
+
+    if (onRequestPermission) {
+      const granted = await onRequestPermission()
+      if (granted) {
+        setAgreed(true)
+      } else {
+        setAgreed(false)
+        if (onPermissionDenied) onPermissionDenied()
+      }
+    } else {
+      setAgreed(true)
+    }
+  }
+
   return (
     <>
-      <StepCard className="gap-4 lg:w-[440px] lg:shrink-0">
+      <StepCard className="gap-4 xl:w-[440px] xl:shrink-0">
         <span className="inline-flex h-[26px] w-fit items-center rounded-full bg-red-50 px-2.5 text-[11px] font-medium text-cath-red-700">
           {consent.pill}
         </span>
@@ -57,7 +82,7 @@ const ConsentStep = ({ copy, onStart, requesting }) => {
         </div>
       </StepCard>
 
-      <StepCard className="gap-5 lg:flex-1">
+      <StepCard className="min-w-0 gap-5 xl:flex-1">
         <h2 className="text-xl font-bold leading-7 text-[#09090B]">
           {consent.agreementTitle}
         </h2>
@@ -75,13 +100,19 @@ const ConsentStep = ({ copy, onStart, requesting }) => {
         </div>
         <div className="flex items-center gap-3">
           <Checkbox
+            id="placement-consent-checkbox"
             checked={agreed}
-            onChange={() => setAgreed((value) => !value)}
-            aria-label={consent.checkbox}
+            onChange={handleCheckboxChange}
+            aria-labelledby="placement-consent-label"
           />
-          <span className="text-xs font-semibold leading-[18px] text-[#09090B]">
+          <label
+            id="placement-consent-label"
+            htmlFor="placement-consent-checkbox"
+            onClick={handleCheckboxChange}
+            className="cursor-pointer text-xs font-semibold leading-[18px] text-[#09090B]"
+          >
             {consent.checkbox}
-          </span>
+          </label>
         </div>
         <PillButton
           onClick={onStart}

@@ -4,6 +4,7 @@ import {
   SCORING_FAILURE_FLAG_KEY,
   adjustLevelMock,
   buildSession,
+  cancelSessionMock,
   createSessionMock,
   getActiveSessionMock,
   getRetakeStatusMock,
@@ -518,3 +519,24 @@ describe("adjustLevelMock", () => {
     expect(response.error.status).toBe(404)
   })
 })
+
+describe("cancelSessionMock", () => {
+  it("clears session and returns cancelled status", async () => {
+    let cleared = false
+    const response = await cancelSessionMock(
+      { sessionId: "session-1" },
+      {
+        delayMs: 0,
+        read: () => ({ id: "session-1" }),
+        clear: () => {
+          cleared = true
+        },
+      },
+    )
+
+    expect(response.data.status).toBe(SESSION_STATUS.CANCELLED)
+    expect(response.data.session_id).toBe("session-1")
+    expect(cleared).toBe(true)
+  })
+})
+

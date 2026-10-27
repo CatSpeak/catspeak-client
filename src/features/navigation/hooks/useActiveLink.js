@@ -10,7 +10,12 @@ export const useActiveLink = () => {
   // Resolves the path with the current language prefix if needed
   const resolvePath = (p) => {
     if (!p) return p
-    if (p.startsWith('/community') || p.startsWith('/cat-speak') || p.startsWith('/learning-path')) {
+    if (
+      p.startsWith("/community") ||
+      p.startsWith("/cat-speak") ||
+      p.startsWith("/ai-tutor") ||
+      p.startsWith("/learning-path")
+    ) {
       return `/${currentLang}${p}`
     }
     return p
@@ -41,6 +46,6 @@ export const useActiveLink = () => {
     resolvePath,
     checkIsActive,
     currentLang,
-    pathname: location.pathname
+    pathname: location.pathname,
   }
 }

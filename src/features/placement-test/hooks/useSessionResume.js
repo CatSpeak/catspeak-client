@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "@/components/ui/toast"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import {
+  useCancelSessionMutation,
   useCreateSessionMutation,
   useGetActiveSessionQuery,
   useResumeSessionMutation,
@@ -20,7 +21,12 @@ const useSessionResume = ({ copy = {} } = {}) => {
   const { user } = useAuth()
   const [createSession, { isLoading: creating }] = useCreateSessionMutation()
   const [resumeSession] = useResumeSessionMutation()
-  const { data: activeSession } = useGetActiveSessionQuery(undefined, {
+  const [cancelSession, { isLoading: cancelling }] = useCancelSessionMutation()
+  const {
+    data: activeSession,
+    isSuccess: activeLoaded,
+    isError: activeFailed,
+  } = useGetActiveSessionQuery(undefined, {
     refetchOnMountOrArgChange: true,
   })
 
@@ -39,8 +45,21 @@ const useSessionResume = ({ copy = {} } = {}) => {
     navigate(PLACEMENT_TEST_SESSION_PATH)
   }, [lifecycle, navigate, resumeSession])
 
+  const cancelActiveSession = useCallback(async () => {
+    const sessionId = lifecycle?.session?.id
+    try {
+      if (sessionId) {
+        await cancelSession({ sessionId }).unwrap()
+      } else {
+        clearActiveSession()
+      }
+    } catch {
+      clearActiveSession()
+    }
+  }, [cancelSession, lifecycle])
+
   const restart = useCallback(async () => {
-    clearActiveSession()
+    await cancelActiveSession()
     try {
       await createSession({
         targetBand: lifecycle?.session?.targetBand || DEFAULT_TARGET_BAND,
@@ -50,7 +69,7 @@ const useSessionResume = ({ copy = {} } = {}) => {
     } catch {
       toast.error(copy.errorToast)
     }
-  }, [createSession, copy.errorToast, lifecycle, navigate, user])
+  }, [cancelActiveSession, createSession, copy.errorToast, lifecycle, navigate, user])
 
   const goToProfile = useCallback(() => {
     navigate(PLACEMENT_TEST_PROFILE_PATH)
@@ -58,11 +77,14 @@ const useSessionResume = ({ copy = {} } = {}) => {
 
   return {
     lifecycle,
-    creating,
+    loaded: Boolean(activeLoaded || activeFailed),
+    creating: creating || cancelling,
     resume,
     restart,
+    cancelActiveSession,
     goToProfile,
   }
 }
 
 export default useSessionResume
+

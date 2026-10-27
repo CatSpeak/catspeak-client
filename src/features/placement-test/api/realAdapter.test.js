@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   adjustLevelReal,
+  cancelSessionReal,
   createSessionReal,
   getActiveSessionReal,
   getQuestionReal,
@@ -288,8 +289,8 @@ describe("realAdapter", () => {
           current_turn: 3,
           total_turns: 5,
           turns: [
-            { turn_index: 1, transcript: "answer 1", speech_duration_ms: 2000 },
-            { turn_index: 2, transcript: "answer 2", speech_duration_ms: 2500 },
+            { turn_index: 1, transcript: "answer 1", speech_duration_ms: 2000, answered_at: "2026-09-21T10:00:00Z" },
+            { turn_index: 2, transcript: "", speech_duration_ms: 0, answered_at: null },
           ],
         },
       },
@@ -304,6 +305,10 @@ describe("realAdapter", () => {
     expect(res.data.id).toBe("psess_active_999")
     expect(res.data.currentOrder).toBe(3)
     expect(res.data.turns).toHaveLength(2)
+    expect(res.data.turns[0].answeredAt).toBe(new Date("2026-09-21T10:00:00Z").getTime())
+    expect(res.data.turns[0].submittedAt).toBe(new Date("2026-09-21T10:00:00Z").getTime())
+    expect(res.data.turns[1].answeredAt).toBeNull()
+    expect(res.data.turns[1].submittedAt).toBeNull()
   })
 
   it("getActiveSessionReal returns null when no active session", async () => {
@@ -400,4 +405,32 @@ describe("realAdapter", () => {
 
     expect(res.data.result.band).toBe(3)
   })
+
+  it("cancelSessionReal makes POST /v1/placement/sessions/{id}/cancel and clears session", async () => {
+    inMemorySession = { id: "psess_12345" }
+    let cleared = false
+    const mockClear = () => {
+      cleared = true
+      inMemorySession = null
+    }
+
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: { session_id: "psess_12345", status: "cancelled" },
+    })
+
+    const res = await cancelSessionReal(
+      { sessionId: "psess_12345" },
+      { baseQuery: mockBaseQuery, read: mockRead, clear: mockClear },
+    )
+
+    expect(mockBaseQuery).toHaveBeenCalledWith(
+      { url: "/v1/placement/sessions/psess_12345/cancel", method: "POST" },
+      undefined,
+      undefined,
+    )
+    expect(res.data.status).toBe("cancelled")
+    expect(cleared).toBe(true)
+    expect(inMemorySession).toBeNull()
+  })
 })
+

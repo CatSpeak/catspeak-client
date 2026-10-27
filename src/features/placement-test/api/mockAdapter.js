@@ -11,6 +11,7 @@ import { getRetakeEligibility } from "../utils/cooldown"
 import { isUnfinishedSession } from "../utils/sessionLifecycle"
 import { upsertTurn } from "../utils/turns"
 import {
+  clearActiveSession,
   readActiveSession,
   readResult,
   saveActiveSession,
@@ -62,10 +63,35 @@ export const buildSession = ({
 
 export const createSessionMock = async (
   { targetBand, studentId } = {},
-  { delayMs = MOCK_LATENCY_MS, persist = saveActiveSession, ...sessionDeps } = {},
+  {
+    delayMs = MOCK_LATENCY_MS,
+    persist = saveActiveSession,
+    readResult: readStoredResult = readResult,
+    now = Date.now,
+    ...sessionDeps
+  } = {},
 ) => {
   await wait(delayMs)
-  const session = buildSession({ targetBand, studentId, ...sessionDeps })
+  const localResult = readStoredResult()
+  const lastTestedAt =
+    Number(localResult?.scoredAt) || Number(localResult?.adjustedAt) || null
+  const eligibility = getRetakeEligibility({ lastTestedAt, now })
+
+  if (eligibility.hasHistory && !eligibility.eligible) {
+    return {
+      error: {
+        status: 403,
+        data: {
+          code: "COOLDOWN_ACTIVE",
+          message: `Bạn cần đợi thêm ${eligibility.daysRemaining} ngày nữa để thi lại theo quy tắc 14 ngày Cooldown.`,
+          days_remaining: eligibility.daysRemaining,
+          eligible_at: eligibility.eligibleAt,
+        },
+      },
+    }
+  }
+
+  const session = buildSession({ targetBand, studentId, now, ...sessionDeps })
   persist(session)
   return { data: session }
 }
@@ -98,16 +124,32 @@ export const getRetakeStatusMock = async ({
 export const getActiveSessionMock = async ({
   delayMs = MOCK_LATENCY_MS,
   read = readActiveSession,
+  totalTurns = TOTAL_TURNS,
 } = {}) => {
   await wait(delayMs)
   const session = read()
-  return { data: isUnfinishedSession(session) ? session : null }
+  if (!session || !isUnfinishedSession(session)) {
+    return { data: null }
+  }
+  const answeredTurns = (session.turns || []).filter(
+    (t) =>
+      Boolean(
+        t.answeredAt ||
+          t.submittedAt ||
+          (t.transcript && t.transcript.trim() !== ""),
+      ),
+  )
+  if (answeredTurns.length >= totalTurns) {
+    return { data: null }
+  }
+  return { data: session }
 }
 
 export const getQuestionMock = async ({
   sessionId,
   delayMs = MOCK_LATENCY_MS,
   read = readActiveSession,
+  totalTurns = TOTAL_TURNS,
 } = {}) => {
   await wait(delayMs)
   const session = read()
@@ -116,7 +158,41 @@ export const getQuestionMock = async ({
       error: { status: 404, data: { message: "placement_session_not_found" } },
     }
   }
+
+  const answeredTurns = (session.turns || []).filter(
+    (t) =>
+      Boolean(
+        t.answeredAt ||
+          t.submittedAt ||
+          (t.transcript && t.transcript.trim() !== ""),
+      ),
+  )
+
+  if (session.status === SESSION_STATUS.COMPLETED || !isUnfinishedSession(session) || answeredTurns.length >= totalTurns) {
+    return {
+      error: {
+        status: 400,
+        data: {
+          code: "SESSION_ALREADY_COMPLETED",
+          message: "Session is already completed.",
+        },
+      },
+    }
+  }
+
   const turnOrder = (session.turns?.length || 0) + 1
+  if (turnOrder > totalTurns) {
+    return {
+      error: {
+        status: 400,
+        data: {
+          code: "SESSION_ALREADY_COMPLETED",
+          message: "All questions have been answered.",
+        },
+      },
+    }
+  }
+
   const question = selectNextQuestion({
     targetBand: session.targetBand,
     turns: session.turns || [],
@@ -141,7 +217,9 @@ export const resumeSessionMock = async (
   {
     delayMs = MOCK_LATENCY_MS,
     read = readActiveSession,
+    readResult: readStoredResult = readResult,
     totalTurns = TOTAL_TURNS,
+    now = Date.now,
   } = {},
 ) => {
   await wait(delayMs)
@@ -151,7 +229,46 @@ export const resumeSessionMock = async (
       error: { status: 404, data: { message: "placement_session_not_found" } },
     }
   }
-  const answeredCount = Array.isArray(session.turns) ? session.turns.length : 0
+
+  const answeredTurns = (session.turns || []).filter(
+    (t) =>
+      Boolean(
+        t.answeredAt ||
+          t.submittedAt ||
+          (t.transcript && t.transcript.trim() !== ""),
+      ),
+  )
+
+  if (session.status === SESSION_STATUS.COMPLETED || !isUnfinishedSession(session) || answeredTurns.length >= totalTurns) {
+    return {
+      error: {
+        status: 400,
+        data: {
+          code: "SESSION_ALREADY_COMPLETED",
+          message: "Session is already completed.",
+        },
+      },
+    }
+  }
+
+  const localResult = readStoredResult()
+  const lastTestedAt =
+    Number(localResult?.scoredAt) || Number(localResult?.adjustedAt) || null
+  const eligibility = getRetakeEligibility({ lastTestedAt, now })
+  if (eligibility.hasHistory && !eligibility.eligible) {
+    return {
+      error: {
+        status: 403,
+        data: {
+          code: "COOLDOWN_ACTIVE",
+          message: `Bạn cần đợi thêm ${eligibility.daysRemaining} ngày nữa để thi lại theo quy tắc 14 ngày Cooldown.`,
+          days_remaining: eligibility.daysRemaining,
+        },
+      },
+    }
+  }
+
+  const answeredCount = session.turns?.length || 0
   return {
     data: {
       session,
@@ -182,46 +299,66 @@ export const submitTurnMock = async (
   await wait(delayMs)
   const session = read()
   if (!session || (sessionId && session.id !== sessionId)) {
-    return { error: { status: 404, data: { message: "placement_session_not_found" } } }
+    return {
+      error: { status: 404, data: { message: "placement_session_not_found" } },
+    }
   }
 
+  if (session.status === SESSION_STATUS.COMPLETED) {
+    return {
+      error: {
+        status: 400,
+        data: {
+          code: "SESSION_ALREADY_COMPLETED",
+          message: "Session is already completed.",
+        },
+      },
+    }
+  }
+
+  const effectiveTurn = order ?? (session.turns?.length || 0) + 1
   const timestamp = typeof now === "function" ? now() : now
+
   const turn = {
-    order: Number(order) || (session.turns?.length || 0) + 1,
-    questionId: questionId || null,
-    level: Number(level) || 1,
-    transcript: typeof transcript === "string" ? transcript : "",
-    durationMs: Number(durationMs) || 0,
-    retryCount: Number(retryCount) || 0,
-    passed: Boolean(passed),
+    order: effectiveTurn,
+    questionId: questionId || `q-${effectiveTurn}`,
+    level: level ?? 1,
+    transcript: transcript ?? "",
+    durationMs: durationMs ?? 0,
+    retryCount: retryCount ?? 0,
+    passed: passed ?? true,
     submittedAt: timestamp,
   }
 
   const turns = upsertTurn(session.turns, turn)
-
-  const updated = {
+  const isCompleted = turns.length >= TOTAL_TURNS
+  const updatedSession = {
     ...session,
     turns,
-    currentOrder: Math.max(session.currentOrder || 0, turn.order),
+    currentOrder: effectiveTurn,
+    status: isCompleted ? SESSION_STATUS.COMPLETED : SESSION_STATUS.IN_PROGRESS,
     updatedAt: timestamp,
   }
-  persist(updated)
 
-  const nextQuestion =
-    selectNextQuestion({
-      targetBand: updated.targetBand,
-      turns,
-      order: turn.order + 1,
-      random,
-    }) || null
+  persist(updatedSession)
+
+  const nextQuestion = isCompleted
+    ? null
+    : selectNextQuestion({
+        targetBand: session.targetBand,
+        turns,
+        order: effectiveTurn + 1,
+        random,
+      })
 
   return {
     data: {
       accepted: true,
       turn,
-      session: updated,
+      turns,
+      isCompleted,
       nextQuestion,
-      status: SESSION_STATUS.IN_PROGRESS,
+      session: updatedSession,
     },
   }
 }
@@ -233,6 +370,7 @@ export const scoreSessionMock = async (
     read = readActiveSession,
     persist = saveActiveSession,
     persistResult = saveResult,
+    clear = clearActiveSession,
     forcedFailure = isScoringFailureForced,
     now = Date.now,
   } = {},
@@ -267,6 +405,7 @@ export const scoreSessionMock = async (
     updatedAt: timestamp,
   }
   persist(completed)
+  clear()
 
   return { data: { result, session: completed } }
 }
@@ -284,36 +423,39 @@ export const adjustLevelMock = async (
 ) => {
   await wait(delayMs)
   const session = read()
-  if (!session || (sessionId && session.id !== sessionId)) {
+  const result = readStoredResult()
+  const activeSessionId = sessionId || session?.id || result?.sessionId
+  if (!activeSessionId) {
     return {
       error: { status: 404, data: { message: "placement_session_not_found" } },
     }
   }
 
-  const result = readStoredResult()
   if (!result || (sessionId && result.sessionId !== sessionId)) {
     return {
       error: { status: 404, data: { message: "placement_result_not_found" } },
     }
   }
 
-  if (session.selfAdjusted || result.selfAdjusted) {
+  if (session?.selfAdjusted || result.selfAdjusted) {
     return {
       error: { status: 409, data: { message: "placement_adjust_locked" } },
     }
   }
 
-  const aiBand = clampHsk(session.finalBand ?? result.band)
+  const aiBand = clampHsk(session?.finalBand ?? result.band)
   const { band: finalBand, applied } = applySelfAdjust({ band: aiBand, level })
   const timestamp = typeof now === "function" ? now() : now
 
-  const updatedSession = {
-    ...session,
-    finalBand,
-    selfAdjusted: true,
-    updatedAt: timestamp,
-  }
-  persist(updatedSession)
+  const updatedSession = session
+    ? {
+        ...session,
+        finalBand,
+        selfAdjusted: true,
+        updatedAt: timestamp,
+      }
+    : null
+  if (updatedSession) persist(updatedSession)
 
   const updatedResult = {
     ...result,
@@ -331,6 +473,27 @@ export const adjustLevelMock = async (
       band: finalBand,
       applied,
       selfAdjusted: true,
+    },
+  }
+}
+
+export const cancelSessionMock = async (
+  { sessionId } = {},
+  {
+    delayMs = MOCK_LATENCY_MS,
+    read = readActiveSession,
+    clear = clearActiveSession,
+  } = {},
+) => {
+  await wait(delayMs)
+  const session = read()
+  if (session && (!sessionId || session.id === sessionId)) {
+    clear()
+  }
+  return {
+    data: {
+      session_id: sessionId || session?.id,
+      status: SESSION_STATUS.CANCELLED,
     },
   }
 }

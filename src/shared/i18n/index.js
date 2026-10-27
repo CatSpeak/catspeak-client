@@ -1,47 +1,47 @@
-import vi from "./locales/vi"
-import en from "./locales/en"
-import zh from "./locales/zh"
-import ja from "./locales/ja"
+import vi from "./locales/vi";
+import en from "./locales/en";
+import zh from "./locales/zh";
+import ja from "./locales/ja";
 
-import { billingTranslations } from "@/features/billing/i18n"
-import { profileTranslations } from "@/features/profile/i18n"
-import { chatTranslations } from "@/features/chat/i18n"
-import { websitesTranslations } from "@/features/websites/i18n"
-import { newsTranslations } from "@/features/news/i18n"
-import { bankAccountsTranslations } from "@/features/bank-accounts/i18n"
-import { refundTranslations } from "@/features/refunds/i18n"
-import { materialsTranslations } from "@/features/materials/i18n"
-import { landingTranslations } from "@/features/landing/i18n"
-import { voucherTranslations } from "@/features/vouchers/i18n"
-import { pointsAndOffersTranslations } from "@/features/points-and-offers"
-import { bugReportTranslations } from "@/features/bug-report/i18n"
-import { chatAssistantTranslations } from "@/features/chat-assistant/i18n"
-import { helpTranslations } from "@/features/help/i18n"
-import { placementTestTranslations } from "@/features/placement-test/i18n"
-import { interactiveScriptTranslations } from "@/features/interactive-script/i18n"
+import { billingTranslations } from "@/features/billing/i18n";
+import { profileTranslations } from "@/features/profile/i18n";
+import { chatTranslations } from "@/features/chat/i18n";
+import { websitesTranslations } from "@/features/websites/i18n";
+import { newsTranslations } from "@/features/news/i18n";
+import { bankAccountsTranslations } from "@/features/bank-accounts/i18n";
+import { refundTranslations } from "@/features/refunds/i18n";
+import { materialsTranslations } from "@/features/materials/i18n";
+import { landingTranslations } from "@/features/landing/i18n";
+import { voucherTranslations } from "@/features/vouchers/i18n";
+import { pointsAndOffersTranslations } from "@/features/points-and-offers";
+import { bugReportTranslations } from "@/features/bug-report/i18n";
+import { chatAssistantTranslations } from "@/features/chat-assistant/i18n";
+import { helpTranslations } from "@/features/help/i18n";
+import { interactiveScriptTranslations } from "@/features/interactive-script/i18n";
+import { placementTestTranslations } from "@/features/placement-test/i18n";
 
 const isObject = (item) =>
-  Boolean(item && typeof item === "object" && !Array.isArray(item))
+  Boolean(item && typeof item === "object" && !Array.isArray(item));
 
 // Helper to deeply merge multiple translation objects safely
 const deepMerge = (...objects) => {
   return objects.reduce((target, source) => {
-    if (!source) return target
-    const result = { ...target }
+    if (!source) return target;
+    const result = { ...target };
     for (const key of Object.keys(source)) {
       if (
         isObject(source[key]) &&
         Object.prototype.hasOwnProperty.call(result, key) &&
         isObject(result[key])
       ) {
-        result[key] = deepMerge(result[key], source[key])
+        result[key] = deepMerge(result[key], source[key]);
       } else {
-        result[key] = source[key]
+        result[key] = source[key];
       }
     }
-    return result
-  }, {})
-}
+    return result;
+  }, {});
+};
 
 export const translations = {
   vi: deepMerge(
@@ -60,8 +60,9 @@ export const translations = {
     bugReportTranslations.vi,
     chatAssistantTranslations.vi,
     helpTranslations.vi,
-    placementTestTranslations.vi,
     interactiveScriptTranslations.vi,
+    placementTestTranslations.vi,
+    { aiTutor: aiTutorTranslations.vi },
   ),
   en: deepMerge(
     en,
@@ -79,8 +80,9 @@ export const translations = {
     bugReportTranslations.en,
     chatAssistantTranslations.en,
     helpTranslations.en,
-    placementTestTranslations.en,
     interactiveScriptTranslations.en,
+    placementTestTranslations.en,
+    { aiTutor: aiTutorTranslations.en },
   ),
   zh: deepMerge(
     zh,
@@ -98,8 +100,9 @@ export const translations = {
     bugReportTranslations.zh,
     chatAssistantTranslations.zh,
     helpTranslations.zh,
-    placementTestTranslations.zh,
     interactiveScriptTranslations.zh,
+    placementTestTranslations.zh,
+    { aiTutor: aiTutorTranslations.zh },
   ),
   ja: deepMerge(
     ja,
@@ -117,17 +120,18 @@ export const translations = {
     bugReportTranslations.ja,
     chatAssistantTranslations.ja,
     helpTranslations.ja,
-    placementTestTranslations.ja,
     interactiveScriptTranslations.ja,
+    placementTestTranslations.ja,
+    { aiTutor: aiTutorTranslations.ja },
   ),
-}
+};
 
 export const languageNames = {
   vi: "Tiếng Việt",
   en: "English",
   zh: "中文",
   ja: "日本語",
-}
+};
 
 // Export default để backward compatibility
-export default translations
+export default translations;

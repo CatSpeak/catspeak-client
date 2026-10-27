@@ -103,7 +103,8 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
         </div>
 
         {/* Right Section: Search + Filter + Lang + User */}
-        <div className="flex items-center justify-end gap-1 shrink-0">
+        {/* min-w-0 + flex-1: ô tìm kiếm co lại thay vì đẩy chuông/chat/avatar ra ngoài mép (BUG-PT-17) */}
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
           {/* Search */}
           <div className="flex items-center gap-1" data-tour="header-search-filter">
             <HeaderSearchBar />

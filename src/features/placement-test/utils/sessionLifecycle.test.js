@@ -65,7 +65,10 @@ describe("getSessionLifecycle", () => {
   it("classifies a recent session as resumable with the next order", () => {
     const lifecycle = getSessionLifecycle({
       session: buildSession({
-        turns: [{ order: 1 }, { order: 2 }],
+        turns: [
+          { order: 1, answeredAt: ACTIVITY },
+          { order: 2, answeredAt: ACTIVITY },
+        ],
       }),
       now: ACTIVITY + 6 * HOUR_MS,
     })
@@ -77,6 +80,22 @@ describe("getSessionLifecycle", () => {
     expect(lifecycle.totalTurns).toBe(5)
     expect(lifecycle.remainingMs).toBe(18 * HOUR_MS)
     expect(lifecycle.expiresAt).toBe(ACTIVITY + RESUME_WINDOW_MS)
+  })
+
+  it("ignores pending unanswered turns when calculating answeredCount and nextOrder", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        turns: [
+          { order: 1, answeredAt: ACTIVITY },
+          { order: 2, answeredAt: null, submittedAt: null, transcript: "" },
+        ],
+      }),
+      now: ACTIVITY + 2 * HOUR_MS,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.RESUME)
+    expect(lifecycle.answeredCount).toBe(1)
+    expect(lifecycle.nextOrder).toBe(2)
   })
 
   it("expires exactly at the 24h boundary", () => {
@@ -100,7 +119,13 @@ describe("getSessionLifecycle", () => {
   it("clamps the next order to the total number of questions", () => {
     const lifecycle = getSessionLifecycle({
       session: buildSession({
-        turns: [{ order: 1 }, { order: 2 }, { order: 3 }, { order: 4 }, { order: 5 }],
+        turns: [
+          { order: 1, answeredAt: ACTIVITY },
+          { order: 2, answeredAt: ACTIVITY },
+          { order: 3, answeredAt: ACTIVITY },
+          { order: 4, answeredAt: ACTIVITY },
+          { order: 5, answeredAt: ACTIVITY },
+        ],
       }),
       now: ACTIVITY,
     })

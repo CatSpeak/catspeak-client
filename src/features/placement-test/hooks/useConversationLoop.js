@@ -5,9 +5,10 @@ import {
   ANALYZE_MIN_MS,
   CONVERSATION_NOTICE,
   CONVERSATION_PHASE,
-  NOT_HEARING_BANNER_MS,
+  NOTICE_BANNER_MS,
   QUESTION_DURATION_MS,
   TICK_MS,
+  VAD_SILENCE_MS,
 } from "../constants/conversation"
 import {
   PLACEMENT_TEST_PATH,
@@ -16,10 +17,19 @@ import {
 import { SESSION_STATUS } from "../constants/session"
 import { CONNECTION_LOST_EVENT } from "../constants/lifecycle"
 import { TOTAL_TURNS, evaluateTurn, selectNextQuestion } from "../engine"
-import { placementTestApi, useSubmitTurnMutation } from "../api"
+import {
+  placementTestApi,
+  useCancelSessionMutation,
+  useCreateSessionMutation,
+  useSubmitTurnMutation,
+} from "../api"
 import { SILENCE_LEVEL } from "../services/audio/constants"
 import { createSilenceTracker } from "../services/speech"
-import { readActiveSession, saveActiveSession } from "../utils/sessionStorage"
+import {
+  clearActiveSession,
+  readActiveSession,
+  saveActiveSession,
+} from "../utils/sessionStorage"
 import {
   advancePauseBudget,
   remainingPauseBudget,
@@ -27,8 +37,30 @@ import {
   startReconnect,
   tickReconnect,
 } from "../utils/lifecycle"
+import { isUnfinishedSession } from "../utils/sessionLifecycle"
 import { upsertTurn } from "../utils/turns"
 import useAudioTransport from "./useAudioTransport"
+
+// Đánh dấu phòng thi đang mở trong tab này. Rời phòng bằng điều hướng trong app
+// thì xóa dấu; F5 không chạy cleanup nên dấu còn, lần mount sau biết là tải lại.
+const ROOM_MARKER_KEY = "catspeak_pt_room_open"
+
+const readRoomMarker = () => {
+  try {
+    return window.sessionStorage.getItem(ROOM_MARKER_KEY)
+  } catch {
+    return null
+  }
+}
+
+const writeRoomMarker = (value) => {
+  try {
+    if (value) window.sessionStorage.setItem(ROOM_MARKER_KEY, value)
+    else window.sessionStorage.removeItem(ROOM_MARKER_KEY)
+  } catch {
+    // sessionStorage bị chặn: bỏ qua, chỉ mất hộp thoại tiếp tục
+  }
+}
 
 const isOnline = () =>
   typeof navigator === "undefined" || navigator.onLine !== false
@@ -47,6 +79,7 @@ const normalizeQuestion = (q, fallbackOrder = 1) => {
     level: Number(q.target_hsk_level || q.hsk_level || q.level) || 1,
     hanzi: q.text || q.hanzi || "",
     pinyin: q.pinyin || "",
+    meaningVi: q.meaning_vi || q.meaningVi || q.translation_vi || q.vi || "",
     audioBase64: q.audio_base64 || q.audioBase64 || null,
     audioFormat: q.audio_format || q.audioFormat || "audio/wav",
   }
@@ -72,6 +105,7 @@ const useConversationLoop = () => {
   const [remainingMs, setRemainingMs] = useState(QUESTION_DURATION_MS)
   const [showHanzi, setShowHanzi] = useState(true)
   const [showPinyin, setShowPinyin] = useState(true)
+  const [showMeaning, setShowMeaning] = useState(true)
   const [paused, setPaused] = useState(false)
   const [pauseSpentMs, setPauseSpentMs] = useState(
     () => readActiveSession()?.pauseSpentMs || 0,
@@ -79,7 +113,13 @@ const useConversationLoop = () => {
   const [connectionLost, setConnectionLost] = useState(false)
   const [reconnect, setReconnect] = useState(() => startReconnect())
   const [suspended, setSuspended] = useState(false)
+  // BUG-PT-13 / FR-PT-012: F5 giữa bài thì hỏi tiếp tục hay thi lại (sc14).
+  const [resumePrompt, setResumePrompt] = useState(null)
+  const [restarting, setRestarting] = useState(false)
+  const [aiSpeaking, setAiSpeaking] = useState(false)
   const [submitTurn] = useSubmitTurnMutation()
+  const [cancelSession] = useCancelSessionMutation()
+  const [createSession] = useCreateSessionMutation()
   const [triggerGetQuestion] = placementTestApi.useLazyGetQuestionQuery()
 
   const {
@@ -118,6 +158,11 @@ const useConversationLoop = () => {
   const handleLeaveRef = useRef(() => {})
 
   const finishTurnRef = useRef(() => {})
+  const autoRecordTimerRef = useRef(null)
+  const audioTokenRef = useRef(0)
+  const suspendedRef = useRef(false)
+  const startRecordRef = useRef(() => {})
+  const reloadDecisionRef = useRef(null)
   const loadQuestionRef = useRef(() => {})
   const stateRef = useRef({})
 
@@ -208,20 +253,72 @@ const useConversationLoop = () => {
     recordedMs,
   ])
 
+  const clearAutoRecord = useCallback(() => {
+    if (autoRecordTimerRef.current != null) {
+      window.clearTimeout(autoRecordTimerRef.current)
+      autoRecordTimerRef.current = null
+    }
+  }, [])
+
+  // VAD (BUG-PT-01): không bắt người dùng bấm mic. AI ngừng nói được
+  // VAD_SILENCE_MS thì tự mở ghi âm cho câu hiện tại.
+  const scheduleAutoRecord = useCallback(
+    (delay = VAD_SILENCE_MS) => {
+      clearAutoRecord()
+      const token = audioTokenRef.current
+      autoRecordTimerRef.current = window.setTimeout(() => {
+        autoRecordTimerRef.current = null
+        if (!mountedRef.current) return
+        if (token !== audioTokenRef.current) return
+        const current = stateRef.current
+        if (
+          suspendedRef.current ||
+          finishingRef.current ||
+          isRecordingRef.current ||
+          current.hasRecorded ||
+          current.phase !== CONVERSATION_PHASE.LISTENING
+        ) {
+          return
+        }
+        startRecordRef.current()
+      }, delay)
+    },
+    [clearAutoRecord],
+  )
+
   const playQuestionAudio = useCallback(
     (q) => {
       handleStopUserAudio()
+      clearAutoRecord()
+      audioTokenRef.current += 1
+      const token = audioTokenRef.current
+      const handleEnd = () => {
+        if (token !== audioTokenRef.current) return
+        setAiSpeaking(false)
+        scheduleAutoRecord()
+      }
+      let started = false
       if (q?.audioBase64) {
-        playAudioBase64(q.audioBase64, q.audioFormat)
+        started = Boolean(
+          playAudioBase64(q.audioBase64, q.audioFormat, { onEnd: handleEnd }),
+        )
       } else if (q?.hanzi) {
-        speakText(q.hanzi)
+        started = Boolean(speakText(q.hanzi, { onEnd: handleEnd }))
+      }
+      if (started) {
+        setAiSpeaking(true)
+      } else {
+        handleEnd()
       }
     },
-    [handleStopUserAudio, playAudioBase64, speakText],
+    [clearAutoRecord, handleStopUserAudio, playAudioBase64, scheduleAutoRecord, speakText],
   )
 
   const handleStartRecord = useCallback(async () => {
     if (finishingRef.current) return
+    clearAutoRecord()
+    audioTokenRef.current += 1
+    setAiSpeaking(false)
     handleStopUserAudio()
     stopSpeakingText()
     stopAudio()
@@ -258,7 +355,11 @@ const useConversationLoop = () => {
         if (finalText) setTranscript(finalText)
       },
     })
-  }, [startAudioListening, startRecording, stopAudio, stopSpeakingText])
+  }, [clearAutoRecord, handleStopUserAudio, startAudioListening, startRecording, stopAudio, stopSpeakingText])
+
+  useEffect(() => {
+    startRecordRef.current = handleStartRecord
+  }, [handleStartRecord])
 
   const handleStopRecord = useCallback(async () => {
     if (!isRecordingRef.current) return
@@ -295,6 +396,7 @@ const useConversationLoop = () => {
 
   const loadQuestion = useCallback(
     async (nextOrder, sourceTurns, preferredQuestion) => {
+      clearAutoRecord()
       finishingRef.current = false
       recordingStoppedRef.current = false
       const current = stateRef.current
@@ -308,7 +410,17 @@ const useConversationLoop = () => {
         try {
           const res = await triggerGetQuestion({ sessionId: current.session.id }).unwrap()
           rawQuestion = res
-        } catch {
+        } catch (err) {
+          if (err?.status === 400 || err?.status === 403 || err?.status === 410) {
+            clearActiveSession()
+            const msg =
+              err?.data?.detail?.message ||
+              err?.data?.message ||
+              "Phiên thi đã kết thúc hoặc không thể tiếp tục."
+            toast.error(msg)
+            navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
+            return
+          }
           rawQuestion = null
         }
       }
@@ -351,6 +463,7 @@ const useConversationLoop = () => {
       playQuestionAudio(nextQuestion)
     },
     [
+      clearAutoRecord,
       handleStopUserAudio,
       navigate,
       playQuestionAudio,
@@ -365,6 +478,9 @@ const useConversationLoop = () => {
     async ({ transcript: rawTranscript = "", skipped = false } = {}) => {
       if (finishingRef.current) return
       finishingRef.current = true
+      clearAutoRecord()
+      audioTokenRef.current += 1
+      setAiSpeaking(false)
       handleStopUserAudio()
       setIsRecording(false)
       stopAudioListening()
@@ -412,7 +528,17 @@ const useConversationLoop = () => {
           skipped: Boolean(skipped),
           ...turn,
         }).unwrap()
-      } catch {
+      } catch (err) {
+        if (err?.status === 400 || err?.status === 403 || err?.status === 410) {
+          clearActiveSession()
+          const msg =
+            err?.data?.detail?.message ||
+            err?.data?.message ||
+            "Phiên thi đã hoàn tất."
+          toast.error(msg)
+          navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
+          return
+        }
         // Network or server error: stay on current question and allow retrying submit
         finishingRef.current = false
         setPhase(CONVERSATION_PHASE.LISTENING)
@@ -437,6 +563,7 @@ const useConversationLoop = () => {
         setIsRecording(false)
         setHasRecorded(false)
         setRecordedMs(0)
+        scheduleAutoRecord()
         return
       }
 
@@ -479,7 +606,10 @@ const useConversationLoop = () => {
       )
     },
     [
+      clearAutoRecord,
+      handleStopUserAudio,
       navigate,
+      scheduleAutoRecord,
       stopAudioListening,
       stopSpeakingText,
       stopAudio,
@@ -498,6 +628,10 @@ const useConversationLoop = () => {
   }, [loadQuestion])
 
   const suspendSession = useCallback(() => {
+    clearAutoRecord()
+    audioTokenRef.current += 1
+    setAiSpeaking(false)
+    suspendedRef.current = true
     handleStopUserAudio()
     stopAudioListening()
     stopSpeakingText()
@@ -508,11 +642,16 @@ const useConversationLoop = () => {
       setHasRecorded(true)
     }
     setSuspended(true)
-  }, [handleStopUserAudio, stopAudioListening, stopSpeakingText, stopAudio, stopRecording])
+  }, [clearAutoRecord, handleStopUserAudio, stopAudioListening, stopSpeakingText, stopAudio, stopRecording])
 
   const resumeSession = useCallback(() => {
+    suspendedRef.current = false
     setSuspended(false)
-  }, [])
+    const current = stateRef.current
+    if (!current.hasRecorded && current.phase === CONVERSATION_PHASE.LISTENING) {
+      scheduleAutoRecord()
+    }
+  }, [scheduleAutoRecord])
 
   const handlePause = useCallback(() => {
     if (connectionLost) return
@@ -541,6 +680,23 @@ const useConversationLoop = () => {
     stopAudio()
     navigate(PLACEMENT_TEST_PATH, { replace: true })
   }, [handleStopUserAudio, navigate, pauseSpentMs, stopAudioListening, stopSpeakingText, stopAudio])
+
+  const handleCancel = useCallback(async () => {
+    const current = stateRef.current
+    if (current.session?.id) {
+      try {
+        await cancelSession({ sessionId: current.session.id }).unwrap()
+      } catch {
+        // Ignore network error on cancel
+      }
+    }
+    clearActiveSession()
+    handleStopUserAudio()
+    stopAudioListening()
+    stopSpeakingText()
+    stopAudio()
+    navigate(PLACEMENT_TEST_PATH, { replace: true })
+  }, [cancelSession, handleStopUserAudio, navigate, stopAudio, stopAudioListening, stopSpeakingText])
 
   const handleConnectionLost = useCallback(() => {
     if (connectionLost) return
@@ -629,29 +785,62 @@ const useConversationLoop = () => {
   useEffect(() => {
     mountedRef.current = true
     const stored = readActiveSession()
-    if (!stored) {
+    if (!stored || !isUnfinishedSession(stored)) {
+      clearActiveSession()
       navigate(PLACEMENT_TEST_PATH, { replace: true })
       return () => {
         mountedRef.current = false
       }
     }
-    const startOrder =
-      Number(stored.currentOrder) || (stored.turns?.length || 0) + 1
-    if (startOrder > TOTAL_TURNS) {
+    const answeredTurns = (stored.turns || []).filter(
+      (t) =>
+        Boolean(
+          t.answeredAt ||
+            t.submittedAt ||
+            (t.transcript && t.transcript.trim() !== ""),
+        ),
+    ).length
+    if (answeredTurns >= TOTAL_TURNS) {
+      clearActiveSession()
       navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
       return () => {
         mountedRef.current = false
       }
     }
-    loadQuestionRef.current(startOrder, stored.turns || [])
+    const startOrder = Math.min(answeredTurns + 1, TOTAL_TURNS)
+    // Giữ quyết định trong ref để StrictMode (mount hai lần ở dev) không đọc sai dấu.
+    if (reloadDecisionRef.current === null) {
+      reloadDecisionRef.current =
+        Boolean(stored.id) && readRoomMarker() === String(stored.id)
+    }
+    const reloaded = reloadDecisionRef.current
+    writeRoomMarker(stored.id ? String(stored.id) : null)
+    if (reloaded) {
+      setResumePrompt({
+        answeredCount: stored.turns?.length || 0,
+        nextOrder: startOrder,
+        expiresAt: Number(stored.expiresAt) || null,
+      })
+    } else {
+      loadQuestionRef.current(startOrder, stored.turns || [])
+    }
     return () => {
       mountedRef.current = false
+      writeRoomMarker(null)
+      clearAutoRecord()
       handleStopUserAudio()
       stopAudioListening()
       stopSpeakingText()
       stopAudio()
     }
-  }, [handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
+  }, [clearAutoRecord, handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
+
+  // FR-PT-008: banner cảnh báo tự ẩn sau NOTICE_BANNER_MS.
+  useEffect(() => {
+    if (!notice) return undefined
+    const id = window.setTimeout(() => setNotice(null), NOTICE_BANNER_MS)
+    return () => window.clearTimeout(id)
+  }, [notice, retryCount])
 
   // Tick loop: smoothly updates recording timer
   useEffect(() => {
@@ -697,16 +886,69 @@ const useConversationLoop = () => {
     finishTurnRef.current({ transcript: "", skipped: true })
   }, [stopAudioListening, stopRecording])
 
-  const handleReplay = useCallback(() => {
-    const q = stateRef.current.question
-    if (q) playQuestionAudio(q)
-  }, [playQuestionAudio])
+  const handleReplay = useCallback(async () => {
+    const current = stateRef.current
+    const q = current.question
+    if (!q || current.phase !== CONVERSATION_PHASE.LISTENING) return
+    // Đang ghi mà nghe lại câu hỏi thì loa sẽ lọt vào bản ghi: bỏ bản đang ghi,
+    // phát xong câu hỏi thì VAD tự mở ghi âm lại.
+    if (isRecordingRef.current) {
+      setIsRecording(false)
+      stopAudioListening()
+      await stopRecording()
+      setHasRecorded(false)
+      setRecordedMs(0)
+    }
+    playQuestionAudio(q)
+  }, [playQuestionAudio, stopAudioListening, stopRecording])
+
+  const handlePromptResume = useCallback(() => {
+    const prompt = resumePrompt
+    if (!prompt) return
+    setResumePrompt(null)
+    loadQuestionRef.current(prompt.nextOrder, stateRef.current.turns || [])
+  }, [resumePrompt])
+
+  const handlePromptRestart = useCallback(async () => {
+    const current = stateRef.current
+    setRestarting(true)
+    try {
+      if (current.session?.id) {
+        try {
+          await cancelSession({ sessionId: current.session.id }).unwrap()
+        } catch {
+          // phiên cũ hủy lỗi vẫn cho tạo phiên mới
+        }
+      }
+      const fresh = await createSession({
+        targetBand: current.session?.targetBand,
+      }).unwrap()
+      writeRoomMarker(fresh?.id ? String(fresh.id) : null)
+      setSession(fresh)
+      setTurns([])
+      setRetryCount(0)
+      setPauseSpentMs(0)
+      pauseSpentRef.current = 0
+      stateRef.current = { ...stateRef.current, session: fresh, turns: [] }
+      setResumePrompt(null)
+      loadQuestionRef.current(1, [], fresh?.initialQuestion || null)
+    } catch {
+      toast.error("Không thể bắt đầu lại bài thi. Vui lòng thử lại.")
+    } finally {
+      setRestarting(false)
+    }
+  }, [cancelSession, createSession])
 
   const toggleHanzi = useCallback(() => setShowHanzi((value) => !value), [])
   const togglePinyin = useCallback(() => setShowPinyin((value) => !value), [])
+  const toggleMeaning = useCallback(() => setShowMeaning((value) => !value), [])
 
   return {
     ready: Boolean(question),
+    resumePrompt,
+    restarting,
+    handlePromptResume,
+    handlePromptRestart,
     session,
     order,
     question,
@@ -715,6 +957,8 @@ const useConversationLoop = () => {
     notice,
     retryCount,
     isRecording,
+    aiSpeaking,
+    micLevel,
     hasRecorded,
     recordedMs,
     remainingMs,
@@ -722,8 +966,10 @@ const useConversationLoop = () => {
     isPlayingUserAudio,
     showHanzi,
     showPinyin,
+    showMeaning,
     toggleHanzi,
     togglePinyin,
+    toggleMeaning,
     canSkip: true,
     answeredCount: turns.length,
     paused,
@@ -734,6 +980,7 @@ const useConversationLoop = () => {
     handlePause,
     handleResume,
     handleLeave,
+    handleCancel,
     handleReconnectNow,
     handleToggleRecord,
     handleStartRecord,

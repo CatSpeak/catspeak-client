@@ -21,6 +21,57 @@ import CalendarPage from "@/features/calendar/pages/CalendarPage";
 import CreateEventPage from "@/features/calendar/pages/CreateEventPage";
 import GroupInvitePage from "@/features/chat/pages/GroupInvitePage";
 
+// AI Tutor Feature Pages
+import AiTutorLayout from "@/features/ai-tutor/layouts/AiTutorLayout";
+// Nạp sẵn (không lazy): phải hiện được cả khi mất mạng không tải được module khác.
+import AiFlashcardRouteError from "@/features/ai-tutor/components/flashcards/FlashcardRouteError";
+const AiLevelAssessmentPage = lazy(
+  () => import("@/features/ai-tutor/pages/LevelAssessmentPage"),
+);
+const AiSpeakingRoomPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingRoomPage"),
+);
+const SpeakingSessionPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingSessionPage"),
+);
+const SpeakingResultPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingResultPage"),
+);
+const SpeakingRoomFlowLayout = lazy(
+  () => import("@/features/ai-tutor/layouts/SpeakingRoomFlowLayout"),
+);
+const AiSpeakingReportPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingReportPage"),
+);
+const AiVocabularyNotebookPage = lazy(
+  () => import("@/features/ai-tutor/pages/VocabularyNotebookPage"),
+);
+// TASK-AI-16: fc02 (phiên ôn) và fc03 (kết quả) của flashcard SRS
+const AiFlashcardReviewPage = lazy(
+  () => import("@/features/ai-tutor/pages/FlashcardReviewPage"),
+);
+const AiFlashcardResultPage = lazy(
+  () => import("@/features/ai-tutor/pages/FlashcardResultPage"),
+);
+const AiDeckBrowsePage = lazy(
+  () => import("@/features/ai-tutor/pages/DeckBrowsePage"),
+);
+const AiDeckListPage = lazy(
+  () => import("@/features/ai-tutor/pages/DeckListPage"),
+);
+const AiAddFlashcardPage = lazy(
+  () => import("@/features/ai-tutor/pages/AddFlashcardPage"),
+);
+const AiPronunciationPracticePage = lazy(
+  () => import("@/features/ai-tutor/pages/PronunciationPracticePage"),
+);
+const AiFlashcardLayout = lazy(
+  () => import("@/features/ai-tutor/layouts/FlashcardLayout"),
+);
+const AiHistoryProgressPage = lazy(
+  () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
+);
+
 // Shared Pages
 import { PageNotFound, ForbiddenPage, ComingSoonPage } from "@/shared/pages";
 
@@ -84,7 +135,9 @@ const SystemSettingsPage = lazy(
 
 const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"));
 const ChatPage = lazy(() => import("@/features/chat/pages/ChatPage"));
-const HelpCenterPage = lazy(() => import("@/features/help/pages/HelpCenterPage"));
+const HelpCenterPage = lazy(
+  () => import("@/features/help/pages/HelpCenterPage"),
+);
 const ReelDetailPage = lazy(
   () => import("@/features/reels/pages/ReelDetailPage"),
 );
@@ -99,7 +152,9 @@ const WorkspaceEventsPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceEventsPage"),
 );
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"));
-const RefundHistoryPage = lazy(() => import("@/features/refunds/pages/RefundHistoryPage.jsx"));
+const RefundHistoryPage = lazy(
+  () => import("@/features/refunds/pages/RefundHistoryPage.jsx"),
+);
 const MyLearningPage = lazy(
   () => import("@/features/courses/pages/MyLearningPage"),
 );
@@ -153,15 +208,11 @@ const WorkspaceDashboardPage = lazy(
 );
 const WorkspaceDashboardRouter = lazy(
   () =>
-    import(
-      "@/features/workspace/components/learner-dashboard/WorkspaceDashboardRouter"
-    ),
+    import("@/features/workspace/components/learner-dashboard/WorkspaceDashboardRouter"),
 );
 const LearnerDashboardPage = lazy(
   () =>
-    import(
-      "@/features/workspace/components/learner-dashboard/LearnerDashboardPage"
-    ),
+    import("@/features/workspace/components/learner-dashboard/LearnerDashboardPage"),
 );
 const CreateVoucherPage = lazy(
   () => import("@/features/vouchers/pages/CreateVoucherPage"),
@@ -208,6 +259,28 @@ const CreateAssignmentPage = lazy(
 const WorkspaceRoomsPage = lazy(
   () => import("@/features/rooms/pages/WorkspaceRoomsPage"),
 );
+
+const AiLevelAssessmentRoute = () => {
+  const { lang } = useParams();
+
+  if (lang !== "zh") {
+    return (
+      <LazyRoute>
+        <AiLevelAssessmentPage />
+      </LazyRoute>
+    );
+  }
+
+  return (
+    <CommunityGuard>
+      <AuthGuard>
+        <LazyRoute>
+          <PlacementTestPage />
+        </LazyRoute>
+      </AuthGuard>
+    </CommunityGuard>
+  );
+};
 
 const CreateExamPage = lazy(
   () => import("@/features/courses/pages/CreateExamPage"),
@@ -359,66 +432,6 @@ const routesConfig = [
             ),
           },
           {
-            path: "placement-test",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementTestPage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
-            path: "placement-test/session",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementSessionPage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
-            path: "placement-test/scoring",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementScoringPage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
-            path: "placement-test/result",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementResultPage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
-            path: "placement-test/profile",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementProfilePage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
             path: "help",
             element: (
               <LazyRoute>
@@ -529,7 +542,212 @@ const routesConfig = [
         ],
       },
 
-      // Language-prefixed learning-path route
+      // Language-prefixed ai-tutor routes
+      {
+        path: "/:lang/ai-tutor",
+        element: <LanguageLayout />,
+        children: [
+          {
+            element: <MainLayout />,
+            children: [
+              {
+                element: <AiTutorLayout />,
+                children: [
+                  {
+                    index: true,
+                    element: <Navigate to="level-assessment" replace />,
+                  },
+                  {
+                    path: "level-assessment",
+                    element: <AiLevelAssessmentRoute />,
+                  },
+                  {
+                    path: "level-assessment/session",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementSessionPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/scoring",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementScoringPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/result",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementResultPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/profile",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementProfilePage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "learning-path",
+                    element: (
+                      <LazyRoute>
+                        <LearningPathCalendarPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "speaking-room",
+                    element: (
+                      <LazyRoute>
+                        <SpeakingRoomFlowLayout />
+                      </LazyRoute>
+                    ),
+                    children: [
+                      {
+                        index: true,
+                        element: (
+                          <LazyRoute>
+                            <AiSpeakingRoomPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "sessions/:sessionId",
+                        element: (
+                          <LazyRoute>
+                            <SpeakingSessionPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "sessions/:sessionId/result",
+                        element: (
+                          <LazyRoute>
+                            <SpeakingResultPage />
+                          </LazyRoute>
+                        ),
+                      },
+                    ],
+                  },
+                  {
+                    // TASK-AI-15: ss10 → ss11 (+ ss12, ss13) của một buổi nói
+                    path: "speaking-room/report/:sessionId",
+                    element: (
+                      <LazyRoute>
+                        <AiSpeakingReportPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    // TASK-AI-16: Sổ tay từ vựng (flashcard). Bắt đăng nhập (CHK-103),
+                    // khung chung có banner offline và bộ đệm offline (CHK-098..100).
+                    path: "vocabulary-notebook",
+                    element: (
+                      <AuthGuard>
+                        <LazyRoute>
+                          <AiFlashcardLayout />
+                        </LazyRoute>
+                      </AuthGuard>
+                    ),
+                    errorElement: <AiFlashcardRouteError />,
+                    children: [
+                      {
+                        index: true,
+                        element: (
+                          <LazyRoute>
+                            <AiVocabularyNotebookPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "review",
+                        element: (
+                          <LazyRoute>
+                            <AiFlashcardReviewPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "review/:sessionId/result",
+                        element: (
+                          <LazyRoute>
+                            <AiFlashcardResultPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "decks",
+                        element: (
+                          <LazyRoute>
+                            <AiDeckListPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "decks/:deckId",
+                        element: (
+                          <LazyRoute>
+                            <AiDeckBrowsePage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "add",
+                        element: (
+                          <LazyRoute>
+                            <AiAddFlashcardPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "practice",
+                        element: (
+                          <LazyRoute>
+                            <AiPronunciationPracticePage />
+                          </LazyRoute>
+                        ),
+                      },
+                    ],
+                  },
+                  {
+                    path: "history-progress",
+                    element: (
+                      <LazyRoute>
+                        <AiHistoryProgressPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  { path: "*", element: <PageNotFound /> },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+
+      // Language-prefixed learning-path route (backward compatibility)
       {
         path: "/:lang/learning-path",
         element: <LanguageLayout />,
@@ -727,7 +945,7 @@ const routesConfig = [
                   <LazyRoute>
                     <MyCalendarPage />
                   </LazyRoute>
-                )
+                ),
               },
               {
                 path: "vocabulary",
@@ -735,7 +953,7 @@ const routesConfig = [
                   <LazyRoute>
                     <VocabularyNotebookPage />
                   </LazyRoute>
-                )
+                ),
               },
               {
                 path: "teaching-tasks",

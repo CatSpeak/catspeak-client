@@ -53,6 +53,15 @@ const Checkbox = ({
     }
   }
 
+  // Bàn phím: Space/Enter đổi trạng thái giống checkbox thật (a11y).
+  const handleKeyDown = (e) => {
+    if (disabled) return
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault()
+      handleClick(e)
+    }
+  }
+
   const checkboxIndicator = (
     <div
       className={`flex w-[18px] h-[18px] items-center justify-center rounded-[2px] border-2 transition-all duration-200 select-none ${outerBorderClass} ${innerClassName}`}
@@ -73,6 +82,11 @@ const Checkbox = ({
       <Component
         type={Component === "button" ? "button" : undefined}
         id={id}
+        role="checkbox"
+        aria-checked={checked}
+        aria-disabled={disabled || undefined}
+        tabIndex={Component === "div" ? (disabled ? -1 : 0) : undefined}
+        onKeyDown={Component === "div" ? handleKeyDown : undefined}
         onClick={handleClick}
         disabled={disabled}
         className={`group/cb inline-flex items-center justify-center w-12 h-12 rounded-full shrink-0 focus:outline-none transition-all duration-200 ${
@@ -96,8 +110,13 @@ const Checkbox = ({
   return (
     <div
       id={id}
+      role="checkbox"
+      aria-checked={checked}
+      aria-disabled={disabled || undefined}
+      tabIndex={disabled ? -1 : 0}
+      onKeyDown={handleKeyDown}
       onClick={handleClick}
-      className={`inline-flex items-center justify-center shrink-0 ${
+      className={`inline-flex items-center justify-center shrink-0 rounded-[3px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]/50 focus-visible:ring-offset-2 ${
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
       } ${className}`}
       {...props}

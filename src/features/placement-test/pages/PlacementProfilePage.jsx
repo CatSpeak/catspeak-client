@@ -2,6 +2,9 @@ import { useCallback, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth/hooks/useAuth"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
+import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
+import { PlanRequiredState } from "@/shared/components/ui/indicators"
 import { toast } from "@/components/ui/toast"
 import { useCreateSessionMutation, useGetRetakeStatusQuery } from "../api"
 import {
@@ -12,8 +15,8 @@ import {
 import { DEFAULT_TARGET_BAND } from "../constants/bands"
 import {
   computeOverallScore,
+  getAllDimensionScores,
   getBandDescriptor,
-  getDimensionScores,
   getTargetRoadmapBand,
 } from "../utils/result"
 import { getRetakeEligibility, getRoadmapProgress } from "../utils/cooldown"
@@ -56,6 +59,8 @@ const PlacementProfilePage = () => {
   const studentFallback = root.result?.studentFallback
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { hasFeature, isLoading: isPlanLoading } = usePlanFeatures()
+  const canAccessPlacement = hasFeature(PLAN_FEATURES.ALLOW_PLACEMENT_TEST)
 
   const [result] = useState(readResult)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -69,13 +74,18 @@ const PlacementProfilePage = () => {
     const eligibility = retakeStatus
       ? {
           hasHistory: retakeStatus.hasHistory,
-          // eligible: retakeStatus.eligible,
-          eligible: true,
+          // BUG-PT-16: khóa thi lại 14 ngày theo máy chủ, áp dụng cho mọi gói (v1).
+          eligible: Boolean(retakeStatus.eligible),
+          cooldownBypassed: Boolean(retakeStatus.cooldownBypassed),
           lastTestedAt: retakeStatus.lastTestedAt,
           eligibleAt: retakeStatus.eligibleRetakeAt,
           daysElapsed: retakeStatus.daysElapsed,
-          daysRemaining: 0,
-          progress: 100,
+          daysRemaining: retakeStatus.eligible
+            ? 0
+            : Number(retakeStatus.daysRemaining) || 0,
+          progress: retakeStatus.eligible
+            ? 100
+            : Number(retakeStatus.progress) || 0,
           totalDays: retakeStatus.totalDays,
         }
       : getRetakeEligibility({ lastTestedAt: result?.scoredAt })
@@ -83,10 +93,12 @@ const PlacementProfilePage = () => {
     const overall = result ? computeOverallScore(result) : 70
     const roadmapBand = getTargetRoadmapBand(effectiveBand)
     const skills = result
-      ? getDimensionScores(result).map((item) => ({
+      ? getAllDimensionScores(result).map((item) => ({
           ...item,
           label: dimensions?.[item.key] || item.key,
-          scoreText: formatTemplate(scoreOf, { score: item.score }),
+          scoreText: item.measured
+            ? formatTemplate(scoreOf, { score: item.score })
+            : root.result?.notMeasured || "Chưa đo được",
         }))
       : []
 
@@ -129,7 +141,6 @@ const PlacementProfilePage = () => {
     try {
       await createSession({
         targetBand,
-        forceRetake: true,
         studentId: user?.id ?? user?.accountId ?? null,
       }).unwrap()
       setConfirmOpen(false)
@@ -138,6 +149,29 @@ const PlacementProfilePage = () => {
       toast.error(copy.confirm?.errorToast)
     }
   }, [createSession, navigate, result, retakeStatus, user, copy.confirm])
+
+  if (isPlanLoading) {
+    return (
+      <div className="min-h-[calc(100vh-200px)] bg-primaryBg flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cath-red-600 border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (!canAccessPlacement) {
+    return (
+      <PlanRequiredState
+        pageTitle={root.title || "Đánh giá trình độ"}
+        title={root.planRequiredTitle || "Yêu cầu Gói Pro"}
+        subtext={
+          root.planRequiredSubtext ||
+          "Tính năng Đánh giá trình độ (Placement Test) cùng AI chỉ dành cho người dùng gói Pro. Vui lòng nâng cấp gói để trải nghiệm tính năng này!"
+        }
+        featureName="Placement Test"
+        animationKey="placement-profile-pro-required"
+      />
+    )
+  }
 
   if (!view) {
     return (
@@ -197,7 +231,7 @@ const PlacementProfilePage = () => {
                 date: view.testDate,
               })}
               testDate={view.testDate}
-              code={result.code}
+              code={result?.code || retakeStatus?.sessionId || ""}
             />
             <ProfileRoadmapCard
               copy={copy}

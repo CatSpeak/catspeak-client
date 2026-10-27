@@ -13,6 +13,7 @@
 import { SESSION_STATUS } from "../constants/session"
 import { normalizeServerResult } from "../utils/result"
 import {
+  clearActiveSession,
   readActiveSession,
   readResult,
   saveActiveSession,
@@ -57,14 +58,15 @@ export const parseSeedBand = (band) => {
 
 /** 1. Khởi tạo phiên thi: POST /v1/placement/sessions/start */
 export const createSessionReal = async (
-  { targetBand = 1, seedBand, voiceConsentGranted = true, forceRetake = true, activeTabToken } = {},
+  { targetBand = 1, seedBand, voiceConsentGranted = true, forceRetake = false, activeTabToken } = {},
   { baseQuery, api, extraOptions, persist = saveActiveSession } = {},
 ) => {
   const effectiveSeedBand = parseSeedBand(seedBand ?? targetBand)
   const body = {
     seed_band: effectiveSeedBand,
     voice_consent_granted: Boolean(voiceConsentGranted),
-    force_retake: true,
+    // BUG-PT-16: không tự vượt khóa 14 ngày nữa; máy chủ quyết theo gói.
+    force_retake: Boolean(forceRetake),
     active_tab_token: activeTabToken ?? null,
   }
 
@@ -324,7 +326,8 @@ export const getActiveSessionReal = async ({
           transcript: t.transcript || "",
           durationMs: t.speech_duration_ms || 0,
           retryCount: t.retry_count || 0,
-          submittedAt: t.answered_at ? new Date(t.answered_at).getTime() : Date.now(),
+          answeredAt: t.answered_at ? new Date(t.answered_at).getTime() : null,
+          submittedAt: t.answered_at ? new Date(t.answered_at).getTime() : null,
         }))
       : [],
   }
@@ -373,6 +376,7 @@ export const getRetakeStatusReal = async ({
   return {
     data: {
       eligible: Boolean(cd.can_retake),
+      cooldownBypassed: Boolean(cd.bypassed),
       lastTestedAt,
       eligibleRetakeAt: eligibleAt,
       daysRemaining: cd.days_remaining ?? eligibility.daysRemaining,
@@ -457,12 +461,15 @@ export const scoreSessionReal = async (
   { sessionId } = {},
   {
     read = readActiveSession,
+    clear = clearActiveSession,
     readResult: readStoredResult = readResult,
   } = {},
 ) => {
   const session = read()
   const result = readStoredResult()
   if (!session && !result) return notFound()
+
+  clear()
 
   return {
     data: {
@@ -471,3 +478,92 @@ export const scoreSessionReal = async (
     },
   }
 }
+
+/** 8. Tiếp tục phiên thi: kiểm tra trạng thái trên máy chủ */
+export const resumeSessionReal = async (
+  { sessionId } = {},
+  {
+    baseQuery,
+    api,
+    extraOptions,
+    read = readActiveSession,
+    clear = clearActiveSession,
+  } = {},
+) => {
+  const session = read()
+  const activeSessionId = sessionId || session?.id
+  if (!activeSessionId) {
+    return notFound()
+  }
+
+  const response = await baseQuery(
+    { url: `/v1/placement/sessions/${activeSessionId}`, method: "GET" },
+    api,
+    extraOptions,
+  )
+
+  if (response.error) {
+    return normalizeError(response.error)
+  }
+
+  const s = response.data || {}
+  if (s.status === "completed" || Number(s.current_turn) > 5) {
+    clear()
+    return {
+      error: {
+        status: 400,
+        data: {
+          code: "SESSION_ALREADY_COMPLETED",
+          message: "Session is already completed.",
+        },
+      },
+    }
+  }
+
+  return { data: { session: s } }
+}
+
+/** 8. Hủy phiên thi: POST /v1/placement/sessions/{id}/cancel */
+export const cancelSessionReal = async (
+  { sessionId } = {},
+  {
+    baseQuery,
+    api,
+    extraOptions,
+    read = readActiveSession,
+    clear = clearActiveSession,
+  } = {},
+) => {
+  const session = read()
+  const activeSessionId = sessionId || session?.id
+  if (!activeSessionId) {
+    clear()
+    return { data: { success: true, status: SESSION_STATUS.CANCELLED } }
+  }
+
+  const response = await baseQuery(
+    {
+      url: `/v1/placement/sessions/${activeSessionId}/cancel`,
+      method: "POST",
+    },
+    api,
+    extraOptions,
+  )
+
+  clear()
+
+  if (response.error) {
+    if (response.error.status === 404 || response.error.status === 410) {
+      return {
+        data: {
+          session_id: activeSessionId,
+          status: SESSION_STATUS.CANCELLED,
+        },
+      }
+    }
+    return normalizeError(response.error)
+  }
+
+  return { data: response.data }
+}
+

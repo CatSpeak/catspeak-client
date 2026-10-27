@@ -144,7 +144,7 @@ uvicorn catspeak_ai.api.main:app --port 8080
 cd catspeak-client && npm run dev
 ```
 
-Vào `/placement-test`, làm đủ 5 câu. Mỗi câu gọi `POST /placement/score-turn`,
+Vào `/zh/ai-tutor/level-assessment`, làm đủ 5 câu. Mỗi câu gọi `POST /placement/score-turn`,
 câu thứ 5 xong gọi `POST /placement/finalize`. Mở tab Network để nhìn.
 
 ---

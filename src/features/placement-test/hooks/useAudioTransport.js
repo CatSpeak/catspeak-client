@@ -35,10 +35,11 @@ const useAudioTransport = ({ deviceId } = {}) => {
     [],
   )
   const playAudioBase64 = useCallback(
-    (base64Data, format) =>
-      transportRef.current?.playAudioBase64(base64Data, format),
+    (base64Data, format, options) =>
+      transportRef.current?.playAudioBase64(base64Data, format, options),
     [],
   )
+
   const stopAudio = useCallback(
     () => transportRef.current?.stopAudio(),
     [],

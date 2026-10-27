@@ -7,6 +7,7 @@
 import { baseApi } from "@/store/api/baseApi"
 import {
   adjustLevelMock,
+  cancelSessionMock,
   createSessionMock,
   getActiveSessionMock,
   getQuestionMock,
@@ -18,10 +19,12 @@ import {
 import {
   USE_REAL_ENGINE,
   adjustLevelReal,
+  cancelSessionReal,
   createSessionReal,
   getActiveSessionReal,
   getQuestionReal,
   getRetakeStatusReal,
+  resumeSessionReal,
   scoreSessionReal,
   submitTurnReal,
 } from "./realAdapter"
@@ -50,7 +53,17 @@ export const placementTestApi = baseApi.injectEndpoints({
       providesTags: ["PlacementSession"],
     }),
     resumeSession: builder.mutation({
-      queryFn: (args) => resumeSessionMock(args),
+      queryFn: (args, api, extraOptions, baseQuery) =>
+        USE_REAL_ENGINE
+          ? resumeSessionReal(args, { baseQuery, api, extraOptions })
+          : resumeSessionMock(args),
+      invalidatesTags: ["PlacementSession"],
+    }),
+    cancelSession: builder.mutation({
+      queryFn: (args, api, extraOptions, baseQuery) =>
+        USE_REAL_ENGINE
+          ? cancelSessionReal(args, { baseQuery, api, extraOptions })
+          : cancelSessionMock(args),
       invalidatesTags: ["PlacementSession"],
     }),
     getRetakeStatus: builder.query({
@@ -99,6 +112,7 @@ export const {
   useGetActiveSessionQuery,
   useGetQuestionQuery,
   useResumeSessionMutation,
+  useCancelSessionMutation,
   useGetRetakeStatusQuery,
   useGetProfileQuery,
   useSubmitTurnMutation,

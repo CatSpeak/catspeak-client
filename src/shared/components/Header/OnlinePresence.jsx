@@ -22,7 +22,7 @@ const OnlinePresence = () => {
   const currentOnlineCount = onlineCounts[getLanguageString(currentLang)] || 0
 
   return (
-    <div className="hidden sm:flex items-center gap-2 ml-2">
+    <div className="hidden sm:flex lg:hidden xl:flex items-center gap-2 ml-2">
       <div className="relative flex h-3 w-3 items-center justify-center shrink-0">
         {/* <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span> */}
         <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
