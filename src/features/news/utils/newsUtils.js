@@ -71,3 +71,32 @@ export const getCommunityName = (code) => {
   return code
 }
 
+/**
+ * Backend Language enum mapping:
+ * 0: All, 1: English, 2: Chinese, 3: Japanese
+ */
+export const COMMUNITY_LANGUAGE_IDS = {
+  All: 0,
+  English: 1,
+  Chinese: 2,
+  Japanese: 3,
+}
+
+/**
+ * Maps community name or language code to numeric LanguageCommunity enum:
+ * 0: All, 1: English, 2: Chinese, 3: Japanese
+ *
+ * @param {string|number} [codeOrName]
+ * @returns {number}
+ */
+export const getCommunityLanguageId = (codeOrName) => {
+  if (typeof codeOrName === "number") return codeOrName
+  if (!codeOrName) return 1
+  const c = String(codeOrName).trim().toLowerCase()
+  if (c === "zh" || c === "cn" || c === "china" || c === "chinese") return 2
+  if (c === "ja" || c === "jp" || c === "japan" || c === "japanese") return 3
+  if (c === "en" || c === "eng" || c === "uk" || c === "english") return 1
+  if (c === "all") return 0
+  return 1
+}
+
