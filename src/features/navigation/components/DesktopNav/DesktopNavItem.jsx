@@ -53,7 +53,7 @@ const DesktopNavItem = ({
             className={`transition-all duration-200 ${
               isDocked ? "justify-center" : ""
             }`}
-            contentClassName={`transition-all duration-200 ${
+            contentClassName={`transition-all duration-200 relative ${
               isDocked ? "px-0 justify-center" : "px-4"
             } ${
               isActive
@@ -65,12 +65,15 @@ const DesktopNavItem = ({
                   : "hover:bg-primaryBg"
             }`}
           >
+            {isActive && !isDocked && (
+              <span className="absolute left-0 top-2 bottom-2 w-1 bg-cath-red-700 rounded-r-md z-20" />
+            )}
             <span
               className={`whitespace-nowrap transition-all duration-300 truncate relative z-10 ${
                 isDocked
                   ? "opacity-0 w-0 pointer-events-none hidden"
                   : "opacity-100 min-w-0 flex-1"
-              }`}
+              } ${isActive && !isDocked ? "font-semibold text-gray-900" : ""}`}
               style={color ? { color } : undefined}
             >
               {label}

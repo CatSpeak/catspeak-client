@@ -920,16 +920,18 @@ export default {
       "Class start date ({{startDate}}) does not match the first scheduled session date ({{firstSessionDate}}). Please choose a start date that falls on one of the scheduled weekdays.",
     toastStartDateMismatchFirstSessionDefault:
       "Class start date does not match the first scheduled session date. Please choose a start date that falls on one of the scheduled weekdays.",
+    toastStartTimeBeforeFirstSession:
+      "The class start time must be on or before its first session.",
     toastAdmissionStartPast: "Admission start date must not be in the past!",
     toastAdmissionEndPast: "Admission end date must not be in the past!",
     toastStartPast:
-      "Class start date must be at least 1 day after enrollment end date!",
+      "Class start date must not be in the past!",
     toastAdmissionEndLater:
       "Enrollment end date must be later than enrollment start date!",
     toastStartLater:
-      "Class start date must be at least 1 day after enrollment end date!",
+      "Class start date must be after enrollment end date!",
     toastPayOSEnrollmentFuture:
-      "Class start date must be at least 1 day after enrollment end date!",
+      "Enrollment start date must be in the future!",
     toastUpdateSuccess: "Class updated successfully!",
     toastRedirectPayment: "Redirecting to payment...",
     toastUpdateFail: "Failed to update class!",

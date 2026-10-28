@@ -21,10 +21,9 @@ export function resolveClassErrorMessage(error, { cc = {}, isEditMode = false } 
     : cc.toastCreateFail || "Failed to create class!"
 
   // Start-date mismatch carries the two dates inside the message template.
-  // Match it (by code first, by template as fallback for old backends).
   if (
-    code === "INVALID_DATE_RANGE" ||
-    msg.includes("does not match the first scheduled session date")
+    msg.includes("does not match the first scheduled session date") ||
+    START_DATE_MISMATCH_RE.test(msg)
   ) {
     const m = msg.match(START_DATE_MISMATCH_RE)
     if (m && cc.toastStartDateMismatchFirstSession) {
@@ -32,9 +31,7 @@ export function resolveClassErrorMessage(error, { cc = {}, isEditMode = false } 
         .replace("{{startDate}}", m[1])
         .replace("{{firstSessionDate}}", m[2])
     }
-    if (code === "INVALID_DATE_RANGE" || m) {
-      return cc.toastStartDateMismatchFirstSessionDefault || cc.toastInvalidDates || failDefault
-    }
+    return cc.toastStartDateMismatchFirstSessionDefault || cc.toastInvalidDates || failDefault
   }
 
   switch (code) {
@@ -65,10 +62,10 @@ export function resolveClassErrorMessage(error, { cc = {}, isEditMode = false } 
     case "LEVELS_LOCKED":
       return cc.levelsLocked || failDefault
     case "INVALID_DATE_RANGE":
-      // Admission/start ordering errors (no embedded dates to interpolate).
-      if (/enrollment end/i.test(msg)) return cc.toastAdmissionEndLater || failDefault
+      // Admission/start ordering & past errors (no embedded dates to interpolate).
       if (/enrollment start/i.test(msg)) return cc.toastAdmissionStartPast || failDefault
-      if (/start date/i.test(msg)) return cc.toastStartPast || failDefault
+      if (/enrollment end/i.test(msg)) return cc.toastAdmissionEndLater || failDefault
+      if (/start date/i.test(msg)) return cc.toastStartLater || failDefault
       return cc.toastInvalidDates || failDefault
     case "INVALID_CAPACITY":
       return cc.toastEnterCapacity || failDefault

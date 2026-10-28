@@ -7,6 +7,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useActiveLink } from "../../hooks/useActiveLink"
+import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 import {
   navSections,
   footerLinks,
@@ -21,7 +22,7 @@ import ListItem from "@/shared/components/ui/ListItem"
 
 const normalizePath = (path) => {
   if (!path) return path
-  return path.replace(/^\/(?:zh|en|vi)(?=\/|$)/, "")
+  return path.replace(/^\/(?:zh|en|vi|ja)(?=\/|$)/, "")
 }
 
 const listContainerVariants = {
@@ -96,10 +97,14 @@ const DesktopSidebar = () => {
       pathname.startsWith("/refunds")
     ) {
       setLastSublink("settings", cleanPath)
+    } else if (pathname.includes("/learning-path") || pathname.includes("/placement-test")) {
+      setLastSublink("aiTutor", cleanPath)
     } else if (pathname.includes("/cat-speak")) {
       setLastSublink("catSpeak", cleanPath)
     } else if (pathname.includes("/workspace")) {
       setLastSublink("workspace", cleanPath)
+    } else if (pathname.includes("/ai-tutor")) {
+      setLastSublink("aiTutor", cleanPath)
     }
   }, [pathname, setLastSublink])
 
@@ -109,7 +114,7 @@ const DesktopSidebar = () => {
   )
   const currentHasSublinks =
     activeDockSection === "settings" ||
-    Boolean(currentSectionData?.items?.length)
+    (Boolean(currentSectionData?.items?.length) && (!currentSectionData?.excludeLangs || !currentSectionData.excludeLangs.includes(currentLang)))
 
   // Auto-expand secondary sidebar panel when switching into a section with sublinks
   const prevSectionRef = useRef(null)
@@ -140,6 +145,7 @@ const DesktopSidebar = () => {
   const getVisibleGroupsForSection = (sectionKey) => {
     const sectionData = navSections.find((s) => s.key === sectionKey)
     if (!sectionData) return []
+    if (sectionData.excludeLangs && currentLang && sectionData.excludeLangs.includes(currentLang)) return []
 
     const isSubVisible = (item) =>
       isNavItemVisible(item, {
@@ -246,7 +252,7 @@ const DesktopSidebar = () => {
         <div className="flex-1 flex flex-col gap-1 items-center w-full">
           {dockNavGroups.map((group, groupIdx) => {
             const visibleItems = group.items.filter((item) =>
-              isNavItemVisible(item, { isStudent }),
+              isNavItemVisible(item, { isStudent, currentLang }),
             )
             if (visibleItems.length === 0) return null
 

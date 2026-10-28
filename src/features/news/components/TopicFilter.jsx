@@ -1,27 +1,58 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
+import { useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetTopicsQuery } from "@/store/api/social/postsApi";
+import { getCommunityName, getCommunityLanguageId } from "../utils/newsUtils";
 
 
 const TopicFilter = ({
   selectedTopicIds = [],
   onTopicChange,
   onPendingChange,
+  languageCommunity: propLanguageCommunity,
   className = "",
 }) => {
-  const { t } = useLanguage();
+  const { lang } = useParams();
+  const { t, language } = useLanguage();
 
-  // 1. Fetch topics
+  const currentCommunity = useMemo(() => {
+    return getCommunityName(
+      lang || localStorage.getItem("communityLanguage") || language || "en",
+    );
+  }, [lang, language]);
+
+  const resolvedLanguageCommunity = useMemo(() => {
+    if (propLanguageCommunity !== undefined && propLanguageCommunity !== null) {
+      return typeof propLanguageCommunity === "number"
+        ? propLanguageCommunity
+        : getCommunityLanguageId(propLanguageCommunity);
+    }
+    return getCommunityLanguageId(lang || currentCommunity);
+  }, [propLanguageCommunity, lang, currentCommunity]);
+
+  // 1. Fetch topics for current community language
   const { data: topicsData, isLoading } = useGetTopicsQuery({
+    languageCommunity: resolvedLanguageCommunity,
     page: 1,
     pageSize: 100,
   });
 
   const topics = useMemo(() => {
     const raw = topicsData?.data ?? topicsData ?? [];
-    return Array.isArray(raw) ? raw : [];
-  }, [topicsData]);
+    const list = Array.isArray(raw) ? raw : [];
+    if (resolvedLanguageCommunity === undefined || resolvedLanguageCommunity === null) {
+      return list;
+    }
+    return list.filter((topic) => {
+      const topicLang = topic.languageCommunity ?? topic.LanguageCommunity;
+      return (
+        topicLang === undefined ||
+        topicLang === 0 ||
+        topicLang === resolvedLanguageCommunity
+      );
+    });
+  }, [topicsData, resolvedLanguageCommunity]);
 
   // 2. Local selection state for instant snappy UI feedback
   const selectedKey = useMemo(

@@ -2,16 +2,19 @@ import MobileCommunityDropdown from "./MobileCommunityDropdown";
 import MobileCatSpeakDropdown from "./MobileCatSpeakDropdown";
 import MobileWorkspaceDropdown from "./MobileWorkspaceDropdown";
 import { navLinks } from "@/features/navigation";
+import { useActiveLink } from "@/features/navigation/hooks/useActiveLink";
 import MobileNavItem from "./MobileNavItem";
 import { useAuth } from "@/features/auth";
 
 const MobileNavLinks = ({ onClose }) => {
   const { isAuthenticated } = useAuth();
+  const { currentLang } = useActiveLink();
 
   return (
     <div className="flex flex-col gap-1 text-sm">
       {navLinks
         .filter((item) => {
+          if (item.lang && item.lang !== currentLang) return false;
           if (item.isPrivate && !isAuthenticated) return false;
           return true;
         })
