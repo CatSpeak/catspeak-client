@@ -21,7 +21,14 @@ import {
   Ticket,
   Gift,
   Bookmark,
+  ClipboardCheck,
+  Bot,
+  Target,
+  Layers,
+  History,
 } from "lucide-react"
+import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
+import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 
 export const navSections = [
   {
@@ -54,6 +61,45 @@ export const navSections = [
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "events", path: "/cat-speak/calendar", icon: Calendar },
+    ],
+  },
+  {
+    key: "aiTutor",
+    labelKey: "aiTutor",
+    defaultLabel: "Gia sư AI",
+    excludeLangs: ["en", "ja"],
+    maxInitial: 5,
+    items: [
+      {
+        key: "levelAssessment",
+        path: "/ai-tutor/level-assessment",
+        icon: Target,
+        excludeLangs: ["en", "ja"],
+      },
+      {
+        key: "learningPath",
+        path: "/ai-tutor/learning-path",
+        icon: CalendarDays,
+        excludeLangs: ["en", "ja"],
+      },
+      {
+        key: "speakingRoom",
+        path: "/ai-tutor/speaking-room",
+        icon: Mic,
+        excludeLangs: ["en", "ja"],
+      },
+      {
+        key: "vocabularyNotebook",
+        path: "/ai-tutor/vocabulary-notebook",
+        icon: Layers,
+        excludeLangs: ["en", "ja"],
+      },
+      {
+        key: "historyProgress",
+        path: "/ai-tutor/history-progress",
+        icon: History,
+        excludeLangs: ["en", "ja"],
+      },
     ],
   },
   {
@@ -96,7 +142,12 @@ export const navSections = [
           },
           { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
-          { key: "vocabularyNotebook", label: "Sổ từ vựng", path: "/workspace/vocabulary", icon: Bookmark },
+          {
+            key: "vocabularyNotebook",
+            label: "Sổ từ vựng",
+            path: "/workspace/vocabulary",
+            icon: Bookmark,
+          },
           {
             key: "myCalendar",
             path: "/workspace/my-calendar",
@@ -129,6 +180,13 @@ export const dockNavGroups = [
         icon: Globe,
         path: "/cat-speak/global-news",
         hasSublinks: true,
+      },
+      {
+        key: "aiTutor",
+        icon: Bot,
+        path: "/ai-tutor/level-assessment",
+        hasSublinks: true,
+        excludeLangs: ["en", "ja"],
       },
     ],
   },
@@ -186,6 +244,8 @@ export const isNavItemVisible = (
   if (!item) return false
   if (item.hideInSidebar) return false
   if (item.lang && currentLang && item.lang !== currentLang) return false
+  if (item.excludeLangs && currentLang && item.excludeLangs.includes(currentLang)) return false
+  if (item.supportedLangs && currentLang && !item.supportedLangs.includes(currentLang)) return false
   if (isHorizontal && item.showOnHorizontalBar === false) return false
   if (item.isPrivate && !isAuthenticated) return false
   if (item.roles && activeRole && !item.roles.includes(activeRole)) return false
@@ -198,20 +258,32 @@ export const isNavItemVisible = (
 
 export const getActiveDockSection = (pathname) => {
   if (!pathname) return "community"
+  const cleanPath = pathname.replace(/^\/(?:zh|en|vi)(?=\/|$)/, "")
+  if (cleanPath.startsWith("/pricing")) {
+    return "pricing"
+  }
   if (
-    pathname.startsWith("/setting") ||
-    pathname.startsWith("/pricing") ||
-    pathname.startsWith("/billing") ||
-    pathname.startsWith("/refunds")
+    cleanPath.startsWith("/setting") ||
+    cleanPath.startsWith("/billing") ||
+    cleanPath.startsWith("/refunds")
   ) {
     return "settings"
   }
-  if (pathname.includes("/cat-speak")) return "catSpeak"
-  if (pathname.includes("/profile")) return "profile"
-  if (pathname.includes("/explore-courses")) return "exploreCourses"
-  if (pathname.includes("/resources")) return "learningResources"
-  if (pathname.includes("/workspace")) return "workspace"
-  if (pathname.includes("/community")) return "community"
+  if (cleanPath.startsWith("/workspace") || cleanPath.includes("/workspace")) {
+    return "workspace"
+  }
+  if (
+    cleanPath.includes("/ai-tutor") ||
+    cleanPath.includes("/learning-path") ||
+    cleanPath.includes("/cat-speak/placement-test")
+  ) {
+    return "aiTutor"
+  }
+  if (cleanPath.includes("/cat-speak")) return "catSpeak"
+  if (cleanPath.includes("/profile")) return "profile"
+  if (cleanPath.includes("/explore-courses")) return "exploreCourses"
+  if (cleanPath.includes("/resources")) return "learningResources"
+  if (cleanPath.includes("/community")) return "community"
   return "community"
 }
 
@@ -259,6 +331,35 @@ export const navLinks = [
     showOnHorizontalBar: false,
   },
   {
+    key: "aiTutor",
+    hasDropdown: true,
+    icon: Bot,
+    excludeLangs: ["en", "ja"],
+    subItems: [
+      {
+        key: "levelAssessment",
+        path: "/ai-tutor/level-assessment",
+        icon: Target,
+      },
+      {
+        key: "learningPath",
+        path: "/ai-tutor/learning-path",
+        icon: CalendarDays,
+      },
+      { key: "speakingRoom", path: "/ai-tutor/speaking-room", icon: Mic },
+      {
+        key: "vocabularyNotebook",
+        path: "/ai-tutor/vocabulary-notebook",
+        icon: Layers,
+      },
+      {
+        key: "historyProgress",
+        path: "/ai-tutor/history-progress",
+        icon: History,
+      },
+    ],
+  },
+  {
     key: "workspace",
     hasDropdown: true,
     icon: Briefcase,
@@ -294,7 +395,12 @@ export const navLinks = [
           },
           { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
-          { key: "vocabularyNotebook", label: "Sổ từ vựng", path: "/workspace/vocabulary", icon: Bookmark },
+          {
+            key: "vocabularyNotebook",
+            label: "Sổ từ vựng",
+            path: "/workspace/vocabulary",
+            icon: Bookmark,
+          },
           {
             key: "myCalendar",
             path: "/workspace/my-calendar",
@@ -318,7 +424,12 @@ export const navLinks = [
 ]
 
 export const settingNavLinks = [
-  { key: "accountInfo", path: "/setting/account", icon: User, roles: ["Student", "Admin"] },
+  {
+    key: "accountInfo",
+    path: "/setting/account",
+    icon: User,
+    roles: ["Student", "Admin"],
+  },
   { key: "pricing", path: "/pricing", icon: CreditCard },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
   { key: "billing", path: "/billing", icon: CreditCard },

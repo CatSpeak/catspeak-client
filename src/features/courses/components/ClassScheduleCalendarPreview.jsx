@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo } from "react"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
@@ -22,28 +22,25 @@ const ClassScheduleCalendarPreview = ({
   timeSlots = {},
   editingClassId = "",
   isEditMode = false,
+  occurrenceDates,
 }) => {
   const { t, language } = useLanguage()
-  const { userTimeZone, getZoneDateStr, formatScheduleTime } = useTimezone()
+  const { userTimeZone, getZoneDateStr } = useTimezone()
   const cc = t?.courses?.createClass || {}
 
   // Mode: "calendar" | "list"
   const [viewMode, setViewMode] = useState("calendar")
 
   // Current view date (month navigation) in user's timezone
-  const [currentViewDate, setCurrentViewDate] = useState(() => {
+  const navigationKey = `${startDate}:${userTimeZone}`
+  const [navigation, setNavigation] = useState({ key: navigationKey, offset: 0 })
+  const currentViewDate = useMemo(() => {
+    const offset = navigation.key === navigationKey ? navigation.offset : 0
     if (startDate && dayjs(startDate).isValid()) {
-      return dayjs.tz(startDate, userTimeZone).startOf("month")
+      return dayjs.tz(startDate, userTimeZone).startOf("month").add(offset, "month")
     }
-    return dayjs().tz(userTimeZone).startOf("month")
-  })
-
-  // Sync view month when startDate changes
-  useEffect(() => {
-    if (startDate && dayjs(startDate).isValid()) {
-      setCurrentViewDate(dayjs.tz(startDate, userTimeZone).startOf("month"))
-    }
-  }, [startDate, userTimeZone])
+    return dayjs().tz(userTimeZone).startOf("month").add(offset, "month")
+  }, [navigation, navigationKey, startDate, userTimeZone])
 
   // Range of dates for fetching instructor's other schedules
   const fromDateStr = useMemo(
@@ -75,8 +72,8 @@ const ClassScheduleCalendarPreview = ({
 
   // Compute all scheduled dates for the current class based on startDate, sessions count & checkedDays
   const computedClassDates = useMemo(() => {
-    return computeClassScheduleDates(startDate, sessions, checkedDays, userTimeZone)
-  }, [startDate, sessions, checkedDays, userTimeZone])
+    return occurrenceDates ?? computeClassScheduleDates(startDate, sessions, checkedDays, userTimeZone)
+  }, [startDate, sessions, checkedDays, userTimeZone, occurrenceDates])
 
   const currentClassDatesSet = useMemo(() => {
     return new Set(computedClassDates.map((item) => item.dateStr))
@@ -84,11 +81,11 @@ const ClassScheduleCalendarPreview = ({
 
   // Month navigation handlers
   const handlePrevMonth = () => {
-    setCurrentViewDate((prev) => prev.tz(userTimeZone).subtract(1, "month"))
+    setNavigation(prev => ({ key: navigationKey, offset: (prev.key === navigationKey ? prev.offset : 0) - 1 }))
   }
 
   const handleNextMonth = () => {
-    setCurrentViewDate((prev) => prev.tz(userTimeZone).add(1, "month"))
+    setNavigation(prev => ({ key: navigationKey, offset: (prev.key === navigationKey ? prev.offset : 0) + 1 }))
   }
 
   // Localized Month & Year header title

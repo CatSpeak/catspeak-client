@@ -1,216 +1,306 @@
-import { lazy } from "react";
-import { MainLayout, VideoCallLayout } from "@layouts";
+import { lazy } from "react"
+import { MainLayout, VideoCallLayout } from "@layouts"
 
 // Guest Pages
-import PolicyPage from "@/features/auth/pages/PolicyPage";
-import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage";
-import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage";
-import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom";
-import QueuePage from "@/features/queue/pages/QueuePage";
-import RoomsPage from "@/features/rooms/pages/RoomsPage";
+import PolicyPage from "@/features/auth/pages/PolicyPage"
+import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage"
+import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage"
+import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom"
+import QueuePage from "@/features/queue/pages/QueuePage"
+import RoomsPage from "@/features/rooms/pages/RoomsPage"
 
 // Cat Speak Feature Pages
-import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout";
-import NewsPage from "@/features/news/pages/NewsPage";
-import GlobalNewsPage from "@/features/news/pages/GlobalNewsPage";
-import NewsDetailPage from "@/features/news/pages/NewsDetailPage";
-import DiscoverPage from "@/features/discover/DiscoverPage";
-import MailPage from "@/features/mail/pages/MailPage";
-import SharedEventPage from "@/features/calendar/pages/SharedEventPage";
-import CalendarPage from "@/features/calendar/pages/CalendarPage";
-import CreateEventPage from "@/features/calendar/pages/CreateEventPage";
-import GroupInvitePage from "@/features/chat/pages/GroupInvitePage";
+import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
+import NewsPage from "@/features/news/pages/NewsPage"
+import GlobalNewsPage from "@/features/news/pages/GlobalNewsPage"
+import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
+import DiscoverPage from "@/features/discover/DiscoverPage"
+import MailPage from "@/features/mail/pages/MailPage"
+import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
+import CalendarPage from "@/features/calendar/pages/CalendarPage"
+import CreateEventPage from "@/features/calendar/pages/CreateEventPage"
+import GroupInvitePage from "@/features/chat/pages/GroupInvitePage"
+
+// AI Tutor Feature Pages
+import AiTutorLayout from "@/features/ai-tutor/layouts/AiTutorLayout"
+// Nạp sẵn (không lazy): phải hiện được cả khi mất mạng không tải được module khác.
+import AiFlashcardRouteError from "@/features/ai-tutor/components/flashcards/FlashcardRouteError"
+const AiLevelAssessmentPage = lazy(
+  () => import("@/features/ai-tutor/pages/LevelAssessmentPage"),
+)
+const AiSpeakingRoomPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingRoomPage"),
+)
+const SpeakingSessionPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingSessionPage"),
+)
+const SpeakingResultPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingResultPage"),
+)
+const SpeakingRoomFlowLayout = lazy(
+  () => import("@/features/ai-tutor/layouts/SpeakingRoomFlowLayout"),
+)
+const AiSpeakingReportPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingReportPage"),
+)
+const AiVocabularyNotebookPage = lazy(
+  () => import("@/features/ai-tutor/pages/VocabularyNotebookPage"),
+)
+// TASK-AI-16: fc02 (phiên ôn) và fc03 (kết quả) của flashcard SRS
+const AiFlashcardReviewPage = lazy(
+  () => import("@/features/ai-tutor/pages/FlashcardReviewPage"),
+)
+const AiFlashcardResultPage = lazy(
+  () => import("@/features/ai-tutor/pages/FlashcardResultPage"),
+)
+const AiDeckBrowsePage = lazy(
+  () => import("@/features/ai-tutor/pages/DeckBrowsePage"),
+)
+const AiDeckListPage = lazy(
+  () => import("@/features/ai-tutor/pages/DeckListPage"),
+)
+const AiAddFlashcardPage = lazy(
+  () => import("@/features/ai-tutor/pages/AddFlashcardPage"),
+)
+const AiPronunciationPracticePage = lazy(
+  () => import("@/features/ai-tutor/pages/PronunciationPracticePage"),
+)
+const AiFlashcardLayout = lazy(
+  () => import("@/features/ai-tutor/layouts/FlashcardLayout"),
+)
+const AiHistoryProgressPage = lazy(
+  () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
+)
 
 // Shared Pages
-import { PageNotFound, ForbiddenPage, ComingSoonPage } from "@/shared/pages";
+import { PageNotFound, ForbiddenPage, ComingSoonPage } from "@/shared/pages"
 
 // User & Admin Pages
-import UserDashboard from "@/features/user/pages/UserDashboard";
+import UserDashboard from "@/features/user/pages/UserDashboard"
 
-import UserPagesLayout from "@/features/user/layouts/UserPagesLayout";
+import UserPagesLayout from "@/features/user/layouts/UserPagesLayout"
 // Language routing components
-import LanguageLayout from "./LanguageLayout";
-import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
+import LanguageLayout from "./LanguageLayout"
+import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
 
-import { Navigate } from "react-router-dom";
-import { AuthGuard, RoleGuard } from "@/shared/components";
-import SettingIndexRedirect from "./SettingIndexRedirect";
-import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
+import SettingIndexRedirect from "./SettingIndexRedirect"
+import { Navigate, useParams } from "react-router-dom"
+import { AuthGuard, CommunityGuard, RoleGuard } from "@/shared/components"
+import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary"
 
-import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect";
-import { WebsitePage, ResourcesHubPage } from "@/features/websites";
-import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/BulletinBoardPage";
-import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage";
-import CreatePostPage from "@/features/courses/components/lecture-hall/pages/CreatePostPage";
-import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage";
-import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage";
+import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect"
+import ClassroomAccessGuard from "@/features/courses/components/ClassroomAccessGuard"
+import { WebsitePage, ResourcesHubPage } from "@/features/websites"
+import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/BulletinBoardPage"
+import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage"
+import CreatePostPage from "@/features/courses/components/lecture-hall/pages/CreatePostPage"
+import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage"
+import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage"
 
-import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton";
-const Profile = lazy(() => import("@/features/profile/pages/Profile"));
+import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton"
+const PlacementTestPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementTestPage"),
+)
+const PlacementSessionPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementSessionPage"),
+)
+const PlacementScoringPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementScoringPage"),
+)
+const PlacementResultPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementResultPage"),
+)
+const PlacementProfilePage = lazy(
+  () => import("@/features/placement-test/pages/PlacementProfilePage"),
+)
+const Profile = lazy(() => import("@/features/profile/pages/Profile"))
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
-);
+)
 const RecordingsPage = lazy(
   () => import("@/features/recordings/pages/RecordingsPage"),
-);
+)
 const WorkspaceLayout = lazy(
   () => import("@/features/workspace/layouts/WorkspaceLayout"),
-);
+)
 const InstructorPage = lazy(
   () => import("@/features/user/pages/InstructorPage"),
-);
+)
 const OrganizationPage = lazy(
   () => import("@/features/user/pages/OrganizationPage"),
-);
+)
 const SystemSettingsPage = lazy(
   () => import("@/features/settings/pages/SystemSettingsPage"),
-);
+)
 
-const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"));
-const ChatPage = lazy(() => import("@/features/chat/pages/ChatPage"));
-const HelpCenterPage = lazy(() => import("@/features/help/pages/HelpCenterPage"));
+const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
+const ChatPage = lazy(() => import("@/features/chat/pages/ChatPage"))
+const HelpCenterPage = lazy(
+  () => import("@/features/help/pages/HelpCenterPage"),
+)
 const ReelDetailPage = lazy(
   () => import("@/features/reels/pages/ReelDetailPage"),
-);
+)
 const WorkspaceReelsPage = lazy(
   () => import("@/features/reels/pages/WorkspaceReelsPage"),
-);
+)
 const WorkspaceReelDetailPage = lazy(
   () => import("@/features/reels/pages/WorkspaceReelDetailPage"),
-);
+)
 
 const WorkspaceEventsPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceEventsPage"),
-);
-const BillingFeature = lazy(() => import("@/features/billing/index.jsx"));
-const RefundHistoryPage = lazy(() => import("@/features/refunds/pages/RefundHistoryPage.jsx"));
+)
+const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
+const RefundHistoryPage = lazy(
+  () => import("@/features/refunds/pages/RefundHistoryPage.jsx"),
+)
 const MyLearningPage = lazy(
   () => import("@/features/courses/pages/MyLearningPage"),
-);
+)
 const PaymentResultPage = lazy(
   () => import("@/features/billing/pages/PaymentResultPage.jsx"),
-);
+)
 const PricingPage = lazy(
   () => import("@/features/billing/pages/PricingPage.jsx"),
-);
+)
 const CheckoutPage = lazy(
   () => import("@/features/billing/pages/CheckoutPage.jsx"),
-);
+)
 const CheckoutClassPage = lazy(
   () => import("@/features/billing/pages/CheckoutClassPage.jsx"),
-);
+)
 const MyCoursesPage = lazy(
   () => import("@/features/courses/pages/MyCoursesPage"),
-);
+)
 const ExploreCoursesPage = lazy(
   () => import("@/features/courses/pages/ExploreCoursesPage"),
-);
+)
 const TeacherPublicProfilePage = lazy(
   () => import("@/features/courses/pages/TeacherPublicProfilePage"),
-);
+)
 const TeacherCompetencyPage = lazy(
   () => import("@/features/courses/pages/TeacherCompetencyPage"),
-);
+)
 const CreateCoursePage = lazy(
   () => import("@/features/courses/pages/CreateCoursePage"),
-);
+)
 const AllCoursesPage = lazy(
   () => import("@/features/courses/pages/AllCoursesPage"),
-);
+)
 const MyClassesPage = lazy(
   () => import("@/features/courses/pages/MyClassesPage"),
-);
+)
 const WorkspaceAnalyticsPage = lazy(
   () => import("@/features/courses/components/WorkspaceAnalyticsPage"),
-);
+)
 const ClassAnalyticsDetailPage = lazy(
   () => import("@/features/courses/pages/ClassAnalyticsDetailPage"),
-);
+)
 const StudentAnalyticsDetailPage = lazy(
   () => import("@/features/courses/pages/StudentAnalyticsDetailPage"),
-);
+)
 const SessionAnalyticsDetailPage = lazy(
   () => import("@/features/courses/pages/SessionAnalyticsDetailPage"),
-);
+)
 const WorkspaceDashboardPage = lazy(
   () => import("@/features/courses/components/WorkspaceDashboardPage"),
-);
+)
 const WorkspaceDashboardRouter = lazy(
   () =>
-    import(
-      "@/features/workspace/components/learner-dashboard/WorkspaceDashboardRouter"
-    ),
-);
+    import("@/features/workspace/components/learner-dashboard/WorkspaceDashboardRouter"),
+)
 const LearnerDashboardPage = lazy(
   () =>
-    import(
-      "@/features/workspace/components/learner-dashboard/LearnerDashboardPage"
-    ),
-);
+    import("@/features/workspace/components/learner-dashboard/LearnerDashboardPage"),
+)
 const CreateVoucherPage = lazy(
   () => import("@/features/vouchers/pages/CreateVoucherPage"),
-);
+)
 const VoucherDetailPage = lazy(
   () => import("@/features/vouchers/pages/VoucherDetailPage"),
-);
+)
 const PointsAndOffersPage = lazy(
   () => import("@/features/points-and-offers/pages/PointsAndOffersPage"),
-);
+)
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
-);
+)
 const AllTeachingTasksPage = lazy(
   () => import("@/features/courses/pages/AllTeachingTasksPage"),
-);
+)
 const AllClassesPage = lazy(
   () => import("@/features/courses/pages/AllClassesPage"),
-);
+)
 const CreateClassPage = lazy(
   () => import("@/features/courses/pages/CreateClassPage"),
-);
+)
 const ClassDetailPage = lazy(
   () => import("@/features/courses/pages/ClassDetailPage"),
-);
+)
 const CourseDetailPage = lazy(
   () => import("@/features/courses/pages/CourseDetailPage"),
-);
+)
 const StudentClassDetailPage = lazy(
   () => import("@/features/courses/pages/StudentClassDetailPage"),
-);
+)
 const StudentCourseDetailPage = lazy(
   () => import("@/features/courses/pages/StudentCourseDetailPage"),
-);
+)
 const PublicClassDetailPage = lazy(
   () => import("@/features/courses/pages/PublicClassDetailPage"),
-);
-const SchedulePage = lazy(
-  () => import("@/features/courses/pages/SchedulePage"),
-);
+)
+const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
 const CreateAssignmentPage = lazy(
   () => import("@/features/courses/pages/CreateAssignmentPage"),
-);
+)
 const WorkspaceRoomsPage = lazy(
   () => import("@/features/rooms/pages/WorkspaceRoomsPage"),
-);
+)
+
+const AiLevelAssessmentRoute = () => {
+  const { lang } = useParams()
+
+  if (lang !== "zh") {
+    return (
+      <LazyRoute>
+        <AiLevelAssessmentPage />
+      </LazyRoute>
+    )
+  }
+
+  return (
+    <CommunityGuard>
+      <AuthGuard>
+        <LazyRoute>
+          <PlacementTestPage />
+        </LazyRoute>
+      </AuthGuard>
+    </CommunityGuard>
+  )
+}
 
 const CreateExamPage = lazy(
   () => import("@/features/courses/pages/CreateExamPage"),
-);
+)
 const TeachingMaterialPage = lazy(
   () => import("@/features/materials/pages/TeachingMaterialPage"),
-);
+)
 const SharedMaterialRedirectPage = lazy(
   () => import("@/features/materials/pages/SharedMaterialRedirectPage"),
-);
+)
 const StudentTakeQuizView = lazy(
   () => import("@/features/courses/components/grading/StudentTakeQuizView"),
-);
+)
 const ReviewClassPage = lazy(
   () => import("@/features/courses/pages/ReviewClassPage"),
-);
+)
 const VocabularyNotebookPage = lazy(
   () => import("@/features/interactive-script/pages/VocabularyNotebookPage"),
-);
+)
+const LearningPathCalendarPage = lazy(
+  () => import("@/features/learning-path/pages/LearningPathCalendarPage"),
+)
 
 const routesConfig = [
   {
@@ -430,12 +520,262 @@ const routesConfig = [
                     path: "calendar/create",
                     element: <CreateEventPage />,
                   },
+                  {
+                    path: "learning-path",
+                    element: (
+                      <LazyRoute>
+                        <LearningPathCalendarPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "placement-test",
+                    element: <ComingSoonPage />,
+                  },
                   { path: "*", element: <PageNotFound /> },
                 ],
               },
             ],
           },
         ],
+      },
+
+      // Language-prefixed ai-tutor routes
+      {
+        path: "/:lang/ai-tutor",
+        element: <LanguageLayout />,
+        children: [
+          {
+            element: <MainLayout />,
+            children: [
+              {
+                element: <AiTutorLayout />,
+                children: [
+                  {
+                    index: true,
+                    element: <Navigate to="level-assessment" replace />,
+                  },
+                  {
+                    path: "level-assessment",
+                    element: <AiLevelAssessmentRoute />,
+                  },
+                  {
+                    path: "level-assessment/session",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementSessionPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/scoring",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementScoringPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/result",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementResultPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/profile",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementProfilePage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "learning-path",
+                    element: (
+                      <LazyRoute>
+                        <LearningPathCalendarPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "speaking-room",
+                    element: (
+                      <LazyRoute>
+                        <SpeakingRoomFlowLayout />
+                      </LazyRoute>
+                    ),
+                    children: [
+                      {
+                        index: true,
+                        element: (
+                          <LazyRoute>
+                            <AiSpeakingRoomPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "sessions/:sessionId",
+                        element: (
+                          <LazyRoute>
+                            <SpeakingSessionPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "sessions/:sessionId/result",
+                        element: (
+                          <LazyRoute>
+                            <SpeakingResultPage />
+                          </LazyRoute>
+                        ),
+                      },
+                    ],
+                  },
+                  {
+                    // TASK-AI-15: ss10 → ss11 (+ ss12, ss13) của một buổi nói
+                    path: "speaking-room/report/:sessionId",
+                    element: (
+                      <LazyRoute>
+                        <AiSpeakingReportPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    // TASK-AI-16: Sổ tay từ vựng (flashcard). Bắt đăng nhập (CHK-103),
+                    // khung chung có banner offline và bộ đệm offline (CHK-098..100).
+                    path: "vocabulary-notebook",
+                    element: (
+                      <AuthGuard>
+                        <LazyRoute>
+                          <AiFlashcardLayout />
+                        </LazyRoute>
+                      </AuthGuard>
+                    ),
+                    errorElement: <AiFlashcardRouteError />,
+                    children: [
+                      {
+                        index: true,
+                        element: (
+                          <LazyRoute>
+                            <AiVocabularyNotebookPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "review",
+                        element: (
+                          <LazyRoute>
+                            <AiFlashcardReviewPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "review/:sessionId/result",
+                        element: (
+                          <LazyRoute>
+                            <AiFlashcardResultPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "decks",
+                        element: (
+                          <LazyRoute>
+                            <AiDeckListPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "decks/:deckId",
+                        element: (
+                          <LazyRoute>
+                            <AiDeckBrowsePage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "add",
+                        element: (
+                          <LazyRoute>
+                            <AiAddFlashcardPage />
+                          </LazyRoute>
+                        ),
+                      },
+                      {
+                        path: "practice",
+                        element: (
+                          <LazyRoute>
+                            <AiPronunciationPracticePage />
+                          </LazyRoute>
+                        ),
+                      },
+                    ],
+                  },
+                  {
+                    path: "history-progress",
+                    element: (
+                      <LazyRoute>
+                        <AiHistoryProgressPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  { path: "*", element: <PageNotFound /> },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+
+      // Language-prefixed learning-path route (backward compatibility)
+      {
+        path: "/:lang/learning-path",
+        element: <LanguageLayout />,
+        children: [
+          {
+            element: <MainLayout />,
+            children: [
+              {
+                element: <CatSpeakLayout />,
+                children: [
+                  {
+                    index: true,
+                    element: (
+                      <LazyRoute>
+                        <LearningPathCalendarPage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
+              },
+              { path: "*", element: <PageNotFound /> },
+            ],
+          },
+        ],
+      },
+
+      // Language-prefixed pricing redirect
+      {
+        path: "/:lang/pricing",
+        element: <Navigate to="/pricing" replace />,
       },
 
       // Language-prefixed video call route
@@ -487,9 +827,11 @@ const routesConfig = [
         path: "/workspace/courses/class/:classId/quiz/:quizId/take",
         element: (
           <AuthGuard>
-            <LazyRoute>
-              <StudentTakeQuizView />
-            </LazyRoute>
+            <ClassroomAccessGuard>
+              <LazyRoute>
+                <StudentTakeQuizView />
+              </LazyRoute>
+            </ClassroomAccessGuard>
           </AuthGuard>
         ),
       },
@@ -601,7 +943,7 @@ const routesConfig = [
                   <LazyRoute>
                     <MyCalendarPage />
                   </LazyRoute>
-                )
+                ),
               },
               {
                 path: "vocabulary",
@@ -609,7 +951,7 @@ const routesConfig = [
                   <LazyRoute>
                     <VocabularyNotebookPage />
                   </LazyRoute>
-                )
+                ),
               },
               {
                 path: "teaching-tasks",
@@ -832,108 +1174,113 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/class/:id",
-                element: (
-                  <LazyRoute>
-                    <ClassDetailPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/create-assignment",
-                element: (
-                  <LazyRoute>
-                    <CreateAssignmentPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/bulletin-board/:boardId",
-                element: (
-                  <LazyRoute>
-                    <BulletinBoardPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/bulletin-board/posts/:postId",
-                element: (
-                  <LazyRoute>
-                    <PostDetailPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/bulletin-board/:boardId/create-post",
-                element: (
-                  <LazyRoute>
-                    <CreatePostPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/bulletin-board/:boardId/edit-post/:postId",
-                element: (
-                  <LazyRoute>
-                    <CreatePostPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/links/:itemId",
-                element: (
-                  <LazyRoute>
-                    <LinkYoutubePage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/assignment/:assignmentId",
-                element: (
-                  <LazyRoute>
-                    <CreateAssignmentPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/assignment/:assignmentId/edit",
-                element: (
-                  <LazyRoute>
-                    <CreateAssignmentPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/create-exam",
-                element: (
-                  <LazyRoute>
-                    <CreateExamPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/quiz/:quizId",
-                element: (
-                  <LazyRoute>
-                    <CreateExamPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/quiz/:quizId/submission/:studentId",
-                element: (
-                  <LazyRoute>
-                    <CreateExamPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/quiz/:quizId/edit",
-                element: (
-                  <LazyRoute>
-                    <CreateExamPage />
-                  </LazyRoute>
-                ),
+                element: <ClassroomAccessGuard instructorView />,
+                children: [
+                  {
+                    path: "courses/class/:id",
+                    element: (
+                      <LazyRoute>
+                        <ClassDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/create-assignment",
+                    element: (
+                      <LazyRoute>
+                        <CreateAssignmentPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/bulletin-board/:boardId",
+                    element: (
+                      <LazyRoute>
+                        <BulletinBoardPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/bulletin-board/posts/:postId",
+                    element: (
+                      <LazyRoute>
+                        <PostDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/bulletin-board/:boardId/create-post",
+                    element: (
+                      <LazyRoute>
+                        <CreatePostPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/bulletin-board/:boardId/edit-post/:postId",
+                    element: (
+                      <LazyRoute>
+                        <CreatePostPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/links/:itemId",
+                    element: (
+                      <LazyRoute>
+                        <LinkYoutubePage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/assignment/:assignmentId",
+                    element: (
+                      <LazyRoute>
+                        <CreateAssignmentPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/assignment/:assignmentId/edit",
+                    element: (
+                      <LazyRoute>
+                        <CreateAssignmentPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/create-exam",
+                    element: (
+                      <LazyRoute>
+                        <CreateExamPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/quiz/:quizId",
+                    element: (
+                      <LazyRoute>
+                        <CreateExamPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/quiz/:quizId/submission/:studentId",
+                    element: (
+                      <LazyRoute>
+                        <CreateExamPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/quiz/:quizId/edit",
+                    element: (
+                      <LazyRoute>
+                        <CreateExamPage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
               },
               {
                 path: "courses/details/:id",
@@ -960,60 +1307,65 @@ const routesConfig = [
                 ),
               },
               {
-                path: "learning/class/:id",
-                element: (
-                  <LazyRoute>
-                    <StudentClassDetailPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/review",
-                element: (
-                  <LazyRoute>
-                    <ReviewClassPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/bulletin-board/:boardId",
-                element: (
-                  <LazyRoute>
-                    <BulletinBoardPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/bulletin-board/posts/:postId",
-                element: (
-                  <LazyRoute>
-                    <PostDetailPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/bulletin-board/:boardId/create-post",
-                element: (
-                  <LazyRoute>
-                    <CreatePostPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/bulletin-board/:boardId/edit-post/:postId",
-                element: (
-                  <LazyRoute>
-                    <CreatePostPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/links/:itemId",
-                element: (
-                  <LazyRoute>
-                    <LinkYoutubePage />
-                  </LazyRoute>
-                ),
+                element: <ClassroomAccessGuard />,
+                children: [
+                  {
+                    path: "learning/class/:id",
+                    element: (
+                      <LazyRoute>
+                        <StudentClassDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/review",
+                    element: (
+                      <LazyRoute>
+                        <ReviewClassPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/bulletin-board/:boardId",
+                    element: (
+                      <LazyRoute>
+                        <BulletinBoardPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/bulletin-board/posts/:postId",
+                    element: (
+                      <LazyRoute>
+                        <PostDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/bulletin-board/:boardId/create-post",
+                    element: (
+                      <LazyRoute>
+                        <CreatePostPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/bulletin-board/:boardId/edit-post/:postId",
+                    element: (
+                      <LazyRoute>
+                        <CreatePostPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/links/:itemId",
+                    element: (
+                      <LazyRoute>
+                        <LinkYoutubePage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
               },
               {
                 path: "recordings",
@@ -1094,14 +1446,6 @@ const routesConfig = [
           </AuthGuard>
         ),
         children: [
-          {
-            path: "profile/:accountId?",
-            element: (
-              <LazyRoute fallback={<ProfilePageSkeleton />}>
-                <Profile />
-              </LazyRoute>
-            ),
-          },
           {
             element: <UserPagesLayout />,
             children: [
@@ -1281,6 +1625,6 @@ const routesConfig = [
       },
     ], // end RootLayout children
   }, // end RootLayout wrapper
-];
+]
 
-export default routesConfig;
+export default routesConfig

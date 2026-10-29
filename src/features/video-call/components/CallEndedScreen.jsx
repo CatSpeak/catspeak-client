@@ -15,6 +15,11 @@ const CallEndedScreen = () => {
   const isExpired = reason === "expired"
   const isEnded = reason === "ended"
 
+  const isLearningPath = Boolean(
+    location.state?.isLearningPath ||
+      new URLSearchParams(location.search).get("isLearningPath") === "true",
+  )
+
   return (
     <div className="flex items-center justify-center h-screen bg-primaryBg animate-fadeIn">
       <div className="flex flex-col items-center gap-4 max-w-[420px] px-8 py-12 text-center bg-white rounded-3xl border border-border shadow-xl">
@@ -48,11 +53,17 @@ const CallEndedScreen = () => {
             </PillButton>
           )}
           <PillButton
-            onClick={() => navigate(getCommunityPath(lang || language))}
+            onClick={() =>
+              navigate(
+                isLearningPath
+                  ? `/${lang || language}/learning-path`
+                  : getCommunityPath(lang || language),
+              )
+            }
             variant="primary"
             className="h-11 px-6 min-w-[140px]"
           >
-            {t.rooms.callEnded.returnHome}
+            {isLearningPath ? "Về lộ trình học" : t.rooms.callEnded.returnHome}
           </PillButton>
         </div>
       </div>

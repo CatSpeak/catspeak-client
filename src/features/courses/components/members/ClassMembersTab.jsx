@@ -396,7 +396,7 @@ const ClassMembersTab = ({
 
   const handleProfileNavigate = (personId) => {
     if (personId) {
-      navigate(`/profile/${personId}`)
+      navigate(`/workspace/profile/${personId}`)
     }
   }
 

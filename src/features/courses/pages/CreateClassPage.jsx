@@ -26,7 +26,8 @@ import {
   useCreateClassMutation,
   useGetClassDetailQuery,
   useUpdateClassMutation,
-  useDeleteClassMutation
+  useDeleteClassMutation,
+  useGetCommissionTiersQuery,
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
@@ -35,6 +36,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import InfoTooltip from "@/shared/components/ui/InfoTooltip"
 import {
+  DEFAULT_CLASS_FEE_TIERS,
   getInstructorFormLanguages,
   getLocalizedLanguageName,
 } from "../data/courseFormOptions"
@@ -49,6 +51,9 @@ import { useClassFormReducer } from "../hooks/useClassFormReducer"
 import { resolveClassErrorMessage } from "../utils/classErrorMessages"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import ClassScheduleCalendarPreview from "../components/ClassScheduleCalendarPreview"
+import ClassCreationOptions from "../components/ClassCreationOptions"
+import { normalizeClassCreationParticipants } from "../utils/classCreationParticipants"
+import { classTimeToIso, normalizeClassInvitees, assertExistingScheduleSupport } from "../utils/classRecurrence"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -62,7 +67,6 @@ const DAYS_OF_WEEK = [
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
-  const { userTimeZone, toIsoInZone, convertTimeToUtc, getShiftedDayToUtc } = useTimezone()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
@@ -83,7 +87,7 @@ const CreateClassPage = () => {
   const mountedRef = useRef(true)
 
   // Localizations
-  const cc = c.createClass || {}
+  const cc = useMemo(() => c.createClass || {}, [c.createClass])
 
   const {
     currentData: coursesData,
@@ -143,6 +147,14 @@ const CreateClassPage = () => {
   const { data: instructorProfileData } = useGetInstructorProfileQuery()
   const instructorProfile = instructorProfileData?.data || instructorProfileData
 
+  const { data: commissionTiersRaw } = useGetCommissionTiersQuery()
+  const commissionTiers = useMemo(() => {
+    const list = Array.isArray(commissionTiersRaw?.data)
+      ? commissionTiersRaw.data
+      : (Array.isArray(commissionTiersRaw) ? commissionTiersRaw : null)
+    return list
+  }, [commissionTiersRaw])
+
   const languagesList = useMemo(
     () => getInstructorFormLanguages(instructorProfile),
     [instructorProfile]
@@ -153,13 +165,6 @@ const CreateClassPage = () => {
   )
   const today = useMemo(() => {
     const d = new Date()
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
-
-  const tomorrow = useMemo(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 1)
     d.setHours(0, 0, 0, 0)
     return d
   }, [])
@@ -182,6 +187,8 @@ const CreateClassPage = () => {
     clearError,
     setField,
     minFee,
+    recurrenceResult,
+    effectiveSessions,
     levelsList,
     editingClassData,
     feeDetails,
@@ -203,6 +210,7 @@ const CreateClassPage = () => {
       activeMutationRequestRef.current = null
     },
     toastError: handleToastError,
+    commissionTiers,
   })
 
   const {
@@ -218,12 +226,12 @@ const CreateClassPage = () => {
     startDateHours,
     retentionDays = 10,
     sessions,
+    recurrence,
     capacity,
     description,
     fee,
     requireMinimumAttendance = true,
     requireMinAttendance = true,
-    minimumAttendanceRate = 80,
     minAttendanceRate = 80,
     lateAttendancePolicy = "CountLate",
     includeLateAttendance = true,
@@ -234,6 +242,7 @@ const CreateClassPage = () => {
     errors,
     showDeleteModal,
   } = state
+  const { userTimeZone, toIsoInZone } = useTimezone()
 
   const isLevelDisabled = useMemo(() => {
     if (!isEditMode || !editingClassData) return false
@@ -328,44 +337,57 @@ const CreateClassPage = () => {
 
   const classCapacityNum = parseInt(capacity, 10) || 0
 
-  const feeTiersTooltipContent = useMemo(() => (
-    <div className="flex flex-col gap-2 min-w-[260px] p-1">
-      <div className="font-bold text-gray-900 border-b border-gray-100 pb-1.5 text-xs">
-        {cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
+  const feeTiersTooltipContent = useMemo(() => {
+    const tiersToRender = (Array.isArray(commissionTiers) && commissionTiers.length > 0)
+      ? commissionTiers
+      : DEFAULT_CLASS_FEE_TIERS
+
+    return (
+      <div className="flex flex-col gap-2 min-w-[260px] p-1">
+        <div className="font-bold text-gray-900 border-b border-gray-100 pb-1.5 text-xs">
+          {cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
+        </div>
+        <table className="w-full text-left text-[11px] border-collapse">
+          <thead>
+            <tr className="border-b border-gray-100 text-gray-400 font-semibold">
+              <th className="py-1 pr-2">{cc.classOpeningFeeTierHeader || "Quy mô lớp"}</th>
+              <th className="py-1 px-2 text-right">{cc.classOpeningFeeHeader || "Phí mở lớp"}</th>
+              <th className="py-1 pl-2 text-right">{cc.commissionRateHeader || "Hoa hồng"}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50 text-gray-700">
+            {tiersToRender.map((tier, idx) => {
+              const min = tier.minSlots ?? tier.minSlot ?? 1
+              const max = tier.maxSlots ?? tier.maxSlot ?? null
+              const isInfinite = max === null || max === undefined || max === Infinity
+              const isMatch = classCapacityNum >= min && (isInfinite || classCapacityNum <= max)
+              const openingFeeVal = tier.openingFee ?? 0
+              const commPercentVal = tier.commissionRate !== undefined
+                ? tier.commissionRate
+                : ((tier.commissionPercent ?? 0) <= 1 ? (tier.commissionPercent ?? 0) * 100 : (tier.commissionPercent ?? 0))
+
+              const labelSlot = isInfinite
+                ? (min > 1 ? `> ${min - 1} slots` : "Không giới hạn")
+                : `${min} - ${max} slots`
+
+              const labelFee = openingFeeVal > 0 ? formatCurrencyVND(openingFeeVal) : (cc.free || "Miễn phí")
+              const labelComm = `${commPercentVal}%`
+
+              return (
+                <tr key={idx} className={isMatch ? "font-bold text-[#990011] bg-red-50/60" : ""}>
+                  <td className="py-1.5 pr-2">{labelSlot}</td>
+                  <td className={`py-1.5 px-2 text-right font-semibold ${openingFeeVal === 0 ? "text-emerald-600" : ""}`}>
+                    {labelFee}
+                  </td>
+                  <td className="py-1.5 pl-2 text-right">{labelComm}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
-      <table className="w-full text-left text-[11px] border-collapse">
-        <thead>
-          <tr className="border-b border-gray-100 text-gray-400 font-semibold">
-            <th className="py-1 pr-2">{cc.classOpeningFeeTierHeader || "Quy mô lớp"}</th>
-            <th className="py-1 px-2 text-right">{cc.classOpeningFeeHeader || "Phí mở lớp"}</th>
-            <th className="py-1 pl-2 text-right">{cc.commissionRateHeader || "Hoa hồng"}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-50 text-gray-700">
-          <tr className={classCapacityNum >= 1 && classCapacityNum <= 6 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
-            <td className="py-1.5 pr-2">1 - 6 slots</td>
-            <td className="py-1.5 px-2 text-right text-emerald-600 font-semibold">{cc.free || "Miễn phí"}</td>
-            <td className="py-1.5 pl-2 text-right">10%</td>
-          </tr>
-          <tr className={classCapacityNum >= 7 && classCapacityNum <= 20 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
-            <td className="py-1.5 pr-2">7 - 20 slots</td>
-            <td className="py-1.5 px-2 text-right font-semibold">200.000đ</td>
-            <td className="py-1.5 pl-2 text-right">12%</td>
-          </tr>
-          <tr className={classCapacityNum >= 21 && classCapacityNum <= 50 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
-            <td className="py-1.5 pr-2">21 - 50 slots</td>
-            <td className="py-1.5 px-2 text-right font-semibold">500.000đ</td>
-            <td className="py-1.5 pl-2 text-right">15%</td>
-          </tr>
-          <tr className={classCapacityNum > 50 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
-            <td className="py-1.5 pr-2">&gt; 50 slots</td>
-            <td className="py-1.5 px-2 text-right text-emerald-600 font-semibold">{cc.free || "Miễn phí"}</td>
-            <td className="py-1.5 pl-2 text-right">20%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  ), [classCapacityNum, cc])
+    )
+  }, [classCapacityNum, cc, commissionTiers])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -379,7 +401,7 @@ const CreateClassPage = () => {
     if (!admissionEnd) newErrors.admissionEnd = true
     if (!startDate) newErrors.startDate = true
 
-    const sessionCount = parseInt(sessions, 10) || 0
+    const sessionCount = isEditMode ? Number(sessions) : effectiveSessions
     const classCapacity = parseInt(capacity, 10) || 0
     if (!Number.isSafeInteger(sessionCount) || sessionCount <= 0) newErrors.sessions = true
     if (!Number.isSafeInteger(classCapacity) || classCapacity <= 0) newErrors.capacity = true
@@ -401,43 +423,65 @@ const CreateClassPage = () => {
 
     setErrors({})
 
-    const start = parseLocalDateString(startDate, startDateHours || "00:00")
-    const enrollStart = parseLocalDateString(admissionStart, admissionStartHours || "00:00")
-    const enrollEnd = parseLocalDateString(admissionEnd, admissionEndHours || "00:00")
+    let start, enrollStart, enrollEnd
+    try {
+      start = new Date(classTimeToIso(startDate, startDateHours || "00:00", userTimeZone))
+      enrollStart = new Date(classTimeToIso(admissionStart, admissionStartHours || "00:00", userTimeZone))
+      enrollEnd = new Date(classTimeToIso(admissionEnd, admissionEndHours || "00:00", userTimeZone))
+      if (!isEditMode) {
+        if (recurrenceResult.error) throw new Error(recurrenceResult.error)
+        assertExistingScheduleSupport(recurrence, recurrenceResult.dates, userTimeZone)
+        if (start > new Date(recurrenceResult.dates[0].startTime)) throw new Error("The class start time must be on or before its first session.")
+        normalizeClassInvitees(state.invitedAccountIds)
+        if (state.coHostAccountId) normalizeClassInvitees([state.coHostAccountId])
+      }
+    } catch (error) {
+      const msg = error?.message || ""
+      if (msg.includes("Choose a start date that falls on a selected teaching weekday")) {
+        toast.error(cc.toastStartDateMismatchFirstSessionDefault || "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!")
+      } else if (msg.includes("Select at least one teaching day")) {
+        toast.error(cc.toastSelectSchedule || "Vui lòng chọn ít nhất một ngày dạy!")
+      } else if (msg.includes("The class start time must be on or before its first session")) {
+        toast.error(cc.toastStartTimeBeforeFirstSession || "Giờ bắt đầu lớp học phải trước hoặc cùng giờ với buổi học đầu tiên!")
+      } else if (msg.includes("Each class must end after it starts")) {
+        toast.error(cc.toastInvalidScheduleTime || "Each class must end after it starts.")
+      } else if (msg.includes("Intervals greater than one")) {
+        toast.error(cc.recurrencePreviewOnly || msg)
+      } else if (msg.includes("student accounts") || msg.includes("invite at most")) {
+        toast.error(cc.toastInvalidParticipants || msg)
+      } else {
+        toast.error(msg)
+      }
+      return
+    }
     if (!start || !enrollStart || !enrollEnd) {
       toast.error(cc.toastInvalidDates || "Enter valid enrollment and class dates.")
       return
     }
 
-    // [VALIDATION BYPASSED BY REQUEST]
-    // if (!isEditMode) {
-    //   const now = new Date()
-    //   if (enrollStart && enrollStart <= now) {
-    //     toast.error(cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!")
-    //     return
-    //   }
-    //   if (enrollEnd && enrollEnd <= now) {
-    //     toast.error(cc.toastAdmissionEndPast || "Thời gian kết thúc tuyển sinh không được ở quá khứ!")
-    //     return
-    //   }
-    //   if (start && start <= now) {
-    //     toast.error(cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!")
-    //     return
-    //   }
-    // }
+    if (!isEditMode) {
+      const now = new Date()
+      if (enrollStart && enrollStart <= now) {
+        toast.error(cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!")
+        return
+      }
+      if (enrollEnd && enrollEnd <= now) {
+        toast.error(cc.toastAdmissionEndPast || "Thời gian kết thúc tuyển sinh không được ở quá khứ!")
+        return
+      }
+      if (start && start <= now) {
+        toast.error(cc.toastStartPast || "Thời gian bắt đầu lớp học không được ở quá khứ!")
+        return
+      }
+    }
 
     if (enrollStart && enrollEnd && enrollEnd <= enrollStart) {
       toast.error(cc.toastAdmissionEndLater || "Enrollment end date must be later than enrollment start date!")
       return
     }
 
-    if (enrollEnd && start && start < enrollEnd) {
-      toast.error(cc.toastStartLater || "Start date must be later than or equal to enrollment end date!")
-      return
-    }
-
-    if (enrollEnd && start && start < enrollEnd) {
-      toast.error(cc.toastStartLater || "Ngày khai giảng phải bằng hoặc trễ hơn thời gian kết thúc tuyển sinh!")
+    if (start <= enrollEnd) {
+      toast.error(cc.toastStartLater || "Start date must be later than enrollment end date!")
       return
     }
 
@@ -464,23 +508,18 @@ const CreateClassPage = () => {
       return
     }
 
-    const daysCodeMap = {
-      monday: "MON",
-      tuesday: "TUE",
-      wednesday: "WED",
-      thursday: "THU",
-      friday: "FRI",
-      saturday: "SAT",
-      sunday: "SUN"
-    }
     const schedule = checkedDaysList.map(k => {
-      const rawDay = daysCodeMap[k]
       const localStart = timeSlots[k].start
       const localEnd = timeSlots[k].end
+      const startDayIndex = dayjs(startDate).day()
+      const localDayIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"].indexOf(k)
+      const referenceDate = dayjs(startDate).add((localDayIndex - startDayIndex + 7) % 7, "day").format("YYYY-MM-DD")
+      const utcStart = dayjs.tz(`${referenceDate}T${localStart}:00`, userTimeZone).utc()
+      const utcEnd = dayjs.tz(`${referenceDate}T${localEnd}:00`, userTimeZone).utc()
       return {
-        dayOfWeek: getShiftedDayToUtc(rawDay, localStart),
-        startTime: convertTimeToUtc(localStart),
-        endTime: convertTimeToUtc(localEnd)
+        dayOfWeek: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][utcStart.day()],
+        startTime: utcStart.format("HH:mm"),
+        endTime: utcEnd.format("HH:mm")
       }
     })
 
@@ -505,14 +544,10 @@ const CreateClassPage = () => {
 
       const activeTz = userTimeZone || "Asia/Ho_Chi_Minh"
 
-      const formatToLocalISO = (dateStr) => {
-        if (!dateStr) return ""
-        const clean = String(dateStr).split("T")[0]
-        return dayjs.tz(`${clean}T00:00:00`, activeTz).toISOString()
-      }
-
       const payload = {
         courseId,
+        voucherId: state.voucherId || null,
+        ...(!isEditMode ? normalizeClassCreationParticipants(state) : {}),
         title: className.trim(),
         language: selectedLanguage,
         levels: payloadLevels,
@@ -594,6 +629,9 @@ const CreateClassPage = () => {
         } else {
           // Class created (free flow or direct creation)
           toast.success(cc.toastCreateSuccess || "Class created successfully!")
+          if (resultPayload.warnings?.includes("CLASS_INVITATION_DELIVERY_FAILED")) {
+            toast(cc.toastInvitationsFailed || "Class created, but some invitations could not be sent. Send them again from the class page.", { icon: "⚠️", duration: 8000 })
+          }
           navigate("/workspace/classes/all-classes")
         }
       }
@@ -777,9 +815,8 @@ const CreateClassPage = () => {
                     type="button"
                     onClick={toggle}
                     disabled={isEditMode || isRecoverMode || !!initialCourseId}
-                    className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
-                      errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border"
-                    }`}
+                    className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                      }`}
                   >
                     <span className={courseId ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
                       {selectedOption?.label || (courseId ? lockedCourseTitle : (cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"))}
@@ -826,9 +863,8 @@ const CreateClassPage = () => {
                       type="button"
                       onClick={toggle}
                       disabled={isRecoverMode || !!initialCourseId || !!courseId}
-                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
-                        errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border"
-                      }`}
+                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                        }`}
                     >
                       <span className={selectedLanguage ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
                         {selectedOption?.label || (selectedLanguage ? getLocalizedLanguageName(selectedLanguage, t) : (c.languagePlaceholder || cc.languagePlaceholder || "—"))}
@@ -856,9 +892,8 @@ const CreateClassPage = () => {
                       type="button"
                       onClick={toggle}
                       disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
-                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
-                        errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border"
-                      }`}
+                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                        }`}
                     >
                       <span className={level ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
                         {selectedOption?.label || level || (c.levelPlaceholder || "Eg. A1, B2...")}
@@ -879,13 +914,15 @@ const CreateClassPage = () => {
                   <button
                     type="button"
                     onClick={() => setField("sessions", Math.max(1, (parseInt(sessions, 10) || 1) - 1))}
+                    disabled={recurrence.endCondition === "until"}
                     className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Minus size={14} />
                   </button>
                   <input
                     type="number"
-                    value={sessions}
+                    value={recurrence.endCondition === "until" ? effectiveSessions : sessions}
+                    disabled={recurrence.endCondition === "until"}
                     onChange={(e) => {
                       setField("sessions", Math.max(1, parseInt(e.target.value, 10) || 1))
                       clearError("sessions")
@@ -895,6 +932,7 @@ const CreateClassPage = () => {
                   <button
                     type="button"
                     onClick={() => setField("sessions", (parseInt(sessions, 10) || 0) + 1)}
+                    disabled={recurrence.endCondition === "until"}
                     className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Plus size={14} />
@@ -1170,6 +1208,31 @@ const CreateClassPage = () => {
             {/* Teaching Schedule */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.teachingSchedule}</label>
+              {!isEditMode && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white rounded-2xl p-4 border border-border">
+                <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
+                  {cc.recurrenceFrequency || "Repeat"}
+                  <Dropdown value={recurrence.frequency} options={[{ value: "weekly", label: cc.selectedWeekdays || "On selected weekdays" }, { value: "daily", label: cc.daily || "Daily" }]}
+                    dropdownClassName="w-full"
+                    onChange={frequency => {
+                      setField("recurrence", { ...recurrence, frequency })
+                      if (frequency === "daily") setField("checkedDays", Object.fromEntries(DAYS_OF_WEEK.map(day => [day.key, true])))
+                    }} />
+                </label>
+                <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
+                  {cc.repeatEvery || "Repeat every"} ({recurrence.frequency === "daily" ? (cc.recurrenceDaysUnit || "days") : (cc.weeksUnit || "weeks")})
+                  <input type="number" min="1" max="52" value={recurrence.interval} onChange={event => setField("recurrence", { ...recurrence, interval: event.target.value })} className="h-11 px-4 rounded-xl border border-border text-sm" />
+                </label>
+                <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
+                  {cc.recurrenceEnds || "Ends"}
+                  <Dropdown value={recurrence.endCondition} options={[{ value: "count", label: cc.afterSessions || "After the number of sessions above" }, { value: "until", label: cc.onDate || "On a date (inclusive)" }]} onChange={endCondition => setField("recurrence", { ...recurrence, endCondition })} dropdownClassName="w-full" />
+                </label>
+                {recurrence.endCondition === "until" && <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
+                  {cc.recurrenceEndDate || "Last teaching date"}
+                  <DatePicker selected={parseLocalDateString(recurrence.endDate)} onChange={date => setField("recurrence", { ...recurrence, endDate: toLocalDateString(date) })} minDate={parseLocalDateString(startDate)} />
+                </label>}
+                <p className="text-xs text-gray-500 sm:col-span-2">{cc.scheduleTimezone || "Schedule time zone"}: {userTimeZone}</p>
+                {Number(recurrence.interval) !== 1 && <p role="status" className="text-xs text-amber-700 sm:col-span-2">{cc.recurrencePreviewOnly || "Intervals greater than one are preview only. Choose an interval of one to create the class."}</p>}
+              </div>}
 
               {/* Outer Gray Container */}
               <div className={`bg-white rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-border"} flex flex-col gap-4`}>
@@ -1182,9 +1245,12 @@ const CreateClassPage = () => {
                   {DAYS_OF_WEEK.map((day) => {
                     const isChecked = checkedDays[day.key]
                     return (
-                      <div
+                      <button
+                        type="button"
                         key={day.key}
-                        onClick={() => handleToggleDay(day.key)}
+                        aria-pressed={isChecked}
+                        disabled={!isEditMode && recurrence.frequency === "daily"}
+                        onClick={() => (isEditMode || recurrence.frequency !== "daily") && handleToggleDay(day.key)}
                         className={`flex flex-col gap-1.5 sm:gap-2 py-2 cursor-pointer select-none transition-all rounded-lg ${isChecked ? "bg-[#990011] text-white" : "bg-transparent hover:bg-white"
                           }`}
                       >
@@ -1199,7 +1265,7 @@ const CreateClassPage = () => {
                             {isChecked && <div className="w-1 h-1 rounded-full bg-[#990011]" />}
                           </div>
                         </div>
-                      </div>
+                      </button>
                     )
                   })}
                 </div>
@@ -1376,8 +1442,9 @@ const CreateClassPage = () => {
               </div>
             )}
 
-            {/* Calendar & Schedule Preview (Only show in edit mode) */}
-            {isEditMode && (
+            {!isEditMode && <ClassCreationOptions state={state} setField={setField} />}
+            {/* Calendar & Schedule Preview */}
+            {(
               <ClassScheduleCalendarPreview
                 startDate={startDate}
                 sessions={sessions}
@@ -1385,6 +1452,7 @@ const CreateClassPage = () => {
                 timeSlots={timeSlots}
                 editingClassId={id}
                 isEditMode={isEditMode}
+                occurrenceDates={isEditMode ? undefined : recurrenceResult.dates}
               />
             )}
           </div>
@@ -1400,11 +1468,10 @@ const CreateClassPage = () => {
                 placement="top-left"
                 trigger={
                   <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
-                      feeDetails.openingFee > 0
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-colors ${feeDetails.openingFee > 0
                         ? "bg-[#990011]/10 text-[#990011] hover:bg-[#990011]/20"
                         : "bg-[#15803D]/10 text-[#15803D] hover:bg-[#15803D]/20"
-                    }`}
+                      }`}
                     title={cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
                   >
                     <Info size={17} />

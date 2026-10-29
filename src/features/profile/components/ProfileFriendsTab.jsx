@@ -63,10 +63,9 @@ const ProfileFriendsTab = ({
 
   const navigateToProfile = useCallback(
     (accountId) => {
-      const isWorkspace = location.pathname.startsWith("/workspace")
-      navigate(`${isWorkspace ? "/workspace" : ""}/profile/${accountId}`)
+      navigate(`/workspace/profile/${accountId}`)
     },
-    [location.pathname, navigate],
+    [navigate],
   )
 
   const applyFilter = () => {

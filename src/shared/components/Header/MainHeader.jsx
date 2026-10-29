@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { Menu } from "lucide-react"
+import { Menu, LayoutGrid } from "lucide-react"
 import HeaderUserControls from "./HeaderUserControls"
 import HeaderGuestControls from "./HeaderGuestControls"
 import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
@@ -10,11 +10,12 @@ import CommunitySwitcher from "./CommunitySwitcher"
 import OnlinePresence from "./OnlinePresence"
 import HeaderSearchBar from "./HeaderSearchBar"
 import HeaderFilter from "./HeaderFilter"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { MainLogo, IconLogo } from "@/shared/assets/icons/logo"
 
 const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
+  const location = useLocation()
 
   const [scrolled, setScrolled] = useState(false)
 
@@ -76,15 +77,32 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
           {showSidebar && (
             <div className="hidden lg:block" data-tour="community-switcher">
               <CommunitySwitcher />
+          {/* Learning path title or Community Switcher */}
+          {location.pathname.includes("/learning-path") ? (
+            <div className="hidden lg:flex items-center gap-2.5">
+              <LayoutGrid className="w-5 h-5 text-cath-red-700" />
+              <span className="text-base font-bold text-gray-900 tracking-tight">
+                Lộ trình 5 ngày
+              </span>
             </div>
-          )}
+          ) : (
+            <>
+              {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
+              {showSidebar && (
+                <div className="hidden lg:block">
+                  <CommunitySwitcher />
+                </div>
+              )}
 
-          {/* Online User Count */}
-          <OnlinePresence />
+              {/* Online User Count */}
+              <OnlinePresence />
+            </>
+          )}
         </div>
 
         {/* Right Section: Search + Filter + Lang + User */}
-        <div className="flex items-center justify-end gap-1 shrink-0">
+        {/* min-w-0 + flex-1: ô tìm kiếm co lại thay vì đẩy chuông/chat/avatar ra ngoài mép (BUG-PT-17) */}
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
           {/* Search */}
           <div className="flex items-center gap-1" data-tour="header-search-filter">
             <HeaderSearchBar />

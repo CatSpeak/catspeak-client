@@ -14,6 +14,7 @@ export default {
   newNotificationTitle: "Thông báo mới",
   newNotificationBody: "Bạn có một thông báo mới cần xem.",
   searchPlaceholder: "Tìm kiếm phòng",
+  filterRooms: "Lọc phòng",
   languages: {
     vi: "Tiếng Việt",
     viNom: "Tiếng Việt (Nôm) - Sắp ra mắt",

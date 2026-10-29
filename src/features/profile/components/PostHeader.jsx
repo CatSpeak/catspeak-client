@@ -48,10 +48,7 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
               onClick={(e) => {
                 if (authorAccountId) {
                   e.stopPropagation()
-                  const isWorkspace = location.pathname.startsWith("/workspace")
-                  navigate(
-                    `${isWorkspace ? "/workspace" : ""}/profile/${authorAccountId}`,
-                  )
+                  navigate(`/workspace/profile/${authorAccountId}`)
                 }
               }}
               className={`font-semibold truncate ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}

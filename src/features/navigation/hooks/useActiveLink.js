@@ -1,14 +1,21 @@
 import { useLocation, useParams } from "react-router-dom"
+import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 
 export const useActiveLink = () => {
   const location = useLocation()
   const { lang } = useParams()
-  const currentLang = lang || localStorage.getItem("communityLanguage") || "zh"
+  const currentLang =
+    lang || localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY_LANG
 
   // Resolves the path with the current language prefix if needed
   const resolvePath = (p) => {
     if (!p) return p
-    if (p.startsWith('/community') || p.startsWith('/cat-speak')) {
+    if (
+      p.startsWith("/community") ||
+      p.startsWith("/cat-speak") ||
+      p.startsWith("/ai-tutor") ||
+      p.startsWith("/learning-path")
+    ) {
       return `/${currentLang}${p}`
     }
     return p
@@ -39,6 +46,6 @@ export const useActiveLink = () => {
     resolvePath,
     checkIsActive,
     currentLang,
-    pathname: location.pathname
+    pathname: location.pathname,
   }
 }

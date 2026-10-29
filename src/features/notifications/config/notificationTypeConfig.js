@@ -288,7 +288,7 @@ export const NOTIFICATION_TYPES = {
         ) || `${name} đã gửi cho bạn một lời mời kết bạn.`
       );
     },
-    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
+    resolveUrl: (m) => (m.userid ? `/workspace/profile/${m.userid}?tab=friends` : null),
     resolveAvatarUrl: (m) => m.avatarUrl || null,
   },
   FriendRequest: {
@@ -305,7 +305,7 @@ export const NOTIFICATION_TYPES = {
         ) || `${name} đã gửi cho bạn một lời mời kết bạn.`
       );
     },
-    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
+    resolveUrl: (m) => (m.userid ? `/workspace/profile/${m.userid}?tab=friends` : null),
     resolveAvatarUrl: (m) => m.avatarUrl || null,
   },
   friend_request_accepted: {
@@ -329,7 +329,7 @@ export const NOTIFICATION_TYPES = {
       return `${name} ${suffix}`;
     },
     resolveUrl: (m) => {
-      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
+      return `/workspace/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
     },
   },
 
@@ -348,7 +348,7 @@ export const NOTIFICATION_TYPES = {
         ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
       );
     },
-    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
+    resolveUrl: (m) => (m.userid ? `/workspace/profile/${m.userid}?tab=friends` : null),
     resolveAvatarUrl: (m) => m.avatarUrl || null,
   },
 
@@ -367,7 +367,7 @@ export const NOTIFICATION_TYPES = {
         ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
       );
     },
-    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
+    resolveUrl: (m) => (m.userid ? `/workspace/profile/${m.userid}?tab=friends` : null),
     resolveAvatarUrl: (m) => m.avatarUrl || null,
   },
 
@@ -392,7 +392,7 @@ export const NOTIFICATION_TYPES = {
       return `${name} ${suffix}`;
     },
     resolveUrl: (m) => {
-      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
+      return `/workspace/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
     },
   },
   friend_request_declined: {
@@ -416,7 +416,7 @@ export const NOTIFICATION_TYPES = {
       return `${name} ${suffix}`;
     },
     resolveUrl: (m) => {
-      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`;
+      return `/workspace/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`;
     },
   },
   FriendRequestDeclined: {
@@ -440,7 +440,7 @@ export const NOTIFICATION_TYPES = {
       return `${name} ${suffix}`;
     },
     resolveUrl: (m) => {
-      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`;
+      return `/workspace/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`;
     },
   },
   new_post: {

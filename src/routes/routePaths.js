@@ -12,11 +12,14 @@ export const ROUTE_PATHS = {
   APP: "/app",
   APP_DASHBOARD: "/app",
   APP_SESSIONS: "/app/sessions",
-  APP_PROFILE: "/profile",
+  APP_PROFILE: "/workspace/profile",
 
   // Chat
   CHAT: "/chat",
   CHAT_DETAIL: "/chat/:id",
+
+  // Learning Path
+  LEARNING_PATH: "/:lang/learning-path",
 
   // Admin routes
   ADMIN: "/admin",

@@ -334,6 +334,11 @@ const resources = [
     lang: "zh",
     url: "https://mandarinbean.com/",
   },
+  {
+    id: "little-fox",
+    lang: "zh",
+    url: "https://chinese.littlefox.com/en/story",
+  },
 
   // 4. Luyện nghe
   {

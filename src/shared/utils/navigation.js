@@ -1,3 +1,5 @@
+export const DEFAULT_COMMUNITY_LANG = "zh"
+
 /**
  * Returns the absolute path to the community page in the correct language.
  * Reads from localStorage first, falls back to the provided language, then "en".
@@ -23,8 +25,8 @@ export const getCommunityLang = (language) => {
       ? saved
       : language && language !== "vi"
       ? language
-      : "zh"
-  return lang || "zh"
+      : DEFAULT_COMMUNITY_LANG
+  return lang || DEFAULT_COMMUNITY_LANG
 }
 
 const CLASS_LANGUAGE_CODE_MAP = {
@@ -55,10 +57,10 @@ export const getClassLanguageCode = (classLanguage) => {
  * Returns the absolute path to a user's profile page.
  *
  * @param {number|string} [accountId] - User account ID
- * @returns {string} e.g. "/profile/123" or "/profile"
+ * @returns {string} e.g. "/workspace/profile/123" or "/workspace/profile"
  */
 export const getProfilePath = (accountId) => {
-  return accountId ? `/profile/${accountId}` : "/profile"
+  return accountId ? `/workspace/profile/${accountId}` : "/workspace/profile"
 }
 
 /**

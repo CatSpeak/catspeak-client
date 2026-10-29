@@ -18,6 +18,8 @@ import { bugReportTranslations } from "@/features/bug-report/i18n"
 import { chatAssistantTranslations } from "@/features/chat-assistant/i18n"
 import { helpTranslations } from "@/features/help/i18n"
 import { interactiveScriptTranslations } from "@/features/interactive-script/i18n"
+import { placementTestTranslations } from "@/features/placement-test/i18n"
+import { aiTutorTranslations } from "@/features/ai-tutor/i18n"
 
 const isObject = (item) =>
   Boolean(item && typeof item === "object" && !Array.isArray(item))
@@ -60,6 +62,8 @@ export const translations = {
     chatAssistantTranslations.vi,
     helpTranslations.vi,
     interactiveScriptTranslations.vi,
+    placementTestTranslations.vi,
+    { aiTutor: aiTutorTranslations.vi },
   ),
   en: deepMerge(
     en,
@@ -78,6 +82,8 @@ export const translations = {
     chatAssistantTranslations.en,
     helpTranslations.en,
     interactiveScriptTranslations.en,
+    placementTestTranslations.en,
+    { aiTutor: aiTutorTranslations.en },
   ),
   zh: deepMerge(
     zh,
@@ -96,6 +102,8 @@ export const translations = {
     chatAssistantTranslations.zh,
     helpTranslations.zh,
     interactiveScriptTranslations.zh,
+    placementTestTranslations.zh,
+    { aiTutor: aiTutorTranslations.zh },
   ),
   ja: deepMerge(
     ja,
@@ -114,6 +122,8 @@ export const translations = {
     chatAssistantTranslations.ja,
     helpTranslations.ja,
     interactiveScriptTranslations.ja,
+    placementTestTranslations.ja,
+    { aiTutor: aiTutorTranslations.ja },
   ),
 }
 

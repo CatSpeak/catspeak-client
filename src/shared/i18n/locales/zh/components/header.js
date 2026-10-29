@@ -13,6 +13,7 @@ export default {
   newNotificationTitle: "新通知",
   newNotificationBody: "您有一个新通知需要查看。",
   searchPlaceholder: "搜索房间",
+  filterRooms: "筛选房间",
   languages: {
     vi: "越南语",
     viNom: "越南语 (喃字) - 即将推出",
