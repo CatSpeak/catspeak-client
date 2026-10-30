@@ -350,7 +350,7 @@ const ChatInput = ({
       if (!isHost && isPrivateAi && !isMemberPrivateAiAllowed) {
         toast.error(
           t.rooms?.general?.privateAiDisabledByHost ||
-            "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên."
+          "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên."
         )
         sendingRef.current = false
         return
@@ -470,7 +470,7 @@ const ChatInput = ({
           : aiDynamicPlaceholder
       : isChatRestricted === true
         ? t.rooms?.chatBox?.chatRestrictedPlaceholder ||
-          "You are restricted from chatting"
+        "You are restricted from chatting"
         : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
 
   const isInputDisabled =
@@ -512,24 +512,21 @@ const ChatInput = ({
       {/* Unified Input Box */}
       <div
         onClick={() => editableRef.current?.focus()}
-        className={`w-full grid grid-cols-[auto_1fr_auto] border focus-within:border-cath-red-700 transition-all cursor-text rounded-[28px] ${
-          isMultiline
+        className={`w-full grid grid-cols-[auto_1fr_auto] border focus-within:border-cath-red-700 transition-all cursor-text rounded-[28px] ${isMultiline
             ? "pb-2 pt-3 min-h-[110px] gap-y-2 px-3"
             : "items-center h-14 pl-3 pr-1"
-        } ${
-          isAiInput
+          } ${isAiInput
             ? "border-red-200 bg-gradient-to-r from-red-50/40 via-white to-red-50/20 shadow-sm"
             : "border-border bg-gray-50/60"
-        }`}
+          }`}
       >
         {/* Left AI Switch Control (FR-006) */}
         {isAiInput && (
           <div
-            className={`flex items-center gap-1.5 pr-1.5 shrink-0 select-none ${
-              isMultiline
+            className={`flex items-center gap-1.5 pr-1.5 shrink-0 select-none ${isMultiline
                 ? "col-start-1 row-start-2 self-center"
                 : "col-start-1 row-start-1 h-full"
-            }`}
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-1.5">
@@ -540,7 +537,7 @@ const ChatInput = ({
                   if (!isHost && !isMemberPrivateAiAllowed && e.target.checked) {
                     toast.error(
                       t.rooms?.general?.privateAiDisabledByHost ||
-                        "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên."
+                      "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên."
                     )
                     return
                   }
@@ -573,11 +570,10 @@ const ChatInput = ({
 
         {/* Text Input Area – contenteditable for @mention inline color support */}
         <div
-          className={`h-full px-1 min-w-0 relative ${
-            isMultiline
+          className={`h-full px-1 min-w-0 relative ${isMultiline
               ? "col-span-3 col-start-1 row-start-1"
               : "col-start-2 row-start-1 flex items-center"
-          }`}
+            }`}
         >
           <div
             ref={editableRef}
@@ -589,9 +585,8 @@ const ChatInput = ({
             onKeyDown={handleKeyDown}
             onBlur={saveSelection}
             data-placeholder={placeholderText}
-            className={`w-full text-base focus:outline-none bg-transparent leading-normal ${
-              isInputDisabled ? "opacity-50 cursor-not-allowed" : ""
-            } empty:before:content-[attr(data-placeholder)] empty:before:text-[#606060] empty:before:pointer-events-none`}
+            className={`w-full text-base focus:outline-none bg-transparent leading-normal ${isInputDisabled ? "opacity-50 cursor-not-allowed" : ""
+              } empty:before:content-[attr(data-placeholder)] empty:before:text-[#606060] empty:before:pointer-events-none`}
             style={{
               minHeight: isMultiline ? "2.5rem" : "1.25rem",
               maxHeight: isMultiline ? "120px" : "100%",
@@ -604,22 +599,20 @@ const ChatInput = ({
 
         {/* Right Actions: Character Counter + Emoji Picker + Send Button */}
         <div
-          className={`flex items-center gap-0.5 shrink-0 ${
-            isMultiline
+          className={`flex items-center gap-0.5 shrink-0 ${isMultiline
               ? "col-start-3 row-start-2 justify-self-end self-center"
               : "col-start-3 row-start-1"
-          }`}
+            }`}
           onClick={(e) => e.stopPropagation()}
         >
           {isMultiline && (
             <span
-              className={`text-[11px] font-mono select-none px-1 ${
-                message.length >= 500
+              className={`text-[11px] font-mono select-none px-1 ${message.length >= 500
                   ? "text-red-500 font-bold"
                   : message.length >= 400
-                  ? "text-amber-600 font-medium"
-                  : "text-gray-400 opacity-75"
-              }`}
+                    ? "text-amber-600 font-medium"
+                    : "text-gray-400 opacity-75"
+                }`}
               title={`${message.length} / 500 characters`}
             >
               {message.length}/500

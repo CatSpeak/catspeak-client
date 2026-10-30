@@ -18,27 +18,47 @@ const EmojiPickerWrapper = ({
   onSelect,
   width = "320px",
   height = "380px",
+  className = "",
   ...props
 }) => {
-  const handleEmojiClick = (emojiData, event) => {
+  const handleEmojiClick = (emojiData) => {
     if (onSelect) {
       onSelect(emojiData.emoji)
     }
   }
 
+  // Parse numeric values if passed as string (e.g. "320px" -> 320)
+  const numericWidth =
+    typeof width === "number" ? width : parseInt(width, 10) || 320
+  const numericHeight =
+    typeof height === "number" ? height : parseInt(height, 10) || 380
+
+  const containerStyle = {
+    width: `min(${numericWidth}px, calc(100vw - 16px))`,
+    height: `min(${numericHeight}px, calc(100vh - 24px))`,
+    "--epr-highlight-color": "#990011",
+    "--epr-category-icon-active-color": "#990011",
+    "--epr-focus-bg-color": "#fce8e6",
+    "--epr-hover-bg-color": "#f9f9f9",
+    "--epr-picker-border-color": "#e5e5e5",
+    "--epr-picker-border-radius": "12px",
+    "--epr-search-input-bg-color": "#f5f5f5",
+    "--epr-search-input-bg-color-active": "#ffffff",
+  }
+
   return (
     <div
-      className="catspeak-emoji-picker-container shadow-lg border border-[#E5E5E5] rounded-xl overflow-hidden bg-white [&_.epr-preview]:!hidden [&_.epr-footer]:!hidden"
-      style={{
-        width,
-        height,
-      }}
+      className={`catspeak-emoji-picker-container shadow-lg border border-[#E5E5E5] rounded-xl overflow-hidden bg-white max-w-[calc(100vw-16px)] max-h-[calc(100vh-24px)] [&_.epr-preview]:!hidden [&_.epr-footer]:!hidden [&_.epr-category-nav]:overflow-x-auto [&_.epr-category-nav]:scrollbar-none ${className}`}
+      style={containerStyle}
     >
       <Suspense
         fallback={
           <div
             className="flex items-center justify-center bg-white"
-            style={{ width, height }}
+            style={{
+              width: `min(${numericWidth}px, calc(100vw - 16px))`,
+              height: `min(${numericHeight}px, calc(100vh - 24px))`,
+            }}
           >
             <div className="w-8 h-8 border-4 border-t-[#990011] border-r-transparent border-b-[#990011] border-l-transparent rounded-full animate-spin" />
           </div>

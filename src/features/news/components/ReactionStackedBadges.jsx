@@ -52,9 +52,8 @@ const ReactionStackedBadges = ({
   return (
     <>
       <div
-        className={`relative flex items-center ${
-          hoveredKey ? "z-50" : ""
-        } ${className}`}
+        className={`relative flex items-center ${hoveredKey ? "z-50" : ""
+          } ${className}`}
       >
         <div
           className="flex items-center -space-x-1.5 cursor-pointer py-1"
@@ -79,7 +78,7 @@ const ReactionStackedBadges = ({
             return (
               <div
                 key={key}
-                className={`relative ${zIndexClass} rounded-full ring-2 ring-white hover:scale-125 hover:z-50 transition-transform duration-150`}
+                className={`relative ${zIndexClass} rounded-full hover:scale-125 hover:z-50 transition-transform duration-150`}
                 onMouseEnter={() => setHoveredKey(key)}
                 onMouseLeave={() => setHoveredKey(null)}
                 onClick={(e) => {
