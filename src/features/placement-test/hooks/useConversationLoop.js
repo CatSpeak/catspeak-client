@@ -6,11 +6,14 @@ import {
   CONVERSATION_NOTICE,
   CONVERSATION_PHASE,
   NOTICE_BANNER_MS,
+  NOT_HEARING_BANNER_MS,
+  NOT_HEARING_EXIT_MS,
   QUESTION_DURATION_MS,
   TICK_MS,
   VAD_SILENCE_MS,
 } from "../constants/conversation"
 import {
+  PLACEMENT_TEST_DASHBOARD_PATH,
   PLACEMENT_TEST_PATH,
   PLACEMENT_TEST_SCORING_PATH,
 } from "../constants/routes"
@@ -23,8 +26,7 @@ import {
   useCreateSessionMutation,
   useSubmitTurnMutation,
 } from "../api"
-import { SILENCE_LEVEL } from "../services/audio/constants"
-import { createSilenceTracker } from "../services/speech"
+import { createNoHearingWatcher } from "../services/speech"
 import {
   clearActiveSession,
   readActiveSession,
@@ -85,7 +87,7 @@ const normalizeQuestion = (q, fallbackOrder = 1) => {
   }
 }
 
-const useConversationLoop = () => {
+const useConversationLoop = ({ exitNotice } = {}) => {
   const navigate = useNavigate()
 
   const [session, setSession] = useState(readActiveSession)
@@ -142,10 +144,10 @@ const useConversationLoop = () => {
 
   const levelRef = useRef(0)
   const micStatusRef = useRef("connecting")
-  const trackerRef = useRef(null)
+  const noHearingRef = useRef(null)
+  const noHearingExitedRef = useRef(false)
   const recordingStartedAtRef = useRef(0)
   const isRecordingRef = useRef(false)
-  const silentSinceRef = useRef(null)
   const finishingRef = useRef(false)
   const recordingStoppedRef = useRef(false)
   const mountedRef = useRef(true)
@@ -158,6 +160,7 @@ const useConversationLoop = () => {
   const handleLeaveRef = useRef(() => {})
 
   const finishTurnRef = useRef(() => {})
+  const handleNoHearingExitRef = useRef(() => {})
   const autoRecordTimerRef = useRef(null)
   const audioTokenRef = useRef(0)
   const suspendedRef = useRef(false)
@@ -342,9 +345,13 @@ const useConversationLoop = () => {
     setRecordedMs(0)
     setTranscript("")
 
-    const tracker = createSilenceTracker({ threshold: SILENCE_LEVEL })
-    tracker.reset(now)
-    trackerRef.current = tracker
+    noHearingExitedRef.current = false
+    const watcher = createNoHearingWatcher({
+      bannerMs: NOT_HEARING_BANNER_MS,
+      exitMs: NOT_HEARING_EXIT_MS,
+    })
+    watcher.reset(now)
+    noHearingRef.current = watcher
 
     startAudioListening({
       level: stateRef.current.question?.level,
@@ -681,6 +688,50 @@ const useConversationLoop = () => {
     navigate(PLACEMENT_TEST_PATH, { replace: true })
   }, [handleStopUserAudio, navigate, pauseSpentMs, stopAudioListening, stopSpeakingText, stopAudio])
 
+  // Mic im lặng quá NOT_HEARING_EXIT_MS: rời phòng, giữ phiên để thi tiếp sau
+  // khi người dùng kiểm tra lại thiết bị âm thanh.
+  const handleNoHearingExit = useCallback(() => {
+    if (noHearingExitedRef.current) return
+    noHearingExitedRef.current = true
+    noHearingRef.current = null
+
+    const current = stateRef.current
+    if (current.session) {
+      saveActiveSession({
+        ...current.session,
+        turns: current.turns,
+        pauseSpentMs,
+        pausedAt: Date.now(),
+      })
+    }
+
+    suspendedRef.current = true
+    setNotice(null)
+    setIsRecording(false)
+    setHasRecorded(false)
+    setRecordedMs(0)
+    handleStopUserAudio()
+    stopAudioListening()
+    stopSpeakingText()
+    stopAudio()
+    stopRecording()
+
+    toast.error(
+      exitNotice ||
+        "Không phát hiện âm thanh từ micrô. Vui lòng kiểm tra thiết bị âm thanh trước khi thi lại.",
+    )
+    navigate(PLACEMENT_TEST_DASHBOARD_PATH, { replace: true })
+  }, [
+    exitNotice,
+    handleStopUserAudio,
+    navigate,
+    pauseSpentMs,
+    stopAudio,
+    stopAudioListening,
+    stopRecording,
+    stopSpeakingText,
+  ])
+
   const handleCancel = useCallback(async () => {
     const current = stateRef.current
     if (current.session?.id) {
@@ -732,6 +783,10 @@ const useConversationLoop = () => {
   useEffect(() => {
     handleLeaveRef.current = handleLeave
   }, [handleLeave])
+
+  useEffect(() => {
+    handleNoHearingExitRef.current = handleNoHearingExit
+  }, [handleNoHearingExit])
 
   useEffect(() => {
     const handleOffline = () => handleConnectionLost()
@@ -835,9 +890,10 @@ const useConversationLoop = () => {
     }
   }, [clearAutoRecord, handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
 
-  // FR-PT-008: banner cảnh báo tự ẩn sau NOTICE_BANNER_MS.
+  // FR-PT-008: banner thử lại tự ẩn sau NOTICE_BANNER_MS. Banner NO_HEARING
+  // phải giữ nguyên cho tới khi có tiếng trở lại hoặc hết NOT_HEARING_EXIT_MS.
   useEffect(() => {
-    if (!notice) return undefined
+    if (!notice || notice === CONVERSATION_NOTICE.NO_HEARING) return undefined
     const id = window.setTimeout(() => setNotice(null), NOTICE_BANNER_MS)
     return () => window.clearTimeout(id)
   }, [notice, retryCount])
@@ -853,6 +909,23 @@ const useConversationLoop = () => {
       const clamped = Math.min(elapsed, QUESTION_DURATION_MS)
       setRecordedMs(clamped)
       setRemainingMs(Math.max(0, QUESTION_DURATION_MS - clamped))
+
+      const watcher = noHearingRef.current
+      if (watcher && !noHearingExitedRef.current) {
+        const verdict = watcher.push(levelRef.current)
+        if (verdict.shouldExit) {
+          handleNoHearingExitRef.current()
+          return
+        }
+        setNotice((previous) => {
+          if (verdict.showBanner) {
+            return previous === CONVERSATION_NOTICE.NO_HEARING
+              ? previous
+              : CONVERSATION_NOTICE.NO_HEARING
+          }
+          return previous === CONVERSATION_NOTICE.NO_HEARING ? null : previous
+        })
+      }
 
       if (elapsed >= QUESTION_DURATION_MS) {
         setIsRecording(false)

@@ -209,6 +209,10 @@ export default {
         "AI chưa nghe rõ câu trả lời. Vui lòng nói lại giúp mình nhé. (Lần {{attempt}} / {{max}})",
       noHearingBanner:
         "AI chưa nghe thấy giọng bạn nói. Vui lòng kiểm tra lại micrô hoặc tăng âm lượng phản xạ.",
+      noHearingSubline: "Chưa phát hiện tín hiệu giọng nói trong vài giây.",
+      noHearingHint: "Vui lòng mở khóa micrô trên trình duyệt.",
+      noHearingExitToast:
+        "Không phát hiện âm thanh từ micrô. Vui lòng kiểm tra thiết bị âm thanh trước khi thi lại.",
       volumeHint: "Âm lượng hơi nhỏ. Hãy nói to hơn hoặc tăng âm lượng micrô.",
       configureNotice: "Tính năng cấu hình AI sẽ sớm được cập nhật.",
       pauseTitle: "Đã Tạm Dừng Khảo Sát",

@@ -130,7 +130,9 @@ const SessionControlRow = ({
             analyzing
               ? "bg-slate-300 shadow-none cursor-not-allowed"
               : isRecording
-                ? "bg-[#E2443F] hover:bg-[#C9302B] shadow-[0_0_16px_rgba(240,90,87,0.45)]"
+                ? waiting
+                  ? "bg-[#D97706] hover:bg-[#B45309] shadow-[0_0_16px_rgba(217,119,6,0.45)]"
+                  : "bg-[#E2443F] hover:bg-[#C9302B] shadow-[0_0_16px_rgba(240,90,87,0.45)]"
                 : "bg-[#F05A57] hover:bg-[#E2443F] shadow-[0_6px_18px_rgba(240,90,87,0.4)] hover:scale-105",
           )}
         >

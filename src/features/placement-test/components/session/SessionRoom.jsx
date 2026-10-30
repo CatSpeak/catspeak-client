@@ -20,7 +20,7 @@ const SessionRoom = () => {
   const { t } = useLanguage()
   const copy = t.placementTest?.room || {}
   const resumeCopy = t.placementTest?.lifecycle?.resume || {}
-  const loop = useConversationLoop()
+  const loop = useConversationLoop({ exitNotice: copy.noHearingExitToast })
 
   const handleConfigure = () => {
     if (copy.configureNotice) toast.info(copy.configureNotice)

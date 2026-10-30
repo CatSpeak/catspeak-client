@@ -209,6 +209,10 @@ export default {
         "The AI did not catch your answer. Please say it again. (Attempt {{attempt}} / {{max}})",
       noHearingBanner:
         "The AI could not hear your voice. Please check your microphone or raise the input volume.",
+      noHearingSubline: "No voice signal detected for a few seconds.",
+      noHearingHint: "Please unmute the microphone in your browser.",
+      noHearingExitToast:
+        "No audio was detected from your microphone. Please check your audio device before retrying.",
       volumeHint:
         "The volume is quite low. Speak louder or increase the microphone volume.",
       configureNotice: "AI settings will be available soon.",

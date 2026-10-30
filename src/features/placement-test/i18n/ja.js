@@ -206,6 +206,10 @@ export default {
         "AI が回答を聞き取れませんでした。もう一度話してください。（{{attempt}} / {{max}} 回目）",
       noHearingBanner:
         "AI があなたの声を聞き取れませんでした。マイクを確認するか、入力音量を上げてください。",
+      noHearingSubline: "しばらく音声が検出されていません。",
+      noHearingHint: "ブラウザでマイクのミュートを解除してください。",
+      noHearingExitToast:
+        "マイクから音声が検出されませんでした。再受験の前に音声デバイスを確認してください。",
       volumeHint: "音量が小さめです。もう少し大きな声で話すか、マイク音量を上げてください。",
       configureNotice: "AI 設定は近日公開予定です。",
       pauseTitle: "調査を一時停止しました",
