@@ -2,8 +2,10 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { GoogleLogin } from "@react-oauth/google"
 import {
   useLoginMutation,
+  useGoogleLoginMutation,
   useResendEmailOtpMutation,
 } from "@/store/api/authApi"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
@@ -29,6 +31,45 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const [login, { isLoading }] = useLoginMutation()
   const [resendEmailOtp, { isLoading: isResendingOtp }] =
     useResendEmailOtpMutation()
+  const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation()
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setApiError(null)
+    setIsNotActivatedError(false)
+    try {
+      const idToken = credentialResponse.credential
+      await googleLogin({
+        idToken,
+        deviceInfo: navigator.userAgent || "Web Browser (Google)",
+      }).unwrap()
+
+      handleClose()
+      if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
+    } catch (err) {
+      console.error("Google login error:", err)
+      const { errorCode, message } = parseApiError(err)
+      if (errorCode === "AUTH_ACCOUNT_INACTIVE") {
+        setApiError(
+          authText.accountInactive ||
+            authText.errorCodes?.AUTH_ACCOUNT_INACTIVE ||
+            "Tài khoản đã bị vô hiệu hóa hoặc ngừng hoạt động.",
+        )
+        return
+      }
+      if (errorCode === "AUTH_GOOGLE_TOKEN_INVALID") {
+        setApiError(
+          authText.errorCodes?.AUTH_GOOGLE_TOKEN_INVALID ||
+            "Xác thực Google Token thất bại.",
+        )
+        return
+      }
+      setApiError(message || authText.loginFailed || "Google login failed.")
+    }
+  }
+
+  const handleGoogleError = () => {
+    setApiError("Đăng nhập bằng Google không thành công hoặc đã bị hủy.")
+  }
 
   const handleClose = () => {
     setEmail("")
@@ -127,6 +168,26 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           >
             {authText.loginButton}
           </PillButton>
+
+          {/* Divider */}
+          <div className="relative my-3 flex items-center justify-center">
+            <div className="w-full border-t border-border" />
+            <span className="absolute bg-white px-3 text-xs uppercase font-medium text-secondary">
+              {authText.or || "Hoặc"}
+            </span>
+          </div>
+
+          {/* Google Login Button */}
+          <div className="flex justify-center w-full mb-3">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              shape="pill"
+              text="signin_with"
+              width="100%"
+            />
+          </div>
 
           {/* Register link */}
           <p className="text-center text-xs text-secondary">
