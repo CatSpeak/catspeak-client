@@ -184,6 +184,8 @@ export default {
       waitingSubline: "请用中文说出你的回答。",
       aiListening: "AI 正在聆听你的声音...",
       aiAnalyzing: "AI 正在分析你的回答...",
+      modelProcessing: "模型处理中",
+      retryPrompt: "请点击麦克风，重新说出你的回答。",
       aiNotHearing: "AI 正在更仔细地聆听...",
       timerRecording: "{{time}} / 00:45 • 录音作答",
       timerWaiting: "{{time}} / 00:45 • 等待声音",

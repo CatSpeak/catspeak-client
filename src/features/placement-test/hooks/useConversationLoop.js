@@ -238,6 +238,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       question,
       transcript,
       retryCount,
+      notice,
       phase,
       isRecording,
       hasRecorded,
@@ -250,6 +251,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     question,
     transcript,
     retryCount,
+    notice,
     phase,
     isRecording,
     hasRecorded,
@@ -393,7 +395,6 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   const handleReRecord = useCallback(async () => {
     const current = stateRef.current
     if (current.question && phase === CONVERSATION_PHASE.LISTENING) {
-      setRetryCount((prev) => prev + 1)
       handleStopUserAudio()
       stopAudioListening()
       await stopRecording()
@@ -461,6 +462,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       setOrder(effectiveOrder)
       setQuestion(nextQuestion)
       setTranscript("")
+      setRetryCount(0)
       setNotice(null)
       setIsRecording(false)
       setHasRecorded(false)
@@ -570,7 +572,8 @@ const useConversationLoop = ({ exitNotice } = {}) => {
         setIsRecording(false)
         setHasRecorded(false)
         setRecordedMs(0)
-        scheduleAutoRecord()
+        // Keep the retry banner until the learner presses the mic: auto-recording
+        // here used to clear it after 2 s and silently loop on question 1/5.
         return
       }
 
@@ -616,7 +619,6 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       clearAutoRecord,
       handleStopUserAudio,
       navigate,
-      scheduleAutoRecord,
       stopAudioListening,
       stopSpeakingText,
       stopAudio,
@@ -655,7 +657,11 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     suspendedRef.current = false
     setSuspended(false)
     const current = stateRef.current
-    if (!current.hasRecorded && current.phase === CONVERSATION_PHASE.LISTENING) {
+    if (
+      !current.hasRecorded &&
+      current.notice !== CONVERSATION_NOTICE.RETRY &&
+      current.phase === CONVERSATION_PHASE.LISTENING
+    ) {
       scheduleAutoRecord()
     }
   }, [scheduleAutoRecord])
@@ -892,8 +898,10 @@ const useConversationLoop = ({ exitNotice } = {}) => {
 
   // FR-PT-008: banner thử lại tự ẩn sau NOTICE_BANNER_MS. Banner NO_HEARING
   // phải giữ nguyên cho tới khi có tiếng trở lại hoặc hết NOT_HEARING_EXIT_MS.
+  // Banner RETRY giữ nguyên tới khi người học bấm mic, vì không còn tự ghi âm.
   useEffect(() => {
     if (!notice || notice === CONVERSATION_NOTICE.NO_HEARING) return undefined
+    if (notice === CONVERSATION_NOTICE.RETRY) return undefined
     const id = window.setTimeout(() => setNotice(null), NOTICE_BANNER_MS)
     return () => window.clearTimeout(id)
   }, [notice, retryCount])

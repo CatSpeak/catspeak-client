@@ -53,6 +53,7 @@ const MascotFace = ({ speaking = false }) => (
 const AiAvatarPanel = ({
   tone = "listening",
   statusText,
+  processingLabel,
   isRecording = false,
   aiSpeaking = false,
   micLevel = 0,
@@ -93,14 +94,26 @@ const AiAvatarPanel = ({
 
       <MascotFace speaking={aiSpeaking} />
 
-      <span
-        className={cn(
-          "inline-flex min-h-[30px] items-center justify-center rounded-full px-4 py-1.5 text-center text-xs font-medium",
-          palette.pill,
+      <div className="flex flex-col items-center gap-2">
+        {tone === "analyzing" && processingLabel && (
+          <span
+            role="status"
+            aria-live="polite"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#F0FDF4] px-2.5 py-1 text-[11px] font-semibold text-[#16A34A]"
+          >
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+            {processingLabel}
+          </span>
         )}
-      >
-        {statusText}
-      </span>
+        <span
+          className={cn(
+            "inline-flex min-h-[30px] items-center justify-center rounded-full px-4 py-1.5 text-center text-xs font-medium",
+            palette.pill,
+          )}
+        >
+          {statusText}
+        </span>
+      </div>
     </div>
   )
 }

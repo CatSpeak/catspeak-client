@@ -59,6 +59,7 @@ const SessionRoom = () => {
   const analyzing = loop.phase === CONVERSATION_PHASE.ANALYZING
   const notHearing =
     loop.notice === CONVERSATION_NOTICE.NO_HEARING && loop.isRecording
+  const retryPending = loop.notice === CONVERSATION_NOTICE.RETRY
   const isRecording = loop.isRecording
   const hasRecorded = loop.hasRecorded
 
@@ -71,6 +72,9 @@ const SessionRoom = () => {
   } else if (notHearing) {
     tone = "notHearing"
     statusText = copy.aiNotHearing
+  } else if (retryPending) {
+    tone = "notHearing"
+    statusText = copy.retryPrompt || copy.aiNotHearing
   } else if (isRecording) {
     tone = "listening"
     statusText = copy.aiListening || "AI đang lắng nghe giọng nói của bạn..."
@@ -107,6 +111,7 @@ const SessionRoom = () => {
           <AiAvatarPanel
             tone={tone}
             statusText={statusText}
+            processingLabel={analyzing ? copy.modelProcessing : undefined}
             isRecording={loop.isRecording}
             aiSpeaking={loop.aiSpeaking}
             micLevel={loop.micLevel}

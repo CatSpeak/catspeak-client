@@ -216,7 +216,7 @@ export const submitTurnReal = async (
         retryCount: payload.retry_count ?? (Number(retryCount) || 0) + 1,
         message:
           payload.message ||
-          "Không phát hiện rõ giọng nói, vui lòng thử trả lời lại.",
+          "Chưa nghe được câu trả lời, vui lòng nói lại.",
         session,
         isCompleted: false,
       },

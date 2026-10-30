@@ -190,6 +190,8 @@ export default {
       waitingSubline: "Hãy nói câu trả lời của bạn bằng tiếng Trung.",
       aiListening: "AI đang lắng nghe giọng nói của bạn...",
       aiAnalyzing: "AI đang phân tích câu trả lời của bạn...",
+      modelProcessing: "Model đang xử lý",
+      retryPrompt: "Vui lòng bấm mic và nói lại câu trả lời.",
       aiNotHearing: "AI đang lắng nghe cẩn thận hơn...",
       timerRecording: "{{time}} / 00:45 • Thu âm phản xạ",
       timerWaiting: "{{time}} / 00:45 • Đang chờ âm thanh",
@@ -206,7 +208,7 @@ export default {
       skipCta: "Bỏ qua câu này (0 điểm) →",
       scoringSummary: "Đang tổng hợp điểm đánh giá...",
       retryBanner:
-        "AI chưa nghe rõ câu trả lời. Vui lòng nói lại giúp mình nhé. (Lần {{attempt}} / {{max}})",
+        "Chưa nghe được câu trả lời, vui lòng nói lại. (Lần {{attempt}} / {{max}})",
       noHearingBanner:
         "AI chưa nghe thấy giọng bạn nói. Vui lòng kiểm tra lại micrô hoặc tăng âm lượng phản xạ.",
       noHearingSubline: "Chưa phát hiện tín hiệu giọng nói trong vài giây.",

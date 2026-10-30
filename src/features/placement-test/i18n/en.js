@@ -190,6 +190,8 @@ export default {
       waitingSubline: "Say your answer in Chinese.",
       aiListening: "The AI is listening to your voice...",
       aiAnalyzing: "The AI is analysing your answer...",
+      modelProcessing: "Model is processing",
+      retryPrompt: "Tap the mic and say your answer again.",
       aiNotHearing: "The AI is listening more carefully...",
       timerRecording: "{{time}} / 00:45 • Recording response",
       timerWaiting: "{{time}} / 00:45 • Waiting for audio",
