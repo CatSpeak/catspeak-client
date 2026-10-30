@@ -231,7 +231,7 @@ const DesktopSidebar = () => {
   )
 
   return (
-    <aside className="hidden lg:flex sticky top-0 h-screen shrink-0 z-30 select-none">
+    <aside className="hidden lg:flex sticky top-0 h-screen shrink-0 z-30 select-none" data-tour="main-sidebar">
       {/* 1. PRIMARY SLIM DOCK (ALWAYS DOCKED - 72px) */}
       <div className="h-full bg-cath-red-700 text-white flex flex-col items-center shrink-0 shadow-lg relative z-20">
         {/* Brand Icon */}

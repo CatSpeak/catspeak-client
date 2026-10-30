@@ -13,6 +13,7 @@ import {
   CreditCard,
   GraduationCap,
   BookOpen,
+  HelpCircle,
 } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
@@ -28,6 +29,7 @@ import { useSidebar } from "@/shared/context/SidebarContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { useTourGuide } from "@/features/tour-guide"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -49,6 +51,7 @@ const ProfileDropdown = () => {
   const { setIsDesktopExpanded } = useSidebar()
   const navigate = useNavigate()
   const { user: authUser, isAuthenticated } = useAuth()
+  const { resetTour } = useTourGuide()
   const [logoutApi] = useLogoutMutation()
   const { data: userData, isLoading } = useGetProfileQuery(undefined, {
     skip: !isAuthenticated,
@@ -222,6 +225,17 @@ const ProfileDropdown = () => {
         <button onClick={handleSettingsClick} className={menuItemClass}>
           <Settings size={20} />
           <span>{t.header?.generalInfo || "Sửa thông tin"}</span>
+        </button>
+
+        <button
+          onClick={() => {
+            handleCloseMenu()
+            resetTour()
+          }}
+          className={menuItemClass}
+        >
+          <HelpCircle size={20} />
+          <span>{t.header?.tourGuide || "Hướng dẫn người dùng mới"}</span>
         </button>
 
         <button onClick={handleLogout} className={menuItemClass}>

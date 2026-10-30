@@ -15,14 +15,23 @@ import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
 import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader"
+import {
+  TourGuideProvider,
+  TourGuideContainer,
+  useTourGuideTrigger,
+} from "@/features/tour-guide"
+
+const TourGuideManager = () => {
+  useTourGuideTrigger()
+  return <TourGuideContainer />
+}
 
 const MainLayout = ({
   showHeader = true,
   showFooter = true,
   showSidebar = true,
 }) => {
-  const { isMobileSidebarOpen, setIsMobileSidebarOpen, isDesktopExpanded } =
-    useSidebar()
+  const { isMobileSidebarOpen, setIsMobileSidebarOpen } = useSidebar()
 
   const [authModal, setAuthModal] = useState({
     isOpen: false,
@@ -47,6 +56,7 @@ const MainLayout = ({
     // If we are on the reset-password route OR we have parameters indicating a reset
     if (location.pathname === "/reset-password") {
       // Assuming parameters are passed in query string: ?token=...&email=...
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAuthModal((prev) => ({
         ...prev,
         isOpen: true,
@@ -138,7 +148,7 @@ const MainLayout = ({
     }))
 
   return (
-    <AuthModalContext.Provider
+      <AuthModalContext.Provider
       value={{
         openAuthModal,
         closeAuthModal,
@@ -209,7 +219,7 @@ const MainLayout = ({
       />
 
       <ScrollRestoration />
-    </AuthModalContext.Provider>
+      </AuthModalContext.Provider>
   )
 }
 

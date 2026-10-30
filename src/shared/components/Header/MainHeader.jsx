@@ -73,6 +73,10 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
             />
           </Link>
 
+          {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
+          {showSidebar && (
+            <div className="hidden lg:block" data-tour="community-switcher">
+              <CommunitySwitcher />
           {/* Learning path title or Community Switcher */}
           {location.pathname.includes("/learning-path") ? (
             <div className="hidden lg:flex items-center gap-2.5">
@@ -100,15 +104,17 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
         {/* min-w-0 + flex-1: ô tìm kiếm co lại thay vì đẩy chuông/chat/avatar ra ngoài mép (BUG-PT-17) */}
         <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
           {/* Search */}
-          <HeaderSearchBar />
+          <div className="flex items-center gap-1" data-tour="header-search-filter">
+            <HeaderSearchBar />
 
-          {/* Filter */}
-          <div className="hidden md:block">
-            <HeaderFilter />
+            {/* Filter */}
+            <div className="hidden md:block">
+              <HeaderFilter />
+            </div>
           </div>
 
           {/* Language flag */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:block" data-tour="language-switcher">
             <LanguageSwitcher />
           </div>
 

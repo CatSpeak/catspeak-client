@@ -63,8 +63,13 @@ const VerifyEmailOtpPopup = ({
 
     try {
       await verifyEmailOtp({ email: currentEmail, otp: otpValue }).unwrap()
+      try {
+        sessionStorage.setItem("catspeak_just_registered", "true")
+      } catch { /* ignore storage error */ }
       onClose()
-      if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
+      const communityLang = localStorage.getItem("communityLanguage") || "zh"
+      const targetUrl = redirectAfterLogin || `/${communityLang}/community`
+      navigate(targetUrl, { replace: true })
     } catch (err) {
       setApiError(
         resolveLocalizedError(

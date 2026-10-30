@@ -8,7 +8,7 @@ const VerifyEmailPage = () => {
   const token = searchParams.get("token")
   const email = searchParams.get("email")
 
-  const [verifyEmail, { isLoading }] = useVerifyEmailMutation()
+  const [verifyEmail] = useVerifyEmailMutation()
   const [status, setStatus] = useState("verifying") // verifying, success, error
 
   useEffect(() => {
@@ -22,6 +22,9 @@ const VerifyEmailPage = () => {
 
       try {
         await verifyEmail({ email, token }).unwrap()
+        try {
+          sessionStorage.setItem("catspeak_just_registered", "true")
+        } catch { /* ignore storage error */ }
         if (mounted) setStatus("success")
       } catch (err) {
         console.error("Email verification failed:", err)
