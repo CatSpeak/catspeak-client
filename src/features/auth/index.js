@@ -40,6 +40,7 @@ export { default as useAuth } from "./hooks/useAuth"
 export {
   authApi,
   useLoginMutation,
+  useGoogleLoginMutation,
   useRegisterMutation,
   useLogoutMutation,
   useGetProfileQuery,

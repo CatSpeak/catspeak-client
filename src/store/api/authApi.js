@@ -20,6 +20,21 @@ export const authApi = baseApi.injectEndpoints({
         }
       },
     }),
+    googleLogin: builder.mutation({
+      query: (body) => ({
+        url: "/Auth/google-login",
+        method: "POST",
+        body,
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled
+          dispatch(setCredentials(data))
+        } catch (err) {
+          // Handled by UI component
+        }
+      },
+    }),
     register: builder.mutation({
       query: (userData) => ({
         url: "/Auth/register",
@@ -173,6 +188,7 @@ export const authApi = baseApi.injectEndpoints({
 
 export const {
   useLoginMutation,
+  useGoogleLoginMutation,
   useRegisterMutation,
   useRegisterAdminMutation,
   useRefreshTokenMutation,
