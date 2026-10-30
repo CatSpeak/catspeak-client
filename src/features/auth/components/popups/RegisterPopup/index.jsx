@@ -103,6 +103,8 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
     try {
       const payload = {
         ...formData,
+        email: formData.email.trim(),
+        username: formData.username.trim(),
         timeZone: getBrowserTimeZone(),
       }
       if (payload.phoneNumber) {
@@ -115,10 +117,9 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
       }
       delete payload.phonePrefix
 
-      console.log("Sending payload to backend:", payload)
       await register(payload).unwrap()
       console.log("Registration successful! Please verify your email.")
-      onSwitchMode("verify-email", formData.email)
+      onSwitchMode("verify-email", payload.email)
     } catch (err) {
       console.error("Registration failed:", err)
 
@@ -126,7 +127,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
       // resume it instead of blocking the re-registration.
       const { errorCode } = parseApiError(err)
       if (errorCode === "AUTH_ACCOUNT_PENDING_ACTIVATION") {
-        onSwitchMode("verify-email", formData.email, true)
+        onSwitchMode("verify-email", formData.email.trim(), true)
         return
       }
 

@@ -1,4 +1,6 @@
 export default {
+  onlineLink: "Liên kết tham gia trực tuyến",
+  onlineLinkInvalid: "Nhập liên kết họp hợp lệ bắt đầu bằng https:// hoặc http://.",
   searchClass: "Tìm tên lớp...",
   generalCalendar: "Lịch tổng hợp",
   personalCalendar: "Lịch cá nhân",

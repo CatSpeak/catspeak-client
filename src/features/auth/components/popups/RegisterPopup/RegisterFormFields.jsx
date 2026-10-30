@@ -220,11 +220,10 @@ const RegisterFormFields = ({
             )}
             renderOption={(option, isSelected) => (
               <div
-                className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${
-                  isSelected
-                    ? "bg-[#F6F6F6] font-semibold"
-                    : "hover:bg-[#F6F6F6]"
-                }`}
+                className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${isSelected
+                  ? "bg-[#F6F6F6] font-semibold"
+                  : "hover:bg-[#F6F6F6]"
+                  }`}
               >
                 <span className="text-base shrink-0">{option.icon}</span>
                 <span className="truncate flex-1">{option.label}</span>
@@ -248,6 +247,7 @@ const RegisterFormFields = ({
             onChange={handleChange("dateOfBirth")}
             error={errors.dateOfBirth}
             helperText={errors.dateOfBirth}
+            invalidDateMessage={authText.validationDobInvalid}
           />
         </div>
 
@@ -257,6 +257,7 @@ const RegisterFormFields = ({
             <span className="text-red-500 ml-0.5">*</span>
           </label>
           <Dropdown
+            fullWidth
             placeholder={authText.languagePlaceholder}
             value={formData.preferredLanguage}
             onChange={(val) =>
@@ -268,11 +269,10 @@ const RegisterFormFields = ({
               <button
                 type="button"
                 onClick={toggleDropdown}
-                className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white transition-colors hover:border-primary focus:border-primary ${
-                  errors.preferredLanguage
-                    ? "!border-red-500 animate-shake"
-                    : "border-border"
-                }`}
+                className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white transition-colors hover:border-primary focus:border-primary ${errors.preferredLanguage
+                  ? "!border-red-500 animate-shake"
+                  : "border-border"
+                  }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
                   {selectedOption?.icon}
@@ -319,6 +319,7 @@ const RegisterFormFields = ({
             <span className="text-red-500 ml-0.5">*</span>
           </label>
           <Dropdown
+            fullWidth
             placeholder={authText.countryPlaceholder}
             value={formData.country}
             onChange={(val) =>
@@ -334,11 +335,10 @@ const RegisterFormFields = ({
               <button
                 type="button"
                 onClick={toggleDropdown}
-                className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white transition-colors hover:border-primary focus:border-primary ${
-                  errors.country
-                    ? "!border-red-500 animate-shake"
-                    : "border-border"
-                }`}
+                className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white transition-colors hover:border-primary focus:border-primary ${errors.country
+                  ? "!border-red-500 animate-shake"
+                  : "border-border"
+                  }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
                   {selectedOption?.icon}

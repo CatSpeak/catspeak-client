@@ -133,6 +133,25 @@ test("confirmed enrollment permits access, including a free class", () => {
   assert.equal(privateScreenMounts, 1)
 })
 
+test("a free class still requires confirmed enrollment before opening lessons or assignments", () => {
+  for (const isEnrolled of [false, undefined, null]) {
+    for (const search of ["", "?tab=lecture-hall", "?tab=grading&assignmentId=3"]) {
+      assert.match(renderGuard({
+        path: `/workspace/learning/class/42${search}`,
+        query: { currentData: { id: 42, isEnrolled, price: 0, tuitionFee: 0 } },
+      }), /href="\/workspace\/explore-courses\/class\/42"/)
+      assert.equal(privateScreenMounts, 0)
+    }
+  }
+})
+
+test("a missing classroom redirects to explore without rendering cached private content", () => {
+  assert.match(renderGuard({
+    query: { error: { status: 404 }, currentData: { id: 42, isEnrolled: true } },
+  }), /href="\/workspace\/explore-courses"/)
+  assert.equal(privateScreenMounts, 0)
+})
+
 test("a teacher role or paid subscription does not replace enrollment", () => {
   assert.match(renderGuard({ user: { accountId: 25, accountType: "Teacher", isTeacher: true, subscription: "Premium" } }), /Redirect/)
   assert.equal(privateScreenMounts, 0)

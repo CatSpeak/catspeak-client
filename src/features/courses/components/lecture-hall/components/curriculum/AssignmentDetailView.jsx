@@ -16,6 +16,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const { classId: routeClassId, id: routeId } = useParams()
   const classId = routeClassId || routeId
   const { t } = useLanguage()
+  const sa = t.courses?.grading?.studentAssignment || {}
   const { formatDateTime } = useTimezone()
   const [now] = useState(() => Date.now())
 
@@ -52,7 +53,6 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const apiAssignment = assignmentData
   const apiSubmission = assignmentData?.studentSubmission
 
-  const sa = t.courses?.grading?.studentAssignment || {}
   const dict = t.courses?.lectureHall?.curriculum || {}
 
   const title = apiAssignment?.name || dict.assignment || "Bài nộp"
