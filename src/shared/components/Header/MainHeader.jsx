@@ -73,10 +73,6 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
             />
           </Link>
 
-          {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
-          {showSidebar && (
-            <div className="hidden lg:block" data-tour="community-switcher">
-              <CommunitySwitcher />
           {/* Learning path title or Community Switcher */}
           {location.pathname.includes("/learning-path") ? (
             <div className="hidden lg:flex items-center gap-2.5">
@@ -89,7 +85,7 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
             <>
               {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
               {showSidebar && (
-                <div className="hidden lg:block">
+                <div className="hidden lg:block" data-tour="community-switcher">
                   <CommunitySwitcher />
                 </div>
               )}

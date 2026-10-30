@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { Settings, ChevronRight, ChevronLeft, Globe } from "lucide-react"
+import { Settings, ChevronRight, ChevronLeft, Globe, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "../DesktopNav/DesktopNavItem"
 import {
@@ -12,8 +12,12 @@ import { useActiveLink } from "../../hooks/useActiveLink"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useAuth } from "@/features/auth"
 import ListItem from "@/shared/components/ui/ListItem"
-import MobileCommunitySwitcher from "./MobileCommunitySwitcher"
-import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
+import MobileCommunitySwitcher, {
+  MobileCommunityContent,
+} from "./MobileCommunitySwitcher"
+import MobileLanguageSwitcher, {
+  MobileLanguageContent,
+} from "./MobileLanguageSwitcher"
 
 const NavIcon = ({ img, icon: Icon, color, size = 24 }) => {
   const [imgError, setImgError] = useState(false)
@@ -59,6 +63,22 @@ const MobileNavItems = ({
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
   const { user } = useAuth()
   const userId = user?.accountId || user?.id || ""
+
+  const communityNavItem = {
+    key: "communitySwitcher",
+    labelKey: "community",
+    defaultLabel: "Community",
+    label: t.header?.community || "Cộng đồng",
+    icon: Users,
+  }
+
+  const languageNavItem = {
+    key: "languageSwitcher",
+    labelKey: "language",
+    defaultLabel: "Language",
+    label: t.header?.language || "Ngôn ngữ",
+    icon: Globe,
+  }
 
   const settingNavItem = {
     key: "settings",
@@ -140,15 +160,21 @@ const MobileNavItems = ({
 
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full">
-      {/* Main View Container */}
+      {/* ============================================================ */}
+      {/* DRAWER PAGE 1: MAIN ROOT VIEW                                */}
+      {/* Initial menu page (Community Switcher, Nav Links, Footers).   */}
+      {/* Slides left (-translate-x-full) when a subpage is opened.     */}
+      {/* ============================================================ */}
       <div
         className={`absolute inset-0 w-full h-full flex flex-col transition-transform duration-300 ${activeDrilldownItem ? "-translate-x-full" : "translate-x-0"}`}
       >
-        <div className="p-3 shrink-0 border-b border-border">
-          <MobileCommunitySwitcher />
+        <div className="shrink-0 border-b border-border">
+          <MobileCommunitySwitcher
+            onOpen={() => setActiveDrilldownItem(communityNavItem)}
+          />
         </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 pb-6 flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {navLinks
             .filter((item) =>
               item.isHorizontalBar
@@ -162,12 +188,7 @@ const MobileNavItems = ({
             )
             .map((item) => {
               if (item.isHorizontalBar) {
-                return (
-                  <div
-                    key={item.key}
-                    className="my-2 border-t border-border -mx-3"
-                  />
-                )
+                return <div key={item.key} className="border-t border-border" />
               }
               const label = t.nav?.[item.key] || item.label || item.key
               const IconComponent = item.icon || Globe
@@ -180,28 +201,26 @@ const MobileNavItems = ({
                 return (
                   <ListItem
                     key={item.key}
+                    selected={checkIsActive(item)}
                     onClick={() => setActiveDrilldownItem(item)}
                     leftContent={
                       <NavIcon
                         img={item.img}
                         icon={IconComponent}
                         color={item.color}
-                        size={24}
                       />
                     }
-                    rightContent={
-                      <ChevronRight
-                        size={24}
-                        strokeWidth={1.5}
-                        className="shrink-0 text-gray-500"
-                      />
-                    }
-                    className="rounded-xl transition-all duration-200 w-full"
-                    contentClassName="rounded-xl transition-all duration-200 px-4 hover:bg-primaryBg"
+                    rightContent={<ChevronRight className="shrink-0" />}
+                    className="transition-all duration-200 w-full"
+                    contentClassName={`transition-all duration-200 px-4 ${
+                      checkIsActive(item)
+                        ? "bg-itemActive hover:bg-itemActiveHover"
+                        : "hover:bg-itemHover"
+                    }`}
                     title={label}
                   >
                     <span
-                      className="text-base font-normal text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate"
+                      className="text-base text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate"
                       style={item.color ? { color: item.color } : undefined}
                     >
                       {label}
@@ -224,8 +243,10 @@ const MobileNavItems = ({
             })}
         </div>
 
-        <div className="p-3 pb-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex flex-col gap-1 mt-auto border-t border-border shrink-0">
-          <MobileLanguageSwitcher />
+        <div className="pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex flex-col mt-auto border-t border-border shrink-0">
+          <MobileLanguageSwitcher
+            onOpen={() => setActiveDrilldownItem(languageNavItem)}
+          />
           {footerLinks.map((item) => {
             const label = t.nav?.[item.key] || item.label || item.key
             const IconComponent = item.icon || Settings
@@ -234,27 +255,27 @@ const MobileNavItems = ({
               return (
                 <ListItem
                   key={item.key}
+                  selected={isSettings}
                   onClick={() => setActiveDrilldownItem(settingNavItem)}
                   leftContent={
                     <NavIcon
                       img={item.img}
                       icon={IconComponent}
                       color={item.color}
-                      size={24}
                     />
                   }
                   rightContent={
-                    <ChevronRight
-                      size={24}
-                      strokeWidth={1.5}
-                      className="shrink-0 text-gray-500"
-                    />
+                    <ChevronRight className="shrink-0 text-gray-500" />
                   }
-                  className="rounded-xl transition-all duration-200 w-full"
-                  contentClassName="rounded-xl transition-all duration-200 px-4 hover:bg-primaryBg"
+                  className="transition-all duration-200 w-full"
+                  contentClassName={`transition-all duration-200 px-4 ${
+                    isSettings
+                      ? "bg-itemActive hover:bg-itemActiveHover"
+                      : "hover:bg-itemHover"
+                  }`}
                   title={label}
                 >
-                  <span className="text-base font-normal text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate">
+                  <span className="text-base text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate">
                     {label}
                   </span>
                 </ListItem>
@@ -276,15 +297,19 @@ const MobileNavItems = ({
         </div>
       </div>
 
-      {/* Drilldown View Container */}
+      {/* ============================================================ */}
+      {/* DRAWER PAGE 2: DRILLDOWN / SUBPAGE VIEW                      */}
+      {/* Submenu page (Cat Speak, Community, Settings, AI Tutor, etc.)*/}
+      {/* Slides in from right (translate-x-0) when item is opened.     */}
+      {/* ============================================================ */}
       <div
         className={`absolute inset-0 w-full h-full bg-white flex flex-col transition-transform duration-300 ${activeDrilldownItem ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Drilldown Header */}
-        <div className="flex items-center px-3 shrink-0">
+        <div className="flex items-center shrink-0">
           <button
             onClick={() => setActiveDrilldownItem(null)}
-            className="relative flex items-center justify-center w-full px-1 h-12 hover:bg-primaryBg rounded-lg transition-colors"
+            className="flex items-center w-full px-4 h-14 gap-4 hover:bg-itemHover active:bg-itemActiveHover transition-colors"
             title={
               activeDrilldownItem
                 ? t.nav?.[activeDrilldownItem.key] ||
@@ -293,14 +318,10 @@ const MobileNavItems = ({
                 : undefined
             }
           >
-            <ChevronLeft
-              size={20}
-              strokeWidth={1.5}
-              className="absolute left-1"
-            />
+            <ChevronLeft />
             {activeDrilldownItem && (
               <span
-                className="font-semibold truncate max-w-[80%]"
+                className="font-bold truncate max-w-[80%]"
                 style={
                   activeDrilldownItem.color
                     ? { color: activeDrilldownItem.color }
@@ -316,36 +337,52 @@ const MobileNavItems = ({
         </div>
 
         {/* Drilldown Links */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 pb-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {getVisibleGroupsForDrilldown(activeDrilldownItem).map(
-            (group, groupIdx) => (
-              <React.Fragment key={group.key}>
-                {groupIdx > 0 && (
-                  <div className="my-1 mx-3 h-px bg-border shrink-0" />
-                )}
-                {group.items.map((sub) => {
-                  const subLabel = t.nav?.[sub.key] || sub.key || sub.label
-                  const SubIconComponent = sub.icon || Globe
-                  let subPath = sub.path
-                  if (sub.key === "profile" && userId) {
-                    subPath = `/workspace/profile/${userId}`
-                  }
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {activeDrilldownItem?.key === "communitySwitcher" ? (
+            <MobileCommunityContent
+              onSelect={() => {
+                setActiveDrilldownItem(null)
+                setIsMobileOpen?.(false)
+              }}
+            />
+          ) : activeDrilldownItem?.key === "languageSwitcher" ? (
+            <MobileLanguageContent
+              onSelect={() => {
+                setActiveDrilldownItem(null)
+                setIsMobileOpen?.(false)
+              }}
+            />
+          ) : (
+            getVisibleGroupsForDrilldown(activeDrilldownItem).map(
+              (group, groupIdx) => (
+                <React.Fragment key={group.key}>
+                  {groupIdx > 0 && (
+                    <div className="my-1 mx-3 h-px bg-border shrink-0" />
+                  )}
+                  {group.items.map((sub) => {
+                    const subLabel = t.nav?.[sub.key] || sub.key || sub.label
+                    const SubIconComponent = sub.icon || Globe
+                    let subPath = sub.path
+                    if (sub.key === "profile" && userId) {
+                      subPath = `/workspace/profile/${userId}`
+                    }
 
-                  return (
-                    <div key={sub.key} className="w-full">
-                      <DesktopNavItem
-                        to={resolvePath(subPath)}
-                        icon={SubIconComponent}
-                        label={subLabel}
-                        color={sub.color}
-                        img={sub.img}
-                        onClick={() => setIsMobileOpen?.(false)}
-                      />
-                    </div>
-                  )
-                })}
-              </React.Fragment>
-            ),
+                    return (
+                      <div key={sub.key} className="w-full">
+                        <DesktopNavItem
+                          to={resolvePath(subPath)}
+                          icon={SubIconComponent}
+                          label={subLabel}
+                          color={sub.color}
+                          img={sub.img}
+                          onClick={() => setIsMobileOpen?.(false)}
+                        />
+                      </div>
+                    )
+                  })}
+                </React.Fragment>
+              ),
+            )
           )}
         </div>
       </div>

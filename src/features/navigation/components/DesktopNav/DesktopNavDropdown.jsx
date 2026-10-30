@@ -29,7 +29,7 @@ const DesktopNavDropdown = ({
         }}
         className={`relative flex items-center shrink-0 h-11 rounded-xl transition-all duration-300 group overflow-hidden w-full ${
           isDocked ? "justify-center" : "px-3 gap-3"
-        } hover:bg-primaryBg`}
+        } hover:bg-itemHover`}
         title={label}
       >
         {img && !imgError ? (

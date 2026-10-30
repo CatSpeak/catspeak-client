@@ -54,51 +54,50 @@ export const navSections = [
     key: "catSpeak",
     labelKey: "catSpeak",
     defaultLabel: "Cat Speak",
-    maxInitial: 5,
+    maxInitial: 6,
     items: [
       { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "events", path: "/cat-speak/calendar", icon: Calendar },
+      {
+        key: "levelAssessment",
+        path: "/ai-tutor/level-assessment",
+        icon: Target,
+      },
     ],
   },
   {
     key: "aiTutor",
     labelKey: "aiTutor",
     defaultLabel: "Gia sư AI",
-    excludeLangs: ["en", "ja"],
     maxInitial: 5,
     items: [
       {
         key: "levelAssessment",
         path: "/ai-tutor/level-assessment",
         icon: Target,
-        excludeLangs: ["en", "ja"],
       },
       {
         key: "learningPath",
         path: "/ai-tutor/learning-path",
         icon: CalendarDays,
-        excludeLangs: ["en", "ja"],
       },
       {
         key: "speakingRoom",
         path: "/ai-tutor/speaking-room",
         icon: Mic,
-        excludeLangs: ["en", "ja"],
       },
       {
         key: "vocabularyNotebook",
         path: "/ai-tutor/vocabulary-notebook",
         icon: Layers,
-        excludeLangs: ["en", "ja"],
       },
       {
         key: "historyProgress",
         path: "/ai-tutor/history-progress",
         icon: History,
-        excludeLangs: ["en", "ja"],
       },
     ],
   },
@@ -186,7 +185,6 @@ export const dockNavGroups = [
         icon: Bot,
         path: "/ai-tutor/level-assessment",
         hasSublinks: true,
-        excludeLangs: ["en", "ja"],
       },
     ],
   },
@@ -303,6 +301,11 @@ export const navLinks = [
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "events", path: "/cat-speak/calendar", icon: Calendar },
+      {
+        key: "levelAssessment",
+        path: "/ai-tutor/level-assessment",
+        icon: Target,
+      },
     ],
   },
   {
@@ -334,7 +337,6 @@ export const navLinks = [
     key: "aiTutor",
     hasDropdown: true,
     icon: Bot,
-    excludeLangs: ["en", "ja"],
     subItems: [
       {
         key: "levelAssessment",

@@ -15,18 +15,13 @@ const DesktopNavItem = ({
   rightText,
 }) => {
   const [imgError, setImgError] = useState(false)
-  const [prevImg, setPrevImg] = useState(img)
-
-  if (prevImg !== img) {
-    setPrevImg(img)
-    setImgError(false)
-  }
 
   const IconComponent = Icon || Globe
 
   const leftIcon =
     img && !imgError ? (
       <img
+        key={img}
         src={img}
         alt=""
         onError={() => setImgError(true)}
@@ -45,40 +40,36 @@ const DesktopNavItem = ({
         className="relative block w-full outline-none no-underline"
       >
         {({ isActive }) => (
-          <ListItem
-            lines={1}
-            leftContent={leftIcon}
-            rightContent={rightContent}
-            rightText={rightText}
-            className={`transition-all duration-200 ${
-              isDocked ? "justify-center" : ""
-            }`}
-            contentClassName={`transition-all duration-200 relative ${
-              isDocked ? "px-0 justify-center" : "px-4"
-            } ${
-              isActive
-                ? isDocked
-                  ? "text-cath-red-700"
-                  : "bg-primaryBg hover:bg-[#E6E6E6]"
-                : isDocked
-                  ? "text-white hover:bg-white/20"
-                  : "hover:bg-primaryBg"
-            }`}
-          >
-            {isActive && !isDocked && (
-              <span className="absolute left-0 top-2 bottom-2 w-1 bg-cath-red-700 rounded-r-md z-20" />
-            )}
-            <span
-              className={`whitespace-nowrap transition-all duration-300 truncate relative z-10 ${
-                isDocked
-                  ? "opacity-0 w-0 pointer-events-none hidden"
-                  : "opacity-100 min-w-0 flex-1"
-              } ${isActive && !isDocked ? "font-semibold text-gray-900" : ""}`}
-              style={color ? { color } : undefined}
+            <ListItem
+              lines={1}
+              selected={isActive && !isDocked}
+              leftContent={leftIcon}
+              rightContent={rightContent}
+              rightText={rightText}
+              className={isDocked ? "justify-center rounded-xl" : ""}
+              contentClassName={`relative transition-colors duration-150 ${
+                isDocked ? "px-0 justify-center rounded-xl" : "px-4"
+              } ${
+                isActive
+                  ? isDocked
+                    ? "text-cath-red-700"
+                    : "bg-itemActive hover:bg-itemActiveHover"
+                  : isDocked
+                    ? "text-white hover:bg-white/20"
+                    : "hover:bg-itemHover"
+              }`}
             >
-              {label}
-            </span>
-          </ListItem>
+              <span
+                className={`whitespace-nowrap truncate relative z-10 ${
+                  isDocked
+                    ? "opacity-0 w-0 pointer-events-none hidden"
+                    : "opacity-100 min-w-0 flex-1"
+                }`}
+                style={color ? { color } : undefined}
+              >
+                {label}
+              </span>
+            </ListItem>
         )}
       </NavLink>
 

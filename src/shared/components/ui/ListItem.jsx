@@ -46,7 +46,7 @@ const ListItem = ({
   const effectiveRightContent =
     variant === "radio" ? <Radio checked={selected} /> : rightContent
 
-  const baseBgClass = selected ? "bg-itemHover" : ""
+  const baseBgClass = selected ? "bg-itemActive" : ""
 
   const defaultHoverClasses = selected
     ? "hover:bg-itemActiveHover group-hover:bg-itemActiveHover"
@@ -80,7 +80,7 @@ const ListItem = ({
       {...props}
     >
       <div
-        className={`w-full ${heightClass} px-4 flex items-center justify-between transition-colors duration-200 ease-in-out rounded-[inherit] ${innerHoverClasses} ${contentClassName}`}
+        className={`w-full ${heightClass} px-4 flex items-center justify-between transition-colors duration-200 ease-in-out rounded-[inherit] ${baseBgClass} ${innerHoverClasses} ${contentClassName}`}
       >
         <div className="flex items-center gap-4 min-w-0 flex-1 my-auto">
           {leftContent && (
@@ -90,7 +90,7 @@ const ListItem = ({
           )}
 
           {children && (
-            <div className="flex flex-col justify-center min-w-0 flex-1 text-base [&>*:first-child]:text-base [&>*:nth-child(2)]:text-sm [&>*:nth-child(2)]:text-[#606060]">
+            <div className="flex flex-col justify-center min-w-0 flex-1 text-base">
               {children}
             </div>
           )}

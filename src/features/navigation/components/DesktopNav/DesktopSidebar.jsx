@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useCallback } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { motion as Motion, AnimatePresence } from "framer-motion"
 import { LandingPageIcon } from "@/features/landing/assets"
@@ -23,27 +23,6 @@ import ListItem from "@/shared/components/ui/ListItem"
 const normalizePath = (path) => {
   if (!path) return path
   return path.replace(/^\/(?:zh|en|vi|ja)(?=\/|$)/, "")
-}
-
-const listContainerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.02,
-      delayChildren: 0.01,
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.1,
-    },
-  },
 }
 
 const DockButton = ({ to, onClick, icon: Icon, label, isActive }) => (
@@ -88,25 +67,33 @@ const DesktopSidebar = () => {
     pathname.startsWith("/billing") ||
     pathname.startsWith("/refunds")
 
-  // Record last selected sublink on route change
+  // Record last selected sublink on route change (guarded to avoid redundant context re-renders)
   useEffect(() => {
     const cleanPath = normalizePath(pathname)
+    let section = null
     if (
       pathname.startsWith("/setting") ||
       pathname.startsWith("/billing") ||
       pathname.startsWith("/refunds")
     ) {
-      setLastSublink("settings", cleanPath)
-    } else if (pathname.includes("/learning-path") || pathname.includes("/placement-test")) {
-      setLastSublink("aiTutor", cleanPath)
+      section = "settings"
+    } else if (
+      pathname.includes("/learning-path") ||
+      pathname.includes("/placement-test")
+    ) {
+      section = "aiTutor"
     } else if (pathname.includes("/cat-speak")) {
-      setLastSublink("catSpeak", cleanPath)
+      section = "catSpeak"
     } else if (pathname.includes("/workspace")) {
-      setLastSublink("workspace", cleanPath)
+      section = "workspace"
     } else if (pathname.includes("/ai-tutor")) {
-      setLastSublink("aiTutor", cleanPath)
+      section = "aiTutor"
     }
-  }, [pathname, setLastSublink])
+
+    if (section && lastSublinks?.[section] !== cleanPath) {
+      setLastSublink(section, cleanPath)
+    }
+  }, [pathname, lastSublinks, setLastSublink])
 
   // Get current active section metadata
   const currentSectionData = navSections.find(
@@ -114,18 +101,25 @@ const DesktopSidebar = () => {
   )
   const currentHasSublinks =
     activeDockSection === "settings" ||
-    (Boolean(currentSectionData?.items?.length) && (!currentSectionData?.excludeLangs || !currentSectionData.excludeLangs.includes(currentLang)))
+    (Boolean(currentSectionData?.items?.length) &&
+      (!currentSectionData?.excludeLangs ||
+        !currentSectionData.excludeLangs.includes(currentLang)))
 
-  // Auto-expand secondary sidebar panel when switching into a section with sublinks
-  const prevSectionRef = useRef(null)
+  // Auto-expand secondary sidebar panel when switching into a section with sublinks (guarded)
+  const prevSectionRef = useRef(activeDockSection)
   useEffect(() => {
     if (prevSectionRef.current !== activeDockSection) {
       prevSectionRef.current = activeDockSection
-      if (currentHasSublinks) {
+      if (currentHasSublinks && !isDesktopExpanded) {
         setIsDesktopExpanded(true)
       }
     }
-  }, [activeDockSection, currentHasSublinks, setIsDesktopExpanded])
+  }, [
+    activeDockSection,
+    currentHasSublinks,
+    isDesktopExpanded,
+    setIsDesktopExpanded,
+  ])
 
   const handleDockClick = (item, e) => {
     if (activeDockSection === item.key) {
@@ -142,44 +136,55 @@ const DesktopSidebar = () => {
     }
   }
 
-  const getVisibleGroupsForSection = (sectionKey) => {
-    const sectionData = navSections.find((s) => s.key === sectionKey)
-    if (!sectionData) return []
-    if (sectionData.excludeLangs && currentLang && sectionData.excludeLangs.includes(currentLang)) return []
+  const getVisibleGroupsForSection = useCallback(
+    (sectionKey) => {
+      const sectionData = navSections.find((s) => s.key === sectionKey)
+      if (!sectionData) return []
+      if (
+        sectionData.excludeLangs &&
+        currentLang &&
+        sectionData.excludeLangs.includes(currentLang)
+      )
+        return []
 
-    const isSubVisible = (item) =>
-      isNavItemVisible(item, {
-        currentLang,
-        isAuthenticated,
-        activeRole,
-        isTeacher,
-      })
-
-    if (sectionData.groups) {
-      return sectionData.groups
-        .filter((group) => {
-          if (group.roles && group.roles.includes("Teacher") && !isTeacher) {
-            return false
-          }
-          return true
+      const isSubVisible = (item) =>
+        isNavItemVisible(item, {
+          currentLang,
+          isAuthenticated,
+          activeRole,
+          isTeacher,
         })
-        .map((group) => ({
-          ...group,
-          items: group.items.filter(isSubVisible),
-        }))
-        .filter((group) => group.items.length > 0)
-    }
 
-    const legacyItems = (sectionData.items || []).filter(isSubVisible)
+      if (sectionData.groups) {
+        return sectionData.groups
+          .filter((group) => {
+            if (group.roles && group.roles.includes("Teacher") && !isTeacher) {
+              return false
+            }
+            return true
+          })
+          .map((group) => ({
+            ...group,
+            items: group.items.filter(isSubVisible),
+          }))
+          .filter((group) => group.items.length > 0)
+      }
 
-    return legacyItems.length > 0
-      ? [{ key: "default", items: legacyItems }]
-      : []
-  }
+      const legacyItems = (sectionData.items || []).filter(isSubVisible)
 
-  const getVisibleItemsForSection = (sectionKey) => {
-    return getVisibleGroupsForSection(sectionKey).flatMap((g) => g.items)
-  }
+      return legacyItems.length > 0
+        ? [{ key: "default", items: legacyItems }]
+        : []
+    },
+    [currentLang, isAuthenticated, activeRole, isTeacher],
+  )
+
+  const getVisibleItemsForSection = useCallback(
+    (sectionKey) => {
+      return getVisibleGroupsForSection(sectionKey).flatMap((g) => g.items)
+    },
+    [getVisibleGroupsForSection],
+  )
 
   const getDockItemPath = (item) => {
     const rememberedPath = lastSublinks?.[item.key]
@@ -231,7 +236,10 @@ const DesktopSidebar = () => {
   )
 
   return (
-    <aside className="hidden lg:flex sticky top-0 h-screen shrink-0 z-30 select-none" data-tour="main-sidebar">
+    <aside
+      className="hidden lg:flex sticky top-0 h-screen shrink-0 z-30 select-none"
+      data-tour="main-sidebar"
+    >
       {/* 1. PRIMARY SLIM DOCK (ALWAYS DOCKED - 72px) */}
       <div className="h-full bg-cath-red-700 text-white flex flex-col items-center shrink-0 shadow-lg relative z-20">
         {/* Brand Icon */}
@@ -310,13 +318,13 @@ const DesktopSidebar = () => {
               opacity: 0,
               transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
             }}
-            transition={{ type: "spring", stiffness: 580, damping: 38 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="h-full bg-white border-r border-border overflow-hidden relative z-10 shrink-0"
           >
             <div className="w-[280px] h-full flex flex-col">
               {/* Secondary Header */}
               <ListItem className="font-bold">
-                <span className="truncate text-lg">
+                <span className="truncate text-xl">
                   {isSettingsPage
                     ? t.nav?.settings || "Settings"
                     : t.nav?.[
@@ -327,38 +335,52 @@ const DesktopSidebar = () => {
                 </span>
               </ListItem>
 
-              {/* Content Sub-Links */}
-              <AnimatePresence mode="wait">
-                <Motion.div
-                  key={`section-${currentSectionKey}`}
-                  variants={listContainerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit={{ opacity: 0, transition: { duration: 0.05 } }}
-                  className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col"
-                >
-                  {isSettingsPage
-                    ? settingNavLinks
-                        .filter((item) =>
-                          isNavItemVisible(item, {
-                            currentLang,
-                            isAuthenticated,
-                            activeRole,
-                          }),
+              {/* Content Sub-Links: Stable, instant list without stagger flicker or duplicate-key collisions */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col py-1">
+                {isSettingsPage
+                  ? settingNavLinks
+                      .filter((item) =>
+                        isNavItemVisible(item, {
+                          currentLang,
+                          isAuthenticated,
+                          activeRole,
+                        }),
+                      )
+                      .map((item) => {
+                        const label =
+                          t.nav?.[item.key] || item.label || item.key
+                        return (
+                          <DesktopNavItem
+                            key={`settings-${item.key}`}
+                            to={resolvePath(item.path)}
+                            icon={item.icon}
+                            label={label}
+                            color={item.color}
+                            img={item.img}
+                            isDocked={false}
+                            sectionId="settings"
+                          />
                         )
-                        .map((item) => {
-                          const label =
-                            t.nav?.[item.key] || item.label || item.key
-                          return (
-                            <Motion.div
-                              key={item.key}
-                              variants={itemVariants}
-                              initial="hidden"
-                              animate="visible"
-                              className="w-full"
-                            >
+                      })
+                  : getVisibleGroupsForSection(currentSectionKey).map(
+                      (group, groupIdx) => (
+                        <React.Fragment
+                          key={`${currentSectionKey}-${group.key}`}
+                        >
+                          {groupIdx > 0 && (
+                            <div className="my-1 mx-2 h-px bg-border shrink-0" />
+                          )}
+                          {group.items.map((item) => {
+                            const label =
+                              t.nav?.[item.key] || item.label || item.key
+                            let itemPath = item.path
+                            if (item.key === "profile" && user) {
+                              itemPath = `/workspace/profile/${user.accountId || user.id || ""}`
+                            }
+                            return (
                               <DesktopNavItem
-                                to={resolvePath(item.path)}
+                                key={`${currentSectionKey}-${item.key}`}
+                                to={resolvePath(itemPath)}
                                 icon={item.icon}
                                 label={label}
                                 color={item.color}
@@ -366,47 +388,12 @@ const DesktopSidebar = () => {
                                 isDocked={false}
                                 sectionId={currentSectionKey}
                               />
-                            </Motion.div>
-                          )
-                        })
-                    : getVisibleGroupsForSection(currentSectionKey).map(
-                        (group, groupIdx) => (
-                          <React.Fragment key={group.key}>
-                            {groupIdx > 0 && (
-                              <div className="my-1 mx-2 h-px bg-border shrink-0" />
-                            )}
-                            {group.items.map((item) => {
-                              const label =
-                                t.nav?.[item.key] || item.label || item.key
-                              let itemPath = item.path
-                              if (item.key === "profile" && user) {
-                                itemPath = `/workspace/profile/${user.accountId || user.id || ""}`
-                              }
-                              return (
-                                <Motion.div
-                                  key={item.key}
-                                  variants={itemVariants}
-                                  initial="hidden"
-                                  animate="visible"
-                                  className="w-full"
-                                >
-                                  <DesktopNavItem
-                                    to={resolvePath(itemPath)}
-                                    icon={item.icon}
-                                    label={label}
-                                    color={item.color}
-                                    img={item.img}
-                                    isDocked={false}
-                                    sectionId={currentSectionKey}
-                                  />
-                                </Motion.div>
-                              )
-                            })}
-                          </React.Fragment>
-                        ),
-                      )}
-                </Motion.div>
-              </AnimatePresence>
+                            )
+                          })}
+                        </React.Fragment>
+                      ),
+                    )}
+              </div>
             </div>
           </Motion.div>
         )}

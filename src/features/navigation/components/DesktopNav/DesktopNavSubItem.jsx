@@ -28,8 +28,8 @@ const DesktopNavSubItem = ({
           isFlyout ? "px-3 gap-3" : "pl-7 pr-3 gap-3"
         } ${
           isActive
-            ? "bg-primaryBg hover:bg-[#E6E6E6]"
-            : "hover:bg-primaryBg"
+            ? "bg-itemActive hover:bg-itemActiveHover"
+            : "hover:bg-itemHover"
         }`
       }
       onClick={onClick}
