@@ -25,6 +25,7 @@ import {
   placementTestApi,
   useCancelSessionMutation,
   useCreateSessionMutation,
+  useResumeSessionMutation,
   useSubmitTurnMutation,
 } from "../api"
 import { createNoHearingWatcher } from "../services/speech"
@@ -39,7 +40,7 @@ import {
   startReconnect,
   tickReconnect,
 } from "../utils/lifecycle"
-import { isUnfinishedSession } from "../utils/sessionLifecycle"
+import { getResumeOrder, isUnfinishedSession } from "../utils/sessionLifecycle"
 import { countSubmittedTurns, upsertTurn } from "../utils/turns"
 import useAudioTransport from "./useAudioTransport"
 
@@ -123,6 +124,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   const [submitTurn] = useSubmitTurnMutation()
   const [cancelSession] = useCancelSessionMutation()
   const [createSession] = useCreateSessionMutation()
+  const [resumeActiveSession] = useResumeSessionMutation()
   const [triggerGetQuestion] = placementTestApi.useLazyGetQuestionQuery()
 
   const {
@@ -848,38 +850,72 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   useEffect(() => {
     mountedRef.current = true
     const stored = readActiveSession()
-    if (!stored || !isUnfinishedSession(stored)) {
-      clearActiveSession()
-      navigate(PLACEMENT_TEST_PATH, { replace: true })
-      return () => {
-        mountedRef.current = false
-      }
-    }
-    const answeredTurns = countSubmittedTurns(stored.turns, TOTAL_TURNS)
-    if (answeredTurns >= TOTAL_TURNS) {
-      clearActiveSession()
-      navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
-      return () => {
-        mountedRef.current = false
-      }
-    }
-    const startOrder = Math.min(answeredTurns + 1, TOTAL_TURNS)
+
     // Giữ quyết định trong ref để StrictMode (mount hai lần ở dev) không đọc sai dấu.
     if (reloadDecisionRef.current === null) {
       reloadDecisionRef.current =
-        Boolean(stored.id) && readRoomMarker() === String(stored.id)
+        Boolean(stored?.id) && readRoomMarker() === String(stored.id)
     }
     const reloaded = reloadDecisionRef.current
-    writeRoomMarker(stored.id ? String(stored.id) : null)
-    if (reloaded) {
-      setResumePrompt({
+    writeRoomMarker(stored?.id ? String(stored.id) : null)
+
+    const openSession = (snapshot) => {
+      if (!mountedRef.current) return
+      if (!snapshot || !isUnfinishedSession(snapshot)) {
+        clearActiveSession()
+        navigate(PLACEMENT_TEST_PATH, { replace: true })
+        return
+      }
+      const answeredTurns = countSubmittedTurns(snapshot.turns, TOTAL_TURNS)
+      if (answeredTurns >= TOTAL_TURNS) {
+        clearActiveSession()
+        navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
+        return
+      }
+      const startOrder = getResumeOrder(snapshot, {
         answeredCount: answeredTurns,
-        nextOrder: startOrder,
-        expiresAt: Number(stored.expiresAt) || null,
+        totalTurns: TOTAL_TURNS,
       })
-    } else {
-      loadQuestionRef.current(startOrder, stored.turns || [])
+      // The question loader reads stateRef synchronously; apply the refreshed
+      // session there before it decides the turn.
+      stateRef.current = {
+        ...stateRef.current,
+        session: snapshot,
+        turns: snapshot.turns || [],
+      }
+      setSession(snapshot)
+      setTurns(snapshot.turns || [])
+      if (reloaded) {
+        setResumePrompt({
+          answeredCount: answeredTurns,
+          nextOrder: startOrder,
+          expiresAt: Number(snapshot.expiresAt) || null,
+        })
+      } else {
+        loadQuestionRef.current(startOrder, snapshot.turns || [])
+      }
     }
+
+    // F5: fetch the server position before offering "Tiếp tục". A local copy
+    // that is missing a submitted turn (old stored shape, another tab) would
+    // otherwise rewind the exam to Câu 1 and replay `initialQuestion`.
+    if (reloaded && stored?.id) {
+      resumeActiveSession({ sessionId: stored.id })
+        .unwrap()
+        .then(() => openSession(readActiveSession() || stored))
+        .catch((err) => {
+          if (!mountedRef.current) return
+          if (err?.status === 400 || err?.status === 403 || err?.status === 410) {
+            clearActiveSession()
+            navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
+            return
+          }
+          openSession(stored)
+        })
+    } else {
+      openSession(stored)
+    }
+
     return () => {
       mountedRef.current = false
       writeRoomMarker(null)
@@ -889,7 +925,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       stopSpeakingText()
       stopAudio()
     }
-  }, [clearAutoRecord, handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
+  }, [clearAutoRecord, handleStopUserAudio, navigate, resumeActiveSession, stopAudioListening, stopSpeakingText, stopAudio])
 
   // FR-PT-008: banner thử lại tự ẩn sau NOTICE_BANNER_MS. Banner NO_HEARING
   // phải giữ nguyên cho tới khi có tiếng trở lại hoặc hết NOT_HEARING_EXIT_MS.

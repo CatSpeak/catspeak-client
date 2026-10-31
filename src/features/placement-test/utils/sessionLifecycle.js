@@ -23,6 +23,27 @@ export const getSessionActivityAt = (session) =>
     Number(session?.createdAt) || 0,
   )
 
+const positiveOrder = (value) => {
+  const order = Number(value)
+  return Number.isFinite(order) && order > 0 ? order : 0
+}
+
+// Resume position = the server's pending question when it has one. The answered
+// count alone rewinds to turn 1 when the locally stored turns are stale, even
+// though `current_question` (read/placement/service.py:44-56) is still turn 2.
+export const getResumeOrder = (
+  session,
+  { answeredCount = 0, totalTurns = TOTAL_TURNS } = {},
+) =>
+  Math.min(
+    totalTurns,
+    Math.max(
+      positiveOrder(answeredCount) + 1,
+      positiveOrder(session?.currentQuestion?.turn_index),
+      positiveOrder(session?.currentOrder),
+    ),
+  )
+
 export const getResumeDeadline = (
   session,
   { windowMs = RESUME_WINDOW_MS } = {},
@@ -41,7 +62,7 @@ export const getSessionLifecycle = ({
   const expiresAt = activityAt + Math.max(0, Number(windowMs) || 0)
   const remainingMs = Math.max(0, expiresAt - (Number.isFinite(nowMs) ? nowMs : 0))
   const answeredCount = countSubmittedTurns(session.turns, totalTurns)
-  const nextOrder = Math.min(answeredCount + 1, totalTurns)
+  const nextOrder = getResumeOrder(session, { answeredCount, totalTurns })
 
   return {
     kind:

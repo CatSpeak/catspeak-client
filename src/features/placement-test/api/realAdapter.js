@@ -280,31 +280,12 @@ export const submitTurnReal = async (
   }
 }
 
-/** 4. Kiểm tra phiên dang dở trong 24h: GET /v1/placement/sessions/active */
-export const getActiveSessionReal = async ({
-  baseQuery,
-  api,
-  extraOptions,
-  persist = saveActiveSession,
-  read = readActiveSession,
-} = {}) => {
-  const response = await baseQuery(
-    { url: SESSIONS_ACTIVE_URL, method: "GET" },
-    api,
-    extraOptions,
-  )
-  if (response.error) {
-    const local = read()
-    return { data: local || null }
-  }
-
-  const data = response.data || {}
-  if (!data.has_active_session || !data.session) {
-    return { data: null }
-  }
-
-  const s = data.session
-  const mappedSession = {
+// The start response already carries turn 1 with its TTS audio. A tag-invalidated
+// /sessions/active refresh (or a resume) must not drop `initialQuestion` for the
+// same session: useConversationLoop would otherwise fetch GET /question again
+// (~1 s of TTS) before "Câu 1/5".
+const mapServerSession = (s, localSession = null) => {
+  const mapped = {
     id: s.session_id,
     code: s.session_id,
     status: s.status === "completed" ? SESSION_STATUS.COMPLETED : SESSION_STATUS.IN_PROGRESS,
@@ -333,15 +314,37 @@ export const getActiveSessionReal = async ({
       : [],
   }
 
-  // The start response already carries turn 1 with its TTS audio. A
-  // tag-invalidated /sessions/active refresh runs while the room mounts, so
-  // replacing the stored session here used to drop `initialQuestion` and make
-  // useConversationLoop fetch GET /question again (~1 s of TTS) before "Câu 1/5".
-  const localSession = read()
-  if (localSession?.id === mappedSession.id && localSession.initialQuestion) {
-    mappedSession.initialQuestion = localSession.initialQuestion
+  if (localSession?.id === mapped.id && localSession.initialQuestion) {
+    mapped.initialQuestion = localSession.initialQuestion
   }
 
+  return mapped
+}
+
+/** 4. Kiểm tra phiên dang dở trong 24h: GET /v1/placement/sessions/active */
+export const getActiveSessionReal = async ({
+  baseQuery,
+  api,
+  extraOptions,
+  persist = saveActiveSession,
+  read = readActiveSession,
+} = {}) => {
+  const response = await baseQuery(
+    { url: SESSIONS_ACTIVE_URL, method: "GET" },
+    api,
+    extraOptions,
+  )
+  if (response.error) {
+    const local = read()
+    return { data: local || null }
+  }
+
+  const data = response.data || {}
+  if (!data.has_active_session || !data.session) {
+    return { data: null }
+  }
+
+  const mappedSession = mapServerSession(data.session, read())
   persist(mappedSession)
   return { data: mappedSession }
 }
@@ -497,6 +500,7 @@ export const resumeSessionReal = async (
     api,
     extraOptions,
     read = readActiveSession,
+    persist = saveActiveSession,
     clear = clearActiveSession,
   } = {},
 ) => {
@@ -529,6 +533,11 @@ export const resumeSessionReal = async (
       },
     }
   }
+
+  // The room derives its position from the stored session, so the authoritative
+  // server copy (current_turn / current_question / turns[].answered_at) must be
+  // applied before navigating — otherwise a stale local copy rewinds to Câu 1.
+  persist(mapServerSession(s, session))
 
   return { data: { session: s } }
 }

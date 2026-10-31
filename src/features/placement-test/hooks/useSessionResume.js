@@ -39,9 +39,13 @@ const useSessionResume = ({ copy = {} } = {}) => {
     if (lifecycle?.kind === "expired") clearActiveSession()
   }, [lifecycle])
 
-  const resume = useCallback(() => {
+  const resume = useCallback(async () => {
     if (!lifecycle || lifecycle.expired) return
-    resumeSession({ sessionId: lifecycle.session.id })
+    try {
+      await resumeSession({ sessionId: lifecycle.session.id }).unwrap()
+    } catch {
+      // Keep the local session when the server check fails; the room validates it.
+    }
     navigate(PLACEMENT_TEST_SESSION_PATH)
   }, [lifecycle, navigate, resumeSession])
 

@@ -98,6 +98,33 @@ describe("getSessionLifecycle", () => {
     expect(lifecycle.nextOrder).toBe(2)
   })
 
+  // Oracle: the server exposes the pending turn as `current_question`
+  // (catspeak-ai/src/catspeak_ai/read/placement/service.py:44-56,64) and
+  // `current_turn = answered + 1` (:39-41). Resume must reopen that turn even
+  // when the locally stored turns array is stale — a reload mid-turn must not
+  // rewind to Câu 1 and replay `initialQuestion`.
+  it("resumes at the server pending question when the local turns are stale", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        turns: [],
+        currentQuestion: { turn_index: 2, text: "你是哪国人？" },
+      }),
+      now: ACTIVITY + 2 * HOUR_MS,
+    })
+
+    expect(lifecycle.answeredCount).toBe(0)
+    expect(lifecycle.nextOrder).toBe(2)
+  })
+
+  it("uses the server current turn as a floor when no pending question is cached", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({ turns: [], currentOrder: 2 }),
+      now: ACTIVITY + 2 * HOUR_MS,
+    })
+
+    expect(lifecycle.nextOrder).toBe(2)
+  })
+
   // Oracle: a turn is completed only when answered_at is stamped
   // (catspeak-ai/src/catspeak_ai/read/placement/service.py:39), which the client
   // maps to answeredAt/submittedAt (realAdapter.js:329-330). A pending turn can

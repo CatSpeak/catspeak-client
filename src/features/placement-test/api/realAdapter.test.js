@@ -6,6 +6,7 @@ import {
   getActiveSessionReal,
   getQuestionReal,
   getRetakeStatusReal,
+  resumeSessionReal,
   scoreSessionReal,
   submitTurnReal,
 } from "./realAdapter"
@@ -375,6 +376,66 @@ describe("realAdapter", () => {
     })
 
     expect(inMemorySession.initialQuestion).toBeUndefined()
+  })
+
+  // Oracle: the resume button must reopen the server's pending turn, not the
+  // locally cached position. GET /v1/placement/sessions/{id} returns
+  // current_turn + current_question + turns[].answered_at
+  // (catspeak-ai/src/catspeak_ai/read/placement/service.py:39-90); the client
+  // used to discard that payload and navigate with the stale local session.
+  it("resumeSessionReal adopts the server session into the local store", async () => {
+    inMemorySession = {
+      id: "psess_resume_2",
+      status: "in_progress",
+      currentOrder: 1,
+      turns: [],
+      initialQuestion: { turn_index: 1, text: "你昨天去哪儿了？" },
+    }
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        session_id: "psess_resume_2",
+        status: "in_progress",
+        seed_band: 3,
+        current_turn: 2,
+        total_turns: 5,
+        current_question: { turn_index: 2, text: "你是哪国人？" },
+        turns: [
+          {
+            turn_index: 1,
+            question_text: "你昨天去哪儿了？",
+            transcript: "我昨天去学校了",
+            speech_duration_ms: 4000,
+            answered_at: "2026-10-31T10:02:00Z",
+          },
+          {
+            turn_index: 2,
+            question_text: "你是哪国人？",
+            transcript: "",
+            speech_duration_ms: 0,
+            answered_at: null,
+          },
+        ],
+      },
+    })
+
+    await resumeSessionReal(
+      { sessionId: "psess_resume_2" },
+      { baseQuery: mockBaseQuery, read: mockRead, persist: mockPersist },
+    )
+
+    expect(inMemorySession.currentOrder).toBe(2)
+    expect(inMemorySession.currentQuestion).toMatchObject({
+      turn_index: 2,
+      text: "你是哪国人？",
+    })
+    expect(inMemorySession.turns[0].submittedAt).toBe(
+      new Date("2026-10-31T10:02:00Z").getTime(),
+    )
+    expect(inMemorySession.turns[1].submittedAt).toBeNull()
+    expect(inMemorySession.initialQuestion).toEqual({
+      turn_index: 1,
+      text: "你昨天去哪儿了？",
+    })
   })
 
   it("getActiveSessionReal returns null when no active session", async () => {
