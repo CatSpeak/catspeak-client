@@ -168,6 +168,9 @@ export default {
       title: "Speaking Practice Room",
       subtitle: "Adaptive AI conversation • HSK 3.0",
       connection: "Stable connection",
+      connectionLost: "Connection lost",
+      connectionLostExitToast:
+        "Your network was disconnected for too long, so the test could not continue. Your progress is saved — check your connection and continue.",
       configure: "AI settings",
       pause: "Pause test",
       casual: "Casual Chat",

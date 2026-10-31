@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
 import { MAX_RECONNECT_ATTEMPTS, PAUSE_BUDGET_MS } from "../constants/lifecycle"
 import {
+  RECONNECT_OUTCOME,
   advancePauseBudget,
   deadlineFromRemaining,
+  nextReconnectStep,
   remainingPauseBudget,
   remainingQuestionMs,
   startReconnect,
@@ -95,5 +97,44 @@ describe("tickReconnect", () => {
       remainingMs: 0,
       exhausted: true,
     })
+  })
+})
+
+describe("nextReconnectStep", () => {
+  // Oracle: user ruling 2026-10-31 — the final countdown with the network still
+  // down must leave the room for the Dashboard, never open the 30-minute pause.
+  it("exits the room when the final attempt runs out offline", () => {
+    const step = nextReconnectStep(
+      { attempt: MAX_RECONNECT_ATTEMPTS, remainingMs: 1000, exhausted: false },
+      { deltaMs: 1000, online: false },
+    )
+    expect(step.outcome).toBe(RECONNECT_OUTCOME.EXIT)
+    expect(step.state).toEqual(startReconnect())
+  })
+
+  it("recovers when the final attempt runs out online", () => {
+    const step = nextReconnectStep(
+      { attempt: MAX_RECONNECT_ATTEMPTS, remainingMs: 1000, exhausted: false },
+      { deltaMs: 1000, online: true },
+    )
+    expect(step.outcome).toBe(RECONNECT_OUTCOME.RECOVER)
+  })
+
+  it("keeps waiting while the current attempt is still counting", () => {
+    const step = nextReconnectStep(
+      { attempt: 1, remainingMs: 15000, exhausted: false },
+      { deltaMs: 1000, online: false },
+    )
+    expect(step.outcome).toBe(RECONNECT_OUTCOME.WAIT)
+    expect(step.state.remainingMs).toBe(14000)
+    expect(step.state.attempt).toBe(1)
+  })
+
+  it("recovers as soon as a new attempt starts with the network back", () => {
+    const step = nextReconnectStep(
+      { attempt: 1, remainingMs: 1000, exhausted: false },
+      { deltaMs: 1000, online: true },
+    )
+    expect(step.outcome).toBe(RECONNECT_OUTCOME.RECOVER)
   })
 })

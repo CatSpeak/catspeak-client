@@ -23,6 +23,7 @@ const SessionRoom = () => {
   const loop = useConversationLoop({
     exitNotice: copy.noHearingExitToast,
     pauseExpiredNotice: t.placementTest?.lifecycle?.pauseExpiredToast,
+    connectionLostNotice: copy.connectionLostExitToast,
   })
 
   const handleConfigure = () => {
@@ -105,6 +106,7 @@ const SessionRoom = () => {
       <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-3">
         <SessionTopbar
           copy={copy}
+          connectionLost={loop.connectionLost}
           onPause={loop.handlePause}
           onConfigure={handleConfigure}
         />

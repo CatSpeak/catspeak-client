@@ -165,6 +165,9 @@ export default {
       title: "スピーキング練習ルーム",
       subtitle: "AI 適応会話 • HSK 3.0",
       connection: "接続は安定",
+      connectionLost: "接続が切れました",
+      connectionLostExitToast:
+        "ネットワークが長時間切断されたため、試験を続行できませんでした。進行状況は保存されています。接続を確認してから再開してください。",
       configure: "AI 設定",
       pause: "試験を一時停止",
       casual: "カジュアル会話（Casual Chat）",

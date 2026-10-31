@@ -38,10 +38,11 @@ import {
   saveActiveSession,
 } from "../utils/sessionStorage"
 import {
+  RECONNECT_OUTCOME,
   advancePauseBudget,
+  nextReconnectStep,
   remainingPauseBudget,
   startReconnect,
-  tickReconnect,
 } from "../utils/lifecycle"
 import { getResumeOrder, isPauseExpired, isUnfinishedSession } from "../utils/sessionLifecycle"
 import { countSubmittedTurns, upsertTurn } from "../utils/turns"
@@ -91,7 +92,7 @@ const normalizeQuestion = (q, fallbackOrder = 1) => {
   }
 }
 
-const useConversationLoop = ({ exitNotice, pauseExpiredNotice } = {}) => {
+const useConversationLoop = ({ exitNotice, pauseExpiredNotice, connectionLostNotice } = {}) => {
   const navigate = useNavigate()
 
   const [session, setSession] = useState(readActiveSession)
@@ -166,6 +167,7 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice } = {}) => {
   const reconnectRef = useRef(startReconnect())
   const pauseSpentRef = useRef(pauseSpentMs)
   const handleReconnectSuccessRef = useRef(() => {})
+  const handleConnectionExitRef = useRef(() => {})
   const expirePausedSessionRef = useRef(() => {})
   const handleLeaveRef = useRef(() => {})
   const expiringRef = useRef(false)
@@ -776,6 +778,50 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice } = {}) => {
     stopSpeakingText,
   ])
 
+  // Hết 3 lần thử kết nối lại mà mạng vẫn mất: lỗi thuộc về đường truyền của
+  // người học, nên rời phòng thi về Dashboard kèm thông báo mạng bị gián đoạn —
+  // không mở hộp thoại tạm dừng 30 phút (lỗi mạng không phải một phiên nghỉ).
+  const handleConnectionExit = useCallback(() => {
+    const current = stateRef.current
+    if (current.session) {
+      saveActiveSession({
+        ...current.session,
+        turns: current.turns,
+        pauseSpentMs: pauseSpentRef.current,
+        pausedAt: Date.now(),
+        pauseStartedAt: 0,
+      })
+    }
+
+    suspendedRef.current = true
+    connectionLostRef.current = false
+    setConnectionLost(false)
+    setPaused(false)
+    setNotice(null)
+    setIsRecording(false)
+    setHasRecorded(false)
+    setRecordedMs(0)
+    handleStopUserAudio()
+    stopAudioListening()
+    stopSpeakingText()
+    stopAudio()
+    stopRecording()
+
+    toast.error(
+      connectionLostNotice ||
+        "Mất kết nối mạng quá lâu nên không thể tiếp tục bài thi. Tiến trình đã được lưu an toàn; hãy kiểm tra đường truyền rồi tiếp tục.",
+    )
+    navigate(PLACEMENT_TEST_DASHBOARD_PATH, { replace: true })
+  }, [
+    connectionLostNotice,
+    handleStopUserAudio,
+    navigate,
+    stopAudio,
+    stopAudioListening,
+    stopRecording,
+    stopSpeakingText,
+  ])
+
   const handleCancel = useCallback(async () => {
     const current = stateRef.current
     if (current.session?.id) {
@@ -863,6 +909,10 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice } = {}) => {
   }, [handleNoHearingExit])
 
   useEffect(() => {
+    handleConnectionExitRef.current = handleConnectionExit
+  }, [handleConnectionExit])
+
+  useEffect(() => {
     const handleOffline = () => handleConnectionLost()
     const handleOnline = () => {
       if (connectionLostRef.current) handleReconnectSuccess()
@@ -880,19 +930,16 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice } = {}) => {
   useEffect(() => {
     if (!connectionLost) return undefined
     const id = window.setInterval(() => {
-      const previous = reconnectRef.current
-      const next = tickReconnect(previous, 1000)
-      if (next.exhausted) {
-        reconnectRef.current = startReconnect()
-        setReconnect(reconnectRef.current)
-        setConnectionLost(false)
-        setPaused(true)
-        return
-      }
-      reconnectRef.current = next
-      setReconnect(next)
-      if (next.attempt !== previous.attempt && isOnline()) {
+      const step = nextReconnectStep(reconnectRef.current, {
+        deltaMs: 1000,
+        online: isOnline(),
+      })
+      reconnectRef.current = step.state
+      setReconnect(step.state)
+      if (step.outcome === RECONNECT_OUTCOME.RECOVER) {
         handleReconnectSuccessRef.current()
+      } else if (step.outcome === RECONNECT_OUTCOME.EXIT) {
+        handleConnectionExitRef.current()
       }
     }, 1000)
     return () => window.clearInterval(id)

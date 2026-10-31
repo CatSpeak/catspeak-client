@@ -162,6 +162,9 @@ export default {
       title: "口语练习房间",
       subtitle: "AI 自适应对话 • HSK 3.0",
       connection: "连接稳定",
+      connectionLost: "连接已断开",
+      connectionLostExitToast:
+        "网络长时间中断，无法继续考试。进度已安全保存，请检查网络后继续。",
       configure: "AI 设置",
       pause: "暂停考试",
       casual: "日常交流（Casual Chat）",

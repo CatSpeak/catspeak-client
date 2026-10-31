@@ -168,6 +168,9 @@ export default {
       title: "Phòng luyện nói",
       subtitle: "Hội thoại thích ứng AI • HSK 3.0",
       connection: "Kết nối ổn định",
+      connectionLost: "Mất kết nối",
+      connectionLostExitToast:
+        "Mất kết nối mạng quá lâu nên không thể tiếp tục bài thi. Tiến trình đã được lưu an toàn; hãy kiểm tra đường truyền rồi tiếp tục.",
       configure: "Cấu hình AI",
       pause: "Tạm dừng bài thi",
       casual: "Giao tiếp (Casual Chat)",
