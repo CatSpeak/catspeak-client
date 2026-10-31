@@ -298,6 +298,8 @@ export function useClassFormReducer({
   onFormInstanceChange,
   toastError,
   commissionTiers,
+  baseTuitionFee = 100000,
+  perSessionTuitionFee = 50000,
 }) {
   const { userTimeZone, getZoneDateStr, formatTime } = useTimezone()
   const [state, dispatch] = useReducer(
@@ -354,7 +356,7 @@ export function useClassFormReducer({
     }
   }, [state.startDate, state.sessions, state.checkedDays, state.timeSlots, state.recurrence, userTimeZone])
   const effectiveSessions = state.recurrence.endCondition === "until" ? recurrenceResult.dates.length : Number(state.sessions)
-  const minFee = 100000 + 50000 * (effectiveSessions || 0)
+  const minFee = Number(baseTuitionFee ?? 100000) + Number(perSessionTuitionFee ?? 50000) * (effectiveSessions || 0)
 
   // ─── Auto min-fee enforcement (create mode only) ───
   useEffect(() => {
