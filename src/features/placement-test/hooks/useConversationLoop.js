@@ -44,30 +44,10 @@ import {
   remainingPauseBudget,
   startReconnect,
 } from "../utils/lifecycle"
-import { getResumeOrder, isPauseExpired, isUnfinishedSession } from "../utils/sessionLifecycle"
+import { getResumeOrder, isPauseExpired, isRoomReload, isUnfinishedSession } from "../utils/sessionLifecycle"
 import { countSubmittedTurns, upsertTurn } from "../utils/turns"
+import { readRoomMarker, writeRoomMarker } from "../utils/roomMarker"
 import useAudioTransport from "./useAudioTransport"
-
-// Đánh dấu phòng thi đang mở trong tab này. Rời phòng bằng điều hướng trong app
-// thì xóa dấu; F5 không chạy cleanup nên dấu còn, lần mount sau biết là tải lại.
-const ROOM_MARKER_KEY = "catspeak_pt_room_open"
-
-const readRoomMarker = () => {
-  try {
-    return window.sessionStorage.getItem(ROOM_MARKER_KEY)
-  } catch {
-    return null
-  }
-}
-
-const writeRoomMarker = (value) => {
-  try {
-    if (value) window.sessionStorage.setItem(ROOM_MARKER_KEY, value)
-    else window.sessionStorage.removeItem(ROOM_MARKER_KEY)
-  } catch {
-    // sessionStorage bị chặn: bỏ qua, chỉ mất hộp thoại tiếp tục
-  }
-}
 
 const isOnline = () =>
   typeof navigator === "undefined" || navigator.onLine !== false
@@ -967,8 +947,7 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice, connectionLostNot
 
     // Giữ quyết định trong ref để StrictMode (mount hai lần ở dev) không đọc sai dấu.
     if (reloadDecisionRef.current === null) {
-      reloadDecisionRef.current =
-        Boolean(stored?.id) && readRoomMarker() === String(stored.id)
+      reloadDecisionRef.current = isRoomReload(stored, readRoomMarker())
     }
     const reloaded = reloadDecisionRef.current
     writeRoomMarker(stored?.id ? String(stored.id) : null)

@@ -20,6 +20,7 @@ import {
   saveResult,
 } from "../utils/sessionStorage"
 import { countSubmittedTurns, upsertTurn } from "../utils/turns"
+import { clearRoomMarker } from "../utils/roomMarker"
 import { getRetakeEligibility } from "../utils/cooldown"
 
 /** Bật/tắt đường máy chủ. Đặt "0" trong .env để quay lại mock hoàn toàn. */
@@ -501,7 +502,7 @@ export const scoreSessionReal = async ({
 
 /** 8. Tiếp tục phiên thi: kiểm tra trạng thái trên máy chủ */
 export const resumeSessionReal = async (
-  { sessionId } = {},
+  { sessionId, fromDashboard = false } = {},
   {
     baseQuery,
     api,
@@ -545,6 +546,13 @@ export const resumeSessionReal = async (
   // server copy (current_turn / current_question / turns[].answered_at) must be
   // applied before navigating — otherwise a stale local copy rewinds to Câu 1.
   persist(mapServerSession(s, session))
+
+  // Choosing "Tiếp tục" on the dashboard is an explicit entry, not an F5. The
+  // room opened before the login expired left its tab marker behind (hard
+  // redirects skip the React cleanup); clearing it stops the recovery modal
+  // from appearing a second time. The in-room F5 refresh keeps the marker so a
+  // further reload still warns about the lost recording.
+  if (fromDashboard) clearRoomMarker()
 
   return { data: { session: s } }
 }

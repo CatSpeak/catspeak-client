@@ -10,6 +10,7 @@ import { createSessionCode } from "../utils/session"
 import { getRetakeEligibility } from "../utils/cooldown"
 import { isUnfinishedSession } from "../utils/sessionLifecycle"
 import { upsertTurn, countSubmittedTurns } from "../utils/turns"
+import { clearRoomMarker } from "../utils/roomMarker"
 import {
   clearActiveSession,
   readActiveSession,
@@ -199,7 +200,7 @@ export const getQuestionMock = async ({
 }
 
 export const resumeSessionMock = async (
-  { sessionId } = {},
+  { sessionId, fromDashboard = false } = {},
   {
     delayMs = MOCK_LATENCY_MS,
     read = readActiveSession,
@@ -248,6 +249,9 @@ export const resumeSessionMock = async (
   }
 
   const answeredCount = countSubmittedTurns(session.turns)
+  // Same contract as the real adapter: an explicit dashboard continue resets
+  // the tab's reload marker so the room does not prompt a second time.
+  if (fromDashboard) clearRoomMarker()
   return {
     data: {
       session,

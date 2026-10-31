@@ -18,6 +18,12 @@ export const SESSION_LIFECYCLE_KIND = {
 export const isUnfinishedSession = (session) =>
   Boolean(session) && RESUMABLE_STATUSES.includes(session.status)
 
+// F5 detection: the previous room instance never ran its cleanup, so the tab
+// marker still points at this session. Choosing "Tiếp tục" on the dashboard is
+// an explicit entry, not a reload — `resumeSessionReal` clears the marker first.
+export const isRoomReload = (session, roomMarker) =>
+  Boolean(session?.id) && roomMarker === String(session.id)
+
 export const getSessionActivityAt = (session) =>
   Math.max(
     Number(session?.updatedAt) || 0,

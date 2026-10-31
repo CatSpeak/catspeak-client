@@ -70,7 +70,10 @@ const useSessionResume = ({ copy = {} } = {}) => {
   const resume = useCallback(async () => {
     if (!lifecycle || lifecycle.expired) return
     try {
-      await resumeSession({ sessionId: lifecycle.session.id }).unwrap()
+      await resumeSession({
+        sessionId: lifecycle.session.id,
+        fromDashboard: true,
+      }).unwrap()
     } catch {
       // Keep the local session when the server check fails; the room validates it.
     }
