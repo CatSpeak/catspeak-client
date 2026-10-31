@@ -95,6 +95,9 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice, connectionLostNot
   const [showPinyin, setShowPinyin] = useState(true)
   const [showMeaning, setShowMeaning] = useState(true)
   const [paused, setPaused] = useState(false)
+  // Destructive cancel is a two-step action: the pause modal asks for
+  // confirmation before the session is cancelled and answered turns are lost.
+  const [cancelConfirming, setCancelConfirming] = useState(false)
   const [pauseSpentMs, setPauseSpentMs] = useState(() => {
     const stored = readActiveSession()
     if (!stored?.pauseStartedAt) return stored?.pauseSpentMs || 0
@@ -674,6 +677,7 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice, connectionLostNot
       })
     }
     setPaused(true)
+    setCancelConfirming(false)
     suspendSession()
   }, [connectionLost, suspendSession])
 
@@ -802,8 +806,17 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice, connectionLostNot
     stopSpeakingText,
   ])
 
+  const handleRequestCancel = useCallback(() => {
+    setCancelConfirming(true)
+  }, [])
+
+  const handleDismissCancel = useCallback(() => {
+    setCancelConfirming(false)
+  }, [])
+
   const handleCancel = useCallback(async () => {
     const current = stateRef.current
+    setCancelConfirming(false)
     if (current.session?.id) {
       try {
         await cancelSession({ sessionId: current.session.id }).unwrap()
@@ -1197,6 +1210,7 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice, connectionLostNot
     canSkip: true,
     answeredCount: countSubmittedTurns(turns, TOTAL_TURNS),
     paused,
+    cancelConfirming,
     pauseRemainingMs: remainingPauseBudget(pauseSpentMs),
     connectionLost,
     reconnectAttempt: reconnect.attempt,
@@ -1204,6 +1218,8 @@ const useConversationLoop = ({ exitNotice, pauseExpiredNotice, connectionLostNot
     handlePause,
     handleResume,
     handleLeave,
+    handleRequestCancel,
+    handleDismissCancel,
     handleCancel,
     handleReconnectNow,
     handleToggleMute,

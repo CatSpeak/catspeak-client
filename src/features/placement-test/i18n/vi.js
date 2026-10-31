@@ -237,6 +237,11 @@ export default {
       pauseLeaveCta: "Rời Phòng Thi Tạm Thời",
       pauseResumeCta: "Tiếp Tục Làm Bài Ngay ▷",
       pauseCancelCta: "Hủy bài thi và thi lại từ đầu",
+      pauseCancelConfirmTitle: "Hủy bài thi và thi lại từ đầu?",
+      pauseCancelConfirmWarning:
+        "Bạn sẽ mất {{answered}}/{{total}} câu trả lời đã làm. Bài thi mới sẽ bắt đầu từ câu 1 và không thể khôi phục tiến trình cũ.",
+      pauseCancelConfirmKeepCta: "Quay lại làm bài",
+      pauseCancelConfirmCta: "Hủy và thi lại từ đầu",
       reconnectTitle: "Mất Kết Nối Đường Truyền",
       reconnectBody:
         "Kết nối âm thanh với phòng thi AI bị gián đoạn do tín hiệu mạng không ổn định. Hệ thống đang thử tái lập kết nối.",

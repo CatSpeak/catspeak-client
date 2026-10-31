@@ -175,9 +175,12 @@ const SessionRoom = () => {
         copy={copy}
         pauseRemainingMs={loop.pauseRemainingMs}
         answeredCount={loop.answeredCount}
+        confirming={loop.cancelConfirming}
         onResume={loop.handleResume}
         onLeave={loop.handleLeave}
-        onCancel={loop.handleCancel}
+        onRequestCancel={loop.handleRequestCancel}
+        onDismissCancel={loop.handleDismissCancel}
+        onConfirmCancel={loop.handleCancel}
       />
       <ConnectionLostModal
         open={loop.connectionLost}

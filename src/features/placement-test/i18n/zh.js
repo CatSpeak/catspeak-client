@@ -228,6 +228,11 @@ export default {
       pauseLeaveCta: "暂时离开考场",
       pauseResumeCta: "立即继续答题 ▷",
       pauseCancelCta: "取消测试并从头开始",
+      pauseCancelConfirmTitle: "取消测试并从头开始？",
+      pauseCancelConfirmWarning:
+        "你将失去已完成的 {{answered}}/{{total}} 道题，新测试将从第 1 题开始，且无法恢复之前的进度。",
+      pauseCancelConfirmKeepCta: "返回继续答题",
+      pauseCancelConfirmCta: "取消并重新开始",
       reconnectTitle: "网络连接中断",
       reconnectBody:
         "由于网络信号不稳定，与 AI 考场的音频连接已中断。系统正在尝试重新连接。",

@@ -234,6 +234,11 @@ export default {
       pauseLeaveCta: "一時的に試験室を離れる",
       pauseResumeCta: "今すぐ試験を再開 ▷",
       pauseCancelCta: "テストを中止して最初からやり直す",
+      pauseCancelConfirmTitle: "テストを中止して最初からやり直しますか？",
+      pauseCancelConfirmWarning:
+        "回答済みの {{answered}}/{{total}} 問が失われます。新しいテストは第 1 問から始まり、以前の進捗は復元できません。",
+      pauseCancelConfirmKeepCta: "回答を続ける",
+      pauseCancelConfirmCta: "中止してやり直す",
       reconnectTitle: "接続が切断されました",
       reconnectBody:
         "ネットワーク信号が不安定なため、AI 試験室との音声接続が中断されました。システムが再接続を試みています。",

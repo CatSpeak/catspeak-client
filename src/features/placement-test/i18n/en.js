@@ -238,6 +238,11 @@ export default {
       pauseLeaveCta: "Leave Exam Room Temporarily",
       pauseResumeCta: "Resume the Test Now ▷",
       pauseCancelCta: "Cancel test and restart from beginning",
+      pauseCancelConfirmTitle: "Cancel the test and start over?",
+      pauseCancelConfirmWarning:
+        "Your {{answered}}/{{total}} answered questions will be lost. The new test starts from question 1 and the previous progress cannot be restored.",
+      pauseCancelConfirmKeepCta: "Keep working",
+      pauseCancelConfirmCta: "Cancel and start over",
       reconnectTitle: "Connection Lost",
       reconnectBody:
         "The audio connection to the AI exam room was interrupted by an unstable network signal. The system is trying to reconnect.",
