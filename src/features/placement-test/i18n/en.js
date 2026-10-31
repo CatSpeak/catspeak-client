@@ -184,9 +184,11 @@ export default {
       statusWaiting: "Listening...",
       statusRecognized: "● Recognised",
       statusSubmitted: "Submitted",
+      statusSkipped: "Question skipped",
       statusNoAudio: "No audio yet",
       transcriptPlaceholder: "Your answer will appear here...",
       analyzingSubline: "Automatically analysing pronunciation & grammar...",
+      skippedSubline: "This question is not scored.",
       waitingSubline: "Say your answer in Chinese.",
       aiListening: "The AI is listening to your voice...",
       aiMuted: "Your microphone is muted. Press the mic button to unmute.",
@@ -210,6 +212,7 @@ export default {
       submitCta: "Finish answer",
       skipCta: "Skip this question (0 points) →",
       scoringSummary: "Compiling your score...",
+      skippingCta: "Moving to the next question...",
       retryBanner:
         "The AI did not catch your answer. Please say it again. (Attempt {{attempt}} / {{max}})",
       noHearingBanner:

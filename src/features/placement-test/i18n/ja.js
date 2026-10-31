@@ -181,9 +181,11 @@ export default {
       statusWaiting: "聞き取り中...",
       statusRecognized: "● 認識良好",
       statusSubmitted: "提出済み",
+      statusSkipped: "この問題をスキップしました",
       statusNoAudio: "音声なし",
       transcriptPlaceholder: "あなたの回答がここに表示されます...",
       analyzingSubline: "発音と文法を自動分析しています...",
+      skippedSubline: "この問題は採点されません。",
       waitingSubline: "中国語で回答を話してください。",
       aiListening: "AI があなたの声を聞いています...",
       aiMuted: "マイクはミュート中です。マイクボタンで解除できます。",
@@ -207,6 +209,7 @@ export default {
       submitCta: "回答を完了する",
       skipCta: "この問題をスキップ（0点）→",
       scoringSummary: "スコアを集計中...",
+      skippingCta: "次の問題に移動しています...",
       retryBanner:
         "AI が回答を聞き取れませんでした。もう一度話してください。（{{attempt}} / {{max}} 回目）",
       noHearingBanner:

@@ -508,7 +508,11 @@ const useConversationLoop = ({ exitNotice } = {}) => {
 
       setTranscript(clean)
       setNotice(null)
-      setPhase(CONVERSATION_PHASE.ANALYZING)
+      // Bỏ qua không phải "đang phân tích": người học phải thấy ngay câu tiếp
+      // theo, không phải màn chờ phân tích ngữ âm/ngữ pháp.
+      setPhase(
+        skipped ? CONVERSATION_PHASE.SKIPPED : CONVERSATION_PHASE.ANALYZING,
+      )
 
       const turn = {
         order: turnOrder,
@@ -588,7 +592,8 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       }
 
       const elapsed = Date.now() - startedAt
-      if (elapsed < ANALYZE_MIN_MS) {
+      // Câu bỏ qua không chờ nhịp phân tích tối thiểu: chuyển câu ngay.
+      if (!skipped && elapsed < ANALYZE_MIN_MS) {
         await new Promise((resolve) => {
           window.setTimeout(resolve, ANALYZE_MIN_MS - elapsed)
         })

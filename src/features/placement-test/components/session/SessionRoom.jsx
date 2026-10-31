@@ -57,6 +57,7 @@ const SessionRoom = () => {
   }
 
   const analyzing = loop.phase === CONVERSATION_PHASE.ANALYZING
+  const skipped = loop.phase === CONVERSATION_PHASE.SKIPPED
   const notHearing =
     loop.notice === CONVERSATION_NOTICE.NO_HEARING && loop.isRecording
   const retryPending = loop.notice === CONVERSATION_NOTICE.RETRY
@@ -66,7 +67,10 @@ const SessionRoom = () => {
   let tone = "listening"
   let statusText = copy.aiListening
 
-  if (analyzing) {
+  if (skipped) {
+    tone = "listening"
+    statusText = copy.statusSkipped || "Đã bỏ qua câu này"
+  } else if (analyzing) {
     tone = "analyzing"
     statusText = copy.aiAnalyzing
   } else if (isRecording && loop.isMuted) {

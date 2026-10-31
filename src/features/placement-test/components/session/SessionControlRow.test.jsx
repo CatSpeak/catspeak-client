@@ -9,6 +9,8 @@ const copy = {
   timerMuted: "Đang tắt tiếng",
   submitCta: "Hoàn tất câu trả lời",
   skipCta: "Bỏ qua câu này",
+  scoringSummary: "Đang tổng hợp điểm đánh giá...",
+  skippingCta: "Đang chuyển câu tiếp...",
 }
 
 const render = (props) =>
@@ -23,6 +25,19 @@ const render = (props) =>
       {...props}
     />,
   )
+
+describe("SessionControlRow skip acknowledgement", () => {
+  it("shows the next-question notice instead of the scoring CTA after a skip", () => {
+    // Oracle: user ruling 2026-10-31 — skipping must not look like scoring.
+    const html = render({
+      phase: CONVERSATION_PHASE.SKIPPED,
+      isRecording: false,
+    })
+
+    expect(html).toContain("Đang chuyển câu tiếp...")
+    expect(html).not.toContain("Đang tổng hợp điểm đánh giá...")
+  })
+})
 
 describe("SessionControlRow mic toggle", () => {
   it("renders the muted state with a crossed-out mic and no level ring", () => {

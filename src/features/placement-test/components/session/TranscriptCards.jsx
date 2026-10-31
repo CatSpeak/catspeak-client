@@ -10,6 +10,12 @@ const statusFor = (
   copy,
   { phase, notice, transcript, isRecording, isMuted, hasRecorded },
 ) => {
+  if (phase === CONVERSATION_PHASE.SKIPPED) {
+    return {
+      label: copy.statusSkipped || "Đã bỏ qua câu này",
+      tone: "slate",
+    }
+  }
   if (phase === CONVERSATION_PHASE.ANALYZING) {
     return { label: copy.statusSubmitted || "Đã nộp bài", tone: "green" }
   }
@@ -84,9 +90,11 @@ const TranscriptCards = ({
   const noHearing =
     notice === CONVERSATION_NOTICE.NO_HEARING && isRecording
   const subline =
-    phase === CONVERSATION_PHASE.ANALYZING
-      ? copy.analyzingSubline
-      : noHearing
+    phase === CONVERSATION_PHASE.SKIPPED
+      ? copy.skippedSubline || "Câu này không được tính điểm."
+      : phase === CONVERSATION_PHASE.ANALYZING
+        ? copy.analyzingSubline
+        : noHearing
         ? copy.noHearingSubline
         : isRecording && isMuted
           ? copy.aiMuted || "Micro đang tắt tiếng. Bấm nút mic để bật lại."

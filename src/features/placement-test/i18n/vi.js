@@ -184,9 +184,11 @@ export default {
       statusWaiting: "Đang lắng nghe...",
       statusRecognized: "● Nhận diện rõ",
       statusSubmitted: "Đã nộp bài",
+      statusSkipped: "Đã bỏ qua câu này",
       statusNoAudio: "Chưa có âm thanh",
       transcriptPlaceholder: "Câu trả lời của bạn sẽ hiện ở đây...",
       analyzingSubline: "Đang tự động phân tích ngữ âm & ngữ pháp...",
+      skippedSubline: "Câu này không được tính điểm.",
       waitingSubline: "Hãy nói câu trả lời của bạn bằng tiếng Trung.",
       aiListening: "AI đang lắng nghe giọng nói của bạn...",
       aiMuted: "Micro đang tắt tiếng. Bấm nút mic để bật lại.",
@@ -210,6 +212,7 @@ export default {
       submitCta: "Hoàn tất câu trả lời",
       skipCta: "Bỏ qua câu này (0 điểm) →",
       scoringSummary: "Đang tổng hợp điểm đánh giá...",
+      skippingCta: "Đang chuyển câu tiếp...",
       retryBanner:
         "Chưa nghe được câu trả lời, vui lòng nói lại. (Lần {{attempt}} / {{max}})",
       noHearingBanner:
