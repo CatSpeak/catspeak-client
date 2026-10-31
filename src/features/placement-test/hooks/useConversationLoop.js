@@ -15,6 +15,7 @@ import {
 import {
   PLACEMENT_TEST_DASHBOARD_PATH,
   PLACEMENT_TEST_PATH,
+  PLACEMENT_TEST_PROFILE_PATH,
   PLACEMENT_TEST_SCORING_PATH,
 } from "../constants/routes"
 import { SESSION_STATUS } from "../constants/session"
@@ -35,7 +36,6 @@ import {
 import {
   advancePauseBudget,
   remainingPauseBudget,
-  remainingQuestionMs,
   startReconnect,
   tickReconnect,
 } from "../utils/lifecycle"
@@ -151,7 +151,6 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   const finishingRef = useRef(false)
   const recordingStoppedRef = useRef(false)
   const mountedRef = useRef(true)
-  const frozenRemainingRef = useRef(QUESTION_DURATION_MS)
   const connectionLostRef = useRef(false)
   const reconnectRef = useRef(startReconnect())
   const pauseSpentRef = useRef(pauseSpentMs)
