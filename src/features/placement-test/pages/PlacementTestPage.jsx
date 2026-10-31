@@ -5,6 +5,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
+import { useGetPlacementPermissionQuery } from "@/store/api/plansApi"
 import { PlanRequiredState } from "@/shared/components/ui/indicators"
 import { PLACEMENT_TEST_STEPS } from "../constants/steps"
 import {
@@ -20,19 +21,32 @@ import DeviceStep from "../components/DeviceStep"
 import BandStep from "../components/BandStep"
 import ResumeSessionModal from "../components/lifecycle/ResumeSessionModal"
 import SessionExpiredModal from "../components/lifecycle/SessionExpiredModal"
+import { isPlanForbiddenError } from "../utils/planAccess"
 
 const PlacementTestPage = () => {
   const { t } = useLanguage()
   const copy = t.placementTest || {}
   const lifecycleCopy = copy.lifecycle || {}
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const { hasFeature, isLoading: isPlanLoading } = usePlanFeatures()
-  const canAccessPlacement = hasFeature(PLAN_FEATURES.ALLOW_PLACEMENT_TEST)
+  // The AI API authorizes POST /v1/placement/sessions/start with
+  // GET /api/v1/Plans/placement-permission. Gate on that same source so a plan
+  // without Placement Test is rejected before consent and the mic prompt.
+  const { data: placementPermission, isLoading: isPermissionLoading } =
+    useGetPlacementPermissionQuery(undefined, { skip: !isAuthenticated })
   const [step, setStep] = useState(PLACEMENT_TEST_STEPS.CONSENT)
   const [hasGrantedMic, setHasGrantedMic] = useState(false)
   const { requesting, request } = useMicrophonePermission()
-  const [createSession, { isLoading: creating }] = useCreateSessionMutation()
+  const [createSession, { isLoading: creating, error: createError }] =
+    useCreateSessionMutation()
+  // A 403 from start means the plan changed or my-usage disagreed with the
+  // enforced permission; render the plan gate from it instead of a toast.
+  const planDenied = isPlanForbiddenError(createError)
+  const canAccessPlacement =
+    !planDenied &&
+    (placementPermission?.isAllowed ??
+      hasFeature(PLAN_FEATURES.ALLOW_PLACEMENT_TEST))
   const entry = useSessionResume({ copy: lifecycleCopy })
   const { data: retakeStatus, isLoading: retakeLoading } = useGetRetakeStatusQuery(
     undefined,
@@ -85,7 +99,8 @@ const PlacementTestPage = () => {
         toast.error(`Bạn cần đợi thêm ${days} ngày nữa để thi lại theo quy tắc 14 ngày Cooldown.`)
         return
       }
-      toast.error(lifecycleCopy.errorToast)
+      // The plan gate is already rendered from the mutation error.
+      if (!isPlanForbiddenError(err)) toast.error(lifecycleCopy.errorToast)
     }
   }
 
@@ -94,7 +109,12 @@ const PlacementTestPage = () => {
     setStep(PLACEMENT_TEST_STEPS.CONSENT)
   }
 
-  if (isPlanLoading || (canAccessPlacement && retakeLoading) || shouldOpenProfile) {
+  if (
+    isPlanLoading ||
+    isPermissionLoading ||
+    (canAccessPlacement && retakeLoading) ||
+    shouldOpenProfile
+  ) {
     return (
       <div className="min-h-[calc(100vh-200px)] bg-primaryBg flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-cath-red-600 border-t-transparent" />

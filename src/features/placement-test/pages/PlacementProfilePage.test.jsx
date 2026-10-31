@@ -5,6 +5,9 @@ import viCopy from "../i18n/vi"
 let PlacementProfilePage
 
 const readResultMock = vi.fn()
+const navigateMock = vi.fn()
+const cooldownProps = { current: null }
+const createSessionState = { value: { isLoading: false, error: null } }
 
 vi.mock("../utils/sessionStorage", async (importOriginal) => ({
   ...(await importOriginal()),
@@ -25,7 +28,7 @@ vi.mock("../api", () => ({
       totalDays: 14,
     },
   }),
-  useCreateSessionMutation: () => [vi.fn(), { isLoading: false }],
+  useCreateSessionMutation: () => [vi.fn(), createSessionState.value],
 }))
 
 vi.mock("@/shared/context/LanguageContext", () => ({
@@ -33,16 +36,34 @@ vi.mock("@/shared/context/LanguageContext", () => ({
 }))
 
 vi.mock("@/features/auth/hooks/useAuth", () => ({
-  useAuth: () => ({ user: { accountId: 202, username: "hoangle102003" } }),
+  useAuth: () => ({
+    user: { accountId: 202, username: "hoangle102003" },
+    isAuthenticated: true,
+  }),
 }))
 
 vi.mock("@/shared/hooks/usePlanFeatures", () => ({
   usePlanFeatures: () => ({ hasFeature: () => true, isLoading: false }),
 }))
 
+vi.mock("@/store/api/plansApi", () => ({
+  useGetPlacementPermissionQuery: () => ({
+    data: { isAllowed: true },
+    isLoading: false,
+  }),
+}))
+
 vi.mock("react-router-dom", async (importOriginal) => ({
   ...(await importOriginal()),
-  useNavigate: () => vi.fn(),
+  useNavigate: () => navigateMock,
+  useParams: () => ({ lang: "zh" }),
+}))
+
+vi.mock("../components/profile/ProfileCooldownCard", () => ({
+  default: (props) => {
+    cooldownProps.current = props
+    return null
+  },
 }))
 
 vi.mock("../components/profile/ConfirmRetakeModal", () => ({
@@ -61,6 +82,9 @@ beforeAll(async () => {
 
 beforeEach(() => {
   readResultMock.mockReset()
+  navigateMock.mockReset()
+  cooldownProps.current = null
+  createSessionState.value = { isLoading: false, error: null }
 })
 
 describe("PlacementProfilePage score sourcing", () => {
@@ -91,5 +115,43 @@ describe("PlacementProfilePage score sourcing", () => {
     expect(html).toContain("Điểm: 50 / 100")
     expect(html).toContain("#psess_own")
     expect(html).toContain("Đánh Giá 4 Kỹ Năng Khẩu Ngữ Đầu Vào")
+  })
+
+  it("opens the 5-day learning path when the cooldown CTA is pressed", () => {
+    readResultMock.mockReturnValue({
+      band: 2,
+      code: "psess_own",
+      scoredAt: Date.now(),
+    })
+
+    renderToStaticMarkup(<PlacementProfilePage />)
+    cooldownProps.current.onContinue()
+
+    expect(navigateMock).toHaveBeenCalledWith("/zh/ai-tutor/learning-path")
+  })
+
+  it("shows the plan gate when the retake is denied by the plan", () => {
+    readResultMock.mockReturnValue({
+      band: 2,
+      code: "psess_own",
+      scoredAt: Date.now(),
+    })
+    createSessionState.value = {
+      isLoading: false,
+      error: {
+        status: 403,
+        data: {
+          detail: {
+            code: "FEATURE_NOT_IN_PLAN",
+            errorCode: "AI_PLACEMENT_TEST_FORBIDDEN",
+          },
+        },
+      },
+    }
+
+    const html = renderToStaticMarkup(<PlacementProfilePage />)
+
+    expect(html).toContain(viCopy.placementTest.planRequiredTitle)
+    expect(html).not.toContain("Đánh Giá 4 Kỹ Năng Khẩu Ngữ Đầu Vào")
   })
 })

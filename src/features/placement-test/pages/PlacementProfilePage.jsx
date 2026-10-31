@@ -1,16 +1,18 @@
 import { useCallback, useMemo, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
+import { useGetPlacementPermissionQuery } from "@/store/api/plansApi"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 import { PlanRequiredState } from "@/shared/components/ui/indicators"
 import { toast } from "@/components/ui/toast"
 import { useCreateSessionMutation, useGetRetakeStatusQuery } from "../api"
+import { isPlanForbiddenError } from "../utils/planAccess"
 import {
-  PLACEMENT_TEST_DASHBOARD_PATH,
   PLACEMENT_TEST_PATH,
   PLACEMENT_TEST_SESSION_PATH,
+  getLearningPathPath,
 } from "../constants/routes"
 import { DEFAULT_TARGET_BAND } from "../constants/bands"
 import {
@@ -60,14 +62,23 @@ const PlacementProfilePage = () => {
   const scoreOf = root.result?.scoreOf
   const studentFallback = root.result?.studentFallback
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { lang } = useParams()
+  const { user, isAuthenticated } = useAuth()
   const { hasFeature, isLoading: isPlanLoading } = usePlanFeatures()
-  const canAccessPlacement = hasFeature(PLAN_FEATURES.ALLOW_PLACEMENT_TEST)
+  // Gate on the permission the AI API actually enforces (see PlacementTestPage).
+  const { data: placementPermission, isLoading: isPermissionLoading } =
+    useGetPlacementPermissionQuery(undefined, { skip: !isAuthenticated })
+  const [createSession, { isLoading: creating, error: createError }] =
+    useCreateSessionMutation()
+  const planDenied = isPlanForbiddenError(createError)
+  const canAccessPlacement =
+    !planDenied &&
+    (placementPermission?.isAllowed ??
+      hasFeature(PLAN_FEATURES.ALLOW_PLACEMENT_TEST))
 
   const [result] = useState(readResult)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const { data: retakeStatus } = useGetRetakeStatusQuery()
-  const [createSession, { isLoading: creating }] = useCreateSessionMutation()
 
   const view = useMemo(() => {
     const effectiveBand = result?.band || retakeStatus?.currentHskLevel
@@ -125,8 +136,8 @@ const PlacementProfilePage = () => {
     ""
 
   const handleContinue = useCallback(() => {
-    navigate(PLACEMENT_TEST_DASHBOARD_PATH)
-  }, [navigate])
+    navigate(getLearningPathPath(lang))
+  }, [lang, navigate])
 
   const handleOpenRetake = useCallback(() => {
     setConfirmOpen(true)
@@ -147,12 +158,12 @@ const PlacementProfilePage = () => {
       }).unwrap()
       setConfirmOpen(false)
       navigate(PLACEMENT_TEST_SESSION_PATH)
-    } catch {
-      toast.error(copy.confirm?.errorToast)
+    } catch (err) {
+      if (!isPlanForbiddenError(err)) toast.error(copy.confirm?.errorToast)
     }
   }, [createSession, navigate, result, retakeStatus, user, copy.confirm])
 
-  if (isPlanLoading) {
+  if (isPlanLoading || isPermissionLoading) {
     return (
       <div className="min-h-[calc(100vh-200px)] bg-primaryBg flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-cath-red-600 border-t-transparent" />
