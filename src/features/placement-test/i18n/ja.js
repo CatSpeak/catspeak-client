@@ -32,6 +32,7 @@ export default {
       checkbox:
         "CatSpeak がマイクを使用し、入門テストのために音声を処理することに同意します。",
       startCta: "テストを開始する",
+      permissionHint: "ブラウザでマイクの使用を許可してください",
       recommend:
         "推奨：マイク付きヘッドセットを着用し、静かな環境で行うと最も正確に測定できます。",
     },

@@ -32,6 +32,7 @@ export default {
       checkbox:
         "我同意 CatSpeak 使用我的麦克风并处理音频，用于本次入门测试。",
       startCta: "开始测试",
+      permissionHint: "请在浏览器中允许使用麦克风",
       recommend:
         "建议：佩戴带麦克风的耳机，并在安静环境中进行，以获得最高的声学准确度。",
     },

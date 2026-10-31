@@ -34,6 +34,7 @@ export default {
       checkbox:
         "I consent to CatSpeak using my microphone and processing my audio for this placement test.",
       startCta: "Start the test",
+      permissionHint: "Please allow microphone access in your browser",
       recommend:
         "Tip: Wear a headset with a microphone and sit in a quiet room for the most accurate acoustic result.",
     },

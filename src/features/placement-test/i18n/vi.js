@@ -34,6 +34,7 @@ export default {
       checkbox:
         "Tôi đồng ý cho phép CatSpeak sử dụng microphone và xử lý âm thanh phục vụ kiểm tra đầu vào.",
       startCta: "Bắt đầu làm bài kiểm tra",
+      permissionHint: "Vui lòng cho phép microphone trên trình duyệt",
       recommend:
         "Khuyến nghị: Đeo tai nghe có micro và ngồi trong môi trường yên tĩnh để đạt độ chính xác âm học cao nhất.",
     },
