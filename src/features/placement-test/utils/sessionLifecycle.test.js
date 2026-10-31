@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { RESUME_WINDOW_MS } from "../constants/lifecycle"
+import { PAUSE_BUDGET_MS, RESUME_WINDOW_MS } from "../constants/lifecycle"
 import { SESSION_STATUS } from "../constants/session"
 import {
   SESSION_LIFECYCLE_KIND,
@@ -186,5 +186,47 @@ describe("getSessionLifecycle", () => {
       windowMs: HOUR_MS,
     })
     expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.EXPIRED)
+  })
+
+  // Oracle: user ruling 2026-10-31 (work/placement-pause-expiry/state.md) —
+  // "Hết 30 phút: đóng modal, hủy phiên, chuyển về Dashboard và thông báo phiên
+  // thi đã hết hạn." The 30-minute pause budget (constants/lifecycle.js:1) must
+  // outrank the 24h resume window once the learner has been paused that long.
+  it("expires a session whose 30-minute pause budget is spent", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        status: SESSION_STATUS.IN_PROGRESS,
+        pauseStartedAt: ACTIVITY,
+      }),
+      now: ACTIVITY + PAUSE_BUDGET_MS + 60_000,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.PAUSE_EXPIRED)
+    expect(lifecycle.expired).toBe(true)
+  })
+
+  it("keeps a session resumable while it still has pause budget", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        status: SESSION_STATUS.IN_PROGRESS,
+        pauseStartedAt: ACTIVITY,
+      }),
+      now: ACTIVITY + 10 * 60 * 1000,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.RESUME)
+  })
+
+  it("subtracts pause time already spent from the budget", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        status: SESSION_STATUS.IN_PROGRESS,
+        pauseStartedAt: ACTIVITY,
+        pauseSpentMs: 25 * 60 * 1000,
+      }),
+      now: ACTIVITY + 5 * 60 * 1000 + 1000,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.PAUSE_EXPIRED)
   })
 })

@@ -438,6 +438,38 @@ describe("realAdapter", () => {
     })
   })
 
+  // Oracle: user ruling 2026-10-31 (work/placement-pause-expiry/state.md) —
+  // F5 inside a paused room must keep the 30-minute pause deadline, otherwise
+  // the reload silently resets the budget and the session stays resumable.
+  it("resumeSessionReal keeps the local pause deadline across F5", async () => {
+    const pauseStartedAt = Date.now() - 10 * 60 * 1000
+    inMemorySession = {
+      id: "psess_pause",
+      status: "in_progress",
+      pauseStartedAt,
+      pauseSpentMs: 60_000,
+      turns: [],
+    }
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        session_id: "psess_pause",
+        status: "in_progress",
+        seed_band: 3,
+        current_turn: 2,
+        total_turns: 5,
+        turns: [],
+      },
+    })
+
+    await resumeSessionReal(
+      { sessionId: "psess_pause" },
+      { baseQuery: mockBaseQuery, read: mockRead, persist: mockPersist },
+    )
+
+    expect(inMemorySession.pauseStartedAt).toBe(pauseStartedAt)
+    expect(inMemorySession.pauseSpentMs).toBe(60_000)
+  })
+
   it("getActiveSessionReal returns null when no active session", async () => {
     const mockBaseQuery = vi.fn().mockResolvedValue({
       data: { has_active_session: false, session: null },
@@ -525,10 +557,10 @@ describe("realAdapter", () => {
     inMemorySession = { id: "psess_12345", finalBand: 3 }
     inMemoryResult = { sessionId: "psess_12345", band: 3 }
 
-    const res = await scoreSessionReal(
-      { sessionId: "psess_12345" },
-      { read: mockRead, readResult: mockReadResult },
-    )
+    const res = await scoreSessionReal({
+      read: mockRead,
+      readResult: mockReadResult,
+    })
 
     expect(res.data.result.band).toBe(3)
   })

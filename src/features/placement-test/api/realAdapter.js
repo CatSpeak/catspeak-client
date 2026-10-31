@@ -314,8 +314,18 @@ const mapServerSession = (s, localSession = null) => {
       : [],
   }
 
-  if (localSession?.id === mapped.id && localSession.initialQuestion) {
-    mapped.initialQuestion = localSession.initialQuestion
+  if (localSession?.id === mapped.id) {
+    if (localSession.initialQuestion) {
+      mapped.initialQuestion = localSession.initialQuestion
+    }
+    // The pause deadline lives only on the client (the server has no pause
+    // budget), so a server refresh must not reset it.
+    if (localSession.pauseStartedAt) {
+      mapped.pauseStartedAt = localSession.pauseStartedAt
+    }
+    if (localSession.pauseSpentMs) {
+      mapped.pauseSpentMs = localSession.pauseSpentMs
+    }
   }
 
   return mapped
@@ -470,14 +480,11 @@ export const adjustLevelReal = async (
 }
 
 /** 7. Hoàn tất & đọc kết quả bài thi */
-export const scoreSessionReal = async (
-  { sessionId } = {},
-  {
-    read = readActiveSession,
-    clear = clearActiveSession,
-    readResult: readStoredResult = readResult,
-  } = {},
-) => {
+export const scoreSessionReal = async ({
+  read = readActiveSession,
+  clear = clearActiveSession,
+  readResult: readStoredResult = readResult,
+} = {}) => {
   const session = read()
   const result = readStoredResult()
   if (!session && !result) return notFound()

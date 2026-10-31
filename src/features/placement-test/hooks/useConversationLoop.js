@@ -19,7 +19,10 @@ import {
   PLACEMENT_TEST_SCORING_PATH,
 } from "../constants/routes"
 import { SESSION_STATUS } from "../constants/session"
-import { CONNECTION_LOST_EVENT } from "../constants/lifecycle"
+import {
+  CONNECTION_LOST_EVENT,
+  PAUSE_EXPIRED_FALLBACK_NOTICE,
+} from "../constants/lifecycle"
 import { TOTAL_TURNS, evaluateTurn, selectNextQuestion } from "../engine"
 import {
   placementTestApi,
@@ -40,7 +43,7 @@ import {
   startReconnect,
   tickReconnect,
 } from "../utils/lifecycle"
-import { getResumeOrder, isUnfinishedSession } from "../utils/sessionLifecycle"
+import { getResumeOrder, isPauseExpired, isUnfinishedSession } from "../utils/sessionLifecycle"
 import { countSubmittedTurns, upsertTurn } from "../utils/turns"
 import useAudioTransport from "./useAudioTransport"
 
@@ -88,7 +91,7 @@ const normalizeQuestion = (q, fallbackOrder = 1) => {
   }
 }
 
-const useConversationLoop = ({ exitNotice } = {}) => {
+const useConversationLoop = ({ exitNotice, pauseExpiredNotice } = {}) => {
   const navigate = useNavigate()
 
   const [session, setSession] = useState(readActiveSession)
@@ -111,9 +114,13 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   const [showPinyin, setShowPinyin] = useState(true)
   const [showMeaning, setShowMeaning] = useState(true)
   const [paused, setPaused] = useState(false)
-  const [pauseSpentMs, setPauseSpentMs] = useState(
-    () => readActiveSession()?.pauseSpentMs || 0,
-  )
+  const [pauseSpentMs, setPauseSpentMs] = useState(() => {
+    const stored = readActiveSession()
+    if (!stored?.pauseStartedAt) return stored?.pauseSpentMs || 0
+    // F5 mid-pause: keep counting from the stored pause start instead of
+    // resetting the 30-minute budget.
+    return advancePauseBudget(stored.pauseSpentMs, Date.now() - stored.pauseStartedAt)
+  })
   const [connectionLost, setConnectionLost] = useState(false)
   const [reconnect, setReconnect] = useState(() => startReconnect())
   const [suspended, setSuspended] = useState(false)
@@ -159,8 +166,9 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   const reconnectRef = useRef(startReconnect())
   const pauseSpentRef = useRef(pauseSpentMs)
   const handleReconnectSuccessRef = useRef(() => {})
-  const handleResumeRef = useRef(() => {})
+  const expirePausedSessionRef = useRef(() => {})
   const handleLeaveRef = useRef(() => {})
+  const expiringRef = useRef(false)
 
   const finishTurnRef = useRef(() => {})
   const handleNoHearingExitRef = useRef(() => {})
@@ -672,11 +680,35 @@ const useConversationLoop = ({ exitNotice } = {}) => {
 
   const handlePause = useCallback(() => {
     if (connectionLost) return
+    const current = stateRef.current
+    if (current.session) {
+      // Persist the pause start so F5 (or a sleeping tab) still knows how much
+      // of the 30-minute budget is already gone.
+      saveActiveSession({
+        ...current.session,
+        turns: current.turns,
+        pauseSpentMs: pauseSpentRef.current,
+        pauseStartedAt: Date.now(),
+      })
+    }
     setPaused(true)
     suspendSession()
   }, [connectionLost, suspendSession])
 
   const handleResume = useCallback(() => {
+    const current = stateRef.current
+    if (remainingPauseBudget(pauseSpentRef.current) <= 0) {
+      expirePausedSessionRef.current(current.session?.id)
+      return
+    }
+    if (current.session) {
+      saveActiveSession({
+        ...current.session,
+        turns: current.turns,
+        pauseSpentMs: pauseSpentRef.current,
+        pauseStartedAt: 0,
+      })
+    }
     setPaused(false)
     resumeSession()
   }, [resumeSession])
@@ -684,11 +716,13 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   const handleLeave = useCallback(() => {
     const current = stateRef.current
     if (current.session) {
+      const stored = readActiveSession()
       saveActiveSession({
         ...current.session,
         turns: current.turns,
-        pauseSpentMs,
+        pauseSpentMs: pauseSpentRef.current,
         pausedAt: Date.now(),
+        pauseStartedAt: stored?.pauseStartedAt || 0,
       })
     }
     handleStopUserAudio()
@@ -696,7 +730,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     stopSpeakingText()
     stopAudio()
     navigate(PLACEMENT_TEST_PATH, { replace: true })
-  }, [handleStopUserAudio, navigate, pauseSpentMs, stopAudioListening, stopSpeakingText, stopAudio])
+  }, [handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
 
   // Mic im lặng quá NOT_HEARING_EXIT_MS: rời phòng, giữ phiên để thi tiếp sau
   // khi người dùng kiểm tra lại thiết bị âm thanh.
@@ -710,8 +744,9 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       saveActiveSession({
         ...current.session,
         turns: current.turns,
-        pauseSpentMs,
+        pauseSpentMs: pauseSpentRef.current,
         pausedAt: Date.now(),
+        pauseStartedAt: 0,
       })
     }
 
@@ -735,7 +770,6 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     exitNotice,
     handleStopUserAudio,
     navigate,
-    pauseSpentMs,
     stopAudio,
     stopAudioListening,
     stopRecording,
@@ -758,6 +792,36 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     stopAudio()
     navigate(PLACEMENT_TEST_PATH, { replace: true })
   }, [cancelSession, handleStopUserAudio, navigate, stopAudio, stopAudioListening, stopSpeakingText])
+
+  // Nghỉ quá 30 phút: đóng modal, hủy phiên trên máy chủ, xóa bản lưu cục bộ
+  // rồi về Dashboard kèm thông báo — không cho làm tiếp phiên đã quá hạn.
+  const expirePausedSession = useCallback(async (sessionId) => {
+    if (expiringRef.current) return
+    expiringRef.current = true
+    setPaused(false)
+    if (sessionId) {
+      try {
+        await cancelSession({ sessionId }).unwrap()
+      } catch {
+        // Phiên đã bị hủy/hết hạn ở nơi khác: vẫn phải dọn bản lưu cục bộ.
+      }
+    }
+    clearActiveSession()
+    handleStopUserAudio()
+    stopAudioListening()
+    stopSpeakingText()
+    stopAudio()
+    toast.error(pauseExpiredNotice || PAUSE_EXPIRED_FALLBACK_NOTICE)
+    navigate(PLACEMENT_TEST_DASHBOARD_PATH, { replace: true })
+  }, [
+    cancelSession,
+    handleStopUserAudio,
+    navigate,
+    pauseExpiredNotice,
+    stopAudio,
+    stopAudioListening,
+    stopSpeakingText,
+  ])
 
   const handleConnectionLost = useCallback(() => {
     if (connectionLost) return
@@ -787,8 +851,8 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   }, [handleReconnectSuccess])
 
   useEffect(() => {
-    handleResumeRef.current = handleResume
-  }, [handleResume])
+    expirePausedSessionRef.current = expirePausedSession
+  }, [expirePausedSession])
 
   useEffect(() => {
     handleLeaveRef.current = handleLeave
@@ -836,12 +900,15 @@ const useConversationLoop = ({ exitNotice } = {}) => {
 
   useEffect(() => {
     if (!paused) return undefined
+    let lastTickAt = Date.now()
     const id = window.setInterval(() => {
-      const next = advancePauseBudget(pauseSpentRef.current, 1000)
+      const now = Date.now()
+      const next = advancePauseBudget(pauseSpentRef.current, now - lastTickAt)
+      lastTickAt = now
       pauseSpentRef.current = next
       setPauseSpentMs(next)
       if (remainingPauseBudget(next) <= 0) {
-        handleResumeRef.current()
+        expirePausedSessionRef.current(stateRef.current.session?.id)
       }
     }, 1000)
     return () => window.clearInterval(id)
@@ -886,10 +953,14 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       setSession(snapshot)
       setTurns(snapshot.turns || [])
       if (reloaded) {
+        const expiresAt = Number(snapshot.expiresAt) || null
         setResumePrompt({
           answeredCount: answeredTurns,
           nextOrder: startOrder,
-          expiresAt: Number(snapshot.expiresAt) || null,
+          expiresAt,
+          // Snapshot outside render so the modal does not call Date.now()
+          // while rendering.
+          remainingMs: expiresAt ? Math.max(0, expiresAt - Date.now()) : 0,
         })
       } else {
         loadQuestionRef.current(startOrder, snapshot.turns || [])
@@ -899,21 +970,35 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     // F5: fetch the server position before offering "Tiếp tục". A local copy
     // that is missing a submitted turn (old stored shape, another tab) would
     // otherwise rewind the exam to Câu 1 and replay `initialQuestion`.
-    if (reloaded && stored?.id) {
-      resumeActiveSession({ sessionId: stored.id })
-        .unwrap()
-        .then(() => openSession(readActiveSession() || stored))
-        .catch((err) => {
-          if (!mountedRef.current) return
-          if (err?.status === 400 || err?.status === 403 || err?.status === 410) {
-            clearActiveSession()
-            navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
-            return
-          }
-          openSession(stored)
-        })
+    if (stored && isPauseExpired(stored)) {
+      // Tab slept through the 30-minute pause budget: the interval never fired.
+      expirePausedSessionRef.current(stored.id)
     } else {
-      openSession(stored)
+      if (stored?.pauseStartedAt) {
+        // Reload closes the pause overlay, but the time already spent must
+        // still count against the budget.
+        saveActiveSession({
+          ...stored,
+          pauseStartedAt: 0,
+          pauseSpentMs: pauseSpentRef.current,
+        })
+      }
+      if (reloaded && stored?.id) {
+        resumeActiveSession({ sessionId: stored.id })
+          .unwrap()
+          .then(() => openSession(readActiveSession() || stored))
+          .catch((err) => {
+            if (!mountedRef.current) return
+            if (err?.status === 400 || err?.status === 403 || err?.status === 410) {
+              clearActiveSession()
+              navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
+              return
+            }
+            openSession(stored)
+          })
+      } else {
+        openSession(stored)
+      }
     }
 
     return () => {

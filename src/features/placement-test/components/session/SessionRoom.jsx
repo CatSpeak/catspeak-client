@@ -20,7 +20,10 @@ const SessionRoom = () => {
   const { t } = useLanguage()
   const copy = t.placementTest?.room || {}
   const resumeCopy = t.placementTest?.lifecycle?.resume || {}
-  const loop = useConversationLoop({ exitNotice: copy.noHearingExitToast })
+  const loop = useConversationLoop({
+    exitNotice: copy.noHearingExitToast,
+    pauseExpiredNotice: t.placementTest?.lifecycle?.pauseExpiredToast,
+  })
 
   const handleConfigure = () => {
     if (copy.configureNotice) toast.info(copy.configureNotice)
@@ -36,9 +39,7 @@ const SessionRoom = () => {
           answeredCount={prompt.answeredCount}
           totalTurns={TOTAL_TURNS}
           nextOrder={prompt.nextOrder}
-          remainingMs={
-            prompt.expiresAt ? Math.max(0, prompt.expiresAt - Date.now()) : 0
-          }
+          remainingMs={prompt.remainingMs ?? 0}
           expiresAt={prompt.expiresAt}
           busy={loop.restarting}
           onResume={loop.handlePromptResume}

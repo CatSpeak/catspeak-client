@@ -463,6 +463,8 @@ export default {
     },
     lifecycle: {
       errorToast: "Could not start a new session. Please try again.",
+      pauseExpiredToast:
+        "Your session expired after being paused for more than 30 minutes. Please start a new test.",
       resume: {
         title: "Unfinished Test Detected",
         body: "We found an unfinished session of yours ({{answered}} / {{total}} questions completed). This session stays valid for another {{remaining}}.",

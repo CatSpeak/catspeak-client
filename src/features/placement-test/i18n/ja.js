@@ -455,6 +455,8 @@ export default {
     lifecycle: {
       errorToast:
         "新しいセッションを開始できませんでした。もう一度お試しください。",
+      pauseExpiredToast:
+        "一時停止が30分を超えたため、試験セッションの有効期限が切れました。新しい受験を開始してください。",
       resume: {
         title: "未完了のテストを検出しました",
         body: "未完了の受験セッションが見つかりました（{{answered}} / {{total}} 問完了）。このセッションはあと {{remaining}} 有効です。",

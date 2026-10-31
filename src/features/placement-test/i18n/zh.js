@@ -435,6 +435,7 @@ export default {
     },
     lifecycle: {
       errorToast: "无法开始新的考试会话，请重试。",
+      pauseExpiredToast: "考试暂停已超过30分钟，本次会话已失效。请重新开始考试。",
       resume: {
         title: "检测到未完成的考试",
         body: "系统发现了你未完成的答题会话（已完成第 {{answered}} / {{total}} 题）。该会话在接下来的 {{remaining}} 内仍然有效。",

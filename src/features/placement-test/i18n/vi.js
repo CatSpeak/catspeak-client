@@ -457,6 +457,8 @@ export default {
     },
     lifecycle: {
       errorToast: "Không thể bắt đầu phiên thi mới. Vui lòng thử lại.",
+      pauseExpiredToast:
+        "Phiên thi đã hết hạn do tạm dừng quá 30 phút. Vui lòng bắt đầu bài thi mới.",
       resume: {
         title: "Phát Hiện Bài Thi Chưa Hoàn Thành",
         body: "Hệ thống tìm thấy một phiên làm bài dở dang của bạn (đã hoàn thành câu {{answered}} / {{total}}). Phiên thi này vẫn còn hiệu lực trong {{remaining}} tới.",
