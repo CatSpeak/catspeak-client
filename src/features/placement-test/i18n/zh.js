@@ -461,11 +461,11 @@ export default {
       takeover: {
         title: "检测到同时打开多个标签页",
         body: "为确保稳定并避免麦克风冲突，CatSpeak 同一时间只允许打开一个口语房间。",
-        mechanismTitle: "旧会话断开机制（Session Takeover）：",
+        mechanismTitle: "重复会话断开机制（Session Takeover）：",
         mechanismBody:
-          "如果你选择在此标签页继续，另一个已打开的标签页将立即断开并锁定，以避免数据重复。",
+          "如果你选择在此标签页继续，另一个标签页中打开的会话将立即断开并锁定，以避免数据重复。",
         continueCta: "在此标签页继续 →",
-        closeCta: "关闭此标签页",
+        closeCta: "返回能力档案主页",
         takenOverTitle: "会话已在其他标签页接管",
         takenOverBody:
           "你的考试正在另一个标签页进行。此标签页的会话已暂停并锁定，以避免数据重复。",

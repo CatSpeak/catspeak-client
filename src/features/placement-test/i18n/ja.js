@@ -481,11 +481,11 @@ export default {
       takeover: {
         title: "複数のタブが同時に開かれています",
         body: "安定性を保ちマイクの競合を避けるため、CatSpeak ではスピーキングルームを同時に 1 つだけ開けます。",
-        mechanismTitle: "旧セッションの切断機構（Session Takeover）：",
+        mechanismTitle: "重複セッションの切断機構（Session Takeover）：",
         mechanismBody:
-          "このタブで続行を選ぶと、開いているもう一方のタブは直ちに切断され、データの重複を防ぐためロックされます。",
+          "このタブで続行を選ぶと、もう一方のタブで開いているセッションは直ちに切断され、データの重複を防ぐためロックされます。",
         continueCta: "このタブで続行 →",
-        closeCta: "このタブを閉じる",
+        closeCta: "能力プロフィールに戻る",
         takenOverTitle: "セッションは別のタブで引き継がれました",
         takenOverBody:
           "試験は別のタブで実行中です。データの重複を防ぐため、このタブのセッションは一時停止されロックされました。",

@@ -483,11 +483,11 @@ export default {
       takeover: {
         title: "Phát Hiện Mở Nhiều Tab Cùng Lúc",
         body: "Để đảm bảo ổn định và tránh xung đột micro, CatSpeak chỉ cho phép mở một phòng luyện nói tại một thời điểm.",
-        mechanismTitle: "Cơ chế ngắt kết nối phiên cũ (Session Takeover):",
+        mechanismTitle: "Cơ chế ngắt kết nối phiên trùng (Session Takeover):",
         mechanismBody:
-          "Nếu bạn chọn tiếp tục tại tab này, tab cũ đang mở sẽ lập tức bị ngắt kết nối và khóa để tránh trùng lặp dữ liệu.",
+          "Nếu bạn chọn tiếp tục tại tab này, tab còn lại đang mở sẽ lập tức bị ngắt kết nối và khóa để tránh trùng lặp dữ liệu.",
         continueCta: "Tiếp Tục Làm Bài Tại Tab Này →",
-        closeCta: "Đóng Tab Này Lại",
+        closeCta: "Quay Về Trang Chủ Hồ Sơ",
         takenOverTitle: "Phiên Đã Được Tiếp Quản Ở Tab Khác",
         takenOverBody:
           "Bài thi của bạn đang được thực hiện ở một tab khác. Phiên tại tab này đã được tạm dừng và khóa để tránh trùng lặp dữ liệu.",

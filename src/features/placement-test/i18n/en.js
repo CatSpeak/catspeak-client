@@ -489,11 +489,11 @@ export default {
       takeover: {
         title: "Multiple Tabs Detected",
         body: "To stay stable and avoid microphone conflicts, CatSpeak allows only one speaking room open at a time.",
-        mechanismTitle: "Old session disconnect mechanism (Session Takeover):",
+        mechanismTitle: "Duplicate session disconnect mechanism (Session Takeover):",
         mechanismBody:
           "If you continue in this tab, the other open tab will be disconnected and locked immediately to prevent duplicate data.",
         continueCta: "Continue in This Tab →",
-        closeCta: "Close This Tab",
+        closeCta: "Back to Profile Home",
         takenOverTitle: "Session Taken Over in Another Tab",
         takenOverBody:
           "Your test is now running in another tab. The session in this tab has been paused and locked to prevent duplicate data.",
