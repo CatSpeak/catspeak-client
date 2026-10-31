@@ -19,7 +19,7 @@ import {
   saveActiveSession,
   saveResult,
 } from "../utils/sessionStorage"
-import { upsertTurn } from "../utils/turns"
+import { countSubmittedTurns, upsertTurn } from "../utils/turns"
 import { getRetakeEligibility } from "../utils/cooldown"
 
 /** Bật/tắt đường máy chủ. Đặt "0" trong .env để quay lại mock hoàn toàn. */
@@ -132,7 +132,8 @@ export const submitTurnReal = async (
   const activeSessionId = sessionId || session?.id
   if (!session || (sessionId && session.id !== sessionId)) return notFound()
 
-  const turnOrder = Number(turnIndex ?? order) || (session.turns?.length || 0) + 1
+  const turnOrder =
+    Number(turnIndex ?? order) || countSubmittedTurns(session.turns) + 1
   const formData = new FormData()
   formData.append("turn_index", String(turnOrder))
   formData.append("speech_duration_ms", String(Math.max(0, Number(durationMs) || 0)))

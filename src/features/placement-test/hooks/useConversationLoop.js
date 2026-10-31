@@ -94,7 +94,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   const [turns, setTurns] = useState(() => readActiveSession()?.turns || [])
   const [order, setOrder] = useState(() => {
     const s = readActiveSession()
-    return Number(s?.currentOrder) || (s?.turns?.length || 0) + 1
+    return Number(s?.currentOrder) || countSubmittedTurns(s?.turns) + 1
   })
   const [question, setQuestion] = useState(null)
   const [transcript, setTranscript] = useState("")

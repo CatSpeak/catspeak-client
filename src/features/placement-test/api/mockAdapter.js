@@ -9,7 +9,7 @@ import {
 import { createSessionCode } from "../utils/session"
 import { getRetakeEligibility } from "../utils/cooldown"
 import { isUnfinishedSession } from "../utils/sessionLifecycle"
-import { upsertTurn } from "../utils/turns"
+import { upsertTurn, countSubmittedTurns } from "../utils/turns"
 import {
   clearActiveSession,
   readActiveSession,
@@ -131,15 +131,8 @@ export const getActiveSessionMock = async ({
   if (!session || !isUnfinishedSession(session)) {
     return { data: null }
   }
-  const answeredTurns = (session.turns || []).filter(
-    (t) =>
-      Boolean(
-        t.answeredAt ||
-          t.submittedAt ||
-          (t.transcript && t.transcript.trim() !== ""),
-      ),
-  )
-  if (answeredTurns.length >= totalTurns) {
+  const answeredTurnCount = countSubmittedTurns(session.turns, totalTurns)
+  if (answeredTurnCount >= totalTurns) {
     return { data: null }
   }
   return { data: session }
@@ -159,16 +152,9 @@ export const getQuestionMock = async ({
     }
   }
 
-  const answeredTurns = (session.turns || []).filter(
-    (t) =>
-      Boolean(
-        t.answeredAt ||
-          t.submittedAt ||
-          (t.transcript && t.transcript.trim() !== ""),
-      ),
-  )
+  const answeredTurnCount = countSubmittedTurns(session.turns, totalTurns)
 
-  if (session.status === SESSION_STATUS.COMPLETED || !isUnfinishedSession(session) || answeredTurns.length >= totalTurns) {
+  if (session.status === SESSION_STATUS.COMPLETED || !isUnfinishedSession(session) || answeredTurnCount >= totalTurns) {
     return {
       error: {
         status: 400,
@@ -180,7 +166,7 @@ export const getQuestionMock = async ({
     }
   }
 
-  const turnOrder = (session.turns?.length || 0) + 1
+  const turnOrder = countSubmittedTurns(session.turns, totalTurns) + 1
   if (turnOrder > totalTurns) {
     return {
       error: {
@@ -230,16 +216,9 @@ export const resumeSessionMock = async (
     }
   }
 
-  const answeredTurns = (session.turns || []).filter(
-    (t) =>
-      Boolean(
-        t.answeredAt ||
-          t.submittedAt ||
-          (t.transcript && t.transcript.trim() !== ""),
-      ),
-  )
+  const answeredTurnCount = countSubmittedTurns(session.turns, totalTurns)
 
-  if (session.status === SESSION_STATUS.COMPLETED || !isUnfinishedSession(session) || answeredTurns.length >= totalTurns) {
+  if (session.status === SESSION_STATUS.COMPLETED || !isUnfinishedSession(session) || answeredTurnCount >= totalTurns) {
     return {
       error: {
         status: 400,
@@ -268,7 +247,7 @@ export const resumeSessionMock = async (
     }
   }
 
-  const answeredCount = session.turns?.length || 0
+  const answeredCount = countSubmittedTurns(session.turns)
   return {
     data: {
       session,
@@ -316,7 +295,7 @@ export const submitTurnMock = async (
     }
   }
 
-  const effectiveTurn = order ?? (session.turns?.length || 0) + 1
+  const effectiveTurn = order ?? countSubmittedTurns(session.turns) + 1
   const timestamp = typeof now === "function" ? now() : now
 
   const turn = {
@@ -394,7 +373,7 @@ export const scoreSessionMock = async (
     ...scoreSession({ turns, now }),
     sessionId: session.id,
     code: session.code,
-    answeredCount: turns.length,
+    answeredCount: countSubmittedTurns(turns),
   }
   persistResult(result)
 
