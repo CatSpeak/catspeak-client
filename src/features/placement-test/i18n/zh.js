@@ -265,12 +265,14 @@ export default {
       bandTitle: "HSK {{band}} · {{tier}}",
       cefrLabel: "欧洲语言参考框架：CEFR {{cefr}}",
       heroDescription:
-        "能够在日常场景中沟通，发音与反应符合 HSK {{band}} 水平，口语词汇积累良好。",
+        "能够在日常场景中沟通，发音与反应符合 HSK {{band}} 水平。",
+      heroVocabularyPraise: "口语词汇积累良好。",
       feedbackTitle: "AI 导师的教学评语",
       strengthLabel: "优势：",
       attentionLabel: "需注意：",
       strengthLine: "{{dimension}} 达到 {{score}}/100 —— 具备突破的良好基础。",
       weaknessLine: "{{dimension}} 仅得 {{score}}/100 —— 需要每天加强练习。",
+      noStrengthLine: "暂无技能达到 60/100，尚无可标注的强项。",
       noWeaknessLine: "未发现明显薄弱项，请保持当前状态。",
       roadmapTitle: "5 天突破至 HSK {{band}} 的学习路线",
       roadmapDays: [
@@ -278,6 +280,33 @@ export default {
         { tag: "D 3-4", text: "与 AI 导师练习复合句反应" },
         { tag: "D 5", text: "中级 HSKK 模拟考试挑战" },
       ],
+      roadmapByBand: {
+        2: [
+          { tag: "D 1-2", text: "巩固 HSK 1 基础：问候、数字、简单句" },
+          { tag: "D 3-4", text: "扩充 HSK 2 词汇：家庭、时间、购物" },
+          { tag: "D 5", text: "与 AI 导师进行 HSK 2 会话模拟" },
+        ],
+        3: [
+          { tag: "D 1-2", text: "练习基础复句：因为…所以、虽然…但是" },
+          { tag: "D 3-4", text: "用 HSK 3 词汇复述简短经历" },
+          { tag: "D 5", text: "与 AI 导师进行 HSK 3 会话模拟" },
+        ],
+        4: [
+          { tag: "D 1-2", text: "练习 HSK 4 句型：不仅…而且、即使…也" },
+          { tag: "D 3-4", text: "就熟悉话题表达观点与比较" },
+          { tag: "D 5", text: "与 AI 导师进行 HSK 4 会话模拟" },
+        ],
+        5: [
+          { tag: "D 1-2", text: "职场与面试口语专题" },
+          { tag: "D 3-4", text: "与 AI 导师练习复合句反应" },
+          { tag: "D 5", text: "中级 HSKK 模拟考试挑战" },
+        ],
+        6: [
+          { tag: "D 1-2", text: "深入讨论经济、社会与文化话题" },
+          { tag: "D 3-4", text: "练习多步论证与表达分寸" },
+          { tag: "D 5", text: "高级 HSKK 模拟考试挑战" },
+        ],
+      },
       skillsTitle: "口语四维能力分析",
       skillsSubtitle: "通过 AI 语音识别模型进行标准化评估",
       dimensions: {
@@ -293,6 +322,10 @@ export default {
       adjustCta: "调整等级（±1 级）",
       adjustCaption: "* 学员在锁定学习路线前最多可调整一次等级。",
       adjustLocked: "你已使用一次性等级调整，学习路线现已锁定。",
+      insufficientTitle: "数据不足，无法评估",
+      insufficientBody:
+        "你跳过了全部 5 道题，没有可用于评分的回答。请重新测评并至少回答一道题，以获取 HSK 3.0 报告。",
+      insufficientRetakeCta: "重新测评",
       emptyTitle: "暂无评估结果",
       emptyBody: "请完成口语测评以查看 HSK 3.0 能力报告。",
       emptyCta: "返回水平评估",

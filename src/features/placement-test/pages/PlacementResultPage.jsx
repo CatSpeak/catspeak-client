@@ -14,12 +14,19 @@ import {
   getAllDimensionScores,
   computeOverallScore,
   getBandDescriptor,
+  getRoadmapDays,
   getStrengthDimension,
   getTargetRoadmapBand,
   getWeaknessDimension,
+  isInsufficientEvidence,
 } from "../utils/result"
 import { formatTemplate } from "../utils/format"
-import { clearActiveSession, readActiveSession, readResult } from "../utils/sessionStorage"
+import {
+  clearActiveSession,
+  clearResult,
+  readActiveSession,
+  readResult,
+} from "../utils/sessionStorage"
 import ResultTopbar from "../components/result/ResultTopbar"
 import ResultHeroCard from "../components/result/ResultHeroCard"
 import ResultFeedbackCard from "../components/result/ResultFeedbackCard"
@@ -54,13 +61,14 @@ const PlacementResultPage = () => {
     if (!result) return null
     const descriptor = getBandDescriptor(result.band)
     const hasWeakness = Array.isArray(result.weaknesses) && result.weaknesses.length > 0
+    const roadmapBand = getTargetRoadmapBand(result.band)
 
     return {
       descriptor,
       overall: computeOverallScore(result),
       strength: getStrengthDimension(result),
       weakness: hasWeakness ? getWeaknessDimension(result) : null,
-      roadmapBand: getTargetRoadmapBand(result.band),
+      roadmapBand,
       options: buildAdjustOptions(result.band),
       skills: getAllDimensionScores(result).map((item) => ({
         ...item,
@@ -70,7 +78,7 @@ const PlacementResultPage = () => {
           : copy.notMeasured || "Chưa đo được",
       })),
     }
-  }, [result, copy.scoreOf, copy.dimensions])
+  }, [result, copy.scoreOf, copy.dimensions, copy.notMeasured])
 
   const studentName =
     user?.fullName ||
@@ -82,6 +90,12 @@ const PlacementResultPage = () => {
   const handleShare = useCallback(() => {
     if (copy.shareNotice) toast.info(copy.shareNotice)
   }, [copy.shareNotice])
+
+  const handleRetake = useCallback(() => {
+    clearResult()
+    clearActiveSession()
+    navigate(PLACEMENT_TEST_PATH)
+  }, [navigate])
 
   const handleStart = useCallback(() => {
     navigate(PLACEMENT_TEST_PROFILE_PATH)
@@ -137,6 +151,28 @@ const PlacementResultPage = () => {
     )
   }
 
+  if (isInsufficientEvidence(result)) {
+    return (
+      <div className="min-h-[calc(100vh-200px)] bg-primaryBg px-4 py-8 md:px-8">
+        <div className="mx-auto flex w-full max-w-[720px] flex-col items-center gap-3 rounded-2xl bg-white p-8 text-center shadow-[0_10px_24px_-3px_rgba(15,23,42,0.07)]">
+          <h1 className="text-xl font-bold leading-7 text-[#09090B]">
+            {copy.insufficientTitle}
+          </h1>
+          <p className="text-sm font-medium leading-[22px] text-slate-600">
+            {copy.insufficientBody}
+          </p>
+          <button
+            type="button"
+            onClick={handleRetake}
+            className="mt-1 h-11 rounded-xl bg-cath-red-700 px-6 text-sm font-bold text-white shadow-[0_4px_12px_rgba(153,0,17,0.2)] transition hover:brightness-90"
+          >
+            {copy.insufficientRetakeCta}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const { descriptor } = view
   const tierLabel = tierLabels[descriptor.tierKey] || descriptor.tierKey
 
@@ -160,9 +196,12 @@ const PlacementResultPage = () => {
               tierLabel={tierLabel}
               cefr={descriptor.cefr}
               score={view.overall}
-              description={formatTemplate(copy.heroDescription, {
-                band: descriptor.band,
-              })}
+              description={[
+                formatTemplate(copy.heroDescription, { band: descriptor.band }),
+                result.vocabulary >= 60 ? copy.heroVocabularyPraise : null,
+              ]
+                .filter(Boolean)
+                .join(" ")}
             />
             <ResultFeedbackCard
               copy={copy}
@@ -172,7 +211,7 @@ const PlacementResultPage = () => {
             <ResultRoadmapCard
               copy={copy}
               band={view.roadmapBand}
-              days={copy.roadmapDays}
+              days={getRoadmapDays(copy, view.roadmapBand)}
             />
           </div>
 

@@ -273,13 +273,16 @@ export default {
       bandTitle: "HSK {{band}} · {{tier}}",
       cefrLabel: "ヨーロッパ言語参照枠：CEFR {{cefr}}",
       heroDescription:
-        "日常の場面で会話でき、発音と反応は HSK {{band}} のレベルに適合しています。口語語彙も十分に蓄積されています。",
+        "日常の場面で会話でき、発音と反応は HSK {{band}} のレベルに適合しています。",
+      heroVocabularyPraise: "口語語彙も十分に蓄積されています。",
       feedbackTitle: "AI チューターからの指導コメント",
       strengthLabel: "強み：",
       attentionLabel: "注意点：",
       strengthLine: "{{dimension}} は {{score}}/100 —— 飛躍のための良い土台です。",
       weaknessLine:
         "{{dimension}} は {{score}}/100 にとどまっています —— 毎日の練習が必要です。",
+      noStrengthLine:
+        "60/100 に達したスキルがないため、強みとして示せる項目はまだありません。",
       noWeaknessLine:
         "目立った弱点は検出されませんでした。現在の調子を維持しましょう。",
       roadmapTitle: "HSK {{band}} へ飛躍する 5 日間ロードマップ",
@@ -288,6 +291,33 @@ export default {
         { tag: "D 3-4", text: "AI チューターと複文の反応練習" },
         { tag: "D 5", text: "中級 HSKK 模擬試験チャレンジ" },
       ],
+      roadmapByBand: {
+        2: [
+          { tag: "D 1-2", text: "HSK 1 の基礎を固める：あいさつ・数字・単文" },
+          { tag: "D 3-4", text: "家族・時間・買い物など HSK 2 の語彙を増やす" },
+          { tag: "D 5", text: "AI チューターと HSK 2 会話シミュレーション" },
+        ],
+        3: [
+          { tag: "D 1-2", text: "基本の複文を練習：因为…所以、虽然…但是" },
+          { tag: "D 3-4", text: "HSK 3 の語彙で短い体験を語る練習" },
+          { tag: "D 5", text: "AI チューターと HSK 3 会話シミュレーション" },
+        ],
+        4: [
+          { tag: "D 1-2", text: "HSK 4 の構文を練習：不仅…而且、即使…也" },
+          { tag: "D 3-4", text: "身近な話題で意見や比較を述べる" },
+          { tag: "D 5", text: "AI チューターと HSK 4 会話シミュレーション" },
+        ],
+        5: [
+          { tag: "D 1-2", text: "仕事・面接のスピーキング特訓" },
+          { tag: "D 3-4", text: "AI チューターと複文の反応練習" },
+          { tag: "D 5", text: "中級 HSKK 模擬試験チャレンジ" },
+        ],
+        6: [
+          { tag: "D 1-2", text: "経済・社会・文化について深く議論する" },
+          { tag: "D 3-4", text: "多段階の論証と表現のニュアンスを磨く" },
+          { tag: "D 5", text: "高級 HSKK 模擬試験チャレンジ" },
+        ],
+      },
       skillsTitle: "スピーキング 4 軸スキル分析",
       skillsSubtitle: "AI 音声認識モデルによる標準化評価",
       dimensions: {
@@ -306,6 +336,10 @@ export default {
         "* 受講者はロードマップがロックされる前に 1 回だけレベルを調整できます。",
       adjustLocked:
         "1 回限りのレベル調整を使用しました。ロードマップはロックされています。",
+      insufficientTitle: "評価に十分なデータがありません",
+      insufficientBody:
+        "5 問すべてをスキップしたため、採点できる回答がありません。もう一度評価を受けて、少なくとも 1 問に回答すると HSK 3.0 レポートが表示されます。",
+      insufficientRetakeCta: "もう一度評価を受ける",
       emptyTitle: "評価結果がありません",
       emptyBody:
         "スピーキング評価を完了すると、HSK 3.0 能力レポートが表示されます。",

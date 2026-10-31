@@ -277,13 +277,16 @@ export default {
       bandTitle: "HSK {{band}} · {{tier}}",
       cefrLabel: "Khung tham chiếu Châu Âu: CEFR {{cefr}}",
       heroDescription:
-        "Khả năng giao tiếp trong ngữ cảnh hàng ngày, phát âm và phản xạ phù hợp trình độ HSK {{band}}. Vốn từ vựng khẩu ngữ được tích lũy tốt.",
+        "Khả năng giao tiếp trong ngữ cảnh hàng ngày, phát âm và phản xạ phù hợp trình độ HSK {{band}}.",
+      heroVocabularyPraise: "Vốn từ vựng khẩu ngữ được tích lũy tốt.",
       feedbackTitle: "Nhận xét sư phạm từ AI Tutor",
       strengthLabel: "Điểm mạnh:",
       attentionLabel: "Cần chú ý:",
       strengthLine: "{{dimension}} đạt {{score}}/100 — nền tảng tốt để bứt phá.",
       weaknessLine:
         "{{dimension}} mới đạt {{score}}/100 — cần luyện thêm mỗi ngày.",
+      noStrengthLine:
+        "Chưa có kỹ năng nào đạt ngưỡng 60/100 để ghi nhận là điểm mạnh.",
       noWeaknessLine:
         "Chưa phát hiện điểm yếu đáng kể, hãy duy trì phong độ hiện tại.",
       roadmapTitle: "Lộ trình 5 ngày bứt phá lên HSK {{band}}",
@@ -292,6 +295,33 @@ export default {
         { tag: "D 3-4", text: "Phản xạ câu ghép phức cùng AI Tutor" },
         { tag: "D 5", text: "Thử thách mô phỏng bài thi HSKK Trung cấp" },
       ],
+      roadmapByBand: {
+        2: [
+          { tag: "D 1-2", text: "Củng cố nền HSK 1: chào hỏi, số đếm, câu đơn" },
+          { tag: "D 3-4", text: "Mở rộng vốn từ HSK 2: gia đình, thời gian, mua sắm" },
+          { tag: "D 5", text: "Thử thách hội thoại HSK 2 cùng AI Tutor" },
+        ],
+        3: [
+          { tag: "D 1-2", text: "Luyện câu ghép cơ bản: 因为…所以, 虽然…但是" },
+          { tag: "D 3-4", text: "Kể lại trải nghiệm ngắn bằng từ vựng HSK 3" },
+          { tag: "D 5", text: "Thử thách hội thoại HSK 3 cùng AI Tutor" },
+        ],
+        4: [
+          { tag: "D 1-2", text: "Luyện cấu trúc HSK 4: 不仅…而且, 即使…也" },
+          { tag: "D 3-4", text: "Nêu quan điểm và so sánh trong chủ đề quen thuộc" },
+          { tag: "D 5", text: "Thử thách hội thoại HSK 4 cùng AI Tutor" },
+        ],
+        5: [
+          { tag: "D 1-2", text: "Khẩu ngữ chuyên đề công việc & phỏng vấn" },
+          { tag: "D 3-4", text: "Phản xạ câu ghép phức cùng AI Tutor" },
+          { tag: "D 5", text: "Thử thách mô phỏng bài thi HSKK Trung cấp" },
+        ],
+        6: [
+          { tag: "D 1-2", text: "Thảo luận chuyên sâu: kinh tế, xã hội, văn hóa" },
+          { tag: "D 3-4", text: "Luyện lập luận nhiều bước và sắc thái biểu cảm" },
+          { tag: "D 5", text: "Thử thách mô phỏng bài thi HSKK Cao cấp" },
+        ],
+      },
       skillsTitle: "Phân Tích 4 Chiều Kỹ Năng Khẩu Ngữ",
       skillsSubtitle: "Đánh giá chuẩn hóa qua mô hình AI Speech Recognition",
       dimensions: {
@@ -310,6 +340,10 @@ export default {
         "* Học viên có tối đa 1 lần điều chỉnh cấp độ trước khi khóa lộ trình.",
       adjustLocked:
         "Bạn đã sử dụng quyền điều chỉnh cấp độ. Lộ trình hiện được khóa.",
+      insufficientTitle: "Không đủ dữ liệu để đánh giá",
+      insufficientBody:
+        "Bạn đã bỏ qua cả 5 câu hỏi nên chưa có câu trả lời nào để chấm điểm. Hãy làm lại bài đánh giá và trả lời ít nhất một câu để nhận báo cáo HSK 3.0.",
+      insufficientRetakeCta: "Làm lại bài đánh giá",
       emptyTitle: "Chưa có kết quả đánh giá",
       emptyBody:
         "Hãy hoàn thành bài khảo sát khẩu ngữ để xem báo cáo năng lực HSK 3.0.",

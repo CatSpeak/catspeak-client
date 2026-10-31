@@ -18,6 +18,7 @@ import {
   getAllDimensionScores,
   getBandDescriptor,
   getTargetRoadmapBand,
+  isInsufficientEvidence,
 } from "../utils/result"
 import { getRetakeEligibility, getRoadmapProgress } from "../utils/cooldown"
 import { formatDate, formatTemplate } from "../utils/format"
@@ -53,6 +54,7 @@ const PlacementProfilePage = () => {
   const { t } = useLanguage()
   const root = t.placementTest || {}
   const copy = root.profile || {}
+  const resultCopy = root.result || {}
   const tierLabels = root.tiers || {}
   const dimensions = root.result?.dimensions
   const scoreOf = root.result?.scoreOf
@@ -109,10 +111,10 @@ const PlacementProfilePage = () => {
       overall,
       roadmapBand,
       skills,
-      testDate: formatDate(result?.scoredAt || retakeStatus?.lastTestedAt || Date.now()),
+      testDate: formatDate(result?.scoredAt || retakeStatus?.lastTestedAt),
       eligibleDate: formatDate(eligibility.eligibleAt),
     }
-  }, [result, retakeStatus, dimensions, scoreOf])
+  }, [result, retakeStatus, dimensions, scoreOf, root.result?.notMeasured])
 
   const studentName =
     user?.fullName ||
@@ -170,6 +172,30 @@ const PlacementProfilePage = () => {
         featureName="Placement Test"
         animationKey="placement-profile-pro-required"
       />
+    )
+  }
+
+  // Phiên không có câu trả lời thật nào: máy chủ đã đặt cờ, không được dựng
+  // chứng chỉ HSK 1 và bốn thanh kỹ năng (trong đó phát âm là "Chưa đo được").
+  if (isInsufficientEvidence(result)) {
+    return (
+      <div className="min-h-[calc(100vh-200px)] bg-primaryBg px-4 py-8 md:px-8">
+        <div className="mx-auto flex w-full max-w-[720px] flex-col items-center gap-3 rounded-2xl bg-white p-8 text-center shadow-[0_10px_24px_-3px_rgba(15,23,42,0.07)]">
+          <h1 className="text-xl font-bold leading-7 text-[#09090B]">
+            {resultCopy.insufficientTitle}
+          </h1>
+          <p className="text-sm font-medium leading-[22px] text-slate-600">
+            {resultCopy.insufficientBody}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate(PLACEMENT_TEST_PATH)}
+            className="mt-1 h-11 rounded-xl bg-cath-red-700 px-6 text-sm font-bold text-white shadow-[0_4px_12px_rgba(153,0,17,0.2)] transition hover:brightness-90"
+          >
+            {resultCopy.insufficientRetakeCta}
+          </button>
+        </div>
+      </div>
     )
   }
 

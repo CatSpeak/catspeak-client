@@ -278,7 +278,8 @@ export default {
       bandTitle: "HSK {{band}} · {{tier}}",
       cefrLabel: "European Reference Framework: CEFR {{cefr}}",
       heroDescription:
-        "You can communicate in daily contexts with pronunciation and reflexes suited to HSK {{band}}. Your spoken vocabulary is well developed.",
+        "You can communicate in daily contexts with pronunciation and reflexes suited to HSK {{band}}.",
+      heroVocabularyPraise: "Your spoken vocabulary is well developed.",
       feedbackTitle: "Pedagogical feedback from AI Tutor",
       strengthLabel: "Strengths:",
       attentionLabel: "Needs attention:",
@@ -286,6 +287,8 @@ export default {
         "{{dimension}} scored {{score}}/100 — a solid base to break through.",
       weaknessLine:
         "{{dimension}} scored only {{score}}/100 — needs daily practice.",
+      noStrengthLine:
+        "No skill reached 60/100, so there is no strength to highlight yet.",
       noWeaknessLine:
         "No significant weakness detected — keep up the current form.",
       roadmapTitle: "5-day roadmap to break through to HSK {{band}}",
@@ -294,6 +297,33 @@ export default {
         { tag: "D 3-4", text: "Compound-sentence reflexes with the AI Tutor" },
         { tag: "D 5", text: "Intermediate HSKK simulation challenge" },
       ],
+      roadmapByBand: {
+        2: [
+          { tag: "D 1-2", text: "Rebuild HSK 1 foundations: greetings, numbers, simple sentences" },
+          { tag: "D 3-4", text: "Expand HSK 2 vocabulary for family, time and shopping" },
+          { tag: "D 5", text: "HSK 2 conversation simulation with the AI Tutor" },
+        ],
+        3: [
+          { tag: "D 1-2", text: "Practise simple compound sentences: 因为…所以, 虽然…但是" },
+          { tag: "D 3-4", text: "Retell short experiences with HSK 3 vocabulary" },
+          { tag: "D 5", text: "HSK 3 conversation simulation with the AI Tutor" },
+        ],
+        4: [
+          { tag: "D 1-2", text: "Practise HSK 4 structures: 不仅…而且, 即使…也" },
+          { tag: "D 3-4", text: "Express opinions and comparisons on familiar topics" },
+          { tag: "D 5", text: "HSK 4 conversation simulation with the AI Tutor" },
+        ],
+        5: [
+          { tag: "D 1-2", text: "Work & interview speaking topics" },
+          { tag: "D 3-4", text: "Compound-sentence reflexes with the AI Tutor" },
+          { tag: "D 5", text: "Intermediate HSKK simulation challenge" },
+        ],
+        6: [
+          { tag: "D 1-2", text: "In-depth discussion: economy, society and culture" },
+          { tag: "D 3-4", text: "Multi-step argumentation and expressive nuance" },
+          { tag: "D 5", text: "Advanced HSKK simulation challenge" },
+        ],
+      },
       skillsTitle: "4-Dimension Speaking Skill Analysis",
       skillsSubtitle:
         "Standardised assessment via the AI Speech Recognition model",
@@ -313,6 +343,10 @@ export default {
         "* Students may adjust their level once before the roadmap is locked.",
       adjustLocked:
         "You have used your one-time level adjustment. The roadmap is now locked.",
+      insufficientTitle: "Not enough data to assess",
+      insufficientBody:
+        "You skipped all 5 questions, so there are no answers to score. Retake the assessment and answer at least one question to receive your HSK 3.0 report.",
+      insufficientRetakeCta: "Retake the assessment",
       emptyTitle: "No assessment result yet",
       emptyBody:
         "Complete the speaking assessment to see your HSK 3.0 proficiency report.",
