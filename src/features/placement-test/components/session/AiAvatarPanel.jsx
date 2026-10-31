@@ -17,10 +17,18 @@ const TONES = {
   },
 }
 
+// Màu mắt theo pha: đỏ san hô khi AI đang nghe, hổ phách khi chờ/đọc câu tiếp.
+// Pha phân tích nhắm mắt nên không dùng màu nền.
+const EYE_FILL = {
+  listening: "#CF5B5B",
+  waiting: "#D97706",
+}
+const CLOSED_EYE_STROKE = "#A50016"
+
 // Gương mặt mèo của AI (BUG-PT-10): hai mắt bầu dục và miệng ω, vẽ bằng SVG để
 // làm động được. Mắt chớp đều; khi AI đang đọc thì miệng nhấp nhô theo nhịp nói.
 // Có mascot Voxis chính thức thì thay khối <svg> này.
-const MascotFace = ({ speaking = false }) => (
+const MascotFace = ({ speaking = false, eyeState = "waiting" }) => (
   <svg
     viewBox="0 0 120 90"
     className="h-20 w-[107px] select-none"
@@ -37,8 +45,45 @@ const MascotFace = ({ speaking = false }) => (
         .pt-eye, .pt-mouth.is-speaking { animation: none; }
       }
     `}</style>
-    <ellipse className="pt-eye" cx="16" cy="28" rx="11" ry="26" fill="#A50016" />
-    <ellipse className="pt-eye" cx="104" cy="28" rx="11" ry="26" fill="#A50016" />
+    {eyeState === "analyzing" ? (
+      <>
+        <path
+          className="pt-eye-closed"
+          d="M4 30 Q16 42 28 30"
+          fill="none"
+          stroke={CLOSED_EYE_STROKE}
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+        <path
+          className="pt-eye-closed"
+          d="M92 30 Q104 42 116 30"
+          fill="none"
+          stroke={CLOSED_EYE_STROKE}
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+      </>
+    ) : (
+      <>
+        <ellipse
+          className="pt-eye"
+          cx="16"
+          cy="28"
+          rx="11"
+          ry="26"
+          fill={EYE_FILL[eyeState]}
+        />
+        <ellipse
+          className="pt-eye"
+          cx="104"
+          cy="28"
+          rx="11"
+          ry="26"
+          fill={EYE_FILL[eyeState]}
+        />
+      </>
+    )}
     <path
       className={cn("pt-mouth", speaking && "is-speaking")}
       d="M36 68 C40 82 52 84 60 75 C68 84 80 82 84 68"
@@ -59,6 +104,12 @@ const AiAvatarPanel = ({
   micLevel = 0,
 }) => {
   const palette = TONES[tone] || TONES.listening
+  const eyeState =
+    tone === "analyzing"
+      ? "analyzing"
+      : isRecording && tone === "listening"
+        ? "listening"
+        : "waiting"
 
   return (
     <div className="flex w-full flex-col items-center gap-3 rounded-2xl bg-white px-6 py-5 shadow-[0_6px_18px_-2px_rgba(15,23,42,0.06),0_1px_3px_rgba(15,23,42,0.02)]">
@@ -92,7 +143,7 @@ const AiAvatarPanel = ({
         })}
       </div>
 
-      <MascotFace speaking={aiSpeaking} />
+      <MascotFace speaking={aiSpeaking} eyeState={eyeState} />
 
       <div className="flex flex-col items-center gap-2">
         {tone === "analyzing" && processingLabel && (
