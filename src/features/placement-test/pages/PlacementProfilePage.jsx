@@ -92,7 +92,7 @@ const PlacementProfilePage = () => {
         }
       : getRetakeEligibility({ lastTestedAt: result?.scoredAt })
     const roadmap = getRoadmapProgress(eligibility)
-    const overall = result ? computeOverallScore(result) : 70
+    const overall = result ? computeOverallScore(result) : null
     const roadmapBand = getTargetRoadmapBand(effectiveBand)
     const skills = result
       ? getAllDimensionScores(result).map((item) => ({
@@ -264,7 +264,9 @@ const PlacementProfilePage = () => {
               band={view.roadmapBand}
               progress={roadmap}
             />
-            <ProfileSkillsCard copy={copy} items={view.skills} />
+            {view.skills.length > 0 && (
+              <ProfileSkillsCard copy={copy} items={view.skills} />
+            )}
           </div>
 
           <div className="flex w-full flex-col gap-2.5 lg:w-[51%]">

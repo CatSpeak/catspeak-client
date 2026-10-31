@@ -15,9 +15,11 @@ const ProfileCertificateCard = ({
       <span className="rounded-[6px] bg-[#FEF08A] px-2 py-[3px] text-[10px] font-bold leading-[14.5px] text-[#854D0E]">
         {copy.certificateBadge}
       </span>
-      <span className="rounded-[6px] bg-white/20 px-2.5 py-[3px] text-[11px] font-bold text-white">
-        {formatTemplate(copy.scoreLabel, { score })}
-      </span>
+      {score !== null && score !== undefined ? (
+        <span className="rounded-[6px] bg-white/20 px-2.5 py-[3px] text-[11px] font-bold text-white">
+          {formatTemplate(copy.scoreLabel, { score })}
+        </span>
+      ) : null}
     </div>
 
     <div className="flex flex-col gap-0.5">
@@ -37,7 +39,7 @@ const ProfileCertificateCard = ({
 
     <div className="flex items-center justify-between gap-3 text-[11px] font-medium text-[#FECACA]">
       <span>{formatTemplate(copy.testDate, { date: testDate })}</span>
-      <span>{formatTemplate(copy.testCode, { code })}</span>
+      {code ? <span>{formatTemplate(copy.testCode, { code })}</span> : null}
     </div>
   </section>
 )
