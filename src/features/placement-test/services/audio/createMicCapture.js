@@ -15,6 +15,7 @@ export const createMicCapture = ({ deviceId } = {}) => {
   let level = 0
   let lastNotifyAt = 0
   let destroyed = false
+  let muted = false
 
   const levelSubscribers = new Set()
 
@@ -31,9 +32,19 @@ export const createMicCapture = ({ deviceId } = {}) => {
     levelSubscribers.forEach((subscriber) => subscriber(value))
   }
 
+  // Báo ngay khi tắt tiếng, không chờ nhịp notifyLevel 60ms: meter phải về 0
+  // cùng lúc với track bị khoá.
+  const emitLevel = (value) => {
+    level = value
+    lastNotifyAt = Date.now()
+    levelSubscribers.forEach((subscriber) => subscriber(value))
+  }
+
   const measure = () => {
     if (!analyser || destroyed) return
-    if (typeof analyser.getFloatTimeDomainData === "function") {
+    if (muted) {
+      notifyLevel(0)
+    } else if (typeof analyser.getFloatTimeDomainData === "function") {
       if (!sampleBuffer) sampleBuffer = new Float32Array(analyser.fftSize)
       analyser.getFloatTimeDomainData(sampleBuffer)
       notifyLevel(computeLevel(sampleBuffer))
@@ -67,6 +78,23 @@ export const createMicCapture = ({ deviceId } = {}) => {
         stream.getAudioTracks().length > 0 &&
         stream.getAudioTracks().some((t) => t.readyState === "live"),
     )
+
+  const applyMuted = () => {
+    if (!stream) return
+    stream.getAudioTracks().forEach((track) => {
+      track.enabled = !muted
+    })
+  }
+
+  const setMuted = (value) => {
+    muted = Boolean(value)
+    applyMuted()
+    if (muted) emitLevel(0)
+    return muted
+  }
+
+  const isMuted = () => muted
+
   const start = async () => {
     if (destroyed) return { ok: false, error: "destroyed" }
     if (isStreamActive()) return { ok: true }
@@ -89,6 +117,8 @@ export const createMicCapture = ({ deviceId } = {}) => {
       stream = null
       return { ok: false, error: "destroyed" }
     }
+
+    applyMuted()
 
     try {
       const AudioContextCtor = window.AudioContext || window.webkitAudioContext
@@ -223,6 +253,8 @@ export const createMicCapture = ({ deviceId } = {}) => {
     getRecordedBlob,
     subscribeLevel,
     isRecording: () => Boolean(recorder && recorder.state === "recording"),
+    setMuted,
+    isMuted,
     destroy,
   }
 }

@@ -69,6 +69,9 @@ const SessionRoom = () => {
   if (analyzing) {
     tone = "analyzing"
     statusText = copy.aiAnalyzing
+  } else if (isRecording && loop.isMuted) {
+    tone = "notHearing"
+    statusText = copy.aiMuted || "Micro đang tắt tiếng. Bấm nút mic để bật lại."
   } else if (notHearing) {
     tone = "notHearing"
     statusText = copy.aiNotHearing
@@ -112,7 +115,7 @@ const SessionRoom = () => {
             tone={tone}
             statusText={statusText}
             processingLabel={analyzing ? copy.modelProcessing : undefined}
-            isRecording={loop.isRecording}
+            isRecording={loop.isRecording && !loop.isMuted}
             aiSpeaking={loop.aiSpeaking}
             micLevel={loop.micLevel}
           />
@@ -123,6 +126,7 @@ const SessionRoom = () => {
             phase={loop.phase}
             notice={loop.notice}
             isRecording={loop.isRecording}
+            isMuted={loop.isMuted}
             hasRecorded={loop.hasRecorded}
             isPlayingUserAudio={loop.isPlayingUserAudio}
             onPlayUserAudio={loop.handlePlayUserAudio}
@@ -140,6 +144,7 @@ const SessionRoom = () => {
             phase={loop.phase}
             notice={loop.notice}
             isRecording={loop.isRecording}
+            isMuted={loop.isMuted}
             aiSpeaking={loop.aiSpeaking}
             micLevel={loop.micLevel}
             hasRecorded={loop.hasRecorded}
@@ -150,7 +155,7 @@ const SessionRoom = () => {
             isPlayingUserAudio={loop.isPlayingUserAudio}
             onPlayUserAudio={loop.handlePlayUserAudio}
             onStopUserAudio={loop.handleStopUserAudio}
-            onToggleRecord={loop.handleToggleRecord}
+            onToggleMute={loop.handleToggleMute}
             onReRecord={loop.handleReRecord}
             onSubmit={loop.handleSubmit}
             onSkip={loop.handleSkip}

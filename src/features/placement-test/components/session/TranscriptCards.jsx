@@ -8,10 +8,13 @@ import { formatTemplate } from "../../utils/format"
 
 const statusFor = (
   copy,
-  { phase, notice, transcript, isRecording, hasRecorded },
+  { phase, notice, transcript, isRecording, isMuted, hasRecorded },
 ) => {
   if (phase === CONVERSATION_PHASE.ANALYZING) {
     return { label: copy.statusSubmitted || "Đã nộp bài", tone: "green" }
+  }
+  if (isRecording && isMuted) {
+    return { label: copy.statusMuted || "● Đang tắt tiếng", tone: "amber" }
   }
   if (notice === CONVERSATION_NOTICE.NO_HEARING && isRecording) {
     return { label: copy.statusNoAudio || "Chưa có âm thanh", tone: "amber" }
@@ -57,6 +60,7 @@ const TranscriptCards = ({
   phase,
   notice,
   isRecording = false,
+  isMuted = false,
   hasRecorded = false,
   isPlayingUserAudio = false,
   onPlayUserAudio,
@@ -74,6 +78,7 @@ const TranscriptCards = ({
     notice,
     transcript,
     isRecording,
+    isMuted,
     hasRecorded,
   })
   const noHearing =
@@ -83,8 +88,10 @@ const TranscriptCards = ({
       ? copy.analyzingSubline
       : noHearing
         ? copy.noHearingSubline
-        : isRecording
-          ? "Nói to và rõ ràng vào micro..."
+        : isRecording && isMuted
+          ? copy.aiMuted || "Micro đang tắt tiếng. Bấm nút mic để bật lại."
+          : isRecording
+            ? "Nói to và rõ ràng vào micro..."
           : hasRecorded
             ? "Đã thu âm câu trả lời. Bạn có thể bấm 'Hoàn tất câu trả lời' để nộp."
             : copy.waitingSubline

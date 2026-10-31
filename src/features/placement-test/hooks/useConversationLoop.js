@@ -102,6 +102,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
   const [notice, setNotice] = useState(null)
   const [retryCount, setRetryCount] = useState(0)
   const [isRecording, setIsRecording] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
   const [hasRecorded, setHasRecorded] = useState(false)
   const [recordedMs, setRecordedMs] = useState(0)
   const [remainingMs, setRemainingMs] = useState(QUESTION_DURATION_MS)
@@ -135,6 +136,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     stopAudio,
     startRecording,
     stopRecording,
+    setMuted: setTransportMuted,
     getRecordedBlob,
     getRecordingUrl,
   } = useAudioTransport()
@@ -369,27 +371,20 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     startRecordRef.current = handleStartRecord
   }, [handleStartRecord])
 
-  const handleStopRecord = useCallback(async () => {
-    if (!isRecordingRef.current) return
-    setIsRecording(false)
-    setHasRecorded(true)
-    stopAudioListening()
-    await stopRecording()
-    const elapsed = Math.min(
-      Date.now() - (recordingStartedAtRef.current || Date.now()),
-      QUESTION_DURATION_MS,
-    )
-    setRecordedMs(Math.max(0, elapsed))
-    setNotice(null)
-  }, [stopAudioListening, stopRecording])
-
-  const handleToggleRecord = useCallback(() => {
-    if (isRecordingRef.current) {
-      handleStopRecord()
+  // BUG-PT-02 (khôi phục theo ruling 2026-10-31): nút mic là công tắc tắt/bật
+  // tiếng. Việc ghi âm do VAD tự mở; "Hoàn tất câu trả lời" mới kết thúc lượt.
+  const handleToggleMute = useCallback(() => {
+    const next = !isMuted
+    setIsMuted(next)
+    setTransportMuted(next)
+    if (next) {
+      setNotice((current) =>
+        current === CONVERSATION_NOTICE.NO_HEARING ? null : current,
+      )
     } else {
-      handleStartRecord()
+      noHearingRef.current?.reset(Date.now())
     }
-  }, [handleStartRecord, handleStopRecord])
+  }, [isMuted, setTransportMuted])
 
   const handleReRecord = useCallback(async () => {
     const current = stateRef.current
@@ -464,6 +459,8 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       setRetryCount(0)
       setNotice(null)
       setIsRecording(false)
+      setIsMuted(false)
+      setTransportMuted(false)
       setHasRecorded(false)
       setRecordedMs(0)
       setRemainingMs(QUESTION_DURATION_MS)
@@ -478,6 +475,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       stopAudio,
       stopAudioListening,
       stopRecording,
+      setTransportMuted,
       triggerGetQuestion,
     ],
   )
@@ -911,7 +909,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       setRemainingMs(Math.max(0, QUESTION_DURATION_MS - clamped))
 
       const watcher = noHearingRef.current
-      if (watcher && !noHearingExitedRef.current) {
+      if (watcher && !isMuted && !noHearingExitedRef.current) {
         const verdict = watcher.push(levelRef.current)
         if (verdict.shouldExit) {
           handleNoHearingExitRef.current()
@@ -935,7 +933,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
       }
     }, TICK_MS)
     return () => window.clearInterval(id)
-  }, [phase, suspended, isRecording, stopAudioListening, stopRecording])
+  }, [phase, suspended, isRecording, isMuted, stopAudioListening, stopRecording])
 
   // User explicitly clicks "Hoàn tất câu trả lời"
   const handleSubmit = useCallback(async () => {
@@ -1030,8 +1028,9 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     notice,
     retryCount,
     isRecording,
+    isMuted,
     aiSpeaking,
-    micLevel,
+    micLevel: isMuted ? 0 : micLevel,
     hasRecorded,
     recordedMs,
     remainingMs,
@@ -1055,9 +1054,8 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     handleLeave,
     handleCancel,
     handleReconnectNow,
-    handleToggleRecord,
+    handleToggleMute,
     handleStartRecord,
-    handleStopRecord,
     handlePlayUserAudio,
     handleStopUserAudio,
     handleSubmit,
