@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
+import LanguageMenuItem from "@/shared/components/Header/LanguageMenuItem"
 
 /**
  * UI languages. Standard Vietnamese (`vi`) is fully enabled.
@@ -98,84 +99,46 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
         aria-label={displayLabel}
         title={displayLabel}
         onClick={handleToggle}
-        variant="transparent"
-        innerClassName="overflow-hidden rounded-full"
+        variant="ghost"
       >
-        <img
-          src={current.flag}
-          alt=""
-          className="pointer-events-none block h-full w-full object-cover rounded-full"
-          draggable={false}
-        />
+        <span className="flex h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border shadow-xs">
+          <img
+            src={current.flag}
+            alt=""
+            className="pointer-events-none block h-full w-full object-cover rounded-full"
+            draggable={false}
+          />
+        </span>
       </IconButton>
 
       <AnimatePresence>
         {open && (
           <div
-            className={`absolute top-full z-50 mt-2 min-w-[210px] w-max max-w-[calc(100vw-2rem)] ${alignClass}`}
+            className={`absolute top-full z-50 mt-2 min-w-[220px] w-max max-w-[calc(100vw-2rem)] ${alignClass}`}
           >
             <FluentAnimation
               direction="down"
               exit
-              className="overflow-hidden rounded-2xl border border-border bg-white shadow-xl"
+              className="overflow-hidden rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-xl"
             >
               <div
-                className="flex flex-col"
+                className="flex flex-col gap-1 p-1"
                 role="listbox"
                 aria-label="Language"
               >
-                {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => {
-                  const isActive = language === key
-
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      role="option"
-                      aria-selected={isActive}
-                      disabled={disabled}
-                      onClick={() => !disabled && handleLanguageSelect(key)}
-                      className={`relative flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${
-                        disabled
-                          ? "cursor-not-allowed text-gray-400"
-                          : isActive
-                            ? "text-cath-red-800 font-medium bg-gray-50/60"
-                            : "text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="lang-active-indicator"
-                          className="absolute inset-0 rounded-xl bg-gray-500/5 pointer-events-none"
-                        />
-                      )}
-                      <span className="flex h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border">
-                        <img
-                          src={flag}
-                          alt=""
-                          className={`block h-full w-full object-cover ${
-                            disabled ? "grayscale opacity-50" : ""
-                          }`}
-                          draggable={false}
-                        />
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-[14px]">
-                        {t.header?.languages?.[key] || label}
-                      </span>
-                      {disabled ? (
-                        <span className="shrink-0 ml-auto rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">
-                          {soonLabel || t.header?.soon || "Soon"}
-                        </span>
-                      ) : isActive ? (
-                        <div className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[2px] border-cath-red-800">
-                          <div className="h-2 w-2 rounded-full bg-cath-red-800" />
-                        </div>
-                      ) : (
-                        <div className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[2px] border-border" />
-                      )}
-                    </button>
-                  )
-                })}
+                {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => (
+                  <LanguageMenuItem
+                    key={key}
+                    code={key}
+                    label={t.header?.languages?.[key] || label}
+                    flag={flag}
+                    disabled={disabled}
+                    soonLabel={soonLabel || t.header?.soon || "Soon"}
+                    isActive={language === key}
+                    onSelect={() => handleLanguageSelect(key)}
+                    layoutId="lang-active-indicator"
+                  />
+                ))}
               </div>
             </FluentAnimation>
           </div>

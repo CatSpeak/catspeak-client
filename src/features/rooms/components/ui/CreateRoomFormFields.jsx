@@ -142,7 +142,7 @@ const CreateRoomFormFields = ({
                 <span className={labelClass}>
                   {cr.privateRoom || "Private Room"}
                 </span>
-                <div className="flex items-center justify-between gap-4 w-full rounded-md border border-border px-4 min-h-[56px] bg-white transition-all duration-200">
+                <div className="flex items-center justify-between gap-4 w-full rounded-md border border-border dark:border-[#3F3F3F] px-4 min-h-[56px] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white transition-all duration-200">
                   <span className="flex-1">
                     {formData.isPrivate
                       ? ct.privateHint ||

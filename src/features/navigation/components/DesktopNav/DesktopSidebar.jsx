@@ -27,21 +27,26 @@ const normalizePath = (path) => {
 
 const DockButton = ({ to, onClick, icon: Icon, label, isActive }) => (
   <div className="relative group/dock px-2 py-1">
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer outline-none transition-all duration-150 ${
-        isActive
-          ? "bg-white text-cath-red-700 shadow-md"
-          : "text-white/80 hover:text-white hover:bg-white/15"
-      }`}
+    <Motion.div
+      whileTap={{ scale: 0.92 }}
+      transition={{ type: "spring", stiffness: 450, damping: 26 }}
     >
-      {Icon && <Icon />}
-    </Link>
+      <Link
+        to={to}
+        onClick={onClick}
+        className={`w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer outline-none transition-colors duration-150 ${
+          isActive
+            ? "bg-white text-cath-red-700 shadow-md active:bg-gray-100 dark:bg-cath-red-700 dark:text-white dark:shadow-md dark:active:bg-cath-red-800"
+            : "text-white/80 hover:text-white hover:bg-white/15 active:bg-white/25 dark:text-[#AAAAAA] dark:hover:text-white dark:hover:bg-[#272727] dark:active:bg-[#333333]"
+        }`}
+      >
+        {Icon && <Icon />}
+      </Link>
+    </Motion.div>
 
     {/* Tooltip on Hover */}
-    <div className="absolute left-full ml-6 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none drop-shadow-md flex items-center">
-      <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45 rounded-xs" />
+    <div className="absolute left-full ml-6 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 dark:bg-[#1A1A1A] dark:border dark:border-[#3F3F3F] text-white text-xs font-semibold rounded-md opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none drop-shadow-md flex items-center">
+      <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 dark:bg-[#1A1A1A] dark:border-b dark:border-l dark:border-[#3F3F3F] rotate-45 rounded-xs" />
       <span className="relative z-10">{label}</span>
     </div>
   </div>
@@ -241,20 +246,27 @@ const DesktopSidebar = () => {
       data-tour="main-sidebar"
     >
       {/* 1. PRIMARY SLIM DOCK (ALWAYS DOCKED - 72px) */}
-      <div className="h-full bg-cath-red-700 text-white flex flex-col items-center shrink-0 shadow-lg relative z-20">
+      <div className="h-full bg-cath-red-700 dark:bg-[#0F0F0F] text-white flex flex-col items-center shrink-0 shadow-lg relative z-20 transition-colors duration-200 border-r border-border dark:border-[#3F3F3F]">
         {/* Brand Icon */}
-        <Link
-          to="/"
-          className="flex items-center justify-center py-4"
-          title="CatSpeak Home"
-        >
-          <img
-            src={LandingPageIcon}
-            alt="Cat Speak"
-            className="w-10 h-10 object-contain drop-shadow-sm"
-            draggable={false}
-          />
-        </Link>
+        <div className="py-4 flex items-center justify-center">
+          <Motion.div
+            whileTap={{ scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 450, damping: 26 }}
+          >
+            <Link
+              to="/"
+              className="flex items-center justify-center outline-none select-none cursor-pointer"
+              title="CatSpeak Home"
+            >
+              <img
+                src={LandingPageIcon}
+                alt="Cat Speak"
+                className="w-10 h-10 object-contain drop-shadow-sm rounded-full"
+                draggable={false}
+              />
+            </Link>
+          </Motion.div>
+        </div>
 
         {/* Dock Section Icons */}
         <div className="flex-1 flex flex-col gap-1 items-center w-full">
@@ -267,7 +279,7 @@ const DesktopSidebar = () => {
             return (
               <React.Fragment key={group.key}>
                 {groupIdx > 0 && (
-                  <div className="w-8 h-[1px] bg-white/20 shrink-0" />
+                  <div className="w-8 h-[1px] bg-white/20 dark:bg-[#3F3F3F] shrink-0" />
                 )}
                 {visibleItems.map(renderDockItem)}
               </React.Fragment>
@@ -277,7 +289,7 @@ const DesktopSidebar = () => {
 
         {/* Bottom Dock Links (Settings / Footer) */}
         <div className="flex flex-col gap-1 items-center w-full">
-          <div className="w-8 h-[1px] bg-white/20 shrink-0" />
+          <div className="w-8 h-[1px] bg-white/20 dark:bg-[#3F3F3F] shrink-0" />
           {footerLinks.map((item) => {
             const isSettingsItem = item.key === "settings"
             const isActive = isSettingsItem
@@ -319,7 +331,7 @@ const DesktopSidebar = () => {
               transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
             }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="h-full bg-white border-r border-border overflow-hidden relative z-10 shrink-0"
+            className="h-full bg-white dark:bg-[#0F0F0F] border-r border-border dark:border-[#3F3F3F] overflow-hidden relative z-10 shrink-0"
           >
             <div className="w-[280px] h-full flex flex-col">
               {/* Secondary Header */}

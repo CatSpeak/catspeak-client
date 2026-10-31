@@ -3,8 +3,9 @@ import { SlidersHorizontal } from "lucide-react"
 import RoomFilterModal from "@/features/rooms/components/navigation/RoomFilterModal"
 import { useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
-const HeaderFilter = () => {
+const HeaderFilter = ({ className = "" }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const { t } = useLanguage()
   const filterLabel = t?.header?.filterRooms || "Lọc phòng"
@@ -23,19 +24,22 @@ const HeaderFilter = () => {
 
   return (
     <>
-      <button 
-        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 transition-colors shrink-0"
+      <IconButton
         onClick={() => setIsFilterOpen(true)}
+        variant="ghost"
         aria-label={filterLabel}
         title={filterLabel}
+        className={className}
+        badge={
+          activeFilterCount > 0 && (
+            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full bg-cath-red-700 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none ring-2 ring-white dark:ring-[#0F0F0F]">
+              {activeFilterCount}
+            </span>
+          )
+        }
       >
         <SlidersHorizontal size={20} strokeWidth={2} aria-hidden="true" />
-        {activeFilterCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-cath-red-700 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
-            {activeFilterCount}
-          </span>
-        )}
-      </button>
+      </IconButton>
 
       {/* Professional Filter Modal */}
       <RoomFilterModal 

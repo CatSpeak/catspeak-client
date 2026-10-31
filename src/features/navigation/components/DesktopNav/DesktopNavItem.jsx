@@ -52,10 +52,10 @@ const DesktopNavItem = ({
               } ${
                 isActive
                   ? isDocked
-                    ? "text-cath-red-700"
+                    ? "text-cath-red-700 dark:text-white dark:bg-cath-red-700"
                     : "bg-itemActive hover:bg-itemActiveHover"
                   : isDocked
-                    ? "text-white hover:bg-white/20"
+                    ? "text-white dark:text-[#AAAAAA] hover:bg-white/20 dark:hover:bg-[#272727] dark:hover:text-white"
                     : "hover:bg-itemHover"
               }`}
             >
@@ -63,7 +63,7 @@ const DesktopNavItem = ({
                 className={`whitespace-nowrap truncate relative z-10 ${
                   isDocked
                     ? "opacity-0 w-0 pointer-events-none hidden"
-                    : "opacity-100 min-w-0 flex-1"
+                    : "opacity-100 min-w-0 flex-1 text-gray-800 dark:text-gray-100"
                 }`}
                 style={color ? { color } : undefined}
               >

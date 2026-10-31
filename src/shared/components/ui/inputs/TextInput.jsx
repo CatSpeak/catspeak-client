@@ -81,7 +81,7 @@ const TextInput = forwardRef(({
     : hasCustomPadding
       ? ""
       : "px-4"
-  const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${paddingClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
+  const finalClassName = `w-full bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white border border-border dark:border-[#3F3F3F] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 dark:disabled:bg-[#272727] placeholder-[var(--placeholder-color)] dark:placeholder-[#AAAAAA] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${paddingClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {
     if (multiline) {

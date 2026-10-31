@@ -158,7 +158,7 @@ const InteractiveScriptWidget = ({
       )}
     >
       <div className="flex flex-wrap items-center gap-2 mb-3">
-        <span className="inline-flex items-center px-3 py-1 rounded-xl text-sm font-bold bg-[#FFDAD6] text-cath-red-700">
+        <span className="inline-flex items-center px-3 py-1 rounded-xl text-sm font-bold bg-[#FFDAD6] dark:bg-[#370006] text-cath-red-700 dark:text-[#FF0033]">
           {currentScript.topic}
         </span>
 
@@ -183,20 +183,20 @@ const InteractiveScriptWidget = ({
         )}
       </div>
 
-      <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight md:leading-relaxed w-full break-words">
+      <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight md:leading-relaxed w-full break-words">
         {renderTitle(currentScript.title)}
       </h1>
 
       <div className="flex items-center gap-2 mt-2 text-sm">
         <Lightbulb className="w-4 h-4 text-[#F59E0B]" />
-        <span className="text-[#6B7280]">{t.widget?.hint || "Nhấn vào từ bất kỳ để xem nghĩa và lưu vào danh sách học tập cá nhân"}</span>
+        <span className="text-[#6B7280] dark:text-[#AAAAAA]">{t.widget?.hint || "Nhấn vào từ bất kỳ để xem nghĩa và lưu vào danh sách học tập cá nhân"}</span>
       </div>
-      <div className="text-base md:text-lg mt-2 leading-relaxed font-sans">
+      <div className="text-base md:text-lg mt-2 leading-relaxed font-sans text-gray-800 dark:text-gray-200">
         {currentScript.contentSegments?.map((seg, idx) => renderSegment(seg, idx))}
       </div>
 
       {currentScript.featuredQuote && (
-        <p className="text-gray-500 text-xl md:text-2xl mt-2 font-bold italic">
+        <p className="text-gray-500 dark:text-[#AAAAAA] text-xl md:text-2xl mt-2 font-bold italic">
           &ldquo;{currentScript.featuredQuote}&rdquo;
         </p>
       )}

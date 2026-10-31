@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
 import CommunityRoomCard from "../CommunityRoomCard"
-import EmptyRoomState from "../EmptyRoomState"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import useResponsiveItemsPerPage from "@/features/rooms/hooks/useResponsiveItemsPerPage"
 import { IconButton } from "@/shared/components/ui/buttons"
@@ -103,7 +102,7 @@ const CategoryRoomSection = ({
 
   const [displayRooms, setDisplayRooms] = useState([])
   const [visualPage, setVisualPage] = useState(page)
-  const [slideDirection, setSlideDirection] = useState("left")
+  const [slideDirection, setSlideDirection] = useState(1)
   const [accumulatedRooms, setAccumulatedRooms] = useState([])
   const scrollContainerRef = useRef(null)
 
@@ -150,11 +149,11 @@ const CategoryRoomSection = ({
   }, [totalCount, isLoading, onTotalCountLoaded, categoryKey])
 
   const goNext = () => {
-    setSlideDirection("left")
+    setSlideDirection(1)
     setPage((prev) => Math.min(prev + 1, totalPages))
   }
   const goPrev = () => {
-    setSlideDirection("right")
+    setSlideDirection(-1)
     setPage((prev) => Math.max(prev - 1, 1))
   }
   const canGoNext = page < totalPages
@@ -170,7 +169,7 @@ const CategoryRoomSection = ({
             scrollContainerRef.current
           if (scrollLeft + clientWidth >= scrollWidth - 50) {
             if (hasNextPage && !isFetching) {
-              setSlideDirection("left")
+              setSlideDirection(1)
               setPage((prev) => prev + 1)
             }
           }
@@ -196,29 +195,16 @@ const CategoryRoomSection = ({
     return (
       <div className="relative z-10 flex w-full items-end justify-between">
         <button
+          type="button"
           onClick={() => onSeeMore(categoryKey)}
-          className="group relative w-fit flex h-10 items-center rounded-lg px-4 border-none bg-transparent overflow-hidden cursor-pointer select-none"
+          className="group flex w-fit items-center text-black dark:text-white cursor-pointer select-none transition-opacity duration-150 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border rounded-lg"
         >
-          {/* Base: Red text on transparent background */}
-          <div className="flex items-center gap-1 text-cath-red-700 whitespace-nowrap">
-            <h6 className="text-xl font-bold">{title}</h6>
-            <ChevronRight />
-          </div>
-
-          {/* Inverted overlay: White text on red background, swept left-to-right on hover, right-to-left on hover away */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 flex items-center px-4 bg-cath-red-700 text-white rounded-lg pointer-events-none whitespace-nowrap transition-[clip-path] duration-300 ease-out [clip-path:inset(0_100%_0_0)] group-hover:[clip-path:inset(0_0_0_0)]"
-          >
-            <div className="flex items-center gap-1">
-              <h6 className="text-xl font-bold">{title}</h6>
-              <ChevronRight />
-            </div>
-          </div>
+          <h3 className="text-xl font-bold tracking-tight">{title}</h3>
+          <ChevronRight className="transition-transform duration-150 ease-out group-hover:translate-x-1 group-active:-translate-x-0.5 group-active:duration-75" />
         </button>
 
         {showRightSide && (
-          <div className="flex items-center gap-2 pr-4">
+          <div className="flex items-center gap-2">
             {!isMobile && (
               <IconButton
                 onClick={goPrev}
@@ -231,7 +217,7 @@ const CategoryRoomSection = ({
             )}
 
             {!isLoading && (
-              <span className="text-sm whitespace-nowrap">
+              <span className="text-sm whitespace-nowrap dark:text-[#AAAAAA]">
                 {totalCount}{" "}
                 {totalCount === 1
                   ? t?.rooms?.filters?.room || "room"
@@ -256,18 +242,7 @@ const CategoryRoomSection = ({
   }
 
   if (!isLoading && totalCount === 0) {
-    return (
-      <div className="flex flex-col gap-2">
-        {renderHeader()}
-
-        <EmptyRoomState
-          message={
-            t?.rooms?.filters?.noRoomsFoundCategory ||
-            "No rooms found in this category"
-          }
-        />
-      </div>
-    )
+    return null
   }
 
   // ── Mobile (≤640px): touch scroll, edge-to-edge bleed, no pagination buttons ──
@@ -292,7 +267,7 @@ const CategoryRoomSection = ({
             Array.from({ length: 3 }).map((_, idx) => (
               <div
                 key={`loading-${idx}`}
-                className="h-[280px] w-[85%] sm:w-[45%] flex-shrink-0 animate-pulse rounded-2xl bg-gray-200 snap-start"
+                className="h-[280px] w-[85%] sm:w-[45%] flex-shrink-0 animate-pulse rounded-2xl bg-gray-200 dark:bg-[#272727] snap-start"
               />
             ))}
           {/* Trailing spacer so the last card has padding when scrolled to the end */}
@@ -310,17 +285,19 @@ const CategoryRoomSection = ({
         : "grid-cols-4"
 
   const slideVariants = {
-    enter: (direction) => ({
-      x: direction === "left" ? 60 : -60,
-      opacity: 0,
+    enter: (dir) => ({
+      x: dir > 0 ? "100%" : "-100%",
+      opacity: 0.9,
     }),
     center: {
       x: 0,
       opacity: 1,
+      zIndex: 1,
     },
-    exit: (direction) => ({
-      x: direction === "left" ? -60 : 60,
-      opacity: 0,
+    exit: (dir) => ({
+      x: dir < 0 ? "100%" : "-100%",
+      opacity: 0.9,
+      zIndex: 0,
     }),
   }
 
@@ -328,7 +305,7 @@ const CategoryRoomSection = ({
     <div className="flex flex-col gap-2">
       {renderHeader()}
 
-      <div className="w-full relative min-h-[280px]">
+      <div className="w-full relative min-h-[280px] overflow-hidden -my-2 py-2">
         <AnimatePresence
           mode="popLayout"
           initial={false}
@@ -341,14 +318,14 @@ const CategoryRoomSection = ({
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className={`grid ${gridCols} gap-4 w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
+            transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+            className={`grid ${gridCols} gap-2 w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
           >
             {isLoading || (displayRooms.length === 0 && isFetching)
               ? Array.from({ length: itemsPerPage }).map((_, idx) => (
                   <div
                     key={`desktop-loading-${idx}`}
-                    className="h-[280px] w-full animate-pulse rounded-2xl bg-gray-200"
+                    className="h-[280px] w-full animate-pulse rounded-2xl bg-gray-200 dark:bg-[#272727]"
                   />
                 ))
               : displayRooms

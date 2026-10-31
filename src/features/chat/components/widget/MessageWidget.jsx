@@ -395,17 +395,17 @@ const MessageWidget = () => {
           }
           dispatch(toggleWidget())
         }}
-        variant="filled"
+        variant="ghost"
         aria-label="Tin nhắn"
         badge={
           totalUnreadCount > 0 && (
-            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-2 border-white bg-red-500 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none dark:border-gray-800">
+            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-2 border-white bg-cath-red-700 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none dark:border-gray-800">
               {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
             </span>
           )
         }
       >
-        <MessageCircle />
+        <MessageCircle size={20} strokeWidth={2} />
       </IconButton>
 
       {/* ── File Size Limit Modal ────────────────────── */}

@@ -19,6 +19,7 @@ This document defines core behavior, efficiency standards, and coding convention
   - Border token: `border-border` (e.g., `border-b border-border`).
   - Colors: CatSpeak brand colors (`cath-red-700`, `bg-primaryBg`, `bg-primary2`, etc.).
   - Header height: Standard application header is `64px` (`h-[64px]` / `h-16`). All header containers must account for border box sizing to avoid layout shifts or 1px vertical overflows.
+  - Shape & Corner Radius Scale: Follow Material 3 shape scale mapped to Tailwind (`rounded-lg` for items/chips, `rounded-xl` for inputs/dropdowns, `rounded-2xl` for cards, `rounded-3xl` for modals, `rounded-full` for pills/avatars). Enforce optical roundness: $\text{inner\_radius} = \text{outer\_radius} - \text{padding}$. See [.agents/rules/shape-system.md](file:///c:/Codes/catspeak-client/.agents/rules/shape-system.md).
 - **Component Structure:**
   - Common UI primitives in `src/shared/components/ui/`.
   - Feature-specific logic isolated in `src/features/<feature-name>/`.

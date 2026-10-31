@@ -157,7 +157,7 @@ const ConversationItem = ({
             className={friendTheme.avatarClass}
           />
           {isOnline && (
-            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
+            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-[#1A1A1A]" />
           )}
         </>
       )}
@@ -166,11 +166,11 @@ const ConversationItem = ({
 
   const rightContent = (
     <div className="flex flex-col items-end gap-1 justify-center shrink-0">
-      <span className="text-xs text-[#606060]">
+      <span className="text-xs text-[#606060] dark:text-[#AAAAAA]">
         {formatRelative(timestamp)}
       </span>
       {unreadCount > 0 ? (
-        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#990011] px-1.5 text-xs text-white">
+        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#990011] dark:bg-[#FF0033] px-1.5 text-xs text-white">
           {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       ) : (
@@ -190,15 +190,15 @@ const ConversationItem = ({
       <span
         className={`truncate ${
           unreadCount > 0
-            ? "font-semibold text-black"
-            : "font-medium text-gray-900"
+            ? "font-semibold text-black dark:text-white"
+            : "font-medium text-gray-900 dark:text-gray-100"
         }`}
       >
         {name}
       </span>
       <span
         className={`text-sm truncate ${
-          unreadCount > 0 ? "font-medium text-black" : "text-[#606060]"
+          unreadCount > 0 ? "font-medium text-black dark:text-gray-200" : "text-[#606060] dark:text-[#AAAAAA]"
         }`}
       >
         {preview ||

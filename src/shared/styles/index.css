@@ -6,7 +6,7 @@
 
 /* CSS Variables */
 :root {
-  color-scheme: light;
+  color-scheme: inherit;
   --font-primary: "Nunito", "Noto Sans SC", "Noto Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   --font-nunito: "Nunito", sans-serif;
   --header-height: 72px;
@@ -42,27 +42,79 @@
   --accent-foreground: 240 5.9% 10%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
+
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
 }
 
 .dark {
-  --background: 240 10% 3.9%;
+  color-scheme: dark;
+  --background: 0 0% 5.9%;
   --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+
+  --card: 0 0% 10.2%;
   --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
+
+  --popover: 0 0% 10.2%;
   --popover-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
+
+  --muted: 0 0% 15.3%;
+  --muted-foreground: 0 0% 66.7%;
+  --accent: 0 0% 15.3%;
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+
+
+
+
+  --border: 0 0% 24.7%;
+  --input: 0 0% 24.7%;
+  --ring: 348 100% 50%;
+
+  /* Dark Mode Brand & Core Tokens */
+  --cath-primary: #990011;
+  --cath-red-700: #990011;
+  --cath-text-secondary: #AAAAAA;
+  --cath-bg: #0F0F0F;
+  --cath-border: #3F3F3F;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Interactive Navigation Item Tokens (Dark Mode) */
+.dark .bg-itemActive {
+  background-color: #272727 !important;
+}
+.dark .bg-itemHover {
+  background-color: #272727 !important;
+}
+.dark .hover\:bg-itemActiveHover:hover {
+  background-color: #3D3D3D !important;
+}
+.dark .hover\:bg-itemHover:hover {
+  background-color: #272727 !important;
+}
+.dark .active\:bg-itemActiveHover:active {
+  background-color: #3D3D3D !important;
+}
+.dark .bg-primaryBg {
+  background-color: #0F0F0F !important;
 }
 
 .font-nunito {
@@ -102,10 +154,15 @@ body {
 
 body {
   background-color: #ffffff;
-  color-scheme: light;
+  color-scheme: inherit;
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark body {
+  background-color: #0F0F0F;
+  color-scheme: dark;
 }
 
 /* Perfectly balanced bold styling (especially for CJK / Chinese text) */
@@ -132,6 +189,15 @@ html {
   scrollbar-color: var(--cath-red-700) transparent;
 }
 
+html.dark,
+html.dark body {
+  scrollbar-color: #3F3F3F #0F0F0F;
+}
+
+.dark * {
+  scrollbar-color: #3F3F3F transparent;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -152,6 +218,32 @@ html {
 
 ::-webkit-scrollbar-thumb:active {
   background: var(--cath-red-500);
+}
+
+.dark ::-webkit-scrollbar-track,
+html.dark ::-webkit-scrollbar-track {
+  background: #0F0F0F;
+}
+
+.dark ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: #3F3F3F;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+.dark ::-webkit-scrollbar-thumb:active,
+html.dark ::-webkit-scrollbar-thumb:active {
+  background: #666666;
+}
+
+.dark ::-webkit-scrollbar-corner,
+html.dark ::-webkit-scrollbar-corner {
+  background: #0F0F0F;
 }
 
 ::-webkit-scrollbar-corner {
@@ -208,6 +300,23 @@ input[type="password"]::-webkit-reveal {
     border-radius: 9999px;
   }
 
+  .dark .scrollbar-app {
+    scrollbar-color: #3F3F3F #1A1A1A;
+  }
+
+  .dark .scrollbar-app::-webkit-scrollbar-track {
+    background: #1A1A1A;
+  }
+
+  .dark .scrollbar-app::-webkit-scrollbar-thumb {
+    background: #3F3F3F;
+    border-radius: 9999px;
+  }
+
+  .dark .scrollbar-app::-webkit-scrollbar-thumb:hover {
+    background: #555555;
+  }
+
   /* Thin dark scrollbar (used for dark menus/modals) */
   .scrollbar-dark {
     scrollbar-width: thin;
@@ -254,6 +363,26 @@ input[type="password"]::-webkit-reveal {
   .scrollbar-app-transparent::-webkit-scrollbar-thumb {
     background-color: #990011;
     border-radius: 9999px;
+  }
+
+  .dark .scrollbar-app-hover:hover::-webkit-scrollbar-thumb {
+    background-color: #555555;
+  }
+
+  .dark .scrollbar-app-hover:hover::-webkit-scrollbar-track {
+    background: #1A1A1A;
+  }
+
+  .dark .scrollbar-app-transparent {
+    scrollbar-color: #3F3F3F transparent;
+  }
+
+  .dark .scrollbar-app-transparent::-webkit-scrollbar-thumb {
+    background-color: #3F3F3F;
+  }
+
+  .dark .scrollbar-app-transparent::-webkit-scrollbar-thumb:hover {
+    background-color: #555555;
   }
 
   /* Hidden scrollbar */

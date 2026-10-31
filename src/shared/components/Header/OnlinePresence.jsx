@@ -10,11 +10,16 @@ const OnlinePresence = () => {
 
   const getLanguageString = (code) => {
     switch (code) {
-      case "en": return "english"
-      case "vi": return "vietnamese"
-      case "zh": return "chinese"
-      case "ja": return "japanese"
-      default: return "english"
+      case "en":
+        return "english"
+      case "vi":
+        return "vietnamese"
+      case "zh":
+        return "chinese"
+      case "ja":
+        return "japanese"
+      default:
+        return "english"
     }
   }
 
@@ -27,8 +32,9 @@ const OnlinePresence = () => {
         {/* <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span> */}
         <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
       </div>
-      <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
-        {currentOnlineCount} {t.welcomeSection?.presence?.onlineIn || "đang trực tuyến"}
+      <span className="text-sm text-secondary dark:text-[#AAAAAA] whitespace-nowrap">
+        {currentOnlineCount}{" "}
+        {t.welcomeSection?.presence?.onlineIn || "đang trực tuyến"}
       </span>
     </div>
   )

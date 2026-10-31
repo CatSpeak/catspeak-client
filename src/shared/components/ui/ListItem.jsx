@@ -75,7 +75,7 @@ const ListItem = ({
           : undefined
       }
       onClick={onClick}
-      className={`group relative outline-none flex w-full items-center text-left ${heightClass} ${baseBgClass} ${className}`}
+      className={`group relative outline-none flex w-full items-center text-left text-gray-900 dark:text-gray-100 ${heightClass} ${baseBgClass} ${className}`}
       disabled={Wrapper === "button" && isClickable ? false : undefined}
       {...props}
     >

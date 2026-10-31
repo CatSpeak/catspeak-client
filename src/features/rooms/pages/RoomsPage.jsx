@@ -15,7 +15,7 @@ import {
 import { WorkshopCarousel } from "@/features/workshops"
 
 import { useCreateAISessionMutation } from "@/store/api/roomsApi"
-import { AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import {
   FadeAnimation,
   FluentAnimation,
@@ -35,11 +35,19 @@ const RoomsPage = () => {
   const { isInCall } = useSelector((s) => s.videoCall)
   const dispatch = useDispatch()
 
-  const [page, setPage] = useState(1)
   const [tab, setTab] = useState("communicate")
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { lang } = useParams()
+
+  const pageParam = parseInt(searchParams.get("page") || "1", 10)
+  const page = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1
+
+  const handleSetPage = (newPage) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("page", newPage)
+    setSearchParams(newParams, { preventScrollReset: true })
+  }
 
   const { state, actions } = useRoomsPageLogic()
   const [createAISession] = useCreateAISessionMutation()
@@ -148,7 +156,14 @@ const RoomsPage = () => {
   const topicsValues = searchParams.getAll("topics")
   const topicsArg = topicsValues.length > 0 ? topicsValues : undefined
 
-  const searchArg = searchParams.get("search")
+  const searchArg = searchParams.get("search")?.trim() || undefined
+
+  const isFiltered = Boolean(
+    searchArg ||
+    (categories && categories.length > 0) ||
+    (topicsArg && topicsArg.length > 0) ||
+    (requiredLevelsArg && requiredLevelsArg.length > 0)
+  )
 
   const pageSize = 12
   const shouldFetch =
@@ -157,7 +172,11 @@ const RoomsPage = () => {
   const hasOtherCategory = categories?.includes("Other")
   const apiCategories = hasOtherCategory ? undefined : categories
 
-  const { data: responseData } = useGetRoomsQuery(
+  const {
+    data: responseData,
+    isLoading,
+    isFetching,
+  } = useGetRoomsQuery(
     {
       page: 1,
       pageSize: 1000,
@@ -169,6 +188,8 @@ const RoomsPage = () => {
     },
     { skip: !shouldFetch },
   )
+
+  const isLoadingRooms = shouldFetch && (isLoading || isFetching)
 
   let rooms = responseData?.items ?? []
 
@@ -231,23 +252,25 @@ const RoomsPage = () => {
           className="w-full h-full flex flex-col"
         >
           <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start mb-4">
-              <RoomsBannerContent
-                sessionProps={{
-                  handleCreateOneOnOneSession: proceedCreateOneOnOne,
-                  handleCreateStudyGroupSession: proceedCreateStudyGroup,
-                  handleCreateAISession: () => actions.openAISettingsModal(),
-                  handleCreateCustomRoomSession: handleCreateCustomRoom,
-                  isCreatingOneOnOne: state.isCreatingOneOnOne,
-                  isCreatingStudyGroup: state.isCreatingStudyGroup,
-                  isCreatingAI: state.isCreatingAI,
-                  isCreatingCustom: state.isCreatingCustom,
-                  canUseAI: true,
-                  currentLang: lang,
-                }}
-              />
-              <WorkshopCarousel hideTitle={true} />
-            </div>
+            {!isFiltered && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start mb-4">
+                <RoomsBannerContent
+                  sessionProps={{
+                    handleCreateOneOnOneSession: proceedCreateOneOnOne,
+                    handleCreateStudyGroupSession: proceedCreateStudyGroup,
+                    handleCreateAISession: () => actions.openAISettingsModal(),
+                    handleCreateCustomRoomSession: handleCreateCustomRoom,
+                    isCreatingOneOnOne: state.isCreatingOneOnOne,
+                    isCreatingStudyGroup: state.isCreatingStudyGroup,
+                    isCreatingAI: state.isCreatingAI,
+                    isCreatingCustom: state.isCreatingCustom,
+                    canUseAI: true,
+                    currentLang: lang,
+                  }}
+                />
+                <WorkshopCarousel hideTitle={true} />
+              </div>
+            )}
 
             <div className="w-full flex flex-col" data-tour="rooms-category-section">
               {/* Tabs hidden temporarily to save vertical space */}
@@ -262,10 +285,11 @@ const RoomsPage = () => {
                         selectedCategories={categories}
                         page={page}
                         totalPages={totalPages}
-                        setPage={setPage}
+                        setPage={handleSetPage}
                         languageType={languageType}
                         requiredLevels={requiredLevelsArg}
                         topics={topicsArg}
+                        isLoading={isLoadingRooms}
                       />
                     )}
                     {tab === "teachers" && <TeachingTab />}

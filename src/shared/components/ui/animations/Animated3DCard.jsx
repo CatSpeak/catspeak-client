@@ -1,9 +1,10 @@
-import React, { useState } from "react"
+import React from "react"
+import { motion } from "framer-motion"
 
 /**
  * A reusable animated card component.
- * Hover: smooth lift + soft glow shadow.
- * Press: slight push-down for tactile feedback.
+ * Hover: optional smooth lift + soft glow shadow.
+ * Tap: fluid physics-based tactile spring feedback.
  */
 const Animated3DCard = ({
   children,
@@ -11,39 +12,41 @@ const Animated3DCard = ({
   containerClassName = "",
   onClick,
   style,
+  liftOnHover = true,
+  disableHover = false,
+  rounded = "rounded-2xl",
   ...props
 }) => {
-  const [isPressed, setIsPressed] = useState(false)
+  const resolvedRounded = className.includes("rounded") ? "" : rounded
 
   return (
-    <div
+    <motion.div
       onClick={onClick}
-      onPointerDown={() => setIsPressed(true)}
-      onPointerUp={() => setIsPressed(false)}
-      onPointerLeave={() => setIsPressed(false)}
-      onPointerCancel={() => setIsPressed(false)}
-      className={`relative group/card outline-offset-4 touch-manipulation block ${
+      whileHover={liftOnHover && !disableHover ? { y: -5 } : undefined}
+      whileTap={!disableHover ? { scale: 0.98 } : undefined}
+      transition={{
+        type: "spring",
+        stiffness: 350,
+        damping: 25,
+        mass: 0.8,
+      }}
+      className={`relative group/card outline-offset-4 touch-manipulation block select-none ${
         onClick ? "cursor-pointer" : ""
       } ${containerClassName}`}
       style={style}
       {...props}
     >
-      {/* Card front — lift on hover, push on press */}
+      {/* Card front */}
       <div
-        className={`relative rounded-xl bg-white flex flex-col overflow-hidden border border-border will-change-transform transition-[transform,box-shadow] duration-[280ms] ease-[cubic-bezier(.25,.8,.25,1)] shadow-sm sm:group-hover/card:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.14),0_2px_8px_-2px_rgba(0,0,0,0.08)] sm:group-hover/card:-translate-y-[5px] ${className}`}
-        style={
-          isPressed
-            ? {
-                transform: "translateY(1px) scale(0.99)",
-                boxShadow: "0 2px 8px -2px rgba(0,0,0,0.10)",
-                transitionDuration: "60ms",
-              }
-            : undefined
-        }
+        className={`relative ${resolvedRounded} bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] transition-all duration-200 ease-out shadow-sm ${
+          !disableHover
+            ? "dark:sm:group-hover/card:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.35),0_2px_8px_-2px_rgba(0,0,0,0.2)]"
+            : ""
+        } ${className}`}
       >
         {children}
       </div>
-    </div>
+    </motion.div>
   )
 }
 

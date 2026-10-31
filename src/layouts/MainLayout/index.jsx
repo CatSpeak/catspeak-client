@@ -158,7 +158,7 @@ const MainLayout = ({
       {/* Background for Community Page - covers FULL viewport behind everything */}
       {isCommunityPage && (
         <div
-          className="fixed inset-0 pointer-events-none z-0 mt-24"
+          className="fixed inset-0 pointer-events-none z-0 mt-24 dark:opacity-10 dark:invert transition-opacity duration-300"
           style={{
             backgroundImage: `url(${BackgroundV2})`,
             backgroundSize: "cover",
@@ -170,7 +170,7 @@ const MainLayout = ({
 
       <div
         className={`relative flex min-h-screen text-left overflow-x-clip ${
-          isLandingPage ? "bg-white" : "bg-primaryBg"
+          isLandingPage ? "bg-white dark:bg-[#0F0F0F]" : "bg-primaryBg dark:bg-[#0F0F0F]"
         } ${isPricingPage ? "h-screen max-h-screen overflow-hidden" : ""}`}
       >
         {shouldShowSidebar && (

@@ -9,16 +9,16 @@ const ModalContent = ({
   onClose,
   children,
   className = "",
-  headerClassName = "flex items-center justify-between p-4 sm:p-6",
+  headerClassName = "flex items-center justify-between p-4",
   title,
   description,
   ariaLabel = "Dialog",
   showCloseButton = true,
   subHeader,
-  subHeaderClassName = "px-4 sm:px-6 pb-6 shrink-0",
+  subHeaderClassName = "px-4 pb-4 shrink-0",
   footer,
-  footerClassName = "p-4 sm:p-6",
-  bodyClassName = "p-4 sm:p-6 flex-1 overflow-y-auto",
+  footerClassName = "p-4",
+  bodyClassName = "",
   fullScreenOnMobile = true,
 }) => {
   useScrollLock(true)
@@ -118,7 +118,7 @@ const ModalContent = ({
           /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(className)
             ? ""
             : "md:max-w-md"
-        } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
+        } ${/(^|\s)bg-/.test(className) ? "" : "bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white border-border dark:border-[#3F3F3F]"} ${
           /(^|\s)rounded/.test(className)
             ? ""
             : fullScreenOnMobile
@@ -150,7 +150,10 @@ const ModalContent = ({
                   )
                 ) : null}
                 {description && (
-                  <p id={descriptionId} className="text-sm text-secondary">
+                  <p
+                    id={descriptionId}
+                    className="text-sm text-secondary dark:text-[#AAAAAA]"
+                  >
                     {description}
                   </p>
                 )}
@@ -164,9 +167,9 @@ const ModalContent = ({
                 type="button"
                 aria-label="Close dialog"
                 onClick={onClose}
-                className="flex shrink-0 items-center justify-center h-10 w-10 hover:bg-[#E5E5E5] rounded-full transition-colors"
+                className="flex shrink-0 items-center justify-center h-10 w-10 hover:bg-[#E5E5E5] dark:hover:bg-[#272727] text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white rounded-full transition-colors"
               >
-                <X size={20} />
+                <X />
               </button>
             )}
           </div>
@@ -174,7 +177,9 @@ const ModalContent = ({
 
         {subHeader && <div className={subHeaderClassName}>{subHeader}</div>}
 
-        <div className={`${bodyClassName} ${!footer ? "mb-4 sm:mb-6" : ""}`}>
+        <div
+          className={`px-4 flex-1 overflow-y-auto ${bodyClassName} ${!footer ? "mb-4" : ""}`}
+        >
           {children}
         </div>
 

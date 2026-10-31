@@ -42,7 +42,7 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
   // ── Group Conversation Header (Height: 72px) ──────────────────────────
   if (isGroup) {
     return (
-      <div className="flex items-center justify-between border-b border-border pl-1 pr-4 h-[72px] shrink-0">
+      <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pl-1 pr-4 h-[72px] shrink-0">
         <div className="flex items-center gap-1 min-w-0 flex-1">
           <IconButton
             onClick={onBack}
@@ -54,9 +54,9 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
           <div className="flex items-center gap-4 min-w-0 flex-1">
             <GroupAvatar conversation={conversation} size={40} />
             <div className="flex flex-col min-w-0">
-              <span className="truncate">{name}</span>
+              <span className="truncate font-semibold text-gray-900 dark:text-white">{name}</span>
               {statusText && (
-                <span className="text-sm text-secondary truncate">
+                <span className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
                   {statusText}
                 </span>
               )}
@@ -79,7 +79,7 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
 
   // ── Normal 1:1 Conversation Header (Height: 56px / h-14) ──────────────
   return (
-    <div className="flex items-center justify-between border-b border-border pr-4 pl-1 h-14 shrink-0">
+    <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pr-4 pl-1 h-14 shrink-0">
       <div className="flex items-center gap-1 min-w-0 flex-1">
         <IconButton
           onClick={onBack}
@@ -102,8 +102,8 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
           />
           <div className="flex flex-col min-w-0">
             <span
-              className={`truncate transition-colors ${
-                friendId ? "group-hover:underline group-hover:text-primary" : ""
+              className={`truncate font-semibold text-gray-900 dark:text-white transition-colors ${
+                friendId ? "group-hover:underline group-hover:text-primary dark:group-hover:text-[#FF0033]" : ""
               }`}
             >
               {name}

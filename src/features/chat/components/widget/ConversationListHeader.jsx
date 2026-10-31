@@ -20,7 +20,7 @@ const ConversationListHeader = ({ onClose, isLoading }) => {
             <ArrowLeft />
           </IconButton>
 
-          <h3>{t.messages.title}</h3>
+          <h3 className="text-gray-900 dark:text-white font-semibold text-lg">{t.messages.title}</h3>
 
           {isLoading && (
             <span className="text-xs text-gray-400">{t.messages.loading}</span>

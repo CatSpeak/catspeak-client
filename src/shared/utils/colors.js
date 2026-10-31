@@ -33,8 +33,8 @@ const coreColors = lightColors
 // ─── Dark Mode Core Tokens ──────────────────────────────
 export const darkColors = {
   // ── Brand & Core Palette ──
-  redPrimary: "#FF0033",
-  primaryRed: "#FF0033",
+  redPrimary: "#990011",
+  primaryRed: "#990011",
 
   // ── Backgrounds ──
   bg: "#0F0F0F", // Dark page background

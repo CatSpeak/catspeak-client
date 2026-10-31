@@ -1,9 +1,36 @@
-import React, { useState, useEffect } from "react"
-import { createPortal } from "react-dom"
+import React, { useState, useEffect, useMemo } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom"
-import { X, SlidersHorizontal } from "lucide-react"
+import {
+  useParams,
+  useSearchParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom"
+import { SlidersHorizontal } from "lucide-react"
 import { TOPICS, LEVELS } from "../../config/constants"
+import Modal from "@/shared/components/ui/Modal"
+import ChipFilter from "@/shared/components/ChipFilter"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+
+const CATEGORIES = [
+  {
+    key: "Knowledge",
+    labelKey: "knowledge",
+    defaultLabel: "Learn something new",
+  },
+  {
+    key: "Culture",
+    labelKey: "culture",
+    defaultLabel: "Explore culture and creativity",
+  },
+  {
+    key: "Lifestyle",
+    labelKey: "lifestyle",
+    defaultLabel: "Enjoy everyday life",
+  },
+  { key: "Growth", labelKey: "growth", defaultLabel: "Build your future" },
+  { key: "Other", labelKey: "other", defaultLabel: "Anything & Everything" },
+]
 
 const RoomFilterModal = ({ open, onClose }) => {
   const { t } = useLanguage()
@@ -14,6 +41,7 @@ const RoomFilterModal = ({ open, onClose }) => {
 
   const [localTopics, setLocalTopics] = useState([])
   const [localLevels, setLocalLevels] = useState([])
+  const [localCategories, setLocalCategories] = useState([])
 
   // Sync state from URL when modal opens
   useEffect(() => {
@@ -21,182 +49,217 @@ const RoomFilterModal = ({ open, onClose }) => {
       queueMicrotask(() => {
         setLocalTopics(searchParams.getAll("topics"))
         setLocalLevels(searchParams.getAll("requiredLevels"))
+        const catsParam = searchParams.get("categories")
+        const parsedCats = catsParam
+          ? catsParam
+              .split(",")
+              .map((c) => c.trim())
+              .filter(Boolean)
+          : []
+        setLocalCategories(parsedCats)
       })
     }
   }, [open, searchParams])
 
   // Map levels based on current language
-  const langMap = { en: "English", zh: "Chinese", vi: "Vietnamese", ja: "Japanese" }
+  const langMap = {
+    en: "English",
+    zh: "Chinese",
+    vi: "Vietnamese",
+    ja: "Japanese",
+  }
   const currentLanguage = lang ? langMap[lang] : "English"
-  
+
   const baseLevels = LEVELS[currentLanguage] || LEVELS.English
   const additionalLevels = [
-    { label: t.rooms?.filters?.levels?.beginner || "Beginner", value: "Beginner" },
-    { label: t.rooms?.filters?.levels?.intermediate || "Intermediate", value: "Intermediate" },
-    { label: t.rooms?.filters?.levels?.advanced || "Advanced", value: "Advanced" },
+    {
+      label: t.rooms?.filters?.levels?.beginner || "Beginner",
+      value: "Beginner",
+    },
+    {
+      label: t.rooms?.filters?.levels?.intermediate || "Intermediate",
+      value: "Intermediate",
+    },
+    {
+      label: t.rooms?.filters?.levels?.advanced || "Advanced",
+      value: "Advanced",
+    },
   ]
-  const currentLevels = [
-    ...baseLevels,
-    ...additionalLevels.filter((level) => !baseLevels.some((bl) => bl.value === level.value)),
-  ]
+  const currentLevels = useMemo(
+    () => [
+      ...baseLevels,
+      ...additionalLevels.filter(
+        (level) => !baseLevels.some((bl) => bl.value === level.value),
+      ),
+    ],
+    [baseLevels, additionalLevels],
+  )
+
+  const categoryItems = useMemo(
+    () =>
+      CATEGORIES.map((cat) => ({
+        key: cat.key,
+        label: t.rooms?.filters?.categories?.[cat.labelKey] || cat.defaultLabel,
+      })),
+    [t],
+  )
+
+  const levelItems = useMemo(
+    () =>
+      currentLevels.map((lvl) => ({
+        key: lvl.value,
+        label: lvl.labelKey
+          ? t.rooms?.filters?.levels?.[lvl.labelKey] || lvl.label
+          : lvl.label,
+      })),
+    [currentLevels, t],
+  )
+
+  const topicItems = useMemo(
+    () =>
+      TOPICS.map((topic) => ({
+        key: topic,
+        label: t.rooms?.filters?.topics?.[topic.toLowerCase()] || topic,
+      })),
+    [t],
+  )
+
+  const toggleCategory = (catKey) => {
+    setLocalCategories((prev) =>
+      prev.includes(catKey)
+        ? prev.filter((c) => c !== catKey)
+        : [...prev, catKey],
+    )
+  }
 
   const toggleTopic = (topic) => {
-    setLocalTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic])
+    setLocalTopics((prev) =>
+      prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic],
+    )
   }
 
   const toggleLevel = (level) => {
-    setLocalLevels(prev => prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level])
+    setLocalLevels((prev) =>
+      prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level],
+    )
   }
 
   const handleApply = () => {
     const newParams = new URLSearchParams(searchParams)
     newParams.delete("topics")
     newParams.delete("requiredLevels")
-    
-    localTopics.forEach(t => newParams.append("topics", t))
-    localLevels.forEach(l => newParams.append("requiredLevels", l))
-    
-    if (localTopics.length > 0 || localLevels.length > 0) {
+    newParams.delete("categories")
+
+    localTopics.forEach((t) => newParams.append("topics", t))
+    localLevels.forEach((l) => newParams.append("requiredLevels", l))
+    if (localCategories.length > 0) {
+      newParams.set("categories", localCategories.join(","))
+    }
+
+    if (
+      localTopics.length > 0 ||
+      localLevels.length > 0 ||
+      localCategories.length > 0
+    ) {
       newParams.set("page", "1")
     }
-    
+
     const communityPath = `/${lang || "en"}/community`
     if (!location.pathname.startsWith(communityPath)) {
       navigate(`${communityPath}?${newParams.toString()}`)
     } else {
       setSearchParams(newParams, { preventScrollReset: true })
     }
-    
+
     onClose()
   }
 
   const handleClear = () => {
     setLocalTopics([])
     setLocalLevels([])
+    setLocalCategories([])
   }
 
-  const totalSelected = localTopics.length + localLevels.length
+  const totalSelected =
+    localTopics.length + localLevels.length + localCategories.length
 
-  if (!open) return null
-
-  return createPortal(
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-0 sm:p-4 md:p-6">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 transition-opacity"
-        onClick={onClose}
-      />
-      
-      {/* Modal Content */}
-      <div className="relative w-full h-full max-h-full rounded-none sm:h-auto sm:max-h-[85vh] sm:max-w-[640px] bg-white sm:rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border bg-white shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-full bg-[#FFF0F2] text-cath-red-700">
-              <SlidersHorizontal size={18} strokeWidth={2.5} />
-            </div>
-            <h2 className="text-[18px] font-bold text-gray-900 tracking-tight">{t.rooms?.filters?.title || "Bộ lọc"}</h2>
-          </div>
-          <button 
-            onClick={onClose} 
-            className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 rounded-full transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-app space-y-8">
-          
-          {/* Levels Section */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[15px] font-bold text-gray-900 tracking-tight">
-                {t.rooms?.filters?.levelsHeading || "Trình độ"}
-              </h3>
-              {localLevels.length > 0 && (
-                <span className="text-xs font-bold text-cath-red-700 bg-[#FFF0F2] px-2 py-0.5 rounded-full">
-                  {localLevels.length}
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {currentLevels.map(level => {
-                const isSelected = localLevels.includes(level.value)
-                return (
-                  <button
-                    key={level.value}
-                    onClick={() => toggleLevel(level.value)}
-                    className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-[14px] font-semibold transition-all duration-200 border ${
-                      isSelected 
-                        ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700" 
-                        : "bg-white border-border text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
-                    }`}
-                  >
-                    {level.labelKey ? t.rooms?.filters?.levels?.[level.labelKey] || level.label : level.label}
-                  </button>
-                )
-              })}
-            </div>
-          </section>
-
-          {/* Topics Section */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[15px] font-bold text-gray-900 tracking-tight">
-                {t.rooms?.filters?.topicsHeading || "Chủ đề"}
-              </h3>
-              {localTopics.length > 0 && (
-                <span className="text-xs font-bold text-cath-red-700 bg-[#FFF0F2] px-2 py-0.5 rounded-full">
-                  {localTopics.length}
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {TOPICS.map(topic => {
-                const isSelected = localTopics.includes(topic)
-                return (
-                  <button
-                    key={topic}
-                    onClick={() => toggleTopic(topic)}
-                    className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-[14px] font-semibold transition-all duration-200 border ${
-                      isSelected 
-                        ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700" 
-                        : "bg-white border-border text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
-                    }`}
-                  >
-                    {t.rooms?.filters?.topics?.[topic.toLowerCase()] || topic}
-                  </button>
-                )
-              })}
-            </div>
-          </section>
-
-        </div>
-
-        <div className="flex gap-3 sm:gap-0 items-center sm:justify-between p-4 sm:p-5 border-t border-border bg-gray-50/80 shrink-0 mt-auto">
-          <button 
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      showCloseButton={true}
+      className="md:max-w-2xl md:max-h-[85vh] rounded-none md:rounded-xl"
+      headerClassName="flex items-center justify-between p-4"
+      title={t.rooms?.filters?.title || "Bộ lọc"}
+      bodyClassName="px-4 flex-1 overflow-y-auto space-y-4 scrollbar-app"
+      footerClassName="p-4 bg-gray-50/80 dark:bg-[#1A1A1A] shrink-0"
+      footer={
+        <div className="flex items-center gap-2 w-full sm:justify-end">
+          <PillButton
+            variant="secondary"
             onClick={handleClear}
-            className="flex-1 sm:flex-none flex items-center justify-center px-4 py-3.5 sm:py-2.5 text-[15px] sm:text-[14px] font-bold text-gray-700 bg-gray-200/70 sm:bg-transparent sm:text-gray-500 hover:text-cath-red-700 hover:bg-[#FFF0F2] rounded-xl transition-all"
+            className="flex-1 sm:flex-initial sm:min-w-[100px]"
           >
-            {t.rooms?.filters?.clear || "Xóa tất cả"}
-          </button>
-          <button 
+            <span>{t.rooms?.filters?.clear || "Xóa tất cả"}</span>
+          </PillButton>
+
+          <PillButton
+            variant="primary"
             onClick={handleApply}
-            className="flex-[2] sm:flex-none flex items-center justify-center gap-2 px-8 py-3.5 sm:py-3 bg-cath-red-700 hover:bg-cath-red-800 text-white text-[15px] font-bold rounded-xl shadow-md shadow-cath-red-700/10 transition-all hover:-translate-y-0.5"
+            className="flex-1 sm:flex-initial"
           >
-            <span>{t.rooms?.filters?.apply || "Áp dụng"}</span>
-            {totalSelected > 0 && (
-              <span className="flex items-center justify-center bg-white/20 px-2 py-0.5 rounded-md text-[12px]">
-                {totalSelected}
-              </span>
-            )}
-          </button>
+            <span>
+              {t.rooms?.filters?.apply || "Áp dụng"}
+              {totalSelected > 0 && ` (${totalSelected})`}
+            </span>
+          </PillButton>
         </div>
-      </div>
-    </div>,
-    document.body
+      }
+    >
+      {/* Categories Section */}
+      <section>
+        <h3 className="text-xs text-secondary dark:text-white mb-2">
+          {t.rooms?.filters?.categoryLabel ||
+            t.rooms?.filters?.categoriesHeading ||
+            "Danh mục"}
+        </h3>
+        <ChipFilter
+          items={categoryItems}
+          value={localCategories}
+          onChange={toggleCategory}
+          wrap={true}
+          selectedVariant="contrast"
+        />
+      </section>
+
+      {/* Levels Section */}
+      <section>
+        <h3 className="text-xs text-secondary dark:text-white mb-2">
+          {t.rooms?.filters?.levelsHeading || "Trình độ"}
+        </h3>
+        <ChipFilter
+          items={levelItems}
+          value={localLevels}
+          onChange={toggleLevel}
+          wrap={true}
+          selectedVariant="contrast"
+        />
+      </section>
+
+      {/* Topics Section */}
+      <section>
+        <h3 className="text-xs text-secondary dark:text-white mb-2">
+          {t.rooms?.filters?.topicsHeading || "Chủ đề"}
+        </h3>
+        <ChipFilter
+          items={topicItems}
+          value={localTopics}
+          onChange={toggleTopic}
+          wrap={true}
+          selectedVariant="contrast"
+        />
+      </section>
+    </Modal>
   )
 }
 

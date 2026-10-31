@@ -27,7 +27,7 @@ const SessionActionButtons = ({
 
   return (
     <div className="relative mt-4">
-      <div className="relative flex flex-col sm:flex-row sm:flex-wrap gap-4 mt-2">
+      <div className="relative flex flex-col sm:flex-row sm:flex-wrap gap-2 mt-2">
         {badges.map((b) => {
           const Icon = b.icon
           const isOneOnOne = b.id === "connect_1_1"
@@ -71,6 +71,7 @@ const SessionActionButtons = ({
               <Button3D
                 disabled={!isActionable || isLoadingThis}
                 loading={isActionable && isLoadingThis}
+                startIcon={Icon ? <Icon className="w-5 h-5" size={20} /> : null}
                 className="w-full sm:w-auto sm:min-w-[140px]"
                 roundedClass="rounded-xl"
               >
@@ -85,8 +86,10 @@ const SessionActionButtons = ({
             onClick={handleVoxisClick}
           >
             <Button3D
-              aria-label={t.rooms?.sessionActions?.aiChat || "Trò chuyện với AI"}
-              startIcon={<Bot className="w-4 h-4" />}
+              aria-label={
+                t.rooms?.sessionActions?.aiChat || "Trò chuyện với AI"
+              }
+              startIcon={<Bot className="w-5 h-5" size={20} />}
               className="w-full sm:w-auto sm:min-w-[140px]"
               roundedClass="rounded-xl"
             >

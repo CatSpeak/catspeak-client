@@ -2,12 +2,13 @@ import React from "react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 
-const WorkshopCard = ({ slide, onCtaClick }) => {
+const WorkshopCard = ({ slide, onCtaClick, className = "" }) => {
   const { t } = useLanguage();
+  const resolvedRounded = className.includes("rounded") ? "" : "rounded-2xl";
 
   return (
     <div
-      className="relative flex w-full flex-col overflow-hidden rounded-xl bg-black/5 group aspect-video cursor-pointer"
+      className={`relative flex w-full flex-col overflow-hidden ${resolvedRounded} border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-sm group aspect-video cursor-pointer ${className}`}
       onClick={() => onCtaClick(slide.modal || "development")}
       style={{ containerType: "inline-size" }}
     >
@@ -17,8 +18,6 @@ const WorkshopCard = ({ slide, onCtaClick }) => {
           alt={slide.title || "Workshop Image"}
           className="absolute inset-0 h-full w-full object-cover"
         />
-        {/* Subtle bottom shadow for text readability without darkening the whole image */}
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
       </div>
 
       {/* Content Section overlaying the image */}

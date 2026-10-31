@@ -87,17 +87,17 @@ const NotificationWidget = () => {
     <div className="relative flex items-center" ref={dropdownRef}>
       <IconButton
         onClick={toggleDropdown}
-        variant="filled"
+        variant="ghost"
         aria-label={t.header?.notifications || "Notifications"}
         badge={
           unreadCount > 0 && (
-            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none dark:border-gray-800">
+            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] items-center justify-center rounded-full border-2 border-white bg-cath-red-700 px-1 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none dark:border-gray-800">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )
         }
       >
-        <Bell />
+        <Bell size={20} strokeWidth={2} />
       </IconButton>
 
       <AnimatePresence>

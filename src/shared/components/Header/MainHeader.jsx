@@ -3,13 +3,13 @@ import { Menu, LayoutGrid } from "lucide-react"
 import HeaderUserControls from "./HeaderUserControls"
 import HeaderGuestControls from "./HeaderGuestControls"
 import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
+import ThemeToggle from "@/shared/components/ui/ThemeToggle"
 import { useAuth } from "@/features/auth"
 
 // Extracted Components
 import CommunitySwitcher from "./CommunitySwitcher"
 import OnlinePresence from "./OnlinePresence"
 import HeaderSearchBar from "./HeaderSearchBar"
-import HeaderFilter from "./HeaderFilter"
 import { Link, useLocation } from "react-router-dom"
 import { MainLogo, IconLogo } from "@/shared/assets/icons/logo"
 
@@ -42,19 +42,21 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
 
   return (
     <header
-      className={`sticky top-0 z-40 h-14 border-b border-border transition-all duration-300 ${
-        scrolled ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-white"
+      className={`sticky top-0 z-40 h-14 transition-all duration-300 border-b border-border dark:border-[#3F3F3F] ${
+        scrolled
+          ? "bg-white/90 dark:bg-[#0F0F0F]/90 backdrop-blur-md shadow-sm"
+          : "bg-white dark:bg-[#0F0F0F]"
       }`}
     >
-      <div className="flex w-full h-full items-center justify-between px-4 lg:px-6">
+      <div className="flex w-full h-full items-center justify-between px-4">
         {/* Left Section: Mobile Menu + Community Switcher + Online count */}
-        <div className="flex items-center gap-3 md:gap-4 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {showSidebar && (
             <button
               onClick={handleDrawerToggle}
-              className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-md shrink-0 cursor-pointer"
+              className="lg:hidden p-2 -ml-2 text-gray-600 dark:text-[#AAAAAA] hover:bg-gray-100 dark:hover:bg-[#272727] rounded-md shrink-0 cursor-pointer"
             >
-              <Menu size={24} />
+              <Menu />
             </button>
           )}
 
@@ -98,21 +100,19 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
 
         {/* Right Section: Search + Filter + Lang + User */}
         {/* min-w-0 + flex-1: ô tìm kiếm co lại thay vì đẩy chuông/chat/avatar ra ngoài mép (BUG-PT-17) */}
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
           {/* Search */}
-          <div className="flex items-center gap-1" data-tour="header-search-filter">
+          <div data-tour="header-search-filter">
             <HeaderSearchBar />
-
-            {/* Filter */}
-            <div className="hidden md:block">
-              <HeaderFilter />
-            </div>
           </div>
 
           {/* Language flag */}
           <div className="hidden lg:block" data-tour="language-switcher">
             <LanguageSwitcher />
           </div>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           {isLoggedIn ? (
             <HeaderUserControls />

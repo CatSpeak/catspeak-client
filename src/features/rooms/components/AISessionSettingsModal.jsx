@@ -112,8 +112,8 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
   const pillClass = (active) =>
     `inline-flex h-10 items-center rounded-full px-4 text-sm border transition-colors ${
       active
-        ? "bg-cath-red-700 border-cath-red-700 text-white hover:bg-cath-red-800 hover:border-cath-red-800"
-        : "border-[#C6C6C6] hover:bg-primaryBg"
+        ? "bg-cath-red-700 dark:bg-[#FF0033] border-cath-red-700 dark:border-[#FF0033] text-white hover:bg-cath-red-800 dark:hover:bg-[#FF0033]/90 hover:border-cath-red-800"
+        : "border-[#C6C6C6] dark:border-[#3F3F3F] text-gray-800 dark:text-[#AAAAAA] hover:bg-primaryBg dark:hover:bg-[#272727] dark:hover:text-white"
     }`
 
   return (
@@ -171,7 +171,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
             step={SPEED_CONFIG.step}
             onChange={(e) => setSpeed(parseFloat(e.target.value))}
           />
-          <div className="flex justify-between text-xs text-[#7A7574] mt-1">
+          <div className="flex justify-between text-xs text-[#7A7574] dark:text-[#AAAAAA] mt-1">
             <span>{s.speedSlow}</span>
             <span>{s.speedNormal}</span>
             <span>{s.speedFast}</span>
@@ -182,7 +182,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
         <div className="text-left flex flex-col">
           <div className="flex items-center justify-between gap-3 mb-2">
             <label className="text-sm">{s.proficiencyLabel}</label>
-            <span className="text-xs text-[#7A7574]">{s.proficiencyOptional}</span>
+            <span className="text-xs text-[#7A7574] dark:text-[#AAAAAA]">{s.proficiencyOptional}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {proficiencyLevels.map((level) => {

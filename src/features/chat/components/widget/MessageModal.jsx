@@ -49,7 +49,7 @@ const MessageModal = ({ isOpen, children }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="relative flex h-full w-full flex-col overflow-hidden bg-white"
+              className="relative flex h-full w-full flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]"
             >
               {children}
             </Motion.div>
@@ -69,7 +69,7 @@ const MessageModal = ({ isOpen, children }) => {
           direction="down"
           distance={12}
           exit={true}
-          className="absolute right-0 top-full mt-2 z-[1200] flex h-[480px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-lg border border-border bg-white shadow-lg "
+          className="absolute right-0 top-full mt-2 z-[1200] flex h-[480px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-lg "
         >
           {children}
         </FluentAnimation>

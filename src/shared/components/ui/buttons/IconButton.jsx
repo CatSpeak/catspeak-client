@@ -31,18 +31,18 @@ const IconButton = ({
 
   const variantClasses = {
     primary: "bg-[#990011] group-hover/icon:bg-[#80000e] text-white",
-    secondary: "bg-white border border-border group-hover/icon:bg-primaryBg",
+    secondary: "bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] text-gray-700 dark:text-gray-200 group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D] active:scale-95 transition-all duration-150",
     white:
       "bg-white border border-gray-200 text-gray-500 group-hover/icon:bg-gray-50 shadow-xs",
-    filled: "bg-primaryBg group-hover/icon:bg-[#C2C2C2]",
-    ghost: "bg-transparent group-hover/icon:bg-[#CCCCCC]",
+    filled: "bg-primaryBg dark:bg-[#1A1A1A] dark:text-gray-200 group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D] active:scale-95 transition-all duration-150",
+    ghost: "bg-transparent group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D] text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white active:scale-95 transition-all duration-150",
     iconOnly:
       "bg-transparent text-white/60 group-hover/icon:text-white transition-colors duration-150",
-    transparent: "bg-transparent",
+    transparent: "bg-transparent group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D] active:scale-95 transition-all duration-150",
     overlay:
       "bg-black/50 group-hover/icon:bg-black/80 text-white/70 group-hover/icon:text-white transition-all",
     outline:
-      "bg-transparent group-hover/icon:bg-primaryBg group-active/icon:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
+      "bg-transparent group-hover/icon:bg-primaryBg dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#e5e5e5] dark:group-active/icon:bg-[#3D3D3D] border-[1.5px] border-solid border-[#990011] dark:border-[#FF0033] text-[#990011] dark:text-[#FF0033]",
     cathRed:
       "bg-[#910B09] group-hover/icon:bg-[#7a0907] text-white transition-colors",
     cathOutline:

@@ -403,7 +403,7 @@ const ChatInput = ({
           >
             <textarea
               ref={textareaRef}
-              className={`bg-transparent placeholder-[#606060] resize-none focus:outline-none w-full ${isMultiline
+              className={`bg-transparent placeholder-[#606060] dark:placeholder-[#AAAAAA] text-gray-900 dark:text-white resize-none focus:outline-none w-full ${isMultiline
                 ? "overflow-y-auto pr-4 pt-1"
                 : "overflow-y-hidden py-1"
                 }`}

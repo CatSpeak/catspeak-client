@@ -117,14 +117,14 @@ const ChatBubbleContent = ({
     : isRecalled
       ? `rounded-2xl border border-border px-4 py-3 select-none inline-flex items-center gap-1 ${
           isOwn
-            ? "bg-neutral-100/90 text-neutral-500"
-            : "bg-primaryBg text-neutral-500"
+            ? "bg-neutral-100/90 dark:bg-[#272727] text-neutral-500 dark:text-[#AAAAAA]"
+            : "bg-primaryBg dark:bg-[#272727] text-neutral-500 dark:text-[#AAAAAA]"
         }`
       : isBubbleCard
         ? `${
             isOwn
-              ? "rounded-2xl bg-[#990011] text-white"
-              : "rounded-2xl bg-primaryBg text-neutral-900"
+              ? "rounded-2xl bg-[#990011] dark:bg-[#FF0033] text-white"
+              : "rounded-2xl bg-primaryBg dark:bg-[#272727] text-neutral-900 dark:text-white"
           } ${
             hasMedia || hasLinkPreview
               ? isAudio
@@ -199,7 +199,7 @@ const ChatBubbleContent = ({
             }}
             rows={2}
             autoFocus
-            className="w-full bg-white text-neutral-900 text-sm p-2 rounded-lg border border-primary/50 focus:border-primary focus:outline-hidden resize-none shadow-xs"
+            className="w-full bg-white dark:bg-[#1A1A1A] text-neutral-900 dark:text-white text-sm p-2 rounded-lg border border-primary/50 dark:border-[#3F3F3F] focus:border-primary focus:outline-hidden resize-none shadow-xs"
           />
           <div className="flex items-center justify-end gap-1.5 select-none">
             <button
@@ -240,7 +240,7 @@ const ChatBubbleContent = ({
           {textContent && (
             <div
               className={`w-full ${
-                isOwn ? "bg-[#990011] text-white" : "bg-primaryBg text-gray-900"
+                isOwn ? "bg-[#990011] dark:bg-[#FF0033] text-white" : "bg-primaryBg dark:bg-[#272727] text-gray-900 dark:text-white"
               } px-4 py-3 rounded-b-2xl rounded-t-none text-left`}
             >
               <FormattedText
@@ -297,8 +297,8 @@ const ChatBubbleContent = ({
             <div
               className={`w-full ${
                 isOwn
-                  ? "bg-[#990011] text-white"
-                  : "bg-primaryBg text-gray-900 shadow-xs"
+                  ? "bg-[#990011] dark:bg-[#FF0033] text-white"
+                  : "bg-primaryBg dark:bg-[#272727] text-gray-900 dark:text-white shadow-xs"
               } px-4 py-3 rounded-b-2xl rounded-t-none text-left`}
             >
               <FormattedText

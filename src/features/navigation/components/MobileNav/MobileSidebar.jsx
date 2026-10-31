@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { MainLogo, IconLogo } from "@/shared/assets/icons/logo"
 import { X } from "lucide-react"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
+import ThemeToggle from "@/shared/components/ui/ThemeToggle"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 import MobileNavItems from "./MobileNavItems"
 
@@ -22,7 +23,7 @@ const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 h-full h-[100dvh] max-h-[100dvh] w-[320px] bg-white shadow-[4px_0_24px_rgba(0,0,0,0.08)] flex flex-col transition-transform duration-300 z-50 min-[1280px]:hidden overflow-hidden ${
+        className={`fixed top-0 left-0 bottom-0 h-full h-[100dvh] max-h-[100dvh] w-[320px] bg-white dark:bg-[#0F0F0F] border-r border-border dark:border-[#3F3F3F] shadow-[4px_0_24px_rgba(0,0,0,0.08)] flex flex-col transition-transform duration-300 z-50 min-[1280px]:hidden overflow-hidden ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -47,6 +48,7 @@ const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
                 className="h-6 w-auto shrink-0"
               />
             </Link>
+            <ThemeToggle className="mr-1" />
             <IconButton
               size="sm"
               variant="ghost"

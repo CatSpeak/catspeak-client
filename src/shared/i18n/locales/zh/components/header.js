@@ -13,6 +13,10 @@ export default {
   newNotificationTitle: "新通知",
   newNotificationBody: "您有一个新通知需要查看。",
   searchPlaceholder: "搜索房间",
+  recentSearches: "最近搜索",
+  clearAll: "清除全部",
+  resultsFound: "找到 {{count}} 个结果",
+  searching: "正在搜索房间...",
   filterRooms: "筛选房间",
   languages: {
     vi: "越南语",

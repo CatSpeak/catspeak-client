@@ -33,11 +33,18 @@ const CommunitySwitcher = () => {
 
   const selectedLabel = useMemo(() => {
     const config = LANGUAGE_CONFIG.find((c) => c.code === currentCommunity)
-    return t.header?.countries?.[config?.labelKey] || config?.fallbackLabel || "Community"
+    return (
+      t.header?.countries?.[config?.labelKey] ||
+      config?.fallbackLabel ||
+      "Community"
+    )
   }, [currentCommunity, t])
 
   const handleCommunitySelect = (newCode) => {
-    if (newCode === currentCommunity) { setIsOpen(false); return }
+    if (newCode === currentCommunity) {
+      setIsOpen(false)
+      return
+    }
     localStorage.setItem("communityLanguage", newCode)
     setIsOpen(false)
 
@@ -47,37 +54,41 @@ const CommunitySwitcher = () => {
       location.pathname.startsWith(`/${currentCommunity}/`)
 
     if (isInsideEcosystem) {
-      window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
+      window.location.href = getSwitchCommunityPath(
+        location.pathname,
+        currentCommunity,
+        newCode,
+      )
     } else {
       window.location.reload()
     }
   }
 
   return (
-    <div className="hidden sm:block relative ml-2" ref={dropdownRef}>
+    <div className="relative flex items-center h-12" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen((p) => !p)}
-        className="flex items-center gap-2 cursor-pointer focus:outline-none"
+        className="flex items-center gap-2 px-4 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer focus:outline-none"
       >
-        <span className="text-cath-red-700 font-medium text-[16px]">
+        <span className="text-cath-red-700 dark:text-white text-sm font-semibold">
           {selectedLabel}
         </span>
         <ChevronDown
-          size={18}
-          className={`text-cath-red-700 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          size={20}
+          className={`text-cath-red-700 dark:text-white transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
       <AnimatePresence>
         {isOpen && (
-          <div className="absolute top-full left-0 mt-2 min-w-[220px] z-[200]">
+          <div className="absolute top-full left-0 mt-2 min-w-[220px] z-50">
             <FluentAnimation
               direction="down"
               exit
-              className="rounded-xl border border-border shadow-xl bg-white overflow-hidden"
+              className="rounded-xl border border-border dark:border-[#3F3F3F] shadow-xl bg-white dark:bg-[#1A1A1A] overflow-hidden"
             >
-              <div className="flex flex-col gap-0.5 p-1.5">
+              <div className="flex flex-col gap-1 p-1">
                 {LANGUAGE_CONFIG.map((config) => {
                   // if (config.code === "vi") return null
                   return (
@@ -85,7 +96,10 @@ const CommunitySwitcher = () => {
                       key={config.code}
                       {...config}
                       isActive={currentCommunity === config.code}
-                      label={t.header?.countries?.[config.labelKey] || config.fallbackLabel}
+                      label={
+                        t.header?.countries?.[config.labelKey] ||
+                        config.fallbackLabel
+                      }
                       soonLabel={t.header?.soon || "Soon"}
                       onSelect={() => handleCommunitySelect(config.code)}
                     />

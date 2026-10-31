@@ -134,7 +134,7 @@ const ConversationDetail = ({
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-white">
+    <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]">
       {/* ── Messages List ──────────────────────────────── */}
       <div
         ref={scrollRef}
@@ -204,7 +204,7 @@ const ConversationDetail = ({
       </div>
 
       {/* ── Chat Input ─────────────────────────────────── */}
-      <div className="border-t border-border">
+      <div className="border-t border-border dark:border-[#3F3F3F]">
         <ChatInput
           value={input}
           compact={true}

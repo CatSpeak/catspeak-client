@@ -1,21 +1,51 @@
-﻿import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { getRoomShareUrl } from "@/shared/utils/shareUtils";
-import { useNavigate, useParams } from "react-router-dom";
-import { Clock, Users, Link as LinkIcon, Bookmark, Lock } from "lucide-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { useAuth } from "@/features/auth";
-import { useAuthModal } from "@/shared/context/AuthModalContext";
-import { useTimezone } from "@/shared/hooks/useTimezone";
-import { calculateEndDate, isRoomExpired } from "@/shared/utils/dateUtils";
-import toast from "react-hot-toast";
-import { useToggleBookmarkRoomMutation } from "@/store/api/roomsApi";
-import RoomFullModal from "./RoomFullModal";
-import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png";
-import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png";
-import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg";
-import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon";
-import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard";
+import React, { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
+import { getRoomShareUrl } from "@/shared/utils/shareUtils"
+import { useNavigate, useParams } from "react-router-dom"
+import { Clock, Users, Link as LinkIcon } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { calculateEndDate, isRoomExpired } from "@/shared/utils/dateUtils"
+import toast from "react-hot-toast"
+import { useToggleBookmarkRoomMutation } from "@/store/api/roomsApi"
+import RoomFullModal from "./RoomFullModal"
+import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
+import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
+import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg"
+import { getTopicMeta } from "../utils/getTopicIcon"
+import Badge from "@/shared/components/ui/indicators/Badge"
+import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
+import { motion as Motion } from "framer-motion"
+
+const ribbonVariants = {
+  unbookmarked: {
+    height: 26,
+    scaleX: 1,
+    transition: {
+      type: "spring",
+      stiffness: 420,
+      damping: 28,
+    },
+  },
+  bookmarked: {
+    height: 52,
+    scaleX: [1, 0.65, 0.65, 1],
+    transition: {
+      height: {
+        duration: 0.42,
+        ease: [0.34, 1.25, 0.64, 1],
+      },
+      scaleX: {
+        duration: 0.46,
+        times: [0, 0.28, 0.68, 1],
+        ease: "easeInOut",
+      },
+    },
+  },
+}
 
 /**
  * CommunityRoomCard — dung rieng cho trang /community.
@@ -33,6 +63,7 @@ const CommunityRoomCard = ({ room }) => {
   const [isBookmarked, setIsBookmarked] = useState(
     Boolean(room.isBookmarked ?? room.isBookmark ?? room.bookmarked),
   )
+  const [isActionHovered, setIsActionHovered] = useState(false)
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -86,7 +117,8 @@ const CommunityRoomCard = ({ room }) => {
 
     if (isExpired) {
       toast.error(
-        t?.rooms?.callEnded?.expiredToast || "Phong nay da het thoi han su dung!"
+        t?.rooms?.callEnded?.expiredToast ||
+          "Phong nay da het thoi han su dung!",
       )
       return
     }
@@ -97,7 +129,9 @@ const CommunityRoomCard = ({ room }) => {
     }
 
     const communityLang = localStorage.getItem("communityLanguage") || "en"
-    navigate(`/${communityLang}/meet/${roomId}`)
+    setTimeout(() => {
+      navigate(`/${communityLang}/meet/${roomId}`)
+    }, 120)
   }
 
   const roomTypeVal = room.roomType ?? room.RoomType
@@ -141,7 +175,8 @@ const CommunityRoomCard = ({ room }) => {
     if (isExpired) {
       e.stopPropagation()
       toast.error(
-        t?.rooms?.callEnded?.expiredToast || "Phong nay da het thoi han su dung!"
+        t?.rooms?.callEnded?.expiredToast ||
+          "Phong nay da het thoi han su dung!",
       )
       return
     }
@@ -171,12 +206,6 @@ const CommunityRoomCard = ({ room }) => {
       if (res?.data?.isBookmarked !== undefined) {
         setIsBookmarked(res.data.isBookmarked)
       }
-      toast.success(
-        res?.message ||
-          (prev
-            ? t.rooms?.unbookmarkSuccess || "Da bo luu phong"
-            : t.rooms?.bookmarkSuccess || "Da luu phong thanh cong"),
-      )
     } catch (err) {
       setIsBookmarked(prev)
       toast.error(
@@ -206,14 +235,21 @@ const CommunityRoomCard = ({ room }) => {
     <>
       <Animated3DCard
         onClick={handleRoomClick}
+        liftOnHover={false}
+        disableHover={isActionHovered}
+        rounded="rounded-2xl"
         style={{
           fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
-        className="h-full w-full"
+        className={`h-full w-full transition-colors duration-200 ease-out ${
+          !isActionHovered
+            ? "hover:bg-gray-200/80 dark:hover:bg-[#272727] active:bg-gray-300/80 dark:active:bg-[#333333]"
+            : ""
+        }`}
         containerClassName="h-full w-full"
       >
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-border">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border">
           {/* Blurred Background Image */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
@@ -227,11 +263,30 @@ const CommunityRoomCard = ({ room }) => {
             className={`relative z-10 h-full w-full ${!imageError && room.thumbnailUrl ? "object-contain" : "object-cover"}`}
           />
 
-          {/* Top Left: Level & Topic badges only (no type/visibility badges) */}
-          <div className="absolute left-2 top-2 max-w-[65%] flex items-center gap-1.5 z-10 p-1">
+          {/* Top Left: Badges (Privacy, Level, Topic) */}
+          <div className="absolute left-2 top-2 max-w-[calc(100%-48px)] flex items-center gap-1.5 z-10 p-1">
+            {/* 1st (Far Left): Privacy / Password badge */}
+            {(isPrivate || hasPassword) && (
+              <Badge
+                color="dark"
+                title={
+                  isPrivate && hasPassword
+                    ? "Private & Password Protected"
+                    : isPrivate
+                      ? t?.rooms?.filters?.visibilities?.Private || "Private"
+                      : t?.rooms?.customRooms?.passwordRequired || "Password"
+                }
+              >
+                {hasPassword
+                  ? t?.rooms?.customRooms?.passwordRequired || "Password"
+                  : t?.rooms?.filters?.visibilities?.Private || "Private"}
+              </Badge>
+            )}
+
+            {/* 2nd: Required Level badge */}
             {room.requiredLevel && (
-              <div
-                className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate cursor-default"
+              <Badge
+                color="cath-red"
                 title={
                   t?.rooms?.filters?.levels?.[
                     room.requiredLevel?.toLowerCase()
@@ -242,96 +297,105 @@ const CommunityRoomCard = ({ room }) => {
                 {t?.rooms?.filters?.levels?.[
                   room.requiredLevel?.toLowerCase()
                 ] || room.requiredLevel}
-              </div>
+              </Badge>
             )}
+
+            {/* 3rd: Topic text badge (hide generic 'Other' / 'Khác' topics) */}
             {(() => {
               const activeTopic =
                 room.topic ||
                 (Array.isArray(room.topics) && room.topics.length > 0
                   ? room.topics[0]
                   : undefined)
+              if (!activeTopic) return null
+
               const { topicKey } = getTopicMeta(activeTopic)
+              const isOther =
+                topicKey === "other" ||
+                ["other", "others", "khác", "khac"].includes(
+                  String(activeTopic).trim().toLowerCase(),
+                )
+              if (isOther) return null
+
               const topicLabel =
-                t?.rooms?.filters?.topics?.[topicKey] ||
-                activeTopic ||
-                t?.rooms?.filters?.topics?.other ||
-                "Khac"
+                t?.rooms?.filters?.topics?.[topicKey] || activeTopic
               return (
-                <div
-                  className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10 cursor-default"
+                <Badge
+                  color="cath-red"
                   title={topicLabel}
+                  className="max-w-[120px] truncate"
                 >
-                  {getTopicIcon(activeTopic)}
-                </div>
+                  {topicLabel}
+                </Badge>
               )
             })()}
           </div>
 
-          {/* Top Right: Actions & Status */}
-          <div className="absolute right-2 top-2 flex items-center gap-1.5 z-10 p-1">
-            {(isPrivate || hasPassword) && (
-              <div
-                className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm shadow-sm"
-                title={
-                  isPrivate && hasPassword
-                    ? "Private & Password Protected"
-                    : isPrivate
-                      ? "Private Room"
-                      : "Password Protected"
-                }
-              >
-                <Lock size={14} className="text-white" />
-              </div>
-            )}
-            <div
-              className={`flex shrink-0 h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-300 shadow-sm cursor-pointer ${
-                isBookmarked
-                  ? "bg-cath-red-700/20 hover:bg-cath-red-700/30 ring-1 ring-cath-red-700/40"
-                  : "bg-white/30 hover:bg-white/50"
-              }`}
-              onClick={handleBookmarkClick}
-              title={
-                isBookmarked
-                  ? t?.rooms?.unbookmark || "Bo luu phong"
-                  : t?.rooms?.bookmark || "Luu phong"
+          {/* Top Right: Bookmark Ribbon Hanging from Top Edge */}
+          <Motion.button
+            type="button"
+            initial={false}
+            animate={isBookmarked ? "bookmarked" : "unbookmarked"}
+            variants={ribbonVariants}
+            ref={(el) => {
+              if (el) {
+                el.onpointerdown = (e) => e.stopPropagation()
               }
-            >
-              <Bookmark
-                size={16}
-                className={`transition-all duration-200 ${
-                  isBookmarked
-                    ? "text-cath-red-700 fill-cath-red-700 scale-110"
-                    : "text-cath-red-800 fill-none"
-                }`}
-              />
-            </div>
-          </div>
+            }}
+            style={{
+              originY: 0,
+              originX: 0.5,
+              clipPath:
+                "polygon(0% 0%, 100% 0%, 100% 100%, 50% calc(100% - 6px), 0% 100%)",
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseEnter={() => setIsActionHovered(true)}
+            onMouseLeave={() => setIsActionHovered(false)}
+            onClick={handleBookmarkClick}
+            title={
+              isBookmarked
+                ? t?.rooms?.unbookmark || "Bo luu phong"
+                : t?.rooms?.bookmark || "Luu phong"
+            }
+            aria-label={
+              isBookmarked
+                ? t?.rooms?.unbookmark || "Bo luu phong"
+                : t?.rooms?.bookmark || "Luu phong"
+            }
+            className="absolute top-0 right-3.5 z-20 w-6.5 sm:w-7 cursor-pointer outline-none transition-colors duration-150 select-none drop-shadow-md bg-cath-red-700 hover:bg-cath-red-800"
+          />
         </div>
 
         {/* Content Section — no badges row */}
-        <div className="flex flex-1 flex-col p-4 pb-4">
+        <div className="flex flex-1 flex-col pl-4 py-4">
           {/* Title & Link */}
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">
+          <div className="flex items-start justify-between gap-2 pr-1 mb-2">
+            <h3 className="text-base font-bold line-clamp-2 text-black dark:text-white leading-snug">
               {translatedName}
             </h3>
-            <div
+            <IconButton
+              variant="ghost"
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseEnter={() => setIsActionHovered(true)}
+              onMouseLeave={() => setIsActionHovered(false)}
               onClick={handleCopyLink}
               title={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
-              className="flex items-center justify-center text-cath-red-800 shrink-0 hover:scale-110 transition-all active:scale-95 cursor-pointer p-1.5 rounded-full hover:bg-red-50"
+              aria-label={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
+              className="shrink-0"
             >
-              <LinkIcon size={18} />
-            </div>
+              <LinkIcon />
+            </IconButton>
           </div>
 
           {/* Footer Info */}
-          <div className="mt-auto flex justify-between items-center gap-3 sm:gap-4 flex-wrap">
+          <div className="mt-auto flex justify-between items-center gap-2 flex-wrap pr-4">
             {/* Participants */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
-                <Users size={14} className="text-[#8B5A2B]" />
-              </div>
-              <span className="text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
+            <div className="flex items-center gap-2">
+              <Users
+                size={18}
+                className="shrink-0 text-secondary dark:text-[#AAAAAA]"
+              />
+              <span className="text-sm text-secondary dark:text-[#AAAAAA] whitespace-nowrap">
                 {isUnlimitedParticipants
                   ? `${room.currentParticipantCount || 0} ${t.rooms.people}`
                   : `${room.currentParticipantCount || 0}/${room.maxParticipants} ${t.rooms.people}`}
@@ -339,13 +403,14 @@ const CommunityRoomCard = ({ room }) => {
             </div>
 
             {/* Date/Time */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
-                <Clock size={14} className="text-[#8B5A2B]" />
-              </div>
-              <div className="flex items-center text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
-                <span>{timeStr}</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Clock
+                size={18}
+                className="shrink-0 text-secondary dark:text-[#AAAAAA]"
+              />
+              <span className="text-sm text-secondary dark:text-[#AAAAAA] whitespace-nowrap">
+                {timeStr}
+              </span>
             </div>
           </div>
         </div>

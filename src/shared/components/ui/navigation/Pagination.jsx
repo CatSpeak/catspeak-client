@@ -53,7 +53,7 @@ const Pagination = ({ page, totalPages, onChangePage, className = "" }) => {
 
   return (
     <div className={`mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:items-center sm:justify-between w-full ${className}`}>
-      <p className="text-sm text-gray-600 text-center sm:text-left font-medium">
+      <p className="text-sm text-gray-600 dark:text-[#AAAAAA] text-center sm:text-left font-medium">
         {pageInfoText}
       </p>
 

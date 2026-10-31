@@ -11,19 +11,19 @@ const Breadcrumb = ({ items, separator = "/", className = "" }) => {
         return (
           <React.Fragment key={index}>
             {isLast ? (
-              <span className="min-w-[120px] flex-1 truncate font-semibold text-cath-red-700">
+              <span className="min-w-[120px] flex-1 truncate font-semibold text-cath-red-700 dark:text-[#FF0033]">
                 {item.label}
               </span>
             ) : (
               <button
                 onClick={item.onClick}
-                className="shrink-0 font-normal text-[#7b7979] transition-colors hover:text-black hover:underline"
+                className="shrink-0 font-normal text-[#7b7979] dark:text-[#AAAAAA] transition-colors hover:text-black dark:hover:text-white hover:underline"
               >
                 {item.label}
               </button>
             )}
 
-            {!isLast && <span className="shrink-0 text-[#7b7979] font-medium">{separator}</span>}
+            {!isLast && <span className="shrink-0 text-[#7b7979] dark:text-[#AAAAAA] font-medium">{separator}</span>}
           </React.Fragment>
         );
       })}

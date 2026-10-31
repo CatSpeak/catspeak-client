@@ -165,7 +165,7 @@ const WordLookupPopover = ({
 
   if (isFetching) {
     return (
-      <div className={cn("relative w-full max-w-[480px] sm:w-[480px] bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 flex justify-center items-center text-slate-400 font-medium italic", className)} style={style}>
+      <div className={cn("relative w-full max-w-[480px] sm:w-[480px] bg-white dark:bg-[#1A1A1A] rounded-3xl shadow-2xl border border-slate-100 dark:border-[#3F3F3F] p-6 flex justify-center items-center text-slate-400 dark:text-[#AAAAAA] font-medium italic", className)} style={style}>
         Đang tra cứu "{wordText}"...
       </div>
     )
@@ -203,20 +203,20 @@ const WordLookupPopover = ({
     <FluentAnimation direction="up" distance={10} duration={0.2} exit>
       <div
         className={cn(
-          "relative w-full max-w-[480px] sm:w-[480px] bg-white rounded-3xl shadow-2xl border border-slate-100 p-5 sm:p-6 text-slate-800 font-sans select-none z-50",
+          "relative w-full max-w-[480px] sm:w-[480px] bg-white dark:bg-[#1A1A1A] rounded-3xl shadow-2xl border border-slate-100 dark:border-[#3F3F3F] p-5 sm:p-6 text-slate-800 dark:text-gray-100 font-sans select-none z-50",
           className
         )}
         style={style}
       >
-        <div className="flex flex-col gap-2 pb-3.5 border-b border-slate-100/80">
+        <div className="flex flex-col gap-2 pb-3.5 border-b border-slate-100/80 dark:border-[#3F3F3F]">
           {/* Dòng 1: Tên từ + Badge Loại từ + Nút Đóng */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 flex-wrap min-w-0">
-              <h3 className="text-xl sm:text-[22px] font-bold text-slate-900 tracking-tight truncate leading-tight">
+              <h3 className="text-xl sm:text-[22px] font-bold text-slate-900 dark:text-white tracking-tight truncate leading-tight">
                 {word}
               </h3>
               {type && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-rose-50 text-cath-red-700 border border-rose-100 shrink-0">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-rose-50 dark:bg-rose-950/40 text-cath-red-700 dark:text-[#FF0033] border border-rose-100 dark:border-rose-900/50 shrink-0">
                   {type}
                 </span>
               )}
@@ -227,7 +227,7 @@ const WordLookupPopover = ({
               size="xs"
               variant="ghost"
               title={t.widget?.lookup?.closeBtn || "Đóng popup"}
-              className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
+              className="text-slate-400 dark:text-[#AAAAAA] hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#272727] shrink-0"
             >
               <X className="w-4 h-4" />
             </IconButton>
@@ -237,7 +237,7 @@ const WordLookupPopover = ({
           <div className="flex items-center justify-between gap-2 pt-0.5">
             <div className="flex items-center gap-2">
               {ipa && (
-                <span className="text-sm font-semibold text-cath-red-700 tracking-wide font-mono">
+                <span className="text-sm font-semibold text-cath-red-700 dark:text-[#FF0033] tracking-wide font-mono">
                   {ipa}
                 </span>
               )}
@@ -259,7 +259,7 @@ const WordLookupPopover = ({
                   e.stopPropagation()
                   setIsLangDropdownOpen(!isLangDropdownOpen)
                 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer select-none"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-[#AAAAAA] bg-white dark:bg-[#272727] border border-slate-200 dark:border-[#3F3F3F] rounded-lg hover:bg-slate-50 dark:hover:bg-[#3D3D3D] transition-colors cursor-pointer select-none"
               >
                 <span>{currentLangLabel}</span>
                 <ChevronDown
@@ -272,7 +272,7 @@ const WordLookupPopover = ({
 
               {/* Menu Inline */}
               {isLangDropdownOpen && (
-                <div className="absolute top-full right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 animate-fadeIn overflow-hidden">
+                <div className="absolute top-full right-0 mt-1.5 w-48 bg-white dark:bg-[#1A1A1A] border border-slate-200 dark:border-[#3F3F3F] rounded-xl shadow-xl py-1 z-50 animate-fadeIn overflow-hidden">
                   {languagePairs.map((pair) => {
                     const isSelected = selectedLanguagePair === pair.value
                     return (
@@ -287,7 +287,7 @@ const WordLookupPopover = ({
                           "px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between cursor-pointer transition-colors",
                           isSelected
                             ? "bg-rose-50 text-cath-red-700 font-semibold"
-                            : "text-[#374151] hover:bg-slate-50 hover:text-cath-red-700"
+                            : "text-[#374151] dark:text-[#AAAAAA] hover:bg-slate-50 dark:hover:bg-[#272727] hover:text-cath-red-700 dark:hover:text-[#FF0033]"
                         )}
                       >
                         <span>{pair.label}</span>
@@ -309,10 +309,10 @@ const WordLookupPopover = ({
               <BookOpen className="w-3.5 h-3.5 text-slate-400" />
               <span>{t.widget?.lookup?.meaning || "NGHĨA"}</span>
             </div>
-            <div className="mt-1 text-[15px] font-medium text-slate-800 leading-snug">
+            <div className="mt-1 text-[15px] font-medium text-slate-800 dark:text-gray-100 leading-snug">
               {meaning}{" "}
               {meaningSecondary && (
-                <span className="font-semibold text-cath-red-700">
+                <span className="font-semibold text-cath-red-700 dark:text-[#FF0033]">
                   {meaningSecondary}
                 </span>
               )}
@@ -320,12 +320,12 @@ const WordLookupPopover = ({
           </div>
 
           {instructorNote && (
-            <div className="rounded-2xl bg-[#FFFBF3] border border-amber-200/70 p-3.5 transition-all">
+            <div className="rounded-2xl bg-[#FFFBF3] dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-800/40 p-3.5 transition-all">
               <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-amber-800 uppercase">
                 <GraduationCap className="w-4 h-4 text-amber-600 shrink-0" />
                 <span>{t.widget?.lookup?.instructorNote || "GIẢI THÍCH CHI TIẾT (GIẢNG VIÊN CAT SPEAK)"}</span>
               </div>
-              <p className="mt-1.5 text-xs sm:text-[13px] text-amber-950/85 leading-relaxed font-normal">
+              <p className="mt-1.5 text-xs sm:text-[13px] text-amber-950/85 dark:text-amber-200/85 leading-relaxed font-normal">
                 {instructorNote}
               </p>
             </div>
@@ -339,7 +339,7 @@ const WordLookupPopover = ({
               </div>
               <div className="flex flex-col gap-2">
                 {/* Ví dụ đầu tiên (mặc định) */}
-                <div className="bg-slate-50/90 border-l-[3px] border-cath-red-700 rounded-r-xl p-3 text-xs sm:text-[13px] text-slate-700 italic leading-relaxed">
+                <div className="bg-slate-50/90 dark:bg-[#272727] border-l-[3px] border-cath-red-700 dark:border-[#FF0033] rounded-r-xl p-3 text-xs sm:text-[13px] text-slate-700 dark:text-gray-200 italic leading-relaxed">
                   &ldquo;{examples[0]}&rdquo;
                 </div>
 
@@ -348,7 +348,7 @@ const WordLookupPopover = ({
                   examples.slice(1).map((ex, idx) => (
                     <div
                       key={idx}
-                      className="bg-slate-50/90 border-l-[3px] border-cath-red-400 rounded-r-xl p-3 text-xs sm:text-[13px] text-slate-700 italic leading-relaxed transition-all"
+                      className="bg-slate-50/90 dark:bg-[#272727] border-l-[3px] border-cath-red-400 dark:border-[#FF0033]/70 rounded-r-xl p-3 text-xs sm:text-[13px] text-slate-700 dark:text-gray-200 italic leading-relaxed transition-all"
                     >
                       &ldquo;{ex}&rdquo;
                     </div>
@@ -360,7 +360,7 @@ const WordLookupPopover = ({
           {/* Mục: Từ liên quan */}
           {relatedWords && relatedWords.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap pt-0.5">
-              <span className="text-xs text-slate-500 font-medium shrink-0">
+              <span className="text-xs text-slate-500 dark:text-[#AAAAAA] font-medium shrink-0">
                 {t.widget?.lookup?.relatedWords || "Từ liên quan:"}
               </span>
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -369,7 +369,7 @@ const WordLookupPopover = ({
                     key={index}
                     type="button"
                     onClick={() => onSelectRelatedWord?.(item)}
-                    className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium text-cath-red-700 bg-rose-50/80 hover:bg-rose-100 hover:text-cath-red-900 border border-rose-100/80 transition-colors cursor-pointer active:scale-95"
+                    className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium text-cath-red-700 dark:text-[#FF0033] bg-rose-50/80 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:text-cath-red-900 dark:hover:text-white border border-rose-100/80 dark:border-rose-900/50 transition-colors cursor-pointer active:scale-95"
                   >
                     {item}
                   </button>
