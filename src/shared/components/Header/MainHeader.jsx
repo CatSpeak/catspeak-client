@@ -91,7 +91,7 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
             <>
               {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
               {showSidebar && (
-                <div className="hidden lg:block">
+                <div className="hidden lg:block" data-tour="community-switcher">
                   <CommunitySwitcher />
                 </div>
               )}

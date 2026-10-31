@@ -1,4 +1,5 @@
 export default {
+  validationDobInvalid: "请输入有效日期，格式为 DD/MM/YYYY。",
   loginTitle: "登录",
   registerTitle: "注册",
   forgotTitle: "忘记密码",

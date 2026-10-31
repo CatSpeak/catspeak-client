@@ -28,7 +28,13 @@ const ProfileHistoryCard = ({
           {copy.historyFirst}
         </span>
         <span className="text-[11px] font-medium leading-4 text-[#64748B]">
-          {`${testDate} · HSK ${band} · ${score}/100`}
+          {[
+            testDate,
+            `HSK ${band}`,
+            score === null || score === undefined ? null : `${score}/100`,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         </span>
       </div>
       <span className="shrink-0 rounded-[4px] bg-[#DCFCE7] px-2 py-0.5 text-[10.5px] font-bold text-[#15803D]">

@@ -128,9 +128,7 @@ const ExploreCoursesPage = () => {
   const teacherSortOptions = [
     {
       value: "default",
-      label: sc.sortFeatured
-        ? `Sắp xếp: ${sc.sortFeatured}`
-        : "Sắp xếp: Nổi bật",
+      label: sc.sortFeatured || "Nổi bật",
     },
     { value: "rating", label: sc.sortRating || "Đánh giá cao nhất" },
     { value: "students", label: sc.sortStudents || "Nhiều học viên nhất" },

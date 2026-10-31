@@ -156,3 +156,70 @@ describe("reduceTakeover peer messages", () => {
     expect(result.effects).toEqual([])
   })
 })
+
+describe("two-tab warning handshake", () => {
+  const holder = () =>
+    createTakeoverState({
+      tabId: "tab-a",
+      sessionId: SESSION,
+      phase: TAKEOVER_PHASE.ACTIVE,
+    })
+
+  const newcomer = () =>
+    createTakeoverState({ tabId: "tab-b", sessionId: SESSION })
+
+  it("warns the active holder when a duplicate tab pings", () => {
+    // Oracle: user ruling 2026-10-31 — tab gốc phải hiện popup khi tab trùng mở.
+    const result = reduceTakeover(holder(), {
+      type: SESSION_BROADCAST_TYPES.PING,
+      payload: { tabId: "tab-b", sessionId: SESSION },
+    })
+
+    expect(result.state.phase).toBe(TAKEOVER_PHASE.CONFLICT)
+    expect(result.state.peerTabId).toBe("tab-b")
+    expect(result.effects).toContain(TAKEOVER_EFFECT.POST_PONG)
+  })
+
+  it("lets the holder keep the session while the duplicate locks", () => {
+    const onPing = reduceTakeover(holder(), {
+      type: SESSION_BROADCAST_TYPES.PING,
+      payload: { tabId: "tab-b", sessionId: SESSION },
+    })
+    const onPong = reduceTakeover(newcomer(), {
+      type: SESSION_BROADCAST_TYPES.PONG,
+      payload: { tabId: "tab-a", sessionId: SESSION },
+    })
+    expect(onPong.state.phase).toBe(TAKEOVER_PHASE.CONFLICT)
+
+    const confirmed = reduceTakeover(onPing.state, {
+      type: TAKEOVER_LOCAL.CONFIRM,
+      payload: { tabId: "tab-a", sessionId: SESSION },
+    })
+    expect(confirmed.state.phase).toBe(TAKEOVER_PHASE.ACTIVE)
+    expect(confirmed.effects).toContain(TAKEOVER_EFFECT.POST_TAKEOVER)
+
+    const locked = reduceTakeover(onPong.state, {
+      type: SESSION_BROADCAST_TYPES.TAKEOVER,
+      payload: { tabId: "tab-a", sessionId: SESSION },
+    })
+    expect(locked.state.phase).toBe(TAKEOVER_PHASE.TAKEN_OVER)
+  })
+
+  it("keeps answering pings while the conflict is open so a third tab locks too", () => {
+    const result = reduceTakeover(
+      createTakeoverState({
+        tabId: "tab-a",
+        sessionId: SESSION,
+        phase: TAKEOVER_PHASE.CONFLICT,
+      }),
+      {
+        type: SESSION_BROADCAST_TYPES.PING,
+        payload: { tabId: "tab-c", sessionId: SESSION },
+      },
+    )
+
+    expect(result.state.phase).toBe(TAKEOVER_PHASE.CONFLICT)
+    expect(result.effects).toContain(TAKEOVER_EFFECT.POST_PONG)
+  })
+})
+

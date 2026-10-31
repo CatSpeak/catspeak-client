@@ -120,6 +120,7 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                     form.setErrors((prev) => ({ ...prev, cityId: undefined }))
                 }}
                 eventLocation={form.eventLocation}
+                isOnline={form.isOnline}
                 onLocationChange={(val) => {
                   form.setEventLocation(val)
                   if (form.errors?.eventLocation)

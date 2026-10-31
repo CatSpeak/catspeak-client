@@ -69,6 +69,23 @@
   font-family: var(--font-nunito) !important;
 }
 
+/* Interactive Navigation Item Tokens */
+.bg-itemActive {
+  background-color: #F2F2F2 !important;
+}
+.bg-itemHover {
+  background-color: #F2F2F2 !important;
+}
+.hover\:bg-itemActiveHover:hover {
+  background-color: #E6E6E6 !important;
+}
+.hover\:bg-itemHover:hover {
+  background-color: #F2F2F2 !important;
+}
+.active\:bg-itemActiveHover:active {
+  background-color: #E6E6E6 !important;
+}
+
 * {
   margin: 0;
   padding: 0;

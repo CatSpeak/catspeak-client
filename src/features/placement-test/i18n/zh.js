@@ -32,6 +32,7 @@ export default {
       checkbox:
         "我同意 CatSpeak 使用我的麦克风并处理音频，用于本次入门测试。",
       startCta: "开始测试",
+      permissionHint: "请在浏览器中允许使用麦克风",
       recommend:
         "建议：佩戴带麦克风的耳机，并在安静环境中进行，以获得最高的声学准确度。",
     },
@@ -161,6 +162,9 @@ export default {
       title: "口语练习房间",
       subtitle: "AI 自适应对话 • HSK 3.0",
       connection: "连接稳定",
+      connectionLost: "连接已断开",
+      connectionLostExitToast:
+        "网络长时间中断，无法继续考试。进度已安全保存，请检查网络后继续。",
       configure: "AI 设置",
       pause: "暂停考试",
       casual: "日常交流（Casual Chat）",
@@ -178,20 +182,27 @@ export default {
       statusWaiting: "正在聆听...",
       statusRecognized: "● 识别清晰",
       statusSubmitted: "已提交",
+      statusSkipped: "已跳过此题",
       statusNoAudio: "暂无声音",
       transcriptPlaceholder: "你的回答会显示在这里...",
       analyzingSubline: "正在自动分析语音与语法...",
+      skippedSubline: "此题不计分。",
       waitingSubline: "请用中文说出你的回答。",
       aiListening: "AI 正在聆听你的声音...",
+      aiMuted: "麦克风已静音，点击麦克风按钮即可恢复。",
+      statusMuted: "● 已静音",
+      timerMuted: "已静音",
+      muteCta: "静音",
+      unmuteCta: "取消静音",
       aiAnalyzing: "AI 正在分析你的回答...",
+      modelProcessing: "模型处理中",
+      retryPrompt: "请点击麦克风，重新说出你的回答。",
       aiNotHearing: "AI 正在更仔细地聆听...",
       timerRecording: "{{time}} / 00:45 • 录音作答",
       timerWaiting: "{{time}} / 00:45 • 等待声音",
       recordedStatus: "已录音",
       pressMicToRecord: "点击麦克风开始作答",
       reRecordCta: "重新录音",
-      stopRecordCta: "停止录音",
-      startRecordCta: "开始说话",
       aiAutoRecord: "AI 读完问题后将自动开始录音。",
       aiSpeaking: "AI 正在朗读问题，请仔细听...",
       autoRecordHint: "AI 读完后自动录音",
@@ -199,8 +210,12 @@ export default {
       submitCta: "完成回答",
       skipCta: "跳过此题（0 分）→",
       scoringSummary: "正在汇总评分...",
+      skippingCta: "正在进入下一题...",
       retryBanner: "AI 没有听清你的回答，请再说一遍。（第 {{attempt}} / {{max}} 次）",
       noHearingBanner: "AI 没有听到你的声音。请检查麦克风或调高输入音量。",
+      noHearingSubline: "暂时未检测到语音信号。",
+      noHearingHint: "请在浏览器中取消麦克风静音。",
+      noHearingExitToast: "未检测到麦克风声音。请在重新考试前检查音频设备。",
       volumeHint: "音量偏小。请说得更大声，或调高麦克风音量。",
       configureNotice: "AI 设置功能即将上线。",
       pauseTitle: "调查已暂停",
@@ -213,6 +228,11 @@ export default {
       pauseLeaveCta: "暂时离开考场",
       pauseResumeCta: "立即继续答题 ▷",
       pauseCancelCta: "取消测试并从头开始",
+      pauseCancelConfirmTitle: "取消测试并从头开始？",
+      pauseCancelConfirmWarning:
+        "你将失去已完成的 {{answered}}/{{total}} 道题，新测试将从第 1 题开始，且无法恢复之前的进度。",
+      pauseCancelConfirmKeepCta: "返回继续答题",
+      pauseCancelConfirmCta: "取消并重新开始",
       reconnectTitle: "网络连接中断",
       reconnectBody:
         "由于网络信号不稳定，与 AI 考场的音频连接已中断。系统正在尝试重新连接。",
@@ -260,12 +280,14 @@ export default {
       bandTitle: "HSK {{band}} · {{tier}}",
       cefrLabel: "欧洲语言参考框架：CEFR {{cefr}}",
       heroDescription:
-        "能够在日常场景中沟通，发音与反应符合 HSK {{band}} 水平，口语词汇积累良好。",
+        "能够在日常场景中沟通，发音与反应符合 HSK {{band}} 水平。",
+      heroVocabularyPraise: "口语词汇积累良好。",
       feedbackTitle: "AI 导师的教学评语",
       strengthLabel: "优势：",
       attentionLabel: "需注意：",
       strengthLine: "{{dimension}} 达到 {{score}}/100 —— 具备突破的良好基础。",
       weaknessLine: "{{dimension}} 仅得 {{score}}/100 —— 需要每天加强练习。",
+      noStrengthLine: "暂无技能达到 60/100，尚无可标注的强项。",
       noWeaknessLine: "未发现明显薄弱项，请保持当前状态。",
       roadmapTitle: "5 天突破至 HSK {{band}} 的学习路线",
       roadmapDays: [
@@ -273,6 +295,33 @@ export default {
         { tag: "D 3-4", text: "与 AI 导师练习复合句反应" },
         { tag: "D 5", text: "中级 HSKK 模拟考试挑战" },
       ],
+      roadmapByBand: {
+        2: [
+          { tag: "D 1-2", text: "巩固 HSK 1 基础：问候、数字、简单句" },
+          { tag: "D 3-4", text: "扩充 HSK 2 词汇：家庭、时间、购物" },
+          { tag: "D 5", text: "与 AI 导师进行 HSK 2 会话模拟" },
+        ],
+        3: [
+          { tag: "D 1-2", text: "练习基础复句：因为…所以、虽然…但是" },
+          { tag: "D 3-4", text: "用 HSK 3 词汇复述简短经历" },
+          { tag: "D 5", text: "与 AI 导师进行 HSK 3 会话模拟" },
+        ],
+        4: [
+          { tag: "D 1-2", text: "练习 HSK 4 句型：不仅…而且、即使…也" },
+          { tag: "D 3-4", text: "就熟悉话题表达观点与比较" },
+          { tag: "D 5", text: "与 AI 导师进行 HSK 4 会话模拟" },
+        ],
+        5: [
+          { tag: "D 1-2", text: "职场与面试口语专题" },
+          { tag: "D 3-4", text: "与 AI 导师练习复合句反应" },
+          { tag: "D 5", text: "中级 HSKK 模拟考试挑战" },
+        ],
+        6: [
+          { tag: "D 1-2", text: "深入讨论经济、社会与文化话题" },
+          { tag: "D 3-4", text: "练习多步论证与表达分寸" },
+          { tag: "D 5", text: "高级 HSKK 模拟考试挑战" },
+        ],
+      },
       skillsTitle: "口语四维能力分析",
       skillsSubtitle: "通过 AI 语音识别模型进行标准化评估",
       dimensions: {
@@ -288,6 +337,10 @@ export default {
       adjustCta: "调整等级（±1 级）",
       adjustCaption: "* 学员在锁定学习路线前最多可调整一次等级。",
       adjustLocked: "你已使用一次性等级调整，学习路线现已锁定。",
+      insufficientTitle: "数据不足，无法评估",
+      insufficientBody:
+        "你跳过了全部 5 道题，没有可用于评分的回答。请重新测评并至少回答一道题，以获取 HSK 3.0 报告。",
+      insufficientRetakeCta: "重新测评",
       emptyTitle: "暂无评估结果",
       emptyBody: "请完成口语测评以查看 HSK 3.0 能力报告。",
       emptyCta: "返回水平评估",
@@ -315,6 +368,8 @@ export default {
       successToast: "学习等级已更新为 HSK {{band}}。",
       alreadyAdjustedToast: "你已使用过等级调整权限。",
       errorToast: "无法更新等级，请重试。",
+      roadmapSyncErrorToast:
+        "等级已更新，但 5 天学习路线未能重新生成。请打开 5 天学习路线并选择“更改等级”进行同步。",
     },
     profile: {
       topbarTitle: "能力档案与学员状态",
@@ -327,7 +382,8 @@ export default {
         "能够在工作与日常生活中流利沟通。已于 {{date}} 完成 5 题 AI CAT 自适应测评。",
       testDate: "考试日期：{{date}}",
       testCode: "考试编号：#{{code}}",
-      roadmapTitle: "冲刺 HSK {{band}} 学习路线",
+      selfAdjustedNote: "等级已自行调整：从 HSK {{from}} 调整为 HSK {{to}}。",
+      roadmapTitle: "HSK {{band}} 学习路线",
       roadmapProgress: "{{done}}/{{total}} 天（{{percent}}%）",
       roadmapDone: "已完成",
       roadmapActive: "学习中",
@@ -390,12 +446,15 @@ export default {
     },
     lifecycle: {
       errorToast: "无法开始新的考试会话，请重试。",
+      pauseExpiredToast: "考试暂停已超过30分钟，本次会话已失效。请重新开始考试。",
       resume: {
         title: "检测到未完成的考试",
         body: "系统发现了你未完成的答题会话（已完成第 {{answered}} / {{total}} 题）。该会话在接下来的 {{remaining}} 内仍然有效。",
         safeTitle: "答题数据已安全保留：",
         safeBody:
           "你将直接在第 {{order}} 题继续，不会丢失分数，已提交的 {{answered}} 题录音也会保留。",
+        pendingAnswerNotice:
+          "当前题目尚未提交 —— 刷新页面后本题录音不会保留，你需要重新录制本题。",
         deadlineLabel: "会话保留期限：",
         autoCancel: "自动取消时间：{{date}}",
         remainingChip: "⏳ 剩余 {{remaining}}",
@@ -414,11 +473,11 @@ export default {
       takeover: {
         title: "检测到同时打开多个标签页",
         body: "为确保稳定并避免麦克风冲突，CatSpeak 同一时间只允许打开一个口语房间。",
-        mechanismTitle: "旧会话断开机制（Session Takeover）：",
+        mechanismTitle: "重复会话断开机制（Session Takeover）：",
         mechanismBody:
-          "如果你选择在此标签页继续，另一个已打开的标签页将立即断开并锁定，以避免数据重复。",
+          "如果你选择在此标签页继续，另一个标签页中打开的会话将立即断开并锁定，以避免数据重复。",
         continueCta: "在此标签页继续 →",
-        closeCta: "关闭此标签页",
+        closeCta: "返回能力档案主页",
         takenOverTitle: "会话已在其他标签页接管",
         takenOverBody:
           "你的考试正在另一个标签页进行。此标签页的会话已暂停并锁定，以避免数据重复。",

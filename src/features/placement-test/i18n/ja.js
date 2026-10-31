@@ -32,6 +32,7 @@ export default {
       checkbox:
         "CatSpeak がマイクを使用し、入門テストのために音声を処理することに同意します。",
       startCta: "テストを開始する",
+      permissionHint: "ブラウザでマイクの使用を許可してください",
       recommend:
         "推奨：マイク付きヘッドセットを着用し、静かな環境で行うと最も正確に測定できます。",
     },
@@ -164,6 +165,9 @@ export default {
       title: "スピーキング練習ルーム",
       subtitle: "AI 適応会話 • HSK 3.0",
       connection: "接続は安定",
+      connectionLost: "接続が切れました",
+      connectionLostExitToast:
+        "ネットワークが長時間切断されたため、試験を続行できませんでした。進行状況は保存されています。接続を確認してから再開してください。",
       configure: "AI 設定",
       pause: "試験を一時停止",
       casual: "カジュアル会話（Casual Chat）",
@@ -181,20 +185,27 @@ export default {
       statusWaiting: "聞き取り中...",
       statusRecognized: "● 認識良好",
       statusSubmitted: "提出済み",
+      statusSkipped: "この問題をスキップしました",
       statusNoAudio: "音声なし",
       transcriptPlaceholder: "あなたの回答がここに表示されます...",
       analyzingSubline: "発音と文法を自動分析しています...",
+      skippedSubline: "この問題は採点されません。",
       waitingSubline: "中国語で回答を話してください。",
       aiListening: "AI があなたの声を聞いています...",
+      aiMuted: "マイクはミュート中です。マイクボタンで解除できます。",
+      statusMuted: "● ミュート中",
+      timerMuted: "ミュート中",
+      muteCta: "ミュート",
+      unmuteCta: "ミュート解除",
       aiAnalyzing: "AI が回答を分析しています...",
+      modelProcessing: "モデル処理中",
+      retryPrompt: "マイクを押して、もう一度回答を話してください。",
       aiNotHearing: "AI がより注意深く聞いています...",
       timerRecording: "{{time}} / 00:45 • 録音中",
       timerWaiting: "{{time}} / 00:45 • 音声を待機中",
       recordedStatus: "録音済み",
       pressMicToRecord: "マイクを押して回答",
       reRecordCta: "再録音",
-      stopRecordCta: "録音停止",
-      startRecordCta: "話し始める",
       aiAutoRecord: "AI が質問を読み終えると自動で録音が始まります。",
       aiSpeaking: "AI が質問を読み上げています。聞いてください...",
       autoRecordHint: "AI の読み上げ後に自動で録音",
@@ -202,10 +213,15 @@ export default {
       submitCta: "回答を完了する",
       skipCta: "この問題をスキップ（0点）→",
       scoringSummary: "スコアを集計中...",
+      skippingCta: "次の問題に移動しています...",
       retryBanner:
         "AI が回答を聞き取れませんでした。もう一度話してください。（{{attempt}} / {{max}} 回目）",
       noHearingBanner:
         "AI があなたの声を聞き取れませんでした。マイクを確認するか、入力音量を上げてください。",
+      noHearingSubline: "しばらく音声が検出されていません。",
+      noHearingHint: "ブラウザでマイクのミュートを解除してください。",
+      noHearingExitToast:
+        "マイクから音声が検出されませんでした。再受験の前に音声デバイスを確認してください。",
       volumeHint: "音量が小さめです。もう少し大きな声で話すか、マイク音量を上げてください。",
       configureNotice: "AI 設定は近日公開予定です。",
       pauseTitle: "調査を一時停止しました",
@@ -218,6 +234,11 @@ export default {
       pauseLeaveCta: "一時的に試験室を離れる",
       pauseResumeCta: "今すぐ試験を再開 ▷",
       pauseCancelCta: "テストを中止して最初からやり直す",
+      pauseCancelConfirmTitle: "テストを中止して最初からやり直しますか？",
+      pauseCancelConfirmWarning:
+        "回答済みの {{answered}}/{{total}} 問が失われます。新しいテストは第 1 問から始まり、以前の進捗は復元できません。",
+      pauseCancelConfirmKeepCta: "回答を続ける",
+      pauseCancelConfirmCta: "中止してやり直す",
       reconnectTitle: "接続が切断されました",
       reconnectBody:
         "ネットワーク信号が不安定なため、AI 試験室との音声接続が中断されました。システムが再接続を試みています。",
@@ -267,13 +288,16 @@ export default {
       bandTitle: "HSK {{band}} · {{tier}}",
       cefrLabel: "ヨーロッパ言語参照枠：CEFR {{cefr}}",
       heroDescription:
-        "日常の場面で会話でき、発音と反応は HSK {{band}} のレベルに適合しています。口語語彙も十分に蓄積されています。",
+        "日常の場面で会話でき、発音と反応は HSK {{band}} のレベルに適合しています。",
+      heroVocabularyPraise: "口語語彙も十分に蓄積されています。",
       feedbackTitle: "AI チューターからの指導コメント",
       strengthLabel: "強み：",
       attentionLabel: "注意点：",
       strengthLine: "{{dimension}} は {{score}}/100 —— 飛躍のための良い土台です。",
       weaknessLine:
         "{{dimension}} は {{score}}/100 にとどまっています —— 毎日の練習が必要です。",
+      noStrengthLine:
+        "60/100 に達したスキルがないため、強みとして示せる項目はまだありません。",
       noWeaknessLine:
         "目立った弱点は検出されませんでした。現在の調子を維持しましょう。",
       roadmapTitle: "HSK {{band}} へ飛躍する 5 日間ロードマップ",
@@ -282,6 +306,33 @@ export default {
         { tag: "D 3-4", text: "AI チューターと複文の反応練習" },
         { tag: "D 5", text: "中級 HSKK 模擬試験チャレンジ" },
       ],
+      roadmapByBand: {
+        2: [
+          { tag: "D 1-2", text: "HSK 1 の基礎を固める：あいさつ・数字・単文" },
+          { tag: "D 3-4", text: "家族・時間・買い物など HSK 2 の語彙を増やす" },
+          { tag: "D 5", text: "AI チューターと HSK 2 会話シミュレーション" },
+        ],
+        3: [
+          { tag: "D 1-2", text: "基本の複文を練習：因为…所以、虽然…但是" },
+          { tag: "D 3-4", text: "HSK 3 の語彙で短い体験を語る練習" },
+          { tag: "D 5", text: "AI チューターと HSK 3 会話シミュレーション" },
+        ],
+        4: [
+          { tag: "D 1-2", text: "HSK 4 の構文を練習：不仅…而且、即使…也" },
+          { tag: "D 3-4", text: "身近な話題で意見や比較を述べる" },
+          { tag: "D 5", text: "AI チューターと HSK 4 会話シミュレーション" },
+        ],
+        5: [
+          { tag: "D 1-2", text: "仕事・面接のスピーキング特訓" },
+          { tag: "D 3-4", text: "AI チューターと複文の反応練習" },
+          { tag: "D 5", text: "中級 HSKK 模擬試験チャレンジ" },
+        ],
+        6: [
+          { tag: "D 1-2", text: "経済・社会・文化について深く議論する" },
+          { tag: "D 3-4", text: "多段階の論証と表現のニュアンスを磨く" },
+          { tag: "D 5", text: "高級 HSKK 模擬試験チャレンジ" },
+        ],
+      },
       skillsTitle: "スピーキング 4 軸スキル分析",
       skillsSubtitle: "AI 音声認識モデルによる標準化評価",
       dimensions: {
@@ -300,6 +351,10 @@ export default {
         "* 受講者はロードマップがロックされる前に 1 回だけレベルを調整できます。",
       adjustLocked:
         "1 回限りのレベル調整を使用しました。ロードマップはロックされています。",
+      insufficientTitle: "評価に十分なデータがありません",
+      insufficientBody:
+        "5 問すべてをスキップしたため、採点できる回答がありません。もう一度評価を受けて、少なくとも 1 問に回答すると HSK 3.0 レポートが表示されます。",
+      insufficientRetakeCta: "もう一度評価を受ける",
       emptyTitle: "評価結果がありません",
       emptyBody:
         "スピーキング評価を完了すると、HSK 3.0 能力レポートが表示されます。",
@@ -328,6 +383,8 @@ export default {
       successToast: "学習レベルを HSK {{band}} に更新しました。",
       alreadyAdjustedToast: "レベル調整権限はすでに使用済みです。",
       errorToast: "レベルを更新できませんでした。もう一度お試しください。",
+      roadmapSyncErrorToast:
+        "レベルは更新されましたが、5日間ロードマップを再作成できませんでした。5日間ロードマップを開き、「レベル変更」から同期してください。",
     },
     profile: {
       topbarTitle: "能力プロフィールと学習状況",
@@ -340,7 +397,8 @@ export default {
         "仕事と日常生活で流暢にコミュニケーションできます。{{date}} に5問の AI CAT 適応型テストを完了しました。",
       testDate: "受験日：{{date}}",
       testCode: "受験コード：#{{code}}",
-      roadmapTitle: "HSK {{band}} 突破ロードマップ",
+      selfAdjustedNote: "レベルを HSK {{from}} から HSK {{to}} に自己調整しました。",
+      roadmapTitle: "HSK {{band}} ロードマップ",
       roadmapProgress: "{{done}}/{{total}} 日（{{percent}}%）",
       roadmapDone: "完了",
       roadmapActive: "学習中",
@@ -408,12 +466,16 @@ export default {
     lifecycle: {
       errorToast:
         "新しいセッションを開始できませんでした。もう一度お試しください。",
+      pauseExpiredToast:
+        "一時停止が30分を超えたため、試験セッションの有効期限が切れました。新しい受験を開始してください。",
       resume: {
         title: "未完了のテストを検出しました",
         body: "未完了の受験セッションが見つかりました（{{answered}} / {{total}} 問完了）。このセッションはあと {{remaining}} 有効です。",
         safeTitle: "受験データは安全に保存されています：",
         safeBody:
           "第 {{order}} 問からそのまま再開でき、得点も提出済みの {{answered}} 問分の録音も失われません。",
+        pendingAnswerNotice:
+          "現在の設問はまだ提出されていません。ページ再読み込み後にこの録音は保持されないため、録音し直す必要があります。",
         deadlineLabel: "セッションの保持期限：",
         autoCancel: "自動キャンセル：{{date}}",
         remainingChip: "⏳ 残り {{remaining}}",
@@ -432,11 +494,11 @@ export default {
       takeover: {
         title: "複数のタブが同時に開かれています",
         body: "安定性を保ちマイクの競合を避けるため、CatSpeak ではスピーキングルームを同時に 1 つだけ開けます。",
-        mechanismTitle: "旧セッションの切断機構（Session Takeover）：",
+        mechanismTitle: "重複セッションの切断機構（Session Takeover）：",
         mechanismBody:
-          "このタブで続行を選ぶと、開いているもう一方のタブは直ちに切断され、データの重複を防ぐためロックされます。",
+          "このタブで続行を選ぶと、もう一方のタブで開いているセッションは直ちに切断され、データの重複を防ぐためロックされます。",
         continueCta: "このタブで続行 →",
-        closeCta: "このタブを閉じる",
+        closeCta: "能力プロフィールに戻る",
         takenOverTitle: "セッションは別のタブで引き継がれました",
         takenOverBody:
           "試験は別のタブで実行中です。データの重複を防ぐため、このタブのセッションは一時停止されロックされました。",

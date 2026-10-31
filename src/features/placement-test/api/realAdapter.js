@@ -19,7 +19,8 @@ import {
   saveActiveSession,
   saveResult,
 } from "../utils/sessionStorage"
-import { upsertTurn } from "../utils/turns"
+import { countSubmittedTurns, upsertTurn } from "../utils/turns"
+import { clearRoomMarker } from "../utils/roomMarker"
 import { getRetakeEligibility } from "../utils/cooldown"
 
 /** Bật/tắt đường máy chủ. Đặt "0" trong .env để quay lại mock hoàn toàn. */
@@ -132,7 +133,8 @@ export const submitTurnReal = async (
   const activeSessionId = sessionId || session?.id
   if (!session || (sessionId && session.id !== sessionId)) return notFound()
 
-  const turnOrder = Number(turnIndex ?? order) || (session.turns?.length || 0) + 1
+  const turnOrder =
+    Number(turnIndex ?? order) || countSubmittedTurns(session.turns) + 1
   const formData = new FormData()
   formData.append("turn_index", String(turnOrder))
   formData.append("speech_duration_ms", String(Math.max(0, Number(durationMs) || 0)))
@@ -216,7 +218,7 @@ export const submitTurnReal = async (
         retryCount: payload.retry_count ?? (Number(retryCount) || 0) + 1,
         message:
           payload.message ||
-          "Không phát hiện rõ giọng nói, vui lòng thử trả lời lại.",
+          "Chưa nghe được câu trả lời, vui lòng nói lại.",
         session,
         isCompleted: false,
       },
@@ -279,31 +281,12 @@ export const submitTurnReal = async (
   }
 }
 
-/** 4. Kiểm tra phiên dang dở trong 24h: GET /v1/placement/sessions/active */
-export const getActiveSessionReal = async ({
-  baseQuery,
-  api,
-  extraOptions,
-  persist = saveActiveSession,
-  read = readActiveSession,
-} = {}) => {
-  const response = await baseQuery(
-    { url: SESSIONS_ACTIVE_URL, method: "GET" },
-    api,
-    extraOptions,
-  )
-  if (response.error) {
-    const local = read()
-    return { data: local || null }
-  }
-
-  const data = response.data || {}
-  if (!data.has_active_session || !data.session) {
-    return { data: null }
-  }
-
-  const s = data.session
-  const mappedSession = {
+// The start response already carries turn 1 with its TTS audio. A tag-invalidated
+// /sessions/active refresh (or a resume) must not drop `initialQuestion` for the
+// same session: useConversationLoop would otherwise fetch GET /question again
+// (~1 s of TTS) before "Câu 1/5".
+const mapServerSession = (s, localSession = null) => {
+  const mapped = {
     id: s.session_id,
     code: s.session_id,
     status: s.status === "completed" ? SESSION_STATUS.COMPLETED : SESSION_STATUS.IN_PROGRESS,
@@ -332,11 +315,85 @@ export const getActiveSessionReal = async ({
       : [],
   }
 
+  if (localSession?.id === mapped.id) {
+    if (localSession.initialQuestion) {
+      mapped.initialQuestion = localSession.initialQuestion
+    }
+    // The pause deadline lives only on the client (the server has no pause
+    // budget), so a server refresh must not reset it.
+    if (localSession.pauseStartedAt) {
+      mapped.pauseStartedAt = localSession.pauseStartedAt
+    }
+    if (localSession.pauseSpentMs) {
+      mapped.pauseSpentMs = localSession.pauseSpentMs
+    }
+  }
+
+  return mapped
+}
+
+/** 4. Kiểm tra phiên dang dở trong 24h: GET /v1/placement/sessions/active */
+export const getActiveSessionReal = async ({
+  baseQuery,
+  api,
+  extraOptions,
+  persist = saveActiveSession,
+  read = readActiveSession,
+} = {}) => {
+  const response = await baseQuery(
+    { url: SESSIONS_ACTIVE_URL, method: "GET" },
+    api,
+    extraOptions,
+  )
+  if (response.error) {
+    const local = read()
+    return { data: local || null }
+  }
+
+  const data = response.data || {}
+  if (!data.has_active_session || !data.session) {
+    return { data: null }
+  }
+
+  const mappedSession = mapServerSession(data.session, read())
   persist(mappedSession)
   return { data: mappedSession }
 }
 
 /** 5. Xem Profile HSK & Cooldown 14 ngày: GET /v1/placement/profile */
+
+/**
+ * `scored_at` là ISO8601; phần còn lại của feature so sánh `scoredAt` bằng ms
+ * (localStorage ghi Date.now()). Đổi ngay ở biên để không ai phải nhớ hai đơn vị.
+ */
+const mapAttemptTimestamp = (value) => {
+  if (!value) return null
+  const ms = new Date(value).getTime()
+  return Number.isFinite(ms) ? ms : null
+}
+
+/** Lần thi gần nhất do máy chủ giữ — nguồn thật khi localStorage trống. */
+const mapLastAttempt = (attempt) => {
+  if (!attempt) return null
+  const scores = attempt.scores || {}
+  return {
+    sessionId: attempt.session_id ?? null,
+    code: attempt.session_id ?? null,
+    finalHskLevel: attempt.final_hsk_level ?? null,
+    turnCount: Number(attempt.turn_count) || 0,
+    scoredAt: mapAttemptTimestamp(attempt.scored_at),
+    scores: {
+      pronunciation: scores.pronunciation ?? null,
+      vocabulary: scores.vocabulary ?? null,
+      grammar: scores.grammar ?? null,
+      fluency: scores.fluency ?? null,
+      ahiTotal: scores.ahi_total ?? null,
+    },
+    selfAdjusted: Boolean(attempt.self_adjusted),
+    adjustedFromHskLevel: attempt.adjusted_from_hsk_level ?? null,
+  }
+}
+
 export const getRetakeStatusReal = async ({
   baseQuery,
   api,
@@ -386,6 +443,7 @@ export const getRetakeStatusReal = async ({
       hasHistory: Boolean(lastTestedAt || data.current_hsk_level),
       currentHskLevel: data.current_hsk_level ?? null,
       evaluatedAt: data.evaluated_at ?? null,
+      lastAttempt: mapLastAttempt(data.last_attempt),
     },
   }
 }
@@ -457,14 +515,11 @@ export const adjustLevelReal = async (
 }
 
 /** 7. Hoàn tất & đọc kết quả bài thi */
-export const scoreSessionReal = async (
-  { sessionId } = {},
-  {
-    read = readActiveSession,
-    clear = clearActiveSession,
-    readResult: readStoredResult = readResult,
-  } = {},
-) => {
+export const scoreSessionReal = async ({
+  read = readActiveSession,
+  clear = clearActiveSession,
+  readResult: readStoredResult = readResult,
+} = {}) => {
   const session = read()
   const result = readStoredResult()
   if (!session && !result) return notFound()
@@ -481,12 +536,13 @@ export const scoreSessionReal = async (
 
 /** 8. Tiếp tục phiên thi: kiểm tra trạng thái trên máy chủ */
 export const resumeSessionReal = async (
-  { sessionId } = {},
+  { sessionId, fromDashboard = false } = {},
   {
     baseQuery,
     api,
     extraOptions,
     read = readActiveSession,
+    persist = saveActiveSession,
     clear = clearActiveSession,
   } = {},
 ) => {
@@ -519,6 +575,18 @@ export const resumeSessionReal = async (
       },
     }
   }
+
+  // The room derives its position from the stored session, so the authoritative
+  // server copy (current_turn / current_question / turns[].answered_at) must be
+  // applied before navigating — otherwise a stale local copy rewinds to Câu 1.
+  persist(mapServerSession(s, session))
+
+  // Choosing "Tiếp tục" on the dashboard is an explicit entry, not an F5. The
+  // room opened before the login expired left its tab marker behind (hard
+  // redirects skip the React cleanup); clearing it stops the recovery modal
+  // from appearing a second time. The in-room F5 refresh keeps the marker so a
+  // further reload still warns about the lost recording.
+  if (fromDashboard) clearRoomMarker()
 
   return { data: { session: s } }
 }

@@ -6,61 +6,48 @@ import {
   CONVERSATION_NOTICE,
   CONVERSATION_PHASE,
   NOTICE_BANNER_MS,
+  NOT_HEARING_BANNER_MS,
+  NOT_HEARING_EXIT_MS,
   QUESTION_DURATION_MS,
   TICK_MS,
   VAD_SILENCE_MS,
 } from "../constants/conversation"
 import {
+  PLACEMENT_TEST_DASHBOARD_PATH,
   PLACEMENT_TEST_PATH,
+  PLACEMENT_TEST_PROFILE_PATH,
   PLACEMENT_TEST_SCORING_PATH,
 } from "../constants/routes"
 import { SESSION_STATUS } from "../constants/session"
-import { CONNECTION_LOST_EVENT } from "../constants/lifecycle"
+import {
+  CONNECTION_LOST_EVENT,
+  PAUSE_EXPIRED_FALLBACK_NOTICE,
+} from "../constants/lifecycle"
 import { TOTAL_TURNS, evaluateTurn, selectNextQuestion } from "../engine"
 import {
   placementTestApi,
   useCancelSessionMutation,
   useCreateSessionMutation,
+  useResumeSessionMutation,
   useSubmitTurnMutation,
 } from "../api"
-import { SILENCE_LEVEL } from "../services/audio/constants"
-import { createSilenceTracker } from "../services/speech"
+import { createNoHearingWatcher } from "../services/speech"
 import {
   clearActiveSession,
   readActiveSession,
   saveActiveSession,
 } from "../utils/sessionStorage"
 import {
+  RECONNECT_OUTCOME,
   advancePauseBudget,
+  nextReconnectStep,
   remainingPauseBudget,
-  remainingQuestionMs,
   startReconnect,
-  tickReconnect,
 } from "../utils/lifecycle"
-import { isUnfinishedSession } from "../utils/sessionLifecycle"
-import { upsertTurn } from "../utils/turns"
+import { getResumeOrder, isPauseExpired, isRoomReload, isUnfinishedSession } from "../utils/sessionLifecycle"
+import { countSubmittedTurns, upsertTurn } from "../utils/turns"
+import { readRoomMarker, writeRoomMarker } from "../utils/roomMarker"
 import useAudioTransport from "./useAudioTransport"
-
-// Đánh dấu phòng thi đang mở trong tab này. Rời phòng bằng điều hướng trong app
-// thì xóa dấu; F5 không chạy cleanup nên dấu còn, lần mount sau biết là tải lại.
-const ROOM_MARKER_KEY = "catspeak_pt_room_open"
-
-const readRoomMarker = () => {
-  try {
-    return window.sessionStorage.getItem(ROOM_MARKER_KEY)
-  } catch {
-    return null
-  }
-}
-
-const writeRoomMarker = (value) => {
-  try {
-    if (value) window.sessionStorage.setItem(ROOM_MARKER_KEY, value)
-    else window.sessionStorage.removeItem(ROOM_MARKER_KEY)
-  } catch {
-    // sessionStorage bị chặn: bỏ qua, chỉ mất hộp thoại tiếp tục
-  }
-}
 
 const isOnline = () =>
   typeof navigator === "undefined" || navigator.onLine !== false
@@ -85,14 +72,14 @@ const normalizeQuestion = (q, fallbackOrder = 1) => {
   }
 }
 
-const useConversationLoop = () => {
+const useConversationLoop = ({ exitNotice, pauseExpiredNotice, connectionLostNotice } = {}) => {
   const navigate = useNavigate()
 
   const [session, setSession] = useState(readActiveSession)
   const [turns, setTurns] = useState(() => readActiveSession()?.turns || [])
   const [order, setOrder] = useState(() => {
     const s = readActiveSession()
-    return Number(s?.currentOrder) || (s?.turns?.length || 0) + 1
+    return Number(s?.currentOrder) || countSubmittedTurns(s?.turns) + 1
   })
   const [question, setQuestion] = useState(null)
   const [transcript, setTranscript] = useState("")
@@ -100,6 +87,7 @@ const useConversationLoop = () => {
   const [notice, setNotice] = useState(null)
   const [retryCount, setRetryCount] = useState(0)
   const [isRecording, setIsRecording] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
   const [hasRecorded, setHasRecorded] = useState(false)
   const [recordedMs, setRecordedMs] = useState(0)
   const [remainingMs, setRemainingMs] = useState(QUESTION_DURATION_MS)
@@ -107,9 +95,16 @@ const useConversationLoop = () => {
   const [showPinyin, setShowPinyin] = useState(true)
   const [showMeaning, setShowMeaning] = useState(true)
   const [paused, setPaused] = useState(false)
-  const [pauseSpentMs, setPauseSpentMs] = useState(
-    () => readActiveSession()?.pauseSpentMs || 0,
-  )
+  // Destructive cancel is a two-step action: the pause modal asks for
+  // confirmation before the session is cancelled and answered turns are lost.
+  const [cancelConfirming, setCancelConfirming] = useState(false)
+  const [pauseSpentMs, setPauseSpentMs] = useState(() => {
+    const stored = readActiveSession()
+    if (!stored?.pauseStartedAt) return stored?.pauseSpentMs || 0
+    // F5 mid-pause: keep counting from the stored pause start instead of
+    // resetting the 30-minute budget.
+    return advancePauseBudget(stored.pauseSpentMs, Date.now() - stored.pauseStartedAt)
+  })
   const [connectionLost, setConnectionLost] = useState(false)
   const [reconnect, setReconnect] = useState(() => startReconnect())
   const [suspended, setSuspended] = useState(false)
@@ -120,6 +115,7 @@ const useConversationLoop = () => {
   const [submitTurn] = useSubmitTurnMutation()
   const [cancelSession] = useCancelSessionMutation()
   const [createSession] = useCreateSessionMutation()
+  const [resumeActiveSession] = useResumeSessionMutation()
   const [triggerGetQuestion] = placementTestApi.useLazyGetQuestionQuery()
 
   const {
@@ -133,6 +129,7 @@ const useConversationLoop = () => {
     stopAudio,
     startRecording,
     stopRecording,
+    setMuted: setTransportMuted,
     getRecordedBlob,
     getRecordingUrl,
   } = useAudioTransport()
@@ -142,22 +139,24 @@ const useConversationLoop = () => {
 
   const levelRef = useRef(0)
   const micStatusRef = useRef("connecting")
-  const trackerRef = useRef(null)
+  const noHearingRef = useRef(null)
+  const noHearingExitedRef = useRef(false)
   const recordingStartedAtRef = useRef(0)
   const isRecordingRef = useRef(false)
-  const silentSinceRef = useRef(null)
   const finishingRef = useRef(false)
   const recordingStoppedRef = useRef(false)
   const mountedRef = useRef(true)
-  const frozenRemainingRef = useRef(QUESTION_DURATION_MS)
   const connectionLostRef = useRef(false)
   const reconnectRef = useRef(startReconnect())
   const pauseSpentRef = useRef(pauseSpentMs)
   const handleReconnectSuccessRef = useRef(() => {})
-  const handleResumeRef = useRef(() => {})
+  const handleConnectionExitRef = useRef(() => {})
+  const expirePausedSessionRef = useRef(() => {})
   const handleLeaveRef = useRef(() => {})
+  const expiringRef = useRef(false)
 
   const finishTurnRef = useRef(() => {})
+  const handleNoHearingExitRef = useRef(() => {})
   const autoRecordTimerRef = useRef(null)
   const audioTokenRef = useRef(0)
   const suspendedRef = useRef(false)
@@ -235,6 +234,7 @@ const useConversationLoop = () => {
       question,
       transcript,
       retryCount,
+      notice,
       phase,
       isRecording,
       hasRecorded,
@@ -247,6 +247,7 @@ const useConversationLoop = () => {
     question,
     transcript,
     retryCount,
+    notice,
     phase,
     isRecording,
     hasRecorded,
@@ -342,9 +343,13 @@ const useConversationLoop = () => {
     setRecordedMs(0)
     setTranscript("")
 
-    const tracker = createSilenceTracker({ threshold: SILENCE_LEVEL })
-    tracker.reset(now)
-    trackerRef.current = tracker
+    noHearingExitedRef.current = false
+    const watcher = createNoHearingWatcher({
+      bannerMs: NOT_HEARING_BANNER_MS,
+      exitMs: NOT_HEARING_EXIT_MS,
+    })
+    watcher.reset(now)
+    noHearingRef.current = watcher
 
     startAudioListening({
       level: stateRef.current.question?.level,
@@ -361,32 +366,24 @@ const useConversationLoop = () => {
     startRecordRef.current = handleStartRecord
   }, [handleStartRecord])
 
-  const handleStopRecord = useCallback(async () => {
-    if (!isRecordingRef.current) return
-    setIsRecording(false)
-    setHasRecorded(true)
-    stopAudioListening()
-    await stopRecording()
-    const elapsed = Math.min(
-      Date.now() - (recordingStartedAtRef.current || Date.now()),
-      QUESTION_DURATION_MS,
-    )
-    setRecordedMs(Math.max(0, elapsed))
-    setNotice(null)
-  }, [stopAudioListening, stopRecording])
-
-  const handleToggleRecord = useCallback(() => {
-    if (isRecordingRef.current) {
-      handleStopRecord()
+  // BUG-PT-02 (khôi phục theo ruling 2026-10-31): nút mic là công tắc tắt/bật
+  // tiếng. Việc ghi âm do VAD tự mở; "Hoàn tất câu trả lời" mới kết thúc lượt.
+  const handleToggleMute = useCallback(() => {
+    const next = !isMuted
+    setIsMuted(next)
+    setTransportMuted(next)
+    if (next) {
+      setNotice((current) =>
+        current === CONVERSATION_NOTICE.NO_HEARING ? null : current,
+      )
     } else {
-      handleStartRecord()
+      noHearingRef.current?.reset(Date.now())
     }
-  }, [handleStartRecord, handleStopRecord])
+  }, [isMuted, setTransportMuted])
 
   const handleReRecord = useCallback(async () => {
     const current = stateRef.current
     if (current.question && phase === CONVERSATION_PHASE.LISTENING) {
-      setRetryCount((prev) => prev + 1)
       handleStopUserAudio()
       stopAudioListening()
       await stopRecording()
@@ -454,8 +451,11 @@ const useConversationLoop = () => {
       setOrder(effectiveOrder)
       setQuestion(nextQuestion)
       setTranscript("")
+      setRetryCount(0)
       setNotice(null)
       setIsRecording(false)
+      setIsMuted(false)
+      setTransportMuted(false)
       setHasRecorded(false)
       setRecordedMs(0)
       setRemainingMs(QUESTION_DURATION_MS)
@@ -470,6 +470,7 @@ const useConversationLoop = () => {
       stopAudio,
       stopAudioListening,
       stopRecording,
+      setTransportMuted,
       triggerGetQuestion,
     ],
   )
@@ -502,7 +503,11 @@ const useConversationLoop = () => {
 
       setTranscript(clean)
       setNotice(null)
-      setPhase(CONVERSATION_PHASE.ANALYZING)
+      // Bỏ qua không phải "đang phân tích": người học phải thấy ngay câu tiếp
+      // theo, không phải màn chờ phân tích ngữ âm/ngữ pháp.
+      setPhase(
+        skipped ? CONVERSATION_PHASE.SKIPPED : CONVERSATION_PHASE.ANALYZING,
+      )
 
       const turn = {
         order: turnOrder,
@@ -563,7 +568,8 @@ const useConversationLoop = () => {
         setIsRecording(false)
         setHasRecorded(false)
         setRecordedMs(0)
-        scheduleAutoRecord()
+        // Keep the retry banner until the learner presses the mic: auto-recording
+        // here used to clear it after 2 s and silently loop on question 1/5.
         return
       }
 
@@ -581,7 +587,8 @@ const useConversationLoop = () => {
       }
 
       const elapsed = Date.now() - startedAt
-      if (elapsed < ANALYZE_MIN_MS) {
+      // Câu bỏ qua không chờ nhịp phân tích tối thiểu: chuyển câu ngay.
+      if (!skipped && elapsed < ANALYZE_MIN_MS) {
         await new Promise((resolve) => {
           window.setTimeout(resolve, ANALYZE_MIN_MS - elapsed)
         })
@@ -609,7 +616,6 @@ const useConversationLoop = () => {
       clearAutoRecord,
       handleStopUserAudio,
       navigate,
-      scheduleAutoRecord,
       stopAudioListening,
       stopSpeakingText,
       stopAudio,
@@ -648,18 +654,47 @@ const useConversationLoop = () => {
     suspendedRef.current = false
     setSuspended(false)
     const current = stateRef.current
-    if (!current.hasRecorded && current.phase === CONVERSATION_PHASE.LISTENING) {
+    if (
+      !current.hasRecorded &&
+      current.notice !== CONVERSATION_NOTICE.RETRY &&
+      current.phase === CONVERSATION_PHASE.LISTENING
+    ) {
       scheduleAutoRecord()
     }
   }, [scheduleAutoRecord])
 
   const handlePause = useCallback(() => {
     if (connectionLost) return
+    const current = stateRef.current
+    if (current.session) {
+      // Persist the pause start so F5 (or a sleeping tab) still knows how much
+      // of the 30-minute budget is already gone.
+      saveActiveSession({
+        ...current.session,
+        turns: current.turns,
+        pauseSpentMs: pauseSpentRef.current,
+        pauseStartedAt: Date.now(),
+      })
+    }
     setPaused(true)
+    setCancelConfirming(false)
     suspendSession()
   }, [connectionLost, suspendSession])
 
   const handleResume = useCallback(() => {
+    const current = stateRef.current
+    if (remainingPauseBudget(pauseSpentRef.current) <= 0) {
+      expirePausedSessionRef.current(current.session?.id)
+      return
+    }
+    if (current.session) {
+      saveActiveSession({
+        ...current.session,
+        turns: current.turns,
+        pauseSpentMs: pauseSpentRef.current,
+        pauseStartedAt: 0,
+      })
+    }
     setPaused(false)
     resumeSession()
   }, [resumeSession])
@@ -667,11 +702,13 @@ const useConversationLoop = () => {
   const handleLeave = useCallback(() => {
     const current = stateRef.current
     if (current.session) {
+      const stored = readActiveSession()
       saveActiveSession({
         ...current.session,
         turns: current.turns,
-        pauseSpentMs,
+        pauseSpentMs: pauseSpentRef.current,
         pausedAt: Date.now(),
+        pauseStartedAt: stored?.pauseStartedAt || 0,
       })
     }
     handleStopUserAudio()
@@ -679,10 +716,107 @@ const useConversationLoop = () => {
     stopSpeakingText()
     stopAudio()
     navigate(PLACEMENT_TEST_PATH, { replace: true })
-  }, [handleStopUserAudio, navigate, pauseSpentMs, stopAudioListening, stopSpeakingText, stopAudio])
+  }, [handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
+
+  // Mic im lặng quá NOT_HEARING_EXIT_MS: rời phòng, giữ phiên để thi tiếp sau
+  // khi người dùng kiểm tra lại thiết bị âm thanh.
+  const handleNoHearingExit = useCallback(() => {
+    if (noHearingExitedRef.current) return
+    noHearingExitedRef.current = true
+    noHearingRef.current = null
+
+    const current = stateRef.current
+    if (current.session) {
+      saveActiveSession({
+        ...current.session,
+        turns: current.turns,
+        pauseSpentMs: pauseSpentRef.current,
+        pausedAt: Date.now(),
+        pauseStartedAt: 0,
+      })
+    }
+
+    suspendedRef.current = true
+    setNotice(null)
+    setIsRecording(false)
+    setHasRecorded(false)
+    setRecordedMs(0)
+    handleStopUserAudio()
+    stopAudioListening()
+    stopSpeakingText()
+    stopAudio()
+    stopRecording()
+
+    toast.error(
+      exitNotice ||
+        "Không phát hiện âm thanh từ micrô. Vui lòng kiểm tra thiết bị âm thanh trước khi thi lại.",
+    )
+    navigate(PLACEMENT_TEST_DASHBOARD_PATH, { replace: true })
+  }, [
+    exitNotice,
+    handleStopUserAudio,
+    navigate,
+    stopAudio,
+    stopAudioListening,
+    stopRecording,
+    stopSpeakingText,
+  ])
+
+  // Hết 3 lần thử kết nối lại mà mạng vẫn mất: lỗi thuộc về đường truyền của
+  // người học, nên rời phòng thi về Dashboard kèm thông báo mạng bị gián đoạn —
+  // không mở hộp thoại tạm dừng 30 phút (lỗi mạng không phải một phiên nghỉ).
+  const handleConnectionExit = useCallback(() => {
+    const current = stateRef.current
+    if (current.session) {
+      saveActiveSession({
+        ...current.session,
+        turns: current.turns,
+        pauseSpentMs: pauseSpentRef.current,
+        pausedAt: Date.now(),
+        pauseStartedAt: 0,
+      })
+    }
+
+    suspendedRef.current = true
+    connectionLostRef.current = false
+    setConnectionLost(false)
+    setPaused(false)
+    setNotice(null)
+    setIsRecording(false)
+    setHasRecorded(false)
+    setRecordedMs(0)
+    handleStopUserAudio()
+    stopAudioListening()
+    stopSpeakingText()
+    stopAudio()
+    stopRecording()
+
+    toast.error(
+      connectionLostNotice ||
+        "Mất kết nối mạng quá lâu nên không thể tiếp tục bài thi. Tiến trình đã được lưu an toàn; hãy kiểm tra đường truyền rồi tiếp tục.",
+    )
+    navigate(PLACEMENT_TEST_DASHBOARD_PATH, { replace: true })
+  }, [
+    connectionLostNotice,
+    handleStopUserAudio,
+    navigate,
+    stopAudio,
+    stopAudioListening,
+    stopRecording,
+    stopSpeakingText,
+  ])
+
+  const handleRequestCancel = useCallback(() => {
+    setCancelConfirming(true)
+  }, [])
+
+  const handleDismissCancel = useCallback(() => {
+    setCancelConfirming(false)
+  }, [])
 
   const handleCancel = useCallback(async () => {
     const current = stateRef.current
+    setCancelConfirming(false)
     if (current.session?.id) {
       try {
         await cancelSession({ sessionId: current.session.id }).unwrap()
@@ -697,6 +831,36 @@ const useConversationLoop = () => {
     stopAudio()
     navigate(PLACEMENT_TEST_PATH, { replace: true })
   }, [cancelSession, handleStopUserAudio, navigate, stopAudio, stopAudioListening, stopSpeakingText])
+
+  // Nghỉ quá 30 phút: đóng modal, hủy phiên trên máy chủ, xóa bản lưu cục bộ
+  // rồi về Dashboard kèm thông báo — không cho làm tiếp phiên đã quá hạn.
+  const expirePausedSession = useCallback(async (sessionId) => {
+    if (expiringRef.current) return
+    expiringRef.current = true
+    setPaused(false)
+    if (sessionId) {
+      try {
+        await cancelSession({ sessionId }).unwrap()
+      } catch {
+        // Phiên đã bị hủy/hết hạn ở nơi khác: vẫn phải dọn bản lưu cục bộ.
+      }
+    }
+    clearActiveSession()
+    handleStopUserAudio()
+    stopAudioListening()
+    stopSpeakingText()
+    stopAudio()
+    toast.error(pauseExpiredNotice || PAUSE_EXPIRED_FALLBACK_NOTICE)
+    navigate(PLACEMENT_TEST_DASHBOARD_PATH, { replace: true })
+  }, [
+    cancelSession,
+    handleStopUserAudio,
+    navigate,
+    pauseExpiredNotice,
+    stopAudio,
+    stopAudioListening,
+    stopSpeakingText,
+  ])
 
   const handleConnectionLost = useCallback(() => {
     if (connectionLost) return
@@ -726,12 +890,20 @@ const useConversationLoop = () => {
   }, [handleReconnectSuccess])
 
   useEffect(() => {
-    handleResumeRef.current = handleResume
-  }, [handleResume])
+    expirePausedSessionRef.current = expirePausedSession
+  }, [expirePausedSession])
 
   useEffect(() => {
     handleLeaveRef.current = handleLeave
   }, [handleLeave])
+
+  useEffect(() => {
+    handleNoHearingExitRef.current = handleNoHearingExit
+  }, [handleNoHearingExit])
+
+  useEffect(() => {
+    handleConnectionExitRef.current = handleConnectionExit
+  }, [handleConnectionExit])
 
   useEffect(() => {
     const handleOffline = () => handleConnectionLost()
@@ -751,19 +923,16 @@ const useConversationLoop = () => {
   useEffect(() => {
     if (!connectionLost) return undefined
     const id = window.setInterval(() => {
-      const previous = reconnectRef.current
-      const next = tickReconnect(previous, 1000)
-      if (next.exhausted) {
-        reconnectRef.current = startReconnect()
-        setReconnect(reconnectRef.current)
-        setConnectionLost(false)
-        setPaused(true)
-        return
-      }
-      reconnectRef.current = next
-      setReconnect(next)
-      if (next.attempt !== previous.attempt && isOnline()) {
+      const step = nextReconnectStep(reconnectRef.current, {
+        deltaMs: 1000,
+        online: isOnline(),
+      })
+      reconnectRef.current = step.state
+      setReconnect(step.state)
+      if (step.outcome === RECONNECT_OUTCOME.RECOVER) {
         handleReconnectSuccessRef.current()
+      } else if (step.outcome === RECONNECT_OUTCOME.EXIT) {
+        handleConnectionExitRef.current()
       }
     }, 1000)
     return () => window.clearInterval(id)
@@ -771,12 +940,15 @@ const useConversationLoop = () => {
 
   useEffect(() => {
     if (!paused) return undefined
+    let lastTickAt = Date.now()
     const id = window.setInterval(() => {
-      const next = advancePauseBudget(pauseSpentRef.current, 1000)
+      const now = Date.now()
+      const next = advancePauseBudget(pauseSpentRef.current, now - lastTickAt)
+      lastTickAt = now
       pauseSpentRef.current = next
       setPauseSpentMs(next)
       if (remainingPauseBudget(next) <= 0) {
-        handleResumeRef.current()
+        expirePausedSessionRef.current(stateRef.current.session?.id)
       }
     }, 1000)
     return () => window.clearInterval(id)
@@ -785,45 +957,89 @@ const useConversationLoop = () => {
   useEffect(() => {
     mountedRef.current = true
     const stored = readActiveSession()
-    if (!stored || !isUnfinishedSession(stored)) {
-      clearActiveSession()
-      navigate(PLACEMENT_TEST_PATH, { replace: true })
-      return () => {
-        mountedRef.current = false
-      }
-    }
-    const answeredTurns = (stored.turns || []).filter(
-      (t) =>
-        Boolean(
-          t.answeredAt ||
-            t.submittedAt ||
-            (t.transcript && t.transcript.trim() !== ""),
-        ),
-    ).length
-    if (answeredTurns >= TOTAL_TURNS) {
-      clearActiveSession()
-      navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
-      return () => {
-        mountedRef.current = false
-      }
-    }
-    const startOrder = Math.min(answeredTurns + 1, TOTAL_TURNS)
+
     // Giữ quyết định trong ref để StrictMode (mount hai lần ở dev) không đọc sai dấu.
     if (reloadDecisionRef.current === null) {
-      reloadDecisionRef.current =
-        Boolean(stored.id) && readRoomMarker() === String(stored.id)
+      reloadDecisionRef.current = isRoomReload(stored, readRoomMarker())
     }
     const reloaded = reloadDecisionRef.current
-    writeRoomMarker(stored.id ? String(stored.id) : null)
-    if (reloaded) {
-      setResumePrompt({
-        answeredCount: stored.turns?.length || 0,
-        nextOrder: startOrder,
-        expiresAt: Number(stored.expiresAt) || null,
+    writeRoomMarker(stored?.id ? String(stored.id) : null)
+
+    const openSession = (snapshot) => {
+      if (!mountedRef.current) return
+      if (!snapshot || !isUnfinishedSession(snapshot)) {
+        clearActiveSession()
+        navigate(PLACEMENT_TEST_PATH, { replace: true })
+        return
+      }
+      const answeredTurns = countSubmittedTurns(snapshot.turns, TOTAL_TURNS)
+      if (answeredTurns >= TOTAL_TURNS) {
+        clearActiveSession()
+        navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
+        return
+      }
+      const startOrder = getResumeOrder(snapshot, {
+        answeredCount: answeredTurns,
+        totalTurns: TOTAL_TURNS,
       })
-    } else {
-      loadQuestionRef.current(startOrder, stored.turns || [])
+      // The question loader reads stateRef synchronously; apply the refreshed
+      // session there before it decides the turn.
+      stateRef.current = {
+        ...stateRef.current,
+        session: snapshot,
+        turns: snapshot.turns || [],
+      }
+      setSession(snapshot)
+      setTurns(snapshot.turns || [])
+      if (reloaded) {
+        const expiresAt = Number(snapshot.expiresAt) || null
+        setResumePrompt({
+          answeredCount: answeredTurns,
+          nextOrder: startOrder,
+          expiresAt,
+          // Snapshot outside render so the modal does not call Date.now()
+          // while rendering.
+          remainingMs: expiresAt ? Math.max(0, expiresAt - Date.now()) : 0,
+        })
+      } else {
+        loadQuestionRef.current(startOrder, snapshot.turns || [])
+      }
     }
+
+    // F5: fetch the server position before offering "Tiếp tục". A local copy
+    // that is missing a submitted turn (old stored shape, another tab) would
+    // otherwise rewind the exam to Câu 1 and replay `initialQuestion`.
+    if (stored && isPauseExpired(stored)) {
+      // Tab slept through the 30-minute pause budget: the interval never fired.
+      expirePausedSessionRef.current(stored.id)
+    } else {
+      if (stored?.pauseStartedAt) {
+        // Reload closes the pause overlay, but the time already spent must
+        // still count against the budget.
+        saveActiveSession({
+          ...stored,
+          pauseStartedAt: 0,
+          pauseSpentMs: pauseSpentRef.current,
+        })
+      }
+      if (reloaded && stored?.id) {
+        resumeActiveSession({ sessionId: stored.id })
+          .unwrap()
+          .then(() => openSession(readActiveSession() || stored))
+          .catch((err) => {
+            if (!mountedRef.current) return
+            if (err?.status === 400 || err?.status === 403 || err?.status === 410) {
+              clearActiveSession()
+              navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
+              return
+            }
+            openSession(stored)
+          })
+      } else {
+        openSession(stored)
+      }
+    }
+
     return () => {
       mountedRef.current = false
       writeRoomMarker(null)
@@ -833,11 +1049,14 @@ const useConversationLoop = () => {
       stopSpeakingText()
       stopAudio()
     }
-  }, [clearAutoRecord, handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
+  }, [clearAutoRecord, handleStopUserAudio, navigate, resumeActiveSession, stopAudioListening, stopSpeakingText, stopAudio])
 
-  // FR-PT-008: banner cảnh báo tự ẩn sau NOTICE_BANNER_MS.
+  // FR-PT-008: banner thử lại tự ẩn sau NOTICE_BANNER_MS. Banner NO_HEARING
+  // phải giữ nguyên cho tới khi có tiếng trở lại hoặc hết NOT_HEARING_EXIT_MS.
+  // Banner RETRY giữ nguyên tới khi người học bấm mic, vì không còn tự ghi âm.
   useEffect(() => {
-    if (!notice) return undefined
+    if (!notice || notice === CONVERSATION_NOTICE.NO_HEARING) return undefined
+    if (notice === CONVERSATION_NOTICE.RETRY) return undefined
     const id = window.setTimeout(() => setNotice(null), NOTICE_BANNER_MS)
     return () => window.clearTimeout(id)
   }, [notice, retryCount])
@@ -854,6 +1073,23 @@ const useConversationLoop = () => {
       setRecordedMs(clamped)
       setRemainingMs(Math.max(0, QUESTION_DURATION_MS - clamped))
 
+      const watcher = noHearingRef.current
+      if (watcher && !isMuted && !noHearingExitedRef.current) {
+        const verdict = watcher.push(levelRef.current)
+        if (verdict.shouldExit) {
+          handleNoHearingExitRef.current()
+          return
+        }
+        setNotice((previous) => {
+          if (verdict.showBanner) {
+            return previous === CONVERSATION_NOTICE.NO_HEARING
+              ? previous
+              : CONVERSATION_NOTICE.NO_HEARING
+          }
+          return previous === CONVERSATION_NOTICE.NO_HEARING ? null : previous
+        })
+      }
+
       if (elapsed >= QUESTION_DURATION_MS) {
         setIsRecording(false)
         setHasRecorded(true)
@@ -862,7 +1098,7 @@ const useConversationLoop = () => {
       }
     }, TICK_MS)
     return () => window.clearInterval(id)
-  }, [phase, suspended, isRecording, stopAudioListening, stopRecording])
+  }, [phase, suspended, isRecording, isMuted, stopAudioListening, stopRecording])
 
   // User explicitly clicks "Hoàn tất câu trả lời"
   const handleSubmit = useCallback(async () => {
@@ -957,8 +1193,9 @@ const useConversationLoop = () => {
     notice,
     retryCount,
     isRecording,
+    isMuted,
     aiSpeaking,
-    micLevel,
+    micLevel: isMuted ? 0 : micLevel,
     hasRecorded,
     recordedMs,
     remainingMs,
@@ -971,8 +1208,9 @@ const useConversationLoop = () => {
     togglePinyin,
     toggleMeaning,
     canSkip: true,
-    answeredCount: turns.length,
+    answeredCount: countSubmittedTurns(turns, TOTAL_TURNS),
     paused,
+    cancelConfirming,
     pauseRemainingMs: remainingPauseBudget(pauseSpentMs),
     connectionLost,
     reconnectAttempt: reconnect.attempt,
@@ -980,11 +1218,12 @@ const useConversationLoop = () => {
     handlePause,
     handleResume,
     handleLeave,
+    handleRequestCancel,
+    handleDismissCancel,
     handleCancel,
     handleReconnectNow,
-    handleToggleRecord,
+    handleToggleMute,
     handleStartRecord,
-    handleStopRecord,
     handlePlayUserAudio,
     handleStopUserAudio,
     handleSubmit,

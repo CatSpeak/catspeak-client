@@ -1,9 +1,10 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { setCredentials, logout } from "../slices/authSlice";
-import { setServerDown, setServerUp } from "../slices/serverStatusSlice";
-import { checkIsServerHealthy } from "@/shared/utils/healthCheck";
-import { getBrowserTimeZone } from "@/shared/constants/timezones";
-import { defaultParamsSerializer } from "./utils/paramsSerializer";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import { setCredentials, logout } from "../slices/authSlice"
+import { setServerDown, setServerUp } from "../slices/serverStatusSlice"
+import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
+import { isBrowserOffline } from "@/shared/utils/networkStatus"
+import { getBrowserTimeZone } from "@/shared/constants/timezones"
+import { defaultParamsSerializer } from "./utils/paramsSerializer"
 import {
   savePendingAutoCrashReport,
   flushPendingAutoCrashReport,
@@ -211,6 +212,15 @@ export async function ensureRefresh(
             status === "FETCH_ERROR" ||
             (typeof status === "number" && status >= 500);
 
+          // Mạng của người học đang rớt: không thử lại, không gắn cờ máy chủ lỗi.
+          if (isServerError && isBrowserOffline()) {
+            console.warn(
+              AUTH_LOG,
+              `Refresh failed offline (${status}) — client network down, skipping server-down flag`,
+            )
+            return false
+          }
+
           if (isServerError && attempt < MAX_RETRIES) {
             attempt++;
             console.warn(
@@ -416,8 +426,8 @@ export function createReauthBaseQuery(queryResolver) {
     const isServerError =
       status === "FETCH_ERROR" || (typeof status === "number" && status >= 500);
 
-    if (!isAborted && isServerError) {
-      const isHealthy = await checkIsServerHealthy();
+    if (!isAborted && isServerError && !isBrowserOffline()) {
+      const isHealthy = await checkIsServerHealthy()
       if (!isHealthy) {
         savePendingAutoCrashReport({ failedUrl: url, status });
         console.warn(

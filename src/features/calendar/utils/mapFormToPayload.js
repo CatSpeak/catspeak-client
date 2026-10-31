@@ -63,9 +63,9 @@ export const mapFormToPayload = ({
   const payload = {
     title,
     description,
-    location: eventLocation,
-    countryId: Number(countryId),
-    cityId: Number(cityId),
+    location: (eventLocation || "").trim(),
+    countryId: isOnline ? null : Number(countryId),
+    cityId: isOnline ? null : Number(cityId),
     color: eventColor,
     isOnline: !!isOnline,
     maxParticipants: Number(maxParticipants),

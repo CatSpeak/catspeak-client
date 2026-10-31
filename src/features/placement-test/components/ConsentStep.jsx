@@ -3,6 +3,7 @@ import { ArrowRight, BarChart3, Lightbulb, Mic, Target } from "lucide-react"
 import { Checkbox } from "@/shared/components/ui/inputs"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { cn } from "@/lib/utils"
+import { toggleConsent } from "../utils/consent"
 import StepCard from "./StepCard"
 
 const FEATURE_ICONS = [Target, Mic, BarChart3]
@@ -23,24 +24,13 @@ const ConsentStep = ({
   const consent = copy?.consent || {}
   const features = consent.features || []
 
-  const handleCheckboxChange = async () => {
-    if (agreed) {
-      setAgreed(false)
-      return
-    }
-
-    if (onRequestPermission) {
-      const granted = await onRequestPermission()
-      if (granted) {
-        setAgreed(true)
-      } else {
-        setAgreed(false)
-        if (onPermissionDenied) onPermissionDenied()
-      }
-    } else {
-      setAgreed(true)
-    }
-  }
+  const handleCheckboxChange = () =>
+    toggleConsent({
+      agreed,
+      requestPermission: onRequestPermission,
+      onAgreedChange: setAgreed,
+      onPermissionDenied,
+    })
 
   return (
     <>
@@ -114,10 +104,17 @@ const ConsentStep = ({
             {consent.checkbox}
           </label>
         </div>
+        {requesting && (
+          <p
+            role="status"
+            className="text-[11px] font-medium leading-4 text-cath-red-700"
+          >
+            {consent.permissionHint}
+          </p>
+        )}
         <PillButton
           onClick={onStart}
-          disabled={!agreed}
-          loading={requesting}
+          disabled={!agreed || requesting}
           endIcon={<ArrowRight className="h-4 w-4" />}
           className="w-full"
         >

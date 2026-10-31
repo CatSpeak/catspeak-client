@@ -48,6 +48,8 @@ const FloatingReactionsBar = ({
       {/* Full Emoji Picker button */}
       <Popover
         placement={isOwn ? "top-right" : "top-left"}
+        estimatedWidth={300}
+        estimatedHeight={350}
         trigger={
           <button
             type="button"

@@ -4,20 +4,63 @@
  * Sử dụng prefix "cath" cho CSS variables
  */
 
-const coreColors = {
+// ─── Light Mode Core Tokens ─────────────────────────────
+export const lightColors = {
+  // ── Brand & Core Palette ──
+  redPrimary: "#990011",
   primaryRed: "#990011", // Cat Speak
+
+  // ── Backgrounds ──
+  bg: "#F5F5F7", // Main page background (primary2)
+
+  // ── Text & Typography ──
   secondaryGray: "#606060", // Secondary text / subtext
+  textSecondary: "#606060",
+
+  // ── Borders ──
+  border: "#E5E5E5",
   borderColor: "#E5E5E5", // Fluent UI
   youtubeBorderColor: "#C6C6C6", // Youtube border color
 
   // ── Interactive Item Tokens ──
   itemHover: "#F2F2F2", // hover & active background
+  itemActive: "#F2F2F2",
   itemActiveHover: "#E6E6E6", // hover background when item is already active
 }
+
+const coreColors = lightColors
+
+// ─── Dark Mode Core Tokens ──────────────────────────────
+export const darkColors = {
+  // ── Brand & Core Palette ──
+  redPrimary: "#FF0033",
+  primaryRed: "#FF0033",
+
+  // ── Backgrounds ──
+  bg: "#0F0F0F", // Dark page background
+
+  // ── Text & Typography ──
+  textSecondary: "#AAAAAA", // Secondary text / subtext
+  secondaryGray: "#AAAAAA", // Alias for consistent naming with light mode
+
+  // ── Borders ──
+  border: "#3F3F3F", // Dark border
+  borderColor: "#3F3F3F", // Alias for consistent naming with light mode
+
+  // ── Interactive Item Tokens ──
+  itemHover: "#272727", // hover background
+  itemActive: "#272727", // active background
+  itemActiveHover: "#3D3D3D", // hover background when item is already active
+}
+
+export const darkCoreColors = darkColors
 
 export const colors = {
   // --- Core Theme Colors ---
   ...coreColors,
+
+  // --- Dark Mode Colors ---
+  dark: darkColors,
   // -------------------------
 
   // Red gradient palette (từ đậm đến sáng)

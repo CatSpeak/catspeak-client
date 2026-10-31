@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import HelpButton from "./HelpButton"
 import HelpChatBox from "./HelpChatBox"
 import BugReportModal from "@/features/bug-report/components/BugReportModal"
+import { isHelpHidden } from "../utils/helpVisibility"
 
 function usePathname() {
   const [pathname, setPathname] = useState(
@@ -29,10 +30,7 @@ export default function HelpWidget() {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const pathname = usePathname()
   // Nhất quán với BugReportButton.jsx:28 ("/meet" || "/room"), và ẩn trên /chat để tránh đè lên ChatInput
-  const isHidden =
-    pathname.includes("/meet") ||
-    pathname.includes("/room") ||
-    pathname.includes("/chat")
+  const isHidden = isHelpHidden(pathname)
 
   // Track chat open state for Q4 extra: Help toggle closes chat
   useEffect(() => {

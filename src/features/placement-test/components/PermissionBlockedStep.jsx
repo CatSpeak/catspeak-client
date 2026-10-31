@@ -28,12 +28,19 @@ const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
         <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-red-50 text-red-600">
           <MicOff size={26} strokeWidth={2} />
         </span>
-        <h1 className="text-2xl font-bold leading-8 text-[#09090B]">
-          {blocked.title}
-        </h1>
-        <p className="text-sm font-semibold leading-[22px] text-[#09090B]">
-          {blocked.body}
-        </p>
+        <div
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          className="flex flex-col gap-4"
+        >
+          <h1 className="text-2xl font-bold leading-8 text-[#09090B]">
+            {blocked.title}
+          </h1>
+          <p className="text-sm font-semibold leading-[22px] text-[#09090B]">
+            {blocked.body}
+          </p>
+        </div>
         <div className="flex flex-col gap-2 rounded-2xl bg-red-50 px-[18px] py-4">
           <span className="text-[13px] font-medium leading-[19px] text-red-800">
             {blocked.consequencesTitle}

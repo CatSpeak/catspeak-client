@@ -3,6 +3,7 @@ import {
   Clock,
   Loader2,
   Mic,
+  MicOff,
   RotateCcw,
   SkipForward,
   Square,
@@ -20,6 +21,7 @@ const SessionControlRow = ({
   phase,
   notice,
   isRecording = false,
+  isMuted = false,
   aiSpeaking = false,
   micLevel = 0,
   hasRecorded = false,
@@ -29,16 +31,24 @@ const SessionControlRow = ({
   isPlayingUserAudio = false,
   onPlayUserAudio,
   onStopUserAudio,
-  onToggleRecord,
+  onToggleMute,
   onReRecord,
   onSubmit,
   onSkip,
 }) => {
   const analyzing = phase === CONVERSATION_PHASE.ANALYZING
+  const skipped = phase === CONVERSATION_PHASE.SKIPPED
+  const busy = analyzing || skipped
   const waiting = notice === CONVERSATION_NOTICE.NO_HEARING && isRecording
 
   let timerText = ""
-  if (isRecording) {
+  if (skipped) {
+    timerText = `${formatClock(0)} / ${formatClock(maxDurationMs)} • ${
+      copy.statusSkipped || "Đã bỏ qua câu này"
+    }`
+  } else if (isRecording && isMuted) {
+    timerText = `${formatClock(recordedMs)} / ${formatClock(maxDurationMs)} • ${copy.timerMuted || "Đang tắt tiếng"}`
+  } else if (isRecording) {
     if (waiting) {
       timerText = formatTemplate(
         copy.timerWaiting || "{{time}} / 00:45 • Đang chờ âm thanh",
@@ -60,13 +70,11 @@ const SessionControlRow = ({
     }`
   }
 
-  // VAD tự mở ghi âm; bấm mic để dừng sớm (hoặc ghi lại), bấm Hoàn tất để nộp.
-  const micLabel = isRecording
-    ? copy.stopRecordCta || "Dừng ghi âm"
-    : hasRecorded
-      ? copy.reRecordCta || "Thu âm lại"
-      : copy.startRecordCta || "Bắt đầu nói"
-  const showLevelRing = isRecording
+  // BUG-PT-02: nút mic chỉ tắt/bật tiếng, không mở hay kết thúc lượt trả lời.
+  const muteLabel = isMuted
+    ? copy.unmuteCta || "Bật tiếng"
+    : copy.muteCta || "Tắt tiếng"
+  const showLevelRing = isRecording && !isMuted
 
   return (
     // Lưới 3 cột 1fr-auto-1fr: hai bên rộng hẹp khác nhau nhưng mic luôn nằm giữa thẻ.
@@ -99,7 +107,7 @@ const SessionControlRow = ({
         {timerText}
       </span>
 
-      {/* VAD tự ghi âm sau khi AI đọc xong; nút mic để dừng sớm hoặc ghi lại */}
+      {/* Nút mic = công tắc tắt/bật tiếng; việc ghi âm do VAD tự mở */}
       <div className="relative flex items-center justify-center">
         {showLevelRing && (
           <>
@@ -121,37 +129,39 @@ const SessionControlRow = ({
         )}
         <button
           type="button"
-          onClick={onToggleRecord}
-          disabled={analyzing}
-          aria-label={micLabel}
-          title={micLabel}
+          onClick={onToggleMute}
+          disabled={busy}
+          aria-pressed={isMuted}
+          aria-label={muteLabel}
+          title={muteLabel}
           className={cn(
             "relative flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full text-white transition-all",
-            analyzing
+            busy
               ? "bg-slate-300 shadow-none cursor-not-allowed"
-              : isRecording
-                ? "bg-[#E2443F] hover:bg-[#C9302B] shadow-[0_0_16px_rgba(240,90,87,0.45)]"
+              : isMuted
+                ? "bg-slate-500 hover:bg-slate-600 shadow-[0_4px_14px_rgba(51,65,85,0.3)]"
                 : "bg-[#F05A57] hover:bg-[#E2443F] shadow-[0_6px_18px_rgba(240,90,87,0.4)] hover:scale-105",
           )}
         >
           {analyzing ? (
             <Loader2 size={22} className="animate-spin" />
-          ) : isRecording ? (
-            <Square size={20} className="fill-white" />
-          ) : hasRecorded ? (
-            <RotateCcw size={22} strokeWidth={2} />
+          ) : isMuted ? (
+            <MicOff size={22} strokeWidth={2} />
           ) : (
             <Mic size={22} strokeWidth={2} />
           )}
         </button>
       </div>
 
-      <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:justify-self-end">
+      {/* Hàng nút chiếm trọn 3 cột: cột phải 1fr chỉ rộng ~500px trong khi 4 nút cần
+          ~633px, nên trước đây CTA bị flex-wrap đẩy xuống hàng riêng và dán vào góc
+          phải-dưới khung (trùng nút "?"). */}
+      <div className="flex w-full flex-col items-stretch gap-2 sm:col-span-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
         {canSkip && (
           <button
             type="button"
             onClick={onSkip}
-            disabled={analyzing}
+            disabled={busy}
             className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[#F8FAFC] px-4 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
           >
             {copy.skipCta}
@@ -159,7 +169,7 @@ const SessionControlRow = ({
           </button>
         )}
 
-        {hasRecorded && !isRecording && !analyzing && onPlayUserAudio && (
+        {hasRecorded && !isRecording && !busy && onPlayUserAudio && (
           <button
             type="button"
             onClick={isPlayingUserAudio ? onStopUserAudio : onPlayUserAudio}
@@ -184,7 +194,7 @@ const SessionControlRow = ({
           </button>
         )}
 
-        {hasRecorded && !isRecording && !analyzing && onReRecord && (
+        {hasRecorded && !isRecording && !busy && onReRecord && (
           <button
             type="button"
             onClick={onReRecord}
@@ -199,17 +209,21 @@ const SessionControlRow = ({
         <button
           type="button"
           onClick={onSubmit}
-          disabled={analyzing}
+          disabled={busy}
           className={cn(
             "inline-flex h-10 items-center justify-center gap-2 rounded-xl px-5 text-xs font-semibold text-white transition-colors",
-            analyzing
+            busy
               ? "bg-slate-300 shadow-none cursor-not-allowed"
               : hasRecorded
                 ? "bg-emerald-600 hover:bg-emerald-700 shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:scale-[1.02]"
                 : "bg-cath-red-700 hover:bg-[#85000f] shadow-[0_4px_12px_rgba(153,0,17,0.25)]",
           )}
         >
-          {analyzing ? copy.scoringSummary : copy.submitCta}
+          {analyzing
+            ? copy.scoringSummary
+            : skipped
+              ? copy.skippingCta || "Đang chuyển câu tiếp..."
+              : copy.submitCta}
           <Check size={14} strokeWidth={2} />
         </button>
       </div>

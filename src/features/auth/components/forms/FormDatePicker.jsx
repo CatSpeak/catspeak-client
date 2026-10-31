@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { createPortal } from "react-dom"
 import dayjs from "dayjs"
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
+import { formatDateInput, maskDateInput, parseDateInput, shouldShowDateFormatError } from "../../utils/dateInput"
 
 const FormDatePicker = ({
   value,
@@ -11,6 +12,7 @@ const FormDatePicker = ({
   placeholder = "Chọn ngày",
   error,
   helperText,
+  invalidDateMessage,
   color = "#8e0000",
   className = "",
   disabled = false,
@@ -19,6 +21,18 @@ const FormDatePicker = ({
   const [view, setView] = useState("days") // "days" | "years"
   const dropdownRef = useRef(null)
   const portalRef = useRef(null)
+  const [lastEmittedValue, setLastEmittedValue] = useState(null)
+  const [hasBlurred, setHasBlurred] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef(null)
+  const pendingCaret = useRef(null)
+
+  useLayoutEffect(() => {
+    if (pendingCaret.current !== null) {
+      inputRef.current?.setSelectionRange(pendingCaret.current, pendingCaret.current)
+      pendingCaret.current = null
+    }
+  })
 
   const [date, setDate] = useState(value ? dayjs(value) : null)
   const [inputValue, setInputValue] = useState(
@@ -50,7 +64,9 @@ const FormDatePicker = ({
 
   if (value !== prevValue) {
     setPrevValue(value)
-    if (value) {
+    if (value === lastEmittedValue) {
+      // The parent acknowledged our change. Preserve the user's text and caret.
+    } else if (value) {
       const newDate = dayjs(value)
       setDate(newDate)
       setCurrentViewDate(newDate.startOf("month"))
@@ -81,15 +97,16 @@ const FormDatePicker = ({
         const spaceAbove = rect.top
 
         const flipUp = spaceBelow < 360 && spaceAbove > spaceBelow
-        const forceAlignRight = rect.left + 280 > window.innerWidth
+        const winWidth = typeof window !== "undefined" ? window.innerWidth : 360
+        const newWidth = Math.min(rect.width, winWidth - 16)
+        const newLeft = Math.max(8, Math.min(rect.left + window.scrollX, winWidth - newWidth - 8))
 
         setPortalCoords({
           top: rect.top + window.scrollY,
-          left: rect.left + window.scrollX,
-          width: rect.width,
+          left: newLeft,
+          width: newWidth,
           height: rect.height,
           flipUp,
-          forceAlignRight,
         })
       }
     }
@@ -106,61 +123,39 @@ const FormDatePicker = ({
   }, [isOpen])
 
   const handleInputChange = (e) => {
-    let val = e.target.value.replace(/[^0-9/]/g, "")
+    let rawValue = e.target.value
+    let selStart = e.target.selectionStart
 
-    // Auto-format DD/MM/YYYY
-    if (e.nativeEvent.inputType !== "deleteContentBackward") {
-      let clean = val.replace(/\D/g, "")
-      if (clean.length > 8) clean = clean.slice(0, 8)
-
-      if (clean.length >= 5) {
-        val = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4)}`
-      } else if (clean.length >= 3) {
-        val = `${clean.slice(0, 2)}/${clean.slice(2)}`
-      } else if (clean.length === 2) {
-        val = `${clean}/`
-      } else {
-        val = clean
-      }
+    if (
+      inputValue.endsWith("/") &&
+      rawValue === inputValue.slice(0, -1) &&
+      selStart === rawValue.length
+    ) {
+      rawValue = rawValue.slice(0, -1)
+      selStart = rawValue.length
     }
 
+    const { value: val, caret } = maskDateInput(rawValue, selStart)
+    pendingCaret.current = caret
+    e.target.setSelectionRange(caret, caret)
     setInputValue(val)
-
-    const parts = val.split("/")
-    if (parts.length === 3) {
-      const day = parseInt(parts[0], 10)
-      const month = parseInt(parts[1], 10) - 1
-      const year = parseInt(parts[2], 10)
-
-      if (
-        year >= 1900 &&
-        year <= 2100 &&
-        month >= 0 &&
-        month < 12 &&
-        day > 0 &&
-        day <= 31
-      ) {
-        const newD = dayjs(new Date(year, month, day))
-        if (newD.isValid()) {
-          setDate(newD)
-          setCurrentViewDate(newD.startOf("month"))
-          setYearBlockStart(Math.floor(newD.year() / 12) * 12)
-          emitChange(newD)
-        }
-      }
-    } else if (val === "") {
-      setDate(null)
-      if (onChange) {
-        onChange({ target: { value: "", type: "text" } })
-      }
+    const isoDate = parseDateInput(val)
+    const newDate = isoDate ? dayjs(isoDate) : null
+    setDate(newDate)
+    if (newDate) {
+      setCurrentViewDate(newDate.startOf("month"))
+      setYearBlockStart(Math.floor(newDate.year() / 12) * 12)
     }
+    emitChange(newDate)
   }
 
   const emitChange = (selectedDate) => {
+    const nextValue = selectedDate ? selectedDate.format("YYYY-MM-DD") : ""
+    setLastEmittedValue(nextValue)
     if (onChange) {
       onChange({
         target: {
-          value: selectedDate.format("YYYY-MM-DD"),
+          value: nextValue,
           type: "text",
         },
       })
@@ -170,6 +165,7 @@ const FormDatePicker = ({
   const handleSelectDate = (dayNumber) => {
     const selectedDate = currentViewDate.date(dayNumber)
     setDate(selectedDate)
+    setInputValue(selectedDate.format("DD/MM/YYYY"))
     setIsOpen(false)
     setView("days")
     emitChange(selectedDate)
@@ -225,6 +221,11 @@ const FormDatePicker = ({
 
   const days = generateDays()
   const years = Array.from({ length: 12 }, (_, i) => yearBlockStart + i)
+  const showInvalidInput = shouldShowDateFormatError(inputValue, isFocused, hasBlurred)
+  const showParentError = Boolean(error) && !isFocused
+  const displayedHelper = showInvalidInput && invalidDateMessage
+    ? invalidDateMessage
+    : (!isFocused ? helperText : null)
 
   return (
     <div
@@ -233,17 +234,38 @@ const FormDatePicker = ({
     >
       <div
         className={`h-14 w-full flex items-center justify-between rounded-md border px-4 text-left transition-colors focus-within:border-primary hover:border-primary
-        ${error ? "!border-red-500 focus-within:!border-red-500 animate-shake" : "border-border"}
+        ${showParentError || showInvalidInput ? "!border-red-500 focus-within:!border-red-500 animate-shake" : "border-border"}
         ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "bg-white"}`}
         onClick={() => {
           if (!disabled && !isOpen) setIsOpen(true)
         }}
       >
         <input
+          ref={inputRef}
           type="text"
+          inputMode="numeric"
           value={inputValue}
           onChange={handleInputChange}
+          onBlur={() => {
+            setIsFocused(false)
+            setHasBlurred(true)
+            const isoDate = parseDateInput(inputValue)
+            if (isoDate) setInputValue(formatDateInput(isoDate))
+          }}
+          onKeyDown={(e) => {
+            const input = e.currentTarget
+            const start = input.selectionStart
+            if (start !== input.selectionEnd) return
+            // Delete the adjacent digit rather than repeatedly restoring a separator.
+            if (e.key === "Backspace" && input.value[start - 1] === "/") {
+              input.setSelectionRange(start - 1, start - 1)
+            } else if (e.key === "Delete" && input.value[start] === "/") {
+              input.setSelectionRange(start + 1, start + 1)
+            }
+          }}
+          aria-invalid={showParentError || showInvalidInput}
           onFocus={() => {
+            setIsFocused(true)
             if (!disabled) setIsOpen(true)
           }}
           placeholder={`${placeholder} (dd/mm/yyyy)`}
@@ -261,7 +283,7 @@ const FormDatePicker = ({
           <Calendar size={18} className="text-gray-400 shrink-0" />
         </button>
       </div>
-      {helperText && <p className="mt-1 text-xs text-red-600">{helperText}</p>}
+      {displayedHelper && <p className="mt-1 text-xs text-red-600">{displayedHelper}</p>}
 
       {typeof document !== "undefined" &&
         createPortal(
@@ -274,6 +296,7 @@ const FormDatePicker = ({
                   top: portalCoords.top,
                   left: portalCoords.left,
                   width: portalCoords.width,
+                  maxWidth: "calc(100vw - 16px)",
                   height: portalCoords.height,
                   zIndex: 9999,
                   pointerEvents: "none",
@@ -281,12 +304,12 @@ const FormDatePicker = ({
               >
                 <div className="relative w-full h-full">
                   <div
-                    className={`absolute z-50 ${portalCoords.flipUp ? "bottom-full mb-4" : "top-full mt-4"} ${portalCoords.forceAlignRight ? "right-0 origin-top-right" : "left-0 origin-top-left"} w-[280px] pointer-events-none`}
+                    className={`absolute z-50 ${portalCoords.flipUp ? "bottom-full mb-2" : "top-full mt-2"} left-0 w-full pointer-events-none`}
                   >
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto bg-white border border-border rounded-md shadow-lg p-4 flex flex-col"
+                      className="pointer-events-auto bg-white border border-border rounded-xl shadow-lg p-4 flex flex-col w-full"
                     >
                       {view === "days" ? (
                         <>
@@ -366,9 +389,9 @@ const FormDatePicker = ({
                                       : {}),
                                     ...(isToday && !isSelected
                                       ? {
-                                          border: `1px solid ${color}`,
-                                          color: color,
-                                        }
+                                        border: `1px solid ${color}`,
+                                        color: color,
+                                      }
                                       : {}),
                                   }}
                                 >

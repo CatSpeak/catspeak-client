@@ -7,7 +7,7 @@ const CycleProgressBar = ({
   completedSessions = 0,
   totalSessions = 5,
   averageScore = null,
-  streak = 5,
+  streak = 0,
   startsTomorrow = false,
   onOpenLevelModal,
 }) => {
@@ -16,7 +16,7 @@ const CycleProgressBar = ({
     Math.round(((completedSessions || 0) / (totalSessions || 5)) * 100),
   )
 
-  const normalizedLevel = hskLevel.replace("HSK ", "HSK ")
+  const normalizedLevel = String(hskLevel).replace(/HSK\s*/i, "HSK ")
   const remainingSessions = Math.max(0, (totalSessions || 5) - completedSessions)
 
   return (
@@ -104,7 +104,7 @@ const CycleProgressBar = ({
             Streak
           </span>
           <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-            {streak || 5} ngày
+            {streak ?? 0} ngày
           </div>
         </div>
       </div>

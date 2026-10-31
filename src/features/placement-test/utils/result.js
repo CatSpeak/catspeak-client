@@ -60,6 +60,14 @@ export const getAllDimensionScores = (result = {}) =>
     return { key, score: measured ? clampScore(value) : null, measured }
   })
 
+/**
+ * Phiên không có câu trả lời thật nào: máy chủ đặt cờ thay vì trả một báo cáo
+ * 0/100 trông như đã chấm. Cả sc09 lẫn hồ sơ năng lực phải dùng cùng một cờ —
+ * đọc thẳng `result.insufficientEvidence` ở hai nơi là hai chỗ để quên.
+ */
+export const isInsufficientEvidence = (result = {}) =>
+  Boolean(result?.insufficientEvidence)
+
 export const computeOverallScore = (result = {}) => {
   const scores = getDimensionScores(result)
   if (scores.length === 0) return 0
@@ -67,12 +75,19 @@ export const computeOverallScore = (result = {}) => {
   return Math.round(total / scores.length)
 }
 
+/** Ngưỡng coi một kỹ năng là điểm mạnh — cùng mức 60 với điểm yếu. */
+const STRENGTH_THRESHOLD = 60
+
 export const getStrengthDimension = (result = {}) => {
   const scores = getDimensionScores(result)
-  return scores.reduce(
-    (best, item) => (item.score > best.score ? item : best),
+  if (scores.length === 0) return null
+  const best = scores.reduce(
+    (top, item) => (item.score > top.score ? item : top),
     scores[0],
   )
+  // Cao nhất trong một tập đều yếu vẫn là yếu. Không có ngưỡng tuyệt đối thì
+  // grammar 30/100 bị gọi là "điểm mạnh" chỉ vì nó nhỉnh hơn ba số 0.
+  return best.score >= STRENGTH_THRESHOLD ? best : null
 }
 
 export const getWeaknessDimension = (result = {}) => {
@@ -92,6 +107,14 @@ export const getTargetRoadmapBand = (band) => {
   const current = clampHsk(band)
   return current >= 6 ? 6 : current + 1
 }
+
+/**
+ * Nội dung lộ trình cho đúng cấp sẽ nhắm tới. Mỗi cấp có mục tiêu riêng; dùng
+ * chung một danh sách cho mọi cấp là cách lộ trình HSK 1 có bài phỏng vấn HSK 5.
+ * `roadmapDays` chỉ còn là bản dự phòng cho dữ liệu cũ thiếu `roadmapByBand`.
+ */
+export const getRoadmapDays = (copy = {}, targetBand) =>
+  copy.roadmapByBand?.[clampHsk(targetBand)] || copy.roadmapDays || []
 
 // BUG-PT-15: ở HSK 1 không còn cấp để giảm, ở HSK 6 không còn cấp để tăng.
 // Lựa chọn đó vẫn trả về nhưng `disabled`, để màn sc10 hiện ghi chú lý do.
@@ -158,6 +181,9 @@ export const normalizeServerResult = (payload = {}, { session = null } = {}) => 
     sessionId: payload.session_id || session?.id || null,
     code: session?.code || null,
     answeredCount: Number(payload.turn_count) || 0,
+    // Máy chủ nói rõ khi cả bài không có câu trả lời thật nào. Đừng suy từ
+    // answeredCount: trước bản sửa này final_report còn không gửi turn_count.
+    insufficientEvidence: Boolean(payload.insufficient_evidence),
     scoredAt: Date.now(),
     selfAdjusted: false,
 

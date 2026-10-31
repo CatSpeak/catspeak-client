@@ -34,6 +34,7 @@ export default {
       checkbox:
         "I consent to CatSpeak using my microphone and processing my audio for this placement test.",
       startCta: "Start the test",
+      permissionHint: "Please allow microphone access in your browser",
       recommend:
         "Tip: Wear a headset with a microphone and sit in a quiet room for the most accurate acoustic result.",
     },
@@ -167,6 +168,9 @@ export default {
       title: "Speaking Practice Room",
       subtitle: "Adaptive AI conversation • HSK 3.0",
       connection: "Stable connection",
+      connectionLost: "Connection lost",
+      connectionLostExitToast:
+        "Your network was disconnected for too long, so the test could not continue. Your progress is saved — check your connection and continue.",
       configure: "AI settings",
       pause: "Pause test",
       casual: "Casual Chat",
@@ -184,20 +188,27 @@ export default {
       statusWaiting: "Listening...",
       statusRecognized: "● Recognised",
       statusSubmitted: "Submitted",
+      statusSkipped: "Question skipped",
       statusNoAudio: "No audio yet",
       transcriptPlaceholder: "Your answer will appear here...",
       analyzingSubline: "Automatically analysing pronunciation & grammar...",
+      skippedSubline: "This question is not scored.",
       waitingSubline: "Say your answer in Chinese.",
       aiListening: "The AI is listening to your voice...",
+      aiMuted: "Your microphone is muted. Press the mic button to unmute.",
+      statusMuted: "● Muted",
+      timerMuted: "Muted",
+      muteCta: "Mute",
+      unmuteCta: "Unmute",
       aiAnalyzing: "The AI is analysing your answer...",
+      modelProcessing: "Model is processing",
+      retryPrompt: "Tap the mic and say your answer again.",
       aiNotHearing: "The AI is listening more carefully...",
       timerRecording: "{{time}} / 00:45 • Recording response",
       timerWaiting: "{{time}} / 00:45 • Waiting for audio",
       recordedStatus: "Recorded",
       pressMicToRecord: "Tap mic to answer",
       reRecordCta: "Record again",
-      stopRecordCta: "Stop recording",
-      startRecordCta: "Start speaking",
       aiAutoRecord: "Recording will start automatically after the AI finishes the question.",
       aiSpeaking: "The AI is reading the question, please listen...",
       autoRecordHint: "Recording starts after the AI finishes",
@@ -205,10 +216,15 @@ export default {
       submitCta: "Finish answer",
       skipCta: "Skip this question (0 points) →",
       scoringSummary: "Compiling your score...",
+      skippingCta: "Moving to the next question...",
       retryBanner:
         "The AI did not catch your answer. Please say it again. (Attempt {{attempt}} / {{max}})",
       noHearingBanner:
         "The AI could not hear your voice. Please check your microphone or raise the input volume.",
+      noHearingSubline: "No voice signal detected for a few seconds.",
+      noHearingHint: "Please unmute the microphone in your browser.",
+      noHearingExitToast:
+        "No audio was detected from your microphone. Please check your audio device before retrying.",
       volumeHint:
         "The volume is quite low. Speak louder or increase the microphone volume.",
       configureNotice: "AI settings will be available soon.",
@@ -222,6 +238,11 @@ export default {
       pauseLeaveCta: "Leave Exam Room Temporarily",
       pauseResumeCta: "Resume the Test Now ▷",
       pauseCancelCta: "Cancel test and restart from beginning",
+      pauseCancelConfirmTitle: "Cancel the test and start over?",
+      pauseCancelConfirmWarning:
+        "Your {{answered}}/{{total}} answered questions will be lost. The new test starts from question 1 and the previous progress cannot be restored.",
+      pauseCancelConfirmKeepCta: "Keep working",
+      pauseCancelConfirmCta: "Cancel and start over",
       reconnectTitle: "Connection Lost",
       reconnectBody:
         "The audio connection to the AI exam room was interrupted by an unstable network signal. The system is trying to reconnect.",
@@ -272,7 +293,8 @@ export default {
       bandTitle: "HSK {{band}} · {{tier}}",
       cefrLabel: "European Reference Framework: CEFR {{cefr}}",
       heroDescription:
-        "You can communicate in daily contexts with pronunciation and reflexes suited to HSK {{band}}. Your spoken vocabulary is well developed.",
+        "You can communicate in daily contexts with pronunciation and reflexes suited to HSK {{band}}.",
+      heroVocabularyPraise: "Your spoken vocabulary is well developed.",
       feedbackTitle: "Pedagogical feedback from AI Tutor",
       strengthLabel: "Strengths:",
       attentionLabel: "Needs attention:",
@@ -280,6 +302,8 @@ export default {
         "{{dimension}} scored {{score}}/100 — a solid base to break through.",
       weaknessLine:
         "{{dimension}} scored only {{score}}/100 — needs daily practice.",
+      noStrengthLine:
+        "No skill reached 60/100, so there is no strength to highlight yet.",
       noWeaknessLine:
         "No significant weakness detected — keep up the current form.",
       roadmapTitle: "5-day roadmap to break through to HSK {{band}}",
@@ -288,6 +312,33 @@ export default {
         { tag: "D 3-4", text: "Compound-sentence reflexes with the AI Tutor" },
         { tag: "D 5", text: "Intermediate HSKK simulation challenge" },
       ],
+      roadmapByBand: {
+        2: [
+          { tag: "D 1-2", text: "Rebuild HSK 1 foundations: greetings, numbers, simple sentences" },
+          { tag: "D 3-4", text: "Expand HSK 2 vocabulary for family, time and shopping" },
+          { tag: "D 5", text: "HSK 2 conversation simulation with the AI Tutor" },
+        ],
+        3: [
+          { tag: "D 1-2", text: "Practise simple compound sentences: 因为…所以, 虽然…但是" },
+          { tag: "D 3-4", text: "Retell short experiences with HSK 3 vocabulary" },
+          { tag: "D 5", text: "HSK 3 conversation simulation with the AI Tutor" },
+        ],
+        4: [
+          { tag: "D 1-2", text: "Practise HSK 4 structures: 不仅…而且, 即使…也" },
+          { tag: "D 3-4", text: "Express opinions and comparisons on familiar topics" },
+          { tag: "D 5", text: "HSK 4 conversation simulation with the AI Tutor" },
+        ],
+        5: [
+          { tag: "D 1-2", text: "Work & interview speaking topics" },
+          { tag: "D 3-4", text: "Compound-sentence reflexes with the AI Tutor" },
+          { tag: "D 5", text: "Intermediate HSKK simulation challenge" },
+        ],
+        6: [
+          { tag: "D 1-2", text: "In-depth discussion: economy, society and culture" },
+          { tag: "D 3-4", text: "Multi-step argumentation and expressive nuance" },
+          { tag: "D 5", text: "Advanced HSKK simulation challenge" },
+        ],
+      },
       skillsTitle: "4-Dimension Speaking Skill Analysis",
       skillsSubtitle:
         "Standardised assessment via the AI Speech Recognition model",
@@ -307,6 +358,10 @@ export default {
         "* Students may adjust their level once before the roadmap is locked.",
       adjustLocked:
         "You have used your one-time level adjustment. The roadmap is now locked.",
+      insufficientTitle: "Not enough data to assess",
+      insufficientBody:
+        "You skipped all 5 questions, so there are no answers to score. Retake the assessment and answer at least one question to receive your HSK 3.0 report.",
+      insufficientRetakeCta: "Retake the assessment",
       emptyTitle: "No assessment result yet",
       emptyBody:
         "Complete the speaking assessment to see your HSK 3.0 proficiency report.",
@@ -335,6 +390,8 @@ export default {
       successToast: "Your learning level was updated to HSK {{band}}.",
       alreadyAdjustedToast: "You have already used your level adjustment.",
       errorToast: "Could not update the level. Please try again.",
+      roadmapSyncErrorToast:
+        "Your level was updated but the 5-day roadmap could not be recreated. Open the 5-day roadmap and choose Change level to sync.",
     },
     profile: {
       topbarTitle: "Proficiency Profile & Student Status",
@@ -347,7 +404,8 @@ export default {
         "Fluent communication at work and in daily life. Completed the 5-question adaptive AI CAT assessment on {{date}}.",
       testDate: "Test date: {{date}}",
       testCode: "Test code: #{{code}}",
-      roadmapTitle: "Roadmap to HSK {{band}}",
+      selfAdjustedNote: "Level was self-adjusted from HSK {{from}} to HSK {{to}}.",
+      roadmapTitle: "HSK {{band}} Roadmap",
       roadmapProgress: "{{done}}/{{total}} Days ({{percent}}%)",
       roadmapDone: "Done",
       roadmapActive: "In progress",
@@ -416,12 +474,16 @@ export default {
     },
     lifecycle: {
       errorToast: "Could not start a new session. Please try again.",
+      pauseExpiredToast:
+        "Your session expired after being paused for more than 30 minutes. Please start a new test.",
       resume: {
         title: "Unfinished Test Detected",
         body: "We found an unfinished session of yours ({{answered}} / {{total}} questions completed). This session stays valid for another {{remaining}}.",
         safeTitle: "Your test data is safely preserved:",
         safeBody:
           "You will resume at Question {{order}} with no lost points, including the recordings of the {{answered}} submitted questions.",
+        pendingAnswerNotice:
+          "The current question was not submitted — its recording is not kept after a page reload, so you will need to record it again.",
         deadlineLabel: "Session retention deadline:",
         autoCancel: "Auto-cancels after: {{date}}",
         remainingChip: "⏳ {{remaining}} left",
@@ -440,11 +502,11 @@ export default {
       takeover: {
         title: "Multiple Tabs Detected",
         body: "To stay stable and avoid microphone conflicts, CatSpeak allows only one speaking room open at a time.",
-        mechanismTitle: "Old session disconnect mechanism (Session Takeover):",
+        mechanismTitle: "Duplicate session disconnect mechanism (Session Takeover):",
         mechanismBody:
           "If you continue in this tab, the other open tab will be disconnected and locked immediately to prevent duplicate data.",
         continueCta: "Continue in This Tab →",
-        closeCta: "Close This Tab",
+        closeCta: "Back to Profile Home",
         takenOverTitle: "Session Taken Over in Another Tab",
         takenOverBody:
           "Your test is now running in another tab. The session in this tab has been paused and locked to prevent duplicate data.",

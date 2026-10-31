@@ -440,6 +440,9 @@ export default {
     retry: "再試行",
   },
   studentCourseDetail: {
+    enrollmentAccessNotice: "このクラスへのアクセス権が確認できていません。登録または支払い済みの場合は、状態を再確認してください。",
+    recheckEnrollment: "状態を再確認",
+    viewEnrollmentDetails: "クラスの登録情報を見る",
     classUnavailable: "このクラスは受講登録できません。",
     enrollFailed: "受講登録を完了できませんでした。もう一度お試しください。",
     courseLoadFailed: "このコースを読み込めませんでした。もう一度お試しください。",
@@ -997,6 +1000,13 @@ export default {
     noResults: "クラスが見つかりません。",
   },
   student: {
+    verifiedTeacher: "認証済み講師",
+    teacherReviews: "{{count}} 件のレビュー",
+    teacherNoReviews: "レビューはまだありません",
+    teacherStudents: "受講生 {{count}} 人",
+    teacherOpenClasses: "募集中のクラス {{count}} 件",
+    teacherNoOpenClasses: "募集中のクラスはありません",
+    teacherLanguageHeadline: "{{languages}}の講師",
     myLearningOverview: {
       registered: "受講中",
       from: "から",
@@ -1576,6 +1586,7 @@ export default {
     },
   },
   grading: {
+    studentListLoadError: "課題またはテストを読み込めませんでした。もう一度お試しください。",
     justNow: "たった今",
     searchPlaceholder: "課題を検索...",
     statusFilter: "課題ステータス",

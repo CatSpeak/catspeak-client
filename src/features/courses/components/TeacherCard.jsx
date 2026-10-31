@@ -6,7 +6,6 @@ import {
   getTeacherHeadline,
   formatTeacherNumber,
   formatRating,
-  formatActiveClassesText,
   getTeacherSlugOrId,
 } from "../utils/teacherUtils"
 
@@ -20,9 +19,9 @@ const TeacherCard = ({
 
   if (!teacher) return null
 
-  const name = teacher.name || teacher.fullName || "Giảng viên"
+  const name = teacher.name || teacher.fullName || t?.defaultTeacherHeadline
   const avatarUrl = teacher.avatarUrl || teacher.avatar
-  const headline = getTeacherHeadline(teacher, t?.defaultTeacherHeadline || "Giảng viên ngôn ngữ")
+  const headline = getTeacherHeadline(teacher, t?.defaultTeacherHeadline, t?.teacherLanguageHeadline)
   const rating = formatRating(teacher.rating || teacher.averageRating)
   const reviewCount = Number(teacher.reviewCount || teacher.totalReviews || 0)
   const totalStudents = teacher.totalStudents || teacher.studentCount || 0
@@ -61,7 +60,7 @@ const TeacherCard = ({
 
         {/* BR-EX-GV-02: Verified Badge Overlay (bottom-right) */}
         <div
-          title="Giảng viên đã xác minh"
+          title={t?.verifiedTeacher}
           className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#10B981] ring-2 ring-white flex items-center justify-center shadow-xs"
         >
           <Check size={11} className="text-white stroke-[3]" />
@@ -83,7 +82,7 @@ const TeacherCard = ({
         <Star size={13} className="fill-[#FBBF24] text-[#FBBF24]" />
         <span className="font-bold text-slate-800">{rating}</span>
         <span className="text-slate-400 font-normal">
-          {reviewCount > 0 ? `(${reviewCount} đánh giá)` : "(Chưa có đánh giá)"}
+          ({reviewCount > 0 ? t?.teacherReviews?.replace("{{count}}", reviewCount) : t?.teacherNoReviews})
         </span>
       </div>
 
@@ -92,7 +91,7 @@ const TeacherCard = ({
         {/* Số học viên */}
         <div className="flex items-center gap-1 text-slate-600 font-semibold truncate">
           <Users size={13} className="text-slate-400 shrink-0" />
-          <span>{formatTeacherNumber(totalStudents)} học viên</span>
+          <span>{t?.teacherStudents?.replace("{{count}}", formatTeacherNumber(totalStudents))}</span>
         </div>
 
         <span className="text-slate-300 font-bold">·</span>
@@ -100,7 +99,7 @@ const TeacherCard = ({
         {/* Số lớp đang mở */}
         <div className="flex items-center gap-1 text-[#990011] font-semibold truncate shrink-0">
           <GraduationCap size={14} className="text-[#990011] shrink-0" />
-          <span>{formatActiveClassesText(activeClassesCount)}</span>
+          <span>{Number(activeClassesCount) > 0 ? t?.teacherOpenClasses?.replace("{{count}}", activeClassesCount) : t?.teacherNoOpenClasses}</span>
         </div>
       </div>
 

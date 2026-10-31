@@ -55,6 +55,7 @@ export default {
 
         // ── Interactive Item Tokens ──
         itemHover: "#F2F2F2",
+        itemActive: "#F2F2F2",
         itemActiveHover: "#E6E6E6",
 
         background: "hsl(var(--background))",

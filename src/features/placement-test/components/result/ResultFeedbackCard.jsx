@@ -13,18 +13,40 @@ const ResultFeedbackCard = ({ copy = {}, strength, weakness }) => {
         </h2>
       </div>
 
-      <div className="flex items-start gap-2 rounded-[10px] bg-[#F0FDF4] px-2.5 py-2">
-        <CheckCircle2
-          size={15}
-          strokeWidth={2}
-          className="mt-0.5 shrink-0 text-[#16A34A]"
-        />
-        <p className="text-[11.5px] leading-[16.7px] text-[#15803D]">
-          <span className="font-semibold">{copy.strengthLabel} </span>
-          {formatTemplate(copy.strengthLine, {
-            dimension: dimensionLabel(strength.key),
-            score: strength.score,
-          })}
+      <div
+        className={`flex items-start gap-2 rounded-[10px] px-2.5 py-2 ${
+          strength ? "bg-[#F0FDF4]" : "bg-[#F8FAFC]"
+        }`}
+      >
+        {strength ? (
+          <CheckCircle2
+            size={15}
+            strokeWidth={2}
+            className="mt-0.5 shrink-0 text-[#16A34A]"
+          />
+        ) : (
+          <Award
+            size={15}
+            strokeWidth={2}
+            className="mt-0.5 shrink-0 text-slate-400"
+          />
+        )}
+        <p
+          className={`text-[11.5px] leading-[16.7px] ${
+            strength ? "text-[#15803D]" : "text-slate-600"
+          }`}
+        >
+          {strength ? (
+            <>
+              <span className="font-semibold">{copy.strengthLabel} </span>
+              {formatTemplate(copy.strengthLine, {
+                dimension: dimensionLabel(strength.key),
+                score: strength.score,
+              })}
+            </>
+          ) : (
+            copy.noStrengthLine
+          )}
         </p>
       </div>
 

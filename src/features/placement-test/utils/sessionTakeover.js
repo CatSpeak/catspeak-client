@@ -89,8 +89,23 @@ export const reduceTakeover = (state = createTakeoverState(), message = {}) => {
   if (!isPeerMessage(state, payload)) return noChange
 
   if (type === SESSION_BROADCAST_TYPES.PING) {
-    if (state.phase !== TAKEOVER_PHASE.ACTIVE) return noChange
-    return { state, effects: [TAKEOVER_EFFECT.POST_PONG] }
+    if (
+      state.phase !== TAKEOVER_PHASE.ACTIVE &&
+      state.phase !== TAKEOVER_PHASE.CONFLICT
+    ) {
+      return noChange
+    }
+    if (state.phase === TAKEOVER_PHASE.CONFLICT) {
+      return { state, effects: [TAKEOVER_EFFECT.POST_PONG] }
+    }
+    return {
+      state: {
+        ...state,
+        phase: TAKEOVER_PHASE.CONFLICT,
+        peerTabId: payload.tabId,
+      },
+      effects: [TAKEOVER_EFFECT.POST_PONG],
+    }
   }
 
   if (type === SESSION_BROADCAST_TYPES.PONG) {

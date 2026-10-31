@@ -20,7 +20,11 @@ const SessionRoom = () => {
   const { t } = useLanguage()
   const copy = t.placementTest?.room || {}
   const resumeCopy = t.placementTest?.lifecycle?.resume || {}
-  const loop = useConversationLoop()
+  const loop = useConversationLoop({
+    exitNotice: copy.noHearingExitToast,
+    pauseExpiredNotice: t.placementTest?.lifecycle?.pauseExpiredToast,
+    connectionLostNotice: copy.connectionLostExitToast,
+  })
 
   const handleConfigure = () => {
     if (copy.configureNotice) toast.info(copy.configureNotice)
@@ -36,9 +40,7 @@ const SessionRoom = () => {
           answeredCount={prompt.answeredCount}
           totalTurns={TOTAL_TURNS}
           nextOrder={prompt.nextOrder}
-          remainingMs={
-            prompt.expiresAt ? Math.max(0, prompt.expiresAt - Date.now()) : 0
-          }
+          remainingMs={prompt.remainingMs ?? 0}
           expiresAt={prompt.expiresAt}
           busy={loop.restarting}
           onResume={loop.handlePromptResume}
@@ -57,20 +59,31 @@ const SessionRoom = () => {
   }
 
   const analyzing = loop.phase === CONVERSATION_PHASE.ANALYZING
+  const skipped = loop.phase === CONVERSATION_PHASE.SKIPPED
   const notHearing =
     loop.notice === CONVERSATION_NOTICE.NO_HEARING && loop.isRecording
+  const retryPending = loop.notice === CONVERSATION_NOTICE.RETRY
   const isRecording = loop.isRecording
   const hasRecorded = loop.hasRecorded
 
   let tone = "listening"
   let statusText = copy.aiListening
 
-  if (analyzing) {
+  if (skipped) {
+    tone = "listening"
+    statusText = copy.statusSkipped || "Đã bỏ qua câu này"
+  } else if (analyzing) {
     tone = "analyzing"
     statusText = copy.aiAnalyzing
+  } else if (isRecording && loop.isMuted) {
+    tone = "notHearing"
+    statusText = copy.aiMuted || "Micro đang tắt tiếng. Bấm nút mic để bật lại."
   } else if (notHearing) {
     tone = "notHearing"
     statusText = copy.aiNotHearing
+  } else if (retryPending) {
+    tone = "notHearing"
+    statusText = copy.retryPrompt || copy.aiNotHearing
   } else if (isRecording) {
     tone = "listening"
     statusText = copy.aiListening || "AI đang lắng nghe giọng nói của bạn..."
@@ -93,6 +106,7 @@ const SessionRoom = () => {
       <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-3">
         <SessionTopbar
           copy={copy}
+          connectionLost={loop.connectionLost}
           onPause={loop.handlePause}
           onConfigure={handleConfigure}
         />
@@ -107,7 +121,8 @@ const SessionRoom = () => {
           <AiAvatarPanel
             tone={tone}
             statusText={statusText}
-            isRecording={loop.isRecording}
+            processingLabel={analyzing ? copy.modelProcessing : undefined}
+            isRecording={loop.isRecording && !loop.isMuted}
             aiSpeaking={loop.aiSpeaking}
             micLevel={loop.micLevel}
           />
@@ -118,6 +133,7 @@ const SessionRoom = () => {
             phase={loop.phase}
             notice={loop.notice}
             isRecording={loop.isRecording}
+            isMuted={loop.isMuted}
             hasRecorded={loop.hasRecorded}
             isPlayingUserAudio={loop.isPlayingUserAudio}
             onPlayUserAudio={loop.handlePlayUserAudio}
@@ -135,6 +151,7 @@ const SessionRoom = () => {
             phase={loop.phase}
             notice={loop.notice}
             isRecording={loop.isRecording}
+            isMuted={loop.isMuted}
             aiSpeaking={loop.aiSpeaking}
             micLevel={loop.micLevel}
             hasRecorded={loop.hasRecorded}
@@ -145,7 +162,7 @@ const SessionRoom = () => {
             isPlayingUserAudio={loop.isPlayingUserAudio}
             onPlayUserAudio={loop.handlePlayUserAudio}
             onStopUserAudio={loop.handleStopUserAudio}
-            onToggleRecord={loop.handleToggleRecord}
+            onToggleMute={loop.handleToggleMute}
             onReRecord={loop.handleReRecord}
             onSubmit={loop.handleSubmit}
             onSkip={loop.handleSkip}
@@ -158,9 +175,12 @@ const SessionRoom = () => {
         copy={copy}
         pauseRemainingMs={loop.pauseRemainingMs}
         answeredCount={loop.answeredCount}
+        confirming={loop.cancelConfirming}
         onResume={loop.handleResume}
         onLeave={loop.handleLeave}
-        onCancel={loop.handleCancel}
+        onRequestCancel={loop.handleRequestCancel}
+        onDismissCancel={loop.handleDismissCancel}
+        onConfirmCancel={loop.handleCancel}
       />
       <ConnectionLostModal
         open={loop.connectionLost}

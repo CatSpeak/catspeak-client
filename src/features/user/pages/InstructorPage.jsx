@@ -6,6 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import { toast } from "react-hot-toast";
+import { isAllowedInstructorLevel } from "../utils/instructorLevels";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, Loader2, GraduationCap } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -381,7 +382,7 @@ const InstructorPage = () => {
         ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
     } else {
       for (const lang of formData.languagesTeach) {
-        if (!lang.language || !lang.level) {
+        if (!lang.language || !isAllowedInstructorLevel(lang.level)) {
           newErrors.languagesTeachLevel =
             ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
           break;
@@ -643,7 +644,7 @@ const InstructorPage = () => {
         ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
     } else {
       for (const lang of formData.languagesTeach) {
-        if (!lang.language || !lang.level) {
+        if (!lang.language || !isAllowedInstructorLevel(lang.level)) {
           newErrors.languagesTeachLevel =
             ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
           break;

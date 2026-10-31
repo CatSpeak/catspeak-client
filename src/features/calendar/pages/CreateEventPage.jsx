@@ -510,12 +510,6 @@ const CreateEventPage = () => {
                   />
                 </div>
 
-                {form.isOnline === true && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Tạo sự kiện online (trực tuyến) hiện tại chưa được hỗ trợ.
-                    Vui lòng chọn lại.
-                  </p>
-                )}
               </div>
             </div>
 
@@ -641,7 +635,7 @@ const CreateEventPage = () => {
               )}
               <button
                 type="submit"
-                disabled={form.isLoading || form.isOnline === true}
+                disabled={form.isLoading}
                 className="flex-1 h-12 rounded-full text-white font-semibold text-base bg-[#990011] hover:bg-[#7a000e] transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {form.isLoading

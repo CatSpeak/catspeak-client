@@ -1,4 +1,6 @@
 export default {
+  onlineLink: "在线会议链接",
+  onlineLinkInvalid: "请输入以 https:// 或 http:// 开头的有效会议链接。",
   searchClass: "搜索课程...",
   generalCalendar: "综合日历",
   personalCalendar: "个人日历",

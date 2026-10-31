@@ -45,6 +45,9 @@ const ClassroomAccessGuard = ({ children, instructorView = false }) => {
   }
 
   const publicClassPath = `/workspace/explore-courses/class/${encodeURIComponent(requestedClassId)}`
+  if (error?.status === 404) {
+    return <Navigate to="/workspace/explore-courses" replace />
+  }
   if (error?.status === 401 || error?.status === 403) {
     return <Navigate to={publicClassPath} replace />
   }

@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from "react"
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
@@ -12,56 +18,182 @@ const Popover = ({
   animationDirection,
   onOpenChange,
   openOnHover = false,
+  isOpen: controlledIsOpen,
+  estimatedWidth,
+  estimatedHeight,
+  offset = 8,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const isControlled = controlledIsOpen !== undefined
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen
+
   const hoverTimeoutRef = useRef(null)
 
   useEffect(() => {
     onOpenChange?.(isOpen)
   }, [isOpen, onOpenChange])
+
   const [actualPlacement, setActualPlacement] = useState(placement)
   const [coords, setCoords] = useState({
-    topEdge: 0,
-    bottomEdge: 0,
+    top: 0,
     left: 0,
-    rightEdge: 0,
+    width: 0,
+    height: 0,
   })
+
   const containerRef = useRef(null)
   const popoverRef = useRef(null)
+  const portalRef = useRef(null)
+
+  const computeLayout = useCallback(() => {
+    if (!containerRef.current) return null
+
+    const triggerRect = containerRef.current.getBoundingClientRect()
+    const popRect = popoverRef.current?.getBoundingClientRect()
+
+    // Measure or estimate popover dimensions
+    const popWidth = Math.round(
+      (popRect && popRect.width > 0 ? popRect.width : null) ||
+      estimatedWidth ||
+      280,
+    )
+    const popHeight = Math.round(
+      (popRect && popRect.height > 0 ? popRect.height : null) ||
+      estimatedHeight ||
+      200,
+    )
+
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+
+    // Available space
+    const spaceBelow = viewportHeight - triggerRect.bottom - offset
+    const spaceAbove = triggerRect.top - offset
+
+    let verticalPlacement = placement.startsWith("top") ? "top" : "bottom"
+
+    if (verticalPlacement === "bottom") {
+      // If doesn't fit below, and there is more space above or fits above, flip to top
+      if (
+        spaceBelow < popHeight &&
+        (spaceAbove >= popHeight || spaceAbove > spaceBelow)
+      ) {
+        verticalPlacement = "top"
+      }
+    } else {
+      // If doesn't fit above, and there is more space below or fits below, flip to bottom
+      if (
+        spaceAbove < popHeight &&
+        (spaceBelow >= popHeight || spaceBelow > spaceAbove)
+      ) {
+        verticalPlacement = "bottom"
+      }
+    }
+
+    // Horizontal placement
+    const preferredHorizontal = placement.endsWith("left") ? "left" : "right"
+    let horizontalPlacement = preferredHorizontal
+
+    if (preferredHorizontal === "right") {
+      const idealLeft = triggerRect.right - popWidth
+      // If it overflows left side of viewport, but fits when aligned to left edge of trigger
+      if (idealLeft < 8 && triggerRect.left + popWidth <= viewportWidth - 8) {
+        horizontalPlacement = "left"
+      }
+    } else {
+      const idealRight = triggerRect.left + popWidth
+      // If it overflows right side of viewport, but fits when aligned to right edge of trigger
+      if (
+        idealRight > viewportWidth - 8 &&
+        triggerRect.right - popWidth >= 8
+      ) {
+        horizontalPlacement = "right"
+      }
+    }
+
+    const nextPlacement = `${verticalPlacement}-${horizontalPlacement}`
+
+    // Calculate ideal viewport position
+    let top =
+      verticalPlacement === "top"
+        ? triggerRect.top - popHeight - offset
+        : triggerRect.bottom + offset
+
+    let left =
+      horizontalPlacement === "right"
+        ? triggerRect.right - popWidth
+        : triggerRect.left
+
+    // Viewport boundary clamping (safety margin 8px)
+    const minLeft = 8
+    const maxLeft = Math.max(8, viewportWidth - popWidth - 8)
+    left = Math.max(minLeft, Math.min(left, maxLeft))
+
+    const minTop = 8
+    const maxTop = Math.max(8, viewportHeight - popHeight - 8)
+    top = Math.max(minTop, Math.min(top, maxTop))
+
+    return {
+      top: top + window.scrollY,
+      left: left + window.scrollX,
+      width: popWidth,
+      height: popHeight,
+      nextPlacement,
+    }
+  }, [placement, estimatedWidth, estimatedHeight, offset])
 
   const updateCoords = useCallback(() => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect()
-      const popoverEstimatedWidth = 220
-      const popoverEstimatedHeight = 120
+    const layout = computeLayout()
+    if (!layout) return
 
-      let nextPlacement = placement
-      if (placement.endsWith("right") && rect.right < popoverEstimatedWidth) {
-        nextPlacement = placement.replace("right", "left")
-      } else if (
-        placement.endsWith("left") &&
-        window.innerWidth - rect.left < popoverEstimatedWidth
-      ) {
-        nextPlacement = placement.replace("left", "right")
+    setActualPlacement(layout.nextPlacement)
+    setCoords({
+      top: layout.top,
+      left: layout.left,
+      width: layout.width,
+      height: layout.height,
+    })
+  }, [computeLayout])
+
+  const repositionDirectly = useCallback(() => {
+    const layout = computeLayout()
+    if (!layout || !portalRef.current) return
+
+    portalRef.current.style.top = `${layout.top}px`
+    portalRef.current.style.left = `${layout.left}px`
+  }, [computeLayout])
+
+  const setIsOpen = useCallback(
+    (val) => {
+      if (!isControlled) {
+        setInternalIsOpen(val)
       }
+      onOpenChange?.(val)
+    },
+    [isControlled, onOpenChange],
+  )
 
-      if (
-        window.innerHeight - rect.bottom < popoverEstimatedHeight &&
-        rect.top > popoverEstimatedHeight
-      ) {
-        nextPlacement = nextPlacement.replace("bottom", "top")
-      }
-
-      setActualPlacement(nextPlacement)
-      setCoords({
-        topEdge: rect.top + window.scrollY,
-        bottomEdge: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
-        rightEdge: rect.right + window.scrollX,
-      })
+  // Reposition synchronously via direct DOM mutation before paint when opened
+  useLayoutEffect(() => {
+    if (isOpen) {
+      repositionDirectly()
     }
-  }, [placement])
+  }, [isOpen, repositionDirectly])
 
+  // Dynamically update coordinates if popover content resizes (e.g. lazy-loaded emoji picker)
+  useEffect(() => {
+    if (!isOpen || !popoverRef.current) return
+    if (typeof ResizeObserver === "undefined") return
+
+    const observer = new ResizeObserver(() => {
+      repositionDirectly()
+    })
+
+    observer.observe(popoverRef.current)
+    return () => observer.disconnect()
+  }, [isOpen, repositionDirectly])
+
+  // Click outside and scroll/resize handling
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -76,9 +208,15 @@ const Popover = ({
     }
 
     const handleScrollOrResize = (e) => {
-      // Ignore scroll events from the popover itself so scrolling inside it doesn't close it
+      // Ignore scroll events from within the popover itself so internal scrolling works
       if (popoverRef.current && popoverRef.current.contains(e.target)) return
-      if (isOpen) setIsOpen(false)
+      if (isOpen) {
+        if (e.type === "resize") {
+          updateCoords()
+        } else {
+          setIsOpen(false)
+        }
+      }
     }
 
     let scrollTimeout
@@ -97,7 +235,7 @@ const Popover = ({
       window.removeEventListener("resize", handleScrollOrResize)
       window.removeEventListener("scroll", handleScrollOrResize, true)
     }
-  }, [isOpen])
+  }, [isOpen, setIsOpen, updateCoords])
 
   const handleToggle = (e) => {
     e.stopPropagation()
@@ -121,27 +259,19 @@ const Popover = ({
     }, 150)
   }
 
-  const xTrans = actualPlacement.endsWith("right") ? "-100%" : "0"
-  const yTrans = actualPlacement.startsWith("top") ? "-100%" : "0"
-  const transform =
-    xTrans !== "0" || yTrans !== "0"
-      ? `translate(${xTrans}, ${yTrans})`
-      : undefined
+  const animDirection =
+    animationDirection || (actualPlacement.startsWith("top") ? "up" : "down")
 
   const portalContent = (
     <div
+      ref={portalRef}
       data-popover-portal
-      className="absolute z-[9999]"
+      className={`absolute z-[9999] ${!isOpen ? "pointer-events-none" : ""}`}
       onMouseDown={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
       style={{
-        top: actualPlacement.startsWith("top")
-          ? `${coords.topEdge - 8}px`
-          : `${coords.bottomEdge + 8}px`,
-        left: actualPlacement.endsWith("right")
-          ? `${coords.rightEdge}px`
-          : `${coords.left}px`,
-        transform,
+        top: `${coords.top}px`,
+        left: `${coords.left}px`,
       }}
       onMouseEnter={() => {
         if (openOnHover) clearTimeout(hoverTimeoutRef.current)
@@ -151,8 +281,8 @@ const Popover = ({
       <AnimatePresence>
         {isOpen && (
           <FluentAnimation
-            direction={actualPlacement.startsWith("top") ? "up" : "down"}
-            distance={10}
+            direction={animDirection}
+            distance={8}
             exit={true}
           >
             <div ref={popoverRef} onClick={(e) => e.stopPropagation()}>

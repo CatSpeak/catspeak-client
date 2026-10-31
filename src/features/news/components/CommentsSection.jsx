@@ -2,11 +2,13 @@ import React, { useState, forwardRef } from "react"
 import { useAuth, useGetProfileQuery } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { ChevronDown, ChevronUp, Smile } from "lucide-react"
+import { ChevronDown, ChevronUp, MessageSquare, Smile } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Popover from "@/shared/components/ui/Popover"
 import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
+import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import {
   useGetPostCommentsQuery,
   useCreatePostCommentMutation,
@@ -36,7 +38,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
     ""
   const userAvatar = userAvatarRaw ? getImageUrl(userAvatarRaw) : null
 
-  const { data: comments, isLoading } = useGetPostCommentsQuery({ postId })
+  const { data: comments, isLoading, isSuccess } = useGetPostCommentsQuery({ postId })
   const [createComment] = useCreatePostCommentMutation()
   const [deleteComment] = useDeletePostCommentMutation()
   const [editComment] = useEditPostCommentMutation()
@@ -130,26 +132,30 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
 
   if (isLoading)
     return (
-      <div className="p-4 text-center text-gray-500">
-        {t.news?.newsDetail?.loadingComments || "Loading comments..."}
+      <div ref={ref} role="status" className="py-6" aria-label={t.news?.newsDetail?.loadingComments || "Loading comments..."}>
+        <LoadingSpinner className="flex flex-col items-center justify-center [&_svg]:h-6 [&_svg]:w-6" text={t.news?.newsDetail?.loadingComments || "Loading comments..."} />
       </div>
     )
 
-  const commentsList = comments?.data || []
+  const commentsList = Array.isArray(comments?.data) ? comments.data : []
 
   return (
     <div ref={ref} className="w-full max-w-full min-w-0 flex flex-col justify-start">
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="min-w-0 truncate text-base font-semibold leading-snug text-slate-900">
+        <h2 className="min-w-0 truncate text-base font-semibold leading-snug text-slate-900">
           {t.news?.newsDetail?.totalComments?.replace(
             "{{count}}",
             totalComments,
           ) || `Bình luận (${totalComments})`}
-        </h3>
+        </h2>
         <button
+          type="button"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex h-6 w-6 shrink-0 items-center justify-center text-[#7b7979] transition-colors hover:text-black"
+          aria-expanded={!isCollapsed}
+          aria-controls={`news-comments-${postId}`}
+          aria-label={isCollapsed ? t.news?.newsDetail?.expandComments || "Show comments" : t.news?.newsDetail?.collapseComments || "Hide comments"}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#7b7979] transition-colors hover:bg-black/5 hover:text-black focus-visible:outline-cath-red-700"
         >
           {isCollapsed ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </button>
@@ -171,6 +177,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
             <div className="flex-1 min-w-0 relative flex items-center">
               <input
                 type="text"
+                aria-label={t.news?.newsDetail?.writeComment || "Write a comment..."}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={
@@ -181,6 +188,8 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
               <div className="absolute right-2">
                 <Popover
                   placement="bottom-right"
+                  estimatedWidth={280}
+                  estimatedHeight={320}
                   trigger={
                     <button
                       type="button"
@@ -238,8 +247,16 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
 
       {/* ── Comments List ───────────────────────────────────────── */}
       {!isCollapsed && (
-        <div className="flex flex-col gap-5 sm:gap-6 w-full max-w-full min-w-0">
-          {commentsList
+        <div id={`news-comments-${postId}`} className="flex flex-col gap-5 sm:gap-6 w-full max-w-full min-w-0">
+          {isSuccess && commentsList.length === 0 ? (
+            <EmptyState
+              variant="component"
+              icon={MessageSquare}
+              title={t.news?.newsDetail?.noComments || "No comments yet"}
+              description={t.news?.newsDetail?.noCommentsDescription || "Be the first to share your thoughts on this article."}
+              className="px-4"
+            />
+          ) : commentsList
             .slice()
             .sort((a, b) => new Date(a.createDate) - new Date(b.createDate))
             .map((comment) => (

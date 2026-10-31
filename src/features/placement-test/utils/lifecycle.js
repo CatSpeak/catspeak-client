@@ -46,3 +46,31 @@ export const tickReconnect = (
   if (attempt >= maxAttempts) return { attempt, remainingMs: 0, exhausted: true }
   return { attempt: attempt + 1, remainingMs: intervalMs, exhausted: false }
 }
+
+export const RECONNECT_OUTCOME = {
+  WAIT: "wait",
+  RECOVER: "recover",
+  EXIT: "exit",
+}
+
+/**
+ * Một nhịp của chu kỳ kết nối lại. Hết lượt thử cuối mà mạng vẫn mất thì rời
+ * phòng thi (EXIT) — lỗi nằm ở mạng của người học, không phải một phiên tạm dừng.
+ */
+export const nextReconnectStep = (
+  state,
+  { deltaMs = RECONNECT_INTERVAL_MS, online = true } = {},
+) => {
+  const attempt = Math.max(1, Number(state?.attempt) || 1)
+  const next = tickReconnect(state, deltaMs)
+  if (next.exhausted) {
+    return {
+      state: startReconnect(),
+      outcome: online ? RECONNECT_OUTCOME.RECOVER : RECONNECT_OUTCOME.EXIT,
+    }
+  }
+  if (next.attempt !== attempt && online) {
+    return { state: startReconnect(), outcome: RECONNECT_OUTCOME.RECOVER }
+  }
+  return { state: next, outcome: RECONNECT_OUTCOME.WAIT }
+}

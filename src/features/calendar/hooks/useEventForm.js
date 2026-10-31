@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isValidMeetingUrl } from "../utils/onlineEvent";
 import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -225,15 +226,17 @@ export const useEventForm = (
       if (!title.trim())
         newErrors.title =
           t.validation?.calendar?.titleRequired || "Thiếu tiêu đề";
-      if (!countryId)
+      if (!isOnline && !countryId)
         newErrors.countryId =
           t.validation?.calendar?.countryRequired || "Đất nước là bắt buộc";
-      if (!cityId)
+      if (!isOnline && !cityId)
         newErrors.cityId =
           t.validation?.calendar?.cityRequired || "Thành phố là bắt buộc";
       if (!eventLocation.trim())
         newErrors.eventLocation =
           t.validation?.calendar?.locationRequired || "Địa điểm là bắt buộc";
+      if (isOnline && !isValidMeetingUrl(eventLocation))
+        newErrors.eventLocation = t.calendar.onlineLinkInvalid;
       // if (!description.trim())
       //   newErrors.description =
       //     t.validation?.calendar?.descriptionRequired || "Mô tả là bắt buộc";

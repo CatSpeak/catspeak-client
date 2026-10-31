@@ -1,6 +1,6 @@
-import { Pause, Settings2, Sparkles } from "lucide-react"
+import { Pause, Settings2, Sparkles, WifiOff } from "lucide-react"
 
-const SessionTopbar = ({ copy = {}, onPause, onConfigure }) => (
+const SessionTopbar = ({ copy = {}, connectionLost = false, onPause, onConfigure }) => (
   <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
     <div className="flex items-center gap-3">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#FFF1F2] text-cath-red-700">
@@ -17,10 +17,19 @@ const SessionTopbar = ({ copy = {}, onPause, onConfigure }) => (
     </div>
 
     <div className="flex flex-wrap items-center gap-2.5">
-      <span className="inline-flex h-[34px] items-center gap-1.5 rounded-full bg-[#F0FDF4] px-3 text-[11px] font-medium text-[#15803D]">
-        <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
-        {copy.connection}
-      </span>
+      {/* Cùng nguồn trạng thái với hộp thoại mất kết nối, để badge không báo
+          "ổn định" trong lúc đường truyền đã rớt (R-ui-002). */}
+      {connectionLost ? (
+        <span className="inline-flex h-[34px] items-center gap-1.5 rounded-full bg-[#FEF2F2] px-3 text-[11px] font-medium text-[#B91C1C]">
+          <WifiOff size={12} strokeWidth={2.5} className="text-red-600" />
+          {copy.connectionLost}
+        </span>
+      ) : (
+        <span className="inline-flex h-[34px] items-center gap-1.5 rounded-full bg-[#F0FDF4] px-3 text-[11px] font-medium text-[#15803D]">
+          <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
+          {copy.connection}
+        </span>
+      )}
       <button
         type="button"
         onClick={onConfigure}

@@ -20,7 +20,7 @@ export const getTeacherInitials = (name) => {
 /**
  * BR-EX-GV-03: Chuyên môn của giảng viên với fallback nếu trống
  */
-export const getTeacherHeadline = (teacher, fallbackText = "Giảng viên ngôn ngữ") => {
+export const getTeacherHeadline = (teacher, fallbackText = "Giảng viên ngôn ngữ", languageTemplate = "Giảng viên {{languages}}") => {
   if (teacher?.headline && teacher.headline.trim()) {
     return teacher.headline.trim()
   }
@@ -30,7 +30,7 @@ export const getTeacherHeadline = (teacher, fallbackText = "Giảng viên ngôn 
       .filter(Boolean)
       .join(", ")
     if (langs) {
-      return `Giảng viên ${langs}`
+      return languageTemplate.replace("{{languages}}", langs)
     }
   }
   return fallbackText

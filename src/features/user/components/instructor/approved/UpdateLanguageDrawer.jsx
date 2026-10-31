@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react"
+import { isAllowedInstructorLevel } from "../../../utils/instructorLevels"
 import { Info } from "lucide-react"
 import ProfileDrawer from "@/features/user/components/instructor/ProfileDrawer"
 import {
@@ -69,7 +70,7 @@ const UpdateLanguageDrawer = ({
         .map((item) => pick(item, "name", "Name"))
         .filter(
           (name) =>
-            name &&
+            isAllowedInstructorLevel(name) &&
             String(name).toLowerCase() !==
               String(currentLevel || "").toLowerCase(),
         )

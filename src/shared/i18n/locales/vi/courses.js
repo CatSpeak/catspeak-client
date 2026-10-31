@@ -441,6 +441,9 @@ export default {
     retry: "Thử lại",
   },
   studentCourseDetail: {
+    enrollmentAccessNotice: "Chưa xác nhận được quyền truy cập lớp học của bạn. Nếu đã đăng ký hoặc thanh toán, hãy kiểm tra lại trạng thái.",
+    recheckEnrollment: "Kiểm tra lại trạng thái",
+    viewEnrollmentDetails: "Xem thông tin đăng ký lớp",
     classUnavailable: "Lớp học này hiện không thể đăng ký.",
     enrollFailed: "Không thể hoàn tất đăng ký. Vui lòng thử lại.",
     courseLoadFailed: "Không thể tải khóa học này. Vui lòng thử lại.",
@@ -1025,6 +1028,13 @@ export default {
     noResults: "Không tìm thấy lớp học.",
   },
   student: {
+    verifiedTeacher: "Giảng viên đã xác minh",
+    teacherReviews: "{{count}} đánh giá",
+    teacherNoReviews: "Chưa có đánh giá",
+    teacherStudents: "{{count}} học viên",
+    teacherOpenClasses: "{{count}} lớp đang mở",
+    teacherNoOpenClasses: "Không có lớp đang mở",
+    teacherLanguageHeadline: "Giảng viên {{languages}}",
     myLearningOverview: {
       registered: "Đã đăng ký",
       completed: "Hoàn thành",
@@ -1631,6 +1641,7 @@ export default {
     },
   },
   grading: {
+    studentListLoadError: "Không tải được bài tập hoặc bài kiểm tra. Vui lòng thử lại.",
     justNow: "Vừa xong",
     searchPlaceholder: "Tìm kiếm bài nộp...",
     statusFilter: "Trạng thái bài nộp",
