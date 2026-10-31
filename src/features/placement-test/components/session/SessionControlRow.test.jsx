@@ -26,6 +26,30 @@ const render = (props) =>
     />,
   )
 
+describe("SessionControlRow action row", () => {
+  it("keeps the submit CTA on the full-width action row with replay and re-record", () => {
+    // Oracle: user ruling 2026-10-31 — 4 nút cuối phòng thi phải nằm cùng một hàng
+    // rộng trong khung; CTA không được nhốt vào cột phải 1fr (đo thực tế 1100px:
+    // cột phải 500px < cụm nút 633px nên CTA rớt xuống hàng riêng).
+    const html = render({
+      isRecording: false,
+      hasRecorded: true,
+      isPlayingUserAudio: false,
+      onPlayUserAudio: vi.fn(),
+      onReRecord: vi.fn(),
+    })
+
+    const actionRowStart = html.indexOf("sm:col-span-3")
+    expect(actionRowStart).toBeGreaterThan(-1)
+
+    const actionRow = html.slice(actionRowStart)
+    expect(actionRow).toContain("Bỏ qua câu này")
+    expect(actionRow).toContain("Nghe lại bản thu")
+    expect(actionRow).toContain("Thu âm lại")
+    expect(actionRow).toContain("Hoàn tất câu trả lời")
+  })
+})
+
 describe("SessionControlRow skip acknowledgement", () => {
   it("shows the next-question notice instead of the scoring CTA after a skip", () => {
     // Oracle: user ruling 2026-10-31 — skipping must not look like scoring.

@@ -153,7 +153,10 @@ const SessionControlRow = ({
         </button>
       </div>
 
-      <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:justify-self-end">
+      {/* Hàng nút chiếm trọn 3 cột: cột phải 1fr chỉ rộng ~500px trong khi 4 nút cần
+          ~633px, nên trước đây CTA bị flex-wrap đẩy xuống hàng riêng và dán vào góc
+          phải-dưới khung (trùng nút "?"). */}
+      <div className="flex w-full flex-col items-stretch gap-2 sm:col-span-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
         {canSkip && (
           <button
             type="button"
