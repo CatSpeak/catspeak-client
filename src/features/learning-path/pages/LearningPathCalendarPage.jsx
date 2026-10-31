@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import React, { useEffect, useState } from "react"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import dayjs from "dayjs"
 import {
   AlertCircle,
@@ -12,6 +12,7 @@ import {
   useLaunchSessionMutation,
   useChangeLevelMutation,
 } from "../api/learningPathApi"
+import { findCardByDay } from "../utils/learningPathUtils"
 
 import CycleProgressBar from "../components/CycleProgressBar"
 import FiveCardCalendar from "../components/FiveCardCalendar"
@@ -92,6 +93,12 @@ const LearningPathCalendarPage = () => {
   const [isLevelModalOpen, setIsLevelModalOpen] = useState(false)
   const [hasDismissedSummary, setHasDismissedSummary] = useState(false)
 
+  // Deep link from the placement profile roadmap (`?day=N`). The URL is
+  // cleaned right away, so the day is captured once and kept until the
+  // preview/quota modal is closed.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [requestedDay, setRequestedDay] = useState(() => searchParams.get("day"))
+
   // API hooks
   const {
     data: calendarData,
@@ -128,6 +135,29 @@ const LearningPathCalendarPage = () => {
     }
     return card
   })
+
+  // Resolve the deep-linked day against the loaded calendar
+  const deepLinkCard = requestedDay
+    ? findCardByDay(processedCards, requestedDay)
+    : null
+  const deepLinkQuotaLocked = Boolean(
+    deepLinkCard &&
+      (deepLinkCard.status === "QuotaLocked" || deepLinkCard.isQuotaLocked),
+  )
+  const deepLinkPreviewOpen = Boolean(deepLinkCard) && !deepLinkQuotaLocked
+
+  // Drop only the `day` param, so closing the modal does not reopen it
+  useEffect(() => {
+    if (!requestedDay) return
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete("day")
+        return next
+      },
+      { replace: true },
+    )
+  }, [requestedDay, setSearchParams])
 
   // Detect whether cycle starts tomorrow
   const startsTomorrow = Boolean(
@@ -184,6 +214,7 @@ const LearningPathCalendarPage = () => {
       setLaunchErrorMessage(null)
       const result = await launchSession(cardId).unwrap()
       setIsPreviewOpen(false)
+      setRequestedDay(null)
 
       if (result.roomId || result.roomName) {
         toast.success("Đang kết nối vào phòng luyện nói...")
@@ -217,6 +248,7 @@ const LearningPathCalendarPage = () => {
 
       if (isQuotaError) {
         setIsPreviewOpen(false)
+        setRequestedDay(null)
         setIsQuotaLockedOpen(true)
       } else {
         // Show floating bottom toast as requested in Figma screen 15 (lp01e-error-states)
@@ -396,11 +428,12 @@ const LearningPathCalendarPage = () => {
       {/* Modals */}
       {/* lp02: Session Preview Modal */}
       <SessionPreviewModal
-        cardId={selectedCardForPreview}
-        isOpen={isPreviewOpen}
+        cardId={deepLinkPreviewOpen ? deepLinkCard.cardId : selectedCardForPreview}
+        isOpen={isPreviewOpen || deepLinkPreviewOpen}
         onClose={() => {
           setIsPreviewOpen(false)
           setSelectedCardForPreview(null)
+          setRequestedDay(null)
         }}
         onLaunchSession={handleLaunchSessionExecution}
         isLaunching={isLaunching}
@@ -408,9 +441,13 @@ const LearningPathCalendarPage = () => {
 
       {/* lp03: Quota Locked Modal */}
       <QuotaLockedModal
-        isOpen={isQuotaLockedOpen}
-        onClose={() => setIsQuotaLockedOpen(false)}
+        isOpen={isQuotaLockedOpen || deepLinkQuotaLocked}
+        onClose={() => {
+          setIsQuotaLockedOpen(false)
+          setRequestedDay(null)
+        }}
         topicTitle={
+          (deepLinkQuotaLocked ? deepLinkCard?.topicTitle : null) ||
           todayCard?.topicTitle ||
           processedCards.find((c) => c.cardId === selectedCardForPreview)?.topicTitle ||
           "Buổi học"

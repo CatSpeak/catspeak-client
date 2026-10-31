@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 import { formatTemplate } from "../../utils/format"
 
-const ProfileRoadmapCard = ({ copy = {}, band, progress = {} }) => {
+const ProfileRoadmapCard = ({ copy = {}, band, progress = {}, onContinue }) => {
   const stages = copy.roadmapStages || []
   const completed = progress.completed || 0
   const total = progress.total || stages.length || 1
@@ -67,9 +67,13 @@ const ProfileRoadmapCard = ({ copy = {}, band, progress = {} }) => {
           {copy.roadmapComplete}
         </p>
       ) : (
-        <p className="text-xs font-bold leading-[17px] text-cath-red-700">
+        <button
+          type="button"
+          onClick={() => onContinue?.(completed + 1)}
+          className="text-xs font-bold leading-[17px] text-cath-red-700"
+        >
           {formatTemplate(copy.roadmapContinue, { day: completed + 1 })}
-        </p>
+        </button>
       )}
     </section>
   )

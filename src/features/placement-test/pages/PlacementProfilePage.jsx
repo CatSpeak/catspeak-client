@@ -12,6 +12,7 @@ import { isPlanForbiddenError } from "../utils/planAccess"
 import {
   PLACEMENT_TEST_PATH,
   PLACEMENT_TEST_SESSION_PATH,
+  getLearningPathDayPath,
   getLearningPathPath,
 } from "../constants/routes"
 import { DEFAULT_TARGET_BAND } from "../constants/bands"
@@ -138,6 +139,13 @@ const PlacementProfilePage = () => {
   const handleContinue = useCallback(() => {
     navigate(getLearningPathPath(lang))
   }, [lang, navigate])
+
+  const handleContinueRoadmapDay = useCallback(
+    (day) => {
+      navigate(getLearningPathDayPath(lang, day))
+    },
+    [lang, navigate],
+  )
 
   const handleOpenRetake = useCallback(() => {
     setConfirmOpen(true)
@@ -274,6 +282,7 @@ const PlacementProfilePage = () => {
               copy={copy}
               band={view.roadmapBand}
               progress={roadmap}
+              onContinue={() => handleContinueRoadmapDay(roadmap.completed + 1)}
             />
             {view.skills.length > 0 && (
               <ProfileSkillsCard copy={copy} items={view.skills} />

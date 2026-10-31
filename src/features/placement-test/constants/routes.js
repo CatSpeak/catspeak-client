@@ -8,6 +8,9 @@ export const PLACEMENT_TEST_DASHBOARD_PATH = "/app"
 export const getLearningPathPath = (lang = "zh") =>
   `/${lang}/ai-tutor/learning-path`
 
+export const getLearningPathDayPath = (lang = "zh", day) =>
+  `${getLearningPathPath(lang)}?day=${day}`
+
 export const PLACEMENT_TEST_PATHS = [
   PLACEMENT_TEST_PATH,
   PLACEMENT_TEST_SESSION_PATH,

@@ -7,6 +7,7 @@ let PlacementProfilePage
 const readResultMock = vi.fn()
 const navigateMock = vi.fn()
 const cooldownProps = { current: null }
+const roadmapProps = { current: null }
 const createSessionState = { value: { isLoading: false, error: null } }
 
 vi.mock("../utils/sessionStorage", async (importOriginal) => ({
@@ -66,6 +67,13 @@ vi.mock("../components/profile/ProfileCooldownCard", () => ({
   },
 }))
 
+vi.mock("../components/profile/ProfileRoadmapCard", () => ({
+  default: (props) => {
+    roadmapProps.current = props
+    return null
+  },
+}))
+
 vi.mock("../components/profile/ConfirmRetakeModal", () => ({
   default: () => null,
 }))
@@ -84,6 +92,7 @@ beforeEach(() => {
   readResultMock.mockReset()
   navigateMock.mockReset()
   cooldownProps.current = null
+  roadmapProps.current = null
   createSessionState.value = { isLoading: false, error: null }
 })
 
@@ -128,6 +137,22 @@ describe("PlacementProfilePage score sourcing", () => {
     cooldownProps.current.onContinue()
 
     expect(navigateMock).toHaveBeenCalledWith("/zh/ai-tutor/learning-path")
+  })
+
+  it("opens the learning path at the next roadmap day from the roadmap CTA", () => {
+    readResultMock.mockReturnValue({
+      band: 2,
+      code: "psess_own",
+      scoredAt: Date.now(),
+    })
+
+    renderToStaticMarkup(<PlacementProfilePage />)
+    roadmapProps.current.onContinue()
+
+    // progress 7% of the 14-day cooldown -> 0 of 5 roadmap days completed -> Day 1
+    expect(navigateMock).toHaveBeenCalledWith(
+      "/zh/ai-tutor/learning-path?day=1",
+    )
   })
 
   it("shows the plan gate when the retake is denied by the plan", () => {
