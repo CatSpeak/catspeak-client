@@ -456,6 +456,8 @@ export default {
         safeTitle: "Dữ liệu làm bài được bảo lưu an toàn:",
         safeBody:
           "Bạn sẽ tiếp tục ngay tại Câu hỏi số {{order}} mà không mất điểm và file ghi âm của {{answered}} câu đã nộp.",
+        pendingAnswerNotice:
+          "Câu đang làm chưa được nộp — bản ghi âm của câu này không được lưu sau khi tải lại trang, bạn sẽ phải ghi âm lại.",
         deadlineLabel: "Thời hạn bảo lưu phiên thi:",
         autoCancel: "Tự động hủy sau: {{date}}",
         remainingChip: "⏳ Còn {{remaining}}",

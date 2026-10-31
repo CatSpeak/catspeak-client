@@ -40,7 +40,7 @@ import {
   tickReconnect,
 } from "../utils/lifecycle"
 import { isUnfinishedSession } from "../utils/sessionLifecycle"
-import { upsertTurn } from "../utils/turns"
+import { countSubmittedTurns, upsertTurn } from "../utils/turns"
 import useAudioTransport from "./useAudioTransport"
 
 // Đánh dấu phòng thi đang mở trong tab này. Rời phòng bằng điều hướng trong app
@@ -853,14 +853,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
         mountedRef.current = false
       }
     }
-    const answeredTurns = (stored.turns || []).filter(
-      (t) =>
-        Boolean(
-          t.answeredAt ||
-            t.submittedAt ||
-            (t.transcript && t.transcript.trim() !== ""),
-        ),
-    ).length
+    const answeredTurns = countSubmittedTurns(stored.turns, TOTAL_TURNS)
     if (answeredTurns >= TOTAL_TURNS) {
       clearActiveSession()
       navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
@@ -878,7 +871,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     writeRoomMarker(stored.id ? String(stored.id) : null)
     if (reloaded) {
       setResumePrompt({
-        answeredCount: stored.turns?.length || 0,
+        answeredCount: answeredTurns,
         nextOrder: startOrder,
         expiresAt: Number(stored.expiresAt) || null,
       })
@@ -1052,7 +1045,7 @@ const useConversationLoop = ({ exitNotice } = {}) => {
     togglePinyin,
     toggleMeaning,
     canSkip: true,
-    answeredCount: turns.length,
+    answeredCount: countSubmittedTurns(turns, TOTAL_TURNS),
     paused,
     pauseRemainingMs: remainingPauseBudget(pauseSpentMs),
     connectionLost,

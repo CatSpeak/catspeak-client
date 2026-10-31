@@ -462,6 +462,8 @@ export default {
         safeTitle: "Your test data is safely preserved:",
         safeBody:
           "You will resume at Question {{order}} with no lost points, including the recordings of the {{answered}} submitted questions.",
+        pendingAnswerNotice:
+          "The current question was not submitted — its recording is not kept after a page reload, so you will need to record it again.",
         deadlineLabel: "Session retention deadline:",
         autoCancel: "Auto-cancels after: {{date}}",
         remainingChip: "⏳ {{remaining}} left",

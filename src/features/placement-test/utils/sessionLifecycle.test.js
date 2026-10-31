@@ -98,6 +98,25 @@ describe("getSessionLifecycle", () => {
     expect(lifecycle.nextOrder).toBe(2)
   })
 
+  // Oracle: a turn is completed only when answered_at is stamped
+  // (catspeak-ai/src/catspeak_ai/read/placement/service.py:39), which the client
+  // maps to answeredAt/submittedAt (realAdapter.js:329-330). A pending turn can
+  // carry a transcript but is still not submitted.
+  it("does not count a pending turn that only has a transcript", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        turns: [
+          { order: 1, answeredAt: null, submittedAt: null, transcript: "我家有四口人" },
+        ],
+      }),
+      now: ACTIVITY + 2 * HOUR_MS,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.RESUME)
+    expect(lifecycle.answeredCount).toBe(0)
+    expect(lifecycle.nextOrder).toBe(1)
+  })
+
   it("expires exactly at the 24h boundary", () => {
     const lifecycle = getSessionLifecycle({
       session: buildSession(),

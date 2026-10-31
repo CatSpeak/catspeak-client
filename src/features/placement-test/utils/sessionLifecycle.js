@@ -1,6 +1,7 @@
 import { RESUME_WINDOW_MS } from "../constants/lifecycle"
 import { SESSION_STATUS } from "../constants/session"
 import { TOTAL_TURNS } from "../engine"
+import { countSubmittedTurns } from "./turns"
 
 export const RESUMABLE_STATUSES = [
   SESSION_STATUS.IN_PROGRESS,
@@ -39,11 +40,7 @@ export const getSessionLifecycle = ({
   const activityAt = getSessionActivityAt(session)
   const expiresAt = activityAt + Math.max(0, Number(windowMs) || 0)
   const remainingMs = Math.max(0, expiresAt - (Number.isFinite(nowMs) ? nowMs : 0))
-  const turns = Array.isArray(session.turns) ? session.turns : []
-  const answeredTurns = turns.filter(
-    (t) => Boolean(t.answeredAt || t.submittedAt || (t.transcript && t.transcript.trim() !== ""))
-  )
-  const answeredCount = Math.min(answeredTurns.length, totalTurns)
+  const answeredCount = countSubmittedTurns(session.turns, totalTurns)
   const nextOrder = Math.min(answeredCount + 1, totalTurns)
 
   return {

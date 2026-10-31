@@ -434,6 +434,8 @@ export default {
         safeTitle: "答题数据已安全保留：",
         safeBody:
           "你将直接在第 {{order}} 题继续，不会丢失分数，已提交的 {{answered}} 题录音也会保留。",
+        pendingAnswerNotice:
+          "当前题目尚未提交 —— 刷新页面后本题录音不会保留，你需要重新录制本题。",
         deadlineLabel: "会话保留期限：",
         autoCancel: "自动取消时间：{{date}}",
         remainingChip: "⏳ 剩余 {{remaining}}",

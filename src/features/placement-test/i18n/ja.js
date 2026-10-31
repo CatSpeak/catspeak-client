@@ -454,6 +454,8 @@ export default {
         safeTitle: "受験データは安全に保存されています：",
         safeBody:
           "第 {{order}} 問からそのまま再開でき、得点も提出済みの {{answered}} 問分の録音も失われません。",
+        pendingAnswerNotice:
+          "現在の設問はまだ提出されていません。ページ再読み込み後にこの録音は保持されないため、録音し直す必要があります。",
         deadlineLabel: "セッションの保持期限：",
         autoCancel: "自動キャンセル：{{date}}",
         remainingChip: "⏳ 残り {{remaining}}",
