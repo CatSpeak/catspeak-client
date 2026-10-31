@@ -139,6 +139,22 @@ describe("PlacementProfilePage score sourcing", () => {
     expect(navigateMock).toHaveBeenCalledWith("/zh/ai-tutor/learning-path")
   })
 
+  it("names the roadmap after the current level, not the next target band", () => {
+    readResultMock.mockReturnValue({
+      band: 2,
+      code: "psess_own",
+      scoredAt: Date.now(),
+    })
+
+    renderToStaticMarkup(<PlacementProfilePage />)
+
+    // Oracle: the 5-day module names its cycle "Lộ trình HSK {currentLevel}"
+    // (CycleProgressBar.jsx:34). The profile card used the next target band,
+    // so after adjusting to HSK 2 it read "Lên HSK 3" while the module read
+    // "HSK 1" (user report 2026-10-31).
+    expect(roadmapProps.current.band).toBe(2)
+  })
+
   it("opens the learning path at the next roadmap day from the roadmap CTA", () => {
     readResultMock.mockReturnValue({
       band: 2,

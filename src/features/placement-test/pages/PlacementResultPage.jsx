@@ -4,6 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { toast } from "@/components/ui/toast"
 import { useAdjustLevelMutation } from "../api"
+import { useChangeLevelMutation } from "@/features/learning-path/api/learningPathApi"
 import {
   PLACEMENT_TEST_PATH,
   PLACEMENT_TEST_PROFILE_PATH,
@@ -41,6 +42,7 @@ const PlacementResultPage = () => {
   const successToast = t.placementTest?.adjust?.successToast
   const alreadyAdjustedToast = t.placementTest?.adjust?.alreadyAdjustedToast
   const errorToast = t.placementTest?.adjust?.errorToast
+  const roadmapSyncErrorToast = t.placementTest?.adjust?.roadmapSyncErrorToast
   const navigate = useNavigate()
   const { user } = useAuth()
 
@@ -48,6 +50,7 @@ const PlacementResultPage = () => {
   const [adjustOpen, setAdjustOpen] = useState(false)
   const [adjustChoice, setAdjustChoice] = useState("keep")
   const [adjustLevel, { isLoading: adjusting }] = useAdjustLevelMutation()
+  const [changeLevel] = useChangeLevelMutation()
 
   useEffect(() => {
     if (result) return
@@ -121,6 +124,14 @@ const PlacementResultPage = () => {
         setResult(response.result)
         setAdjustOpen(false)
         toast.success(formatTemplate(successToast, { band: response.band }))
+
+        // The modal promises a fresh 5-day roadmap for the adjusted level;
+        // the placement service only owns the placement profile.
+        try {
+          await changeLevel({ newLevel: `HSK${response.band}` }).unwrap()
+        } catch {
+          toast.error(roadmapSyncErrorToast)
+        }
       } catch (error) {
         if (error?.status === 409) {
           setResult((current) =>
@@ -133,7 +144,15 @@ const PlacementResultPage = () => {
         toast.error(errorToast)
       }
     },
-    [result, adjustLevel, successToast, alreadyAdjustedToast, errorToast],
+    [
+      result,
+      adjustLevel,
+      changeLevel,
+      successToast,
+      alreadyAdjustedToast,
+      errorToast,
+      roadmapSyncErrorToast,
+    ],
   )
 
   if (!result || !view) {

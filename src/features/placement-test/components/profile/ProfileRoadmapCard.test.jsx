@@ -19,12 +19,14 @@ describe("ProfileRoadmapCard", () => {
     const html = renderToStaticMarkup(
       <ProfileRoadmapCard
         copy={copy}
-        band={3}
+        band={2}
         progress={progress}
         onContinue={vi.fn()}
       />,
     )
 
+    expect(html).toContain("Lộ trình HSK 2")
+    expect(html).not.toContain("Lên HSK")
     expect(html).toContain("Tiếp tục bài học Ngày 1 →")
     expect(html).toMatch(
       /<button[^>]*type="button"[^>]*>Tiếp tục bài học Ngày 1 →<\/button>/,

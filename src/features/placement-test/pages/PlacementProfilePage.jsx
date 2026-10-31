@@ -280,7 +280,7 @@ const PlacementProfilePage = () => {
             />
             <ProfileRoadmapCard
               copy={copy}
-              band={view.roadmapBand}
+              band={descriptor.band}
               progress={roadmap}
               onContinue={() => handleContinueRoadmapDay(roadmap.completed + 1)}
             />

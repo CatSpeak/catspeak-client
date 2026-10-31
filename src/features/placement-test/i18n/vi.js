@@ -387,6 +387,8 @@ export default {
       successToast: "Đã cập nhật trình độ học tập sang HSK {{band}}.",
       alreadyAdjustedToast: "Bạn đã sử dụng quyền điều chỉnh trình độ.",
       errorToast: "Không thể cập nhật trình độ. Vui lòng thử lại.",
+      roadmapSyncErrorToast:
+        "Đã cập nhật trình độ nhưng chưa tạo lại lộ trình. Mở Lộ trình 5 ngày và chọn Đổi trình độ để đồng bộ.",
     },
     profile: {
       topbarTitle: "Hồ Sơ Năng Lực & Trạng Thái Học Viên",
@@ -399,7 +401,7 @@ export default {
         "Khả năng giao tiếp trôi chảy trong công việc & đời sống hàng ngày. Đã hoàn tất bài khảo sát thích ứng AI CAT 5 câu ngày {{date}}.",
       testDate: "Ngày thi: {{date}}",
       testCode: "Mã bài thi: #{{code}}",
-      roadmapTitle: "Lộ Trình Bứt Phá Lên HSK {{band}}",
+      roadmapTitle: "Lộ trình HSK {{band}}",
       roadmapProgress: "{{done}}/{{total}} Ngày ({{percent}}%)",
       roadmapDone: "Xong",
       roadmapActive: "Đang học",

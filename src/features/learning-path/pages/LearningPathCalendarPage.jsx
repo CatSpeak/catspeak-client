@@ -380,7 +380,7 @@ const LearningPathCalendarPage = () => {
             completedSessions={calendarData?.completedSessions ?? 0}
             totalSessions={calendarData?.totalSessions ?? 5}
             averageScore={calendarData?.averageScore}
-            streak={calendarData?.streak ?? 5}
+            streak={calendarData?.streak ?? 0}
             startsTomorrow={startsTomorrow}
             onOpenLevelModal={() => setIsLevelModalOpen(true)}
           />

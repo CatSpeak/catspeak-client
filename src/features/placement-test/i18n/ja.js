@@ -383,6 +383,8 @@ export default {
       successToast: "学習レベルを HSK {{band}} に更新しました。",
       alreadyAdjustedToast: "レベル調整権限はすでに使用済みです。",
       errorToast: "レベルを更新できませんでした。もう一度お試しください。",
+      roadmapSyncErrorToast:
+        "レベルは更新されましたが、5日間ロードマップを再作成できませんでした。5日間ロードマップを開き、「レベル変更」から同期してください。",
     },
     profile: {
       topbarTitle: "能力プロフィールと学習状況",
@@ -395,7 +397,7 @@ export default {
         "仕事と日常生活で流暢にコミュニケーションできます。{{date}} に5問の AI CAT 適応型テストを完了しました。",
       testDate: "受験日：{{date}}",
       testCode: "受験コード：#{{code}}",
-      roadmapTitle: "HSK {{band}} 突破ロードマップ",
+      roadmapTitle: "HSK {{band}} ロードマップ",
       roadmapProgress: "{{done}}/{{total}} 日（{{percent}}%）",
       roadmapDone: "完了",
       roadmapActive: "学習中",

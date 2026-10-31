@@ -368,6 +368,8 @@ export default {
       successToast: "学习等级已更新为 HSK {{band}}。",
       alreadyAdjustedToast: "你已使用过等级调整权限。",
       errorToast: "无法更新等级，请重试。",
+      roadmapSyncErrorToast:
+        "等级已更新，但 5 天学习路线未能重新生成。请打开 5 天学习路线并选择“更改等级”进行同步。",
     },
     profile: {
       topbarTitle: "能力档案与学员状态",
@@ -380,7 +382,7 @@ export default {
         "能够在工作与日常生活中流利沟通。已于 {{date}} 完成 5 题 AI CAT 自适应测评。",
       testDate: "考试日期：{{date}}",
       testCode: "考试编号：#{{code}}",
-      roadmapTitle: "冲刺 HSK {{band}} 学习路线",
+      roadmapTitle: "HSK {{band}} 学习路线",
       roadmapProgress: "{{done}}/{{total}} 天（{{percent}}%）",
       roadmapDone: "已完成",
       roadmapActive: "学习中",

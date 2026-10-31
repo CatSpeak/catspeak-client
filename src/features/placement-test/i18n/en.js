@@ -390,6 +390,8 @@ export default {
       successToast: "Your learning level was updated to HSK {{band}}.",
       alreadyAdjustedToast: "You have already used your level adjustment.",
       errorToast: "Could not update the level. Please try again.",
+      roadmapSyncErrorToast:
+        "Your level was updated but the 5-day roadmap could not be recreated. Open the 5-day roadmap and choose Change level to sync.",
     },
     profile: {
       topbarTitle: "Proficiency Profile & Student Status",
@@ -402,7 +404,7 @@ export default {
         "Fluent communication at work and in daily life. Completed the 5-question adaptive AI CAT assessment on {{date}}.",
       testDate: "Test date: {{date}}",
       testCode: "Test code: #{{code}}",
-      roadmapTitle: "Roadmap to HSK {{band}}",
+      roadmapTitle: "HSK {{band}} Roadmap",
       roadmapProgress: "{{done}}/{{total}} Days ({{percent}}%)",
       roadmapDone: "Done",
       roadmapActive: "In progress",
