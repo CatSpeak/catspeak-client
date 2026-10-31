@@ -17,6 +17,7 @@ import {
 } from "../constants/routes"
 import { DEFAULT_TARGET_BAND } from "../constants/bands"
 import {
+  DIMENSION_KEYS,
   computeOverallScore,
   getAllDimensionScores,
   getBandDescriptor,
@@ -53,6 +54,53 @@ const getInitials = (name) =>
     .join("")
     .toUpperCase() || "?"
 
+/** Bản `result`-shaped từ lần thi máy chủ giữ (GET /profile → lastAttempt). */
+const serverAttemptResult = (lastAttempt) => {
+  if (!lastAttempt) return null
+  return {
+    band: lastAttempt.finalHskLevel,
+    code: lastAttempt.sessionId,
+    scoredAt: lastAttempt.scoredAt,
+    pronunciation: lastAttempt.scores?.pronunciation,
+    vocabulary: lastAttempt.scores?.vocabulary,
+    grammar: lastAttempt.scores?.grammar,
+    fluency: lastAttempt.scores?.fluency,
+  }
+}
+
+const fillAttempt = (primary, fallback) => {
+  // Chỉ trộn khi chắc chắn cùng một lần thi. Một kết quả local cũ thiếu `code`
+  // không được nhận điểm, mã hay ngày của phiên server khác (R-data-001).
+  const sameAttempt = Boolean(
+    primary.code && fallback.code && primary.code === fallback.code,
+  )
+  if (!sameAttempt) return { ...primary }
+  const filled = {
+    ...primary,
+    scoredAt: primary.scoredAt ?? fallback.scoredAt,
+  }
+  for (const key of DIMENSION_KEYS) {
+    filled[key] = primary[key] ?? fallback[key]
+  }
+  return filled
+}
+
+/**
+ * Local là bản vừa thi trên máy này; server là bản còn lại sau khi xoá cache.
+ * Chọn bản mới hơn theo `scoredAt`; thiếu mốc thời gian thì giữ local (hành vi cũ).
+ * Chỉ vá chỗ trống từ bản kia khi hai bản cùng `code` (cùng một lần thi).
+ */
+const pickAttempt = (local, server) => {
+  if (!local) return server
+  if (!server) return local
+  const localAt = Number(local.scoredAt)
+  const serverAt = Number(server.scoredAt)
+  const localHasTime = Number.isFinite(localAt) && localAt > 0
+  const serverHasTime = Number.isFinite(serverAt) && serverAt > 0
+  if (!localHasTime || !serverHasTime) return fillAttempt(local, server)
+  return serverAt > localAt ? fillAttempt(server, local) : fillAttempt(local, server)
+}
+
 const PlacementProfilePage = () => {
   const { t } = useLanguage()
   const root = t.placementTest || {}
@@ -82,7 +130,10 @@ const PlacementProfilePage = () => {
   const { data: retakeStatus } = useGetRetakeStatusQuery()
 
   const view = useMemo(() => {
-    const effectiveBand = result?.band || retakeStatus?.currentHskLevel
+    const attempt = pickAttempt(result, serverAttemptResult(retakeStatus?.lastAttempt))
+    // Cấp hiện tại do hồ sơ quyết (HSK 2 sau tự điều chỉnh); cấp của lần thi đã
+    // chấm chỉ còn trong ghi chú "từ HSK 1 sang HSK 2".
+    const effectiveBand = retakeStatus?.currentHskLevel ?? attempt?.band
     if (!effectiveBand) return null
     const descriptor = getBandDescriptor(effectiveBand)
     const eligibility = retakeStatus
@@ -102,12 +153,12 @@ const PlacementProfilePage = () => {
             : Number(retakeStatus.progress) || 0,
           totalDays: retakeStatus.totalDays,
         }
-      : getRetakeEligibility({ lastTestedAt: result?.scoredAt })
+      : getRetakeEligibility({ lastTestedAt: attempt?.scoredAt })
     const roadmap = getRoadmapProgress(eligibility)
-    const overall = result ? computeOverallScore(result) : null
+    const overall = attempt ? computeOverallScore(attempt) : null
     const roadmapBand = getTargetRoadmapBand(effectiveBand)
-    const skills = result
-      ? getAllDimensionScores(result).map((item) => ({
+    const skills = attempt
+      ? getAllDimensionScores(attempt).map((item) => ({
           ...item,
           label: dimensions?.[item.key] || item.key,
           scoreText: item.measured
@@ -115,6 +166,18 @@ const PlacementProfilePage = () => {
             : root.result?.notMeasured || "Chưa đo được",
         }))
       : []
+    const lastAttempt = retakeStatus?.lastAttempt
+    const adjustmentNote =
+      lastAttempt?.selfAdjusted &&
+      lastAttempt.adjustedFromHskLevel !== null &&
+      lastAttempt.adjustedFromHskLevel !== undefined &&
+      Number(lastAttempt.adjustedFromHskLevel) !== Number(effectiveBand) &&
+      copy.selfAdjustedNote
+        ? formatTemplate(copy.selfAdjustedNote, {
+            from: lastAttempt.adjustedFromHskLevel,
+            to: effectiveBand,
+          })
+        : null
 
     return {
       descriptor,
@@ -123,10 +186,19 @@ const PlacementProfilePage = () => {
       overall,
       roadmapBand,
       skills,
-      testDate: formatDate(result?.scoredAt || retakeStatus?.lastTestedAt),
+      code: attempt?.code || "",
+      adjustmentNote,
+      testDate: formatDate(attempt?.scoredAt || retakeStatus?.lastTestedAt),
       eligibleDate: formatDate(eligibility.eligibleAt),
     }
-  }, [result, retakeStatus, dimensions, scoreOf, root.result?.notMeasured])
+  }, [
+    result,
+    retakeStatus,
+    dimensions,
+    scoreOf,
+    root.result?.notMeasured,
+    copy.selfAdjustedNote,
+  ])
 
   const studentName =
     user?.fullName ||
@@ -276,7 +348,8 @@ const PlacementProfilePage = () => {
                 date: view.testDate,
               })}
               testDate={view.testDate}
-              code={result?.code || retakeStatus?.sessionId || ""}
+              code={view.code}
+              adjustmentNote={view.adjustmentNote}
             />
             <ProfileRoadmapCard
               copy={copy}

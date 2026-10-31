@@ -361,6 +361,39 @@ export const getActiveSessionReal = async ({
 }
 
 /** 5. Xem Profile HSK & Cooldown 14 ngày: GET /v1/placement/profile */
+
+/**
+ * `scored_at` là ISO8601; phần còn lại của feature so sánh `scoredAt` bằng ms
+ * (localStorage ghi Date.now()). Đổi ngay ở biên để không ai phải nhớ hai đơn vị.
+ */
+const mapAttemptTimestamp = (value) => {
+  if (!value) return null
+  const ms = new Date(value).getTime()
+  return Number.isFinite(ms) ? ms : null
+}
+
+/** Lần thi gần nhất do máy chủ giữ — nguồn thật khi localStorage trống. */
+const mapLastAttempt = (attempt) => {
+  if (!attempt) return null
+  const scores = attempt.scores || {}
+  return {
+    sessionId: attempt.session_id ?? null,
+    code: attempt.session_id ?? null,
+    finalHskLevel: attempt.final_hsk_level ?? null,
+    turnCount: Number(attempt.turn_count) || 0,
+    scoredAt: mapAttemptTimestamp(attempt.scored_at),
+    scores: {
+      pronunciation: scores.pronunciation ?? null,
+      vocabulary: scores.vocabulary ?? null,
+      grammar: scores.grammar ?? null,
+      fluency: scores.fluency ?? null,
+      ahiTotal: scores.ahi_total ?? null,
+    },
+    selfAdjusted: Boolean(attempt.self_adjusted),
+    adjustedFromHskLevel: attempt.adjusted_from_hsk_level ?? null,
+  }
+}
+
 export const getRetakeStatusReal = async ({
   baseQuery,
   api,
@@ -410,6 +443,7 @@ export const getRetakeStatusReal = async ({
       hasHistory: Boolean(lastTestedAt || data.current_hsk_level),
       currentHskLevel: data.current_hsk_level ?? null,
       evaluatedAt: data.evaluated_at ?? null,
+      lastAttempt: mapLastAttempt(data.last_attempt),
     },
   }
 }

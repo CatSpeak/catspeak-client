@@ -401,6 +401,7 @@ export default {
         "Khả năng giao tiếp trôi chảy trong công việc & đời sống hàng ngày. Đã hoàn tất bài khảo sát thích ứng AI CAT 5 câu ngày {{date}}.",
       testDate: "Ngày thi: {{date}}",
       testCode: "Mã bài thi: #{{code}}",
+      selfAdjustedNote: "Cấp độ đã được tự điều chỉnh từ HSK {{from}} sang HSK {{to}}.",
       roadmapTitle: "Lộ trình HSK {{band}}",
       roadmapProgress: "{{done}}/{{total}} Ngày ({{percent}}%)",
       roadmapDone: "Xong",

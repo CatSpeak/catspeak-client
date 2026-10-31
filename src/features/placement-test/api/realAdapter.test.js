@@ -495,6 +495,21 @@ describe("realAdapter", () => {
           eligible_at: "2026-10-01T12:00:00Z",
           last_tested_at: "2026-09-17T12:00:00Z",
         },
+        last_attempt: {
+          session_id: "psess_750a5e2bdff2472c",
+          final_hsk_level: 1,
+          turn_count: 5,
+          scored_at: "2026-09-20T10:00:00Z",
+          scores: {
+            pronunciation: 10,
+            vocabulary: 10,
+            grammar: 10,
+            fluency: 10,
+            ahi_total: 42.5,
+          },
+          self_adjusted: true,
+          adjusted_from_hsk_level: 1,
+        },
       },
     })
 
@@ -511,6 +526,40 @@ describe("realAdapter", () => {
     expect(res.data.eligible).toBe(false)
     expect(res.data.daysRemaining).toBe(10)
     expect(res.data.currentHskLevel).toBe(3)
+    expect(res.data.lastAttempt).toEqual({
+      sessionId: "psess_750a5e2bdff2472c",
+      code: "psess_750a5e2bdff2472c",
+      finalHskLevel: 1,
+      turnCount: 5,
+      scoredAt: new Date("2026-09-20T10:00:00Z").getTime(),
+      scores: {
+        pronunciation: 10,
+        vocabulary: 10,
+        grammar: 10,
+        fluency: 10,
+        ahiTotal: 42.5,
+      },
+      selfAdjusted: true,
+      adjustedFromHskLevel: 1,
+    })
+  })
+
+  it("getRetakeStatusReal maps an absent last_attempt to null", async () => {
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        account_id: 101,
+        current_hsk_level: 2,
+        last_attempt: null,
+        cooldown: { can_retake: true, days_remaining: 0 },
+      },
+    })
+
+    const res = await getRetakeStatusReal({
+      baseQuery: mockBaseQuery,
+      readResult: mockReadResult,
+    })
+
+    expect(res.data.lastAttempt).toBeNull()
   })
 
   it("adjustLevelReal calls POST /adjust-level and updates result", async () => {

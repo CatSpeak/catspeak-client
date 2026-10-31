@@ -382,6 +382,7 @@ export default {
         "能够在工作与日常生活中流利沟通。已于 {{date}} 完成 5 题 AI CAT 自适应测评。",
       testDate: "考试日期：{{date}}",
       testCode: "考试编号：#{{code}}",
+      selfAdjustedNote: "等级已自行调整：从 HSK {{from}} 调整为 HSK {{to}}。",
       roadmapTitle: "HSK {{band}} 学习路线",
       roadmapProgress: "{{done}}/{{total}} 天（{{percent}}%）",
       roadmapDone: "已完成",

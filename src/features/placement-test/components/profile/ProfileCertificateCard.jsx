@@ -9,6 +9,7 @@ const ProfileCertificateCard = ({
   description,
   testDate,
   code,
+  adjustmentNote,
 }) => (
   <section className="flex w-full flex-col gap-2.5 rounded-[16px] bg-gradient-to-r from-[#881337] to-cath-red-700 px-[18px] py-4 shadow-[0_8px_20px_rgba(136,19,55,0.2)]">
     <div className="flex items-center justify-between gap-3">
@@ -36,6 +37,12 @@ const ProfileCertificateCard = ({
         {description}
       </p>
     </div>
+
+    {adjustmentNote ? (
+      <p className="text-[11.5px] leading-[16.7px] text-[#FECACA]">
+        {adjustmentNote}
+      </p>
+    ) : null}
 
     <div className="flex items-center justify-between gap-3 text-[11px] font-medium text-[#FECACA]">
       <span>{formatTemplate(copy.testDate, { date: testDate })}</span>

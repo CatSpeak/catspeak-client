@@ -404,6 +404,7 @@ export default {
         "Fluent communication at work and in daily life. Completed the 5-question adaptive AI CAT assessment on {{date}}.",
       testDate: "Test date: {{date}}",
       testCode: "Test code: #{{code}}",
+      selfAdjustedNote: "Level was self-adjusted from HSK {{from}} to HSK {{to}}.",
       roadmapTitle: "HSK {{band}} Roadmap",
       roadmapProgress: "{{done}}/{{total}} Days ({{percent}}%)",
       roadmapDone: "Done",

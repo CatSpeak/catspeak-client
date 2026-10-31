@@ -397,6 +397,7 @@ export default {
         "仕事と日常生活で流暢にコミュニケーションできます。{{date}} に5問の AI CAT 適応型テストを完了しました。",
       testDate: "受験日：{{date}}",
       testCode: "受験コード：#{{code}}",
+      selfAdjustedNote: "レベルを HSK {{from}} から HSK {{to}} に自己調整しました。",
       roadmapTitle: "HSK {{band}} ロードマップ",
       roadmapProgress: "{{done}}/{{total}} 日（{{percent}}%）",
       roadmapDone: "完了",
