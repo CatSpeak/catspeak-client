@@ -311,6 +311,72 @@ describe("realAdapter", () => {
     expect(res.data.turns[1].submittedAt).toBeNull()
   })
 
+  // `useConversationLoop` loads turn 1 from `initialQuestion`
+  // (hooks/useConversationLoop.js:407). Dropping it here makes the room call
+  // GET /question and re-synthesise TTS (~1 s) before "Câu 1/5" can render.
+  it("getActiveSessionReal keeps the first question of the same session", async () => {
+    const initialQuestion = {
+      turn_index: 1,
+      text: "你好！请问你叫什么名字？",
+      audio_base64: "Q1AUDIO",
+    }
+    inMemorySession = {
+      id: "psess_active_999",
+      turns: [],
+      initialQuestion,
+    }
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        has_active_session: true,
+        session: {
+          session_id: "psess_active_999",
+          status: "in_progress",
+          seed_band: 2,
+          current_turn: 1,
+          total_turns: 5,
+          turns: [],
+        },
+      },
+    })
+
+    await getActiveSessionReal({
+      baseQuery: mockBaseQuery,
+      persist: mockPersist,
+      read: mockRead,
+    })
+
+    expect(inMemorySession.initialQuestion).toEqual(initialQuestion)
+  })
+
+  it("getActiveSessionReal does not carry the first question across sessions", async () => {
+    inMemorySession = {
+      id: "psess_old",
+      turns: [],
+      initialQuestion: { turn_index: 1, text: "旧问题" },
+    }
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        has_active_session: true,
+        session: {
+          session_id: "psess_new",
+          status: "in_progress",
+          seed_band: 2,
+          current_turn: 1,
+          total_turns: 5,
+          turns: [],
+        },
+      },
+    })
+
+    await getActiveSessionReal({
+      baseQuery: mockBaseQuery,
+      persist: mockPersist,
+      read: mockRead,
+    })
+
+    expect(inMemorySession.initialQuestion).toBeUndefined()
+  })
+
   it("getActiveSessionReal returns null when no active session", async () => {
     const mockBaseQuery = vi.fn().mockResolvedValue({
       data: { has_active_session: false, session: null },

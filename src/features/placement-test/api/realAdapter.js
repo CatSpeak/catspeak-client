@@ -333,6 +333,15 @@ export const getActiveSessionReal = async ({
       : [],
   }
 
+  // The start response already carries turn 1 with its TTS audio. A
+  // tag-invalidated /sessions/active refresh runs while the room mounts, so
+  // replacing the stored session here used to drop `initialQuestion` and make
+  // useConversationLoop fetch GET /question again (~1 s of TTS) before "Câu 1/5".
+  const localSession = read()
+  if (localSession?.id === mappedSession.id && localSession.initialQuestion) {
+    mappedSession.initialQuestion = localSession.initialQuestion
+  }
+
   persist(mappedSession)
   return { data: mappedSession }
 }
