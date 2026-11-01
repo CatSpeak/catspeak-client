@@ -961,7 +961,7 @@ export default {
     title: "背景",
     none: "无",
     upload: "上传",
-    fileTooLarge: "文件太大。最大为 3MB。",
+    fileTooLarge: "文件太大。最大为 5MB。",
     uploadSuccess: "背景已上传并应用",
     uploadFailed: "上传背景失败",
     setFailed: "设置虚拟背景失败",

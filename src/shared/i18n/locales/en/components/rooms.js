@@ -1018,7 +1018,7 @@ export default {
     title: "Backgrounds",
     none: "None",
     upload: "Upload",
-    fileTooLarge: "File is too large. Maximum size is 3MB.",
+    fileTooLarge: "File is too large. Maximum size is 5MB.",
     uploadSuccess: "Background uploaded and applied",
     uploadFailed: "Failed to upload background",
     setFailed: "Failed to set virtual background",

@@ -208,7 +208,7 @@ export default {
   eventDescOptional: "イベントの説明（任意）",
   descMaxChars: "内容は150語以内にしてください",
   imageUploadHint: "png、jpeg、svg形式に対応。",
-  imageUploadSize: "サイズは50mb未満",
+  imageUploadSize: "サイズは10MB未満",
   randomEventTitle: "イベント名",
   from: "開始",
   createEventSuccess: "イベントを作成しました！",

@@ -436,14 +436,14 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
       return;
     }
 
-    // Verify size limit (e.g. 50MB)
-    const maxSize = 50 * 1024 * 1024;
+    // Verify size limit (100MB)
+    const maxSize = 100 * 1024 * 1024;
     if (file.size > maxSize) {
       setValidationErrors((prev) => ({
         ...prev,
         video:
           t.catSpeak?.reels?.videoSizeError ||
-          "Video file size exceeds 50MB limit.",
+          "Video file size exceeds 100MB limit.",
       }));
       return;
     }

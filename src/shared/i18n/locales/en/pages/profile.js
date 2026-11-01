@@ -100,7 +100,7 @@ export default {
     uploadVideo: "Upload your video introduce yourself",
     videoLabel: "Video",
     videoNote:
-      "We recommend uploading a short 1-3 minute video introducing yourself to attract and impress potential students. The video should be in landscape (mp4) format! and under 500MB.",
+      "We recommend uploading a short 1-3 minute video introducing yourself to attract and impress potential students. The video should be in landscape (mp4) format and under 50MB.",
     certify:
       "I certify that the information provided is accurate and agree to comply with the platform's regulations.",
     submit: "Submit",

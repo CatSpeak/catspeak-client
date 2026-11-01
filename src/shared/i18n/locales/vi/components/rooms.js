@@ -995,7 +995,7 @@ export default {
     title: "Phông nền",
     none: "Không có",
     upload: "Tải lên",
-    fileTooLarge: "Tệp quá lớn. Kích thước tối đa là 3MB.",
+    fileTooLarge: "Tệp quá lớn. Kích thước tối đa là 5MB.",
     uploadSuccess: "Đã tải lên và áp dụng phông nền",
     uploadFailed: "Không thể tải lên phông nền",
     setFailed: "Không thể cài đặt phông nền ảo",

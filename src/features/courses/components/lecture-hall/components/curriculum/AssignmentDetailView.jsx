@@ -11,6 +11,26 @@ import HorizontalCard from '@/shared/components/ui/HorizontalCard'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import AssignmentStatusBadge from './AssignmentStatusBadge'
 
+const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+
+const getAllowedFileTypes = (value) => {
+  const values = Array.isArray(value)
+    ? value
+    : (typeof value === "string" ? value.split(",") : [])
+
+  return [...new Set(values
+    .map((type) => String(type).trim().toLowerCase())
+    .filter(Boolean)
+    .map((type) => type.startsWith(".") ? type : `.${type}`)
+    .filter((type) => /^\.[a-z0-9]+$/.test(type)))]
+}
+
+const getFileExtension = (fileName) => {
+  if (typeof fileName !== "string") return ""
+  const dotIndex = fileName.lastIndexOf(".")
+  return dotIndex >= 0 ? fileName.slice(dotIndex).toLowerCase() : ""
+}
+
 const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   // Hooks & Basic Variables
   const { classId: routeClassId, id: routeId } = useParams()
@@ -61,6 +81,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const formattedDeadline = deadline ? formatDateTime(deadline) : null
   const isAllowLate = apiAssignment?.allowLateSubmission ?? true
   const maxFiles = apiAssignment?.maxFiles ?? 1
+  const allowedFileTypes = getAllowedFileTypes(apiAssignment?.allowedFileTypes)
 
   const dueDateMs = deadline ? new Date(deadline).getTime() : null
   const isExpired = dueDateMs !== null && dueDateMs < now
@@ -101,6 +122,24 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
         toast.error((sa.maxFilesAllowed || "Bạn chỉ được nộp tối đa {{maxFiles}} tệp").replace("{{maxFiles}}", maxFiles));
         return;
       }
+
+      for (const file of newFiles) {
+        if (!file || typeof file.name !== "string") continue;
+        const extension = getFileExtension(file.name);
+        if (allowedFileTypes.length > 0 && !allowedFileTypes.includes(extension)) {
+          const msg = sa.fileFormatNotAllowed 
+            ? sa.fileFormatNotAllowed.replace("{{formats}}", allowedFileTypes.join(", ")).replace("{{extension}}", extension) 
+            : `Định dạng tệp ${extension} không được cho phép (${allowedFileTypes.join(", ")})`;
+          toast.error(msg);
+          return;
+        }
+
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+          toast.error((sa.fileExceedsLimit || "Tệp {{fileName}} vượt quá giới hạn 50MB").replace("{{fileName}}", file.name));
+          return;
+        }
+      }
+
       setSelectedFiles((prev) => [...prev, ...newFiles]);
     }
   }
@@ -129,18 +168,17 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
       return;
     }
 
-    const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 25 * 1024 * 1024) {
-      toast.error(sa.fileExceedsLimit?.replace("{{fileName}}", "Total") || "Tổng kích thước tệp vượt quá giới hạn 25MB");
-      return;
-    }
-
-    const allowedTypes = [".doc", ".docx", ".pdf"];
     for (const file of selectedFiles) {
-      const extension = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
-      if (!allowedTypes.includes(extension)) {
-        const msg = sa.fileFormatNotAllowed ? sa.fileFormatNotAllowed.replace("{{formats}}", allowedTypes.join(", ")) : "Định dạng tệp không hợp lệ";
+      const extension = getFileExtension(file.name);
+      if (allowedFileTypes.length > 0 && !allowedFileTypes.includes(extension)) {
+        const msg = sa.fileFormatNotAllowed 
+          ? sa.fileFormatNotAllowed.replace("{{formats}}", allowedFileTypes.join(", ")).replace("{{extension}}", extension) 
+          : "Định dạng tệp không hợp lệ";
         toast.error(msg);
+        return;
+      }
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        toast.error((sa.fileExceedsLimit || "Tệp {{fileName}} vượt quá giới hạn 50MB").replace("{{fileName}}", file.name));
         return;
       }
     }
@@ -355,7 +393,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
               type="file"
               ref={fileInputRef}
               className="hidden"
-              accept=".doc,.docx,.pdf"
+              accept={allowedFileTypes.length > 0 ? allowedFileTypes.join(",") : undefined}
               multiple={maxFiles > 1}
               onChange={handleFileChange}
             />
@@ -368,10 +406,10 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
                 <Upload size={28} className="text-[#9CA3AF] mb-3" />
                 <p className="text-sm text-[#9CA3AF] mb-1 text-center">
                   {sa.supportedFilesSummary
-                    ? sa.supportedFilesSummary.replace("{{formats}}", "doc, pdf").replace("{{maxFiles}}", maxFiles)
-                    : `Hỗ trợ định dạng doc, pdf, tối đa ${maxFiles} tệp`}
+                    ? sa.supportedFilesSummary.replace("{{formats}}", allowedFileTypes.length > 0 ? allowedFileTypes.join(", ") : "doc, docx, pdf, zip").replace("{{maxFiles}}", maxFiles)
+                    : `Hỗ trợ ${allowedFileTypes.length > 0 ? allowedFileTypes.join(", ") : "mọi định dạng"}, tối đa ${maxFiles} tệp`}
                 </p>
-                <p className="text-sm text-[#9CA3AF] text-center">{sa.fileExceedsLimit?.replace("{{fileName}}", "Total").replace("50 MB", "25MB") || "Tổng kích cỡ dưới <= 25mb"}</p>
+                <p className="text-sm text-[#9CA3AF] text-center">{sa.maxSizePerFile || "Dung lượng tối đa 50MB mỗi tệp"}</p>
               </FluentCard>
             )}
 

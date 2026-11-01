@@ -663,6 +663,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         toast.error(ce.toastInvalidImage || "Please select a valid image file");
         return;
       }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(ce.toastImageTooLarge || "Ảnh câu hỏi không được vượt quá 5MB");
+        return;
+      }
       const previewUrl = URL.createObjectURL(file);
       setFormField("questions", (prev) =>
         prev.map((q, i) =>
@@ -686,6 +690,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       if (!file) return;
       if (!file.type.startsWith("audio/")) {
         toast.error(ce.toastInvalidAudio || "Please select a valid audio file");
+        return;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error(ce.toastAudioTooLarge || "Tệp âm thanh không được vượt quá 20MB");
         return;
       }
       const previewUrl = URL.createObjectURL(file);

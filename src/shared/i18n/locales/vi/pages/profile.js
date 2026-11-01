@@ -102,7 +102,7 @@ export default {
     uploadVideo: "Tải video giới thiệu bản thân",
     videoLabel: "Video",
     videoNote:
-      "Chúng tôi khuyến khích bạn tải lên video ngắn 1-3 phút giới thiệu bản thân để thu hút và gây ấn tượng với học viên tiềm năng. Video nên ở định dạng ngang (mp4) và dưới 500MB.",
+      "Chúng tôi khuyến khích bạn tải lên video ngắn 1-3 phút giới thiệu bản thân để thu hút và gây ấn tượng với học viên tiềm năng. Video nên ở định dạng ngang (mp4) và dưới 50MB.",
     certify:
       "Tôi xác nhận rằng thông tin cung cấp là chính xác và đồng ý tuân thủ các quy định của nền tảng.",
     submit: "Gửi",

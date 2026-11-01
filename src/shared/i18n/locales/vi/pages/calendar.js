@@ -205,7 +205,7 @@ export default {
   eventDescOptional: "Mô tả sự kiện (tùy chọn)",
   descMaxChars: "Nội dung không được quá 150 từ",
   imageUploadHint: "Hỗ trợ định dạng png, jpeg và svg.",
-  imageUploadSize: "Kích cỡ dưới 50mb",
+  imageUploadSize: "Kích cỡ dưới 10MB",
   randomEventTitle: "Tên Event",
   from: "Từ",
   createEventSuccess: "Tạo sự kiện thành công!",

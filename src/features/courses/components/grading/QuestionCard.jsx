@@ -174,7 +174,7 @@ const QuestionCard = ({
             {/* Media Image Upload Icon Button */}
             <label
               className="p-1.5 border border-border bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
-              title={ce.uploadImage || "Upload image"}
+              title={ce.uploadImageTooltip || ce.uploadImage || "Tải lên ảnh (tối đa 5MB)"}
             >
               <ImageIcon size={15} className="text-[#990011]" />
               <span className="hidden sm:inline text-[11px]">
@@ -196,7 +196,7 @@ const QuestionCard = ({
             {/* Audio Upload Icon Button */}
             <label
               className="p-1.5 border border-border bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
-              title={ce.uploadAudio || "Upload audio"}
+              title={ce.uploadAudioTooltip || ce.uploadAudio || "Tải lên âm thanh (tối đa 20MB)"}
             >
               <MusicIcon size={15} className="text-[#990011]" />
               <span className="hidden sm:inline text-[11px]">

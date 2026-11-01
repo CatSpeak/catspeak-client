@@ -18,6 +18,7 @@ import Modal from "@/shared/components/ui/Modal"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import PostEditorPreviews from "./PostEditorPreviews"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { toast } from "react-hot-toast"
 
 const getFileType = (file) => {
   if (file && file.type) {
@@ -156,7 +157,21 @@ const PostEditorModal = ({
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files).map((file) => {
+      const incomingFiles = Array.from(e.target.files)
+      const totalCount = files.length + existingMedias.length + incomingFiles.length
+      if (totalCount > 5) {
+        toast.error("Tối đa 5 tệp đính kèm cho mỗi bài viết.")
+        return
+      }
+
+      for (const file of incomingFiles) {
+        if (file.size > 50 * 1024 * 1024) {
+          toast.error(`Tệp ${file.name} vượt quá giới hạn 50MB.`)
+          return
+        }
+      }
+
+      const newFiles = incomingFiles.map((file) => {
         const type = getFileType(file)
         return {
           file,
@@ -464,9 +479,14 @@ const PostEditorModal = ({
 
         {(files.length > 0 || existingMedias.length > 0) && (
           <div className="flex flex-col gap-2">
-            <span className="text-xs">
-              {t.profile?.post?.editor?.attachmentsLabel || "Tệp đính kèm"}
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs">
+                {t.profile?.post?.editor?.attachmentsLabel || "Tệp đính kèm"} ({files.length + existingMedias.length}/5)
+              </span>
+              <span className="text-[11px] text-gray-400">
+                Tối đa 50MB/tệp
+              </span>
+            </div>
             <PostEditorPreviews
               files={files}
               existingMedias={existingMedias}

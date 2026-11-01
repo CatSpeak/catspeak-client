@@ -208,7 +208,7 @@ export default {
   eventDescOptional: "Event description (optional)",
   descMaxChars: "Content must not exceed 150 words",
   imageUploadHint: "Supports png, jpeg and svg formats.",
-  imageUploadSize: "Size under 50mb",
+  imageUploadSize: "Size under 10MB",
   randomEventTitle: "Event Name",
   from: "From",
   createEventSuccess: "Event created successfully!",

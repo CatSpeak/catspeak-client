@@ -8,18 +8,31 @@
  */
 export function parseApiError(err) {
   const res = err?.data
+  const statusCode = res?.statusCode || res?.status || err?.status
+  let errorCode =
+    res?.errorCode ||
+    res?.error_code ||
+    (typeof res?.detail === "object" ? res?.detail?.errorCode || res?.detail?.error_code : undefined) ||
+    res?.code
+
+  if (!errorCode && statusCode === 413) {
+    errorCode = "COMMON_PAYLOAD_TOO_LARGE"
+  }
+
+  let message =
+    res?.message ||
+    (typeof res?.detail === "string" ? res.detail : res?.detail?.message) ||
+    err?.message
+
+  if (statusCode === 413 && (!message || message === "Payload Too Large")) {
+    message = "Dung lượng tệp tải lên vượt quá giới hạn cho phép của hệ thống."
+  }
+
   return {
     res,
-    statusCode: res?.statusCode || res?.status || err?.status,
-    errorCode:
-      res?.errorCode ||
-      res?.error_code ||
-      (typeof res?.detail === "object" ? res?.detail?.errorCode || res?.detail?.error_code : undefined) ||
-      res?.code,
-    message:
-      res?.message ||
-      (typeof res?.detail === "string" ? res.detail : res?.detail?.message) ||
-      err?.message,
+    statusCode,
+    errorCode,
+    message,
     validationErrors: res?.validationErrors || res?.errors,
     traceId: res?.traceId,
   }

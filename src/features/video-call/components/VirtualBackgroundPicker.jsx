@@ -65,11 +65,11 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Max size 3MB
-    if (file.size > 3 * 1024 * 1024) {
+    // Max size 5MB
+    if (file.size > 5 * 1024 * 1024) {
       toast.error(
         t?.rooms?.virtualBackground?.fileTooLarge ||
-          "File is too large. Maximum size is 3MB.",
+          "File is too large. Maximum size is 5MB.",
       )
       return
     }

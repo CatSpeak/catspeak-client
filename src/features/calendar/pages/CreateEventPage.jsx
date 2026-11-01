@@ -232,6 +232,11 @@ const CreateEventPage = () => {
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(cal.imageTooLarge || "Ảnh sự kiện không được vượt quá 10MB");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
       form.setThumbnailFile(file);
       const reader = new FileReader();
       reader.onload = (ev) => setImagePreview(ev.target.result);
@@ -463,7 +468,7 @@ const CreateEventPage = () => {
                         "Hỗ trợ định dạng png, jpeg và svg."}
                       <br />
                       <span className="text-xs">
-                        {cal.imageUploadSize || "Kích cỡ dưới 50mb"}
+                        {cal.imageUploadSize || "Kích cỡ dưới 10MB"}
                       </span>
                     </p>
                   </>

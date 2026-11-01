@@ -204,7 +204,7 @@ export default {
   eventDescOptional: "活动描述（可选）",
   descMaxChars: "内容不得超过 150 字",
   imageUploadHint: "支持 png、jpeg 和 svg 格式。",
-  imageUploadSize: "大小不超过 50mb",
+  imageUploadSize: "大小不超过 10MB",
   randomEventTitle: "随机活动名称",
   from: "从",
   createEventSuccess: "活动创建成功！",

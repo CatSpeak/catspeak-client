@@ -29,7 +29,7 @@ export default {
     description: "Watch short videos from our community.",
     loginRequired: "Please log in to upload a Reel.",
     videoFormatError: "Video format not supported.",
-    videoSizeError: "Video file size exceeds 50MB limit.",
+    videoSizeError: "Video file size exceeds 100MB limit.",
     coverFormatError: "Cover image format not supported.",
     coverSizeError: "Cover file size exceeds 5MB limit.",
     videoRequiredError: "A video file is required.",
@@ -92,7 +92,7 @@ export default {
     shareKnowledge:
       "Share knowledge and practice roleplay with the Cat Speak community.",
     formatLimit: "Format MP4, MOV",
-    sizeLimit: "Max 5 mins, 50MB",
+    sizeLimit: "Max 5 mins, 100MB",
     uploadReel: "Upload Reel",
     dragDropVideo: "Drag and drop your video here to upload",
     clickToBrowse: "or click to browse files",

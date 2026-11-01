@@ -14,6 +14,18 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
   const [file, setFile] = useState(null)
   const [error, setError] = useState(null)
 
+  const handleFileChange = (e) => {
+    const selected = e.target.files?.[0]
+    if (!selected) return
+    if (selected.size > 5 * 1024 * 1024) {
+      setError(t.billing?.reportIssueModal?.imageTooLarge || "Ảnh bằng chứng không được vượt quá 5MB.")
+      e.target.value = ""
+      return
+    }
+    setError(null)
+    setFile(selected)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!explanation.trim()) {
@@ -126,12 +138,15 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
                 <p className="text-xs text-[#7A7574] px-2 text-center truncate max-w-[300px]">
                   {file ? file.name : t.billing.reportIssueModal.uploadFileText}
                 </p>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  {t.billing?.reportIssueModal?.uploadHint || "Hỗ trợ JPG, PNG (tối đa 5MB)"}
+                </p>
               </div>
               <input
                 type="file"
                 className="hidden"
                 accept="image/*"
-                onChange={(e) => setFile(e.target.files[0])}
+                onChange={handleFileChange}
                 disabled={isLoading}
               />
             </label>

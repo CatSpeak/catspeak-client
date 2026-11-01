@@ -8,7 +8,7 @@ import { getFileMeta, getSafeFileUrl } from "../../utils/assignmentUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
-const MAX_MATERIAL_SIZE_BYTES = 15 * 1024 * 1024
+const MAX_MATERIAL_SIZE_BYTES = 50 * 1024 * 1024
 const MATERIAL_DOCUMENT_EXTENSIONS = new Set(["pdf", "docx", "xlsx"])
 const MATERIAL_IMAGE_EXTENSIONS = new Set([
   "bmp",
@@ -140,7 +140,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
     const file = selectedFiles[0]
     const validationError = validateMaterialFile(file)
     if (validationError === "size") {
-      toast.error(cm.toastFileTooLarge || cd.toastFileTooLarge || "The file must be 15MB or smaller.")
+      toast.error(cm.toastFileTooLarge || cd.toastFileTooLarge || "The file must be 50MB or smaller.")
       return
     }
     if (validationError === "type") {
@@ -456,7 +456,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                   id="material-upload-limits"
                   className="text-[10px] text-gray-400 font-semibold mt-1"
                 >
-                  {cm.supportedFiles || "Supports PDF, DOCX, XLSX, and images (max 15 MB)"}
+                  {cm.supportedFiles || "Supports PDF, DOCX, XLSX, and images (max 50 MB)"}
                 </span>
               </div>
               <input

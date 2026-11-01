@@ -977,7 +977,7 @@ export default {
     title: "背景",
     none: "なし",
     upload: "アップロード",
-    fileTooLarge: "ファイルが大きすぎます。最大サイズは3MBです。",
+    fileTooLarge: "ファイルが大きすぎます。最大サイズは5MBです。",
     uploadSuccess: "背景をアップロードして適用しました",
     uploadFailed: "背景のアップロードに失敗しました",
     setFailed: "仮想背景の設定に失敗しました",

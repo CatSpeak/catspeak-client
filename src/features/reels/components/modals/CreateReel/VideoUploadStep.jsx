@@ -49,7 +49,7 @@ export const VideoUploadStep = () => {
         <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-2 text-[10px] text-gray-400">
           <span>{t.catSpeak?.reels?.formatLimit || "MP4, WebM or MOV"}</span>
           <span>•</span>
-          <span>{t.catSpeak?.reels?.sizeLimit || "Max 5 mins, 150MB"}</span>
+          <span>{t.catSpeak?.reels?.sizeLimit || "Max 5 mins, 100MB"}</span>
         </div>
       </div>
 
