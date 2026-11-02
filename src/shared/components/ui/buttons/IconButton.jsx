@@ -30,33 +30,38 @@ const IconButton = ({
   }
 
   const variantClasses = {
-    primary: "bg-[#990011] group-hover/icon:bg-[#80000e] text-white",
-    secondary: "bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] text-gray-700 dark:text-gray-200 group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D] active:scale-95 transition-all duration-150",
+    primary:
+      "bg-[#990011] hover:bg-[#80000e] active:bg-[#6b000c] text-white border border-transparent transition-colors",
+    secondary:
+      "bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] text-gray-700 dark:text-gray-200 hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] transition-colors",
     white:
-      "bg-white border border-gray-200 text-gray-500 group-hover/icon:bg-gray-50 shadow-xs",
-    filled: "bg-primaryBg dark:bg-[#1A1A1A] dark:text-gray-200 group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D] active:scale-95 transition-all duration-150",
-    ghost: "bg-transparent group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D] text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white active:scale-95 transition-all duration-150",
+      "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 shadow-xs transition-colors",
+    filled:
+      "bg-primaryBg dark:bg-[#1A1A1A] dark:text-gray-200 hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] transition-colors",
+    ghost:
+      "bg-transparent hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white transition-colors",
     iconOnly:
-      "bg-transparent text-white/60 group-hover/icon:text-white transition-colors duration-150",
-    transparent: "bg-transparent group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D] active:scale-95 transition-all duration-150",
+      "bg-transparent text-white/60 hover:text-white transition-colors duration-150",
+    transparent:
+      "bg-transparent hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] transition-colors",
     overlay:
-      "bg-black/50 group-hover/icon:bg-black/80 text-white/70 group-hover/icon:text-white transition-all",
+      "bg-black/50 hover:bg-black/80 text-white/70 hover:text-white transition-all",
     outline:
-      "bg-transparent group-hover/icon:bg-primaryBg dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#e5e5e5] dark:group-active/icon:bg-[#3D3D3D] border-[1.5px] border-solid border-[#990011] dark:border-[#FF0033] text-[#990011] dark:text-[#FF0033]",
+      "bg-transparent hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-[#e5e5e5] dark:active:bg-[#3D3D3D] border-[1.5px] border-solid border-[#990011] dark:border-[#FF0033] text-[#990011] dark:text-[#FF0033] transition-colors",
     cathRed:
-      "bg-[#910B09] group-hover/icon:bg-[#7a0907] text-white transition-colors",
+      "bg-[#910B09] hover:bg-[#7a0907] text-white transition-colors",
     cathOutline:
-      "bg-white border border-[#910B09] text-[#910B09] group-hover/icon:bg-[#910B09] group-hover/icon:text-white transition-colors shadow-sm",
+      "bg-white border border-[#910B09] text-[#910B09] hover:bg-[#910B09] hover:text-white transition-colors shadow-sm",
     darkGhost:
-      "bg-transparent text-neutral-400 group-hover/icon:text-white group-hover/icon:bg-white/10 transition-colors",
+      "bg-transparent text-neutral-400 hover:text-white hover:bg-white/10 transition-colors",
     darkFilled:
-      "bg-neutral-800 text-white group-hover/icon:bg-neutral-700 transition-colors",
+      "bg-neutral-800 text-white hover:bg-neutral-700 transition-colors",
     danger:
-      "bg-red-600 text-white group-hover/icon:bg-red-700 shadow-md shadow-red-600/30 transition-colors",
+      "bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-600/30 transition-colors",
     success:
-      "bg-emerald-600 text-white group-hover/icon:bg-emerald-700 shadow-md shadow-emerald-600/30 transition-colors",
+      "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-600/30 transition-colors",
     darkMuted:
-      "bg-neutral-800/80 border border-white/10 text-neutral-400 group-hover/icon:text-white group-hover/icon:bg-neutral-700 transition-colors",
+      "bg-neutral-800/80 border border-white/10 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors",
   }
 
   const currentSize = sizeClasses[size] || sizeClasses.sm
@@ -66,11 +71,11 @@ const IconButton = ({
     <Component
       {...(Component === "button" ? { onClick, disabled, type } : {})}
       title={title}
-      className={`group/icon inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${currentSize.button} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation ${currentSize.button} ${className}`}
       {...props}
     >
       <span
-        className={`relative inline-flex items-center justify-center rounded-full transition-colors ${currentSize.inner} ${variantClasses[variant] || variantClasses.filled} ${innerClassName}`}
+        className={`relative inline-flex items-center justify-center rounded-full transition-colors duration-150 ${currentSize.inner} ${variantClasses[variant] || variantClasses.filled} ${innerClassName}`}
       >
         {children}
         {badge}

@@ -9,7 +9,7 @@ import React from "react"
 const MenuList = ({ children, className = "", ...props }) => {
   return (
     <div
-      className={`bg-white border border-border rounded-xl shadow-lg py-[2px] min-w-[140px] w-max max-w-xs flex flex-col ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] text-gray-900 dark:text-gray-100 rounded-xl shadow-lg py-[2px] min-w-[140px] w-max max-w-xs flex flex-col ${className}`}
       {...props}
     >
       {children}

@@ -1,5 +1,14 @@
 import React, { useEffect } from "react"
-import { Sparkles, Sun, Thermometer, Palette, Eye, Smile, Scissors, ZoomIn } from "lucide-react"
+import {
+  Sparkles,
+  Sun,
+  Thermometer,
+  Palette,
+  Eye,
+  Smile,
+  Scissors,
+  ZoomIn,
+} from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Slider from "@/shared/components/ui/Slider"
@@ -14,16 +23,25 @@ const readStoredBeautyOptions = () => {
   try {
     const raw = localStorage.getItem(BEAUTY_STORAGE_KEY)
     if (raw) return JSON.parse(raw)
-  } catch { /* ignore corrupt data */ }
+  } catch {
+    /* ignore corrupt data */
+  }
   return null
 }
 
-const BeautyPicker = ({ beautyOptions: propOptions, onChange, roomType: propRoomType }) => {
+const BeautyPicker = ({
+  beautyOptions: propOptions,
+  onChange,
+  roomType: propRoomType,
+  className = "px-2.5 py-2",
+}) => {
   const { t } = useLanguage()
   const ctx = useGlobalVideoCall()
   const { hasFeature, isPro } = usePlanFeatures()
 
-  const userHasProPlan = Boolean(isPro || hasFeature(PLAN_FEATURES.BEAUTY_FILTER))
+  const userHasProPlan = Boolean(
+    isPro || hasFeature(PLAN_FEATURES.BEAUTY_FILTER),
+  )
   const currentRoomType = propRoomType ?? ctx?.room?.roomType
 
   // Guard against unsupported room types or non-pro users in restricted rooms
@@ -65,45 +83,77 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange, roomType: propRoom
   const items = [
     {
       key: "smoothing",
-      icon: <Sparkles size={18} className="text-gray-500" />,
+      icon: (
+        <Sparkles
+          size={18}
+          className="text-gray-500 dark:text-[#AAAAAA] shrink-0"
+        />
+      ),
       label: t?.rooms?.beauty?.smoothing || "Skin Smoothing",
     },
     {
       key: "brightness",
-      icon: <Sun size={18} className="text-gray-500" />,
+      icon: (
+        <Sun size={18} className="text-gray-500 dark:text-[#AAAAAA] shrink-0" />
+      ),
       label: t?.rooms?.beauty?.brightness || "Brightness Boost",
     },
     {
       key: "warmth",
-      icon: <Thermometer size={18} className="text-gray-500" />,
+      icon: (
+        <Thermometer
+          size={18}
+          className="text-gray-500 dark:text-[#AAAAAA] shrink-0"
+        />
+      ),
       label: t?.rooms?.beauty?.warmth || "Warm Tone",
     },
     {
       key: "colorFilter",
-      icon: <Palette size={18} className="text-gray-500" />,
+      icon: (
+        <Palette
+          size={18}
+          className="text-gray-500 dark:text-[#AAAAAA] shrink-0"
+        />
+      ),
       label: t?.rooms?.beauty?.colorFilter || "Color Filter (Vivid)",
     },
     {
       key: "eyeBrighten",
-      icon: <Eye size={18} className="text-gray-500" />,
+      icon: (
+        <Eye size={18} className="text-gray-500 dark:text-[#AAAAAA] shrink-0" />
+      ),
       label: t?.rooms?.beauty?.eyeBrighten || "Eye Brighten",
     },
     {
       key: "teethWhiten",
-      icon: <Smile size={18} className="text-gray-500" />,
+      icon: (
+        <Smile
+          size={18}
+          className="text-gray-500 dark:text-[#AAAAAA] shrink-0"
+        />
+      ),
       label: t?.rooms?.beauty?.teethWhiten || "Teeth Whiten",
     },
     {
       key: "faceSlim",
-      icon: <Scissors size={18} className="text-gray-500" />,
+      icon: (
+        <Scissors
+          size={18}
+          className="text-gray-500 dark:text-[#AAAAAA] shrink-0"
+        />
+      ),
       label: t?.rooms?.beauty?.faceSlim || "Face Slim",
-      hint: t?.rooms?.beauty?.faceAwareHint || "Face-aware",
     },
     {
       key: "eyeEnlarge",
-      icon: <ZoomIn size={18} className="text-gray-500" />,
+      icon: (
+        <ZoomIn
+          size={18}
+          className="text-gray-500 dark:text-[#AAAAAA] shrink-0"
+        />
+      ),
       label: t?.rooms?.beauty?.eyeEnlarge || "Eye Enlarge",
-      hint: t?.rooms?.beauty?.faceAwareHint || "Face-aware",
     },
   ]
 
@@ -114,29 +164,29 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange, roomType: propRoom
     switch (ctx.processorStatus) {
       case "attached":
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300 border border-transparent dark:border-green-800/40">
+            <span className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400" />
             {t?.rooms?.beauty?.statusActive || "Active"}
           </span>
         )
       case "unsupported":
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300 border border-transparent dark:border-red-800/40">
+            <span className="w-2 h-2 rounded-full bg-red-500 dark:bg-red-400" />
             {t?.rooms?.beauty?.statusUnsupported || "Unsupported"}
           </span>
         )
       case "initializing":
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-            <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 dark:bg-yellow-950/50 text-yellow-800 dark:text-yellow-300 border border-transparent dark:border-yellow-800/40">
+            <span className="w-2 h-2 rounded-full bg-yellow-500 dark:bg-yellow-400 animate-pulse" />
             {t?.rooms?.beauty?.statusInitializing || "Initializing..."}
           </span>
         )
       case "error":
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
-            <span className="w-2 h-2 rounded-full bg-orange-500" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 dark:bg-orange-950/50 text-orange-800 dark:text-orange-300 border border-transparent dark:border-orange-800/40">
+            <span className="w-2 h-2 rounded-full bg-orange-500 dark:bg-orange-400" />
             {t?.rooms?.beauty?.statusError || "Error"}
           </span>
         )
@@ -146,32 +196,21 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange, roomType: propRoom
   }
 
   return (
-    <div className="flex flex-col w-full p-4">
+    <div className={`flex flex-col w-full ${className}`}>
       {/* ── Processor status diagnostic badge ── */}
       {ctx.processorStatus && ctx.processorStatus !== "idle" && (
         <div className="mb-3">{statusBadge()}</div>
       )}
 
-      <div className="text-sm font-medium text-gray-900 mb-4">
-        {t?.rooms?.beauty?.title || "Beauty"}
-      </div>
-      <div className="flex flex-col gap-5 pb-6">
-        {items.map(({ key, icon, label, hint }) => (
-          <div
-            key={key}
-            className="flex flex-col"
-          >
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-3 text-sm text-gray-700">
+      <div className="flex flex-col gap-4">
+        {items.map(({ key, icon, label }) => (
+          <div key={key} className="flex flex-col">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-neutral-200">
                 {icon}
                 <span>{label}</span>
-                {hint && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-600 font-medium">
-                    {hint}
-                  </span>
-                )}
               </div>
-              <span className="text-xs text-gray-400 w-8 text-right tabular-nums">
+              <span className="text-xs text-gray-400 dark:text-[#AAAAAA] w-8 text-right tabular-nums">
                 {beautyOptions[key] ?? 0}
               </span>
             </div>
@@ -180,6 +219,9 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange, roomType: propRoom
               max={100}
               value={beautyOptions[key] ?? 0}
               onChange={(e) => handleChange(key, Number(e.target.value))}
+              trackColor="bg-gray-200 dark:bg-neutral-700"
+              activeColor="bg-cath-red-700 dark:bg-cath-red-1000"
+              thumbColor="bg-cath-red-700 dark:bg-cath-red-1000"
             />
           </div>
         ))}

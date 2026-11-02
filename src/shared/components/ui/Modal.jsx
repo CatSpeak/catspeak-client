@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion" // eslint-disable-line n
 import { X } from "lucide-react"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
 const ModalContent = ({
   onClose,
@@ -163,14 +164,14 @@ const ModalContent = ({
             )}
 
             {showCloseButton && (
-              <button
+              <IconButton
                 type="button"
                 aria-label="Close dialog"
                 onClick={onClose}
-                className="flex shrink-0 items-center justify-center h-10 w-10 hover:bg-[#E5E5E5] dark:hover:bg-[#272727] text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white rounded-full transition-colors"
+                variant="ghost"
               >
                 <X />
-              </button>
+              </IconButton>
             )}
           </div>
         )}

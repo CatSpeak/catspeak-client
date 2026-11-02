@@ -211,7 +211,7 @@ const VideoPreview = ({
       </div>
 
       {/* Controls Overlay */}
-      <div className="flex flex-row min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
+      <div className="flex flex-row gap-2 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
         <IconButton
           onClick={onToggleMic}
           variant={micOn ? "primary" : "secondary"}

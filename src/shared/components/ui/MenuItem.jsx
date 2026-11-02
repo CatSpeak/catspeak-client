@@ -1,4 +1,5 @@
 import React from "react"
+import colors from "@/shared/utils/colors"
 
 /**
  * Shared reusable MenuItem component for select menus, dropdowns, and popovers.
@@ -19,32 +20,52 @@ const MenuItem = ({
   rightContent,
   isSelected = false,
   activeColor = "inherit",
-  hoverBg = "hover:bg-primaryBg group-hover:bg-primaryBg",
+  hoverBg = "hover:bg-primaryBg group-hover:bg-primaryBg dark:hover:bg-[#272727] dark:group-hover:bg-[#272727]",
   className = "",
   onClick,
   ...props
 }) => {
-  const textColor = isSelected ? activeColor : "inherit"
+  const isPrimaryRed =
+    activeColor === colors.primaryRed ||
+    activeColor === "#990011" ||
+    activeColor === "var(--cath-red-700)"
+
+  const customTextColor = isSelected
+    ? isPrimaryRed || activeColor === "inherit"
+      ? undefined
+      : activeColor
+    : undefined
   const Wrapper = onClick ? "button" : "div"
 
   return (
     <Wrapper
       type={onClick ? "button" : undefined}
       onClick={onClick}
-      className={`group w-full h-12 px-1 flex items-center focus:outline-none ${className}`}
+      className={`group w-full min-h-[48px] h-auto py-0.5 px-1 flex items-center focus:outline-none ${className}`}
+      title={typeof label === "string" ? label : undefined}
       {...props}
     >
       <div
-        className={`w-full px-3 flex items-center justify-between transition-colors rounded-xl text-left text-sm ${hoverBg} ${
-          isSelected ? "bg-[#F6F6F6]" : ""
-        } h-11`}
-        style={isSelected ? { color: textColor } : {}}
+        className={`w-full px-3 py-2 flex items-center justify-between transition-colors rounded-xl text-left text-sm ${hoverBg} ${
+          isSelected
+            ? `bg-[#F6F6F6] dark:bg-[#272727] ${
+                isPrimaryRed
+                  ? "text-cath-red-700 dark:text-red-400 font-medium"
+                  : ""
+              }`
+            : "text-gray-800 dark:text-gray-200"
+        } min-h-[44px]`}
+        style={customTextColor ? { color: customTextColor } : {}}
       >
         <div className="flex items-center gap-2 overflow-hidden flex-1">
           {icon && (
             <div
-              className="shrink-0 flex items-center justify-center"
-              style={isSelected ? { color: textColor } : {}}
+              className={`shrink-0 flex items-center justify-center ${
+                isSelected && isPrimaryRed
+                  ? "text-cath-red-700 dark:text-red-400"
+                  : ""
+              }`}
+              style={customTextColor ? { color: customTextColor } : {}}
             >
               {React.isValidElement(icon)
                 ? React.cloneElement(icon, {
@@ -54,15 +75,17 @@ const MenuItem = ({
             </div>
           )}
 
-          <div className="min-w-0 flex-1">
-            {label ? <span className="truncate">{label}</span> : children}
+          <div className="min-w-0 flex-1 leading-snug break-words">
+            {label ? <span className="line-clamp-2">{label}</span> : children}
           </div>
         </div>
 
         {(rightText !== undefined || rightContent) && (
           <div className="flex items-center shrink-0 ml-2">
             {rightText !== undefined && (
-              <span className="text-xs mr-2">{rightText}</span>
+              <span className="text-xs mr-2 text-secondary dark:text-[#AAAAAA]">
+                {rightText}
+              </span>
             )}
             {rightContent}
           </div>

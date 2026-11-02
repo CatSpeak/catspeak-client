@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useRef } from "react"
 
 /**
- * Reusable Tabs component that prevents layout shift on active bold states and supports optional icons.
+ * Reusable Tabs component supporting optional icons and horizontal drag/wheel scroll.
  * Hỗ trợ cuộn ngang không hiện scrollbar, kéo chuột (mouse drag-to-scroll) trên laptop,
  * cảm ứng vuốt mượt trên mobile, và tự động cuộn theo con lăn chuột.
  *
@@ -19,13 +19,18 @@ const Tabs = memo(
     activeTab,
     onChange,
     className = "",
-    activeClassName = "text-[#990011]",
-    inactiveClassName = "text-[#606060]",
+    activeClassName = "text-neutral-900 dark:text-white",
+    inactiveClassName = "text-neutral-500 group-hover:text-neutral-800 dark:text-neutral-400 dark:group-hover:text-neutral-100",
     fullWidth = true,
     height = "h-12",
   }) => {
-    const isResponsive = fullWidth === "responsive"
-    const isFull = fullWidth === true
+    const widthClass =
+      fullWidth === true
+        ? "flex-1"
+        : fullWidth === "responsive"
+          ? "flex-1 sm:flex-none"
+          : "flex-none"
+
     const scrollContainerRef = useRef(null)
     const activeTabRef = useRef(null)
 
@@ -107,11 +112,7 @@ const Tabs = memo(
         onMouseLeave={handleMouseUpOrLeave}
         onWheel={handleWheel}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        className={`w-full max-w-full min-w-0 flex items-center overflow-x-auto select-none touch-pan-x overscroll-x-contain cursor-grab active:cursor-grabbing border-b border-border scrollbar-none scrollbar-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-          !isFull && !isResponsive
-            ? "gap-1 sm:gap-2 px-1 sm:px-2 py-0.5"
-            : "py-0.5"
-        } ${className}`}
+        className={`w-full min-w-0 flex items-end overflow-x-auto select-none touch-pan-x overscroll-x-contain border-b border-border scrollbar-none ${className}`}
       >
         {tabs.map((tab) => {
           const tabKey = tab.id ?? tab.value
@@ -124,56 +125,37 @@ const Tabs = memo(
               ref={isActive ? activeTabRef : null}
               type="button"
               onClick={() => handleTabClick(tabKey)}
-              className={`h-11 sm:h-12 min-w-fit shrink-0 group relative flex items-center justify-center transition-all select-none ${
-                isFull
-                  ? "flex-1 px-3 sm:px-4"
-                  : isResponsive
-                    ? "flex-1 sm:flex-none px-3.5 sm:px-5"
-                    : "flex-none px-3.5 sm:px-5"
-              }`}
+              className={`${height} ${widthClass} -mb-px min-w-fit shrink-0 group relative flex items-center justify-center px-4 select-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/50 dark:focus-visible:ring-cath-red-1000/50 rounded-t-lg rounded-b-none transition-colors duration-100 ease-out hover:bg-neutral-500/10 dark:hover:bg-white/5 active:bg-neutral-500/20 dark:active:bg-white/10`}
             >
               <div
-                className={`relative h-full flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[15px] font-medium transition-colors whitespace-nowrap ${
+                className={`relative z-10 h-full flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[15px] font-medium transition-colors whitespace-nowrap ${
                   isActive ? activeClassName : inactiveClassName
                 }`}
               >
-                {Icon && <Icon size={18} className="hidden sm:block shrink-0" />}
+                {Icon && (
+                  <Icon size={18} className="hidden sm:block shrink-0" />
+                )}
 
-                <span className="relative flex flex-col items-center justify-center whitespace-nowrap">
-                  {/* Invisible bold text to reserve space and prevent layout shift */}
-                  <span
-                    className="invisible h-0 overflow-hidden font-bold whitespace-nowrap select-none"
-                    aria-hidden="true"
-                  >
-                    {tab.label}
-                  </span>
-                  <span
-                    className={`whitespace-nowrap transition-all ${
-                      isActive ? "font-bold text-[#990011]" : "font-medium"
-                    }`}
-                  >
-                    {tab.label}
-                  </span>
-                </span>
+                <span className="whitespace-nowrap">{tab.label}</span>
 
                 {tab.badge && (
                   <span
                     className={`min-w-4 h-4 px-1.5 rounded-full text-xs font-semibold flex items-center justify-center transition-colors shrink-0 ${
                       isActive
-                        ? "bg-[#990011] text-white"
-                        : "bg-gray-200 text-gray-700"
+                        ? "bg-cath-red-700 dark:bg-cath-red-1000 text-white"
+                        : "bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
                     }`}
                   >
                     {tab.badge}
                   </span>
                 )}
 
-                {/* Underline Indicator */}
+                {/* Underline Indicator - anchored to the bottom edge, resting directly on the container's border line */}
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${
+                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 pointer-events-none ${
                     isActive
-                      ? "bg-[#990011] scale-x-100"
-                      : "bg-[#990011]/30 scale-x-0 group-hover:scale-x-100 origin-center"
+                      ? "bg-cath-red-700 dark:bg-cath-red-1000 scale-x-100"
+                      : "bg-cath-red-700/30 dark:bg-cath-red-1000/30 scale-x-0 group-hover:scale-x-100 origin-center"
                   }`}
                 />
               </div>

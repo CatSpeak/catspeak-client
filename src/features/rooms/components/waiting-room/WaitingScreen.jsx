@@ -75,12 +75,13 @@ const WaitingScreen = ({
       maxWidthClass="max-w-[520px] lg:max-w-6xl"
       contentClassName="max-md:min-h-0"
       cardClassName="h-full md:h-auto"
+      rounded="rounded-3xl"
     >
       {webview.isWebView && (
-        <div className="mb-4 w-full rounded-lg bg-amber-500/15 border border-amber-500/30 p-3 text-amber-200 text-sm flex items-start gap-2.5 shadow-sm">
+        <div className="mb-4 w-full rounded-lg bg-amber-500/15 border border-amber-500/30 p-3 text-amber-900 dark:text-amber-200 text-sm flex items-start gap-2.5 shadow-sm">
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold text-amber-300">
+            <p className="font-semibold text-amber-950 dark:text-amber-300">
               {t?.rooms?.waitingScreen?.webViewWarning ??
                 "You are in an in-app browser. Please tap '...' and select 'Open in Safari' to use your microphone and camera."}
             </p>
@@ -155,7 +156,7 @@ const WaitingScreen = ({
             </div>
 
             {isFull && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-red-600 dark:text-red-400">
                 {t.rooms.waitingScreen.roomFull} ({effectiveParticipantCount}/
                 {maxParticipants})
               </p>

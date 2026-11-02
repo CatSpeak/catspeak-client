@@ -10,7 +10,11 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
   const count = participantCount ?? humanParticipants.length
 
   if (count === 0) {
-    return <p className="text-[#7A7574]">{t.rooms.waitingScreen.noOneHere}</p>
+    return (
+      <p className="text-[#7A7574] dark:text-[#AAAAAA]">
+        {t.rooms.waitingScreen.noOneHere}
+      </p>
+    )
   }
 
   const MAX_VISIBLE = 5
@@ -31,13 +35,13 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
               src={p.avatarUrl}
               name={p.username || "User"}
               size={44}
-              className="border-2 border-white shadow-sm"
+              className="border-2 border-white dark:border-[#1A1A1A] shadow-sm"
             />
           </div>
         ))}
         {remainingCount > 0 && (
           <div
-            className={`z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-semibold text-gray-600 shadow-sm ${visibleParticipants.length > 0 ? "-ml-3" : ""}`}
+            className={`z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white dark:border-[#1A1A1A] bg-gray-100 dark:bg-neutral-800 text-xs font-semibold text-gray-600 dark:text-gray-300 shadow-sm ${visibleParticipants.length > 0 ? "-ml-3" : ""}`}
           >
             +{remainingCount}
           </div>
@@ -45,7 +49,7 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
       </div>
 
       {/* Meta Text */}
-      <p className="text-sm text-secondary">
+      <p className="text-sm text-secondary dark:text-[#AAAAAA]">
         <span>{count}</span> {t.rooms.waitingScreen.isHere}
       </p>
     </div>

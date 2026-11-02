@@ -7,7 +7,6 @@ import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import MenuItem from "@/shared/components/ui/MenuItem"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 
 const removeDiacritics = (str) => {
@@ -33,6 +32,7 @@ const Dropdown = ({
   className = "",
   dropdownClassName,
   fullWidth = false,
+  fitContent = false,
   triggerClassName = "",
   roundedClass = "rounded-full",
   align = "left", // 'left' | 'right' | 'center'
@@ -58,6 +58,8 @@ const Dropdown = ({
 
   const isMultiple = mode === "multiple"
   const isSearchActive = enableSearch || Boolean(handleSearch)
+  const hasOptions = options.length > 0 || Boolean(handleSearch) || loading
+  const isInteractive = !disabled && hasOptions
 
   // Normalize selected values for multiple and single mode
   const selectedValues = useMemo(() => {
@@ -138,13 +140,17 @@ const Dropdown = ({
         const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow
 
         // Check horizontal clipping (assume ~260px width default)
-        const forceAlignRight = rect.left + 260 > window.innerWidth && rect.right >= 260
+        const forceAlignRight =
+          rect.left + 260 > window.innerWidth && rect.right >= 260
         const forceAlignLeft = rect.right < 260 || rect.left < 50
 
         const newTop = rect.top + window.scrollY
         const winWidth = typeof window !== "undefined" ? window.innerWidth : 360
         const newWidth = Math.min(rect.width, winWidth - 16)
-        const newLeft = Math.max(8, Math.min(rect.left + window.scrollX, winWidth - newWidth - 8))
+        const newLeft = Math.max(
+          8,
+          Math.min(rect.left + window.scrollX, winWidth - newWidth - 8),
+        )
 
         setPortalCoords((prev) => {
           if (
@@ -262,34 +268,45 @@ const Dropdown = ({
 
   // Resolved translations
   const resolvedSearchPlaceholder =
-    searchPlaceholder ||
-    t?.search ||
-    t?.common?.search ||
-    "Search..."
+    searchPlaceholder || t?.search || t?.common?.search || "Search..."
 
   const resolvedNoOptionsFound =
-    t?.noOptionsFound ||
-    t?.common?.noOptionsFound ||
-    "No options found"
+    t?.noOptionsFound || t?.common?.noOptionsFound || "No options found"
 
-  const resolvedLoading =
-    t?.loading ||
-    t?.common?.loading ||
-    "Loading..."
+  const resolvedLoading = t?.loading || t?.common?.loading || "Loading..."
 
   // Default trigger content based on single/multiple mode
   const renderDefaultTriggerContent = () => {
     if (!isMultiple) {
+      const rawLabel = selectedOption ? selectedOption.label : placeholder
+      const displayLabel =
+        typeof rawLabel === "string" && !selectedOption
+          ? rawLabel.replace(/\.+$/, "")
+          : rawLabel
       return (
-        <span className="flex-1 text-left truncate min-w-0">
-          {selectedOption ? selectedOption.label : placeholder}
+        <span
+          title={typeof displayLabel === "string" ? displayLabel : undefined}
+          className={`text-left truncate min-w-0 ${
+            fitContent ? "max-w-[280px]" : "flex-1"
+          } ${
+            selectedOption
+              ? "text-gray-900 dark:text-white"
+              : "text-gray-500 dark:text-[#AAAAAA]"
+          }`}
+        >
+          {displayLabel}
         </span>
       )
     }
 
     if (selectedValues.length === 0) {
       return (
-        <span className="flex-1 text-left truncate min-w-0">
+        <span
+          title={typeof placeholder === "string" ? placeholder : undefined}
+          className={`text-left truncate min-w-0 ${
+            fitContent ? "max-w-[280px]" : "flex-1"
+          } text-gray-500 dark:text-[#AAAAAA]`}
+        >
           {placeholder}
         </span>
       )
@@ -300,49 +317,67 @@ const Dropdown = ({
 
     if (selectedValues.length === 1) {
       return (
-        <span className="flex-1 text-left truncate min-w-0">
+        <span
+          title={typeof firstLabel === "string" ? firstLabel : undefined}
+          className={`text-left truncate min-w-0 ${
+            fitContent ? "max-w-[280px]" : "flex-1"
+          } text-gray-900 dark:text-white`}
+        >
           {firstLabel}
         </span>
       )
     }
 
     return (
-      <span className="flex-1 text-left truncate min-w-0 flex items-center gap-1.5">
+      <span
+        title={typeof firstLabel === "string" ? firstLabel : undefined}
+        className={`text-left truncate min-w-0 ${
+          fitContent ? "max-w-[280px]" : "flex-1"
+        } flex items-center gap-1.5 text-gray-900 dark:text-white`}
+      >
         <span className="truncate">{firstLabel}</span>
-        <span className="shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-[#990011]">
+        <span className="shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-[#990011] dark:bg-red-950/60 dark:text-red-400">
           +{selectedValues.length - 1}
         </span>
       </span>
     )
   }
 
+  const startIconNode = !isMultiple
+    ? selectedOption?.icon
+    : selectedValues.length === 1
+      ? options.find((opt) => opt.value === selectedValues[0])?.icon
+      : undefined
+
   const defaultTrigger = (
-    <PillButton
+    <button
       type="button"
-      onClick={() => !disabled && setIsOpen(!isOpen)}
-      disabled={disabled}
-      variant="secondary"
-      roundedClass={roundedClass}
-      startIcon={
-        !isMultiple
-          ? selectedOption?.icon
-          : selectedValues.length === 1
-            ? options.find((opt) => opt.value === selectedValues[0])?.icon
-            : undefined
-      }
-      endIcon={
-        <ChevronDown
-          className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-            }`}
-        />
-      }
+      onClick={() => isInteractive && setIsOpen(!isOpen)}
+      disabled={!isInteractive}
       aria-label={ariaLabel}
       aria-haspopup="listbox"
       aria-expanded={isOpen}
-      className={`w-full focus-visible:ring-2 focus-visible:ring-cath-red-700/40 focus-visible:ring-offset-1 ${triggerClassName}`}
+      className={`h-10 px-4 ${roundedClass} border text-sm font-medium transition-colors duration-150 flex items-center justify-between gap-2 whitespace-nowrap select-none touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 focus-visible:ring-offset-1 ${
+        fitContent ? "w-auto min-w-fit max-w-full inline-flex" : "w-full"
+      } bg-white dark:bg-[#272727] text-gray-900 dark:text-[#AAAAAA] border-[#e5e5e5] dark:border-[#3F3F3F] ${
+        isInteractive
+          ? "cursor-pointer hover:bg-primaryBg dark:hover:bg-[#3D3D3D] hover:text-black dark:hover:text-white active:bg-[#e0e0e0] dark:active:bg-[#333333]"
+          : "opacity-50 cursor-not-allowed pointer-events-none"
+      } ${triggerClassName}`}
     >
+      {startIconNode && (
+        <span className="flex items-center justify-center shrink-0">
+          {startIconNode}
+        </span>
+      )}
       {renderDefaultTriggerContent()}
-    </PillButton>
+      <ChevronDown
+        size={20}
+        className={`shrink-0 transition-transform duration-200 ${
+          !hasOptions ? "opacity-30" : "text-gray-500 dark:text-[#AAAAAA]"
+        } ${isOpen ? "rotate-180" : ""}`}
+      />
+    </button>
   )
 
   const alignClass = portalCoords?.forceAlignLeft
@@ -360,26 +395,35 @@ const Dropdown = ({
       ? dropdownClassName
       : fullWidth
         ? "w-full"
-        : "min-w-[260px] max-w-[260px]"
+        : fitContent
+          ? "w-max min-w-[200px] max-w-[min(480px,calc(100vw-32px))]"
+          : "min-w-[260px] max-w-[260px]"
 
   return (
-    <div className={`relative ${fullWidth ? "w-full" : ""} ${className}`} ref={dropdownRef}>
+    <div
+      className={`relative ${
+        fullWidth ? "w-full" : fitContent ? "w-fit" : ""
+      } ${className}`}
+      ref={dropdownRef}
+    >
       {trigger
         ? typeof trigger === "function"
           ? trigger(
-            isOpen,
-            isMultiple ? selectedOptionsList : selectedOption,
-            () => !disabled && setIsOpen(!isOpen),
-            {
-              isMultiple,
-              selectedValues,
-              selectedOptions: selectedOptionsList,
-            },
-          )
+              isOpen,
+              isMultiple ? selectedOptionsList : selectedOption,
+              () => isInteractive && setIsOpen(!isOpen),
+              {
+                isMultiple,
+                selectedValues,
+                selectedOptions: selectedOptionsList,
+                hasOptions,
+                disabled: !isInteractive,
+              },
+            )
           : React.cloneElement(trigger, {
-            onClick: () => !disabled && setIsOpen(!isOpen),
-            disabled,
-          })
+              onClick: () => isInteractive && setIsOpen(!isOpen),
+              disabled: !isInteractive,
+            })
         : defaultTrigger}
 
       {typeof document !== "undefined" &&
@@ -406,29 +450,33 @@ const Dropdown = ({
                   <FluentAnimation
                     direction={portalCoords.flipUp ? "up" : "down"}
                     exit={true}
-                    className={`absolute ${portalCoords.flipUp
-                      ? "bottom-full mb-2 origin-bottom"
-                      : "top-full mt-2"
-                      } flex flex-col pointer-events-auto shadow-lg border border-border rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${resolvedDropdownClassName}`}
+                    className={`absolute ${
+                      portalCoords.flipUp
+                        ? "bottom-full mb-1 origin-bottom"
+                        : "top-full mt-1"
+                    } flex flex-col pointer-events-auto shadow-lg border border-border dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-gray-100 ${maxHeightClass} overflow-hidden ${alignClass} ${resolvedDropdownClassName}`}
                     data-dropdown-portal="true"
                   >
                     {isSearchActive && (
-                      <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-border">
+                      <div className="px-3 py-2 shrink-0 bg-white dark:bg-[#1A1A1A] z-10 border-b border-border dark:border-[#3F3F3F]">
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             {loading && handleSearch ? (
                               <Loader2
                                 size={14}
-                                className="text-gray-400 animate-spin"
+                                className="text-gray-400 dark:text-[#AAAAAA] animate-spin"
                               />
                             ) : (
-                              <Search size={14} className="text-gray-400" />
+                              <Search
+                                size={14}
+                                className="text-gray-400 dark:text-[#AAAAAA]"
+                              />
                             )}
                           </div>
                           <input
                             ref={searchInputRef}
                             type="text"
-                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-border rounded-md focus:outline-none focus:border-cath-red-700"
+                            className="w-full pl-9 pr-3 py-1.5 text-sm bg-white dark:bg-[#272727] text-gray-900 dark:text-white border border-border dark:border-[#3F3F3F] rounded-md focus:outline-none focus:border-cath-red-700 dark:focus:border-cath-red-700 placeholder:text-gray-400 dark:placeholder:text-[#AAAAAA]"
                             placeholder={resolvedSearchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -440,10 +488,10 @@ const Dropdown = ({
 
                     <div className="flex-1 py-[2px] overflow-y-auto overflow-x-hidden">
                       {loading ? (
-                        <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500">
+                        <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500 dark:text-[#AAAAAA]">
                           <Loader2
                             size={16}
-                            className="animate-spin text-[#990011]"
+                            className="animate-spin text-[#990011] dark:text-red-400"
                           />
                           <span>{resolvedLoading}</span>
                         </div>
@@ -453,7 +501,7 @@ const Dropdown = ({
                             return (
                               <hr
                                 key={`divider-${idx}`}
-                                className="border-t border-gray-200 my-1 w-full"
+                                className="border-t border-gray-200 dark:border-[#3F3F3F] my-1 w-full"
                               />
                             )
                           }
@@ -472,7 +520,7 @@ const Dropdown = ({
                               type="button"
                               disabled={option.disabled}
                               onClick={() => handleSelect(option)}
-                              className="group w-full flex items-center focus:outline-none px-1 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="group w-full flex items-center focus:outline-none px-1 h-12 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:text-gray-200 hover:bg-primaryBg dark:hover:bg-[#272727]"
                             >
                               {renderOption(option, isSelected, {
                                 isMultiple,
@@ -494,10 +542,11 @@ const Dropdown = ({
                                 isMultiple ? (
                                   <div className="flex items-center ml-2">
                                     <div
-                                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${isSelected
-                                        ? "bg-[#990011] border-[#990011] text-white"
-                                        : "border-gray-300 bg-white group-hover:border-gray-400"
-                                        }`}
+                                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
+                                        isSelected
+                                          ? "bg-[#990011] border-[#990011] text-white"
+                                          : "border-gray-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] group-hover:border-gray-400 dark:group-hover:border-[#555555]"
+                                      }`}
                                     >
                                       {isSelected && (
                                         <Check size={12} strokeWidth={3} />
@@ -517,7 +566,7 @@ const Dropdown = ({
                           )
                         })
                       ) : (
-                        <div className="px-3 py-6 text-sm text-center text-gray-500">
+                        <div className="px-3 py-6 text-sm text-center text-gray-500 dark:text-[#AAAAAA]">
                           {resolvedNoOptionsFound}
                         </div>
                       )}

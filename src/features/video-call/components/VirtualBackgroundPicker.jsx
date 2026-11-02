@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { Upload, Check } from "lucide-react"
+import { Upload, Ban } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -10,7 +10,17 @@ import {
   useSetActiveBackgroundMutation,
 } from "@/store/api/userApi"
 
-const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
+const TILE_BASE =
+  "relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-colors duration-150 outline-none"
+
+const TILE_DISABLED = "opacity-70 cursor-not-allowed pointer-events-none"
+
+const TILE_SELECTED = "border-cath-red-700 dark:border-cath-red-1000"
+
+const TILE_UNSELECTED =
+  "border-border hover:border-neutral-400 dark:hover:border-neutral-500"
+
+const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
   const { t } = useLanguage()
 
   // Fetch sample backgrounds
@@ -21,9 +31,12 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
   // Fetch current active background — handle both single-level and
   // double-nested (data.data) shapes produced by baseApi normalization, and
   // force refetch on mount so re-entering waiting room always reflects server.
-  const { data: currentBackgroundResponse } = useGetCurrentBackgroundQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  })
+  const { data: currentBackgroundResponse } = useGetCurrentBackgroundQuery(
+    undefined,
+    {
+      refetchOnMountOrArgChange: true,
+    },
+  )
   const activeUrl =
     currentBackgroundResponse?.activeBackgroundUrl ??
     currentBackgroundResponse?.data?.activeBackgroundUrl ??
@@ -82,11 +95,15 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
       await uploadCustom(formData).unwrap()
 
       const res = await getCurrent().unwrap()
-      const uploadedUrl = res?.customUploadedBackgroundUrl ?? res?.data?.customUploadedBackgroundUrl ?? null
+      const uploadedUrl =
+        res?.customUploadedBackgroundUrl ??
+        res?.data?.customUploadedBackgroundUrl ??
+        null
 
       if (uploadedUrl) {
         // Ensure it's active
-        const resActive = res?.activeBackgroundUrl ?? res?.data?.activeBackgroundUrl ?? null
+        const resActive =
+          res?.activeBackgroundUrl ?? res?.data?.activeBackgroundUrl ?? null
         if (resActive !== uploadedUrl) {
           await setActive({ backgroundUrl: uploadedUrl }).unwrap()
         }
@@ -114,145 +131,113 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
   }
 
   return (
-    <div className={`flex flex-col w-full gap-6 ${className}`}>
-      {/* Backgrounds */}
-      <div>
-        <div className="text-sm font-medium text-gray-900 mb-3">
-          {t?.rooms?.virtualBackground?.title || "Backgrounds"}
+    <div className={`flex flex-col w-full ${className}`}>
+      <div className="grid grid-cols-2 gap-2 auto-rows-max content-start items-start">
+        {/* None Option */}
+        <div
+          onClick={() => handleSelect(null)}
+          className={`${TILE_BASE} group block bg-neutral-50 dark:bg-neutral-800/40 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 ${
+            selectedUrl === null
+              ? TILE_SELECTED
+              : `border-dashed ${TILE_UNSELECTED} active:bg-neutral-200 dark:active:bg-neutral-700/80`
+          } ${isSettingActive || isUploading ? TILE_DISABLED : ""}`}
+        >
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <Ban
+              size={20}
+              className="text-neutral-400 dark:text-neutral-400 mb-2 group-hover:text-neutral-600 dark:group-hover:text-neutral-200 transition-colors"
+            />
+            <span className="text-xs text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-200 font-medium transition-colors">
+              {t?.rooms?.virtualBackground?.none || "None"}
+            </span>
+          </div>
         </div>
-        <div className="grid grid-cols-2 min-[426px]:grid-cols-3 md:grid-cols-3 gap-3 auto-rows-max content-start items-start pb-2 border rounded-2xl md:p-4 p-3">
-          {/* None Option */}
+
+        {/* Upload Option */}
+        <label
+          className={`${TILE_BASE} border-dashed group block bg-neutral-50 dark:bg-neutral-800/40 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 ${TILE_UNSELECTED} active:bg-neutral-200 dark:active:bg-neutral-700/80 ${
+            isUploading ? TILE_DISABLED : ""
+          }`}
+        >
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            {isUploading ? (
+              <div className="flex flex-col items-center">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-cath-red-700 border-t-transparent mb-1"></div>
+              </div>
+            ) : (
+              <>
+                <Upload
+                  size={20}
+                  className="text-neutral-400 dark:text-neutral-400 mb-2 group-hover:text-neutral-600 dark:group-hover:text-neutral-200 transition-colors"
+                />
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-200 font-medium transition-colors">
+                  {t?.rooms?.virtualBackground?.upload || "Upload"}
+                </span>
+              </>
+            )}
+          </div>
+          <input
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp"
+            className="hidden"
+            onChange={handleFileUpload}
+            disabled={isUploading}
+          />
+        </label>
+
+        {/* Custom Uploaded Background */}
+        {customUploadedUrl && (
           <div
-            onClick={() => handleSelect(null)}
-            className={`relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 block ${
-              selectedUrl === null ? "border-cath-red-700" : "border-border"
-            } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
+            onClick={() => handleSelect(customUploadedUrl)}
+            className={`${TILE_BASE} group block bg-neutral-100 dark:bg-neutral-800 ${
+              selectedUrl === customUploadedUrl
+                ? TILE_SELECTED
+                : TILE_UNSELECTED
+            } ${isSettingActive || isUploading ? TILE_DISABLED : ""}`}
           >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-gray-500 font-medium text-sm">
-                {t?.rooms?.virtualBackground?.none || "None"}
-              </span>
-              {selectedUrl === null && (
-                <div className="absolute top-1.5 right-1.5 bg-cath-red-700 text-white rounded-full p-0.5 shadow-sm">
-                  <Check size={12} />
-                </div>
-              )}
+            <div className="absolute inset-0">
+              <img
+                src={customUploadedUrl}
+                alt="Custom"
+                className="w-full h-full object-cover transition-[filter] duration-100 ease-out group-hover:brightness-90 group-active:brightness-75"
+              />
             </div>
           </div>
+        )}
 
-          {/* Upload Option */}
-          <label
-            className={`relative w-full cursor-pointer rounded-lg border border-dashed aspect-video overflow-hidden transition-all duration-200 block bg-gray-50 hover:bg-gray-100 ${
-              isUploading ? "border-border" : "border-border"
-            }`}
-          >
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              {isUploading ? (
-                <div className="flex flex-col items-center">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-cath-red-700 border-t-transparent mb-1"></div>
-                </div>
-              ) : (
-                <>
-                  <Upload className="text-gray-400 mb-1" size={20} />
-                  <span className="text-[10px] text-gray-500">
-                    {t?.rooms?.virtualBackground?.upload || "Upload"}
-                  </span>
-                </>
-              )}
+        {/* Sample Backgrounds */}
+        {isSamplesLoading ? (
+          <div className="col-span-full flex h-24 items-center justify-center text-neutral-400 dark:text-neutral-500 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-cath-red-700 border-t-transparent" />
+              <span>
+                {t?.rooms?.virtualBackground?.loading || "Loading..."}
+              </span>
             </div>
-            <input
-              type="file"
-              accept=".jpg,.jpeg,.png,.webp"
-              className="hidden"
-              onChange={handleFileUpload}
-              disabled={isUploading}
-            />
-          </label>
-
-          {/* Custom Uploaded Background */}
-          {customUploadedUrl && (
+          </div>
+        ) : (
+          Array.isArray(samples) &&
+          samples.map((url, i) => (
             <div
-              onClick={() => handleSelect(customUploadedUrl)}
-              className={`relative  w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 group block ${
-                selectedUrl === customUploadedUrl
-                  ? "border-cath-red-700"
-                  : "border-border"
-              } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
+              key={url || i}
+              onClick={() => handleSelect(url)}
+              className={`${TILE_BASE} group block bg-neutral-100 dark:bg-neutral-800 ${
+                selectedUrl === url ? TILE_SELECTED : TILE_UNSELECTED
+              } ${isSettingActive || isUploading ? TILE_DISABLED : ""}`}
             >
               <div className="absolute inset-0">
                 <img
-                  src={customUploadedUrl}
-                  alt="Custom"
-                  className="w-full h-full object-cover transition-transform duration-300"
+                  src={url}
+                  alt={`Background ${i + 1}`}
+                  className="w-full h-full object-cover transition-[filter] duration-100 ease-out group-hover:brightness-90 group-active:brightness-75"
                 />
-                {selectedUrl === customUploadedUrl && (
-                  <div className="absolute top-1.5 right-1.5 bg-cath-red-700 text-white rounded-full p-0.5 shadow-sm">
-                    <Check size={12} />
-                  </div>
-                )}
               </div>
             </div>
-          )}
-
-          {/* Sample Backgrounds */}
-          {isSamplesLoading ? (
-            <div className="col-span-full flex h-24 items-center justify-center text-gray-400 text-xs">
-              {t?.rooms?.virtualBackground?.loading || "Loading..."}
-            </div>
-          ) : (
-            Array.isArray(samples) &&
-            samples.map((url, i) => (
-              <div
-                key={url || i}
-                onClick={() => handleSelect(url)}
-                className={`relative  w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 group block ${
-                  selectedUrl === url
-                    ? "border-cath-red-700"
-                    : "border-border"
-                } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
-              >
-                <div className="absolute inset-0">
-                  <img
-                    src={url}
-                    alt={`Background ${i + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-300"
-                  />
-                  {selectedUrl === url && (
-                    <div className="absolute top-1.5 right-1.5 bg-cath-red-700 text-white rounded-full p-0.5 shadow-sm">
-                      <Check size={12} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+          ))
+        )}
       </div>
-
-      {/* Topics */}
-      {/* <div>
-        <div className="text-sm font-medium text-gray-900 mb-3">
-          {t?.rooms?.topicBackground?.title || "Backgrounds"}
-        </div>
-        <div className="grid grid-cols-3 min-[426px]:grid-cols-3 md:grid-cols-3 gap-3 auto-rows-max content-start items-start pb-2 border rounded-2xl md:p-4 p-3">
-          <div
-            className={`relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 block`}
-          >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-gray-500 font-medium text-sm">
-                {t?.rooms?.topicBackground?.none || "None"}
-              </span>
-              {selectedUrl === null && (
-                <div className="absolute top-1.5 right-1.5 bg-cath-red-700 text-white rounded-full p-0.5 shadow-sm">
-                  <Check size={12} />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div> */}
     </div>
-  );
-};
+  )
+}
 
-export default VirtualBackgroundPicker;
+export default VirtualBackgroundPicker

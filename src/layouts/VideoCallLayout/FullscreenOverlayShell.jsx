@@ -10,6 +10,7 @@ const FullscreenOverlayShell = ({
   maxWidthClass = "max-w-[420px]",
   cardClassName = "",
   contentClassName = "",
+  rounded = "rounded-3xl",
   children,
 }) => {
   return (
@@ -23,13 +24,13 @@ const FullscreenOverlayShell = ({
     >
       <div className="fixed inset-0 bg-[#111111]/40 blur-sm" />
 
-      <div className="relative z-50 w-full p-4 flex justify-start shrink-0">
+      <div className="relative z-50 w-full p-4 flex justify-start items-center shrink-0">
         <PillButton
           variant="transparent"
           onClick={onBack}
           startIcon={
             <ArrowLeft
-              size={16}
+              size={20}
               className="transition-transform group-hover/pill:-translate-x-1"
             />
           }
@@ -42,6 +43,7 @@ const FullscreenOverlayShell = ({
         className={`relative z-10 flex flex-1 w-full flex-col items-center justify-center px-4 pb-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] ${contentClassName}`}
       >
         <FluentCard
+          rounded={rounded}
           className={`shadow-2xl w-full ${maxWidthClass} items-center my-auto ${cardClassName}`}
         >
           {children}

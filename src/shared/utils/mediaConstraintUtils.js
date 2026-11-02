@@ -74,7 +74,7 @@ export const mapDevicesToOptions = (
     icon: icon,
   }))
 
-  if (isAudio) {
+  if (isAudio && deviceList.length > 0) {
     options.unshift({
       value: "",
       label: defaultLabel,

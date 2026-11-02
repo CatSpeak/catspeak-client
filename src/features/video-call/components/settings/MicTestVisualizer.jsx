@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Play, Square } from "lucide-react"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 import ProgressBar from "@/shared/components/ui/ProgressBar"
 import { buildAudioConstraint } from "@/shared/utils/mediaConstraintUtils"
 
-const DETECT_THRESHOLD = 8
 const CLIP_THRESHOLD = 85
 
 const MicTestVisualizer = ({
@@ -19,17 +18,13 @@ const MicTestVisualizer = ({
   detectedLabel,
 }) => {
   const [volumeLevel, setVolumeLevel] = useState(0) // 0 to 100%
-  const [hasDetected, setHasDetected] = useState(false)
   const audioContextRef = useRef(null)
   const analyserRef = useRef(null)
   const animFrameRef = useRef(null)
-  const detectedRef = useRef(false)
 
   useEffect(() => {
     if (!testMic) {
       setVolumeLevel(0)
-      setHasDetected(false)
-      detectedRef.current = false
       if (audioContextRef.current) {
         audioContextRef.current.close().catch(() => {})
         audioContextRef.current = null
@@ -93,10 +88,6 @@ const MicTestVisualizer = ({
           const pct = Math.min(100, Math.max(0, Math.round(rms * 280)))
 
           setVolumeLevel(pct)
-          if (pct > DETECT_THRESHOLD && !detectedRef.current) {
-            detectedRef.current = true
-            setHasDetected(true)
-          }
           animFrameRef.current = requestAnimationFrame(updateMeter)
         }
 
@@ -123,69 +114,44 @@ const MicTestVisualizer = ({
     }
   }, [testMic, stream, selectedMic])
 
-  const barColor = volumeLevel > CLIP_THRESHOLD
-    ? "bg-red-500"
-    : "bg-emerald-500"
-
-  const statusText = testMic
-    ? hasDetected
-      ? detectedLabel || "Audio detected"
-      : listeningLabel || "Say a few words..."
-    : hint || "Press Test mic and say a few words"
+  const barColor =
+    volumeLevel > CLIP_THRESHOLD ? "bg-red-500" : "bg-emerald-500"
 
   return (
-    <div className="rounded-xl border border-[#e5e5e5] bg-primaryBg/60 p-3">
-      <div className="flex items-center gap-3">
-        <PillButton
+    <div className="flex flex-col gap-1">
+      <span className="truncate text-xs text-neutral-700 dark:text-neutral-200">
+        {label}
+      </span>
+
+      <div className="h-[56px] flex items-center gap-4">
+        <IconButton
           type="button"
           onClick={onToggleTest}
-          variant={testMic ? "secondary" : "primary"}
-          textColor={testMic ? "#990011" : undefined}
-          startIcon={
-            testMic ? (
-              <Square size={12} className="fill-current" aria-hidden="true" />
-            ) : (
-              <Play size={14} className="fill-current" aria-hidden="true" />
-            )
-          }
-          className="shrink-0 min-w-[132px]"
+          variant="primary"
+          title={testMic ? stopLabel : label}
+          aria-label={testMic ? stopLabel : label}
+          className="shrink-0"
         >
-          {testMic ? stopLabel : label}
-        </PillButton>
+          {testMic ? (
+            <Square className="text-white" aria-hidden="true" />
+          ) : (
+            <Play className="text-white" aria-hidden="true" />
+          )}
+        </IconButton>
 
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <span
-              role="status"
-              aria-live="polite"
-              className={`truncate text-[11px] font-medium ${
-                testMic && hasDetected
-                  ? "text-emerald-600"
-                  : "text-neutral-500"
-              }`}
-            >
-              {statusText}
-            </span>
-            {testMic && (
-              <span className="shrink-0 text-[11px] font-semibold tabular-nums text-neutral-700">
-                {volumeLevel}%
-              </span>
-            )}
-          </div>
-          <div
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={testMic ? volumeLevel : 0}
-            aria-label={label}
-          >
-            <ProgressBar
-              progress={testMic ? volumeLevel : 0}
-              heightClass="h-2"
-              colorClass={`${barColor} transition-all !duration-75 ease-out`}
-              trackColorClass="bg-neutral-200"
-            />
-          </div>
+        <div
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={testMic ? volumeLevel : 0}
+          aria-label={label}
+          className="min-w-0 flex-1"
+        >
+          <ProgressBar
+            progress={testMic ? volumeLevel : 0}
+            colorClass={`${barColor} transition-all !duration-75 ease-out`}
+            trackColorClass="bg-neutral-200 dark:bg-neutral-800"
+          />
         </div>
       </div>
     </div>
