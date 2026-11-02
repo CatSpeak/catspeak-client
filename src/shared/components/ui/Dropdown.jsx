@@ -349,6 +349,12 @@ const Dropdown = ({
       ? options.find((opt) => opt.value === selectedValues[0])?.icon
       : undefined
 
+  const hasCustomHeight = triggerClassName
+    .split(" ")
+    .some((c) => c.startsWith("h-") || c.startsWith("!h-") || c.startsWith("min-h-"))
+  const wrapperHeight = hasCustomHeight ? "h-auto" : "h-12"
+  const innerHeight = hasCustomHeight ? "" : "h-10"
+
   const defaultTrigger = (
     <button
       type="button"
@@ -357,26 +363,34 @@ const Dropdown = ({
       aria-label={ariaLabel}
       aria-haspopup="listbox"
       aria-expanded={isOpen}
-      className={`h-10 px-4 ${roundedClass} border text-sm font-medium transition-colors duration-150 flex items-center justify-between gap-2 whitespace-nowrap select-none touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 focus-visible:ring-offset-1 ${
+      className={`group/dropdown-trigger relative outline-none flex items-center ${wrapperHeight} ${
         fitContent ? "w-auto min-w-fit max-w-full inline-flex" : "w-full"
-      } bg-white dark:bg-[#272727] text-gray-900 dark:text-[#AAAAAA] border-[#e5e5e5] dark:border-[#3F3F3F] ${
+      } ${
         isInteractive
-          ? "cursor-pointer hover:bg-primaryBg dark:hover:bg-[#3D3D3D] hover:text-black dark:hover:text-white active:bg-[#e0e0e0] dark:active:bg-[#333333]"
+          ? "cursor-pointer"
           : "opacity-50 cursor-not-allowed pointer-events-none"
-      } ${triggerClassName}`}
+      } touch-manipulation`}
     >
-      {startIconNode && (
-        <span className="flex items-center justify-center shrink-0">
-          {startIconNode}
-        </span>
-      )}
-      {renderDefaultTriggerContent()}
-      <ChevronDown
-        size={20}
-        className={`shrink-0 transition-transform duration-200 ${
-          !hasOptions ? "opacity-30" : "text-gray-500 dark:text-[#AAAAAA]"
-        } ${isOpen ? "rotate-180" : ""}`}
-      />
+      <div
+        className={`w-full ${innerHeight} px-4 ${roundedClass} border text-sm font-medium transition-colors duration-150 flex items-center justify-between gap-2 whitespace-nowrap select-none bg-white dark:bg-[#272727] text-gray-900 dark:text-[#AAAAAA] border-[#e5e5e5] dark:border-[#3F3F3F] ${
+          isInteractive
+            ? "hover:bg-primaryBg group-hover/dropdown-trigger:bg-primaryBg dark:hover:bg-[#3D3D3D] dark:group-hover/dropdown-trigger:bg-[#3D3D3D] hover:text-black group-hover/dropdown-trigger:text-black dark:hover:text-white dark:group-hover/dropdown-trigger:text-white active:bg-[#e0e0e0] group-active/dropdown-trigger:bg-[#e0e0e0] dark:active:bg-[#333333] dark:group-active/dropdown-trigger:bg-[#333333]"
+            : ""
+        } group-focus-visible/dropdown-trigger:ring-2 group-focus-visible/dropdown-trigger:ring-cath-red-700/40 group-focus-visible/dropdown-trigger:ring-offset-1 ${triggerClassName}`}
+      >
+        {startIconNode && (
+          <span className="flex items-center justify-center shrink-0">
+            {startIconNode}
+          </span>
+        )}
+        {renderDefaultTriggerContent()}
+        <ChevronDown
+          size={20}
+          className={`shrink-0 transition-transform duration-200 ${
+            !hasOptions ? "opacity-30" : "text-gray-500 dark:text-[#AAAAAA]"
+          } ${isOpen ? "rotate-180" : ""}`}
+        />
+      </div>
     </button>
   )
 

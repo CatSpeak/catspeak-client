@@ -12,7 +12,7 @@ const StopRecordingModal = ({ open, onClose, onConfirm }) => {
       title={t.rooms?.videoCall?.recording?.stopTitle || "Dừng ghi hình"}
     >
       <div className="flex flex-col gap-5 pt-2 pb-6">
-        <p className="text-gray-700">
+        <p className="text-gray-700 dark:text-neutral-200">
           {t.rooms?.videoCall?.recording?.stopDescription ? (
             <span
               dangerouslySetInnerHTML={{
@@ -29,7 +29,7 @@ const StopRecordingModal = ({ open, onClose, onConfirm }) => {
         <div className="flex items-center justify-end gap-3 mt-4">
           <button
             onClick={onClose}
-            className="rounded-full bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-200"
+            className="rounded-full bg-gray-100 dark:bg-[#272727] px-5 py-2.5 text-sm font-semibold text-gray-800 dark:text-neutral-200 transition-colors hover:bg-gray-200 dark:hover:bg-[#3D3D3D]"
           >
             {t.rooms?.videoCall?.recording?.continueBtn || "Tiếp tục ghi"}
           </button>

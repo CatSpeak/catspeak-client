@@ -14,7 +14,7 @@ import RoomFullModal from "./RoomFullModal"
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
 import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg"
-import { getTopicMeta } from "../utils/getTopicIcon"
+import RoomBadges from "./RoomBadges"
 import Badge from "@/shared/components/ui/indicators/Badge"
 import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
@@ -283,52 +283,11 @@ const CommunityRoomCard = ({ room }) => {
               </Badge>
             )}
 
-            {/* 2nd: Required Level badge */}
-            {room.requiredLevel && (
-              <Badge
-                color="cath-red"
-                title={
-                  t?.rooms?.filters?.levels?.[
-                    room.requiredLevel?.toLowerCase()
-                  ] ||
-                  `${t?.rooms?.filters?.levelLabel || "Trinh do"}: ${room.requiredLevel}`
-                }
-              >
-                {t?.rooms?.filters?.levels?.[
-                  room.requiredLevel?.toLowerCase()
-                ] || room.requiredLevel}
-              </Badge>
-            )}
-
-            {/* 3rd: Topic text badge (hide generic 'Other' / 'Khác' topics) */}
-            {(() => {
-              const activeTopic =
-                room.topic ||
-                (Array.isArray(room.topics) && room.topics.length > 0
-                  ? room.topics[0]
-                  : undefined)
-              if (!activeTopic) return null
-
-              const { topicKey } = getTopicMeta(activeTopic)
-              const isOther =
-                topicKey === "other" ||
-                ["other", "others", "khác", "khac"].includes(
-                  String(activeTopic).trim().toLowerCase(),
-                )
-              if (isOther) return null
-
-              const topicLabel =
-                t?.rooms?.filters?.topics?.[topicKey] || activeTopic
-              return (
-                <Badge
-                  color="cath-red"
-                  title={topicLabel}
-                  className="max-w-[120px] truncate"
-                >
-                  {topicLabel}
-                </Badge>
-              )
-            })()}
+            <RoomBadges
+              room={room}
+              maxTopics={1}
+              topicClassName="max-w-[120px] truncate"
+            />
           </div>
 
           {/* Top Right: Bookmark Ribbon Hanging from Top Edge */}

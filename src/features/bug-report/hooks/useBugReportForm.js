@@ -126,20 +126,22 @@ export function useBugReportForm({
       // Q1/Q7: viewport-only tại đúng vị trí scroll hiện tại.
       // Chụp documentElement (không phải body) để luôn phủ đủ viewport
       // kể cả trang ngắn hơn màn hình.
-      const x = window.scrollX || window.pageXOffset || 0
-      const y = window.scrollY || window.pageYOffset || 0
+      const scrollX = window.scrollX || window.pageXOffset || 0
+      const scrollY = window.scrollY || window.pageYOffset || 0
       const width = window.innerWidth || document.documentElement.clientWidth
       const height = window.innerHeight || document.documentElement.clientHeight
       const canvas = await html2canvas(document.documentElement, {
         scale: CAPTURE_SCALE,
         useCORS: true,
         logging: false,
-        x,
-        y,
+        x: scrollX,
+        y: scrollY,
         width,
         height,
-        windowWidth: document.documentElement.clientWidth,
-        windowHeight: document.documentElement.clientHeight,
+        windowWidth: width,
+        windowHeight: height,
+        scrollX,
+        scrollY,
         // Q2/Q5: modal vẫn hiện nhưng bị loại khỏi ảnh, chỉ giữ nền web.
         ignoreElements: (el) => shouldIgnoreCaptureElement(el),
       })

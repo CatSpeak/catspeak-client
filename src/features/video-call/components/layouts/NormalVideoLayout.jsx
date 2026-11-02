@@ -38,7 +38,7 @@ const NormalVideoLayout = ({
       return (
         <div
           key={item.key}
-          className={`relative overflow-hidden rounded-xl ${extraClass}`}
+          className={`relative overflow-hidden rounded-2xl ${extraClass}`}
         >
           <ScreenShareTile
             trackRef={item.data}
@@ -65,7 +65,7 @@ const NormalVideoLayout = ({
     return (
       <div
         key={item.key}
-        className={`relative overflow-hidden rounded-xl ${extraClass}`}
+        className={`relative overflow-hidden rounded-2xl ${extraClass}`}
       >
         <VideoTile
           participant={item.data}

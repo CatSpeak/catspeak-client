@@ -109,7 +109,7 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
         <button
           type="button"
           onClick={toggleMute}
-          className="text-gray-500 hover:text-gray-900 transition-colors shrink-0"
+          className="text-gray-500 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white transition-colors shrink-0"
           title={volume === 0 ? pl.unmute : pl.mute}
         >
           {volume === 0 ? (
@@ -129,7 +129,7 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
             aria-label={pl.adjustVolume}
           />
         </div>
-        <span className="text-sm font-semibold text-gray-700 w-11 text-right tabular-nums shrink-0">
+        <span className="text-sm font-semibold text-gray-700 dark:text-neutral-200 w-11 text-right tabular-nums shrink-0">
           {formatPercent(volume)}%
         </span>
       </div>
@@ -137,7 +137,7 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
   }
 
   return (
-    <div className={`p-3 w-60 flex flex-col gap-2 bg-white rounded-xl ${className}`}>
+    <div className={`p-3 w-60 flex flex-col gap-2 bg-white dark:bg-[#1A1A1A] rounded-xl text-foreground dark:text-white border border-border dark:border-[#3F3F3F] ${className}`}>
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
           {pl.volume}
@@ -413,16 +413,16 @@ export const ParticipantActionPopover = ({ participant, children }) => {
 
 
   const popoverContent = (
-    <div className="bg-white rounded-xl shadow-lg border border-neutral-200/80 p-3 w-72 flex flex-col gap-2">
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-xl shadow-lg border border-neutral-200/80 dark:border-[#3F3F3F] p-3 w-72 flex flex-col gap-2 text-foreground dark:text-white">
       <ParticipantVolumeSlider participant={participant} isInline />
 
       {canModerateMedia && (
-        <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
+        <div className="border-t border-neutral-100 dark:border-[#272727] pt-2 flex flex-col gap-1">
           {canToggleMic && (
             <button
               onClick={() => handleMuteTrack("audio", isTargetMicOn)}
               disabled={isMuting}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
             >
               <MicOff size={18} className="text-neutral-500 shrink-0" />
               <span>
@@ -435,7 +435,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             <button
               onClick={() => handleMuteTrack("video", isTargetCamOn)}
               disabled={isMuting}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
             >
               <VideoOff size={18} className="text-neutral-500 shrink-0" />
               <span>
@@ -447,12 +447,12 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       )}
 
       {(canRestrictChat || canRestrictVoice) && (
-        <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
+        <div className="border-t border-neutral-100 dark:border-[#272727] pt-2 flex flex-col gap-1">
           {canRestrictChat && (!isTargetChatRestricted ? (
             <button
               onClick={() => setRestrictConfirm({ open: true, type: "chat" })}
               disabled={isRestrictingChat}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
             >
               <MessageSquareOff size={18} className="text-neutral-500 shrink-0" />
               <span>{pl.restrictChat}</span>
@@ -461,7 +461,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             <button
               onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_chat" })}
               disabled={isUnrestrictingChat}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
             >
               <MessageSquareOff size={18} className="text-emerald-600 shrink-0" />
               <span>{pl.unrestrictChat}</span>
@@ -471,7 +471,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             <button
               onClick={() => setRestrictConfirm({ open: true, type: "voice" })}
               disabled={isRestrictingVoice}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
             >
               <Mic size={18} className="text-neutral-500 shrink-0" />
               <span>{pl.restrictVoice}</span>
@@ -480,7 +480,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             <button
               onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_voice" })}
               disabled={isUnrestrictingVoice}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
             >
               <Mic size={18} className="text-emerald-600 shrink-0" />
               <span>{pl.unrestrictVoice}</span>
@@ -490,11 +490,11 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       )}
 
       {isCurrentHost && (
-        <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
+        <div className="border-t border-neutral-100 dark:border-[#272727] pt-2 flex flex-col gap-1">
           <button
             onClick={() => handleMuteTrack("screen", true)}
             disabled={isMuting}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <MonitorUp size={18} className="text-neutral-500 shrink-0" />
             <span>{pl.stopScreenShare}</span>
@@ -503,7 +503,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
           <button
             onClick={() => handleKick(false)}
             disabled={isKicking}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <UserX size={18} className="text-red-500 shrink-0" />
             <span>{pl.kick}</span>
@@ -512,7 +512,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
           <button
             onClick={() => handleKick(true)}
             disabled={isKicking}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <UserX size={18} className="text-red-600 shrink-0" />
             <span>{pl.ban}</span>
@@ -522,7 +522,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
           {isClassOrCustom(room?.roomType) && (
             <button
               onClick={() => setCoHostModalOpen(true)}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-lg transition-colors text-left w-full"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors text-left w-full"
             >
               <Shield size={18} className="text-amber-600 shrink-0" />
               <span>
@@ -534,7 +534,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
           {isClassOrCustom(room?.roomType) && isTargetCoHost && (
             <button
               onClick={() => setRevokeCoHostConfirm(true)}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors text-left w-full"
             >
               <UserX size={18} className="text-red-500 shrink-0" />
               <span>Gỡ co-host</span>
@@ -546,12 +546,12 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       {/* Ticket 03: co-host with remove_student sees kick-only (no ban, no screen-stop). */}
       {/* Ticket 05: co-host with manage_student_share sees stop-share. */}
       {(!isCurrentHost && (canKick || canStopScreen)) && (
-        <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
+        <div className="border-t border-neutral-100 dark:border-[#272727] pt-2 flex flex-col gap-1">
           {canStopScreen && (
             <button
               onClick={() => handleMuteTrack("screen", true)}
               disabled={isMuting}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
             >
               <MonitorUp size={18} className="text-neutral-500 shrink-0" />
               <span>{pl.stopScreenShare}</span>
@@ -561,7 +561,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
           <button
             onClick={() => handleKick(false)}
             disabled={isKicking}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <UserX size={18} className="text-red-500 shrink-0" />
             <span>{pl.kick}</span>

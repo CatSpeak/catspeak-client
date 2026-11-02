@@ -92,7 +92,7 @@ const MoreMenuMobileGeneralView = ({
               ? "bg-red-100 text-red-700 border border-red-300 font-bold animate-pulse shadow-sm"
               : closingRemainingSeconds !== null && closingRemainingSeconds <= 300
               ? "bg-amber-100 text-amber-900 border border-amber-300 font-bold animate-pulse shadow-sm"
-              : "bg-[#F5F5F5] text-black"
+              : "bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white"
           }`}
         >
           {t?.rooms?.videoCall?.remainingTime || "Thời gian còn lại"}:{" "}
@@ -108,8 +108,8 @@ const MoreMenuMobileGeneralView = ({
           }}
           className={`h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors ${
             showParticipants
-              ? "bg-red-100 text-red-600"
-              : "bg-[#F5F5F5] text-black"
+              ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400"
+              : "bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white"
           }`}
         >
           <Users size={20} />
@@ -125,7 +125,7 @@ const MoreMenuMobileGeneralView = ({
             setShowMoreMenu(false)
           }}
           className={`relative h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors ${
-            showChat ? "bg-red-100 text-red-600" : "bg-[#F5F5F5] text-black"
+            showChat ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400" : "bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white"
           }`}
         >
           <MessageSquare size={20} />
@@ -160,8 +160,8 @@ const MoreMenuMobileGeneralView = ({
               }}
               className={`h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors px-3 ${
                 (isHost ? showSpeakingTimeBalance : showStudentSpeakingWidget)
-                  ? "bg-red-100 text-red-600"
-                  : "bg-[#F5F5F5] text-black"
+                  ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400"
+                  : "bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white"
               }`}
             >
               <BarChart2 size={20} className="shrink-0" />
@@ -181,8 +181,8 @@ const MoreMenuMobileGeneralView = ({
                 }}
                 className={`h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors px-3 ${
                   showBreakout
-                    ? "bg-red-100 text-red-600"
-                    : "bg-[#F5F5F5] text-black"
+                    ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400"
+                    : "bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white"
                 }`}
               >
                 <Split size={20} className="shrink-0" />
@@ -208,7 +208,7 @@ const MoreMenuMobileGeneralView = ({
               : undefined
           }
           className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
-            isLocalScreenShare ? "bg-red-100 text-red-600" : "bg-[#F5F5F5]"
+            isLocalScreenShare ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400" : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
           } ${!canShareScreen ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           {isLocalScreenShare ? (
@@ -225,7 +225,7 @@ const MoreMenuMobileGeneralView = ({
               setShowMoreMenu(false)
             }}
             className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
-              showWatchTogether ? "bg-red-100 text-red-600" : "bg-[#F5F5F5]"
+              showWatchTogether ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400" : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
             }`}
           >
             <Clapperboard size={24} />
@@ -249,8 +249,8 @@ const MoreMenuMobileGeneralView = ({
           disabled={!isAISession && (isStartingSubtitles || isStoppingSubtitles)}
           className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
             (isAISession ? showCC : isSubtitleActive)
-              ? "bg-red-100 text-red-600"
-              : "bg-[#F5F5F5]"
+              ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400"
+              : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
           } ${!isAISession && (isStartingSubtitles || isStoppingSubtitles) ? "opacity-70 cursor-not-allowed" : ""}`}
         >
           <Captions size={24} />
@@ -268,8 +268,8 @@ const MoreMenuMobileGeneralView = ({
           disabled={isTogglingRecording}
           className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
             isRecording
-              ? "bg-red-100 text-red-600 animate-pulse"
-              : "bg-[#F5F5F5]"
+              ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 animate-pulse"
+              : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
           }`}
         >
           {isTogglingRecording ? (
@@ -285,7 +285,7 @@ const MoreMenuMobileGeneralView = ({
 
       <button
         onClick={handleCopyLink}
-        className="w-full h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center gap-2 font-medium"
+        className="w-full h-16 bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D] rounded-xl flex items-center justify-center gap-2 font-medium transition-colors"
       >
         <Copy size={20} />
         {t?.rooms?.videoCall?.copyLink || "Sao chép liên kết"}
@@ -295,7 +295,7 @@ const MoreMenuMobileGeneralView = ({
       <div className="grid grid-cols-1 gap-3">
         <button
           onClick={() => setShowMobileSettings(true)}
-          className="h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center"
+          className="h-16 bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D] rounded-xl flex items-center justify-center transition-colors"
         >
           <Settings size={24} />
         </button>

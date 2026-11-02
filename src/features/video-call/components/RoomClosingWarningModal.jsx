@@ -41,13 +41,13 @@ const RoomClosingWarningModal = ({ remainingSeconds, t }) => {
       className="max-w-md w-full"
     >
       <div className="flex flex-col items-center justify-center p-4 py-8 text-center">
-        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4 border border-amber-200 shadow-sm animate-pulse">
+        <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mb-4 border border-amber-200 dark:border-amber-800/40 shadow-sm animate-pulse">
           <Clock size={32} />
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
           {t?.rooms?.videoCall?.roomClosingSubtitleStatic || "Phòng sẽ tự động kết thúc sau ít phút nữa"}
         </h3>
-        <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
+        <p className="text-sm text-gray-500 dark:text-[#AAAAAA] max-w-xs leading-relaxed">
           {t?.rooms?.videoCall?.roomClosingDescription ||
             "Còn chưa đầy 5 phút nữa cuộc gọi sẽ tự động đóng. Vui lòng hoàn tất cuộc hội thoại của bạn."}
         </p>

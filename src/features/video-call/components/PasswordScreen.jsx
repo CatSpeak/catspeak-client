@@ -51,11 +51,11 @@ const PasswordScreen = ({ room, error, isLoading, onSubmit }) => {
         </div>
 
         <div className="text-center">
-          <h1 className="text-2xl font-bold leading-tight mb-2">
+          <h1 className="text-2xl font-bold leading-tight mb-2 text-foreground dark:text-white">
             {t.rooms.passwordScreen.title}
           </h1>
           {room?.name && (
-            <p className="text-base text-[#7A7574] font-medium mb-1">
+            <p className="text-base text-secondary dark:text-[#AAAAAA] font-medium mb-1">
               {room.name}
             </p>
           )}
@@ -83,13 +83,13 @@ const PasswordScreen = ({ room, error, isLoading, onSubmit }) => {
                 })}
             </div>
           )}
-          <p className="text-[15px] text-[#7A7574] leading-relaxed">
+          <p className="text-[15px] text-secondary dark:text-[#AAAAAA] leading-relaxed">
             {t.rooms.passwordScreen.description}
           </p>
         </div>
 
         <div className="flex flex-col gap-2 w-full">
-          <label htmlFor="room-password-screen" className="text-sm font-medium">
+          <label htmlFor="room-password-screen" className="text-sm font-medium text-foreground dark:text-white">
             {t.rooms.passwordScreen.label}
           </label>
           <TextInput

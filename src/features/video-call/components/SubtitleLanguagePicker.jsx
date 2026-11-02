@@ -22,7 +22,7 @@ const SubtitleLanguagePicker = ({
   onBack,
   backLabel = "Back",
   languageNames,
-  className = "w-full rounded-lg border border-border bg-white shadow-lg",
+  className = "w-full rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-lg",
 }) => {
   const ref = useRef(null)
 
@@ -42,25 +42,25 @@ const SubtitleLanguagePicker = ({
         {onBack ? (
           <button
             onClick={onBack}
-            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-gray-800 hover:bg-[#F6F6F6]"
+            className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-[#F6F6F6] dark:hover:bg-[#272727]"
           >
             <ChevronLeft size={18} />
             {backLabel}
           </button>
         ) : label ? (
-          <p className="px-2 py-2 text-xs font-medium text-gray-500">{label}</p>
+          <p className="px-2 py-2 text-xs font-medium text-gray-500 dark:text-[#AAAAAA]">{label}</p>
         ) : null}
         
-        {(onBack || label) && <div className="mb-1 border-t border-border"></div>}
+        {(onBack || label) && <div className="mb-1 border-t border-border dark:border-[#3F3F3F]"></div>}
         <div className="flex flex-col gap-1">
           {languages.map((lang) => (
             <button
               key={lang}
               onClick={() => onSelect(lang)}
-              className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-left text-sm hover:bg-[#F6F6F6] ${
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 min-h-10 text-left text-sm hover:bg-[#F6F6F6] dark:hover:bg-[#272727] ${
                 selectedLanguage === lang
-                  ? "font-semibold text-[#d40018]"
-                  : "text-gray-800"
+                  ? "font-semibold text-cath-red-700 dark:text-red-400 bg-cath-red-700/10 dark:bg-red-950/40"
+                  : "text-gray-800 dark:text-gray-200"
               }`}
             >
               {languageNames?.[lang] ?? lang}

@@ -106,7 +106,7 @@ const MoreMenuDesktopView = ({
         label={t.rooms?.game?.crackIt?.gameHistory || "Game History"}
       />
 
-      <div className="border-t border-border my-[2px]"></div>
+      <div className="border-t border-border dark:border-[#3F3F3F] my-[2px]"></div>
 
       <MenuItem
         onClick={() => {
@@ -200,7 +200,7 @@ const MoreMenuDesktopView = ({
         />
         {isRecording && (
           <div className="px-4 pb-2 pt-1">
-            <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1">
+            <div className="flex items-center justify-between text-[10px] text-gray-500 dark:text-[#AAAAAA] mb-1">
               <span>Storage</span>
               <span>
                 {totalUsedMb.toFixed(1)}MB {limitMb != null && limitMb > 0 ? `/ ${limitMb.toFixed(0)}MB` : "(Unlimited)"}
@@ -209,7 +209,7 @@ const MoreMenuDesktopView = ({
             <ProgressBar
               progress={usagePercent}
               heightClass="h-1.5"
-              trackColorClass="bg-primaryBg"
+              trackColorClass="bg-primaryBg dark:bg-[#272727]"
               colorClass={
                 isDanger
                   ? "bg-red-500 animate-pulse"
@@ -245,7 +245,7 @@ const MoreMenuDesktopView = ({
         }
       />
 
-      <div className="border-t border-border my-[2px]"></div>
+      <div className="border-t border-border dark:border-[#3F3F3F] my-[2px]"></div>
 
       <MenuItem
         onClick={() => {

@@ -54,7 +54,7 @@ const OverflowTile = ({ overflowItems = [], overflowCount = 0, onClick }) => {
   return (
     <div
       onClick={handleClick}
-      className="group relative h-full w-full min-h-[100px] overflow-hidden rounded-xl bg-neutral-900/90 border border-white/10 hover:border-white/25 hover:bg-neutral-800/90 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md flex flex-col items-center justify-center p-3 select-none [container-type:inline-size]"
+      className="group relative h-full w-full min-h-[100px] overflow-hidden rounded-2xl bg-neutral-900/90 border border-white/10 hover:border-white/25 hover:bg-neutral-800/90 transition-all duration-200 cursor-pointer shadow-lg backdrop-blur-md flex flex-col items-center justify-center p-3 select-none [container-type:inline-size]"
       title={t.rooms?.videoCall?.participantList?.title || "Participants"}
     >
       {/* Subtle radial glow background */}

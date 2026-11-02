@@ -194,7 +194,7 @@ const SpeakingTimeBalancePanel = ({
     participantStatsList.some((p) => p.durationSec > 0)
 
   return (
-    <div className="flex flex-col h-full w-full bg-white">
+    <div className="flex flex-col h-full w-full bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white">
       {/* Header */}
       <SpeakingTimeBalanceHeader
         title={panelTitle}
@@ -210,10 +210,10 @@ const SpeakingTimeBalancePanel = ({
       {/* State: Loading */}
       {activeIsLoading ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
+          <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-[#272727] flex items-center justify-center mb-3">
             <Loader2 className="w-6 h-6 text-cath-red-700 animate-spin" />
           </div>
-          <p className="text-sm text-gray-600 font-medium">
+          <p className="text-sm text-gray-600 dark:text-[#AAAAAA] font-medium">
             {stbT.loadingData || "Đang tải dữ liệu"}
           </p>
         </div>
@@ -250,11 +250,11 @@ const SpeakingTimeBalancePanel = ({
             labels={stbT}
           />
 
-          <div className="bg-[#F8F9FA] border-y border-[#EFEFEF] px-4 py-2 flex items-center justify-between text-xs font-medium text-gray-600 shrink-0">
+          <div className="bg-[#F8F9FA] dark:bg-[#222222] border-y border-[#EFEFEF] dark:border-[#3F3F3F] px-4 py-2 flex items-center justify-between text-xs font-medium text-gray-600 dark:text-[#AAAAAA] shrink-0">
             <span>
               {stbT.students || "HV"} ({studentCount})
             </span>
-            <span className="text-gray-500 font-mono">
+            <span className="text-gray-500 dark:text-[#AAAAAA] font-mono">
               {stbT.expected || "Exp"}: {expectedSharePercent}%
             </span>
           </div>

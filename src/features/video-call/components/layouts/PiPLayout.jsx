@@ -262,7 +262,7 @@ const PiPLayout = ({
       {/* Floating PiP Video — draggable, snaps to 4 corners */}
       <div
         ref={pipRef}
-        className={`absolute ${CORNER_CLASSES[corner]} w-[134px] h-[190px] md:w-[240px] md:h-[135px] rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 z-20 ${dragging ? "" : "transition-all duration-300 ease-out"}`}
+        className={`absolute ${CORNER_CLASSES[corner]} w-[134px] h-[190px] md:w-[240px] md:h-[135px] rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 z-20 ${dragging ? "" : "transition-all duration-300 ease-out"}`}
         style={{ touchAction: "none" }}
       >
         {renderItem(pipItem)}

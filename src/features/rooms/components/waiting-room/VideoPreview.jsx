@@ -162,11 +162,11 @@ const VideoPreview = ({
   // up height and the whole pre-join card fits the viewport. From md up it
   // keeps the original card frame (border + surface).
   return (
-    <div className="relative w-full max-w-[440px] lg:max-w-none flex flex-col items-center flex-1 min-h-0 rounded-none border-0 bg-transparent md:flex-none md:rounded-xl md:border md:border-neutral-800 md:bg-neutral-900">
+    <div className="relative w-full max-w-[440px] lg:max-w-none flex flex-col items-center flex-1 min-h-0 rounded-none border-0 bg-transparent md:flex-none md:rounded-2xl md:border md:border-neutral-800 dark:md:border-[#3F3F3F] md:bg-neutral-900">
       {/* Mobile portrait: the box is height-driven (flex-1) and its width
           follows the 3/4 ratio, so the camera image is never squashed.
           Desktop/tablet keeps the original width-driven 16:9 box. */}
-      <div className="relative flex-1 min-h-0 min-w-0 w-auto max-w-full aspect-[3/4] overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 md:flex-none md:w-full md:aspect-video md:max-h-none md:border-0 md:bg-transparent">
+      <div className="relative flex-1 min-h-0 min-w-0 w-auto max-w-full aspect-[3/4] overflow-hidden rounded-2xl border border-neutral-800 dark:border-[#3F3F3F] bg-neutral-900 md:flex-none md:w-full md:aspect-video md:max-h-none md:border-0 md:bg-transparent">
         {showIphoneDiag && (
           <IphoneDiagOverlay videoRef={videoRef} localStream={localStream} />
         )}
@@ -177,7 +177,7 @@ const VideoPreview = ({
             autoPlay
             playsInline
             muted // Always mute local video preview purely for UI
-            className={`h-full w-full rounded-xl object-cover transform -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
+            className={`h-full w-full rounded-2xl object-cover transform -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
           />
         )}
 

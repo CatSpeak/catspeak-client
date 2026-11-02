@@ -13,7 +13,7 @@ const TeacherTalkRatioCard = ({
 }) => {
   if (isError) {
     return (
-      <div className="px-4 py-3 border-l-4 border-gray-400 bg-white shrink-0">
+      <div className="px-4 py-3 border-l-4 border-gray-400 bg-white dark:bg-[#1A1A1A] shrink-0">
         <div className="text-sm font-medium text-gray-600">
           {labels.teacherTalk || "Teacher Talk"}
         </div>
@@ -28,19 +28,19 @@ const TeacherTalkRatioCard = ({
   const hvPercent = hasAnySpeechData ? studentPercent : 0
 
   return (
-    <div className="px-4 py-3 border-l-4 border-cath-red-700 bg-white shrink-0">
+    <div className="px-4 py-3 border-l-4 border-cath-red-700 bg-white dark:bg-[#1A1A1A] shrink-0">
       <div className="mb-2">
-        <span className="text-sm font-semibold text-gray-800">
+        <span className="text-sm font-semibold text-gray-800 dark:text-neutral-100">
           {labels.teacherTalk || "Teacher Talk"}
         </span>
       </div>
 
       <div className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-2.5 gap-y-2">
         {/* GV (Teacher) Row */}
-        <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">
+        <span className="text-xs font-semibold text-gray-600 dark:text-[#AAAAAA] whitespace-nowrap">
           {labels.teacher || "GV"}
         </span>
-        <div className="bg-gray-200 rounded-full h-2 overflow-hidden w-full">
+        <div className="bg-gray-200 dark:bg-neutral-800 rounded-full h-2 overflow-hidden w-full">
           <div
             className="bg-cath-red-700 h-full rounded-full transition-all duration-500"
             style={{ width: `${Math.min(100, Math.max(0, gvPercent))}%` }}
@@ -51,10 +51,10 @@ const TeacherTalkRatioCard = ({
         </span>
 
         {/* HV (Students) Row */}
-        <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">
+        <span className="text-xs font-semibold text-gray-600 dark:text-[#AAAAAA] whitespace-nowrap">
           {labels.students || "HV"}
         </span>
-        <div className="bg-gray-200 rounded-full h-2 overflow-hidden w-full">
+        <div className="bg-gray-200 dark:bg-neutral-800 rounded-full h-2 overflow-hidden w-full">
           <div
             className="bg-emerald-500 h-full rounded-full transition-all duration-500"
             style={{ width: `${Math.min(100, Math.max(0, hvPercent))}%` }}

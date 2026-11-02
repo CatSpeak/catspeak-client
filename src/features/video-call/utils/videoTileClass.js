@@ -1,7 +1,7 @@
 export const VIDEO_TILE_MIN_HEIGHT_CLASS = "min-h-[100px]"
 
 const VIDEO_TILE_ROOT_BASE =
-  "group relative h-full w-full overflow-hidden rounded-xl transition-all duration-200 ease-in-out [container-type:inline-size]"
+  "group relative h-full w-full overflow-hidden rounded-2xl transition-all duration-200 ease-in-out [container-type:inline-size]"
 
 /**
  * Pure class seam for the VideoTile root (unit-testable, single source of

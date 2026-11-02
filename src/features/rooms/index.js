@@ -1,4 +1,5 @@
 export { default as RoomCard } from "./components/RoomCard"
+export { default as RoomBadges } from "./components/RoomBadges"
 export { default as CreateRoomModal } from "./components/CreateRoomModal"
 export { default as EditRoomModal } from "./components/EditRoomModal"
 export { default as JoinRoomModal } from "./components/JoinRoomModal"
@@ -34,7 +35,7 @@ export { useMediaPreview } from "./hooks/useMediaPreview"
 export { useDeviceSelection } from "./hooks/useDeviceSelection"
 
 // Utils
-export { formatTopic, formatLevel } from "./utils/formatters"
+export { formatTopic, formatLevel, isOtherTopic, getValidRoomTopics } from "./utils/formatters"
 
 // API
 export {

@@ -11,14 +11,14 @@ import {
 } from "@/store/api/userApi"
 
 const TILE_BASE =
-  "relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-colors duration-150 outline-none"
+  "relative w-full cursor-pointer rounded-xl border aspect-video overflow-hidden transition-colors duration-150 outline-none"
 
 const TILE_DISABLED = "opacity-70 cursor-not-allowed pointer-events-none"
 
 const TILE_SELECTED = "border-cath-red-700 dark:border-cath-red-1000"
 
 const TILE_UNSELECTED =
-  "border-border hover:border-neutral-400 dark:hover:border-neutral-500"
+  "border-border dark:border-[#3F3F3F] hover:border-neutral-400 dark:hover:border-neutral-500"
 
 const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
   const { t } = useLanguage()

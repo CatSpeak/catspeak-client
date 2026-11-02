@@ -10,6 +10,7 @@ import { Check } from "lucide-react"
  * @param {boolean} disabled - Disabled state.
  * @param {"default" | "white" | "large"} variant - Styling variant.
  * @param {boolean} withWrapper - Optional 48px touch target with 40px hover circle.
+ * @param {number | "sm" | "md" | "lg"} size - Indicator box size in px (defaults to 24).
  * @param {"button" | "div"} as - Element type when withWrapper/large is used.
  * @param {string} className - Optional styling overrides for outer wrapper.
  * @param {string} innerClassName - Optional styling overrides for indicator.
@@ -21,6 +22,7 @@ const Checkbox = ({
   disabled = false,
   variant = "default",
   withWrapper = false,
+  size = 24,
   as = "button",
   className = "",
   innerClassName = "",
@@ -29,13 +31,25 @@ const Checkbox = ({
   const isWhite = variant === "white"
   const isLarge = variant === "large" || withWrapper
 
+  const sizeConfig = {
+    18: { box: "w-[18px] h-[18px] rounded-[3px]", icon: 12 },
+    20: { box: "w-5 h-5 rounded-[4px]", icon: 14 },
+    24: { box: "w-6 h-6 rounded-[4px]", icon: 16 },
+    sm: { box: "w-[18px] h-[18px] rounded-[3px]", icon: 12 },
+    md: { box: "w-5 h-5 rounded-[4px]", icon: 14 },
+    lg: { box: "w-6 h-6 rounded-[4px]", icon: 16 },
+  }[size] || {
+    box: typeof size === "number" ? `w-[${size}px] h-[${size}px] rounded-[4px]` : "w-6 h-6 rounded-[4px]",
+    icon: typeof size === "number" ? Math.round(size * 0.65) : 16,
+  }
+
   const outerBorderClass = isWhite
     ? checked
       ? "bg-white border-white text-[#990011]"
       : "bg-transparent border-white/60 group-hover:border-white text-transparent"
     : checked
       ? "bg-[#990011] border-[#990011] text-white"
-      : "bg-white border-black/50 group-hover:border-black text-transparent"
+      : "bg-white dark:bg-[#272727] border-black/50 dark:border-[#555555] group-hover:border-black dark:group-hover:border-white text-transparent"
 
   const handleClick = (e) => {
     if (disabled) return
@@ -64,11 +78,11 @@ const Checkbox = ({
 
   const checkboxIndicator = (
     <div
-      className={`flex w-[18px] h-[18px] items-center justify-center rounded-[2px] border-2 transition-all duration-200 select-none ${outerBorderClass} ${innerClassName}`}
+      className={`flex ${sizeConfig.box} items-center justify-center border-2 transition-all duration-200 select-none ${outerBorderClass} ${innerClassName}`}
     >
       {checked && (
         <Check
-          size={12}
+          size={sizeConfig.icon}
           strokeWidth={3}
           className={isWhite ? "text-[#990011]" : "text-white"}
         />
@@ -98,7 +112,7 @@ const Checkbox = ({
           className={`w-10 h-10 inline-flex items-center justify-center rounded-full transition-colors ${
             disabled
               ? ""
-              : "group-hover/cb:bg-primaryBg hover:bg-primaryBg active:bg-[#E6E6E6]"
+              : "group-hover/cb:bg-primaryBg dark:group-hover/cb:bg-white/10 hover:bg-primaryBg dark:hover:bg-white/10 active:bg-[#E6E6E6] dark:active:bg-white/15"
           }`}
         >
           {checkboxIndicator}

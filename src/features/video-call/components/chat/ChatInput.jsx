@@ -500,7 +500,7 @@ const ChatInput = ({
 
       {/* Ticket 02: chat restriction reason — visible to the restricted user. */}
       {!isAiInput && isChatRestricted === true && (
-        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs font-medium text-amber-800 dark:text-amber-300">
           <MessageSquareOff size={14} className="shrink-0" />
           <span>
             {t.rooms?.chatBox?.chatRestrictedReason ||
@@ -512,12 +512,12 @@ const ChatInput = ({
       {/* Unified Input Box */}
       <div
         onClick={() => editableRef.current?.focus()}
-        className={`w-full grid grid-cols-[auto_1fr_auto] border focus-within:border-cath-red-700 transition-all cursor-text rounded-[28px] ${isMultiline
+        className={`w-full grid grid-cols-[auto_1fr_auto] border focus-within:border-cath-red-700 transition-all cursor-text rounded-2xl ${isMultiline
             ? "pb-2 pt-3 min-h-[110px] gap-y-2 px-3"
             : "items-center h-14 pl-3 pr-1"
           } ${isAiInput
-            ? "border-red-200 bg-gradient-to-r from-red-50/40 via-white to-red-50/20 shadow-sm"
-            : "border-border bg-gray-50/60"
+            ? "border-red-200 dark:border-red-900/50 bg-gradient-to-r from-red-50/40 via-white to-red-50/20 dark:from-red-950/20 dark:via-[#1A1A1A] dark:to-red-950/10 shadow-sm"
+            : "border-border dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#272727]"
           }`}
       >
         {/* Left AI Switch Control (FR-006) */}
@@ -553,8 +553,8 @@ const ChatInput = ({
                 }}
               >
                 {isPrivateAi ? (
-                  <span className="inline-flex items-center gap-0.5 text-gray-700">
-                    <Lock size={12} className="text-gray-500 shrink-0 -translate-y-[0.08em]" />
+                  <span className="inline-flex items-center gap-0.5 text-gray-700 dark:text-neutral-200">
+                    <Lock size={12} className="text-gray-500 dark:text-[#AAAAAA] shrink-0 -translate-y-[0.08em]" />
                     <span>{t.rooms?.chatBox?.privateModeLabel || "Riêng tư"}</span>
                   </span>
                 ) : (
@@ -585,8 +585,8 @@ const ChatInput = ({
             onKeyDown={handleKeyDown}
             onBlur={saveSelection}
             data-placeholder={placeholderText}
-            className={`w-full text-base focus:outline-none bg-transparent leading-normal ${isInputDisabled ? "opacity-50 cursor-not-allowed" : ""
-              } empty:before:content-[attr(data-placeholder)] empty:before:text-[#606060] empty:before:pointer-events-none`}
+            className={`w-full text-base text-foreground dark:text-white focus:outline-none bg-transparent leading-normal ${isInputDisabled ? "opacity-50 cursor-not-allowed" : ""
+              } empty:before:content-[attr(data-placeholder)] empty:before:text-[#606060] dark:empty:before:text-[#AAAAAA] empty:before:pointer-events-none`}
             style={{
               minHeight: isMultiline ? "2.5rem" : "1.25rem",
               maxHeight: isMultiline ? "120px" : "100%",

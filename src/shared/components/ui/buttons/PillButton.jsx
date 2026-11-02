@@ -18,6 +18,10 @@ const VARIANT_CLASSES = {
     "bg-black/30 hover:bg-black/50 active:bg-black/60 group-hover/pill:bg-black/50 group-active/pill:bg-black/60 text-white backdrop-blur-md border-white/10 shadow-sm",
   snackbar:
     "bg-transparent hover:text-[#FF9999] active:text-[#FF4D4D] group-hover/pill:text-[#FF9999] group-active/pill:text-[#FF4D4D] text-[#FF6B6B] border-none p-0 h-auto font-semibold",
+  control:
+    "bg-primaryBg hover:bg-[#E6E6E6] text-black dark:bg-[#272727] dark:hover:bg-[#3D3D3D] dark:text-white border-transparent transition-colors",
+  controlActive:
+    "bg-cath-red-600 hover:bg-cath-red-700 active:bg-cath-red-800 text-white border-transparent transition-colors",
 }
 
 const PillButton = ({
@@ -44,7 +48,8 @@ const PillButton = ({
   const isSecondary =
     variant === "secondary" ||
     variant === "secondary-no-outline" ||
-    variant === "outline"
+    variant === "outline" ||
+    variant === "control"
 
   const variantStyle = VARIANT_CLASSES[variant] || VARIANT_CLASSES.primary
   const disabledStyle = isActuallyDisabled
@@ -100,9 +105,7 @@ const PillButton = ({
         ) : (
           <>
             {renderIcon(startIcon)}
-            <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
-              {children}
-            </span>
+            {children}
             {renderIcon(endIcon)}
           </>
         )}

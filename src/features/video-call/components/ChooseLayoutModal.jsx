@@ -10,47 +10,47 @@ const LOCAL_STORAGE_KEY = "catspeak_video_layout_settings";
 // Icons for layout modes
 const LayoutIconAuto = () => (
   <div className="flex gap-[2px] w-12 h-8">
-    <div className="bg-gray-300 w-1/4 h-full rounded-[2px]" />
-    <div className="bg-gray-300 w-1/4 h-full rounded-[2px]" />
-    <div className="bg-gray-300 w-1/4 h-full rounded-[2px]" />
-    <div className="bg-gray-300 w-1/4 h-full rounded-[2px]" />
+    <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[2px]" />
+    <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[2px]" />
+    <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[2px]" />
+    <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[2px]" />
   </div>
 );
 
 const LayoutIconGrid = () => (
   <div className="flex flex-col gap-[2px] w-12 h-8">
     <div className="flex gap-[2px] h-1/3">
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
     </div>
     <div className="flex gap-[2px] h-1/3">
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
     </div>
     <div className="flex gap-[2px] h-1/3">
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
-      <div className="bg-gray-300 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
     </div>
   </div>
 );
 
 const LayoutIconSpotlight = () => (
-  <div className="w-12 h-8 bg-gray-300 rounded-[2px]" />
+  <div className="w-12 h-8 bg-gray-300 dark:bg-neutral-600 rounded-[2px]" />
 );
 
 const LayoutIconSidebar = () => (
   <div className="flex gap-[2px] w-12 h-8">
-    <div className="bg-gray-300 flex-1 h-full rounded-[2px]" />
+    <div className="bg-gray-300 dark:bg-neutral-600 flex-1 h-full rounded-[2px]" />
     <div className="flex flex-col gap-[2px] w-3 h-full">
-      <div className="bg-gray-300 w-full h-1/3 rounded-[1px]" />
-      <div className="bg-gray-300 w-full h-1/3 rounded-[1px]" />
-      <div className="bg-gray-300 w-full h-1/3 rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-full h-1/3 rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-full h-1/3 rounded-[1px]" />
+      <div className="bg-gray-300 dark:bg-neutral-600 w-full h-1/3 rounded-[1px]" />
     </div>
   </div>
 );
@@ -74,7 +74,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
 
   return (
     <Modal open={open} onClose={onClose} title={changeLayoutT.title || "Điều chỉnh chế độ xem"} className="md:max-w-[380px]">
-      <div className="flex flex-col text-[#3C4043] p-1 pb-4 w-full">
+      <div className="flex flex-col text-[#3C4043] dark:text-neutral-200 p-1 pb-4 w-full">
         {/* Layout Modes */}
         <div className="flex flex-col gap-3 mb-6">
           <label className="flex items-center justify-between cursor-pointer group">
@@ -88,10 +88,10 @@ const ChooseLayoutModal = ({ open, onClose }) => {
                 className="w-5 h-5 accent-[#1A73E8]"
               />
               <span className="text-[15px] flex items-center gap-2">
-                {changeLayoutT.auto || "Tự động (linh động)"} <Sparkles size={16} className="text-[#3C4043]" />
+                {changeLayoutT.auto || "Tự động (linh động)"} <Sparkles size={16} className="text-[#3C4043] dark:text-neutral-300" />
               </span>
             </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "auto" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-border group-hover:border-gray-300"}`}>
+            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "auto" ? "border-[#1A73E8] bg-[#E8F0FE]/50 dark:bg-blue-950/30" : "border-border dark:border-[#3F3F3F] group-hover:border-gray-300 dark:group-hover:border-neutral-500"}`}>
               <LayoutIconAuto />
             </div>
           </label>
@@ -108,7 +108,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
               />
               <span className="text-[15px]">{changeLayoutT.grid || "Lưới"}</span>
             </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "grid" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-border group-hover:border-gray-300"}`}>
+            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "grid" ? "border-[#1A73E8] bg-[#E8F0FE]/50 dark:bg-blue-950/30" : "border-border dark:border-[#3F3F3F] group-hover:border-gray-300 dark:group-hover:border-neutral-500"}`}>
               <LayoutIconGrid />
             </div>
           </label>
@@ -125,7 +125,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
               />
               <span className="text-[15px]">{changeLayoutT.spotlight || "Tiêu điểm"}</span>
             </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "spotlight" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-border group-hover:border-gray-300"}`}>
+            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "spotlight" ? "border-[#1A73E8] bg-[#E8F0FE]/50 dark:bg-blue-950/30" : "border-border dark:border-[#3F3F3F] group-hover:border-gray-300 dark:group-hover:border-neutral-500"}`}>
               <LayoutIconSpotlight />
             </div>
           </label>
@@ -142,7 +142,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
               />
               <span className="text-[15px]">{changeLayoutT.sidebar || "Thanh bên"}</span>
             </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "sidebar" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-border group-hover:border-gray-300"}`}>
+            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "sidebar" ? "border-[#1A73E8] bg-[#E8F0FE]/50 dark:bg-blue-950/30" : "border-border dark:border-[#3F3F3F] group-hover:border-gray-300 dark:group-hover:border-neutral-500"}`}>
               <LayoutIconSidebar />
             </div>
           </label>
@@ -153,14 +153,14 @@ const ChooseLayoutModal = ({ open, onClose }) => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex flex-col">
               <span className="text-sm font-medium">{changeLayoutT.tilesLabel || "Số ô"}</span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-[#AAAAAA]">
                 {changeLayoutT.tilesDescription || "Số ô tối đa được hiển thị, tùy vào kích thước cửa sổ."}
               </span>
             </div>
-            <span className="text-base font-semibold text-[#1A73E8] bg-blue-50 px-2 py-0.5 rounded-md min-w-[32px] text-center">{maxTiles}</span>
+            <span className="text-base font-semibold text-[#1A73E8] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md min-w-[32px] text-center">{maxTiles}</span>
           </div>
           <div className="flex items-center gap-4">
-            <LayoutGrid size={24} className="text-gray-600" />
+            <LayoutGrid size={24} className="text-gray-600 dark:text-neutral-400" />
             <div className="flex-1 px-2">
               <Slider
                 value={maxTiles}
@@ -172,7 +172,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
             </div>
             <div className="grid grid-cols-3 gap-0.5 w-6 h-6">
               {[...Array(9)].map((_, i) => (
-                <div key={i} className="bg-gray-600 rounded-[1px]" />
+                <div key={i} className="bg-gray-600 dark:bg-neutral-400 rounded-[1px]" />
               ))}
             </div>
           </div>

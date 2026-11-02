@@ -105,10 +105,10 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
 
   return (
     <div className="w-full shrink-0 flex flex-col items-center mt-4 z-20 relative">
-      <div className="w-full flex flex-col h-52 bg-white rounded-xl border border-border group/subtitles relative overflow-hidden">
+      <div className="w-full flex flex-col h-52 bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white rounded-2xl border border-border dark:border-[#3F3F3F] group/subtitles relative overflow-hidden">
         {/* Full Loading Overlay when starting or stopping */}
         {(isStartingSubtitles || isStoppingSubtitles) && (
-          <div className="absolute inset-0 z-30 bg-white/85 backdrop-blur-[2px] flex items-center justify-center select-none pointer-events-auto">
+          <div className="absolute inset-0 z-30 bg-white/85 dark:bg-[#1A1A1A]/85 backdrop-blur-[2px] flex items-center justify-center select-none pointer-events-auto">
             <LoadingSpinner
               text={
                 isStoppingSubtitles
@@ -120,7 +120,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
         )}
 
         {/* Header bar with Language switcher, Font size button and Close button - absolute UI overlay on hover */}
-        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-border/80 px-4 h-14 rounded-t-xl opacity-0 group-hover/subtitles:opacity-100 pointer-events-none group-hover/subtitles:pointer-events-auto transition-all duration-200 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-border/80 dark:border-[#3F3F3F]/80 px-4 h-14 rounded-t-2xl opacity-0 group-hover/subtitles:opacity-100 pointer-events-none group-hover/subtitles:pointer-events-auto transition-all duration-200 bg-white/90 dark:bg-[#1A1A1A]/90 backdrop-blur-sm shadow-sm">
           <span className="font-semibold">
             {t.rooms?.videoCall?.subtitles || "Subtitles"}
           </span>
@@ -160,7 +160,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                 </IconButton>
 
                 {showSizePicker && (
-                  <div className="absolute bottom-full right-0 mb-2 z-50 min-w-[170px] bg-white text-gray-800 rounded-2xl shadow-xl border border-border py-1.5 flex flex-col overflow-hidden pointer-events-auto">
+                  <div className="absolute bottom-full right-0 mb-2 z-50 min-w-[170px] bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white rounded-xl shadow-xl border border-border dark:border-[#3F3F3F] py-1.5 flex flex-col overflow-hidden pointer-events-auto">
                     {FONT_SIZES.map((size) => {
                       const isSelected = fontSize === size.id
                       return (
@@ -177,13 +177,13 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                           }}
                           className={`flex items-center gap-2.5 px-3.5 py-2 text-sm text-left transition cursor-pointer ${
                             isSelected
-                              ? "bg-primaryBg text-[#d40018] font-semibold"
-                              : "text-gray-700 hover:bg-primaryBg hover:text-gray-900"
+                              ? "bg-primaryBg dark:bg-[#272727] text-cath-red-700 dark:text-red-400 font-semibold"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-primaryBg dark:hover:bg-[#272727] hover:text-gray-900 dark:hover:text-white"
                           }`}
                         >
                           <div className="w-4 h-4 flex items-center justify-center shrink-0">
                             {isSelected && (
-                              <Check className="w-4 h-4 text-[#d40018]" />
+                              <Check className="w-4 h-4 text-cath-red-700 dark:text-red-400" />
                             )}
                           </div>
                           <span>
@@ -230,7 +230,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                 className="rounded-xl overflow-hidden"
                 contentClassName={`rounded-xl ${
                   subtitleSelectedLanguage === lang
-                    ? "bg-primaryBg font-semibold text-[#d40018]"
+                    ? "bg-primaryBg dark:bg-[#272727] font-semibold text-cath-red-700 dark:text-red-400"
                     : ""
                 }`}
                 leftContent={
@@ -256,7 +256,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
         >
           {subtitles.length === 0 ? (
             <div className="flex h-full items-center justify-center">
-              <span className="text-gray-400 italic text-sm">
+              <span className="text-gray-400 dark:text-[#AAAAAA] italic text-sm">
                 {t.rooms?.videoCall?.subtitleWaiting ||
                   "Subtitles will appear when someone speaks..."}
               </span>
@@ -266,9 +266,9 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
               {groupedSubtitles.map((group, groupIdx) => (
                 <p
                   key={`${group.timestamp}-${groupIdx}`}
-                  className={`${currentFontClass} leading-relaxed text-gray-900 w-full break-words text-left`}
+                  className={`${currentFontClass} leading-relaxed text-gray-900 dark:text-gray-100 w-full break-words text-left`}
                 >
-                  <span className="font-semibold text-[#d40018] mr-1.5 shrink-0">
+                  <span className="font-semibold text-cath-red-700 dark:text-red-400 mr-1.5 shrink-0">
                     {group.speaker}:
                   </span>
                   {group.items.map((item, itemIdx) => (

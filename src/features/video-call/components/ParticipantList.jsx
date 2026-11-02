@@ -163,7 +163,7 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors [&_svg]:!h-4 [&_svg]:!w-4 ${
         on
           ? "bg-cath-red-700/10 text-cath-red-700"
-          : "bg-neutral-100 text-neutral-400"
+          : "bg-neutral-100 dark:bg-[#272727] text-neutral-400 dark:text-[#AAAAAA]"
       }`}
     >
       {on ? onIcon : offIcon}
@@ -217,7 +217,7 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
       {!isLocal && (
         <div
           aria-hidden="true"
-          className="ml-0.5 flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 transition-colors group-hover:bg-neutral-200/70 group-hover:text-neutral-600 [&_svg]:!h-4 [&_svg]:!w-4"
+          className="ml-0.5 flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 dark:text-[#AAAAAA] transition-colors group-hover:bg-neutral-200/70 dark:group-hover:bg-[#3D3D3D] group-hover:text-neutral-600 dark:group-hover:text-white [&_svg]:!h-4 [&_svg]:!w-4"
         >
           <Ellipsis />
         </div>
@@ -229,7 +229,7 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
     <ListItem
       lines={1}
       hoverEffect={true}
-      hoverBgColor="bg-gray-100"
+      hoverBgColor="bg-gray-100 dark:bg-[#272727]"
       className="rounded-xl cursor-pointer"
       contentClassName="rounded-xl"
       leftContent={leftContent}
@@ -257,7 +257,7 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
           </span>
         )}
         {isThisCoHost && (
-          <span className="shrink-0 rounded-md bg-amber-100 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700">
+          <span className="shrink-0 rounded-md bg-amber-100 dark:bg-amber-950/40 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400">
             {pl.coHostBadge || "Co-host"}
           </span>
         )}
@@ -273,12 +273,12 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
  */
 const ADVANCED_ACTION_TONES = {
   danger: {
-    tile: "enabled:hover:border-red-200 enabled:hover:bg-red-50/40",
-    icon: "bg-red-50 text-cath-red-700",
+    tile: "enabled:hover:border-red-200 dark:enabled:hover:border-red-900/50 enabled:hover:bg-red-50/40 dark:enabled:hover:bg-red-950/30",
+    icon: "bg-red-50 dark:bg-red-950/50 text-cath-red-700 dark:text-red-400",
   },
   warning: {
-    tile: "enabled:hover:border-amber-200 enabled:hover:bg-amber-50/40",
-    icon: "bg-amber-50 text-amber-600",
+    tile: "enabled:hover:border-amber-200 dark:enabled:hover:border-amber-900/50 enabled:hover:bg-amber-50/40 dark:enabled:hover:bg-amber-950/30",
+    icon: "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400",
   },
 }
 
@@ -299,14 +299,14 @@ const AdvancedAction = ({
       disabled={disabled}
       title={title || label}
       aria-label={label}
-      className={`inline-flex h-9 min-w-0 items-center gap-2 rounded-xl border border-neutral-200/90 bg-white pl-1.5 pr-2 text-left transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 ${toneStyles.tile}`}
+      className={`inline-flex h-9 min-w-0 items-center gap-2 rounded-xl border border-neutral-200/90 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] pl-1.5 pr-2 text-left transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 ${toneStyles.tile}`}
     >
       <span
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-colors [&_svg]:!h-3.5 [&_svg]:!w-3.5 ${toneStyles.icon}`}
       >
         {icon}
       </span>
-      <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-neutral-700">
+      <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-neutral-700 dark:text-neutral-200">
         {label}
       </span>
       {badge}
@@ -1080,9 +1080,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full bg-white overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white overflow-hidden">
       {/* Header Bar */}
-      <div className="flex items-center justify-between border-b border-neutral-200/80 px-2.5 py-1.5 bg-white shrink-0 gap-1.5">
+      <div className="flex items-center justify-between border-b border-neutral-200/80 dark:border-[#3F3F3F] px-2.5 py-1.5 bg-white dark:bg-[#1A1A1A] shrink-0 gap-1.5">
         {canViewWaiting || canViewBanned || canManagePolicies ? (
           <div
             className="flex items-center gap-1 overflow-x-auto scrollbar-hidden flex-1 min-w-0"
@@ -1097,7 +1097,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold transition-all ${
                 activeTab === "members"
                   ? "bg-cath-red-700 text-white shadow-xs"
-                  : "text-neutral-600 hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
+                  : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
               }`}
             >
               {pl.membersTab || pl.title} ({participants.length})
@@ -1112,7 +1112,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                 className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold transition-all flex items-center gap-1 ${
                   activeTab === "waiting"
                     ? "bg-cath-red-700 text-white shadow-xs"
-                    : "text-neutral-600 hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
+                    : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
                 }`}
               >
                 <span>{t?.rooms?.videoCall?.waitingQueue?.tab || "Chờ"}</span>
@@ -1139,7 +1139,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                 className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold transition-all ${
                   activeTab === "banned"
                     ? "bg-cath-red-700 text-white shadow-xs"
-                    : "text-neutral-600 hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
+                    : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
                 }`}
               >
                 {pl.bannedTabShort || "Bị cấm"}
@@ -1155,7 +1155,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                 className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold transition-all flex items-center gap-1.5 ${
                   activeTab === "settings"
                     ? "bg-cath-red-700 text-white shadow-xs"
-                    : "text-neutral-600 hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
+                    : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
                 }`}
               >
                 <Settings2 size={13} className="shrink-0" />
@@ -1171,7 +1171,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             )}
           </div>
         ) : !hideTitle ? (
-          <span className="text-xs font-bold text-neutral-800 px-1 truncate flex-1">
+          <span className="text-xs font-bold text-neutral-800 dark:text-white px-1 truncate flex-1">
             {pl.membersTab || pl.title} ({participants.length})
           </span>
         ) : (
@@ -1179,7 +1179,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         )}
 
         {/* Invite action button separated from tabs */}
-        <div className="flex items-center shrink-0 pl-1.5 border-l border-neutral-200/80">
+        <div className="flex items-center shrink-0 pl-1.5 border-l border-neutral-200/80 dark:border-[#3F3F3F]">
           <button
             type="button"
             onClick={() => setIsInviteModalOpen(true)}
@@ -1205,7 +1205,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={pl.searchPlaceholder || "Tìm theo tên..."}
-                  className="w-full h-7.5 pl-8 pr-7 text-xs bg-neutral-100/90 hover:bg-neutral-100 focus:bg-white border border-transparent focus:border-cath-red-700 rounded-lg outline-none transition-all placeholder:text-neutral-400"
+                  className="w-full h-7.5 pl-8 pr-7 text-xs bg-neutral-100/90 hover:bg-neutral-100 focus:bg-white dark:bg-[#272727] dark:hover:bg-[#333333] dark:focus:bg-[#1A1A1A] border border-transparent focus:border-cath-red-700 dark:focus:border-red-500 rounded-lg outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-[#AAAAAA] text-neutral-900 dark:text-white"
                 />
                 {searchQuery && (
                   <button
@@ -1228,12 +1228,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             canBlockAllMics ||
             canLowerAllHands) && (
             <div className="px-2.5 pt-2 shrink-0">
-              <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-neutral-50/60">
+              <div className="overflow-hidden rounded-2xl border border-neutral-200/80 dark:border-[#3F3F3F] bg-neutral-50/60 dark:bg-[#222222]">
                 <button
                   type="button"
                   onClick={() => setAdvancedOpen((v) => !v)}
                   aria-expanded={advancedOpen}
-                  className="flex w-full items-center justify-between px-2.5 py-1.5 text-left transition-colors hover:bg-neutral-100/70"
+                  className="flex w-full items-center justify-between px-2.5 py-1.5 text-left transition-colors hover:bg-neutral-100/70 dark:hover:bg-[#2a2a2a]"
                 >
                   <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
                     <SlidersHorizontal
@@ -1370,7 +1370,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
             {/* Divider between sections */}
             {raisedHandParticipants.length > 0 && otherParticipants.length > 0 && (
-              <div className="my-2 mx-1 border-t border-neutral-100" />
+              <div className="my-2 mx-1 border-t border-neutral-100 dark:border-[#3F3F3F]" />
             )}
 
             {/* Section: Các thành viên khác */}

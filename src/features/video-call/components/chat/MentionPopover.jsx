@@ -18,7 +18,7 @@ const MentionPopover = ({
   if (!participants || participants.length === 0) return null
 
   return (
-    <div className="absolute bottom-full left-0 mb-2 w-72 max-h-60 overflow-y-auto bg-white border border-neutral-200/90 rounded-2xl shadow-xl z-50 py-1.5">
+    <div className="absolute bottom-full left-0 mb-2 w-72 max-h-60 overflow-y-auto bg-white dark:bg-[#1A1A1A] border border-neutral-200/90 dark:border-[#3F3F3F] rounded-xl shadow-xl z-50 py-1.5">
       <div className="flex flex-col py-1">
         {participants.map((p, idx) => {
           const isSelected = idx === selectedIndex
@@ -32,10 +32,10 @@ const MentionPopover = ({
                   e.preventDefault()
                   onSelect(p)
                 }}
-                className={`flex items-center gap-2.5 px-3 py-2 text-left w-full transition-colors cursor-pointer border-b border-neutral-100 ${
+                className={`flex items-center gap-2.5 px-3 py-2 text-left w-full transition-colors cursor-pointer border-b border-neutral-100 dark:border-[#272727] ${
                   isSelected
-                    ? "bg-red-50 text-[#990011] font-bold"
-                    : "hover:bg-neutral-50 text-neutral-800"
+                    ? "bg-red-50 dark:bg-red-950/40 text-[#990011] dark:text-red-400 font-bold"
+                    : "hover:bg-neutral-50 dark:hover:bg-[#272727] text-neutral-800 dark:text-neutral-200"
                 }`}
               >
                 <div className="w-7 h-7 rounded-full bg-[#990011] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
@@ -44,11 +44,11 @@ const MentionPopover = ({
 
                 <div className="flex flex-col min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-[#990011]">
+                    <span className="text-xs font-bold text-[#990011] dark:text-red-400">
                       @All
                     </span>
                   </div>
-                  <span className="text-[10px] text-neutral-500 truncate">
+                  <span className="text-[10px] text-neutral-500 dark:text-[#AAAAAA] truncate">
                     {chatT.mentionAllDesc || "Tất cả thành viên trong phòng"}
                   </span>
                 </div>
@@ -75,20 +75,20 @@ const MentionPopover = ({
               }}
               className={`flex items-center gap-2.5 px-3 py-2 text-left w-full transition-colors cursor-pointer ${
                 isSelected
-                  ? "bg-red-50 text-[#990011] font-bold"
-                  : "hover:bg-neutral-50 text-neutral-800"
+                  ? "bg-red-50 dark:bg-red-950/40 text-[#990011] dark:text-red-400 font-bold"
+                  : "hover:bg-neutral-50 dark:hover:bg-[#272727] text-neutral-800 dark:text-neutral-200"
               }`}
             >
               <Avatar src={avatarUrl} name={name} size={28} />
 
               <div className="flex flex-col min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-xs truncate ${isSelected ? "font-bold text-[#990011]" : "font-semibold"}`}>
+                  <span className={`text-xs truncate ${isSelected ? "font-bold text-[#990011] dark:text-red-400" : "font-semibold text-neutral-900 dark:text-white"}`}>
                     {name}
                   </span>
                 </div>
                 {meta.email && (
-                  <span className="text-[10px] text-neutral-400 truncate">
+                  <span className="text-[10px] text-neutral-400 dark:text-[#AAAAAA] truncate">
                     {meta.email}
                   </span>
                 )}

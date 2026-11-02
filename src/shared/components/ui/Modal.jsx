@@ -119,12 +119,12 @@ const ModalContent = ({
           /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(className)
             ? ""
             : "md:max-w-md"
-        } ${/(^|\s)bg-/.test(className) ? "" : "bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white border-border dark:border-[#3F3F3F]"} ${
+        } ${/(^|\s)bg-/.test(className) ? "" : "bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white"} ${
           /(^|\s)rounded/.test(className)
             ? ""
             : fullScreenOnMobile
-              ? "rounded-none md:rounded-3xl md:border md:border-border"
-              : "rounded-3xl border border-border"
+              ? "rounded-none md:rounded-3xl md:border md:border-border dark:md:border-[#3F3F3F]"
+              : "rounded-3xl border border-border dark:border-[#3F3F3F]"
         } ${className}`}
         role="dialog"
         aria-modal="true"
@@ -137,7 +137,7 @@ const ModalContent = ({
         {(title || description || showCloseButton) && (
           <div className={headerClassName}>
             {title || description ? (
-              <div className="flex min-w-0 flex-col gap-1">
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {title ? (
                   typeof title === "string" ? (
                     <h2
@@ -169,6 +169,7 @@ const ModalContent = ({
                 aria-label="Close dialog"
                 onClick={onClose}
                 variant="ghost"
+                className="shrink-0"
               >
                 <X />
               </IconButton>

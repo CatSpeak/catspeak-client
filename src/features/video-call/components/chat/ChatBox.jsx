@@ -112,7 +112,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   }
 
   return (
-    <div className={`relative flex h-full flex-col bg-white ${className}`}>
+    <div className={`relative flex h-full flex-col bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white ${className}`}>
       {/* Tab Bar */}
       <Tabs
         tabs={chatTabs}

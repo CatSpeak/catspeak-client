@@ -22,13 +22,13 @@ const SpeakingParticipantRow = ({
   const isAttention = status === "attention"
   const isTooLow = status === "tooLow"
 
-  let containerClass = "px-4 py-3 border-b border-gray-100 transition-colors"
+  let containerClass = "px-4 py-3 border-b border-gray-100 dark:border-[#272727] transition-colors"
   let badge = null
   let barFillColor = "bg-emerald-500"
   let percentColor = "text-emerald-600"
 
   if (isAttention) {
-    containerClass += " bg-[#FFFDF5] border-l-4 border-l-amber-500"
+    containerClass += " bg-[#FFFDF5] dark:bg-amber-950/20 border-l-4 border-l-amber-500"
     barFillColor = "bg-amber-500"
     percentColor = "text-amber-600"
     badge = (
@@ -37,7 +37,7 @@ const SpeakingParticipantRow = ({
       </span>
     )
   } else if (isTooLow) {
-    containerClass += " bg-[#FFF8F8] border-l-4 border-l-cath-red-700"
+    containerClass += " bg-[#FFF8F8] dark:bg-red-950/20 border-l-4 border-l-cath-red-700"
     barFillColor = "bg-cath-red-700"
     percentColor = "text-cath-red-700"
     badge = (
@@ -53,11 +53,11 @@ const SpeakingParticipantRow = ({
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2 min-w-0 pr-2">
           {badge}
-          <span className="font-medium text-sm text-gray-900 truncate">
+          <span className="font-medium text-sm text-gray-900 dark:text-white truncate">
             {name}
           </span>
         </div>
-        <span className="text-xs text-gray-500 font-medium font-mono shrink-0">
+        <span className="text-xs text-gray-500 dark:text-[#AAAAAA] font-medium font-mono shrink-0">
           {formatDuration(durationSec)}
         </span>
       </div>
@@ -67,7 +67,7 @@ const SpeakingParticipantRow = ({
         <span className={`text-xs font-bold w-7 shrink-0 ${percentColor}`}>
           {sharePercent}%
         </span>
-        <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+        <div className="flex-1 bg-gray-100 dark:bg-neutral-800 rounded-full h-1.5 overflow-hidden">
           <div
             className={`${barFillColor} h-full rounded-full transition-all duration-500`}
             style={{

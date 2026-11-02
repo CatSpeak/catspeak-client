@@ -38,19 +38,19 @@ const PolicyRow = ({
       tabIndex={disabled ? -1 : 0}
       onClick={handleToggle}
       onKeyDown={handleKeyDown}
-      className={`group flex items-center justify-between gap-3 rounded-xl border border-neutral-200/90 bg-white px-3.5 py-2.5 transition-all select-none ${
+      className={`group flex items-center justify-between gap-3 rounded-xl border border-neutral-200/90 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-3.5 py-2.5 transition-all select-none ${
         disabled
           ? "cursor-not-allowed opacity-60"
-          : "cursor-pointer hover:border-neutral-300 hover:bg-neutral-50/80 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
+          : "cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-500 hover:bg-neutral-50/80 dark:hover:bg-[#3D3D3D] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
       }`}
     >
       <div className="flex min-w-0 items-center gap-2.5 flex-1">
         {icon && (
-          <span className="shrink-0 text-neutral-500 group-hover:text-cath-red-700 transition-colors">
+          <span className="shrink-0 text-neutral-500 dark:text-[#AAAAAA] group-hover:text-cath-red-700 transition-colors">
             {icon}
           </span>
         )}
-        <span className="text-xs font-medium text-neutral-800 leading-snug break-words flex-1">
+        <span className="text-xs font-medium text-neutral-800 dark:text-neutral-200 leading-snug break-words flex-1">
           {label}
         </span>
         {description && (

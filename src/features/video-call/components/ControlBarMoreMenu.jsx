@@ -50,7 +50,7 @@ const ControlBarMoreMenu = ({
               duration={0.2}
               className="fixed inset-x-0 bottom-0 md:absolute md:inset-x-auto md:bottom-[110%] md:right-0 z-50 md:mb-2 md:min-w-56 md:max-w-72 w-full"
             >
-              <div className="w-full overflow-hidden rounded-t-[24px] md:rounded-lg border border-border bg-white shadow-lg pb-safe md:pb-0">
+              <div className="w-full overflow-hidden rounded-t-3xl md:rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-lg pb-safe md:pb-0">
                 <AnimatePresence mode="wait" initial={false}>
                   {!showSubtitlePicker ? (
                     <FluentAnimation

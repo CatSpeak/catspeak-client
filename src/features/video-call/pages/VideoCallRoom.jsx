@@ -290,7 +290,7 @@ const VideoCallRoomContent = () => {
   }
 
   return (
-    <div className="flex h-full w-full flex-col relative overflow-hidden">
+    <div className="flex h-full w-full flex-col relative overflow-hidden bg-primaryBg dark:bg-[#0F0F0F]">
       {isReconnecting && (
         <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/50 backdrop-blur-md text-white">
           <div className="relative flex items-center justify-center h-16 w-16 mb-6">
@@ -309,7 +309,7 @@ const VideoCallRoomContent = () => {
 
       {/* Main Content Area — the only scrollable region; header above and
           control bar below stay pinned to the viewport */}
-      <div className="p-4 relative flex flex-1 min-h-0 flex-col overflow-y-auto overflow-x-hidden overscroll-contain md:flex-row md:bg-primaryBg bg-white gap-4">
+      <div className="p-4 relative flex flex-1 min-h-0 flex-col overflow-y-auto overflow-x-hidden overscroll-contain md:flex-row bg-primaryBg dark:bg-[#0F0F0F] gap-4 lg:gap-0">
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
@@ -330,7 +330,7 @@ const VideoCallRoomContent = () => {
                       stays in the normal layout behind. */}
                   <div
                     ref={mediaRef}
-                    className="watch-fs-card w-full shrink-0 overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/[0.06]"
+                    className="watch-fs-card w-full shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-[#1A1A1A] shadow-lg ring-1 ring-black/[0.06] dark:ring-white/10"
                   >
                     <SyncedYouTubePlayer
                       ref={mediaPlayerRef}
@@ -408,14 +408,14 @@ const VideoCallRoomContent = () => {
         <AnimatePresence initial={false}>
           {isSidePanelOpen && (
             <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 360, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="hidden lg:flex flex-col overflow-hidden relative"
-              style={{ width: 360 }}
+              initial={{ width: 0, marginLeft: 0 }}
+              animate={{ width: 360, marginLeft: 16 }}
+              exit={{ width: 0, marginLeft: 0 }}
+              transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
+              className="hidden lg:flex flex-col overflow-hidden relative shrink-0"
+
             >
-              <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+              <div className="w-[360px] min-w-[360px] h-full flex flex-col shrink-0 bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white rounded-2xl shadow-sm border border-border dark:border-[#3F3F3F] overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showSpeakingTimeBalance &&
                   isHost &&
@@ -426,7 +426,9 @@ const VideoCallRoomContent = () => {
                   )}
                 {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                 {showAvatarPicker && <AvatarUrlPicker />}
-                {showTroubleshoot && <TroubleshootPanel />}
+                {showTroubleshoot && (
+                  <TroubleshootPanel onClose={() => setActiveSidePanel(null)} />
+                )}
                 {showBreakout && isBreakoutSupported(room?.roomType) && (
                   <BreakoutSidebarPanel
                     sessionId={parentSessionId}
@@ -464,8 +466,8 @@ const VideoCallRoomContent = () => {
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white shadow-2xl flex flex-col border-l border-border overflow-hidden"
+              transition={{ type: "tween", duration: 0.18, ease: "easeOut" }}
+              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-2xl flex flex-col border-l border-border dark:border-[#3F3F3F] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {showParticipants && <ParticipantList />}
@@ -478,7 +480,9 @@ const VideoCallRoomContent = () => {
                 )}
               {showVirtualBackground && <BackgroundsAndEffectsPanel />}
               {showAvatarPicker && <AvatarUrlPicker />}
-              {showTroubleshoot && <TroubleshootPanel />}
+              {showTroubleshoot && (
+                <TroubleshootPanel onClose={() => setActiveSidePanel(null)} />
+              )}
               {showBreakout && isBreakoutSupported(room?.roomType) && (
                 <BreakoutSidebarPanel
                   sessionId={parentSessionId}
@@ -515,24 +519,24 @@ const VideoCallRoomContent = () => {
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
-                transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-                className="flex h-[75vh] w-full flex-col bg-white shadow-xl rounded-t-[24px] overflow-hidden"
+                transition={{ type: "tween", duration: 0.2, ease: "easeOut" }}
+                className="flex h-[75vh] w-full flex-col bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-xl rounded-t-3xl overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div
                   className="w-full flex justify-center pt-3 pb-1 shrink-0 cursor-pointer"
                   onClick={() => setActiveSidePanel(null)}
                 >
-                  <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
+                  <div className="w-10 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full" />
                 </div>
 
                 {!showChat && (
                   <button
                     type="button"
-                    className="text-black flex w-full items-center gap-2 border-b border-border px-4 py-3 text-left hover:bg-gray-50 shrink-0"
+                    className="text-foreground dark:text-white flex w-full items-center gap-2 border-b border-border dark:border-[#3F3F3F] px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-[#272727] shrink-0"
                     onClick={() => setActiveSidePanel(null)}
                   >
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10 dark:bg-white/10 dark:text-white">
                       <ChevronRight className="rotate-180" />
                     </span>
                     <div className="text-base font-semibold">
@@ -547,15 +551,15 @@ const VideoCallRoomContent = () => {
                     currentUser={user}
                     onSendMessage={handleSendMessage}
                     isConnected={isConnected}
-                    className="flex-1 min-h-0 w-full rounded-t-[24px]"
+                    className="flex-1 min-h-0 w-full rounded-t-3xl"
                     hideTitle
                   />
                 ) : showParticipants ? (
-                  <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white">
+                  <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]">
                     <ParticipantList hideTitle />
                   </div>
                 ) : (
-                  <div className="flex-1 overflow-y-auto bg-white min-h-0">
+                  <div className="flex-1 overflow-y-auto bg-white dark:bg-[#1A1A1A] min-h-0">
                     {showSpeakingTimeBalance &&
                       isHost &&
                       isSpeakingTimeBalanceSupported(room) && (

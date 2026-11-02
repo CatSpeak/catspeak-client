@@ -25,7 +25,7 @@ const SwitchCallModal = ({
       title={t.rooms?.videoCall?.provider?.switchTitle ?? "Switch Call?"}
       showCloseButton={false}
       fullScreenOnMobile={false}
-      className="rounded-xl border border-border"
+      className="rounded-3xl border border-border dark:border-[#3F3F3F]"
       headerClassName="flex items-start justify-between p-4"
       bodyClassName="px-4"
       footerClassName="p-4"
@@ -49,7 +49,7 @@ const SwitchCallModal = ({
         </div>
       }
     >
-      <div className="text-sm text-secondary">
+      <div className="text-sm text-secondary dark:text-[#AAAAAA]">
         <p>
           {message ??
             t.rooms?.videoCall?.provider?.switchMessage ??

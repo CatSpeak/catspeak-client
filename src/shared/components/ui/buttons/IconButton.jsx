@@ -6,7 +6,7 @@ const IconButton = ({
   onClick,
   title,
   disabled = false,
-  variant = "filled", // "filled" | "ghost" | "outline" | "primary" | "iconOnly" | "transparent" | "overlay" | "secondary" | "cathRed" | "cathOutline" | "white" | "darkGhost" | "darkFilled" | "danger" | "success" | "darkMuted"
+  variant = "filled", // "filled" | "ghost" | "outline" | "primary" | "iconOnly" | "transparent" | "overlay" | "secondary" | "cathRed" | "cathOutline" | "white" | "darkGhost" | "darkFilled" | "danger" | "success" | "darkMuted" | "control" | "controlActive"
   size = "sm", // "xs" | "sm" | "md"
   className = "",
   innerClassName = "",
@@ -62,6 +62,10 @@ const IconButton = ({
       "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-600/30 transition-colors",
     darkMuted:
       "bg-neutral-800/80 border border-white/10 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors",
+    control:
+      "bg-primaryBg hover:bg-[#E6E6E6] text-black dark:bg-[#272727] dark:hover:bg-[#3D3D3D] dark:text-white shadow-sm transition-colors",
+    controlActive:
+      "bg-cath-red-600 hover:bg-cath-red-700 text-white shadow-sm transition-colors",
   }
 
   const currentSize = sizeClasses[size] || sizeClasses.sm
@@ -71,11 +75,11 @@ const IconButton = ({
     <Component
       {...(Component === "button" ? { onClick, disabled, type } : {})}
       title={title}
-      className={`inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation ${currentSize.button} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation shrink-0 ${currentSize.button} ${className}`}
       {...props}
     >
       <span
-        className={`relative inline-flex items-center justify-center rounded-full transition-colors duration-150 ${currentSize.inner} ${variantClasses[variant] || variantClasses.filled} ${innerClassName}`}
+        className={`relative inline-flex items-center justify-center rounded-full transition-colors duration-150 shrink-0 ${currentSize.inner} ${variantClasses[variant] || variantClasses.filled} ${innerClassName}`}
       >
         {children}
         {badge}
