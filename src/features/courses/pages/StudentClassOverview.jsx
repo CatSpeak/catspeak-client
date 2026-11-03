@@ -1,5 +1,5 @@
 import React from 'react'
-import { CalendarDays, MessageSquare, LogIn, ArrowRightFromLine } from 'lucide-react'
+import { CalendarDays, MessageSquare, ArrowRightFromLine } from 'lucide-react'
 import Avatar from '@/shared/components/ui/Avatar'
 import FluentCard from '@/shared/components/ui/FluentCard'
 import { PillButton } from '@/shared/components/ui/buttons'
@@ -49,7 +49,7 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
     : (t.courses?.student?.noUpcomingSessions || "Không có buổi học sắp tới");
 
   return (
-    <FluentCard className="w-full !bg-transparent !p-0 border-none flex flex-col gap-6">
+    <FluentCard className="w-full !bg-transparent !p-0 border-none flex flex-col gap-6 text-[#1A1A1A] dark:text-gray-100">
       {/* ─── Top Section: Title, Schedule Badge & Instructor Profile ─── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         {/* Left Column: Title & Schedule Badge */}
@@ -57,8 +57,8 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
           <PageTitle className='line-clamp-2'> {title}</PageTitle>
 
           {/* Weekly Schedule Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cath-red-900/10 text-[#700000] text-xs sm:text-sm font-medium w-max max-w-full">
-            <CalendarDays size={16} className="text-[#700000] shrink-0" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cath-red-900/10 dark:bg-rose-950/30 text-[#700000] dark:text-[#FF6B6B] text-xs sm:text-sm font-medium w-max max-w-full">
+            <CalendarDays size={16} className="text-[#700000] dark:text-[#FF6B6B] shrink-0" />
             <span className="truncate">{weeklyScheduleStr}</span>
           </div>
         </div>
@@ -69,10 +69,10 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
           className="flex items-center justify-end gap-3 cursor-pointer shrink-0 self-start sm:self-auto hover:opacity-90 transition-opacity flex-row-reverse md:flex-row"
         >
           <div className="flex flex-col text-left sm:text-right">
-            <span className="text-base font-bold">
+            <span className="text-base font-bold text-gray-900 dark:text-white">
               {instructorName}
             </span>
-            <span className="text-sm text-secondary">
+            <span className="text-sm text-secondary dark:text-gray-400">
               {t.profile?.instructor?.title || "Giảng viên"}
             </span>
           </div>
@@ -80,27 +80,27 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
             src={avatarUrl}
             name={instructorName}
             size={40}
-            className="ring-2 ring-white shadow-2xs"
+            className="ring-2 ring-white dark:ring-[#1A1A1A] shadow-2xs"
           />
         </div>
       </div>
 
       {/* ─── Bottom Section: Pink Spotlight Box ("Buổi học tiếp theo") ─── */}
       <FluentCard
-        className="bg-white flex flex-col md:flex-row lg:items-center justify-between gap-6"
+        className="bg-white dark:bg-[#1A1A1A] dark:border-[#3F3F3F] flex flex-col md:flex-row lg:items-center justify-between gap-6"
       >
         {/* Left Side: Session Info & Action Buttons */}
         <div className="flex flex-col gap-4 min-w-0">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-semibold text-gray-600">
+            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
               {t.courses?.courseDetail?.upcomingSession || "Buổi học tiếp theo"}
             </span>
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 ">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
               {nextSessionDisplay}
             </h2>
           </div>
 
-          <div className='block md:hidden md:w-1/3 w-full bg-white rounded-xl p-4'>
+          <div className='block md:hidden md:w-1/3 w-full bg-white dark:bg-[#222222] rounded-xl p-4'>
             <CountdownCard rawNs={rawNs} />
           </div>
 
@@ -123,7 +123,7 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
           </div>
         </div>
 
-        <div className='md:block hidden md:w-1/3 w-full bg-white rounded-xl p-4'>
+        <div className='md:block hidden md:w-1/3 w-full bg-white dark:bg-[#222222] rounded-xl p-4'>
           <CountdownCard rawNs={rawNs} />
         </div>
       </FluentCard>

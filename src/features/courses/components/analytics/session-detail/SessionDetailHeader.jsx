@@ -61,7 +61,7 @@ const SessionDetailHeader = ({ sessionData, classData }) => {
 
       {/* Title */}
       <div className="flex flex-col gap-1 mt-1">
-        <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight leading-tight">
           {sessionName}
         </h1>
       </div>

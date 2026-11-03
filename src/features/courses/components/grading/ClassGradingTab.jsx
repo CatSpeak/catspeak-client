@@ -156,11 +156,11 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, onSelect }) => {
   return (
     <tr
       onClick={() => onSelect(assignment.id)}
-      className="group hover:bg-amber-50/30 transition-colors cursor-pointer"
+      className="group hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition-colors cursor-pointer"
     >
-      <td className="p-4 pl-6 font-extrabold text-gray-850">
+      <td className="p-4 pl-6 font-extrabold text-gray-850 dark:text-gray-100">
         <div className="flex items-center gap-2.5">
-          <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
+          <span className="bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
             {cg.badgeAssignment}
           </span>
           <button
@@ -169,13 +169,13 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, onSelect }) => {
               event.stopPropagation()
               onSelect(assignment.id)
             }}
-            className="truncate max-w-sm text-left font-bold text-gray-900 group-hover:text-[#990011] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
+            className="truncate max-w-sm text-left font-bold text-gray-900 dark:text-white group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
           >
             {getAssignmentTitle(assignment, cg.untitledAssignment)}
           </button>
         </div>
       </td>
-      <td className="p-4 text-gray-500 font-semibold">{dueLabel}</td>
+      <td className="p-4 text-gray-500 dark:text-gray-400 font-semibold">{dueLabel}</td>
       <td className="p-4">
         {isLoading && !hasEmbeddedSubmission ? (
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
@@ -184,30 +184,30 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, onSelect }) => {
         ) : (
           <>
             {displayStatus === "not_submitted" && (
-              <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100 uppercase tracking-wider">
+              <span className="bg-red-50 dark:bg-red-950/30 text-red-655 dark:text-red-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100 dark:border-red-900/40 uppercase tracking-wider">
                 {cd.statusNotSubmitted}
               </span>
             )}
             {(displayStatus === "submitted" || displayStatus === "late") && (
-              <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-blue-100 uppercase tracking-wider">
+              <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-blue-100 dark:border-blue-900/40 uppercase tracking-wider">
                 {displayStatus === "late"
                   ? cg.filterLate
                   : cd.statusNeedsGrading}
               </span>
             )}
             {displayStatus === "returned" && (
-              <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">
+              <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/40 uppercase tracking-wider">
                 {cg.filterReturned}
               </span>
             )}
           </>
         )}
       </td>
-      <td className="p-4 pr-6 text-center font-black text-sm text-gray-900">
+      <td className="p-4 pr-6 text-center font-black text-sm text-gray-900 dark:text-white">
         {isLoading && !hasEmbeddedSubmission ? (
           "—"
         ) : isReleased && gradeLabel !== "—" ? (
-          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg inline-block">
+          <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 px-2.5 py-1 rounded-lg inline-block">
             {gradeLabel}
           </span>
         ) : (
@@ -252,11 +252,11 @@ const StudentQuizRow = ({ quiz, cg, onSelect }) => {
   return (
     <tr
       onClick={() => onSelect && onSelect(quiz.id)}
-      className="group hover:bg-red-50/30 transition-colors cursor-pointer"
+      className="group hover:bg-red-50/30 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
     >
-      <td className="p-4 pl-6 font-extrabold text-gray-850">
+      <td className="p-4 pl-6 font-extrabold text-gray-850 dark:text-gray-100">
         <div className="flex items-center gap-2.5">
-          <span className="bg-red-50 text-[#990011] border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0 flex items-center gap-1">
+          <span className="bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] border border-red-200 dark:border-red-900/40 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0 flex items-center gap-1">
             <Timer size={10} />
             {cg.badgeQuiz}
           </span>
@@ -266,29 +266,29 @@ const StudentQuizRow = ({ quiz, cg, onSelect }) => {
               event.stopPropagation()
               onSelect?.(quiz.id)
             }}
-            className="truncate max-w-sm text-left font-bold text-gray-900 group-hover:text-[#990011] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
+            className="truncate max-w-sm text-left font-bold text-gray-900 dark:text-white group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
           >
             {quiz.name || quiz.title || cg.untitledQuiz}
           </button>
         </div>
       </td>
-      <td className="p-4 text-gray-500 font-semibold">{closeTimeFormatted}</td>
+      <td className="p-4 text-gray-500 dark:text-gray-400 font-semibold">{closeTimeFormatted}</td>
       <td className="p-4 flex items-center gap-2">
         {recordStatus === "submitted" ? (
-          <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">
+          <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/40 uppercase tracking-wider">
             {cg.quizStatusSubmitted}
           </span>
         ) : recordStatus === "inprogress" ? (
-          <span className="bg-amber-50 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-wider flex items-center gap-1">
+          <span className="bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-100 dark:border-amber-900/40 uppercase tracking-wider flex items-center gap-1">
             <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
             {cg.quizStatusInProgress}
           </span>
         ) : hasKnownRecordStatus ? (
-          <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100 uppercase tracking-wider">
+          <span className="bg-red-50 dark:bg-red-950/30 text-red-655 dark:text-red-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100 dark:border-red-900/40 uppercase tracking-wider">
             {cg.quizStatusToDo}
           </span>
         ) : (
-          <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-border uppercase tracking-wider">
+          <span className="bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-border dark:border-[#3F3F3F] uppercase tracking-wider">
             {cg.statusUnavailable}
           </span>
         )}
@@ -300,7 +300,7 @@ const StudentQuizRow = ({ quiz, cg, onSelect }) => {
                 event.stopPropagation()
                 onSelect?.(quiz.id, "result")
               }}
-              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/40 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
             >
               <Eye size={11} />
               <span>{cg.seeQuizResultBtn}</span>
@@ -312,7 +312,7 @@ const StudentQuizRow = ({ quiz, cg, onSelect }) => {
                   event.stopPropagation()
                   onSelect?.(quiz.id, "intro")
                 }}
-                className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                className="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
               >
                 <RotateCcw size={11} />
                 <span>{cg.retakeQuizBtn || "Retake Quiz"}</span>
@@ -327,14 +327,14 @@ const StudentQuizRow = ({ quiz, cg, onSelect }) => {
               event.stopPropagation()
               onSelect?.(quiz.id)
             }}
-            className="ml-auto px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+            className="ml-auto px-2.5 py-1 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
           >
             <RotateCcw size={11} />
             <span>{cg.continueQuizBtn || "Continue Quiz"}</span>
           </button>
         )}
       </td>
-      <td className="p-4 pr-6 text-center font-bold text-xs text-gray-600">
+      <td className="p-4 pr-6 text-center font-bold text-xs text-gray-600 dark:text-gray-400">
         {hasTimeLimit
           ? interpolate(cg.minsLabel, { mins: quiz.timeLimitMinutes })
           : "—"}
@@ -400,12 +400,12 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
   return (
     <div
       onClick={() => onSelect(assignment.id)}
-      className="group relative bg-white border border-border hover:border-amber-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-amber-500 overflow-hidden"
+      className="group relative bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] hover:border-amber-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-amber-500 overflow-hidden"
     >
       <div>
         {/* Top Header Row */}
         <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="bg-amber-50 text-amber-700 border border-amber-200/80 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+          <span className="bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/80 dark:border-amber-900/40 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
             <FileText size={12} className="text-amber-600" />
             {cg.badgeAssignment}
           </span>
@@ -417,8 +417,8 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
               <>
                 {displayStatus === "not_submitted" && (
                   <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full border uppercase tracking-wider ${isExpired
-                    ? "bg-red-50 text-red-655 border-red-200"
-                    : "bg-amber-50 text-amber-700 border-amber-200"
+                    ? "bg-red-50 dark:bg-red-950/30 text-red-655 dark:text-red-400 border-red-200 dark:border-red-900/40"
+                    : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40"
                     }`}>
                     {isExpired
                       ? cg.badgeExpired
@@ -426,14 +426,14 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
                   </span>
                 )}
                 {(displayStatus === "submitted" || displayStatus === "late") && (
-                  <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                     {displayStatus === "late"
                       ? cg.filterLate
                       : cd.statusNeedsGrading}
                   </span>
                 )}
                 {displayStatus === "returned" && (
-                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                     {cg.filterReturned}
                   </span>
                 )}
@@ -443,13 +443,13 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
         </div>
 
         {/* Title */}
-        <h4 className="text-sm font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mb-3">
+        <h4 className="text-sm font-extrabold text-gray-900 dark:text-white group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors leading-snug line-clamp-2 mb-3">
           {getAssignmentTitle(assignment, cg.untitledAssignment)}
         </h4>
 
         {/* Info badges / Due date */}
-        <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 mb-4">
-          <div className="flex items-center gap-2 text-gray-600">
+        <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-4">
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
             <Clock size={13} className={isExpired && displayStatus === "not_submitted" ? "text-red-500 shrink-0" : "text-gray-400 shrink-0"} />
             <span className={`truncate text-xs ${isExpired && displayStatus === "not_submitted" ? "text-red-600 font-extrabold" : ""}`}>
               {cg.dueDateLabel}{dueLabel}
@@ -457,7 +457,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
           </div>
 
           {maxScore !== null && (
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
               <Award size={13} className="text-amber-500 shrink-0" />
               <span>{interpolate(cg.maxScoreLabel, { score: maxScore })}</span>
             </div>
@@ -468,12 +468,12 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
       {/* Grade Banner or Action Footer */}
       <div>
         {gradeLabel && (
-          <div className="bg-emerald-50 border border-emerald-200/60 rounded-xl p-2.5 mb-3 flex items-center justify-between text-xs">
-            <span className="font-extrabold text-emerald-800 flex items-center gap-1.5">
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 rounded-xl p-2.5 mb-3 flex items-center justify-between text-xs">
+            <span className="font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
               <Award size={14} className="text-emerald-600" />
               {cg.scoreLabel}
             </span>
-            <span className="font-black text-emerald-700 text-sm bg-white px-2.5 py-0.5 rounded-md border border-emerald-200 shadow-2xs">
+            <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm bg-white dark:bg-[#222222] px-2.5 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-900/40 shadow-2xs">
               {gradeLabel}
             </span>
           </div>
@@ -486,11 +486,11 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
             onSelect(assignment.id)
           }}
           className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer ${displayStatus === "returned"
-            ? "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-border"
+            ? "bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333333] text-gray-700 dark:text-gray-300 border border-border dark:border-[#3F3F3F]"
             : displayStatus === "submitted" || displayStatus === "late"
-              ? "bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200"
+              ? "bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-950/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40"
               : isExpired
-                ? "bg-red-50 hover:bg-red-100 text-red-700 border border-red-200"
+                ? "bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/40"
                 : "bg-[#990011] hover:bg-[#80000e] text-white shadow-xs"
             }`}
         >
@@ -544,28 +544,28 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
   return (
     <div
       onClick={() => onSelect && onSelect(quiz.id)}
-      className="group relative bg-white border border-border hover:border-red-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-[#990011] overflow-hidden"
+      className="group relative bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] hover:border-red-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-[#990011] overflow-hidden"
     >
       <div>
         {/* Top Header Row */}
         <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="bg-red-50 text-[#990011] border border-red-200/80 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
-            <Timer size={12} className="text-[#990011]" />
+          <span className="bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] border border-red-200/80 dark:border-red-900/40 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+            <Timer size={12} className="text-[#990011] dark:text-[#FF6B6B]" />
             {cg.badgeQuiz}
           </span>
 
           <div className="flex items-center gap-1.5">
             {recordStatus === "submitted" ? (
-              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+              <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                 {cg.quizStatusSubmitted}
               </span>
             ) : recordStatus === "inprogress" ? (
-              <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+              <span className="bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
                 {cg.quizStatusInProgress}
               </span>
             ) : (
-              <span className="bg-red-50 text-red-655 border border-red-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+              <span className="bg-red-50 dark:bg-red-950/30 text-red-655 dark:text-red-400 border border-red-200 dark:border-red-900/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                 {cg.quizStatusToDo}
               </span>
             )}
@@ -573,18 +573,18 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
         </div>
 
         {/* Title */}
-        <h4 className="text-sm font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mb-3">
+        <h4 className="text-sm font-extrabold text-gray-900 dark:text-white group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors leading-snug line-clamp-2 mb-3">
           {quiz.name || quiz.title || cg.untitledQuiz}
         </h4>
 
         {/* Info Grid */}
-        <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 mb-4">
-          <div className="flex items-center gap-2 text-gray-600">
+        <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-4">
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
             <Clock size={13} className="text-gray-400 shrink-0" />
             <span className="truncate">{interpolate(cg.closesLabel, { time: closeTimeFormatted })}</span>
           </div>
 
-          <div className="flex items-center gap-4 text-gray-500 text-xs">
+          <div className="flex items-center gap-4 text-gray-500 dark:text-gray-400 text-xs">
             {hasTimeLimit && (
               <span className="inline-flex items-center gap-1.5">
                 <Timer size={13} className="text-red-500 shrink-0" />
@@ -611,7 +611,7 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
                 e.stopPropagation()
                 onSelect?.(quiz.id, "result")
               }}
-              className={`w-full py-2.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs ${!hasRemainingAttempts ? "col-span-2" : ""}`}
+              className={`w-full py-2.5 px-2 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/40 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs ${!hasRemainingAttempts ? "col-span-2" : ""}`}
             >
               <Eye size={13} />
               <span>{cg.seeQuizResultBtn}</span>
@@ -623,7 +623,7 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
                   e.stopPropagation()
                   onSelect?.(quiz.id, "intro")
                 }}
-                className="w-full py-2.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
+                className="w-full py-2.5 px-2 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
               >
                 <RotateCcw size={13} />
                 <span>{cg.retakeQuizBtn || "Retake Quiz"}</span>
@@ -775,26 +775,26 @@ const QuizCard = ({
   }
 
   return (
-    <div className="bg-white border border-gray-100/90 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between min-h-[300px]">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100/90 dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between min-h-[300px]">
       <div>
         {/* Header Row: Badges & 3-dot Menu */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             {/* 1. Main Publish Status Badge */}
             {isDraft && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] dark:bg-[#4B5563] text-white">
                 <Pencil size={9} />
                 <span>{cg.badgeDraft || "NHÁP"}</span>
               </span>
             )}
             {isPublished && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] dark:bg-[#4B5563] text-white">
                 <Check size={10} strokeWidth={2.5} />
                 <span>{cg.badgePublished || "ĐÃ ĐĂNG"}</span>
               </span>
             )}
             {isClosed && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] dark:bg-[#4B5563] text-white">
                 <X size={10} strokeWidth={2.5} />
                 <span>{cg.badgeClosed || "ĐÃ ĐÓNG"}</span>
               </span>
@@ -804,19 +804,19 @@ const QuizCard = ({
             {!isDraft && !isClosed && (
               <>
                 {isExpired ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] text-[#d32f2f]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] dark:bg-red-950/40 text-[#d32f2f] dark:text-red-400">
                     {cg.badgeExpired || "HẾT HẠN"}
                   </span>
                 ) : isDueSoon ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] text-[#d97706]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] dark:bg-amber-950/40 text-[#d97706] dark:text-amber-400">
                     {cg.badgeUpcoming || "SẮP ĐẾN HẠN"}
                   </span>
                 ) : isUpcomingOpen ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e0f2fe] text-[#0369a1]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e0f2fe] dark:bg-sky-950/40 text-[#0369a1] dark:text-sky-400">
                     {cg.badgeUpcomingOpen || "SẮP MỞ"}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e8f5e9] text-[#2e7d32]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e8f5e9] dark:bg-emerald-950/40 text-[#2e7d32] dark:text-emerald-400">
                     {cg.badgeOpen || "ĐANG MỞ"}
                   </span>
                 )}
@@ -827,7 +827,7 @@ const QuizCard = ({
           {/* 3-dots Menu */}
           <Dropdown
             align="right"
-            dropdownClassName="min-w-[150px] p-1.5 shadow-xl border border-border/80 rounded-2xl bg-white z-50"
+            dropdownClassName="min-w-[150px] p-1.5 shadow-xl border border-border/80 dark:border-[#3F3F3F] rounded-2xl bg-white dark:bg-[#222222] z-50"
             trigger={(isOpen, _, toggle) => (
               <button
                 type="button"
@@ -835,7 +835,7 @@ const QuizCard = ({
                   e.stopPropagation()
                   toggle()
                 }}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors cursor-pointer"
               >
                 <MoreVertical size={16} />
               </button>
@@ -854,17 +854,17 @@ const QuizCard = ({
               navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`)
             }
           }}
-          className="text-lg font-bold text-gray-900 line-clamp-2 leading-snug mt-4 mb-1 hover:text-[#990011] transition-colors cursor-pointer"
+          className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug mt-4 mb-1 hover:text-[#990011] dark:hover:text-[#FF6B6B] transition-colors cursor-pointer"
         >
           {title}
         </h4>
 
         {/* Subtitle */}
-        <p className="text-xs text-gray-400 font-medium mb-3">{subtitle}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mb-3">{subtitle}</p>
 
         {/* Date & Time Row (for Non-Draft) */}
         {!isDraft && dateStr && (
-          <div className="flex items-center justify-between text-xs text-gray-700 font-semibold my-3">
+          <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300 font-semibold my-3">
             <div className="flex items-center gap-1.5">
               <Calendar size={14} className="text-gray-400 shrink-0" />
               <span>{dateStr}</span>
@@ -884,14 +884,14 @@ const QuizCard = ({
         {!isDraft && (
           <div className="mb-4">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-gray-600">{cg.submittedLabel || "Đã nộp"}</span>
-              <span className="font-bold text-gray-900">
+              <span className="font-semibold text-gray-600 dark:text-gray-400">{cg.submittedLabel || "Đã nộp"}</span>
+              <span className="font-bold text-gray-900 dark:text-white">
                 {submittedCount} <span className="font-normal text-gray-400">/ {enrolledCount}</span>
               </span>
             </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-gray-100 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#990011] transition-all duration-300"
+                className="h-full rounded-full bg-[#990011] dark:bg-[#FF6B6B] transition-all duration-300"
                 style={{ width: `${statsPercentage}%` }}
               />
             </div>
@@ -902,7 +902,7 @@ const QuizCard = ({
           <button
             type="button"
             onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}/edit`)}
-            className="w-full py-2.5 bg-white border border-[#990011] hover:bg-rose-50/40 text-[#990011] font-bold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
+            className="w-full py-2.5 bg-white dark:bg-[#1A1A1A] border border-[#990011] dark:border-[#FF6B6B] hover:bg-rose-50/40 dark:hover:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] font-bold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
           >
             <span>{cg.btnContinueEditing || "Tiếp tục chỉnh sửa"}</span>
             <Pencil size={13} />
@@ -1005,26 +1005,26 @@ const TeacherAssignmentCard = ({
   }
 
   return (
-    <div className="bg-white border border-gray-100/90 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between min-h-[300px]">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100/90 dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between min-h-[300px]">
       <div>
         {/* Header Row: Badges & 3-dot Menu */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             {/* 1. Main Publish Status Badge */}
             {isDraft && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] dark:bg-[#4B5563] text-white">
                 <Pencil size={9} />
                 <span>{cg.badgeDraft || "NHÁP"}</span>
               </span>
             )}
             {isPublished && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] dark:bg-[#4B5563] text-white">
                 <Check size={10} strokeWidth={2.5} />
                 <span>{cg.badgePublished || "ĐÃ ĐĂNG"}</span>
               </span>
             )}
             {isClosed && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] dark:bg-[#4B5563] text-white">
                 <X size={10} strokeWidth={2.5} />
                 <span>{cg.badgeClosed || "ĐÃ ĐÓNG"}</span>
               </span>
@@ -1034,15 +1034,15 @@ const TeacherAssignmentCard = ({
             {!isDraft && !isClosed && (
               <>
                 {isExpired ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] text-[#d32f2f]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] dark:bg-red-950/40 text-[#d32f2f] dark:text-red-400">
                     {cg.badgeExpired || "HẾT HẠN"}
                   </span>
                 ) : isDueSoon ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] text-[#d97706]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] dark:bg-amber-950/40 text-[#d97706] dark:text-amber-400">
                     {cg.badgeUpcoming || "SẮP ĐẾN HẠN"}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e8f5e9] text-[#2e7d32]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e8f5e9] dark:bg-emerald-950/40 text-[#2e7d32] dark:text-emerald-400">
                     {cg.badgeOpen || "ĐANG MỞ"}
                   </span>
                 )}
@@ -1053,7 +1053,7 @@ const TeacherAssignmentCard = ({
           {/* 3-dots Menu */}
           <Dropdown
             align="right"
-            dropdownClassName="min-w-[150px] p-1.5 shadow-xl border border-border/80 rounded-2xl bg-white z-50"
+            dropdownClassName="min-w-[150px] p-1.5 shadow-xl border border-border/80 dark:border-[#3F3F3F] rounded-2xl bg-white dark:bg-[#222222] z-50"
             trigger={(isOpen, _, toggle) => (
               <button
                 type="button"
@@ -1061,7 +1061,7 @@ const TeacherAssignmentCard = ({
                   e.stopPropagation()
                   toggle()
                 }}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors cursor-pointer"
               >
                 <MoreVertical size={16} />
               </button>
@@ -1080,17 +1080,17 @@ const TeacherAssignmentCard = ({
               onViewSubmissions(assignment.id)
             }
           }}
-          className="text-lg font-bold text-gray-900 line-clamp-2 leading-snug mt-4 mb-1 hover:text-[#990011] transition-colors cursor-pointer"
+          className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug mt-4 mb-1 hover:text-[#990011] dark:hover:text-[#FF6B6B] transition-colors cursor-pointer"
         >
           {title}
         </h4>
 
         {/* Subtitle */}
-        <p className="text-xs text-gray-400 font-medium mb-3">{subtitle}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mb-3">{subtitle}</p>
 
         {/* Date & Time Row (for Non-Draft) */}
         {!isDraft && dateStr && (
-          <div className="flex items-center justify-between text-xs text-gray-700 font-semibold my-3">
+          <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300 font-semibold my-3">
             <div className="flex items-center gap-1.5">
               <Calendar size={14} className="text-gray-400 shrink-0" />
               <span>{dateStr}</span>
@@ -1110,14 +1110,14 @@ const TeacherAssignmentCard = ({
         {!isDraft && (
           <div className="mb-4">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-gray-600">{cg.submittedLabel || "Đã nộp"}</span>
-              <span className="font-bold text-gray-900">
+              <span className="font-semibold text-gray-600 dark:text-gray-400">{cg.submittedLabel || "Đã nộp"}</span>
+              <span className="font-bold text-gray-900 dark:text-white">
                 {submittedCount} <span className="font-normal text-gray-400">/ {enrolledCount}</span>
               </span>
             </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-gray-100 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#990011] transition-all duration-300"
+                className="h-full rounded-full bg-[#990011] dark:bg-[#FF6B6B] transition-all duration-300"
                 style={{ width: `${statsPercentage}%` }}
               />
             </div>
@@ -1128,7 +1128,7 @@ const TeacherAssignmentCard = ({
           <button
             type="button"
             onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/assignment/${encodeURIComponent(assignment.id)}`)}
-            className="w-full py-2.5 bg-white border border-[#990011] hover:bg-rose-50/40 text-[#990011] font-bold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
+            className="w-full py-2.5 bg-white dark:bg-[#1A1A1A] border border-[#990011] dark:border-[#FF6B6B] hover:bg-rose-50/40 dark:hover:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] font-bold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
           >
             <span>{cg.btnContinueEditing || "Tiếp tục chỉnh sửa"}</span>
             <Pencil size={13} />
@@ -1590,72 +1590,72 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   // ─── Sub-View: Student personal grades view ───
   if (isStudent) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-200">
 
         {/* ─── 1. Student Dashboard Overview Metrics (4 Cards) ─── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Card 1: Total Items */}
-          <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
-            <div className="w-11 h-11 rounded-xl bg-red-50 text-[#990011] flex items-center justify-center shrink-0 border border-red-100">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border/80 dark:border-[#3F3F3F] rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+            <div className="w-11 h-11 rounded-xl bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] flex items-center justify-center shrink-0 border border-red-100 dark:border-red-900/40">
               <FileText size={20} />
             </div>
             <div>
-              <p className="text-2xl font-black text-gray-900 leading-none mb-1">{totalItemsCount}</p>
-              <p className="text-xs font-bold text-gray-500">{cg.totalItems}</p>
+              <p className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">{totalItemsCount}</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400">{cg.totalItems}</p>
             </div>
           </div>
 
           {/* Card 2: Action Required / Pending */}
-          <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border/80 dark:border-[#3F3F3F] rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${pendingStudentItemsCount > 0
-              ? "bg-amber-50 text-amber-700 border-amber-200"
-              : "bg-gray-100 text-gray-500 border-border"
+              ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40"
+              : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400 border-border dark:border-[#3F3F3F]"
               }`}>
               <Clock size={20} />
             </div>
             <div>
-              <p className="text-2xl font-black text-gray-900 leading-none mb-1">{pendingStudentItemsCount}</p>
-              <p className="text-xs font-bold text-gray-500">{cg.pendingWork}</p>
+              <p className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">{pendingStudentItemsCount}</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400">{cg.pendingWork}</p>
             </div>
           </div>
 
           {/* Card 3: Completed */}
-          <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border/80 dark:border-[#3F3F3F] rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+            <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-900/40">
               <CheckCircle2 size={20} />
             </div>
             <div>
-              <p className="text-2xl font-black text-gray-900 leading-none mb-1">{completedStudentItemsCount}</p>
-              <p className="text-xs font-bold text-gray-500">{cg.completedWork}</p>
+              <p className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">{completedStudentItemsCount}</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400">{cg.completedWork}</p>
             </div>
           </div>
 
           {/* Card 4: Graded / Returned */}
-          <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
-            <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-200">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border/80 dark:border-[#3F3F3F] rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+            <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-200 dark:border-blue-900/40">
               <Award size={20} />
             </div>
             <div>
-              <p className="text-2xl font-black text-gray-900 leading-none mb-1">{gradedStudentItemsCount}</p>
-              <p className="text-xs font-bold text-gray-500">{cg.gradedWork}</p>
+              <p className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">{gradedStudentItemsCount}</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400">{cg.gradedWork}</p>
             </div>
           </div>
         </div>
 
         {/* ─── 2. Rich Control Bar (Search, Tabs, Filter, Sort, View Mode Toggle) ─── */}
-        <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-border/80 dark:border-[#3F3F3F] rounded-2xl p-4 shadow-2xs flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
 
           {/* Left: Content Type Tabs with Counts */}
-          <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl shrink-0">
+          <div className="flex items-center gap-1 bg-gray-100/80 dark:bg-[#222222] p-1 rounded-xl shrink-0">
             <button
               type="button"
               onClick={() => selectContentType("all")}
               aria-pressed={contentType === "all"}
-              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 ${contentType === "all" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
+              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${contentType === "all" ? "bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] shadow-xs" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
             >
               <span>{cg.filterAll}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "all" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "all" ? "bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B]" : "bg-gray-200 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
                 }`}>
                 {totalItemsCount}
               </span>
@@ -1665,12 +1665,12 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               type="button"
               onClick={() => selectContentType("assignments")}
               aria-pressed={contentType === "assignments"}
-              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 ${contentType === "assignments" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
+              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${contentType === "assignments" ? "bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] shadow-xs" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
             >
               <FileText size={13} />
               <span>{cg.contentAssignments}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "assignments" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "assignments" ? "bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B]" : "bg-gray-200 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
                 }`}>
                 {totalAssignmentsCount}
               </span>
@@ -1680,12 +1680,12 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               type="button"
               onClick={() => selectContentType("quizzes")}
               aria-pressed={contentType === "quizzes"}
-              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 ${contentType === "quizzes" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
+              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${contentType === "quizzes" ? "bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] shadow-xs" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
             >
               <Timer size={13} />
               <span>{cg.contentQuizzes}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "quizzes" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "quizzes" ? "bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B]" : "bg-gray-200 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
                 }`}>
                 {totalQuizzesCount}
               </span>
@@ -1703,13 +1703,13 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder={cg.searchByTitlePlaceholder}
-                className="w-full bg-gray-50 border border-border rounded-xl pl-9 pr-8 py-2 text-xs font-semibold text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
+                className="w-full bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl pl-9 pr-8 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 focus:bg-white dark:focus:bg-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] transition-all placeholder-gray-400 dark:placeholder-gray-500"
               />
               {searchTerm && (
                 <button
                   type="button"
                   onClick={() => setSearchTerm("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   <X size={13} />
                 </button>
@@ -1741,12 +1741,12 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </div>
 
             {/* View Mode Toggle Switcher */}
-            <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl border border-border/60 shrink-0">
+            <div className="flex items-center gap-1 bg-gray-100/80 dark:bg-[#222222] p-1 rounded-xl border border-border/60 dark:border-[#3F3F3F] shrink-0">
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
                 title={cg.viewModeGrid}
-                className={`p-1.5 rounded-lg transition-all ${viewMode === "grid" ? "bg-white text-[#990011] shadow-2xs font-bold" : "text-gray-500 hover:text-gray-800"
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === "grid" ? "bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] shadow-2xs font-bold" : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
                   }`}
               >
                 <LayoutGrid size={15} />
@@ -1755,7 +1755,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 type="button"
                 onClick={() => setViewMode("list")}
                 title={cg.viewModeList}
-                className={`p-1.5 rounded-lg transition-all ${viewMode === "list" ? "bg-white text-[#990011] shadow-2xs font-bold" : "text-gray-500 hover:text-gray-800"
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === "list" ? "bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] shadow-2xs font-bold" : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
                   }`}
               >
                 <List size={15} />
@@ -1769,13 +1769,13 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
         {hasVisibleListError && (
           <div
             role="alert"
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-800"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-xs font-semibold text-red-800 dark:text-red-400"
           >
             <span>{listErrorMessage}</span>
             <button
               type="button"
               onClick={retryFailedLists}
-              className="self-start sm:self-auto rounded-lg border border-red-300 bg-white px-3 py-1.5 font-extrabold hover:bg-red-100"
+              className="self-start sm:self-auto rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-[#1A1A1A] px-3 py-1.5 font-extrabold hover:bg-red-100 dark:hover:bg-red-950/50 cursor-pointer"
             >
               {cg.retry}
             </button>
@@ -1783,18 +1783,18 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
         )}
 
         {isPartiallyLoading && (
-          <p className="text-xs font-semibold text-gray-500" role="status" aria-live="polite">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
             {cg.loadingMoreContent}
           </p>
         )}
 
         {/* ─── 3. Main Content (Grid View or List View) ─── */}
         {totalStudentItems === 0 ? (
-          <div className="bg-white border border-border/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border/80 dark:border-[#3F3F3F] rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-[#222222] flex items-center justify-center text-gray-400">
               <FileText size={24} />
             </div>
-            <p className="text-sm font-bold text-gray-700">
+            <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
               {searchTerm || statusFilter !== "all"
                 ? cg.noMatchingItems
                 : cg.noDataLabel}
@@ -1806,7 +1806,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                   setSearchTerm("")
                   setStatusFilter("all")
                 }}
-                className="mt-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs rounded-xl transition-colors"
+                className="mt-1 px-4 py-2 bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333333] text-gray-700 dark:text-gray-300 font-extrabold text-xs rounded-xl transition-colors cursor-pointer"
               >
                 {cg.clearFiltersBtn}
               </button>
@@ -1842,18 +1842,18 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
           </div>
         ) : (
           /* Table List View Layout */
-          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-2xs">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border/80 dark:border-[#3F3F3F] rounded-2xl overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
+              <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
                 <thead>
-                  <tr className="border-b border-border bg-gray-50/80 text-gray-700 font-extrabold uppercase tracking-wider">
+                  <tr className="border-b border-border dark:border-[#3F3F3F] bg-gray-50/80 dark:bg-[#222222] text-gray-700 dark:text-gray-300 font-extrabold uppercase tracking-wider">
                     <th className="p-4 pl-6">{cg.contentHeader}</th>
                     <th className="p-4">{cg.deadlineCloseHeader}</th>
                     <th className="p-4">{cg.thStatus}</th>
                     <th className="p-4 pr-6 text-center">{cg.scoreLimitHeader}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 text-gray-800">
+                <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A2A] text-gray-800 dark:text-gray-200">
                   {visibleStudentItems.map((item) => (
                     item.type === "assignment" ? (
                       <StudentAssignmentRow
@@ -1909,18 +1909,18 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const hasNoItems = totalTeacherItems === 0
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 text-[#2e2e2e] dark:text-gray-200">
 
       {/* ─── Filter & Search Bar ─── */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between w-full">
 
         {/* Left: Content Type Tabs (All | Assignments | Quizzes) */}
-        <div className="flex items-center gap-1 bg-gray-150/70 p-1 rounded-xl w-full md:w-auto shrink-0">
+        <div className="flex items-center gap-1 bg-gray-150/70 dark:bg-[#222222] p-1 rounded-xl w-full md:w-auto shrink-0">
           <button
             type="button"
             onClick={() => selectContentType("all")}
             aria-pressed={contentType === "all"}
-            className={`flex-1 md:flex-initial px-4 py-2 text-xs font-extrabold rounded-lg transition-all ${contentType === "all" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
+            className={`flex-1 md:flex-initial px-4 py-2 text-xs font-extrabold rounded-lg transition-all cursor-pointer ${contentType === "all" ? "bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] shadow-xs" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
           >
             {cg.filterAll}
@@ -1929,7 +1929,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             type="button"
             onClick={() => selectContentType("assignments")}
             aria-pressed={contentType === "assignments"}
-            className={`flex-1 md:flex-initial px-4 py-2 text-xs font-extrabold rounded-lg transition-all ${contentType === "assignments" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
+            className={`flex-1 md:flex-initial px-4 py-2 text-xs font-extrabold rounded-lg transition-all cursor-pointer ${contentType === "assignments" ? "bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] shadow-xs" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
           >
             {cg.contentAssignments}
@@ -1938,7 +1938,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             type="button"
             onClick={() => selectContentType("quizzes")}
             aria-pressed={contentType === "quizzes"}
-            className={`flex-1 md:flex-initial px-4 py-2 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 ${contentType === "quizzes" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
+            className={`flex-1 md:flex-initial px-4 py-2 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${contentType === "quizzes" ? "bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] shadow-xs" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
           >
             <Timer size={14} />
@@ -1955,7 +1955,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             onChange={handleSearchChange}
             placeholder={cg.searchPlaceholder}
             aria-label={cg.searchContent}
-            className="w-full bg-white border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
+            className="w-full bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] transition-all placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
@@ -1991,13 +1991,13 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
       {hasVisibleListError && (
         <div
           role="alert"
-          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-800"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-xs font-semibold text-red-800 dark:text-red-400"
         >
           <span>{listErrorMessage}</span>
           <button
             type="button"
             onClick={retryFailedLists}
-            className="self-start sm:self-auto rounded-lg border border-red-300 bg-white px-3 py-1.5 font-extrabold hover:bg-red-100"
+            className="self-start sm:self-auto rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-[#1A1A1A] px-3 py-1.5 font-extrabold hover:bg-red-100 dark:hover:bg-red-950/50 cursor-pointer"
           >
             {cg.retry}
           </button>
@@ -2005,14 +2005,14 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
       )}
 
       {isPartiallyLoading && (
-        <p className="text-xs font-semibold text-gray-500" role="status" aria-live="polite">
+        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
           {cg.loadingMoreContent}
         </p>
       )}
 
       {/* ─── Grid of Assignment & Quiz Cards ─── */}
       {hasNoItems ? (
-        <div className="text-center py-16 bg-white border border-border rounded-3xl p-6 shadow-xs text-xs text-gray-400 font-bold">
+        <div className="text-center py-16 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs text-xs text-gray-400 dark:text-gray-500 font-bold">
           {hasVisibleListError
             ? listErrorMessage
             : cg.noDataLabel}

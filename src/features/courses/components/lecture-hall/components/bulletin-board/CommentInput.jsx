@@ -39,7 +39,7 @@ const CommentInput = ({ onSubmit }) => {
 
   return (
     <div className="flex-1 relative">
-      <div className="rounded-[20px] overflow-hidden border border-[#E2E2E2] bg-white focus-within:border-[#750000] transition-colors shadow-sm flex flex-col">
+      <div className="rounded-[20px] overflow-hidden border border-[#E2E2E2] dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] focus-within:border-[#750000] dark:focus-within:border-[#FF6B6B] transition-colors shadow-sm flex flex-col">
         <style>{`
           .tox-tinymce {
             border: none !important;
@@ -50,12 +50,19 @@ const CommentInput = ({ onSubmit }) => {
             background-color: #F3F4F5 !important;
             border-radius: 20px 20px 0 0 !important;
           }
+          .dark .tox-edit-area {
+            background-color: #222222 !important;
+          }
           .tox .tox-editor-header {
             border-top: 1px solid white !important; /* hide default border to blend */
             box-shadow: none !important;
             padding: 8px 48px 8px 16px !important;
             background-color: white !important;
             border-radius: 0 0 20px 20px !important;
+          }
+          .dark .tox .tox-editor-header {
+            border-top: 1px solid #1A1A1A !important;
+            background-color: #1A1A1A !important;
           }
           .tox .tox-toolbar__primary {
             display: flex !important;
@@ -70,8 +77,14 @@ const CommentInput = ({ onSubmit }) => {
           .tox .tox-tbtn svg {
             fill: #191C1D !important;
           }
+          .dark .tox .tox-tbtn svg {
+            fill: #E2E2E2 !important;
+          }
+          .dark .tox .tox-tbtn:hover {
+            background-color: #2A2A2A !important;
+          }
         `}</style>
-        <div className="bg-[#F3F4F5] w-full rounded-t-[20px]">
+        <div className="bg-[#F3F4F5] dark:bg-[#222222] w-full rounded-t-[20px]">
           <Editor
             tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
             value={value}
@@ -108,8 +121,8 @@ const CommentInput = ({ onSubmit }) => {
             disabled={!hasContent}
             className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
               hasContent
-                ? "bg-[#990011] text-white hover:bg-[#80000e]"
-                : "bg-[#990011] text-white opacity-100" // Image 2 shows it red even if empty? Or maybe it's just red. Let's make it always red but change opacity on disabled if needed. Actually I'll use full opacity red, or dim it if disabled. Wait, in Image 2 it is red.
+                ? "bg-[#990011] text-white hover:bg-[#80000e] dark:bg-[#990011] dark:hover:bg-[#b30014]"
+                : "bg-[#990011] text-white opacity-100"
             }`}
           >
             <SendHorizonal size={16} className="ml-[-2px] text-white" />

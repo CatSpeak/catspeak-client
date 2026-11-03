@@ -207,7 +207,7 @@ const AssignmentGradingWorkspace = ({
   }
 
   return (
-    <div aria-busy={isMutating} className="flex flex-col gap-5 text-[#2e2e2e]">
+    <div aria-busy={isMutating} className="flex flex-col gap-5 text-[#2e2e2e] dark:text-gray-200">
       {/* Top Breadcrumb Navigation */}
       <div className="flex items-center justify-between gap-4">
         <Breadcrumb
@@ -220,11 +220,11 @@ const AssignmentGradingWorkspace = ({
         />
         <PillButton
           variant="outline"
-          className="!h-9 shrink-0"
-          startIcon={<ArrowLeft className="w-4 h-4 text-[#990011]" />}
+          className="!h-9 shrink-0 dark:border-[#3F3F3F]"
+          startIcon={<ArrowLeft className="w-4 h-4 text-[#990011] dark:text-[#FF6B6B]" />}
           onClick={onBack}
         >
-          <span className="text-xs font-semibold text-[#990011]">{cg.btnBack || "Quay lại"}</span>
+          <span className="text-xs font-semibold text-[#990011] dark:text-[#FF6B6B]">{cg.btnBack || "Quay lại"}</span>
         </PillButton>
       </div>
 
@@ -233,11 +233,11 @@ const AssignmentGradingWorkspace = ({
         {/* ─── LEFT COLUMN: Document & Submission Preview (8 cols) ─── */}
         <div className="lg:col-span-8 flex flex-col gap-3">
           {/* Document Header Bar */}
-          <div className="bg-white rounded-2xl border border-border px-4 py-3 flex items-center justify-between shadow-2xs">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] px-4 py-3 flex items-center justify-between shadow-2xs">
             {/* Left: Document Type Badge + File Name */}
             <div className="flex items-center gap-3 min-w-0 flex-1 mr-3">
               <DocumentTypeBadge extension={fileExtension} className="w-8 h-10" />
-              <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">
+              <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate">
                 {firstFileName}
               </span>
             </div>
@@ -245,12 +245,12 @@ const AssignmentGradingWorkspace = ({
             {/* Right: Connected Pill Zoom Controls & More */}
             <div className="flex items-center gap-2 shrink-0">
               {/* Single Connected Pill Zoom Control */}
-              <div className="flex items-center rounded-full overflow-hidden border border-border bg-gray-100/90 h-9 shadow-2xs">
+              <div className="flex items-center rounded-full overflow-hidden border border-border dark:border-[#3F3F3F] bg-gray-100/90 dark:bg-[#222222] h-9 shadow-2xs">
                 {/* Zoom Out: Red Rounded-L Button */}
                 <button
                   type="button"
                   onClick={() => setZoomLevel((val) => Math.max(50, val - 10))}
-                  className="w-9 sm:w-10 h-full bg-[#80000e] hover:bg-[#990011] active:bg-[#66000b] text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-9 sm:w-10 h-full bg-[#80000e] hover:bg-[#990011] active:bg-[#66000b] dark:bg-[#990011] dark:hover:bg-[#b20a1c] text-white flex items-center justify-center transition-colors cursor-pointer"
                   title={cg.zoomOutSubmission || "Thu nhỏ"}
                   aria-label={cg.zoomOutSubmission || "Thu nhỏ"}
                 >
@@ -258,7 +258,7 @@ const AssignmentGradingWorkspace = ({
                 </button>
 
                 {/* 100% Center Display */}
-                <div className="px-3 sm:px-4 text-xs font-semibold text-gray-800 select-none min-w-[52px] sm:min-w-[58px] text-center bg-gray-50/60 h-full flex items-center justify-center">
+                <div className="px-3 sm:px-4 text-xs font-semibold text-gray-800 dark:text-gray-200 select-none min-w-[52px] sm:min-w-[58px] text-center bg-gray-50/60 dark:bg-[#2A2A2A] h-full flex items-center justify-center">
                   {zoomLevel}%
                 </div>
 
@@ -266,7 +266,7 @@ const AssignmentGradingWorkspace = ({
                 <button
                   type="button"
                   onClick={() => setZoomLevel((val) => Math.min(200, val + 10))}
-                  className="w-9 sm:w-10 h-full bg-[#80000e] hover:bg-[#990011] active:bg-[#66000b] text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-9 sm:w-10 h-full bg-[#80000e] hover:bg-[#990011] active:bg-[#66000b] dark:bg-[#990011] dark:hover:bg-[#b20a1c] text-white flex items-center justify-center transition-colors cursor-pointer"
                   title={cg.zoomInSubmission || "Phóng to"}
                   aria-label={cg.zoomInSubmission || "Phóng to"}
                 >
@@ -279,7 +279,7 @@ const AssignmentGradingWorkspace = ({
                 <button
                   type="button"
                   onClick={() => setShowMoreDocMenu((prev) => !prev)}
-                  className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] flex items-center justify-center transition-colors cursor-pointer"
                   title="Thao tác"
                   aria-label="Thao tác tài liệu"
                 >
@@ -289,7 +289,7 @@ const AssignmentGradingWorkspace = ({
                 {showMoreDocMenu && (
                   <>
                     <div className="fixed inset-0 z-30" onClick={() => setShowMoreDocMenu(false)} />
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-border rounded-2xl shadow-xl py-2 z-40 text-xs font-semibold text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-xl py-2 z-40 text-xs font-semibold text-gray-700 dark:text-gray-200 animate-in fade-in slide-in-from-top-2 duration-150">
                       {firstFileUrl && (
                         <a
                           href={firstFileUrl}
@@ -297,9 +297,9 @@ const AssignmentGradingWorkspace = ({
                           rel="noopener noreferrer"
                           download={firstFileName}
                           onClick={() => setShowMoreDocMenu(false)}
-                          className="w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center gap-2 cursor-pointer text-gray-800"
+                          className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200"
                         >
-                          <Download className="w-4 h-4 text-[#990011]" />
+                          <Download className="w-4 h-4 text-[#990011] dark:text-[#FF6B6B]" />
                           <span>Tải xuống tệp</span>
                         </a>
                       )}
@@ -309,8 +309,8 @@ const AssignmentGradingWorkspace = ({
                           setZoomLevel(100)
                           setShowMoreDocMenu(false)
                         }}
-                        className={`w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center gap-2 cursor-pointer text-gray-800 ${
-                          firstFileUrl ? "border-t border-gray-100" : ""
+                        className={`w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200 ${
+                          firstFileUrl ? "border-t border-gray-100 dark:border-[#3F3F3F]" : ""
                         }`}
                       >
                         <ZoomIn className="w-4 h-4 text-gray-400" />
@@ -324,13 +324,13 @@ const AssignmentGradingWorkspace = ({
           </div>
 
           {/* Document Content Canvas */}
-          <div className="bg-white rounded-2xl border border-border p-6 sm:p-10 shadow-xs min-h-[550px] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] p-6 sm:p-10 shadow-xs min-h-[550px] overflow-hidden flex flex-col">
             {!isSubmitted ? (
               <div className="flex-1 flex flex-col items-center justify-center p-12 text-center text-gray-400 gap-3">
-                <div className="w-14 h-14 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-500 dark:text-amber-400 flex items-center justify-center">
                   <X className="w-7 h-7" />
                 </div>
-                <h4 className="text-base font-bold text-gray-800">
+                <h4 className="text-base font-bold text-gray-800 dark:text-white">
                   {cg.modalNotSubmittedMsg || "Học viên chưa nộp bài làm"}
                 </h4>
                 <p className="text-xs text-gray-400 max-w-sm">
@@ -339,7 +339,7 @@ const AssignmentGradingWorkspace = ({
               </div>
             ) : (
               <div
-                className="flex-1 flex flex-col gap-6 text-[#2e2e2e] transition-transform duration-150"
+                className="flex-1 flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-200 transition-transform duration-150"
                 style={{
                   transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined,
                   transformOrigin: "top left",
@@ -347,28 +347,28 @@ const AssignmentGradingWorkspace = ({
                 }}
               >
                 {/* Canvas Header */}
-                <div className="border-b border-gray-200 pb-4 space-y-3">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight leading-snug">
+                <div className="border-b border-gray-200 dark:border-[#3F3F3F] pb-4 space-y-3">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-snug">
                     {safeAssignmentTitle}
                   </h2>
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-gray-500 font-medium">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
                     <div>
                       <span className="text-gray-400">{cg.studentNameLabel || "Tên học viên:"} </span>
-                      <strong className="text-gray-900 font-bold">{studentName}</strong>
+                      <strong className="text-gray-900 dark:text-white font-bold">{studentName}</strong>
                     </div>
                     <div>
                       <span className="text-gray-400">{cg.classLabel || "Lớp:"} </span>
-                      <strong className="text-gray-900 font-bold">{className}</strong>
+                      <strong className="text-gray-900 dark:text-white font-bold">{className}</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Direct Text Response (if any) */}
                 {submissionText ? (
-                  <div className="space-y-4 text-xs sm:text-sm font-normal text-gray-800 leading-relaxed font-sans">
+                  <div className="space-y-4 text-xs sm:text-sm font-normal text-gray-800 dark:text-gray-200 leading-relaxed font-sans">
                     <RenderHTML
                       html={submissionText}
-                      className="prose max-w-none text-gray-800 leading-relaxed font-sans"
+                      className="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 leading-relaxed font-sans"
                       fallback={<p className="italic text-gray-400">{cg.noContentProvided || "Không có nội dung văn bản."}</p>}
                     />
                   </div>
@@ -378,7 +378,7 @@ const AssignmentGradingWorkspace = ({
                 {submissionFiles.length > 0 && (
                   <div className="space-y-3 pt-2">
                     {submissionText && (
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
                         {cg.submittedFilesHeader || "Tệp tin đính kèm"}
                       </span>
                     )}
@@ -392,12 +392,12 @@ const AssignmentGradingWorkspace = ({
                         return (
                           <div
                             key={`${safeUrl || displayName}-${index}`}
-                            className="flex items-center justify-between p-3.5 bg-gray-50/80 border border-border rounded-2xl hover:bg-gray-100/60 transition-colors"
+                            className="flex items-center justify-between p-3.5 bg-gray-50/80 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl hover:bg-gray-100/60 dark:hover:bg-[#2A2A2A] transition-colors"
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <DocumentTypeBadge extension={ext} className="w-7 h-9" />
                               <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-bold text-gray-800 truncate max-w-[200px] sm:max-w-md">
+                                <span className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate max-w-[200px] sm:max-w-md">
                                   {displayName}
                                 </span>
                                 <span className="text-[10px] text-gray-400 font-medium">
@@ -412,7 +412,7 @@ const AssignmentGradingWorkspace = ({
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   download={displayName}
-                                  className="p-1.5 text-gray-400 hover:text-[#990011] hover:bg-red-50 rounded-lg transition-colors"
+                                  className="p-1.5 text-gray-400 hover:text-[#990011] dark:hover:text-[#FF6B6B] hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                                   title="Tải về"
                                 >
                                   <Download className="w-4 h-4" />
@@ -438,23 +438,23 @@ const AssignmentGradingWorkspace = ({
         </div>
 
         {/* ─── RIGHT COLUMN: Grading & Feedback Card (4 cols) ─── */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-6 border border-border shadow-xs flex flex-col gap-5 sticky top-6">
+        <div className="lg:col-span-4 bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 border border-border dark:border-[#3F3F3F] shadow-xs flex flex-col gap-5 sticky top-6">
           {/* Card Title */}
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               {cg.gradingAndComment || "Chấm điểm & nhận xét"}
             </h3>
-            <div className="h-px bg-gray-200 w-full mt-4" />
+            <div className="h-px bg-gray-200 dark:bg-[#3F3F3F] w-full mt-4" />
           </div>
 
           {/* Student Profile Box */}
-          <div className="border border-border rounded-2xl p-3.5 flex items-center gap-3.5 bg-white shadow-2xs">
+          <div className="border border-border dark:border-[#3F3F3F] rounded-2xl p-3.5 flex items-center gap-3.5 bg-white dark:bg-[#222222] shadow-2xs">
             {safeAvatarUrl && !hasAvatarError ? (
               <img
                 src={safeAvatarUrl}
                 alt={studentName}
                 onError={() => setHasAvatarError(true)}
-                className="w-11 h-11 rounded-full object-cover shrink-0 border border-border"
+                className="w-11 h-11 rounded-full object-cover shrink-0 border border-border dark:border-[#3F3F3F]"
               />
             ) : (
               <div className="w-11 h-11 rounded-full bg-[#990011] text-white font-bold text-sm font-sans flex items-center justify-center shrink-0 shadow-2xs">
@@ -462,7 +462,7 @@ const AssignmentGradingWorkspace = ({
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <h4 className="font-bold text-gray-900 text-sm truncate">
+              <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">
                 {studentName}
               </h4>
               <p className="text-xs text-gray-400 font-medium truncate mt-0.5">
@@ -475,29 +475,29 @@ const AssignmentGradingWorkspace = ({
           <div className="space-y-2">
             <label
               htmlFor={scoreInputId}
-              className="text-xs sm:text-sm font-bold text-gray-800 block"
+              className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 block"
             >
               {scoreInputLabel}
             </label>
 
             {!isSubmitted ? (
-              <div className="text-xs font-semibold text-gray-400 italic bg-gray-50 border border-dashed border-border rounded-xl p-3.5 text-center">
+              <div className="text-xs font-semibold text-gray-400 italic bg-gray-50 dark:bg-[#222222] border border-dashed border-border dark:border-[#3F3F3F] rounded-xl p-3.5 text-center">
                 {cg.modalNotSubmittedMsg || "Học viên chưa nộp bài"}
               </div>
             ) : !assignmentClosed ? (
               /* State 1: Assignment is OPEN -> Disabled Gray Stepper (Cannot grade yet) */
               <div
-                className="flex items-center rounded-full overflow-hidden border border-gray-200 bg-gray-100/90 h-11 select-none"
+                className="flex items-center rounded-full overflow-hidden border border-gray-200 dark:border-[#3F3F3F] bg-gray-100/90 dark:bg-[#222222] h-11 select-none"
                 title="Bài tập đang mở, bạn cần khóa bài nộp để chấm điểm"
               >
                 {/* Left Disabled Minus Button */}
-                <div className="w-12 h-full bg-[#9CA3AF] text-white flex items-center justify-center font-bold text-xl rounded-l-full shrink-0 cursor-not-allowed">
+                <div className="w-12 h-full bg-[#9CA3AF] dark:bg-[#4B5563] text-white flex items-center justify-center font-bold text-xl rounded-l-full shrink-0 cursor-not-allowed">
                   <Minus className="w-4 h-4 stroke-[3]" />
                 </div>
 
                 {/* Centered Gray Score Display */}
                 <div className="flex-1 flex items-center justify-center gap-1.5 text-base font-bold">
-                  <span className="text-gray-900 font-bold">{score || "0"}</span>
+                  <span className="text-gray-900 dark:text-white font-bold">{score || "0"}</span>
                   <span className="text-gray-400 font-medium">/ {assignmentMaxScore}</span>
                 </div>
 
@@ -510,10 +510,10 @@ const AssignmentGradingWorkspace = ({
               /* State 2: Assignment is CLOSED -> Active Red Stepper (Grading Enabled) */
               <div className="space-y-1">
                 <div
-                  className={`flex items-center rounded-full overflow-hidden border bg-gray-50 h-11 transition-all ${
+                  className={`flex items-center rounded-full overflow-hidden border bg-gray-50 dark:bg-[#222222] h-11 transition-all ${
                     isScoreInvalid
-                      ? "border-red-500 ring-1 ring-red-200"
-                      : "border-gray-200 focus-within:border-[#990011] focus-within:ring-1 focus-within:ring-[#990011]"
+                      ? "border-red-500 ring-1 ring-red-200 dark:ring-red-900/40"
+                      : "border-gray-200 dark:border-[#3F3F3F] focus-within:border-[#990011] dark:focus-within:border-[#FF6B6B] focus-within:ring-1 focus-within:ring-[#990011] dark:focus-within:ring-[#FF6B6B]"
                   }`}
                 >
                   {/* Active Minus Button (Gray) */}
@@ -543,10 +543,10 @@ const AssignmentGradingWorkspace = ({
                       placeholder="0"
                       inputMode="decimal"
                       className={`w-14 text-center bg-transparent font-bold text-base select-all focus:outline-none ${
-                        isScoreInvalid ? "text-red-600" : "text-[#80000e]"
+                        isScoreInvalid ? "text-red-600 dark:text-red-400" : "text-[#80000e] dark:text-[#FF6B6B]"
                       }`}
                     />
-                    <span className="font-bold text-gray-900 text-base select-none">
+                    <span className="font-bold text-gray-900 dark:text-white text-base select-none">
                       / {assignmentMaxScore}
                     </span>
                   </div>
@@ -556,7 +556,7 @@ const AssignmentGradingWorkspace = ({
                     type="button"
                     onClick={() => handleStepScore(0.5)}
                     disabled={isMutating || (Number(score) || 0) >= assignmentMaxScore}
-                    className="w-12 h-full bg-[#80000e] hover:bg-[#990011] active:bg-[#66000b] text-white flex items-center justify-center font-bold text-xl transition-colors cursor-pointer shrink-0 rounded-r-full disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-12 h-full bg-[#80000e] hover:bg-[#990011] active:bg-[#66000b] dark:bg-[#990011] dark:hover:bg-[#b20a1c] text-white flex items-center justify-center font-bold text-xl transition-colors cursor-pointer shrink-0 rounded-r-full disabled:opacity-40 disabled:cursor-not-allowed"
                     title="Tăng điểm"
                     aria-label="Tăng điểm"
                   >
@@ -568,7 +568,7 @@ const AssignmentGradingWorkspace = ({
                   <span
                     id={`${scoreInputId}-error`}
                     role="alert"
-                    className="text-red-500 text-xs font-semibold mt-1 flex items-center gap-1"
+                    className="text-red-500 dark:text-red-400 text-xs font-semibold mt-1 flex items-center gap-1"
                   >
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {scoreError}
                   </span>
@@ -581,7 +581,7 @@ const AssignmentGradingWorkspace = ({
           <div className="space-y-2">
             <label
               htmlFor={feedbackInputId}
-              className="text-xs sm:text-sm font-bold text-gray-800 block"
+              className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 block"
             >
               {cg.generalFeedback || "Nhận xét chung"}
             </label>
@@ -592,12 +592,12 @@ const AssignmentGradingWorkspace = ({
               onChange={(e) => setFeedback(e.target.value)}
               placeholder={cg.modalFeedbackPlaceholder || "Nhập nhận xét tại đây"}
               rows={4}
-              className="w-full px-4 py-3 rounded-2xl bg-gray-50/90 border border-border text-xs sm:text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] transition-colors resize-none leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 rounded-2xl bg-gray-50/90 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#990011] dark:focus:ring-[#FF6B6B] focus:border-[#990011] dark:focus:border-[#FF6B6B] transition-colors resize-none leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-3 border-t border-gray-100 flex flex-col gap-2.5">
+          <div className="pt-3 border-t border-gray-100 dark:border-[#3F3F3F] flex flex-col gap-2.5">
             {studentStatus === "graded" && (
               <PillButton
                 variant="primary"
@@ -619,11 +619,11 @@ const AssignmentGradingWorkspace = ({
             <div className="flex items-center gap-2.5 w-full">
               <PillButton
                 variant="outline"
-                className="!h-11 flex-1 shrink-0"
+                className="!h-11 flex-1 shrink-0 dark:border-[#3F3F3F]"
                 onClick={onBack}
                 disabled={isMutating}
               >
-                <span className="font-bold text-xs uppercase tracking-wider text-gray-700">
+                <span className="font-bold text-xs uppercase tracking-wider text-gray-700 dark:text-gray-300">
                   {cg.btnBack || "Quay về"}
                 </span>
               </PillButton>

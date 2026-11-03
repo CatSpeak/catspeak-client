@@ -12,14 +12,14 @@ export default function ClassCreationOptions({ state, setField }) {
     { refetchOnMountOrArgChange: true },
   )
   const vouchers = (Array.isArray(data?.data) ? data.data : []).filter(v => v.status === "Draft")
-  const labelStyle = "text-xs font-extrabold text-gray-700 uppercase tracking-wider"
+  const labelStyle = "text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider"
   return (
-    <div className="bg-white rounded-2xl p-4 border border-border flex flex-col gap-4">
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-4 border border-border dark:border-[#3F3F3F] flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <label className={labelStyle}>{cc.voucher || "Class voucher"}</label>
         <Dropdown value={state.voucherId} onChange={value => setField("voucherId", value)} loading={isLoading} dropdownClassName="w-full"
           options={[{ value: "", label: cc.noVoucher || "No voucher" }, ...vouchers.map(v => ({ value: v.id, label: `${v.code} — ${v.title}` }))]} />
-        {error && <button type="button" onClick={refetch} className="text-xs text-[#990011] text-left">{cc.retryVouchers || "Vouchers could not be loaded. Try again."}</button>}
+        {error && <button type="button" onClick={refetch} className="text-xs text-[#990011] dark:text-[#FF6B6B] text-left">{cc.retryVouchers || "Vouchers could not be loaded. Try again."}</button>}
       </div>
       <div className="flex flex-col gap-2">
         <label className={labelStyle}>{cc.creationInviteStudents || "Invite students"}</label>
@@ -37,7 +37,7 @@ export default function ClassCreationOptions({ state, setField }) {
             onChange={value => setField("coHostPermissions", value === "all" ? [...CO_HOST_PRESETS.ALL] : value === "assistant" ? [...CO_HOST_PRESETS.ASSISTANT] : ["share_screen"])}
             options={[{ value: "share", label: cc.coHostShareScreen || "Screen sharing" }, { value: "assistant", label: cc.coHostAssistant || "Teaching assistant" }, { value: "all", label: cc.coHostFullPermissions || "All co-host permissions" }]} />
         </>}
-        {state.coHostAccountId && <button type="button" className="text-xs text-[#990011] text-left" onClick={() => setField("coHostAccountId", "")}>{cc.clearCoHost || "Clear co-host"}</button>}
+        {state.coHostAccountId && <button type="button" className="text-xs text-[#990011] dark:text-[#FF6B6B] text-left" onClick={() => setField("coHostAccountId", "")}>{cc.clearCoHost || "Clear co-host"}</button>}
       </div>
     </div>
   )

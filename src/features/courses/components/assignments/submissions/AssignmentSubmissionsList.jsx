@@ -33,12 +33,12 @@ const interpolate = (template, values) =>
 const getSubmissionStatusBadge = (student, qg) => {
   const status = String(student.status || "").toLowerCase()
   if (status.includes("late") || status.includes("muộn")) {
-    return { label: qg.submissionLate || "Nộp muộn", style: "bg-[#FDF2F2] text-[#E02424] border border-pink-100" }
+    return { label: qg.submissionLate || "Nộp muộn", style: "bg-[#FDF2F2] dark:bg-pink-950/30 text-[#E02424] dark:text-pink-400 border border-pink-100 dark:border-pink-900/40" }
   }
   if (status.includes("not") || status.includes("chưa") || status === "not_submitted") {
-    return { label: qg.submissionNotSubmitted || "Chưa nộp", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+    return { label: qg.submissionNotSubmitted || "Chưa nộp", style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" }
   }
-  return { label: qg.submissionSubmitted || "Đã nộp", style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
+  return { label: qg.submissionSubmitted || "Đã nộp", style: "bg-[#ECFDF5] dark:bg-emerald-950/30 text-[#059669] dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40" }
 }
 
 const getGradingStatusBadge = (student, qg) => {
@@ -48,9 +48,9 @@ const getGradingStatusBadge = (student, qg) => {
     status === "returned" ||
     (student.score !== null && student.score !== undefined && student.score !== "" && student.score !== "–")
   ) {
-    return { label: qg.gradingGraded || "Đã chấm", style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
+    return { label: qg.gradingGraded || "Đã chấm", style: "bg-[#ECFDF5] dark:bg-emerald-950/30 text-[#059669] dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40" }
   }
-  return { label: qg.gradingNotGraded || "Chưa chấm", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+  return { label: qg.gradingNotGraded || "Chưa chấm", style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" }
 }
 
 const AssignmentSubmissionsList = ({
@@ -103,9 +103,9 @@ const AssignmentSubmissionsList = ({
 
   const submissionStatusOptions = [
     { label: qg.all || "Tất cả", value: "all" },
-    { label: qg.submissionSubmitted || "Đã nộp", value: "submitted", style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" },
-    { label: qg.submissionNotSubmitted || "Chưa nộp", value: "not_submitted", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" },
-    { label: qg.submissionLate || "Nộp muộn", value: "late", style: "bg-[#FDF2F2] text-[#E02424] border border-pink-100" },
+    { label: qg.submissionSubmitted || "Đã nộp", value: "submitted", style: "bg-[#ECFDF5] dark:bg-emerald-950/30 text-[#059669] dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40" },
+    { label: qg.submissionNotSubmitted || "Chưa nộp", value: "not_submitted", style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" },
+    { label: qg.submissionLate || "Nộp muộn", value: "late", style: "bg-[#FDF2F2] dark:bg-pink-950/30 text-[#E02424] dark:text-pink-400 border border-pink-100 dark:border-pink-900/40" },
   ]
 
   const submittedTimeOptions = [
@@ -116,8 +116,8 @@ const AssignmentSubmissionsList = ({
 
   const gradingStatusOptions = [
     { label: qg.all || "Tất cả", value: "all" },
-    { label: qg.gradingGraded || "Đã chấm", value: "graded", style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" },
-    { label: qg.gradingNotGraded || "Chưa chấm", value: "not_graded", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" },
+    { label: qg.gradingGraded || "Đã chấm", value: "graded", style: "bg-[#ECFDF5] dark:bg-emerald-950/30 text-[#059669] dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40" },
+    { label: qg.gradingNotGraded || "Chưa chấm", value: "not_graded", style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" },
   ]
 
   const scoreOptions = [
@@ -217,7 +217,7 @@ const AssignmentSubmissionsList = ({
     (scoreFilter !== "all" ? 1 : 0)
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-200">
       {/* Breadcrumb Navigation */}
       <Breadcrumb
         items={[
@@ -230,12 +230,12 @@ const AssignmentSubmissionsList = ({
       />
 
       {/* Main Header Card matching screenshot */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xs border border-border mb-6">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xs border border-border dark:border-[#3F3F3F] mb-6">
         {/* Top Header Row */}
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 sm:gap-6">
           {/* Left Title & Badges */}
           <div className="space-y-3 min-w-0 flex-1">
-            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-snug break-words">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white leading-snug break-words">
               {assignmentTitle}
             </h1>
             <div className="flex flex-wrap items-center gap-2">
@@ -269,29 +269,29 @@ const AssignmentSubmissionsList = ({
             <IconButton
               variant="outline"
               size="xs"
-              className="!w-10 !h-10 shrink-0"
-              innerClassName="!w-10 !h-10 [&>svg]:!w-4 [&>svg]:!h-4 !border-[#990011] !text-[#990011]"
+              className="!w-10 !h-10 shrink-0 dark:border-[#3F3F3F]"
+              innerClassName="!w-10 !h-10 [&>svg]:!w-4 [&>svg]:!h-4 !border-[#990011] dark:!border-[#FF6B6B] !text-[#990011] dark:!text-[#FF6B6B]"
               onClick={() => {
                 navigate(`/workspace/courses/class/${encodeURIComponent(String(classId))}/assignment/${encodeURIComponent(String(assignmentId))}`)
               }}
               title={gradingTranslations.editBtn || "Chỉnh sửa"}
               aria-label={gradingTranslations.editBtn || "Chỉnh sửa"}
             >
-              <Pencil className="w-4 h-4 text-[#990011]" />
+              <Pencil className="w-4 h-4 text-[#990011] dark:text-[#FF6B6B]" />
             </IconButton>
 
             {/* 2. Post to Lecture Hall Button (PillButton with outline variant) */}
             <PillButton
               variant="outline"
-              className="!h-10 flex-1 sm:flex-initial min-w-0 [&>div]:!px-2.5 sm:[&>div]:!px-4 [&>div]:!gap-1.5 sm:[&>div]:!gap-2"
-              endIcon={<ArrowUpToLine className="w-4 h-4 text-[#990011]" />}
+              className="!h-10 flex-1 sm:flex-initial min-w-0 dark:border-[#3F3F3F] [&>div]:!px-2.5 sm:[&>div]:!px-4 [&>div]:!gap-1.5 sm:[&>div]:!gap-2"
+              endIcon={<ArrowUpToLine className="w-4 h-4 text-[#990011] dark:text-[#FF6B6B]" />}
               onClick={() => {
                 navigate(`/workspace/courses/class/${encodeURIComponent(String(classId))}?tab=lecture-hall`)
               }}
               title={gradingTranslations.postToLectureHall || "Đăng giảng đường"}
               aria-label={gradingTranslations.postToLectureHall || "Đăng giảng đường"}
             >
-              <span className="text-[11px] sm:text-sm font-semibold truncate">
+              <span className="text-[11px] sm:text-sm font-semibold truncate text-gray-700 dark:text-gray-300">
                 {gradingTranslations.postToLectureHall || "Đăng giảng đường"}
               </span>
             </PillButton>
@@ -321,7 +321,7 @@ const AssignmentSubmissionsList = ({
                   : (gradingTranslations.lockSubmissions || "Khóa bài nộp")
               }
             >
-              <span className="text-[11px] sm:text-sm font-semibold truncate">
+              <span className="text-[11px] sm:text-sm font-semibold truncate text-white">
                 {assignmentClosed
                   ? (gradingTranslations.openSubmissions || "Mở bài nộp")
                   : (gradingTranslations.lockSubmissions || "Khóa bài nộp")}
@@ -333,8 +333,8 @@ const AssignmentSubmissionsList = ({
               <IconButton
                 variant="secondary"
                 size="xs"
-                className="!w-10 !h-10 shrink-0 border border-gray-200 hover:bg-gray-50"
-                innerClassName="!w-10 !h-10 [&>svg]:!w-4 [&>svg]:!h-4 text-gray-500 hover:text-gray-900"
+                className="!w-10 !h-10 shrink-0 border border-gray-200 dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2A2A2A]"
+                innerClassName="!w-10 !h-10 [&>svg]:!w-4 [&>svg]:!h-4 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 onClick={() => setShowMoreMenu((isOpen) => !isOpen)}
                 title={gradingTranslations.moreAssignmentActions || "Thao tác khác"}
                 aria-label={gradingTranslations.moreAssignmentActions || "Thao tác khác"}
@@ -349,7 +349,7 @@ const AssignmentSubmissionsList = ({
                   <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
                   <div
                     role="menu"
-                    className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-2xl shadow-xl py-2 z-50 text-xs font-bold text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150"
+                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-xl py-2 z-50 text-xs font-bold text-gray-700 dark:text-gray-200 animate-in fade-in slide-in-from-top-2 duration-150"
                   >
                     <button
                       type="button"
@@ -359,9 +359,9 @@ const AssignmentSubmissionsList = ({
                         setShowMoreMenu(false)
                         onDownloadGradeSheet()
                       }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 text-gray-700 dark:text-gray-200"
                     >
-                      <Download size={14} className="text-[#990011]" />
+                      <Download size={14} className="text-[#990011] dark:text-[#FF6B6B]" />
                       <span>
                         {isDownloadingGradeSheet
                           ? gradingTranslations.downloading || "Đang tải..."
@@ -376,7 +376,7 @@ const AssignmentSubmissionsList = ({
                         setShowMoreMenu(false)
                         onBulkReturn()
                       }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 transition-colors flex items-center gap-2 text-green-700 cursor-pointer disabled:opacity-50"
+                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors flex items-center gap-2 text-green-700 dark:text-emerald-400 cursor-pointer disabled:opacity-50"
                     >
                       <FileCheck size={14} />
                       <span>
@@ -393,7 +393,7 @@ const AssignmentSubmissionsList = ({
                         setShowMoreMenu(false)
                         setShowDeleteModal(true)
                       }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-red-50 transition-colors flex items-center gap-2 text-red-600 cursor-pointer border-t border-border disabled:opacity-50"
+                      className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center gap-2 text-red-600 dark:text-red-400 cursor-pointer border-t border-border dark:border-[#3F3F3F] disabled:opacity-50"
                     >
                       <Trash2 size={14} />
                       <span>{gradingTranslations.deleteAssignment || "Xóa bài nộp"}</span>
@@ -406,20 +406,20 @@ const AssignmentSubmissionsList = ({
         </div>
 
         {/* Divider Line */}
-        <div className="h-px bg-gray-200 my-6" />
+        <div className="h-px bg-gray-200 dark:bg-[#3F3F3F] my-6" />
 
         {/* Bottom Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           {/* Left Stat: Hạn nộp */}
           <div className="md:col-span-5 flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400 flex items-center justify-center shrink-0">
               <Calendar className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-gray-400 font-medium truncate">
                 {gradingTranslations.deadlineHeader || "Hạn nộp"}
               </p>
-              <p className="text-sm sm:text-base font-bold text-gray-800 mt-0.5 truncate">
+              <p className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-200 mt-0.5 truncate">
                 {assignmentDueLabel}
               </p>
             </div>
@@ -427,7 +427,7 @@ const AssignmentSubmissionsList = ({
 
           {/* Right Stat: Bài đã nộp */}
           <div className="md:col-span-7 flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
               <ClipboardCheck className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
@@ -435,16 +435,16 @@ const AssignmentSubmissionsList = ({
                 <p className="text-xs text-gray-400 font-medium truncate">
                   {gradingTranslations.submittedHeader || "Bài đã nộp"}
                 </p>
-                <p className="text-sm sm:text-base font-bold text-gray-800 truncate">
-                  <span className="font-bold text-gray-900">{stats.submitted}</span>
+                <p className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-200 truncate">
+                  <span className="font-bold text-gray-900 dark:text-white">{stats.submitted}</span>
                   <span className="text-xs text-gray-400 font-normal">
                     {" "}/ {stats.total} {gradingTranslations.totalLabel || "Tổng số"}
                   </span>
                 </p>
               </div>
-              <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden mt-2">
+              <div className="w-full bg-gray-200 dark:bg-[#2A2A2A] h-2 rounded-full overflow-hidden mt-2">
                 <div
-                  className="bg-[#990011] h-full rounded-full transition-all duration-300"
+                  className="bg-[#990011] dark:bg-[#FF6B6B] h-full rounded-full transition-all duration-300"
                   style={{ width: `${stats.submittedPercentage}%` }}
                 />
               </div>
@@ -454,10 +454,10 @@ const AssignmentSubmissionsList = ({
       </div>
 
       {/* Submissions Table Section */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-border space-y-4 sm:space-y-5 animate-fade-in">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-border dark:border-[#3F3F3F] space-y-4 sm:space-y-5 animate-fade-in">
         {/* Top Header Row: Title & Search bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-          <h3 className="text-base sm:text-lg font-bold text-gray-900">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
             {qg.submissions || gradingTranslations.submissionsList || "Danh sách nộp bài"}
           </h3>
 
@@ -472,7 +472,7 @@ const AssignmentSubmissionsList = ({
                   setPage(1)
                 }}
                 placeholder={qg.searchPlaceholder || gradingTranslations.searchStudentsPlaceholder || "Tìm kiếm học viên..."}
-                className="w-full bg-gray-50/50 hover:bg-gray-50 focus:bg-white border border-border rounded-xl pl-10 pr-4 py-2 text-xs font-medium text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all"
+                className="w-full bg-gray-50/50 dark:bg-[#222222] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] focus:bg-white dark:focus:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl pl-10 pr-4 py-2 text-xs font-medium text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 dark:focus:ring-[#FF6B6B]/20 focus:border-[#990011] dark:focus:border-[#FF6B6B] transition-all"
               />
             </div>
 
@@ -482,15 +482,15 @@ const AssignmentSubmissionsList = ({
               onClick={() => setIsMobileFilterOpen(true)}
               className={`md:hidden relative flex items-center justify-center w-9 h-9 rounded-xl border transition-all shrink-0 cursor-pointer ${
                 activeFiltersCount > 0
-                  ? "border-[#990011] bg-red-50 text-[#990011]"
-                  : "border-border bg-white text-gray-600 hover:bg-gray-50"
+                  ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B]"
+                  : "border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2A2A2A]"
               }`}
               aria-label={qg.filter || "Bộ lọc"}
               title={qg.filter || "Bộ lọc"}
             >
               <SlidersHorizontal className="w-4 h-4" />
               {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#990011] text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-white text-[10px] font-bold flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
@@ -536,7 +536,7 @@ const AssignmentSubmissionsList = ({
           page={page}
           totalPages={totalPages}
           onChangePage={setPage}
-          className="pt-4 border-t border-gray-100"
+          className="pt-4 border-t border-gray-100 dark:border-[#3F3F3F]"
         />
       </div>
 

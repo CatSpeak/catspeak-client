@@ -52,7 +52,7 @@ const StudentAvatar = ({ student, size = "md", fallbackInitials = "HV" }) => {
         src={avatarUrl}
         alt={studentName}
         onError={() => setHasError(true)}
-        className={`${sizeClasses} rounded-full object-cover shrink-0 border border-border`}
+        className={`${sizeClasses} rounded-full object-cover shrink-0 border border-border dark:border-[#3F3F3F]`}
       />
     )
   }
@@ -69,12 +69,12 @@ const StudentAvatar = ({ student, size = "md", fallbackInitials = "HV" }) => {
 const getSubmissionStatusBadge = (student, qg) => {
   const status = String(student.status || "").toLowerCase()
   if (status.includes("late") || status.includes("muộn")) {
-    return { label: qg.submissionLate || "Nộp muộn", style: "bg-[#FDF2F2] text-[#E02424] border border-pink-100" }
+    return { label: qg.submissionLate || "Nộp muộn", style: "bg-[#FDF2F2] dark:bg-pink-950/30 text-[#E02424] dark:text-pink-400 border border-pink-100 dark:border-pink-900/40" }
   }
   if (status.includes("not") || status.includes("chưa") || status === "not_submitted") {
-    return { label: qg.submissionNotSubmitted || "Chưa nộp", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+    return { label: qg.submissionNotSubmitted || "Chưa nộp", style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" }
   }
-  return { label: qg.submissionSubmitted || "Đã nộp", style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
+  return { label: qg.submissionSubmitted || "Đã nộp", style: "bg-[#ECFDF5] dark:bg-emerald-950/30 text-[#059669] dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40" }
 }
 
 const getGradingStatusBadge = (student, qg) => {
@@ -84,9 +84,9 @@ const getGradingStatusBadge = (student, qg) => {
     status === "returned" ||
     (student.score !== null && student.score !== undefined && student.score !== "" && student.score !== "–")
   ) {
-    return { label: qg.gradingGraded || "Đã chấm", style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
+    return { label: qg.gradingGraded || "Đã chấm", style: "bg-[#ECFDF5] dark:bg-emerald-950/30 text-[#059669] dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40" }
   }
-  return { label: qg.gradingNotGraded || "Chưa chấm", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+  return { label: qg.gradingNotGraded || "Chưa chấm", style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" }
 }
 
 const AssignmentSubmissionsTable = ({
@@ -160,7 +160,7 @@ const AssignmentSubmissionsTable = ({
             return (
               <div
                 key={st.id || idx}
-                className="bg-white rounded-2xl p-3.5 border border-border shadow-2xs space-y-2.5 hover:border-gray-300 transition-colors"
+                className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-3.5 border border-border dark:border-[#3F3F3F] shadow-2xs space-y-2.5 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
               >
                 {/* Top Row: Avatar, Name, Time & Eye Action Button */}
                 <div className="flex items-center justify-between gap-3">
@@ -171,7 +171,7 @@ const AssignmentSubmissionsTable = ({
                       fallbackInitials={qg.studentInitials || "HV"}
                     />
                     <div className="min-w-0">
-                      <h5 className="font-bold text-gray-900 text-sm truncate">
+                      <h5 className="font-bold text-gray-900 dark:text-white text-sm truncate">
                         {studentName}
                       </h5>
                       <div className="text-[11px] text-gray-400 font-medium flex items-center gap-1 mt-0.5">
@@ -192,24 +192,24 @@ const AssignmentSubmissionsTable = ({
                       if (!hasSubmitted) return
                       onSelectStudent?.(st)
                     }}
-                    className="hover:!bg-red-50 !text-[#990011] shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:!bg-transparent"
+                    className="hover:!bg-red-50 dark:hover:!bg-red-950/30 !text-[#990011] dark:!text-[#FF6B6B] shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:!bg-transparent"
                     title={hasSubmitted ? (qg.viewAttempt || "Xem bài nộp") : (qg.studentHasNotSubmitted || "Học viên chưa nộp bài")}
                     aria-label={hasSubmitted ? (qg.viewAttempt || "Xem bài nộp") : (qg.studentHasNotSubmitted || "Học viên chưa nộp bài")}
                   >
-                    <Eye className="w-4.5 h-4.5 text-[#990011]" />
+                    <Eye className="w-4.5 h-4.5 text-[#990011] dark:text-[#FF6B6B]" />
                   </IconButton>
                 </div>
 
                 {/* Middle Row: Submitted Date Time */}
                 {submittedDT && (
-                  <div className="text-xs text-gray-500 font-medium flex items-center gap-1.5 pt-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1.5 pt-1">
                     <span className="text-gray-400">{qg.submittedAt || "Thời gian nộp"}:</span>
-                    <span className="font-semibold text-gray-800">{submittedDT.date} {submittedDT.time}</span>
+                    <span className="font-semibold text-gray-800 dark:text-gray-200">{submittedDT.date} {submittedDT.time}</span>
                   </div>
                 )}
 
                 {/* Bottom Row: Status Badges & Score */}
-                <div className="pt-2 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
+                <div className="pt-2 border-t border-gray-100 dark:border-[#3F3F3F] flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span
                       className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full inline-block ${subStatus.style}`}
@@ -224,33 +224,33 @@ const AssignmentSubmissionsTable = ({
                   </div>
 
                   {/* Score Badge */}
-                  <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 bg-gray-50 px-2 py-0.5 rounded-lg border border-border/60">
+                  <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#222222] px-2 py-0.5 rounded-lg border border-border/60 dark:border-[#3F3F3F]">
                     <span className="text-gray-400 text-[11px]">{qg.score || "Điểm"}:</span>
-                    <span className="font-bold text-gray-900">{displayScore}</span>
+                    <span className="font-bold text-gray-900 dark:text-white">{displayScore}</span>
                   </div>
                 </div>
               </div>
             )
           })
         ) : (
-          <div className="py-12 text-center text-gray-400 text-xs font-medium bg-gray-50/50 rounded-2xl border border-dashed border-border">
+          <div className="py-12 text-center text-gray-400 text-xs font-medium bg-gray-50/50 dark:bg-[#1A1A1A] rounded-2xl border border-dashed border-border dark:border-[#3F3F3F]">
             {qg.noMatchingStudents || "Không tìm thấy học viên nào."}
           </div>
         )}
       </div>
 
       {/* Desktop Table View (hidden on mobile, visible md and up) */}
-      <div className="hidden md:block overflow-x-auto rounded-2xl border border-border shadow-2xs">
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-border dark:border-[#3F3F3F] shadow-2xs">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-border bg-gray-50/80 text-gray-600 font-bold text-[11px] uppercase tracking-wider">
+            <tr className="border-b border-border dark:border-[#3F3F3F] bg-gray-50/80 dark:bg-[#222222] text-gray-600 dark:text-gray-300 font-bold text-[11px] uppercase tracking-wider">
               {/* Col 1: Student info */}
-              <th className="py-3 px-5 border-r border-border min-w-[200px]">
+              <th className="py-3 px-5 border-r border-border dark:border-[#3F3F3F] min-w-[200px]">
                 <span>{qg.thStudentInfo || qg.studentInformation || "Thông tin học viên"}</span>
               </th>
 
               {/* Col 2: Submission status */}
-              <th className="py-3 px-5 border-r border-border text-center min-w-[140px]">
+              <th className="py-3 px-5 border-r border-border dark:border-[#3F3F3F] text-center min-w-[140px]">
                 <TableColumnFilter
                   title={qg.thSubmissionStatus || qg.submissionStatus || "Trạng thái nộp"}
                   filterTitle={qg.filterSubmissionStatus || qg.submissionStatus || "Lọc trạng thái nộp"}
@@ -266,7 +266,7 @@ const AssignmentSubmissionsTable = ({
               </th>
 
               {/* Col 3: Submitted Time (Thời gian nộp) */}
-              <th className="py-3 px-5 border-r border-border text-center min-w-[140px]">
+              <th className="py-3 px-5 border-r border-border dark:border-[#3F3F3F] text-center min-w-[140px]">
                 <TableColumnFilter
                   title={qg.thSubmittedTime || qg.submittedTime || "Thời gian nộp"}
                   filterTitle={qg.filterSubmittedTime || "Sắp xếp thời gian nộp"}
@@ -282,7 +282,7 @@ const AssignmentSubmissionsTable = ({
               </th>
 
               {/* Col 4: Grading status */}
-              <th className="py-3 px-5 border-r border-border text-center min-w-[140px]">
+              <th className="py-3 px-5 border-r border-border dark:border-[#3F3F3F] text-center min-w-[140px]">
                 <TableColumnFilter
                   title={qg.thGradingStatus || qg.gradingStatus || "Trạng thái chấm"}
                   filterTitle={qg.filterGradingStatus || qg.gradingStatus || "Lọc trạng thái chấm"}
@@ -298,7 +298,7 @@ const AssignmentSubmissionsTable = ({
               </th>
 
               {/* Col 5: Score */}
-              <th className="py-3 px-5 border-r border-border text-center min-w-[110px]">
+              <th className="py-3 px-5 border-r border-border dark:border-[#3F3F3F] text-center min-w-[110px]">
                 <TableColumnFilter
                   title={qg.thScore || qg.score || "Điểm"}
                   filterTitle={qg.sortScore || "Sắp xếp / Lọc điểm"}
@@ -319,7 +319,7 @@ const AssignmentSubmissionsTable = ({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A2A] bg-white dark:bg-[#1A1A1A]">
             {students.length > 0 ? (
               students.map((st, idx) => {
                 const subStatus = getSubmissionStatusBadge(st, qg)
@@ -337,10 +337,10 @@ const AssignmentSubmissionsTable = ({
                 return (
                   <tr
                     key={st.id || idx}
-                    className="hover:bg-gray-50/60 transition-colors"
+                    className="hover:bg-gray-50/60 dark:hover:bg-[#222222] transition-colors"
                   >
                     {/* Col 1: Student info */}
-                    <td className="py-4 px-5 border-r border-border">
+                    <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F]">
                       <div className="flex items-center gap-3">
                         <StudentAvatar
                           student={st}
@@ -348,7 +348,7 @@ const AssignmentSubmissionsTable = ({
                           fallbackInitials={qg.studentInitials || "HV"}
                         />
                         <div>
-                          <h5 className="font-bold text-gray-900 text-sm">
+                          <h5 className="font-bold text-gray-900 dark:text-white text-sm">
                             {studentName}
                           </h5>
                           <div className="text-xs text-gray-400 font-medium flex items-center gap-1 mt-0.5">
@@ -362,7 +362,7 @@ const AssignmentSubmissionsTable = ({
                     </td>
 
                     {/* Col 2: Submission status */}
-                    <td className="py-4 px-5 border-r border-border text-center">
+                    <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center">
                       <span
                         className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${subStatus.style}`}
                       >
@@ -371,10 +371,10 @@ const AssignmentSubmissionsTable = ({
                     </td>
 
                     {/* Col 3: Submitted Time (Thời gian nộp) */}
-                    <td className="py-4 px-5 border-r border-border text-center">
+                    <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center">
                       {submittedDT ? (
                         <div className="flex flex-col items-center justify-center">
-                          <span className="font-bold text-gray-900 text-xs sm:text-sm">
+                          <span className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">
                             {submittedDT.date}
                           </span>
                           {submittedDT.time && (
@@ -389,7 +389,7 @@ const AssignmentSubmissionsTable = ({
                     </td>
 
                     {/* Col 4: Grading status */}
-                    <td className="py-4 px-5 border-r border-border text-center">
+                    <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center">
                       <span
                         className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${gradStatus.style}`}
                       >
@@ -398,7 +398,7 @@ const AssignmentSubmissionsTable = ({
                     </td>
 
                     {/* Col 5: Score */}
-                    <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800">
+                    <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center text-sm font-semibold text-gray-800 dark:text-gray-200">
                       {displayScore}
                     </td>
 
@@ -412,11 +412,11 @@ const AssignmentSubmissionsTable = ({
                           if (!hasSubmitted) return
                           onSelectStudent?.(st)
                         }}
-                        className="hover:!bg-red-50 !text-[#990011] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:!bg-transparent"
+                        className="hover:!bg-red-50 dark:hover:!bg-red-950/30 !text-[#990011] dark:!text-[#FF6B6B] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:!bg-transparent"
                         title={hasSubmitted ? (qg.viewAttempt || "Xem bài nộp") : (qg.studentHasNotSubmitted || "Học viên chưa nộp bài")}
                         aria-label={hasSubmitted ? (qg.viewAttempt || "Xem bài nộp") : (qg.studentHasNotSubmitted || "Học viên chưa nộp bài")}
                       >
-                        <Eye className="w-4.5 h-4.5 text-[#990011]" />
+                        <Eye className="w-4.5 h-4.5 text-[#990011] dark:text-[#FF6B6B]" />
                       </IconButton>
                     </td>
                   </tr>

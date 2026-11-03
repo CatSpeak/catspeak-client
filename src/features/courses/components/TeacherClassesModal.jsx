@@ -32,7 +32,7 @@ const TeacherClassesModal = ({
   const modalTitle = (
     <div className="flex items-center gap-2">
       <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-      <span className="font-extrabold text-slate-900 text-lg sm:text-xl">
+      <span className="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl">
         {t.courses?.openClassesOfTeacher
           ?.replace("{{name}}", teacherName)
           ?.replace("{{count}}", count) ||
@@ -48,8 +48,8 @@ const TeacherClassesModal = ({
       title={modalTitle}
       fullScreenOnMobile={false}
       className="md:max-w-3xl lg:max-w-4xl max-h-[85vh] flex flex-col"
-      headerClassName="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white"
-      bodyClassName="p-4 sm:p-6 flex-1 overflow-y-auto bg-[#F8F9FA]"
+      headerClassName="px-6 py-4 border-b border-slate-100 dark:border-[#3F3F3F] flex items-center justify-between shrink-0 bg-white dark:bg-[#1A1A1A]"
+      bodyClassName="p-4 sm:p-6 flex-1 overflow-y-auto bg-[#F8F9FA] dark:bg-[#121212]"
     >
       {/* ─── Loading Skeleton ─── */}
       {isLoading && classesList.length === 0 ? (
@@ -57,16 +57,16 @@ const TeacherClassesModal = ({
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-28 bg-white rounded-2xl border border-slate-200"
+              className="h-28 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]"
             />
           ))}
         </div>
       ) : isError && classesList.length === 0 ? (
-        <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-sm">
+        <div className="p-8 text-center bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F] text-slate-500 dark:text-gray-400 text-sm">
           {t.courses?.errorOccurred || "Không thể tải danh sách lớp học."}
         </div>
       ) : classesList.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-sm">
+        <div className="p-12 text-center bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F] text-slate-500 dark:text-gray-400 text-sm">
           {t.courses?.noClassesOpen ||
             "Hiện tại giảng viên chưa có lớp học nào đang mở."}
         </div>

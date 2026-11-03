@@ -114,49 +114,49 @@ const getVoucherStatusBadge = (voucher, t, language = "vi") => {
   if (sStr === "draft" || sStr === "1") {
     return {
       label: vs.Draft || "Bản nháp",
-      className: "bg-slate-100 text-slate-700",
+      className: "bg-slate-100 dark:bg-[#2A2A2A] text-slate-700 dark:text-gray-300",
     }
   }
   if (sStr === "disabled" || sStr === "3") {
     return {
       label: vs.Disabled || "Đã vô hiệu hóa",
-      className: "bg-zinc-200 text-zinc-700",
+      className: "bg-zinc-200 dark:bg-[#333333] text-zinc-700 dark:text-gray-300",
     }
   }
   if (sStr === "expired" || sStr === "4") {
     return {
       label: vs.Expired || "Đã hết hạn",
-      className: "bg-amber-100 text-amber-800",
+      className: "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300",
     }
   }
   if (sStr === "exhausted" || sStr === "5") {
     return {
       label: vs.Exhausted || "Hết lượt dùng",
-      className: "bg-purple-100 text-purple-800",
+      className: "bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300",
     }
   }
   if (sStr === "pendingdeposit" || sStr === "6") {
     return {
       label: vs.PendingDeposit || "Chờ nạp cọc",
-      className: "bg-blue-100 text-blue-800",
+      className: "bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300",
     }
   }
   if (sStr === "pendingapproval" || sStr === "7") {
     return {
       label: vs.PendingApproval || "Chờ duyệt",
-      className: "bg-yellow-100 text-yellow-800",
+      className: "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-800 dark:text-yellow-300",
     }
   }
   if (sStr === "rejected" || sStr === "8") {
     return {
       label: vs.Rejected || "Bị từ chối",
-      className: "bg-rose-100 text-rose-800",
+      className: "bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300",
     }
   }
   if (sStr === "stopped" || sStr === "9") {
     return {
       label: vs.Stopped || "Đã dừng",
-      className: "bg-gray-200 text-gray-700",
+      className: "bg-gray-200 dark:bg-[#2A2A2A] text-gray-700 dark:text-gray-300",
     }
   }
   return {
@@ -257,16 +257,16 @@ const VoucherSection = ({
 
   return (
     <div
-      className={`bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5 ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex flex-col gap-5 ${className}`}
     >
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-xl font-bold text-gray-950 tracking-tight">
+        <h3 className="text-xl font-bold text-gray-950 dark:text-white tracking-tight">
           {vt.card?.appliedTitle || cd.appliedVouchers || "Ưu đãi đang áp dụng"}
         </h3>
         <button
           type="button"
           onClick={handleViewAll}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#990011] hover:text-[#7a000e] transition-colors cursor-pointer group"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#990011] dark:text-[#FF6B6B] hover:text-[#7a000e] dark:hover:text-[#FF8585] transition-colors cursor-pointer group"
         >
           <span>
             {vt.card?.viewAll || cd.viewAll || c.viewAll || "Xem tất cả"}
@@ -299,25 +299,25 @@ const VoucherSection = ({
             return (
               <div
                 key={voucher.id || voucher.code}
-                className="bg-white border border-gray-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between gap-3 relative hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-[#222222] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl p-4 shadow-xs flex flex-col justify-between gap-3 relative hover:shadow-md transition-shadow"
               >
                 {/* Top: Icon + Info + Status */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     {/* Dashed Box with Gift Icon */}
-                    <div className="w-14 h-14 shrink-0 rounded-2xl border border-dashed border-[#ff7700] bg-[#fff9f5] flex items-center justify-center text-[#ff7700]">
+                    <div className="w-14 h-14 shrink-0 rounded-2xl border border-dashed border-[#ff7700] bg-[#fff9f5] dark:bg-amber-950/20 flex items-center justify-center text-[#ff7700]">
                       <Gift className="w-7 h-7 stroke-[1.8]" />
                     </div>
 
                     {/* Main details */}
                     <div className="flex flex-col min-w-0 flex-1">
-                      <h4 className="text-base sm:text-lg font-bold text-gray-950 tracking-tight truncate">
+                      <h4 className="text-base sm:text-lg font-bold text-gray-950 dark:text-white tracking-tight truncate">
                         {voucher.code}
                       </h4>
-                      <p className="text-sm font-bold text-[#990011]">
+                      <p className="text-sm font-bold text-[#990011] dark:text-[#FF6B6B]">
                         {getVoucherDiscountDisplay(voucher, t, language)}
                       </p>
-                      <p className="text-xs text-gray-500 font-medium truncate mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate mt-0.5">
                         {getVoucherScopeDisplay(voucher.scopeType, t)} •{" "}
                         {vt.card?.exp || "HSD"}:{" "}
                         {getVoucherExpiryDisplay(voucher, t, language)}
@@ -335,7 +335,7 @@ const VoucherSection = ({
 
                 {/* Bottom: Progress Bar + Usages */}
                 <div className="flex items-center gap-3 pt-1 w-full">
-                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-gray-100 dark:bg-[#333333] rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#ff7700] rounded-full transition-all duration-300"
                       style={{ width: `${usedPercent}%` }}
@@ -357,7 +357,7 @@ const VoucherSection = ({
           })}
         </div>
       ) : (
-        <div className="text-center py-6 text-gray-400 text-xs font-medium bg-white/60 border border-dashed border-gray-200 rounded-2xl">
+        <div className="text-center py-6 text-gray-400 dark:text-gray-500 text-xs font-medium bg-white/60 dark:bg-[#1E1E1E] border border-dashed border-gray-200 dark:border-[#3F3F3F] rounded-2xl">
           {vt.card?.noAppliedVouchers ||
             cd.noAppliedVouchers ||
             (isCourse

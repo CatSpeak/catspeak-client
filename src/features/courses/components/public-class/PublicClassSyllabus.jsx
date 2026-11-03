@@ -86,10 +86,10 @@ const PublicClassSyllabus = ({ classData }) => {
     <div id="syllabus" className="scroll-mt-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight">
             Nội Dung & Chương Trình Học
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 font-medium mt-1">
             Tổng cộng {totalSessions} buổi học trực tiếp • Lộ trình được thiết kế chuẩn quốc tế
           </p>
         </div>
@@ -97,7 +97,7 @@ const PublicClassSyllabus = ({ classData }) => {
         <button
           type="button"
           onClick={toggleAll}
-          className="text-xs font-bold text-[#b20a1c] hover:text-[#880715] bg-rose-50 hover:bg-rose-100 px-4 py-2 rounded-xl transition-colors self-start sm:self-auto"
+          className="text-xs font-bold text-[#b20a1c] dark:text-[#FF6B6B] hover:text-[#880715] dark:hover:text-[#ff8585] bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-950/60 px-4 py-2 rounded-xl transition-colors self-start sm:self-auto cursor-pointer"
         >
           {Object.values(openItems).filter(Boolean).length === DEFAULT_SYLLABUS.length ? "Thu gọn tất cả" : "Mở rộng tất cả"}
         </button>
@@ -109,28 +109,28 @@ const PublicClassSyllabus = ({ classData }) => {
           return (
             <div
               key={idx}
-              className="bg-white border border-border rounded-2xl overflow-hidden shadow-2xs transition-all"
+              className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl overflow-hidden shadow-2xs transition-all"
             >
               <button
                 type="button"
                 onClick={() => toggleItem(idx)}
-                className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50/80 transition-colors"
+                className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50/80 dark:hover:bg-[#222222]/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3 pr-4">
-                  <div className="w-9 h-9 rounded-xl bg-rose-50 text-[#b20a1c] font-black text-sm flex items-center justify-center shrink-0 border border-rose-100">
+                  <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-[#b20a1c] dark:text-[#FF6B6B] font-black text-sm flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-900/40">
                     {idx + 1}
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 leading-snug">
+                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white leading-snug">
                       {item.title}
                     </h3>
-                    <div className="flex items-center gap-3 text-xs text-slate-500 font-semibold mt-1">
+                    <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-gray-400 font-semibold mt-1">
                       <span className="flex items-center gap-1">
-                        <Clock size={13} className="text-slate-400" />
+                        <Clock size={13} className="text-slate-400 dark:text-gray-500" />
                         {item.duration}
                       </span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 text-rose-700">
+                      <span className="flex items-center gap-1 text-rose-700 dark:text-[#FF6B6B]">
                         <Video size={13} />
                         {item.type}
                       </span>
@@ -138,20 +138,20 @@ const PublicClassSyllabus = ({ classData }) => {
                   </div>
                 </div>
 
-                <div className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 shrink-0">
+                <div className="p-1.5 rounded-lg text-slate-400 dark:text-gray-500 hover:text-slate-700 dark:hover:text-gray-300 shrink-0">
                   {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </div>
               </button>
 
               {isOpen && (
-                <div className="px-5 pb-5 pt-1 border-t border-slate-100 bg-slate-50/40">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <div className="px-5 pb-5 pt-1 border-t border-slate-100 dark:border-[#333333] bg-slate-50/40 dark:bg-[#222222]/40">
+                  <h4 className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                     Nội dung trọng tâm:
                   </h4>
                   <ul className="flex flex-col gap-2">
                     {item.topics.map((topic, tIdx) => (
-                      <li key={tIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#b20a1c] mt-2 shrink-0" />
+                      <li key={tIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-gray-300 font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#b20a1c] dark:bg-[#FF6B6B] mt-2 shrink-0" />
                         <span>{topic}</span>
                       </li>
                     ))}

@@ -46,10 +46,10 @@ const StudentDetailHeader = ({ data }) => {
 
       {/* Title & Subtitle */}
       <div className="flex flex-col gap-1 mt-1">
-        <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight leading-tight">
           {titleText}
         </h1>
-        <p className="text-xs sm:text-sm text-gray-500 font-medium">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
           {subtitleText}
         </p>
       </div>

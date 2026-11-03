@@ -22,8 +22,8 @@ const StudentDetailNotice = ({ message, unmet = 0, total = 0 }) => {
   )
 
   return (
-    <div className="bg-[#ffeceb] border border-[#fecdd3]/80 rounded-xl px-4 py-3 flex items-center gap-2.5 text-[#9f1239] text-xs sm:text-sm font-medium shadow-2xs">
-      <AlertTriangle size={17} className="text-[#be123c] shrink-0 fill-[#ffe4e6]" />
+    <div className="bg-[#ffeceb] dark:bg-rose-950/30 border border-[#fecdd3]/80 dark:border-rose-900/40 rounded-xl px-4 py-3 flex items-center gap-2.5 text-[#9f1239] dark:text-[#FF6B6B] text-xs sm:text-sm font-medium shadow-2xs">
+      <AlertTriangle size={17} className="text-[#be123c] dark:text-[#FF6B6B] shrink-0 fill-[#ffe4e6] dark:fill-rose-950/60" />
       <span>{bannerText}</span>
     </div>
   )

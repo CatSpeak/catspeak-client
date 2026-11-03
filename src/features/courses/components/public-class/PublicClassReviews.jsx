@@ -42,26 +42,26 @@ const RATING_BREAKDOWN = [
 const PublicClassReviews = () => {
   return (
     <div id="reviews" className="scroll-mt-24">
-      <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mb-6">
+      <h2 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight mb-6">
         Đánh Giá Từ Học Viên
       </h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Rating Breakdown Card */}
-        <div className="lg:col-span-5 bg-white border border-border rounded-3xl p-6 flex flex-col justify-between shadow-xs">
+        <div className="lg:col-span-5 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 flex flex-col justify-between shadow-xs">
           <div>
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+            <div className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Đánh giá trung bình
             </div>
             <div className="flex items-baseline gap-3">
-              <span className="text-5xl font-black text-slate-900">4.9</span>
+              <span className="text-5xl font-black text-slate-900 dark:text-white">4.9</span>
               <div className="flex flex-col">
                 <div className="flex text-amber-400">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={18} className="fill-amber-400" />
                   ))}
                 </div>
-                <span className="text-xs font-semibold text-slate-500 mt-1">
+                <span className="text-xs font-semibold text-slate-500 dark:text-gray-400 mt-1">
                   dựa trên 185+ đánh giá
                 </span>
               </div>
@@ -70,15 +70,15 @@ const PublicClassReviews = () => {
             {/* Bars */}
             <div className="flex flex-col gap-2 mt-6">
               {RATING_BREAKDOWN.map((item) => (
-                <div key={item.stars} className="flex items-center gap-3 text-xs font-semibold text-slate-600">
+                <div key={item.stars} className="flex items-center gap-3 text-xs font-semibold text-slate-600 dark:text-gray-300">
                   <span className="w-8">{item.stars} sao</span>
-                  <div className="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2.5 bg-slate-100 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#b20a1c] rounded-full transition-all duration-500"
+                      className="h-full bg-[#b20a1c] dark:bg-[#FF6B6B] rounded-full transition-all duration-500"
                       style={{ width: `${item.percentage}%` }}
                     />
                   </div>
-                  <span className="w-10 text-right text-slate-400 font-medium">
+                  <span className="w-10 text-right text-slate-400 dark:text-gray-500 font-medium">
                     {item.percentage}%
                   </span>
                 </div>
@@ -86,7 +86,7 @@ const PublicClassReviews = () => {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-100 text-xs font-bold text-emerald-700 bg-emerald-50 p-3 rounded-xl flex items-center gap-2">
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-[#333333] text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl flex items-center gap-2">
             <ThumbsUp size={16} />
             98% học viên giới thiệu lớp học này cho bạn bè!
           </div>
@@ -97,19 +97,19 @@ const PublicClassReviews = () => {
           {MOCK_REVIEWS.map((review) => (
             <div
               key={review.id}
-              className="bg-white border border-border rounded-3xl p-6 shadow-2xs relative"
+              className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-2xs relative"
             >
-              <Quote className="absolute top-4 right-4 text-slate-200" size={32} />
+              <Quote className="absolute top-4 right-4 text-slate-200 dark:text-[#333333]" size={32} />
 
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-rose-100 text-[#b20a1c] font-black text-sm flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-950/40 text-[#b20a1c] dark:text-[#FF6B6B] font-black text-sm flex items-center justify-center">
                   {review.name.charAt(0)}
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-sm text-slate-900 leading-snug">
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white leading-snug">
                     {review.name}
                   </h4>
-                  <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                  <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-gray-500 font-medium">
                     <span>{review.role}</span>
                     <span>•</span>
                     <span>{review.date}</span>
@@ -123,7 +123,7 @@ const PublicClassReviews = () => {
                 ))}
               </div>
 
-              <p className="text-sm font-medium text-slate-700 leading-relaxed">
+              <p className="text-sm font-medium text-slate-700 dark:text-gray-300 leading-relaxed">
                 "{review.comment}"
               </p>
             </div>

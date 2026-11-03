@@ -65,8 +65,6 @@ const AddActivityModal = ({
     return [...assignmentsList, ...quizzesList]
   }, [assignmentsResponse, quizzesResponse])
 
-  console.log(activities)
-
   const filteredActivities = activities.filter((act) => {
     if (filterType !== "all" && act._activityType !== filterType) return false
 
@@ -78,7 +76,6 @@ const AddActivityModal = ({
   })
 
   const handleSubmit = () => {
-
     if (selectedIds.length === 0) {
       toast.error(dict.toastSelectionRequired)
       return
@@ -104,11 +101,11 @@ const AddActivityModal = ({
   const getTypeBadgeStyle = (type) => {
     switch (type) {
       case "assignment":
-        return "bg-[#E6F4EA] text-[#137333]"
+        return "bg-[#E6F4EA] dark:bg-emerald-950/40 text-[#137333] dark:text-emerald-400"
       case "quiz":
-        return "bg-[#FCE8E6] text-[#C5221F]"
+        return "bg-[#FCE8E6] dark:bg-red-950/40 text-[#C5221F] dark:text-red-400"
       default:
-        return "bg-[#FFDBCF] text-[#380D00]"
+        return "bg-[#FFDBCF] dark:bg-orange-950/40 text-[#380D00] dark:text-orange-400"
     }
   }
 
@@ -118,13 +115,13 @@ const AddActivityModal = ({
       onClose={onClose}
       title={
         <div className="w-full relative flex items-center justify-center">
-          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D]">
+          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D] dark:text-white">
             {dict.title || "Thêm hoạt động học tập"}
           </h2>
           <button 
             type="button" 
             onClick={onClose}
-            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-full text-gray-500 dark:text-gray-400 transition-colors"
           >
             <X size={28} strokeWidth={1.5} />
           </button>
@@ -132,7 +129,7 @@ const AddActivityModal = ({
       }
       showCloseButton={false}
       fullScreenOnMobile={false}
-      className="md:max-w-[900px] rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px]"
+      className="md:max-w-[900px] rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px] bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F]"
       headerClassName="flex items-center justify-between px-6 md:px-10 py-6 md:py-8"
       bodyClassName="px-6 md:px-10 pb-6 flex-1 overflow-y-auto"
       footerClassName="p-0"
@@ -141,7 +138,7 @@ const AddActivityModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-[52px] rounded-full border border-[#990011] text-[#990011] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 transition-colors"
+            className="flex-1 h-[52px] rounded-full border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
           >
             {dict.cancel || "Hủy"} <X size={18} strokeWidth={2} />
           </button>
@@ -149,7 +146,7 @@ const AddActivityModal = ({
             type="button"
             onClick={handleSubmit}
             disabled={selectedIds.length === 0}
-            className="flex-1 h-[52px] rounded-full bg-[#990011] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] transition-colors disabled:opacity-70"
+            className="flex-1 h-[52px] rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-gray-950 font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] dark:hover:bg-[#ff8080] transition-colors disabled:opacity-70"
           >
             {dict.add || "Thêm hoạt động"} <Plus size={18} strokeWidth={2} />
           </button>
@@ -164,7 +161,7 @@ const AddActivityModal = ({
               <LoadingSpinner text={t.courses.lectureHall.loading} />
             </div>
           ) : filteredActivities.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-[#9CA3AF]">
+            <div className="flex flex-col items-center justify-center py-12 text-[#9CA3AF] dark:text-gray-500">
               <Inbox size={48} className="mb-3 opacity-50" strokeWidth={1.5} />
               <p className="text-sm font-medium">{dict.noActivitiesFound}</p>
             </div>
@@ -194,10 +191,10 @@ const AddActivityModal = ({
                   : dict.noDueDate
                 timeInfo = (
                   <div className="text-right">
-                    <span className="text-xs text-[#5B403C] block font-medium">
+                    <span className="text-xs text-[#5B403C] dark:text-gray-400 block font-medium">
                       {dict.dueDate || "Hạn nộp"}
                     </span>
-                    <span className="text-sm text-[#191C1D] font-normal">
+                    <span className="text-sm text-[#191C1D] dark:text-gray-200 font-normal">
                       {dueDateLabel}
                     </span>
                   </div>
@@ -212,12 +209,12 @@ const AddActivityModal = ({
                 timeInfo = (
                   <div className="text-right flex flex-col gap-0.5 justify-end">
                     <div className="flex items-center justify-end gap-1">
-                      <span className="text-xs text-[#5B403C] font-medium">{dict.openTime || "Mở:"}</span>
-                      <span className="text-sm text-[#191C1D] font-normal">{openTimeStr}</span>
+                      <span className="text-xs text-[#5B403C] dark:text-gray-400 font-medium">{dict.openTime || "Mở:"}</span>
+                      <span className="text-sm text-[#191C1D] dark:text-gray-200 font-normal">{openTimeStr}</span>
                     </div>
                     <div className="flex items-center justify-end gap-1">
-                      <span className="text-xs text-[#5B403C] font-medium">{dict.closeTime || "Đóng:"}</span>
-                      <span className="text-sm text-[#191C1D] font-normal">{closeTimeStr}</span>
+                      <span className="text-xs text-[#5B403C] dark:text-gray-400 font-medium">{dict.closeTime || "Đóng:"}</span>
+                      <span className="text-sm text-[#191C1D] dark:text-gray-200 font-normal">{closeTimeStr}</span>
                     </div>
                   </div>
                 )
@@ -228,8 +225,8 @@ const AddActivityModal = ({
                   key={uid}
                   onClick={() => handleToggleSelect(uid)}
                   className={`rounded-[16px] p-4 flex items-center justify-between transition-all cursor-pointer ${isChecked
-                    ? "bg-[#F9F9F9] ring-2 ring-cath-red-700"
-                    : "bg-[#F9F9F9] hover:bg-gray-100"
+                    ? "bg-[#F9F9F9] dark:bg-[#222222] ring-2 ring-cath-red-700 dark:ring-[#FF6B6B]"
+                    : "bg-[#F9F9F9] dark:bg-[#222222] hover:bg-gray-100 dark:hover:bg-[#2A2A2A]"
                     }`}
                 >
                   {/* Checkbox & Left info */}
@@ -259,7 +256,7 @@ const AddActivityModal = ({
                         </span>
                       </div>
 
-                      <h5 className="text-[14px] font-normal text-[#191C1D] truncate">
+                      <h5 className="text-[14px] font-normal text-[#191C1D] dark:text-white truncate">
                         {title}
                       </h5>
                     </div>
@@ -277,7 +274,7 @@ const AddActivityModal = ({
         <div className="pt-2">
           <ToggleOption
             icon={<Eye size={20} className="text-[#F83B4F]" />}
-            iconBg="bg-[#FFEAED]"
+            iconBg="bg-[#FFEAED] dark:bg-red-950/40"
             title={dict.visibleToStudents || "Hiển thị với học viên"}
             description={dict.visibleToStudentsDesc || "Tùy chỉnh độ hiển thị với học viên"}
             checked={isVisibleToStudents}

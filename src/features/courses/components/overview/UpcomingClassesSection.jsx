@@ -72,8 +72,8 @@ const UpcomingClassCardItem = ({
 
   const studentCountValue = Number(
     classDetail?.studentCount ??
-      classDetail?.enrolledStudents ??
-      session?.class?.studentCount,
+    classDetail?.enrolledStudents ??
+    session?.class?.studentCount,
   )
   const studentCount = Number.isFinite(studentCountValue)
     ? Math.max(0, Math.floor(studentCountValue))
@@ -114,17 +114,17 @@ const UpcomingClassCardItem = ({
   return (
     <div
       onClick={handleCardClick}
-      className="bg-[#FCFCFC] rounded-2xl border border-gray-100 p-3.5 sm:p-4 hover:border-gray-200 hover:shadow-xs transition-all flex flex-col gap-3 cursor-pointer group shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+      className="bg-[#FCFCFC] dark:bg-[#222222] rounded-2xl border border-gray-100 dark:border-[#333333] p-3.5 sm:p-4 hover:border-gray-200 dark:hover:border-[#444] hover:shadow-xs transition-all flex flex-col gap-3 cursor-pointer group shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
     >
       {/* Top Row: Language, Level, Status Pill */}
       <div className="flex flex-wrap items-center gap-1.5">
         {langName && (
-          <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+          <span className="bg-[#FEF3C7] dark:bg-amber-950/40 text-[#D97706] dark:text-amber-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
             {langName}
           </span>
         )}
         {levelText && (
-          <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+          <span className="bg-[#FEF3C7] dark:bg-amber-950/40 text-[#D97706] dark:text-amber-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
             {levelText}
           </span>
         )}
@@ -132,30 +132,30 @@ const UpcomingClassCardItem = ({
       </div>
 
       {/* Class Title */}
-      <h4 className="font-bold text-sm sm:text-base text-gray-950 leading-snug group-hover:text-[#990011] transition-colors line-clamp-1">
+      <h4 className="font-bold text-sm sm:text-base text-gray-950 dark:text-white leading-snug group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors line-clamp-1">
         {className}
       </h4>
 
       {/* Bottom Row: Info & Action Button */}
       <div className="flex flex-col justify-between gap-2 pt-1">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
-          <Clock size={13} className="text-gray-400" />
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400">
+          <Clock size={13} className="text-gray-400 dark:text-gray-500" />
           <span>{timeDisplay}</span>
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
-          <Calendar size={13} className="text-gray-400" />
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400">
+          <Calendar size={13} className="text-gray-400 dark:text-gray-500" />
           <span>{dateDisplay}</span>
         </div>
 
-        <div className="flex flex-wrap justify-between items-center pt-1 border-t border-gray-100/80">
+        <div className="flex flex-wrap justify-between items-center pt-1 border-t border-gray-100/80 dark:border-[#333333]">
           <div className="flex items-center gap-1.5 min-w-0">
             {students.length > 0 ? (
               <OverlapAvatar users={students} maxShow={3} size={24} />
             ) : (
               <div className="flex items-center gap-1.5">
-                <Users size={15} className="text-gray-400" />
-                <span className="text-[11px] font-bold text-gray-400 font-sans">
+                <Users size={15} className="text-gray-400 dark:text-gray-500" />
+                <span className="text-[11px] font-bold text-gray-400 dark:text-gray-400 font-sans">
                   {studentCount ?? "—"}
                 </span>
               </div>
@@ -204,12 +204,12 @@ const UpcomingClassesSection = ({ className = "" }) => {
 
   return (
     <div
-      className={`bg-white rounded-3xl border border-border shadow-xs p-4 sm:p-5 flex flex-col gap-3.5 h-fit ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] shadow-xs p-4 sm:p-5 flex flex-col gap-3.5 h-fit ${className}`}
     >
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-base sm:text-lg font-bold text-gray-950 tracking-tight">
+          <h3 className="text-base sm:text-lg font-bold text-gray-950 dark:text-white tracking-tight">
             {c.upcomingClasses || "Lớp học sắp tới"}
           </h3>
           {totalCount > 0 && (
@@ -222,7 +222,7 @@ const UpcomingClassesSection = ({ className = "" }) => {
         <button
           type="button"
           onClick={() => navigate("/workspace/my-calendar")}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#990011] hover:text-[#7a000e] transition-colors cursor-pointer group"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#990011] dark:text-[#FF6B6B] hover:text-[#7a000e] dark:hover:text-[#FF8585] transition-colors cursor-pointer group"
         >
           <span>{c.viewSchedule || "Xem lịch trình"}</span>
           <ArrowRight
@@ -239,13 +239,13 @@ const UpcomingClassesSection = ({ className = "" }) => {
         </div>
       ) : upcomingSessions.length === 0 ? (
         <div className="p-6 flex flex-col items-center justify-center text-center min-h-[160px] gap-2">
-          <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+          <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-[#242424] flex items-center justify-center text-gray-400 dark:text-gray-500">
             <Calendar size={20} />
           </div>
-          <span className="font-bold text-sm text-gray-700">
+          <span className="font-bold text-sm text-gray-700 dark:text-gray-300">
             {cd.noUpcoming || "Chưa có lớp học nào sắp tới"}
           </span>
-          <p className="text-xs text-gray-400 max-w-sm">
+          <p className="text-xs text-gray-400 dark:text-gray-400 max-w-sm">
             {cd.createClassToSchedule ||
               "Các buổi học sắp tới theo lịch của bạn sẽ hiển thị tại đây."}
           </p>

@@ -38,7 +38,7 @@ const PublicClassHero = ({
     getSafeMediaUrl(classData?.thumbnailUrl) || defaultCourseThumbnail
 
   return (
-    <section className="relative bg-slate-950 text-white overflow-hidden min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] flex flex-col justify-between pt-4 pb-12 sm:pb-14 border-b border-slate-800">
+    <section className="relative bg-slate-950 text-white overflow-hidden min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] flex flex-col justify-between pt-4 pb-12 sm:pb-14 border-b border-slate-800 dark:border-[#3F3F3F]">
       {/* Full-Vibrancy Thumbnail Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-85 transition-all duration-700"
@@ -55,7 +55,7 @@ const PublicClassHero = ({
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 backdrop-blur-md text-xs sm:text-sm font-semibold transition-all duration-200 group cursor-pointer shadow-md hover:shadow-lg"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800 dark:bg-black/60 dark:hover:bg-black/80 text-slate-200 hover:text-white border border-slate-700/80 dark:border-slate-600 backdrop-blur-md text-xs sm:text-sm font-semibold transition-all duration-200 group cursor-pointer shadow-md hover:shadow-lg"
           >
             <ArrowLeft
               size={16}
@@ -116,11 +116,11 @@ const PublicClassHero = ({
               </div>
             )}
             <div className="flex flex-col">
-              <div className="flex items-center gap-1 text-xs text-slate-300 group-hover:text-cath-red-700 font-medium transition-colors">
+              <div className="flex items-center gap-1 text-xs text-slate-300 group-hover:text-cath-red-700 dark:group-hover:text-[#FF6B6B] font-medium transition-colors">
                 {c.instructorLabel || pc.instructorLabel || "Giảng viên"}
-                <BadgeCheck size={13} className="text-rose-400 group-hover:text-cath-red-700 transition-colors inline" />
+                <BadgeCheck size={13} className="text-rose-400 group-hover:text-cath-red-700 dark:group-hover:text-[#FF6B6B] transition-colors inline" />
               </div>
-              <span className="text-white font-bold text-sm sm:text-base group-hover:text-cath-red-700 transition-colors">
+              <span className="text-white font-bold text-sm sm:text-base group-hover:text-cath-red-700 dark:group-hover:text-[#FF6B6B] transition-colors">
                 {teacherName}
               </span>
             </div>
@@ -132,7 +132,7 @@ const PublicClassHero = ({
               <button
                 type="button"
                 onClick={onEnroll}
-                className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white font-bold shadow-lg shadow-[#b20a1c]/40 transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 text-sm cursor-pointer"
+                className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-[#b20a1c] hover:bg-[#960817] dark:bg-[#b20a1c] dark:hover:bg-[#c9182b] text-white font-bold shadow-lg shadow-[#b20a1c]/40 transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 text-sm cursor-pointer"
               >
                 {c.enterClass || pc.enterClass || "Vào Lớp Học"}
               </button>
@@ -165,7 +165,7 @@ const PublicClassHero = ({
                 type="button"
                 onClick={onEnroll}
                 disabled={isEnrolling}
-                className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold shadow-lg shadow-[#b20a1c]/40 transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 text-sm cursor-pointer"
+                className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-[#b20a1c] hover:bg-[#960817] dark:bg-[#b20a1c] dark:hover:bg-[#c9182b] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold shadow-lg shadow-[#b20a1c]/40 transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 text-sm cursor-pointer"
               >
                 {isEnrolling
                   ? pc.processing || "Đang xử lý..."
@@ -186,20 +186,12 @@ const PublicClassHero = ({
                 setLinkCopied(true)
                 setTimeout(() => setLinkCopied(false), 2000)
               }}
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full shrink-0 bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 inline-flex items-center justify-center transition-colors backdrop-blur-md cursor-pointer shadow-md"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full shrink-0 bg-slate-900/80 hover:bg-slate-800 dark:bg-black/60 dark:hover:bg-black/80 text-slate-200 border border-slate-700/80 dark:border-slate-600 inline-flex items-center justify-center transition-colors backdrop-blur-md cursor-pointer shadow-md"
               title={pc.shareClass || "Chia sẻ lớp học"}
             >
               {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
             </button>
           </div>
-
-          {/* Enrollment statistics subtext */}
-          {/* <div className="flex items-center gap-4 text-xs text-slate-300 pt-1">
-            <span className="flex items-center gap-1 text-slate-200 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              {classData?.enrolledCount ? `${classData.enrolledCount} ${pc.studentsEnrolled || "học viên đã đăng ký"}` : `3,750+ ${pc.studentsEnrolled || "học viên đã đăng ký"}`}
-            </span>
-          </div> */}
         </div>
       </div>
     </section>

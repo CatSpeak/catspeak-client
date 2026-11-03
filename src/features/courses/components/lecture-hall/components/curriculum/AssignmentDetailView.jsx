@@ -28,8 +28,6 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const targetAssignmentId = itemData?.itemId
   const [submitAssignment, { isLoading: isSubmitting }] = useSubmitAssignmentMutation()
 
-  console.log(itemData)
-
   if (!itemData) {
     return (
       <div className="p-6 w-full animate-fade-in">
@@ -41,7 +39,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
         >
           {t.courses?.lectureHall?.postDetail?.back || "Quay lại"}
         </PillButton>
-        <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
+        <div className="text-center py-12 text-sm text-[#EF4444] dark:text-red-400 border border-dashed border-[#FCA5A5] dark:border-red-900/40 rounded-xl bg-[#FEF2F2] dark:bg-red-950/30">
           {sa.assignmentNotFound || "Bài nộp không tồn tại"}
         </div>
       </div>
@@ -91,7 +89,6 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.toLowerCase() : "pending"
   const isDone = ["completed", "submitted", "graded", "late", "returned"].includes(normalizedStatus)
   const showGrading = ["graded", "returned"].includes(normalizedStatus)
-
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -192,12 +189,11 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
         {t.courses?.lectureHall?.title}
       </PillButton>
 
-
       <div className='space-y-6'>
         {/* Assignment Info Card */}
-        <FluentCard className="p-4 sm:p-6">
+        <FluentCard className="p-4 sm:p-6 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F]">
           <div className="flex items-center gap-3 mb-3 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A]">{title}</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A] dark:text-white">{title}</h1>
             <AssignmentStatusBadge
               classId={classId}
               assignmentId={targetAssignmentId}
@@ -207,7 +203,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
             />
           </div>
 
-          <div className="flex flex-col items-start gap-2 text-sm text-[#7B7979] mb-6 flex-wrap">
+          <div className="flex flex-col items-start gap-2 text-sm text-[#7B7979] dark:text-gray-400 mb-6 flex-wrap">
             <span className='font-semibold'>{dict.belongsTo || "Thuộc"}: {sectionData?.name || dict.generalSection || "Mục chung"}</span>
             {formattedDeadline && (
               <div className="flex items-center gap-1">
@@ -219,7 +215,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
 
           {description && (
             <div
-              className="text-[#5B403C] text-sm mb-6 whitespace-pre-wrap assignment-description-html"
+              className="text-[#5B403C] dark:text-gray-300 text-sm mb-6 whitespace-pre-wrap assignment-description-html"
               dangerouslySetInnerHTML={{ __html: description }}
             />
           )}
@@ -230,10 +226,10 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
                 <div
                   key={idx}
                   onClick={() => handleDownloadAttachment(att.fileUrl || att.url, att.title || att.fileName)}
-                  className="flex items-center gap-2 bg-[#FEF6E7] border border-[#FDE1AB] rounded-lg px-3 py-2 cursor-pointer hover:bg-[#FDE1AB] transition-colors"
+                  className="flex items-center gap-2 bg-[#FEF6E7] dark:bg-amber-950/30 border border-[#FDE1AB] dark:border-amber-900/40 rounded-lg px-3 py-2 cursor-pointer hover:bg-[#FDE1AB] dark:hover:bg-amber-900/60 transition-colors"
                 >
                   <FileText size={16} className="text-[#F59E0B]" />
-                  <span className="text-sm text-[#5B403C] truncate w-full">
+                  <span className="text-sm text-[#5B403C] dark:text-amber-200 truncate w-full">
                     {att.title || att.fileName || (dict.unnamedMaterial ? `${dict.unnamedMaterial} ${idx + 1}` : `Tài liệu ${idx + 1}`)}
                   </span>
                 </div>
@@ -246,18 +242,18 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
         {(isDone && !isResubmitting) ? (
           <>
             {!showGrading && (
-              <FluentCard className="p-4 sm:p-6 mb-6">
+              <FluentCard className="p-4 sm:p-6 mb-6 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F]">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-[#e7effb] flex items-center justify-center shrink-0">
-                      <Check size={24} className="text-[#1c6dd7]" />
+                    <div className="h-12 w-12 rounded-xl bg-[#e7effb] dark:bg-blue-950/40 flex items-center justify-center shrink-0">
+                      <Check size={24} className="text-[#1c6dd7] dark:text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-[#1A1A1A]">{sa.submittedHeading || "Đã nộp bài"}</h3>
-                      <p className="text-sm text-[#7B7979] mt-0.5">
+                      <h3 className="text-lg font-semibold text-[#1A1A1A] dark:text-white">{sa.submittedHeading || "Đã nộp bài"}</h3>
+                      <p className="text-sm text-[#7B7979] dark:text-gray-400 mt-0.5">
                         {t.courses?.grading?.submittedAtLabel || "Nộp lúc: "} {submittedAt ? formatDateTime(submittedAt) : (t.courses?.grading?.justNow || "Vừa xong")}
                       </p>
-                      <a href={submissionFileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-[#7B7979] mt-0.5 hover:underline">
+                      <a href={submissionFileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-[#7B7979] dark:text-gray-400 mt-0.5 hover:underline">
                         {submissionFileName}
                       </a>
                     </div>
@@ -288,18 +284,18 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
             )}
 
             {showGrading && (
-              <FluentCard className="p-4 sm:p-6 mb-6">
-                <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">{t.courses?.grading?.examResult || "Kết quả"}</h3>
+              <FluentCard className="p-4 sm:p-6 mb-6 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F]">
+                <h3 className="text-lg font-semibold text-[#1A1A1A] dark:text-white mb-4">{t.courses?.grading?.examResult || "Kết quả"}</h3>
 
                 <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-                  <div className="bg-[#faf0f1] rounded-2xl p-4 min-w-[100px] flex flex-col items-center justify-center shrink-0">
-                    <span className="text-3xl font-bold text-[#c8402e]">{score}</span>
-                    <span className="text-sm font-medium text-[#c8402e]/50">/ 10</span>
+                  <div className="bg-[#faf0f1] dark:bg-red-950/30 rounded-2xl p-4 min-w-[100px] flex flex-col items-center justify-center shrink-0 border border-transparent dark:border-red-900/40">
+                    <span className="text-3xl font-bold text-[#c8402e] dark:text-[#FF6B6B]">{score}</span>
+                    <span className="text-sm font-medium text-[#c8402e]/50 dark:text-[#FF6B6B]/50">/ 10</span>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold text-[#7B7979] uppercase tracking-wider">{t.courses?.grading?.generalFeedback || "Nhận xét của giảng viên"}</span>
-                    <p className="text-sm text-[#1A1C1C]">
+                    <span className="text-xs font-semibold text-[#7B7979] dark:text-gray-400 uppercase tracking-wider">{t.courses?.grading?.generalFeedback || "Nhận xét của giảng viên"}</span>
+                    <p className="text-sm text-[#1A1C1C] dark:text-gray-200">
                       {feedback}
                     </p>
                   </div>
@@ -308,15 +304,15 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
             )}
           </>
         ) : (
-          <FluentCard className="p-4 sm:p-6 mb-6 space-y-6">
+          <FluentCard className="p-4 sm:p-6 mb-6 space-y-6 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F]">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg sm:text-xl font-semibold text-[#1A1A1A]">
+              <h2 className="text-lg sm:text-xl font-semibold text-[#1A1A1A] dark:text-white">
                 {isResubmitting ? (sa.resubmitHeading || "Nộp lại bài") : (sa.submitHeading || "Nộp bài của bạn")}
               </h2>
               {isResubmitting && (
                 <button
                   onClick={() => setIsResubmitting(false)}
-                  className="text-sm text-[#4B5563] hover:text-[#1A1A1A] transition-colors"
+                  className="text-sm text-[#4B5563] dark:text-gray-400 hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
                 >
                   {sa.cancel || t.courses?.grading?.studentQuiz?.cancel || "Hủy"}
                 </button>
@@ -328,23 +324,23 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
                 {selectedFiles.map((file, idx) => (
                   <HorizontalCard
                     key={idx}
-                    leftContent={<FileText size={24} className="text-[#DC2626]" />}
+                    leftContent={<FileText size={24} className="text-[#DC2626] dark:text-red-400" />}
                     rightContent={
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveFile(idx);
                         }}
-                        className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500 transition-colors"
+                        className="p-1.5 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-md text-gray-500 dark:text-gray-400 transition-colors"
                       >
                         <X size={18} />
                       </button>
                     }
-                    className="w-full !p-4 !min-h-0"
+                    className="w-full !p-4 !min-h-0 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F]"
                   >
                     <div className="flex flex-col overflow-hidden">
-                      <span className="text-sm font-medium text-[#1A1A1A] truncate">{file.name}</span>
-                      <span className="text-xs text-[#7B7979]">{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                      <span className="text-sm font-medium text-[#1A1A1A] dark:text-white truncate">{file.name}</span>
+                      <span className="text-xs text-[#7B7979] dark:text-gray-400">{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
                     </div>
                   </HorizontalCard>
                 ))}
@@ -362,22 +358,22 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
 
             {selectedFiles.length < maxFiles && (
               <FluentCard
-                className="h-[150px] flex flex-col items-center justify-center transition-colors bg-[#f5f5f5] cursor-pointer hover:bg-gray-100 mt-4"
+                className="h-[150px] flex flex-col items-center justify-center transition-colors bg-[#f5f5f5] dark:bg-[#222222] border border-dashed border-gray-300 dark:border-[#3F3F3F] cursor-pointer hover:bg-gray-100 dark:hover:bg-[#2A2A2A] mt-4"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload size={28} className="text-[#9CA3AF] mb-3" />
-                <p className="text-sm text-[#9CA3AF] mb-1 text-center">
+                <Upload size={28} className="text-[#9CA3AF] dark:text-gray-400 mb-3" />
+                <p className="text-sm text-[#9CA3AF] dark:text-gray-400 mb-1 text-center">
                   {sa.supportedFilesSummary
                     ? sa.supportedFilesSummary.replace("{{formats}}", "doc, pdf").replace("{{maxFiles}}", maxFiles)
                     : `Hỗ trợ định dạng doc, pdf, tối đa ${maxFiles} tệp`}
                 </p>
-                <p className="text-sm text-[#9CA3AF] text-center">{sa.fileExceedsLimit?.replace("{{fileName}}", "Total").replace("50 MB", "25MB") || "Tổng kích cỡ dưới <= 25mb"}</p>
+                <p className="text-sm text-[#9CA3AF] dark:text-gray-400 text-center">{sa.fileExceedsLimit?.replace("{{fileName}}", "Total").replace("50 MB", "25MB") || "Tổng kích cỡ dưới <= 25mb"}</p>
               </FluentCard>
             )}
 
 
             <div className="flex items-center justify-between w-full">
-              <p className="text-base text-[#7B7979]">
+              <p className="text-base text-[#7B7979] dark:text-gray-400">
                 {sa.allowLateSubmission || "Cho phép nộp muộn"}: {isAllowLate ? (dict.yes || "Có") : (dict.no || "Không")}
               </p>
               <PillButton

@@ -1,7 +1,7 @@
 import React from "react"
 import { Pencil, EyeOff, Trash, FilePlusCorner, Folder, BookOpen, Link2, Eye, MoreVertical } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { IconButton, PillButton } from "@/shared/components/ui/buttons"
+import { IconButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const SectionActionMenu = ({
@@ -18,43 +18,43 @@ const SectionActionMenu = ({
     {
       value: "addAnnouncement",
       label: dict.createBoard,
-      icon: <FilePlusCorner size={14} className="text-[#1A1A1A]" />,
+      icon: <FilePlusCorner size={14} className="text-[#1A1A1A] dark:text-gray-200" />,
       action: () => onAddContent("announcement"),
     },
     {
       value: "addMaterial",
       label: dict.addMaterial,
-      icon: <Folder size={14} className="text-[#1A1A1A]" />,
+      icon: <Folder size={14} className="text-[#1A1A1A] dark:text-gray-200" />,
       action: () => onAddContent("material"),
     },
     {
       value: "addAssignment",
       label: dict.addActivity,
-      icon: <BookOpen size={14} className="text-[#1A1A1A]" />,
+      icon: <BookOpen size={14} className="text-[#1A1A1A] dark:text-gray-200" />,
       action: () => onAddContent("assignment"),
     },
     {
       value: "addLink",
       label: dict.addLink,
-      icon: <Link2 size={14} className="text-[#1A1A1A]" />,
+      icon: <Link2 size={14} className="text-[#1A1A1A] dark:text-gray-200" />,
       action: () => onAddContent("link"),
     },
     {
       value: "edit",
       label: dict.edit,
-      icon: <Pencil size={14} className="text-[#1A1A1A]" />,
+      icon: <Pencil size={14} className="text-[#1A1A1A] dark:text-gray-200" />,
       action: () => onEdit(section),
     },
     {
       value: "toggleVisibility",
       label: dict.toggleVisibility,
-      icon: section?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />,
+      icon: section?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A] dark:text-gray-200" /> : <EyeOff size={15} className="text-[#1A1A1A] dark:text-gray-200" />,
       action: () => onToggleVisibility(section.id),
     },
     {
       value: "delete",
       label: dict.delete,
-      icon: <Trash size={15} className="text-[#1A1A1A]" />,
+      icon: <Trash size={15} className="text-[#1A1A1A] dark:text-gray-200" />,
       action: () => onDelete(section.id),
     }
   ]

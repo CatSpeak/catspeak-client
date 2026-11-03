@@ -44,9 +44,9 @@ const CommentList = ({
   const hasMore = !showAll && totalCount > previewCount
 
   return (
-    <div className="bg-white rounded-2xl md:rounded-[24px] p-4 sm:p-6 md:p-8 shadow-sm h-fit">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-2xl md:rounded-[24px] p-4 sm:p-6 md:p-8 shadow-sm h-fit">
       {/* Header */}
-      <h3 className="text-[20px] font-semibold text-[#191C1D] mb-4">
+      <h3 className="text-[20px] font-semibold text-[#191C1D] dark:text-white mb-4">
         {totalCount} {dict.replies || "Phản hồi"}
       </h3>
 
@@ -76,7 +76,7 @@ const CommentList = ({
             message={dict.lockedComments}
             variant="component"
           >
-            <p className="text-base text-[#7B7979] mt-4">{dict.lockedCommentsDesc}</p>
+            <p className="text-base text-[#7B7979] dark:text-gray-400 mt-4">{dict.lockedCommentsDesc}</p>
           </EmptyState>
         ) : totalCount === 0 && (
           <EmptyState
@@ -84,14 +84,14 @@ const CommentList = ({
             message={dict.noComments}
             variant="component"
           >
-            <p className="text-base text-[#7B7979] mt-4">{dict.noCommentsDesc}</p>
+            <p className="text-base text-[#7B7979] dark:text-gray-400 mt-4">{dict.noCommentsDesc}</p>
           </EmptyState>
         )}
 
         {/* Comment List */}
         {totalCount > 0 && (
           <>
-            <div className="border-t border-[#1A1A1A]/50 my-6" />
+            <div className="border-t border-[#1A1A1A]/10 dark:border-[#3F3F3F] my-6" />
             <div className="space-y-6">
               {visibleComments.map((comment) => (
                 <CommentItem
@@ -107,7 +107,7 @@ const CommentList = ({
             {hasMore && (
               <div className="flex justify-center mt-6">
                 <button
-                  className="text-sm font-semibold text-[#750000] hover:opacity-75 transition-opacity"
+                  className="text-sm font-semibold text-[#750000] dark:text-[#FF6B6B] hover:opacity-75 transition-opacity"
                   onClick={onShowAll}
                 >
                   {dict.viewAll}

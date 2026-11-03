@@ -60,7 +60,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const [sectionsOverride, setSectionsOverride] = useState(null)
   const sections = sectionsOverride ?? apiSections
 
-
   const updateSections = (updater) => {
     setSectionsOverride((prev) => {
       const current = prev ?? apiSections
@@ -68,18 +67,18 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
     })
   }
   // Active Modal state
-  const [activeModal, setActiveModal] = useState(null) // null | 'announcement' | 'material' | 'assignment' | 'link'
+  const [activeModal, setActiveModal] = useState(null)
   const [targetSectionId, setTargetSectionId] = useState(null)
   const [targetSectionName, setTargetSectionName] = useState("")
   const [editItemData, setEditItemData] = useState(null)
 
   // Active Detail View State (replaces the section list)
-  const [activeDetailView, setActiveDetailView] = useState(null) // { type: 'link' | 'material', item: object }
+  const [activeDetailView, setActiveDetailView] = useState(null)
 
   // Section Modal State
   const [sectionModal, setSectionModal] = useState({
     open: false,
-    mode: "create", // "create" | "edit"
+    mode: "create",
     sectionId: null,
     name: "",
     description: "",
@@ -89,7 +88,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   // Delete Confirmation Modal State
   const [deleteConfirm, setDeleteConfirm] = useState({
     open: false,
-    type: "section", // "section" | "item"
+    type: "section",
     sectionId: null,
     itemId: null,
   })
@@ -99,7 +98,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
     setTargetSectionId(sectionId)
     const targetSec = sections.find((s) => s.id === sectionId)
     setTargetSectionName(targetSec?.name || dict.unknownSection)
-    setEditItemData(null) // Reset edit data
+    setEditItemData(null)
     setActiveModal(type)
   }
 
@@ -120,7 +119,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const handleSaveBulletinBoard = async (data) => {
     if (id) {
       if (editItemData) {
-        // Edit mode
         try {
           await updateBulletinBoard({
             classId: id,
@@ -136,7 +134,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           toast.error(dict.bulletinBoard.toastUpdateFailed)
         }
       } else {
-        // Create mode
         try {
           await createBulletinBoard({
             classId: id,
@@ -154,7 +151,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
       }
     } else {
       if (editItemData) {
-        // Local edit mode
         updateSections((prev) =>
           prev.map((sec) =>
             sec.id === targetSectionId
@@ -177,7 +173,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
         )
         toast.success(dict.bulletinBoard.toastUpdateSuccess)
       } else {
-        // Local create mode
         const newItem = {
           id: `item-${Date.now()}`,
           type: "announcement",
@@ -319,7 +314,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const handleSaveLink = async (data) => {
     if (id) {
       if (editItemData) {
-        // Edit mode
         try {
           await updateLink({
             classId: id,
@@ -343,7 +337,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           toast.error(dict.curriculum.updateLinkError)
         }
       } else {
-        // Create mode
         try {
           await addLink({
             classId: id,
@@ -606,7 +599,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
       )}
 
       {isError && (
-        <div className="flex flex-col items-center justify-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
+        <div className="flex flex-col items-center justify-center py-12 text-sm text-[#EF4444] dark:text-red-400 border border-dashed border-[#FCA5A5] dark:border-red-900/40 rounded-xl bg-[#FEF2F2] dark:bg-red-950/30">
           <AlertCircle size={32} className="mb-3 opacity-80" />
           <p>{dict.curriculum.loadError}</p>
         </div>
@@ -648,8 +641,8 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
               {/* Sections List */}
               <div className="space-y-6">
                 {sections.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-                    <FolderOpen size={32} className="mb-3 text-[#9CA3AF] opacity-80" />
+                  <div className="flex flex-col items-center justify-center py-12 text-sm text-[#6B7280] dark:text-gray-400 border border-dashed border-[#E2E2E2] dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#1A1A1A]">
+                    <FolderOpen size={32} className="mb-3 text-[#9CA3AF] dark:text-gray-500 opacity-80" />
                     {isStudent ? (
                       <p>{dict.curriculum.emptyState}</p>
                     ) : (

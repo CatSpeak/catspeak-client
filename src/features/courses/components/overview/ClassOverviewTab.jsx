@@ -107,7 +107,7 @@ const ClassOverviewTab = ({
   const showRightColumn = !isStudent || isEnrolled
 
   return (
-    <div className="flex flex-col sm:grid sm:grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="flex flex-col sm:grid sm:grid-cols-1 lg:grid-cols-3 gap-4 text-slate-900 dark:text-gray-100">
       {/* LEFT COLUMN: Visual Banner, Information Details, Vouchers, and Circular Progress */}
       <div
         className={`contents sm:flex sm:flex-col sm:gap-4 ${

@@ -94,7 +94,7 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[320px] gap-3 py-12">
         <LoadingSpinner />
-        <span className="text-sm text-neutral-500 font-medium">
+        <span className="text-sm text-neutral-500 dark:text-neutral-400 font-medium">
           Đang tải danh sách video bài giảng...
         </span>
       </div>
@@ -103,13 +103,13 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[260px] p-6 bg-red-50/50 border border-red-200 rounded-2xl text-center gap-3">
+      <div className="flex flex-col items-center justify-center min-h-[260px] p-6 bg-red-50/50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 rounded-2xl text-center gap-3">
         <AlertCircle className="w-10 h-10 text-red-500" />
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-semibold text-red-900">
+          <p className="text-sm font-semibold text-red-900 dark:text-red-300">
             Không thể tải video bài giảng của lớp học
           </p>
-          <p className="text-xs text-red-600">
+          <p className="text-xs text-red-600 dark:text-red-400">
             {error?.data?.message ||
               "Vui lòng kiểm tra lại kết nối mạng hoặc quyền truy cập của bạn."}
           </p>
@@ -124,32 +124,32 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
   return (
     <div className="flex flex-col gap-6">
       {/* ── Banner Giới Thiệu ───────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white border border-neutral-200/80 rounded-2xl shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#1A1A1A] border border-neutral-200/80 dark:border-[#3F3F3F] rounded-2xl shadow-xs">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-[#990011]/10 rounded-xl text-[#990011]">
+            <div className="p-2 bg-[#990011]/10 dark:bg-[#FF6B6B]/10 rounded-xl text-[#990011] dark:text-[#FF6B6B]">
               <Video className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-neutral-900">
+            <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
               Video Bài Giảng Lớp Học
             </h2>
           </div>
-          <p className="text-xs text-neutral-500 ml-1">
+          <p className="text-xs text-neutral-500 dark:text-gray-400 ml-1">
             Xem lại các buổi học đã được ghi hình và công bố bởi giảng viên
             {classData?.name ? ` của lớp ${classData.name}` : ""}
           </p>
         </div>
 
         <div className="flex items-center gap-3 self-start sm:self-auto">
-          <div className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
-            <GraduationCap className="w-4 h-4 text-[#990011]" />
+          <div className="px-3 py-1.5 bg-neutral-50 dark:bg-[#222222] border border-neutral-200 dark:border-[#3F3F3F] rounded-xl text-xs font-semibold text-neutral-700 dark:text-gray-300 flex items-center gap-1.5">
+            <GraduationCap className="w-4 h-4 text-[#990011] dark:text-[#FF6B6B]" />
             <span>Tổng cộng: {pagination.total ?? recordings.length} video</span>
           </div>
         </div>
       </div>
 
       {/* ── Thanh Tìm Kiếm ──────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-neutral-50/70 border border-neutral-200/70 rounded-xl">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-neutral-50/70 dark:bg-[#222222] border border-neutral-200/70 dark:border-[#3F3F3F] rounded-xl">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -157,7 +157,7 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm video theo tiêu đề, buổi số hoặc ngày học..."
-            className="w-full pl-9 pr-3 py-2 bg-white border border-neutral-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all"
+            className="w-full pl-9 pr-3 py-2 bg-white dark:bg-[#1A1A1A] border border-neutral-200 dark:border-[#3F3F3F] rounded-lg text-xs sm:text-sm text-neutral-800 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all placeholder:text-neutral-400"
           />
         </div>
 
@@ -170,17 +170,17 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
 
       {/* ── Danh Sách Video Cards ───────────────────────────────────── */}
       {filteredRecordings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-white border border-dashed border-neutral-300 rounded-2xl text-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-400">
+        <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-[#1A1A1A] border border-dashed border-neutral-300 dark:border-[#3F3F3F] rounded-2xl text-center gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-[#2A2A2A] flex items-center justify-center text-neutral-400">
             <Video className="w-7 h-7" />
           </div>
           <div className="flex flex-col gap-1 max-w-md">
-            <h3 className="text-base font-semibold text-neutral-900">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-white">
               {searchQuery
                 ? "Không tìm thấy video bài giảng phù hợp"
                 : "Chưa có video bài giảng nào"}
             </h3>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-neutral-500 dark:text-gray-400">
               {searchQuery
                 ? "Thử tìm kiếm với từ khóa khác như số buổi học hoặc ngày học."
                 : "Các buổi dạy đã hoàn thành sẽ hiển thị tại đây sau khi giảng viên công bố lên lớp học."}
@@ -210,7 +210,7 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
               <div
                 key={recording.id}
                 onClick={() => setSelectedVideoToPlay(recording)}
-                className="group flex flex-col bg-white border border-neutral-200/80 hover:border-[#990011]/40 rounded-2xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-200 cursor-pointer"
+                className="group flex flex-col bg-white dark:bg-[#1A1A1A] border border-neutral-200/80 dark:border-[#3F3F3F] hover:border-[#990011]/40 dark:hover:border-[#FF6B6B]/40 rounded-2xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-200 cursor-pointer"
               >
                 {/* Thumbnail & Video Preview */}
                 <div className="relative aspect-video bg-neutral-950 flex items-center justify-center overflow-hidden">
@@ -243,14 +243,14 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
                 <div className="p-4 flex flex-col flex-1 gap-3">
                   <div className="flex flex-col gap-1">
                     <h3
-                      className="font-bold text-neutral-900 text-sm line-clamp-2 group-hover:text-[#990011] transition-colors"
+                      className="font-bold text-neutral-900 dark:text-white text-sm line-clamp-2 group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors"
                       title={titleDisplay}
                     >
                       {titleDisplay}
                     </h3>
 
                     {/* Metadata tags */}
-                    <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-neutral-500">
+                    <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-neutral-500 dark:text-gray-400">
                       {formattedDate && (
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-neutral-400" />
@@ -267,8 +267,8 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
                   </div>
 
                   {/* Action Link */}
-                  <div className="mt-auto pt-3 border-t border-neutral-100 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[#990011] group-hover:underline flex items-center gap-1">
+                  <div className="mt-auto pt-3 border-t border-neutral-100 dark:border-[#333333] flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#990011] dark:text-[#FF6B6B] group-hover:underline flex items-center gap-1">
                       <Play className="w-3.5 h-3.5 fill-current" />
                       Xem bài giảng
                     </span>
@@ -285,9 +285,9 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
 
       {/* ── Phân Trang (Pagination) ─────────────────────────────────── */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-neutral-200/80 pt-4 px-1 mt-2">
-          <div className="text-xs text-neutral-500">
-            Hiển thị trang <span className="font-semibold text-neutral-900">{pagination.page}</span> / <span className="font-semibold text-neutral-900">{pagination.totalPages}</span> (Tổng số {pagination.total} video)
+        <div className="flex items-center justify-between border-t border-neutral-200/80 dark:border-[#3F3F3F] pt-4 px-1 mt-2">
+          <div className="text-xs text-neutral-500 dark:text-gray-400">
+            Hiển thị trang <span className="font-semibold text-neutral-900 dark:text-white">{pagination.page}</span> / <span className="font-semibold text-neutral-900 dark:text-white">{pagination.totalPages}</span> (Tổng số {pagination.total} video)
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -295,7 +295,7 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
               type="button"
               disabled={page <= 1 || isFetching}
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-              className="p-2 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg border border-neutral-200 dark:border-[#3F3F3F] text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#2A2A2A] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
               title="Trang trước"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -325,10 +325,10 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
                   type="button"
                   disabled={isFetching}
                   onClick={() => setPage(p)}
-                  className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
+                  className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     p === page
-                      ? "bg-[#990011] text-white shadow-xs"
-                      : "border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                      ? "bg-[#990011] dark:bg-[#b20a1c] text-white shadow-xs"
+                      : "border border-neutral-200 dark:border-[#3F3F3F] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-[#2A2A2A]"
                   }`}
                 >
                   {p}
@@ -340,7 +340,7 @@ const StudentClassRecordingsTab = ({ classId, classData }) => {
               type="button"
               disabled={page >= pagination.totalPages || isFetching}
               onClick={() => setPage((prev) => Math.min(pagination.totalPages, prev + 1))}
-              className="p-2 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg border border-neutral-200 dark:border-[#3F3F3F] text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#2A2A2A] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
               title="Trang kế tiếp"
             >
               <ChevronRight className="w-4 h-4" />

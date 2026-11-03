@@ -42,7 +42,7 @@ const TeacherStatCard = ({
 
   return (
     <div
-      className={`bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-3 shadow-sm hover:shadow-md transition-shadow border border-gray-100/80 flex flex-col items-center justify-center text-center ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-xl sm:rounded-2xl p-2.5 sm:p-3 shadow-sm hover:shadow-md transition-shadow border border-gray-100/80 dark:border-[#3F3F3F] flex flex-col items-center justify-center text-center ${className}`}
       title={title}
     >
       {/* Dòng 1: icon, bao bọc bằng parent hình tròn có màu color/50, màu icon = màu color */}
@@ -51,20 +51,19 @@ const TeacherStatCard = ({
           backgroundColor: isHex ? `${color}26` : circleBg,
           color: isTailwindText ? undefined : iconColor,
         }}
-        className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mb-1.5 ${
-          isTailwindText ? `${color} bg-gray-100` : ""
-        }`}
+        className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mb-1.5 ${isTailwindText ? `${color} bg-gray-100 dark:bg-[#2A2A2A]` : ""
+          }`}
       >
         {renderIcon()}
       </div>
 
       {/* Dòng 2: Value, chữ lớn, không in đậm, màu đen */}
-      <div className="text-base sm:text-lg font-normal text-black leading-tight">
+      <div className="text-base sm:text-lg font-normal text-black dark:text-white leading-tight">
         {value ?? "—"}
       </div>
 
       {/* Dòng 3: title */}
-      <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium mt-0.5 truncate max-w-full">
+      <span className="text-[10px] sm:text-[11px] text-gray-400 dark:text-gray-400 font-medium mt-0.5 truncate max-w-full">
         {title}
       </span>
     </div>
