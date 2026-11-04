@@ -6,6 +6,10 @@ import { FormattedText, findUrlsInText } from "@/shared/utils/linkUtils"
 import YouTubeEmbed from "@/features/chat/components/messages/YouTubeEmbed"
 import LinkPreviewCard from "@/features/chat/components/messages/LinkPreviewCard"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import Badge from "@/shared/components/ui/indicators/Badge"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { isOtherTopic } from "@/features/rooms/utils/formatters"
 
 const isEmojiOnly = (text) => {
   if (!text || typeof text !== "string") return false
@@ -45,27 +49,37 @@ const StarterGreetingBubble = ({
   const topicInfo = msg.topicInfo
   const suggestions = msg.suggestions || []
   const topicLabel = t.rooms?.chatBox?.aiTopicLabel || "Chủ đề:"
-  const topicName =
-    topicInfo?.topicNameVi || topicInfo?.topicNameEn || "Du lịch & Giao tiếp"
+  const rawTopic =
+    topicInfo?.topicKey ||
+    topicInfo?.topicNameEn ||
+    topicInfo?.topicNameVi ||
+    topicInfo?.topic ||
+    msg.topic ||
+    ""
+  const shouldShowTopic =
+    Boolean(rawTopic) &&
+    !isOtherTopic(rawTopic) &&
+    !isOtherTopic(topicInfo?.topicNameVi)
+  const topicName = topicInfo?.topicNameVi || topicInfo?.topicNameEn || rawTopic
 
   return (
-    <div className="flex flex-col mb-4 items-start w-full gap-2.5">
-      {/* 1. Header: Icon + Title on left, Solid Maroon Topic Badge on right */}
+    <div className="flex flex-col items-start w-full gap-2">
+      {/* 1. Header: Icon + Title on left, Topic Badge on right (if valid topic) */}
       <div className="flex items-center justify-between gap-2 w-full">
-        <div className="flex items-center gap-1.5 font-bold text-[13px] text-[#b91c1c] tracking-tight">
-          <span>🎓</span>
-          <span>
-            {t.rooms?.chatBox?.aiMeetingSuggestionLabel ||
-              "GỢI Ý CÂU CHO BUỔI HỌC"}
-          </span>
+        <div className="font-bold text-base text-neutral-900 dark:text-neutral-100">
+          {t.rooms?.chatBox?.aiMeetingSuggestionLabel ||
+            "GỢI Ý CÂU CHO BUỔI HỌC"}
         </div>
-        <div className="bg-[#b91c1c] text-white text-[11px] font-bold px-2 py-0.5 rounded shadow-2xs whitespace-nowrap">
-          {topicLabel} {topicName}
-        </div>
+
+        {shouldShowTopic && (
+          <Badge color="cath-red" title={`${topicLabel} ${topicName}`}>
+            {topicName}
+          </Badge>
+        )}
       </div>
 
       {/* 2. Intro Box: Light subtle gray background with clean border */}
-      <div className="w-full bg-[#fbfbfa] dark:bg-[#272727] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl px-4 py-3 text-[13px] text-gray-800 dark:text-neutral-200 leading-snug">
+      <div className="w-full pb-2 text-sm text-neutral-800 dark:text-neutral-200">
         {t.rooms?.chatBox?.aiGreetingIntro ||
           "Xin chào! Dưới đây là các câu gợi ý theo chủ đề buổi học hôm nay để bạn luyện nói hoặc gửi vào phòng học:"}
       </div>
@@ -86,21 +100,21 @@ const StarterGreetingBubble = ({
               t.rooms?.chatBox?.aiAskVocabularyTooltip ||
               "Click để hỏi AI từ vựng cho câu này"
             }
-            className="group w-full text-left bg-white dark:bg-[#1A1A1A] hover:bg-red-50/40 dark:hover:bg-red-950/20 active:scale-[0.99] border border-red-200 dark:border-red-900/40 hover:border-red-300 rounded-2xl px-4 py-2.5 transition-all shadow-2xs flex flex-col gap-0.5 cursor-pointer"
+            className="group w-full text-left bg-white dark:bg-[#1A1A1A] hover:bg-neutral-50 dark:hover:bg-[#252525] active:scale-[0.99] border border-border dark:border-[#3F3F3F] hover:border-neutral-300 dark:hover:border-[#555555] rounded-2xl px-4 py-2 transition-all shadow-2xs flex items-start gap-2 cursor-pointer"
           >
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[14px] leading-none shrink-0">
-                {item.icon || "🎓"}
-              </span>
-              <span className="font-bold text-[13.5px] text-[#b91c1c] dark:text-red-400 group-hover:text-red-800 dark:group-hover:text-red-300 leading-snug break-words">
+            <span className="text-[20px] shrink-0">{item.icon || "🎓"}</span>
+
+            <div className="flex flex-col min-w-0">
+              <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100 group-hover:text-cath-red-700 dark:group-hover:text-red-400 break-words transition-colors">
                 {item.vi || item.targetText}
               </span>
+
+              {item.targetText && item.vi && item.targetText !== item.vi && (
+                <div className="text-xs text-neutral-500 dark:text-neutral-400 break-words">
+                  {item.targetText}
+                </div>
+              )}
             </div>
-            {item.targetText && item.vi && item.targetText !== item.vi && (
-              <div className="text-[12px] text-gray-600 dark:text-[#AAAAAA] font-normal leading-tight pl-5 break-words">
-                {item.targetText}
-              </div>
-            )}
           </button>
         ))}
 
@@ -108,7 +122,7 @@ const StarterGreetingBubble = ({
         <button
           type="button"
           onClick={() => onLoadMoreSuggestions?.()}
-          className="w-full text-center text-[13px] py-2.5 border border-dashed border-red-300/80 dark:border-red-800/60 hover:border-red-400 bg-transparent hover:bg-red-50/30 dark:hover:bg-red-950/20 text-gray-600 dark:text-[#AAAAAA] hover:text-gray-800 dark:hover:text-white font-medium rounded-2xl transition-all cursor-pointer mt-0.5"
+          className="w-full text-center text-sm py-2 px-4 h-12 border border-dashed border-border dark:border-[#3F3F3F] hover:border-neutral-400 dark:hover:border-neutral-500 bg-transparent hover:bg-neutral-50/80 dark:hover:bg-[#252525] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-medium rounded-2xl transition-all cursor-pointer"
         >
           {t.rooms?.chatBox?.aiLoadMoreSuggestions || "+ Gợi ý thêm"}
         </button>
@@ -128,6 +142,8 @@ const MessageBubble = ({
   onLoadMoreSuggestions,
   onSelectFollowUp,
   onRetryAi,
+  isRetrying = false,
+  isAnyRetrying = false,
   isUserTyping = false,
 }) => {
   const { formatTime } = useTimezone()
@@ -152,30 +168,16 @@ const MessageBubble = ({
   const renderFormattedMessage = (text) => {
     if (!text) return text
 
-    let prefixNode = null
-    let mainText = text
+    const cleanText = text.replace(/^((@(AIPublic|AIPrivate|public-ai|private-ai|AISystem))\s*)+/gi, (m) => `${m.trim().split(/\s+/)[0]} `)
 
-    if (text.startsWith("@AIPublic")) {
-      mainText = text.slice(9)
-    } else if (text.startsWith("@AIPrivate")) {
-      mainText = text.slice(10)
-    } else if (text.startsWith("@public-ai")) {
-      mainText = text.slice(10)
-    } else if (text.startsWith("@private-ai")) {
-      mainText = text.slice(11)
-    } else if (text.startsWith("@AISystem")) {
-      mainText = text.slice(9)
-    }
+
 
     return (
-      <>
-        {prefixNode}
-        <FormattedText
-          text={mainText.trim()}
-          isOwn={isMe}
-          currentUserName={currentUserName}
-        />
-      </>
+      <FormattedText
+        text={cleanText}
+        isOwn={isMe}
+        currentUserName={currentUserName}
+      />
     )
   }
 
@@ -209,38 +211,37 @@ const MessageBubble = ({
 
   const isError = msg.status === "error"
 
+  const displayName = isMe
+    ? t?.rooms?.chatBox?.you || t?.chat?.you || "You"
+    : senderName
+
   return (
-    <div className={`flex flex-col mb-2.5 ${isMe ? "items-end" : "items-start"}`}>
-      {/* Header Info: Sender Name & Exception Warning (FR-006) */}
-      {!isMe ? (
-        <div className="flex items-center gap-1 mb-1 max-w-full">
-          <span
-            className={`text-xs ${isAi ? "text-gray-500 dark:text-[#AAAAAA] font-medium" : "font-bold text-gray-800 dark:text-neutral-100"} truncate shrink flex items-center gap-1`}
-            title={senderName}
-          >
-            {senderName}
+    <div
+      className={`flex flex-col mb-2.5 ${isMe ? "items-end" : "items-start"}`}
+    >
+      {/* Header Info: Sender Name, Exception Warning (FR-006) & Timestamp */}
+      <div className="flex items-center gap-1 mb-1 max-w-full">
+        <span
+          className={`font-bold text-xs ${isAi ? "text-gray-500 dark:text-[#AAAAAA]" : "text-gray-800 dark:text-neutral-100"} truncate shrink`}
+          title={displayName}
+        >
+          {displayName}
+        </span>
+
+        {msg.isPublic && (
+          <span className="flex items-center gap-1 text-[11px] text-red-600 dark:text-red-400 font-semibold ml-0.5 shrink-0">
+            <Globe size={12} className="shrink-0" />
+            <span>
+              {t?.rooms?.chatBox?.aiPublicWarningBadge ||
+                "🌐 Công khai với phòng"}
+            </span>
           </span>
-          <span className="text-xs text-[#606060] dark:text-[#AAAAAA] shrink-0">
-            {formatTime(msg.timestamp)}
-          </span>
-        </div>
-      ) : msg.isPublic ? (
-        /* Exception Warning: Public warning badge when user asks Public AI */
-        <div className="flex items-center gap-1 text-[11px] text-red-600 font-semibold mb-1">
-          <Globe size={12} className="shrink-0" />
-          <span>{t.rooms?.chatBox?.aiPublicWarningBadge || "🌐 Công khai với phòng"}</span>
-          <span className="text-xs text-[#606060] dark:text-[#AAAAAA] font-normal ml-1">
-            {formatTime(msg.timestamp)}
-          </span>
-        </div>
-      ) : (
-        /* Private mode: Clean, minimal header (timestamp only) */
-        <div className="flex items-center gap-1 mb-1 max-w-full">
-          <span className="text-xs text-[#606060] dark:text-[#AAAAAA] shrink-0">
-            {formatTime(msg.timestamp)}
-          </span>
-        </div>
-      )}
+        )}
+
+        <span className="text-xs text-[#606060] dark:text-[#AAAAAA] shrink-0">
+          {formatTime(msg.timestamp)}
+        </span>
+      </div>
 
       {/* Main Bubble */}
       <div
@@ -252,16 +253,14 @@ const MessageBubble = ({
           className={
             isEmoji
               ? "bg-transparent p-0 text-3xl md:text-4xl leading-relaxed select-text border-0 shadow-none min-h-0 min-w-0"
-              : `max-w-[85%] rounded-2xl px-4 py-3 text-sm break-words transition-all ${
+              : `max-w-[85%] w-fit rounded-2xl px-3 py-2 text-base break-words transition-all ${
                   isMe
                     ? "bg-[#990011] text-white"
-                    : isError
-                      ? "bg-[#fff5f5] dark:bg-red-950/30 text-gray-900 dark:text-red-200 border border-red-200 dark:border-red-900/50 shadow-2xs"
+                    : isError || isAi
+                      ? "bg-[#fbfbfa] dark:bg-[#1A1A1A] text-gray-900 dark:text-neutral-100 border border-gray-200/90 dark:border-[#3F3F3F] shadow-2xs"
                       : isSystem
                         ? "bg-orange-100 dark:bg-amber-950/40 text-orange-900 dark:text-amber-200"
-                        : isAi
-                          ? "bg-[#fbfbfa] dark:bg-[#1A1A1A] text-gray-900 dark:text-neutral-100 border border-gray-200/90 dark:border-[#3F3F3F] shadow-2xs"
-                          : "bg-[#F0F0F0] dark:bg-[#272727] text-black dark:text-white"
+                        : "bg-[#F0F0F0] dark:bg-[#272727] text-black dark:text-white"
                 }`
           }
         >
@@ -275,24 +274,24 @@ const MessageBubble = ({
           )}
 
           {msg.status === "loading" ? (
-            <div className="flex gap-2 items-center py-0.5 text-xs text-gray-500 font-medium select-none">
+            <div className="flex gap-2 items-center py-0.5 text-xs text-gray-500 dark:text-[#AAAAAA] font-medium select-none">
               <div className="flex gap-1 items-center shrink-0">
                 <span
-                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"
                   style={{
                     animationDelay: "0s",
                     animationDuration: "0.8s",
                   }}
                 ></span>
                 <span
-                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"
                   style={{
                     animationDelay: "0.15s",
                     animationDuration: "0.8s",
                   }}
                 ></span>
                 <span
-                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"
                   style={{
                     animationDelay: "0.3s",
                     animationDuration: "0.8s",
@@ -307,11 +306,10 @@ const MessageBubble = ({
           ) : isError ? (
             /* AI Error Card (E-003) */
             <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-1.5 font-bold text-[13.5px] text-[#b91c1c]">
+              <div className="flex items-center gap-1.5 font-bold text-[13.5px] text-amber-600 dark:text-amber-400">
                 <span className="text-[14px]">⚠️</span>
                 <span>
-                  {t.rooms?.chatBox?.aiErrorTitle ||
-                    "Không thể kết nối trợ lý"}
+                  {t.rooms?.chatBox?.aiErrorTitle || "Không thể kết nối trợ lý"}
                 </span>
               </div>
               <p className="m-0 text-[13px] leading-relaxed text-gray-800 dark:text-neutral-200 font-normal">
@@ -384,29 +382,38 @@ const MessageBubble = ({
 
         {/* Reply button */}
         {onReplyTo && (!isAi || msg.status === "done") && (
-          <button
+          <IconButton
             type="button"
+            variant="ghost"
             onClick={() => onReplyTo(msg)}
-            className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 flex items-center justify-center p-1.5 text-gray-400 hover:text-[#990011] transition-all rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] shrink-0"
+            className="-my-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 shrink-0 text-gray-400 dark:text-[#AAAAAA] hover:text-[#990011] dark:hover:text-red-400"
             title={t.rooms?.chatBox?.reply || "Reply"}
+            aria-label={t.rooms?.chatBox?.reply || "Reply"}
           >
-            <Reply size={18} />
-          </button>
+            <Reply />
+          </IconButton>
         )}
       </div>
 
       {/* Retry Button on Error (E-003) */}
       {isError && onRetryAi && (
-        <button
-          type="button"
+        <PillButton
+          variant="secondary"
+          loading={isRetrying}
+          disabled={isAnyRetrying && !isRetrying}
+          loadingText={t.rooms?.chatBox?.aiRetrying || "Đang thử lại..."}
           onClick={() =>
-            onRetryAi(msg.promptRaw || msg.message, msg.interactionId)
+            onRetryAi(
+              msg.promptRaw || msg.replyTo?.message || msg.message,
+              msg.interactionId || msg.id,
+              { isPrivateAi: !msg.isPublic }
+            )
           }
-          className="mt-2 inline-flex items-center gap-1.5 self-start px-3 py-1.5 text-xs font-medium text-[#990011] dark:text-red-400 bg-white dark:bg-[#1A1A1A] border border-[#990011] rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-[0.99] transition-all shadow-2xs cursor-pointer"
+          startIcon={<RotateCw />}
+          className="mt-2 self-start"
         >
-          <RotateCw size={13} className="text-blue-500 shrink-0" />
-          <span>{t.rooms?.chatBox?.aiRetry || "Thử lại"}</span>
-        </button>
+          {t.rooms?.chatBox?.aiRetry || "Thử lại"}
+        </PillButton>
       )}
 
       {/* Follow-up Question Buttons (FR-002, FR-005) */}
@@ -438,7 +445,9 @@ const MessageBubble = ({
                     onClick={() => onSelectFollowUp?.(qText)}
                     className="group/btn w-full text-left bg-white dark:bg-[#1A1A1A] hover:bg-gray-50 dark:hover:bg-[#272727] active:scale-[0.99] border border-gray-200 dark:border-[#3F3F3F] hover:border-gray-300 rounded-full px-4 py-2 transition-all shadow-2xs flex items-center gap-2 cursor-pointer"
                   >
-                    <span className="text-[14px] leading-none shrink-0">❓</span>
+                    <span className="text-[14px] leading-none shrink-0">
+                      ❓
+                    </span>
                     <span className="text-[13px] text-gray-800 dark:text-neutral-200 group-hover/btn:text-gray-900 dark:group-hover/btn:text-white font-medium leading-snug break-words">
                       {qText}
                     </span>

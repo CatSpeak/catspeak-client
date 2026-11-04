@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react"
 import { Mic, Settings } from "lucide-react"
-import { motion, LayoutGroup } from "framer-motion"
 import Modal from "@/shared/components/ui/Modal"
 import ListItem from "@/shared/components/ui/ListItem"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
@@ -52,12 +51,12 @@ const RoomSettingsModal = ({
       onClose={onClose}
       title={waitingT.deviceSettings || "Cài đặt"}
       className="md:max-w-[920px] w-full flex flex-col h-full md:!h-[560px] max-h-none md:max-h-[80vh]"
-      headerClassName="flex items-center justify-between p-4 sm:p-6 border-b border-border shrink-0"
-      bodyClassName="p-0 flex-1 overflow-hidden flex flex-col min-h-0"
+      headerClassName="flex items-center justify-between p-4 border-b border-border dark:border-[#3F3F3F] shrink-0"
+      bodyClassName="!px-0 !mb-0 flex-1 overflow-hidden flex flex-col min-h-0"
       fullScreenOnMobile={true}
     >
       {/* Mobile Navigation Tabs */}
-      <div className="block md:hidden bg-white shrink-0">
+      <div className="block md:hidden bg-white dark:bg-[#1A1A1A] border-b border-border dark:border-[#3F3F3F] shrink-0">
         <Tabs
           tabs={tabs}
           activeTab={activeTab}
@@ -72,59 +71,55 @@ const RoomSettingsModal = ({
           role="tablist"
           aria-orientation="vertical"
           aria-label={waitingT.deviceSettings || "Settings"}
-          className="hidden md:flex w-[300px] bg-white border-r border-border p-4 flex-col gap-1 shrink-0 overflow-y-auto"
+          className="hidden md:flex w-[280px] bg-white dark:bg-[#1A1A1A] border-r border-border dark:border-[#3F3F3F] flex-col shrink-0 overflow-y-auto"
         >
-          <LayoutGroup id="roomSettingsSidebarNav">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              const isActive = activeTab === tab.id
-              return (
-                <div
-                  key={tab.id}
-                  className="relative group/navitem w-full shrink-0"
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
+            return (
+              <div
+                key={tab.id}
+                className="relative group/navitem w-full shrink-0"
+              >
+                <ListItem
+                  onClick={() => setActiveTab(tab.id)}
+                  lines={1}
+                  selected={isActive}
+                  role="tab"
+                  aria-selected={isActive}
+                  id={`room-settings-tab-${tab.id}`}
+                  aria-controls="room-settings-panel"
+                  leftContent={
+                    <span
+                      className={
+                        isActive
+                          ? "text-neutral-900 dark:text-white"
+                          : "text-neutral-500 dark:text-[#AAAAAA]"
+                      }
+                    >
+                      {Icon && <Icon size={20} />}
+                    </span>
+                  }
+                  className="w-full transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600"
+                  contentClassName={`relative transition-colors duration-150 px-4 ${
+                    isActive
+                      ? "bg-itemActive hover:bg-itemActiveHover dark:bg-[#272727] dark:hover:bg-[#3D3D3D]"
+                      : "hover:bg-itemHover dark:hover:bg-[#272727]"
+                  }`}
                 >
-                  {isActive && (
-                    <motion.div
-                      layoutId="roomSettingsNavActiveIndicator"
-                      className="absolute left-0 inset-y-0 my-auto w-[3px] h-5 bg-cath-red-700 rounded-r-full z-20"
-                      transition={{
-                        type: "spring",
-                        stiffness: 380,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                  <ListItem
-                    onClick={() => setActiveTab(tab.id)}
-                    lines={1}
-                    role="tab"
-                    aria-selected={isActive}
-                    id={`room-settings-tab-${tab.id}`}
-                    aria-controls="room-settings-panel"
-                    leftContent={
-                      <span className={isActive ? "text-cath-red-700" : "text-neutral-500"}>
-                        {Icon && <Icon size={20} />}
-                      </span>
-                    }
-                    className="w-full rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
-                    contentClassName={`rounded-xl transition-all duration-200 px-4 ${
+                  <span
+                    className={`whitespace-nowrap text-base flex-1 ${
                       isActive
-                        ? "bg-cath-red-700/[0.07] hover:bg-cath-red-700/10"
-                        : "hover:bg-primaryBg"
+                        ? "text-neutral-900 dark:text-white"
+                        : "text-neutral-700 dark:text-[#AAAAAA]"
                     }`}
                   >
-                    <span
-                      className={`whitespace-nowrap text-base flex-1 ${
-                        isActive ? "font-semibold text-neutral-900" : ""
-                      }`}
-                    >
-                      {tab.label}
-                    </span>
-                  </ListItem>
-                </div>
-              )
-            })}
-          </LayoutGroup>
+                    {tab.label}
+                  </span>
+                </ListItem>
+              </div>
+            )
+          })}
         </div>
 
         {/* Content Area */}
@@ -132,7 +127,7 @@ const RoomSettingsModal = ({
           role="tabpanel"
           id="room-settings-panel"
           aria-labelledby={`room-settings-tab-${activeTab}`}
-          className="bg-primaryBg flex-1 p-4 sm:p-6 overflow-y-auto min-h-0 h-full"
+          className="bg-white dark:bg-[#1A1A1A] flex-1 overflow-y-auto min-h-0 h-full"
         >
           {activeTab === "audio-video" && (
             <AudioVideoTab

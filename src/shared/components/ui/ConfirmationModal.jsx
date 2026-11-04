@@ -28,7 +28,7 @@ const ConfirmationModal = ({
       title={title}
       showCloseButton={false}
       fullScreenOnMobile={false}
-      className={`rounded-xl border border-border ${className}`.trim()}
+      className={`rounded-xl border border-border dark:border-[#3F3F3F] ${className}`.trim()}
       headerClassName="flex items-start justify-between p-4"
       bodyClassName="px-4"
       footerClassName="p-4"
@@ -50,7 +50,7 @@ const ConfirmationModal = ({
         </div>
       }
     >
-      <div className="text-[#606060] text-sm">
+      <div className="text-[#606060] dark:text-[#AAAAAA] text-sm">
         {message ? <p>{message}</p> : children}
       </div>
     </Modal>

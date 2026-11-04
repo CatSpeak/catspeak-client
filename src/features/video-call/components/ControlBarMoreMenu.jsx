@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -33,6 +33,14 @@ const ControlBarMoreMenu = ({
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
   const [showChooseLayout, setShowChooseLayout] = useState(false)
 
+  // Reset inner submenus when menu is closed
+  useEffect(() => {
+    if (!showMoreMenu) {
+      setShowSubtitlePicker(false)
+      setShowMobileSettings(false)
+    }
+  }, [showMoreMenu])
+
   return (
     <>
       <AnimatePresence>
@@ -48,7 +56,7 @@ const ControlBarMoreMenu = ({
               distance={15}
               exit={true}
               duration={0.2}
-              className="fixed inset-x-0 bottom-0 md:absolute md:inset-x-auto md:bottom-[110%] md:right-0 z-50 md:mb-2 md:min-w-56 md:max-w-72 w-full"
+              className="fixed inset-x-0 bottom-0 md:absolute md:inset-x-auto md:bottom-[110%] md:right-0 z-50 md:mb-2 md:min-w-64 md:max-w-80 w-full"
             >
               <div className="w-full overflow-hidden rounded-t-3xl md:rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-lg pb-safe md:pb-0">
                 <AnimatePresence mode="wait" initial={false}>
@@ -110,7 +118,7 @@ const ControlBarMoreMenu = ({
                           t?.rooms?.videoCall?.controls?.back || "Back"
                         }
                         onClose={() => setShowSubtitlePicker(false)}
-                        className="w-full bg-[#FFFFFF]"
+                        className="w-full bg-transparent text-foreground dark:text-white"
                       />
                     </FluentAnimation>
                   )}

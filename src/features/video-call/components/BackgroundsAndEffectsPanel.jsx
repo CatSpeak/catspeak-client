@@ -44,11 +44,13 @@ const BackgroundsAndEffectsPanel = () => {
 
       {/* Tab content */}
       <div className={`flex-1 overflow-y-auto ${scrollbarClasses}`}>
-        {activeTab === "backgrounds" ? (
-          <VirtualBackgroundPicker />
-        ) : (
-          isBeautyAllowed && <BeautyPicker />
-        )}
+        <div className="p-4">
+          {activeTab === "backgrounds" ? (
+            <VirtualBackgroundPicker />
+          ) : (
+            isBeautyAllowed && <BeautyPicker />
+          )}
+        </div>
       </div>
     </div>
   )

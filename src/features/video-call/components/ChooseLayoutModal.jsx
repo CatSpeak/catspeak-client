@@ -1,11 +1,13 @@
-import Modal from "@/shared/components/ui/Modal";
-import Switch from "@/shared/components/ui/inputs/Switch";
-import Slider from "@/shared/components/ui/Slider";
-import { Sparkles, LayoutGrid } from "lucide-react";
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
-import { useLanguage } from "@/shared/context/LanguageContext";
+import Modal from "@/shared/components/ui/Modal"
+import Switch from "@/shared/components/ui/inputs/Switch"
+import Radio from "@/shared/components/ui/inputs/Radio"
+import Slider from "@/shared/components/ui/Slider"
+import ListItem from "@/shared/components/ui/ListItem"
+import { LayoutGrid } from "lucide-react"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
-const LOCAL_STORAGE_KEY = "catspeak_video_layout_settings";
+const LOCAL_STORAGE_KEY = "catspeak_video_layout_settings"
 
 // Icons for layout modes
 const LayoutIconAuto = () => (
@@ -15,7 +17,7 @@ const LayoutIconAuto = () => (
     <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[2px]" />
     <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[2px]" />
   </div>
-);
+)
 
 const LayoutIconGrid = () => (
   <div className="flex flex-col gap-[2px] w-12 h-8">
@@ -38,11 +40,11 @@ const LayoutIconGrid = () => (
       <div className="bg-gray-300 dark:bg-neutral-600 w-1/4 h-full rounded-[1px]" />
     </div>
   </div>
-);
+)
 
 const LayoutIconSpotlight = () => (
   <div className="w-12 h-8 bg-gray-300 dark:bg-neutral-600 rounded-[2px]" />
-);
+)
 
 const LayoutIconSidebar = () => (
   <div className="flex gap-[2px] w-12 h-8">
@@ -53,11 +55,11 @@ const LayoutIconSidebar = () => (
       <div className="bg-gray-300 dark:bg-neutral-600 w-full h-1/3 rounded-[1px]" />
     </div>
   </div>
-);
+)
 
 const ChooseLayoutModal = ({ open, onClose }) => {
-  const { t } = useLanguage();
-  const changeLayoutT = t?.rooms?.videoCall?.changeLayout || {};
+  const { t } = useLanguage()
+  const changeLayoutT = t?.rooms?.videoCall?.changeLayout || {}
 
   const {
     layoutMode,
@@ -66,101 +68,97 @@ const ChooseLayoutModal = ({ open, onClose }) => {
     setMaxTiles,
     hideEmptyTiles,
     setHideEmptyTiles,
-  } = useGlobalVideoCall();
+  } = useGlobalVideoCall()
 
   const handleLayoutChange = (mode) => {
-    setLayoutMode(mode);
-  };
+    setLayoutMode(mode)
+  }
+
+  const layoutOptions = [
+    {
+      id: "auto",
+      label: changeLayoutT.auto || "Tự động (linh động)",
+      icon: <LayoutIconAuto />,
+    },
+    {
+      id: "grid",
+      label: changeLayoutT.grid || "Lưới",
+      icon: <LayoutIconGrid />,
+    },
+    {
+      id: "spotlight",
+      label: changeLayoutT.spotlight || "Tiêu điểm",
+      icon: <LayoutIconSpotlight />,
+    },
+    {
+      id: "sidebar",
+      label: changeLayoutT.sidebar || "Thanh bên",
+      icon: <LayoutIconSidebar />,
+    },
+  ]
 
   return (
-    <Modal open={open} onClose={onClose} title={changeLayoutT.title || "Điều chỉnh chế độ xem"} className="md:max-w-[380px]">
-      <div className="flex flex-col text-[#3C4043] dark:text-neutral-200 p-1 pb-4 w-full">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={changeLayoutT.title || "Điều chỉnh chế độ xem"}
+      className="md:max-w-[380px]"
+      bodyClassName="!px-0"
+    >
+      <div className="flex flex-col text-[#3C4043] dark:text-neutral-200 w-full">
         {/* Layout Modes */}
-        <div className="flex flex-col gap-3 mb-6">
-          <label className="flex items-center justify-between cursor-pointer group">
-            <div className="flex items-center gap-4">
-              <input
-                type="radio"
-                name="layoutMode"
-                value="auto"
-                checked={layoutMode === "auto"}
-                onChange={() => handleLayoutChange("auto")}
-                className="w-5 h-5 accent-[#1A73E8]"
-              />
-              <span className="text-[15px] flex items-center gap-2">
-                {changeLayoutT.auto || "Tự động (linh động)"} <Sparkles size={16} className="text-[#3C4043] dark:text-neutral-300" />
-              </span>
-            </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "auto" ? "border-[#1A73E8] bg-[#E8F0FE]/50 dark:bg-blue-950/30" : "border-border dark:border-[#3F3F3F] group-hover:border-gray-300 dark:group-hover:border-neutral-500"}`}>
-              <LayoutIconAuto />
-            </div>
-          </label>
-
-          <label className="flex items-center justify-between cursor-pointer group">
-            <div className="flex items-center gap-4">
-              <input
-                type="radio"
-                name="layoutMode"
-                value="grid"
-                checked={layoutMode === "grid"}
-                onChange={() => handleLayoutChange("grid")}
-                className="w-5 h-5 accent-[#1A73E8]"
-              />
-              <span className="text-[15px]">{changeLayoutT.grid || "Lưới"}</span>
-            </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "grid" ? "border-[#1A73E8] bg-[#E8F0FE]/50 dark:bg-blue-950/30" : "border-border dark:border-[#3F3F3F] group-hover:border-gray-300 dark:group-hover:border-neutral-500"}`}>
-              <LayoutIconGrid />
-            </div>
-          </label>
-
-          <label className="flex items-center justify-between cursor-pointer group">
-            <div className="flex items-center gap-4">
-              <input
-                type="radio"
-                name="layoutMode"
-                value="spotlight"
-                checked={layoutMode === "spotlight"}
-                onChange={() => handleLayoutChange("spotlight")}
-                className="w-5 h-5 accent-[#1A73E8]"
-              />
-              <span className="text-[15px]">{changeLayoutT.spotlight || "Tiêu điểm"}</span>
-            </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "spotlight" ? "border-[#1A73E8] bg-[#E8F0FE]/50 dark:bg-blue-950/30" : "border-border dark:border-[#3F3F3F] group-hover:border-gray-300 dark:group-hover:border-neutral-500"}`}>
-              <LayoutIconSpotlight />
-            </div>
-          </label>
-
-          <label className="flex items-center justify-between cursor-pointer group">
-            <div className="flex items-center gap-4">
-              <input
-                type="radio"
-                name="layoutMode"
-                value="sidebar"
-                checked={layoutMode === "sidebar"}
-                onChange={() => handleLayoutChange("sidebar")}
-                className="w-5 h-5 accent-[#1A73E8]"
-              />
-              <span className="text-[15px]">{changeLayoutT.sidebar || "Thanh bên"}</span>
-            </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "sidebar" ? "border-[#1A73E8] bg-[#E8F0FE]/50 dark:bg-blue-950/30" : "border-border dark:border-[#3F3F3F] group-hover:border-gray-300 dark:group-hover:border-neutral-500"}`}>
-              <LayoutIconSidebar />
-            </div>
-          </label>
+        <div
+          role="radiogroup"
+          aria-label={changeLayoutT.title || "Điều chỉnh chế độ xem"}
+          className="flex flex-col mb-4"
+        >
+          {layoutOptions.map((option) => {
+            const isSelected = layoutMode === option.id
+            return (
+              <ListItem
+                key={option.id}
+                as="div"
+                role="radio"
+                aria-checked={isSelected}
+                selected={isSelected}
+                onClick={() => handleLayoutChange(option.id)}
+                hoverEffect
+                leftContent={<Radio checked={isSelected} />}
+                rightContent={
+                  <div className="p-1 border border-border dark:border-[#3F3F3F] rounded-md transition-colors group-hover:border-gray-400 dark:group-hover:border-neutral-500">
+                    {option.icon}
+                  </div>
+                }
+              >
+                {option.label}
+              </ListItem>
+            )
+          })}
         </div>
 
         {/* Tiles count */}
-        <div className={`flex flex-col mb-4 transition-opacity ${layoutMode !== 'grid' && layoutMode !== 'auto' ? 'opacity-50 pointer-events-none' : ''}`}>
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{changeLayoutT.tilesLabel || "Số ô"}</span>
-              <span className="text-xs text-gray-500 dark:text-[#AAAAAA]">
-                {changeLayoutT.tilesDescription || "Số ô tối đa được hiển thị, tùy vào kích thước cửa sổ."}
-              </span>
-            </div>
-            <span className="text-base font-semibold text-[#1A73E8] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md min-w-[32px] text-center">{maxTiles}</span>
+        <div
+          className={`px-4 flex flex-col mb-4 transition-opacity ${
+            layoutMode !== "grid" && layoutMode !== "auto"
+              ? "opacity-50 pointer-events-none"
+              : ""
+          }`}
+        >
+          <div className="flex flex-col mb-2">
+            <span className="text-base font-medium">
+              {changeLayoutT.tilesLabel || "Số ô"}
+            </span>
+            <span className="text-sm text-secondary dark:text-[#AAAAAA]">
+              {changeLayoutT.tilesDescription ||
+                "Số ô tối đa được hiển thị, tùy vào kích thước cửa sổ."}
+            </span>
           </div>
+
           <div className="flex items-center gap-4">
-            <LayoutGrid size={24} className="text-gray-600 dark:text-neutral-400" />
+            <LayoutGrid
+              size={24}
+              className="text-gray-600 dark:text-neutral-400 shrink-0"
+            />
             <div className="flex-1 px-2">
               <Slider
                 value={maxTiles}
@@ -170,26 +168,35 @@ const ChooseLayoutModal = ({ open, onClose }) => {
                 onChange={(e) => setMaxTiles(Number(e.target.value))}
               />
             </div>
-            <div className="grid grid-cols-3 gap-0.5 w-6 h-6">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="bg-gray-600 dark:bg-neutral-400 rounded-[1px]" />
-              ))}
-            </div>
+            <span className="text-base font-medium min-w-[28px] text-right shrink-0">
+              {maxTiles}
+            </span>
           </div>
         </div>
 
         {/* Hide empty tiles */}
-        <div className="flex items-center justify-between">
-          <span className="text-[15px] font-medium">{changeLayoutT.hideNonVideo || "Ẩn ô không có video"}</span>
-          <Switch
-            checked={hideEmptyTiles}
-            onChange={(e) => setHideEmptyTiles(e.target.checked)}
-            colorClass="peer-checked:bg-[#1A73E8]"
-          />
-        </div>
+        <ListItem
+          as="div"
+          onClick={() => setHideEmptyTiles(!hideEmptyTiles)}
+          hoverEffect
+          rightContent={
+            <div
+              className="flex items-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Switch
+                checked={hideEmptyTiles}
+                onChange={(e) => setHideEmptyTiles(e.target.checked)}
+                colorClass="peer-checked:bg-cath-red-700 dark:peer-checked:bg-cath-red-1000"
+              />
+            </div>
+          }
+        >
+          <span>{changeLayoutT.hideNonVideo || "Ẩn ô không có video"}</span>
+        </ListItem>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default ChooseLayoutModal;
+export default ChooseLayoutModal

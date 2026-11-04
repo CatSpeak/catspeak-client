@@ -98,8 +98,8 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
 
   if (isLoading && !queue) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-12 text-sm text-neutral-400">
-        <Loader2 size={22} className="animate-spin text-cath-red-700" />
+      <div className="flex flex-col items-center justify-center gap-3 py-12 text-sm text-neutral-400 dark:text-[#AAAAAA]">
+        <Loader2 size={22} className="animate-spin text-cath-red-700 dark:text-red-400" />
         <span>{wq.loading || "Đang tải danh sách chờ..."}</span>
       </div>
     )
@@ -108,15 +108,15 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
   if (pending.length === 0 && mergedExternal.length === 0) {
     return (
       <div className="p-4">
-        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-neutral-200/80 bg-neutral-50/50 p-8 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-neutral-200/80 dark:border-[#3F3F3F] bg-neutral-50/50 dark:bg-[#222222] p-8 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
             <Clock size={24} />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-semibold text-neutral-800">
+            <span className="text-sm font-semibold text-neutral-800 dark:text-white">
               {wq.empty || "Chưa có ai đang chờ duyệt"}
             </span>
-            <span className="text-xs text-neutral-500 max-w-xs">
+            <span className="text-xs text-neutral-500 dark:text-[#AAAAAA] max-w-xs">
               {wq.emptyDesc || "Những người tham gia gửi yêu cầu vào phòng sẽ xuất hiện tại đây."}
             </span>
           </div>
@@ -129,7 +129,7 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
     <div className="flex flex-col gap-2 p-2">
       {pending.length > 1 && (
         <div className="flex items-center justify-between px-1 pb-1">
-          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+          <span className="text-xs font-semibold text-neutral-500 dark:text-[#AAAAAA] uppercase tracking-wider">
             {pending.length} {wq.pendingCountLabel || "yêu cầu chờ"}
           </span>
           <button
@@ -148,13 +148,13 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
         {pending.map((entry) => (
           <li
             key={entry.accountId}
-            className="flex items-center justify-between gap-2.5 rounded-xl border border-amber-200/80 bg-amber-50/40 p-2.5 transition-colors hover:bg-amber-50/70"
+            className="flex items-center justify-between gap-2.5 rounded-xl border border-amber-200/80 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 p-2.5 transition-colors hover:bg-amber-50/70 dark:hover:bg-amber-950/40"
           >
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-neutral-800">
+              <p className="truncate text-xs font-semibold text-neutral-800 dark:text-neutral-100">
                 {wq.userLabel || "Người dùng"} #{entry.accountId}
               </p>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-neutral-500 dark:text-[#AAAAAA]">
                 {(wq.pendingLabel || "Đang chờ duyệt")}
                 {entry.decidedBy != null ? ` • ${wq.rejectedLabel || "Đã từ chối trước đó"}` : ""}
               </p>
@@ -173,7 +173,7 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
                 type="button"
                 onClick={() => handleReject(entry.accountId)}
                 disabled={busy}
-                className="inline-flex h-8 items-center gap-1 rounded-lg bg-white px-2.5 text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 active:scale-[0.97] transition-all disabled:opacity-50"
+                className="inline-flex h-8 items-center gap-1 rounded-lg bg-white dark:bg-[#272727] px-2.5 text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/40 active:scale-[0.97] transition-all disabled:opacity-50"
               >
                 <UserX size={14} />
                 <span>{wq.reject || "Từ chối"}</span>
@@ -185,13 +185,13 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
         {mergedExternal.map((p) => (
           <li
             key={`ext-${p.accountId}`}
-            className="flex items-center justify-between gap-2.5 rounded-xl border border-neutral-200/90 bg-white p-2.5 transition-colors hover:bg-neutral-50"
+            className="flex items-center justify-between gap-2.5 rounded-xl border border-neutral-200/90 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] p-2.5 transition-colors hover:bg-neutral-50 dark:hover:bg-[#333333]"
           >
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-neutral-800">
+              <p className="truncate text-xs font-semibold text-neutral-800 dark:text-neutral-100">
                 {p.name || `${wq.userLabel || "Người dùng"} #${p.accountId}`}
               </p>
-              <p className="truncate text-[11px] text-neutral-500">
+              <p className="truncate text-[11px] text-neutral-500 dark:text-[#AAAAAA]">
                 {p.email || (wq.enrollmentPending || "Chờ duyệt ghi danh")}
               </p>
             </div>

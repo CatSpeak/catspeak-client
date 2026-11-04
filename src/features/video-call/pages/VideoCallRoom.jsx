@@ -265,7 +265,11 @@ const VideoCallRoomContent = () => {
         to="/"
         state={{
           requireLogin: true,
-          redirectTo: location.pathname + location.search + location.hash,
+          redirectTo: location?.pathname
+            ? location.pathname + (location.search || "") + (location.hash || "")
+            : typeof window !== "undefined"
+              ? window.location.pathname + window.location.search + window.location.hash
+              : "/",
         }}
         replace
       />

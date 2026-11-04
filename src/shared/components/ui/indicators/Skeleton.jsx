@@ -3,7 +3,7 @@ import React from "react"
 const Skeleton = ({ className = "", ...props }) => {
   return (
     <div
-      className={`animate-pulse rounded bg-gray-200 ${className}`}
+      className={`animate-pulse rounded bg-gray-200 dark:bg-[#272727] ${className}`}
       {...props}
     />
   )

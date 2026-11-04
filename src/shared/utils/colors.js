@@ -8,7 +8,8 @@
 export const lightColors = {
   // ── Brand & Core Palette ──
   redPrimary: "#990011",
-  primaryRed: "#990011", // Cat Speak
+  primaryRed: "#990011", // Cat Speak (WCAG AAA >= 7:1 on #FFFFFF)
+
 
   // ── Backgrounds ──
   bg: "#F5F5F7", // Main page background (primary2)
@@ -35,6 +36,9 @@ export const darkColors = {
   // ── Brand & Core Palette ──
   redPrimary: "#990011",
   primaryRed: "#990011",
+  // Accessible red tokens for dark mode surfaces (WCAG AA: >= 4.5:1 on #1A1A1A / #0F0F0F)
+  redAccessible: "#f87171", // Accessible text red (Tailwind red-400, contrast > 6:1)
+  redHighContrast: "#e7001a", // High contrast accent red (cath-red-1000)
 
   // ── Backgrounds ──
   bg: "#0F0F0F", // Dark page background

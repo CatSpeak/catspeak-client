@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Upload, Ban } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import {
   useGetCurrentBackgroundQuery,
   useLazyGetCurrentBackgroundQuery,
@@ -207,14 +208,12 @@ const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
 
         {/* Sample Backgrounds */}
         {isSamplesLoading ? (
-          <div className="col-span-full flex h-24 items-center justify-center text-neutral-400 dark:text-neutral-500 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-cath-red-700 border-t-transparent" />
-              <span>
-                {t?.rooms?.virtualBackground?.loading || "Loading..."}
-              </span>
-            </div>
-          </div>
+          Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              className="w-full aspect-video rounded-xl border border-border dark:border-[#3F3F3F]"
+            />
+          ))
         ) : (
           Array.isArray(samples) &&
           samples.map((url, i) => (

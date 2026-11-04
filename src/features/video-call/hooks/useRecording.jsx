@@ -13,6 +13,7 @@ import {
   hasCoHostPermission,
   CO_HOST_PERMISSIONS,
 } from "@/features/co-host/constants"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 /**
  * useRecording — manages recording state for a video call session.
@@ -240,11 +241,12 @@ export function useRecording(lkRoom = null, syncState = {}) {
             <div className="flex items-start gap-3">
               <span className="mt-0.5">⏹️</span>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
                   {t.recordings?.actions?.stopSuccess ||
                     "Recording saved in My Workspace"}
                 </span>
-                <button
+                <PillButton
+                  variant="snackbar"
                   onClick={() => {
                     dispatch(setPiP(true))
                     if (navigate) {
@@ -252,10 +254,10 @@ export function useRecording(lkRoom = null, syncState = {}) {
                     }
                     toast.dismiss(tToast.id)
                   }}
-                  className="mt-1 text-left text-sm font-semibold text-cath-red-600 transition-colors hover:text-cath-red-700 hover:underline active:text-cath-red-800"
+                  className="mt-1"
                 >
                   {t.recordings?.actions?.viewRecordings || "View Recordings"}
-                </button>
+                </PillButton>
               </div>
             </div>
           )

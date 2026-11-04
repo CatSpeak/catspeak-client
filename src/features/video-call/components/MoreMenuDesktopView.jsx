@@ -6,7 +6,6 @@ import {
   History,
   Users,
   Split,
-  Loader2,
   Circle,
   Captions,
   Sparkles,
@@ -15,10 +14,11 @@ import {
   Settings,
   BarChart2,
   Clapperboard,
+  AlertTriangle,
+  Languages,
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useRecordingStatus } from "@/features/video-call/hooks/useRecordingStatus"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 import {
   isBreakoutSupported,
@@ -26,6 +26,7 @@ import {
 } from "@/features/video-call/utils/roomTypeHelpers"
 import MenuItem from "@/shared/components/ui/MenuItem"
 import ProgressBar from "@/shared/components/ui/ProgressBar"
+import { getLanguageFlag } from "./SubtitleLanguagePicker"
 
 const MoreMenuDesktopView = ({
   setShowMoreMenu,
@@ -58,6 +59,7 @@ const MoreMenuDesktopView = ({
     isTogglingRecording,
     handleToggleRecording,
     confirmStopRecording,
+    recordingStatus,
     setShowRoomSettings,
     setActiveSettingsTab,
     isSubtitleActive,
@@ -66,21 +68,20 @@ const MoreMenuDesktopView = ({
     stopSubtitles,
     showWatchTogether,
     setShowWatchTogether,
+    subtitleSelectedLanguage,
   } = useGlobalVideoCall()
 
-  const { isBreakoutActive, callInfo } = useSelector((s) => s.videoCall)
+  const { isBreakoutActive } = useSelector((s) => s.videoCall)
   const { isHost, canStartGame, gameDisabledReason } = useGameControlStatus()
 
-  const sessionId = callInfo?.sessionId
-
   const {
-    formattedTime,
-    totalUsedMb,
-    limitMb,
-    usagePercent,
-    isDanger,
-    isWarning,
-  } = useRecordingStatus(isRecording, confirmStopRecording, sessionId)
+    formattedTime = "00:00",
+    totalUsedMb = 0,
+    limitMb = null,
+    usagePercent = 0,
+    isDanger = false,
+    isWarning = false,
+  } = recordingStatus || {}
 
   return (
     <div className="hidden md:flex flex-col py-[2px]">
@@ -150,19 +151,18 @@ const MoreMenuDesktopView = ({
           />
         )}
 
-      {!isAISession &&
-        isHost && (
-          <MenuItem
-            onClick={() => {
-              setShowWatchTogether(!showWatchTogether)
-              setShowMoreMenu(false)
-            }}
-            icon={<Clapperboard size={20} />}
-            label={
-              t?.rooms?.videoCall?.watchTogether?.toggleButton || "Watch together"
-            }
-          />
-        )}
+      {!isAISession && isHost && (
+        <MenuItem
+          onClick={() => {
+            setShowWatchTogether(!showWatchTogether)
+            setShowMoreMenu(false)
+          }}
+          icon={<Clapperboard size={20} />}
+          label={
+            t?.rooms?.videoCall?.watchTogether?.toggleButton || "Watch together"
+          }
+        />
+      )}
 
       <div className="flex flex-col">
         <MenuItem
@@ -175,10 +175,9 @@ const MoreMenuDesktopView = ({
             setShowMoreMenu(false)
           }}
           disabled={isTogglingRecording}
+          className={isTogglingRecording ? "opacity-50 cursor-not-allowed" : ""}
           icon={
-            isTogglingRecording ? (
-              <Loader2 size={20} className="animate-spin" />
-            ) : isRecording ? (
+            isRecording ? (
               <Circle
                 size={20}
                 className="text-red-600 fill-red-600 animate-pulse"
@@ -194,21 +193,25 @@ const MoreMenuDesktopView = ({
           }
           rightText={
             isRecording ? (
-              <span className="font-semibold text-red-600">{formattedTime}</span>
+              <span className="font-semibold">{formattedTime}</span>
             ) : undefined
           }
         />
         {isRecording && (
-          <div className="px-4 pb-2 pt-1">
-            <div className="flex items-center justify-between text-[10px] text-gray-500 dark:text-[#AAAAAA] mb-1">
-              <span>Storage</span>
+          <div className="px-4 py-2.5">
+            <div className="flex items-center justify-between text-xs text-secondary dark:text-[#AAAAAA] mb-1">
+              <span>{t?.recordings?.storage?.title || "Storage"}</span>
               <span>
-                {totalUsedMb.toFixed(1)}MB {limitMb != null && limitMb > 0 ? `/ ${limitMb.toFixed(0)}MB` : "(Unlimited)"}
+                {totalUsedMb.toFixed(1)}MB{" "}
+                {limitMb != null && limitMb > 0
+                  ? `/ ${limitMb.toFixed(0)}MB`
+                  : "(Unlimited)"}
               </span>
             </div>
+
             <ProgressBar
               progress={usagePercent}
-              heightClass="h-1.5"
+              heightClass="h-1"
               trackColorClass="bg-primaryBg dark:bg-[#272727]"
               colorClass={
                 isDanger
@@ -218,6 +221,18 @@ const MoreMenuDesktopView = ({
                     : "bg-emerald-500"
               }
             />
+            {isDanger && (
+              <div className="flex items-center gap-1 text-xs text-red-600 font-bold mt-1 animate-pulse">
+                <AlertTriangle size={18} />
+                <span>Critical Space!</span>
+              </div>
+            )}
+            {isWarning && !isDanger && (
+              <div className="flex items-center gap-1 text-xs text-amber-600 font-semibold mt-1">
+                <AlertTriangle size={18} />
+                <span>Approaching Limit.</span>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -232,7 +247,7 @@ const MoreMenuDesktopView = ({
               stopSubtitles()
               setShowMoreMenu(false)
             } else {
-              setShowSubtitlePicker((v) => !v)
+              setShowSubtitlePicker(true)
             }
           }
         }}
@@ -243,7 +258,37 @@ const MoreMenuDesktopView = ({
             ? t?.rooms?.videoCall?.controls?.captionsOff || "Turn off captions"
             : t?.rooms?.videoCall?.controls?.captionsOn || "Turn on captions"
         }
+        hasSubmenu={!isAISession && !isSubtitleActive}
       />
+
+      {!isAISession && isSubtitleActive && (
+        <MenuItem
+          onClick={() => setShowSubtitlePicker(true)}
+          disabled={isStartingSubtitles || isStoppingSubtitles}
+          icon={<Languages size={20} />}
+          label={
+            t?.rooms?.videoCall?.controls?.selectSubtitleLanguage ||
+            "Chọn ngôn ngữ phụ đề"
+          }
+          rightContent={
+            getLanguageFlag(subtitleSelectedLanguage) ? (
+              <span className="flex h-5 w-5 shrink-0 overflow-hidden rounded-full border border-border dark:border-[#3F3F3F]">
+                <img
+                  src={getLanguageFlag(subtitleSelectedLanguage)}
+                  alt=""
+                  className="block h-full w-full object-cover"
+                  draggable={false}
+                />
+              </span>
+            ) : undefined
+          }
+          rightText={
+            t?.rooms?.videoCall?.subtitleLanguages?.[subtitleSelectedLanguage] ||
+            subtitleSelectedLanguage
+          }
+          hasSubmenu={true}
+        />
+      )}
 
       <div className="border-t border-border dark:border-[#3F3F3F] my-[2px]"></div>
 
@@ -265,21 +310,17 @@ const MoreMenuDesktopView = ({
           setShowMoreMenu(false)
         }}
         icon={<UserCircle size={20} />}
-        label={
-          t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"
-        }
+        label={t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"}
       />
 
-      {(isPiPSupported ?? ("documentPictureInPicture" in window)) && (
+      {(isPiPSupported ?? "documentPictureInPicture" in window) && (
         <MenuItem
           onClick={() => {
             enterPiP?.()
             setShowMoreMenu(false)
           }}
           icon={<MonitorUp size={20} />}
-          label={
-            t?.rooms?.videoCall?.pictureInPicture || "Picture-in-Picture"
-          }
+          label={t?.rooms?.videoCall?.pictureInPicture || "Picture-in-Picture"}
         />
       )}
 
@@ -291,9 +332,7 @@ const MoreMenuDesktopView = ({
           setShowMoreMenu(false)
         }}
         icon={<Settings size={20} className="shrink-0" />}
-        label={
-          t?.rooms?.waitingScreen?.deviceSettings || "Cài đặt"
-        }
+        label={t?.rooms?.waitingScreen?.deviceSettings || "Cài đặt"}
       />
     </div>
   )

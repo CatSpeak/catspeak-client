@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
-import { MoreVertical, Volume2, VolumeX, MicOff, VideoOff, UserX, MonitorUp, Shield, MessageSquareOff, Mic } from "lucide-react"
+import {
+  MoreVertical,
+  Volume2,
+  VolumeX,
+  MicOff,
+  VideoOff,
+  Video,
+  UserX,
+  MonitorUp,
+  Shield,
+  MessageSquareOff,
+  Mic,
+  User,
+} from "lucide-react"
+import MenuItem from "@/shared/components/ui/MenuItem"
 import { toast } from "react-hot-toast"
 import Popover from "@/shared/components/ui/Popover"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
@@ -105,7 +119,7 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
 
   if (isInline) {
     return (
-      <div className={`flex items-center gap-3 py-2 px-2 ${className}`}>
+      <div className={`flex items-center gap-3 py-1.5 px-4 ${className}`}>
         <button
           type="button"
           onClick={toggleMute}
@@ -202,7 +216,12 @@ export const ParticipantActionPopover = ({ participant, children }) => {
   }
 
   const meta = parseMetadata(participant?.metadata)
-  const targetAccountId = meta.accountId || participant?.identity
+  const targetAccountId =
+    meta.accountId || (participant?.isLocal ? user?.accountId : null) || participant?.identity
+  const isTargetSelf = Boolean(
+    participant?.isLocal ||
+      (user?.accountId && targetAccountId && String(user.accountId) === String(targetAccountId)),
+  )
   const participantName =
     participant?.name || participant?.identity || String(targetAccountId ?? "")
 
@@ -281,12 +300,16 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       else if (type === "voice") await restrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
       else if (type === "unrestrict_chat") await unrestrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
       else if (type === "unrestrict_voice") await unrestrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
-      const msgMap = { chat: pl.successRestrictChat, voice: pl.successRestrictVoice, unrestrict_chat: pl.successUnrestrictChat, unrestrict_voice: pl.successUnrestrictVoice }
+      const msgMap = {
+        chat: pl.successRestrictChat,
+        voice: pl.successRestrictVoice,
+        unrestrict_chat: pl.successUnrestrictChat,
+        unrestrict_voice: pl.successUnrestrictVoice,
+      }
       toast.success(msgMap[type])
     } catch (err) {
       if (err?.status === 404) {
         toast.error(pl.participantNotFound)
-        // trigger refresh via broadcast?
       } else if (err?.status === 409) {
         toast.error(err?.data?.message || pl.alreadyRestricted)
       } else {
@@ -294,8 +317,6 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       }
     }
   }
-
-  if (participant?.isLocal) return <>{children}</>
 
   const handleMuteTrack = async (trackKind, muted = true) => {
     if (!roomId) return
@@ -411,312 +432,408 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     toast.success(banRejoin ? pl.successBan : pl.successKick)
   }
 
+  const popoverContent = isTargetSelf ? (
+    <div className="w-64 md:w-72 flex flex-col py-[2px] bg-white dark:bg-[#1A1A1A] rounded-xl border border-border dark:border-[#3F3F3F] shadow-lg text-foreground dark:text-white overflow-hidden">
+      {targetAccountId && (
+        <MenuItem
+          onClick={() => {
+            setPopoverOpen(false)
+            window.open(`/workspace/profile/${targetAccountId}`, "_blank")
+          }}
+          icon={<User size={20} />}
+          label={pl.viewProfile || "Xem hồ sơ"}
+        />
+      )}
+    </div>
+  ) : (
+    <div className="w-64 md:w-72 flex flex-col py-[2px] bg-white dark:bg-[#1A1A1A] rounded-xl border border-border dark:border-[#3F3F3F] shadow-lg text-foreground dark:text-white overflow-hidden">
+      {targetAccountId && (
+        <MenuItem
+          onClick={() => {
+            setPopoverOpen(false)
+            window.open(`/workspace/profile/${targetAccountId}`, "_blank")
+          }}
+          icon={<User size={20} />}
+          label={pl.viewProfile || "Xem hồ sơ"}
+        />
+      )}
 
-  const popoverContent = (
-    <div className="bg-white dark:bg-[#1A1A1A] rounded-xl shadow-lg border border-neutral-200/80 dark:border-[#3F3F3F] p-3 w-72 flex flex-col gap-2 text-foreground dark:text-white">
+      {targetAccountId && (
+        <div className="border-t border-border dark:border-[#3F3F3F] my-[2px]" />
+      )}
+
       <ParticipantVolumeSlider participant={participant} isInline />
 
       {canModerateMedia && (
-        <div className="border-t border-neutral-100 dark:border-[#272727] pt-2 flex flex-col gap-1">
+        <>
+          <div className="border-t border-border dark:border-[#3F3F3F] my-[2px]" />
           {canToggleMic && (
-            <button
-              onClick={() => handleMuteTrack("audio", isTargetMicOn)}
+            <MenuItem
+              onClick={() => {
+                setPopoverOpen(false)
+                handleMuteTrack("audio", isTargetMicOn)
+              }}
               disabled={isMuting}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
-            >
-              <MicOff size={18} className="text-neutral-500 shrink-0" />
-              <span>
-                {isTargetMicOn ? pl.mute : pl.unmute}
-              </span>
-            </button>
+              className={isMuting ? "opacity-50 cursor-not-allowed" : ""}
+              icon={isTargetMicOn ? <MicOff size={20} /> : <Mic size={20} />}
+              label={isTargetMicOn ? pl.mute : pl.unmute}
+            />
           )}
 
           {canToggleCam && (
-            <button
-              onClick={() => handleMuteTrack("video", isTargetCamOn)}
+            <MenuItem
+              onClick={() => {
+                setPopoverOpen(false)
+                handleMuteTrack("video", isTargetCamOn)
+              }}
               disabled={isMuting}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
-            >
-              <VideoOff size={18} className="text-neutral-500 shrink-0" />
-              <span>
-                {isTargetCamOn ? pl.muteCam : pl.unmuteCam}
-              </span>
-            </button>
+              className={isMuting ? "opacity-50 cursor-not-allowed" : ""}
+              icon={isTargetCamOn ? <VideoOff size={20} /> : <Video size={20} />}
+              label={isTargetCamOn ? pl.muteCam : pl.unmuteCam}
+            />
           )}
-        </div>
+        </>
       )}
 
       {(canRestrictChat || canRestrictVoice) && (
-        <div className="border-t border-neutral-100 dark:border-[#272727] pt-2 flex flex-col gap-1">
-          {canRestrictChat && (!isTargetChatRestricted ? (
-            <button
-              onClick={() => setRestrictConfirm({ open: true, type: "chat" })}
-              disabled={isRestrictingChat}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
-            >
-              <MessageSquareOff size={18} className="text-neutral-500 shrink-0" />
-              <span>{pl.restrictChat}</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_chat" })}
-              disabled={isUnrestrictingChat}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
-            >
-              <MessageSquareOff size={18} className="text-emerald-600 shrink-0" />
-              <span>{pl.unrestrictChat}</span>
-            </button>
-          ))}
-          {canRestrictVoice && (!isTargetVoiceRestricted ? (
-            <button
-              onClick={() => setRestrictConfirm({ open: true, type: "voice" })}
-              disabled={isRestrictingVoice}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
-            >
-              <Mic size={18} className="text-neutral-500 shrink-0" />
-              <span>{pl.restrictVoice}</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_voice" })}
-              disabled={isUnrestrictingVoice}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
-            >
-              <Mic size={18} className="text-emerald-600 shrink-0" />
-              <span>{pl.unrestrictVoice}</span>
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="border-t border-border dark:border-[#3F3F3F] my-[2px]" />
+          {canRestrictChat && (
+            <MenuItem
+              onClick={() => {
+                setPopoverOpen(false)
+                setRestrictConfirm({
+                  open: true,
+                  type: isTargetChatRestricted ? "unrestrict_chat" : "chat",
+                })
+              }}
+              disabled={isRestrictingChat || isUnrestrictingChat}
+              className={
+                isRestrictingChat || isUnrestrictingChat
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }
+              icon={
+                <MessageSquareOff
+                  size={20}
+                  className={isTargetChatRestricted ? "text-emerald-600" : ""}
+                />
+              }
+              label={
+                isTargetChatRestricted ? pl.unrestrictChat : pl.restrictChat
+              }
+            />
+          )}
+
+          {canRestrictVoice && (
+            <MenuItem
+              onClick={() => {
+                setPopoverOpen(false)
+                setRestrictConfirm({
+                  open: true,
+                  type: isTargetVoiceRestricted ? "unrestrict_voice" : "voice",
+                })
+              }}
+              disabled={isRestrictingVoice || isUnrestrictingVoice}
+              className={
+                isRestrictingVoice || isUnrestrictingVoice
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }
+              icon={
+                <Mic
+                  size={20}
+                  className={isTargetVoiceRestricted ? "text-emerald-600" : ""}
+                />
+              }
+              label={
+                isTargetVoiceRestricted ? pl.unrestrictVoice : pl.restrictVoice
+              }
+            />
+          )}
+        </>
       )}
 
       {isCurrentHost && (
-        <div className="border-t border-neutral-100 dark:border-[#272727] pt-2 flex flex-col gap-1">
-          <button
-            onClick={() => handleMuteTrack("screen", true)}
+        <>
+          <div className="border-t border-border dark:border-[#3F3F3F] my-[2px]" />
+          <MenuItem
+            onClick={() => {
+              setPopoverOpen(false)
+              handleMuteTrack("screen", true)
+            }}
             disabled={isMuting}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <MonitorUp size={18} className="text-neutral-500 shrink-0" />
-            <span>{pl.stopScreenShare}</span>
-          </button>
+            className={isMuting ? "opacity-50 cursor-not-allowed" : ""}
+            icon={<MonitorUp size={20} />}
+            label={pl.stopScreenShare}
+          />
 
-          <button
-            onClick={() => handleKick(false)}
+          <MenuItem
+            onClick={() => {
+              setPopoverOpen(false)
+              handleKick(false)
+            }}
             disabled={isKicking}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <UserX size={18} className="text-red-500 shrink-0" />
-            <span>{pl.kick}</span>
-          </button>
-
-          <button
-            onClick={() => handleKick(true)}
-            disabled={isKicking}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <UserX size={18} className="text-red-600 shrink-0" />
-            <span>{pl.ban}</span>
-          </button>
-
-          {/* Co-host chỉ hỗ trợ phòng Lớp học (3) và Custom (4) — ẩn ở phòng 1:1/Group. */}
-          {isClassOrCustom(room?.roomType) && (
-            <button
-              onClick={() => setCoHostModalOpen(true)}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors text-left w-full"
-            >
-              <Shield size={18} className="text-amber-600 shrink-0" />
-              <span>
-                {isTargetCoHost ? "Quản lý co-host" : "Phân công làm Co-host"}
+            className={isKicking ? "opacity-50 cursor-not-allowed" : ""}
+            hoverBg="hover:bg-red-50 group-hover:bg-red-50 dark:hover:bg-red-950/40 dark:group-hover:bg-red-950/40"
+            icon={<UserX size={20} className="text-red-600 dark:text-red-400" />}
+            label={
+              <span className="text-red-600 dark:text-red-400 font-medium">
+                {pl.kick}
               </span>
-            </button>
+            }
+          />
+
+          <MenuItem
+            onClick={() => {
+              setPopoverOpen(false)
+              handleKick(true)
+            }}
+            disabled={isKicking}
+            className={isKicking ? "opacity-50 cursor-not-allowed" : ""}
+            hoverBg="hover:bg-red-50 group-hover:bg-red-50 dark:hover:bg-red-950/40 dark:group-hover:bg-red-950/40"
+            icon={<UserX size={20} className="text-red-600 dark:text-red-400" />}
+            label={
+              <span className="text-red-600 dark:text-red-400 font-medium">
+                {pl.ban}
+              </span>
+            }
+          />
+
+          {isClassOrCustom(room?.roomType) && (
+            <MenuItem
+              onClick={() => {
+                setPopoverOpen(false)
+                setCoHostModalOpen(true)
+              }}
+              hoverBg="hover:bg-amber-50 group-hover:bg-amber-50 dark:hover:bg-amber-950/40 dark:group-hover:bg-amber-950/40"
+              icon={
+                <Shield
+                  size={20}
+                  className="text-amber-600 dark:text-amber-400"
+                />
+              }
+              label={
+                <span className="text-amber-700 dark:text-amber-400 font-medium">
+                  {isTargetCoHost
+                    ? pl.manageCoHost || "Quản lý co-host"
+                    : pl.assignCoHost || "Phân công làm Co-host"}
+                </span>
+              }
+            />
           )}
 
           {isClassOrCustom(room?.roomType) && isTargetCoHost && (
-            <button
-              onClick={() => setRevokeCoHostConfirm(true)}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors text-left w-full"
-            >
-              <UserX size={18} className="text-red-500 shrink-0" />
-              <span>Gỡ co-host</span>
-            </button>
+            <MenuItem
+              onClick={() => {
+                setPopoverOpen(false)
+                setRevokeCoHostConfirm(true)
+              }}
+              hoverBg="hover:bg-red-50 group-hover:bg-red-50 dark:hover:bg-red-950/40 dark:group-hover:bg-red-950/40"
+              icon={
+                <UserX size={20} className="text-red-600 dark:text-red-400" />
+              }
+              label={
+                <span className="text-red-600 dark:text-red-400 font-medium">
+                  {pl.revokeCoHost || "Gỡ co-host"}
+                </span>
+              }
+            />
           )}
-        </div>
+        </>
       )}
 
-      {/* Ticket 03: co-host with remove_student sees kick-only (no ban, no screen-stop). */}
-      {/* Ticket 05: co-host with manage_student_share sees stop-share. */}
-      {(!isCurrentHost && (canKick || canStopScreen)) && (
-        <div className="border-t border-neutral-100 dark:border-[#272727] pt-2 flex flex-col gap-1">
+      {!isCurrentHost && (canKick || canStopScreen) && (
+        <>
+          <div className="border-t border-border dark:border-[#3F3F3F] my-[2px]" />
           {canStopScreen && (
-            <button
-              onClick={() => handleMuteTrack("screen", true)}
+            <MenuItem
+              onClick={() => {
+                setPopoverOpen(false)
+                handleMuteTrack("screen", true)
+              }}
               disabled={isMuting}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full disabled:opacity-50"
-            >
-              <MonitorUp size={18} className="text-neutral-500 shrink-0" />
-              <span>{pl.stopScreenShare}</span>
-            </button>
+              className={isMuting ? "opacity-50 cursor-not-allowed" : ""}
+              icon={<MonitorUp size={20} />}
+              label={pl.stopScreenShare}
+            />
           )}
           {canKick && (
-          <button
-            onClick={() => handleKick(false)}
-            disabled={isKicking}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <UserX size={18} className="text-red-500 shrink-0" />
-            <span>{pl.kick}</span>
-          </button>
+            <MenuItem
+              onClick={() => {
+                setPopoverOpen(false)
+                handleKick(false)
+              }}
+              disabled={isKicking}
+              className={isKicking ? "opacity-50 cursor-not-allowed" : ""}
+              hoverBg="hover:bg-red-50 group-hover:bg-red-50 dark:hover:bg-red-950/40 dark:group-hover:bg-red-950/40"
+              icon={
+                <UserX size={20} className="text-red-600 dark:text-red-400" />
+              }
+              label={
+                <span className="text-red-600 dark:text-red-400 font-medium">
+                  {pl.kick}
+                </span>
+              }
+            />
           )}
-        </div>
+        </>
       )}
     </div>
   )
 
-  return (<>
-    <Popover
-      className="w-full"
-      triggerClassName="w-full text-left"
-      onOpenChange={setPopoverOpen}
-      trigger={
-        <div
-          role="button"
-          tabIndex={0}
-          aria-haspopup="true"
-          aria-expanded={popoverOpen}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault()
-              e.currentTarget.click()
-            }
-          }}
-          className="w-full text-left cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
-        >
-          {children}
-        </div>
-      }
-      content={popoverContent}
-      placement="bottom-right"
-    />
-
-    <ConfirmationModal
-      open={kickConfirm.open}
-      onClose={() => setKickConfirm({ open: false, banRejoin: false })}
-      onConfirm={confirmKick}
-      title={kickConfirm.banRejoin ? pl.confirmBanTitle : pl.confirmKickTitle}
-      message={(kickConfirm.banRejoin ? pl.confirmBan : pl.confirmKick).replace("{name}", participantName)}
-      confirmText={kickConfirm.banRejoin ? pl.ban : pl.kick}
-      confirmVariant="destructive"
-      isPending={isKicking}
-    />
-
-    <ConfirmationModal
-      open={restrictConfirm.open}
-      onClose={() => setRestrictConfirm({ open: false, type: null })}
-      onConfirm={() => {
-        const t2 = restrictConfirm.type
-        setRestrictConfirm({ open: false, type: null })
-        handleRestrict(t2)
-      }}
-      title={
-        restrictConfirm.type === "chat" ? pl.confirmRestrictChatTitle :
-        restrictConfirm.type === "unrestrict_chat" ? pl.confirmUnrestrictChatTitle :
-        restrictConfirm.type === "voice" ? pl.confirmRestrictVoiceTitle :
-        pl.confirmUnrestrictVoiceTitle
-      }
-      message={
-        restrictConfirm.type === "chat" ? pl.confirmRestrictChat.replace("{name}", participantName) :
-        restrictConfirm.type === "unrestrict_chat" ? pl.confirmUnrestrictChat.replace("{name}", participantName) :
-        restrictConfirm.type === "voice" ? pl.confirmRestrictVoice.replace("{name}", participantName) :
-        pl.confirmUnrestrictVoice.replace("{name}", participantName)
-      }
-      confirmText={t.confirm}
-      confirmVariant={restrictConfirm.type?.startsWith("unrestrict") ? "default" : "destructive"}
-      isPending={isRestrictingChat || isRestrictingVoice || isUnrestrictingChat || isUnrestrictingVoice}
-    />
-
-    {/* Revoke trong live cũng cần confirm riêng */}
-    <ConfirmationModal
-      open={revokeCoHostConfirm}
-      onClose={() => setRevokeCoHostConfirm(false)}
-      onConfirm={async () => {
-        try {
-          await revokeRoomCoHost(roomId).unwrap()
-          toast.success("Đã gỡ phân công co-host.")
-          setRevokeCoHostConfirm(false)
-        } catch (err) {
-          toast.error(
-            resolveCoHostErrorMessage(
-              err,
-              t,
-              err?.data?.message || "Không thể gỡ co-host. Vui lòng thử lại.",
-            ),
-          )
+  return (
+    <>
+      <Popover
+        className="shrink-0"
+        triggerClassName="shrink-0 inline-flex items-center justify-center"
+        onOpenChange={setPopoverOpen}
+        trigger={
+          <div
+            role="button"
+            tabIndex={0}
+            aria-haspopup="true"
+            aria-expanded={popoverOpen}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                e.currentTarget.click()
+              }
+            }}
+            className="shrink-0 inline-flex items-center justify-center cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
+          >
+            {children}
+          </div>
         }
-      }}
-      title="Xác nhận gỡ co-host"
-      message="Bạn có chắc muốn gỡ phân công co-host này? Hành động này không thể hoàn tác."
-      cancelText="Hủy"
-      confirmText="Xóa"
-      confirmVariant="destructive"
-      isPending={isRevokingCoHost}
-    />
+        content={popoverContent}
+        placement="bottom-right"
+      />
 
-    {coHostModalOpen && (
-      <CoHostModal
-        open={coHostModalOpen}
-        onClose={() => setCoHostModalOpen(false)}
-        title="Phân công Co-host"
-        candidates={[
-          {
-            accountId: Number(targetAccountId),
-            name: participant?.name || meta?.name || String(targetAccountId),
-            email: "",
-            badge:
-              liveCoHost?.coHostAccountId != null &&
-              String(liveCoHost.coHostAccountId) === String(targetAccountId)
-                ? "Co-host"
-                : undefined,
-          },
-        ]}
-        initialAccountId={Number(targetAccountId)}
-        initialPermissions={
-          liveCoHost?.coHostAccountId != null &&
-          String(liveCoHost.coHostAccountId) === String(targetAccountId)
-            ? (liveCoHost.permissions ?? [])
-            : []
+      <ConfirmationModal
+        open={kickConfirm.open}
+        onClose={() => setKickConfirm({ open: false, banRejoin: false })}
+        onConfirm={confirmKick}
+        title={kickConfirm.banRejoin ? pl.confirmBanTitle : pl.confirmKickTitle}
+        message={(kickConfirm.banRejoin ? pl.confirmBan : pl.confirmKick).replace("{name}", participantName)}
+        confirmText={kickConfirm.banRejoin ? pl.ban : pl.kick}
+        confirmVariant="destructive"
+        isPending={isKicking}
+      />
+
+      <ConfirmationModal
+        open={restrictConfirm.open}
+        onClose={() => setRestrictConfirm({ open: false, type: null })}
+        onConfirm={() => {
+          const t2 = restrictConfirm.type
+          setRestrictConfirm({ open: false, type: null })
+          handleRestrict(t2)
+        }}
+        title={
+          restrictConfirm.type === "chat"
+            ? pl.confirmRestrictChatTitle
+            : restrictConfirm.type === "unrestrict_chat"
+            ? pl.confirmUnrestrictChatTitle
+            : restrictConfirm.type === "voice"
+            ? pl.confirmRestrictVoiceTitle
+            : pl.confirmUnrestrictVoiceTitle
         }
-        confirmLabel="Phân công Co-host"
-        isSaving={isAssigningCoHost || isUpdatingCoHost}
-        onSubmit={async ({ coHostAccountId, permissions }) => {
+        message={
+          restrictConfirm.type === "chat"
+            ? pl.confirmRestrictChat.replace("{name}", participantName)
+            : restrictConfirm.type === "unrestrict_chat"
+            ? pl.confirmUnrestrictChat.replace("{name}", participantName)
+            : restrictConfirm.type === "voice"
+            ? pl.confirmRestrictVoice.replace("{name}", participantName)
+            : pl.confirmUnrestrictVoice.replace("{name}", participantName)
+        }
+        confirmText={t.confirm}
+        confirmVariant={restrictConfirm.type?.startsWith("unrestrict") ? "default" : "destructive"}
+        isPending={isRestrictingChat || isRestrictingVoice || isUnrestrictingChat || isUnrestrictingVoice}
+      />
+
+      {/* Revoke trong live cũng cần confirm riêng */}
+      <ConfirmationModal
+        open={revokeCoHostConfirm}
+        onClose={() => setRevokeCoHostConfirm(false)}
+        onConfirm={async () => {
           try {
-            const samePerson =
-              liveCoHost?.coHostAccountId != null &&
-              String(liveCoHost.coHostAccountId) === String(coHostAccountId)
-            if (samePerson) {
-              await updateRoomCoHost({ id: roomId, permissions }).unwrap()
-              toast.success("Đã cập nhật quyền co-host.")
-            } else {
-              await assignRoomCoHost({
-                id: roomId,
-                coHostAccountId: Number(coHostAccountId),
-                permissions,
-              }).unwrap()
-              toast.success("Đã phân công co-host.")
-            }
-            setCoHostModalOpen(false)
+            await revokeRoomCoHost(roomId).unwrap()
+            toast.success("Đã gỡ phân công co-host.")
+            setRevokeCoHostConfirm(false)
           } catch (err) {
             toast.error(
               resolveCoHostErrorMessage(
                 err,
                 t,
-                err?.data?.message ||
-                  "Không thể phân công co-host. Vui lòng thử lại.",
+                err?.data?.message || "Không thể gỡ co-host. Vui lòng thử lại.",
               ),
             )
           }
         }}
+        title="Xác nhận gỡ co-host"
+        message="Bạn có chắc muốn gỡ phân công co-host này? Hành động này không thể hoàn tác."
+        cancelText="Hủy"
+        confirmText="Xóa"
+        confirmVariant="destructive"
+        isPending={isRevokingCoHost}
       />
-    )}
-  </>)
-}
 
+      {coHostModalOpen && (
+        <CoHostModal
+          open={coHostModalOpen}
+          onClose={() => setCoHostModalOpen(false)}
+          title="Phân công Co-host"
+          candidates={[
+            {
+              accountId: Number(targetAccountId),
+              name: participant?.name || meta?.name || String(targetAccountId),
+              email: "",
+              badge:
+                liveCoHost?.coHostAccountId != null &&
+                String(liveCoHost.coHostAccountId) === String(targetAccountId)
+                  ? "Co-host"
+                  : undefined,
+            },
+          ]}
+          initialAccountId={Number(targetAccountId)}
+          initialPermissions={
+            liveCoHost?.coHostAccountId != null &&
+            String(liveCoHost.coHostAccountId) === String(targetAccountId)
+              ? (liveCoHost.permissions ?? [])
+              : []
+          }
+          confirmLabel="Phân công Co-host"
+          isSaving={isAssigningCoHost || isUpdatingCoHost}
+          onSubmit={async ({ coHostAccountId, permissions }) => {
+            try {
+              const samePerson =
+                liveCoHost?.coHostAccountId != null &&
+                String(liveCoHost.coHostAccountId) === String(coHostAccountId)
+              if (samePerson) {
+                await updateRoomCoHost({ id: roomId, permissions }).unwrap()
+                toast.success("Đã cập nhật quyền co-host.")
+              } else {
+                await assignRoomCoHost({
+                  id: roomId,
+                  coHostAccountId: Number(coHostAccountId),
+                  permissions,
+                }).unwrap()
+                toast.success("Đã phân công co-host.")
+              }
+              setCoHostModalOpen(false)
+            } catch (err) {
+              toast.error(
+                resolveCoHostErrorMessage(
+                  err,
+                  t,
+                  err?.data?.message ||
+                    "Không thể phân công co-host. Vui lòng thử lại.",
+                ),
+              )
+            }
+          }}
+        />
+      )}
+    </>
+  )
+}

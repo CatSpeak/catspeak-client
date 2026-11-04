@@ -230,7 +230,7 @@ const VirtualBackgroundModal = ({
                   beautyOptions={beautyOptions}
                   onChange={handleBeautyChange}
                   roomType={room?.roomType}
-                  className="pl-3"
+                  className="pl-2.5"
                 />
               )
             )}

@@ -46,7 +46,7 @@ const PolicyRow = ({
     >
       <div className="flex min-w-0 items-center gap-2.5 flex-1">
         {icon && (
-          <span className="shrink-0 text-neutral-500 dark:text-[#AAAAAA] group-hover:text-cath-red-700 transition-colors">
+          <span className="shrink-0 text-neutral-500 dark:text-[#AAAAAA] group-hover:text-cath-red-700 dark:group-hover:text-red-400 transition-colors">
             {icon}
           </span>
         )}

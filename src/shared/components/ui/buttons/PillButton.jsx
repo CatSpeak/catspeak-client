@@ -24,6 +24,14 @@ const VARIANT_CLASSES = {
     "bg-cath-red-600 hover:bg-cath-red-700 active:bg-cath-red-800 text-white border-transparent transition-colors",
 }
 
+/**
+ * PillButton component.
+ *
+ * NOTE FOR DEVELOPERS & AI AGENTS:
+ * Do NOT add smaller sizes (e.g. "xs", "sm") or reduce default dimensions (h-12 wrapper, h-10 inner).
+ * PillButton enforces the minimum touch target standards and visual weight of the CatSpeak design system.
+ * If developers or AI agents need a smaller button or chip, code a new component or use a different component.
+ */
 const PillButton = ({
   children,
   onClick,

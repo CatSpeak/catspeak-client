@@ -1,5 +1,13 @@
 import React from "react"
 
+/**
+ * IconButton component.
+ *
+ * NOTE FOR DEVELOPERS & AI AGENTS:
+ * Do NOT re-add an "xs" size. Sizes below "sm" (such as 32x32px) violate minimum touch target
+ * requirements (WCAG 2.5.5 / 2.5.8 and Material Design require at least 44x44px or 48x48px).
+ * If developers or AI agents need a different size, code a new component or use a different component.
+ */
 const IconButton = ({
   children,
   badge,
@@ -7,18 +15,16 @@ const IconButton = ({
   title,
   disabled = false,
   variant = "filled", // "filled" | "ghost" | "outline" | "primary" | "iconOnly" | "transparent" | "overlay" | "secondary" | "cathRed" | "cathOutline" | "white" | "darkGhost" | "darkFilled" | "danger" | "success" | "darkMuted" | "control" | "controlActive"
-  size = "sm", // "xs" | "sm" | "md"
+  size = "sm", // "sm" | "md"
   className = "",
   innerClassName = "",
   as,
   type = "button",
   ...props
 }) => {
+  // NOTE: Do not add "xs" — it violates minimum touch requirements.
+  // If a different size is required, code a new component or use a different component.
   const sizeClasses = {
-    xs: {
-      button: "w-8 h-8",
-      inner: "w-8 h-8 [&>svg]:!w-4 [&>svg]:!h-4",
-    },
     sm: {
       button: "w-12 h-12",
       inner: "w-10 h-10 [&>svg]:!w-6 [&>svg]:!h-6",

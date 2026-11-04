@@ -39,7 +39,7 @@ export const flattenAiInteractions = (interactions) =>
       id: interaction.id + "-prompt",
       interactionId: interaction.id,
       timestamp: interaction.timestamp,
-      message: interaction.prompt,
+      message: interaction.prompt || interaction.promptRaw,
       promptRaw: interaction.promptRaw || interaction.prompt,
       topic: interaction.topic,
       isPublic: interaction.topic === "public-ai",
@@ -50,7 +50,7 @@ export const flattenAiInteractions = (interactions) =>
 
     // 2. The AI response (or loading / error state)
     const replyTo = {
-      message: interaction.prompt,
+      message: interaction.prompt || interaction.promptRaw,
       name: interaction.from?.name || "User",
     }
 
@@ -60,6 +60,7 @@ export const flattenAiInteractions = (interactions) =>
         interactionId: interaction.id,
         timestamp: interaction.timestamp + 1,
         message: null,
+        promptRaw: interaction.promptRaw || interaction.prompt,
         status: "loading",
         replyTo,
         topic: interaction.topic,

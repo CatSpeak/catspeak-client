@@ -1,136 +1,249 @@
-let globalToastRef = null
-const pendingToastQueue = []
+import React from "react"
+import { toast as sonnerToast } from "sonner"
+import CatSpeakToast from "@/shared/components/ui/toast/CatSpeakToast"
 
 /**
- * Binds PrimeReact Toast instance reference from AppToaster container
+ * Toast Bridge for CatSpeak Client
+ *
+ * ARCHITECTURAL NOTE FOR FUTURE DEVELOPERS & AI AGENTS:
+ * -----------------------------------------------------
+ * Do NOT replace this bridge with PrimeReact Toast or legacy react-hot-toast.
+ * Vite aliases 'react-hot-toast' to this file (`src/shared/utils/toastBridge.jsx`).
+ *
+ * All toast calls (standard, promises, custom render functions) are rendered via
+ * our custom `CatSpeakToast` component (`src/shared/components/ui/toast/CatSpeakToast.jsx`).
+ * Sonner is used strictly as the headless engine for positioning, stacking, and animations.
  */
-export const setGlobalToastRef = (ref) => {
-  globalToastRef = ref
-  if (globalToastRef && pendingToastQueue.length > 0) {
-    while (pendingToastQueue.length > 0) {
-      const item = pendingToastQueue.shift()
-      globalToastRef.show(item)
-    }
-  }
+
+const normalizeOpts = (opts) => {
+  if (!opts || typeof opts !== "object") return {}
+  return { ...opts }
 }
 
-export const getGlobalToastRef = () => globalToastRef
+const parseMessageAndOptions = (messageOrFn, opts = {}, defaultType = "default") => {
+  const options = normalizeOpts(opts)
 
-/**
- * Normalizes message & options into PrimeReact / PrimeNG Basic Toast message structure
- */
-const showToast = (severity, messageOrObj, opts = {}) => {
-  let payload
-
-  if (typeof messageOrObj === "object" && messageOrObj !== null) {
-    payload = {
-      severity: messageOrObj.severity || severity || "info",
-      summary:
-        messageOrObj.summary ||
-        (severity
-          ? severity.charAt(0).toUpperCase() + severity.slice(1)
-          : "Info"),
-      detail:
-        messageOrObj.detail || messageOrObj.description || messageOrObj.message,
-      life: messageOrObj.life || messageOrObj.duration || 3000,
-      sticky: messageOrObj.sticky || false,
-      closable: messageOrObj.closable !== false,
-      ...messageOrObj,
-    }
-  } else {
-    const options = typeof opts === "object" ? opts : { detail: opts }
-    const detail = options.detail || options.description
-    const summary = options.summary || messageOrObj
-
-    payload = {
-      severity: severity || "info",
-      summary: summary,
-      detail: detail,
-      life:
-        options.duration ||
-        options.life ||
-        (severity === "error" ? 4000 : 3000),
-      sticky: options.sticky || false,
-      closable: options.closeButton !== false && options.closable !== false,
-      ...options,
+  // Custom function render: toast((t) => <JSX />)
+  if (typeof messageOrFn === "function") {
+    return {
+      isFunction: true,
+      renderFn: messageOrFn,
+      options,
+      type: options.type || defaultType,
     }
   }
 
-  if (globalToastRef?.show) {
-    globalToastRef.show(payload)
-  } else {
-    pendingToastQueue.push(payload)
+  // Custom React element passed directly: toast(<Component />)
+  if (React.isValidElement(messageOrFn)) {
+    return {
+      isElement: true,
+      element: messageOrFn,
+      options,
+      type: options.type || defaultType,
+    }
   }
 
-  return payload
-}
+  // Object payload: toast({ summary, detail, action, ... })
+  if (typeof messageOrFn === "object" && messageOrFn !== null) {
+    const {
+      summary,
+      detail,
+      message,
+      description,
+      title,
+      action,
+      cancel,
+      icon,
+      type,
+      ...rest
+    } = messageOrFn
 
-const customToast = (message, opts = {}) => {
-  return showToast(opts.type || opts.severity || "info", message, opts)
-}
-
-/** PrimeNG/PrimeReact standard show() method */
-customToast.show = (messageOrObj) => {
-  if (typeof messageOrObj === "object" && messageOrObj !== null) {
-    return showToast(messageOrObj.severity || "info", messageOrObj)
+    return {
+      title: title || summary || message || description || detail || "",
+      description: description || detail || options.description,
+      action: action || options.action,
+      cancel: cancel || options.cancel,
+      icon: icon !== undefined ? icon : options.icon,
+      type: type || options.type || defaultType,
+      options: { ...options, ...rest },
+    }
   }
-  return showToast("info", messageOrObj)
+
+  // Plain string or number
+  return {
+    title: String(messageOrFn ?? ""),
+    description: options.description,
+    action: options.action,
+    cancel: options.cancel,
+    icon: options.icon,
+    type: options.type || defaultType,
+    options,
+  }
 }
 
-/** Basic Success Toast */
-customToast.success = (message, opts) => showToast("success", message, opts)
+const dispatchCatSpeakToast = (parsed) => {
+  const { options, type, icon } = parsed
 
-/** Basic Error Toast */
-customToast.error = (message, opts) => showToast("error", message, opts)
+  return sonnerToast.custom(
+    (id) => {
+      const dismiss = () => sonnerToast.dismiss(id)
 
-/** Basic Info Toast */
-customToast.info = (message, opts) => showToast("info", message, opts)
+      if (parsed.isFunction) {
+        return (
+          <CatSpeakToast
+            id={id}
+            type={type}
+            icon={icon}
+            onDismiss={dismiss}
+            {...options}
+          >
+            {parsed.renderFn({ id, dismiss })}
+          </CatSpeakToast>
+        )
+      }
 
-/** Basic Warning / Warn Toast */
-customToast.warning = (message, opts) => showToast("warn", message, opts)
-customToast.warn = (message, opts) => showToast("warn", message, opts)
+      if (parsed.isElement) {
+        return (
+          <CatSpeakToast
+            id={id}
+            type={type}
+            icon={icon}
+            onDismiss={dismiss}
+            {...options}
+          >
+            {parsed.element}
+          </CatSpeakToast>
+        )
+      }
 
-/** Basic Loading Toast (sticky) */
-customToast.loading = (message, opts) => {
-  return showToast("info", message, { ...opts, sticky: true })
+      return (
+        <CatSpeakToast
+          id={id}
+          type={type}
+          title={parsed.title}
+          description={parsed.description}
+          action={parsed.action}
+          cancel={parsed.cancel}
+          icon={icon}
+          onDismiss={dismiss}
+          {...options}
+        />
+      )
+    },
+    options,
+  )
 }
 
-/** Clear / Dismiss active toasts */
-customToast.dismiss = () => {
-  globalToastRef?.clear?.()
-}
-customToast.clear = () => {
-  globalToastRef?.clear?.()
+export const customToast = (messageOrFn, opts = {}) => {
+  const parsed = parseMessageAndOptions(messageOrFn, opts, "default")
+  return dispatchCatSpeakToast(parsed)
 }
 
-/** Async promise toast */
+customToast.success = (msg, opts = {}) => {
+  const parsed = parseMessageAndOptions(msg, opts, "success")
+  return dispatchCatSpeakToast(parsed)
+}
+
+customToast.error = (msg, opts = {}) => {
+  const parsed = parseMessageAndOptions(msg, opts, "error")
+  return dispatchCatSpeakToast(parsed)
+}
+
+customToast.info = (msg, opts = {}) => {
+  const parsed = parseMessageAndOptions(msg, opts, "info")
+  return dispatchCatSpeakToast(parsed)
+}
+
+customToast.warning = (msg, opts = {}) => {
+  const parsed = parseMessageAndOptions(msg, opts, "warning")
+  return dispatchCatSpeakToast(parsed)
+}
+
+customToast.warn = (msg, opts = {}) => {
+  const parsed = parseMessageAndOptions(msg, opts, "warning")
+  return dispatchCatSpeakToast(parsed)
+}
+
+customToast.loading = (msg, opts = {}) => {
+  const parsed = parseMessageAndOptions(msg, opts, "loading")
+  return dispatchCatSpeakToast(parsed)
+}
+
 customToast.promise = (promise, msgs = {}, opts = {}) => {
-  const loadingMsg =
-    typeof msgs.loading === "string" ? msgs.loading : "Đang xử lý..."
-  customToast.loading(loadingMsg, opts)
+  const options = normalizeOpts(opts)
+  const id = sonnerToast.custom(
+    (toastId) => (
+      <CatSpeakToast
+        id={toastId}
+        type="loading"
+        title={typeof msgs.loading === "string" ? msgs.loading : "Loading..."}
+        onDismiss={() => sonnerToast.dismiss(toastId)}
+        showCloseButton={false}
+      />
+    ),
+    { ...options, duration: Infinity },
+  )
 
-  const p = typeof promise === "function" ? promise() : promise
-
-  return p
-    .then((data) => {
-      customToast.clear()
-      const successMsg =
+  promise
+    .then((result) => {
+      const successTitle =
         typeof msgs.success === "function"
-          ? msgs.success(data)
-          : msgs.success || "Thành công!"
-      customToast.success(successMsg, opts)
-      return data
+          ? msgs.success(result)
+          : msgs.success || "Success"
+
+      sonnerToast.custom(
+        () => (
+          <CatSpeakToast
+            id={id}
+            type="success"
+            title={successTitle}
+            onDismiss={() => sonnerToast.dismiss(id)}
+          />
+        ),
+        { ...options, id, duration: options.duration || 4000 },
+      )
+      return result
     })
-    .catch((err) => {
-      customToast.clear()
-      const errorMsg =
+    .catch((error) => {
+      const errorTitle =
         typeof msgs.error === "function"
-          ? msgs.error(err)
-          : msgs.error || "Có lỗi xảy ra"
-      customToast.error(errorMsg, opts)
-      throw err
+          ? msgs.error(error)
+          : msgs.error || error?.message || "Error occurred"
+
+      sonnerToast.custom(
+        () => (
+          <CatSpeakToast
+            id={id}
+            type="error"
+            title={errorTitle}
+            onDismiss={() => sonnerToast.dismiss(id)}
+          />
+        ),
+        { ...options, id, duration: options.duration || 5000 },
+      )
     })
+
+  return id
 }
+
+// 100% unstyled escape hatch if someone strictly wants no CatSpeakToast card
+customToast.custom = (jsxOrFn, opts) => {
+  const options = normalizeOpts(opts)
+  if (typeof jsxOrFn === "function") {
+    return sonnerToast.custom(
+      (id) => jsxOrFn({ id, dismiss: () => sonnerToast.dismiss(id) }),
+      options,
+    )
+  }
+  return sonnerToast.custom(() => jsxOrFn, options)
+}
+
+customToast.dismiss = (id) => sonnerToast.dismiss(id)
+customToast.clear = () => sonnerToast.dismiss()
+
+// Backward-compat refs for legacy PrimeReact calls
+export const setGlobalToastRef = () => {}
+export const getGlobalToastRef = () => null
 
 export const toast = customToast
 export default customToast

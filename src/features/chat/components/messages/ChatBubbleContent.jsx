@@ -115,13 +115,13 @@ const ChatBubbleContent = ({
   const bubbleClasses = isEmoji
     ? "bg-transparent text-4xl min-h-0 min-w-0"
     : isRecalled
-      ? `rounded-2xl border border-border px-4 py-3 select-none inline-flex items-center gap-1 ${
+      ? `rounded-2xl border border-border px-3 py-2 text-base select-none inline-flex items-center gap-1 ${
           isOwn
             ? "bg-neutral-100/90 dark:bg-[#272727] text-neutral-500 dark:text-[#AAAAAA]"
             : "bg-primaryBg dark:bg-[#272727] text-neutral-500 dark:text-[#AAAAAA]"
         }`
       : isBubbleCard
-        ? `${
+        ? `text-base ${
             isOwn
               ? "rounded-2xl bg-[#990011] dark:bg-[#FF0033] text-white"
               : "rounded-2xl bg-primaryBg dark:bg-[#272727] text-neutral-900 dark:text-white"
@@ -130,7 +130,7 @@ const ChatBubbleContent = ({
               ? isAudio
                 ? "p-0 overflow-hidden inline-flex flex-col w-fit max-w-[340px]"
                 : "p-0 overflow-hidden flex flex-col w-full max-w-[360px]"
-              : "px-4 py-3 min-h-[40px] min-w-[60px] inline-block max-w-full"
+              : "px-3 py-2 min-h-[40px] min-w-[60px] inline-block max-w-full"
           }`
         : `bg-transparent p-0 min-h-0 min-w-0 flex flex-col ${
             isOwn ? "items-end" : "items-start"
@@ -140,7 +140,7 @@ const ChatBubbleContent = ({
     <div className={bubbleClasses}>
       {/* Quoted Replied Message (if any) */}
       {hasReply && (
-        <div className={hasMedia || hasLinkPreview ? "px-4 pt-4" : ""}>
+        <div className={hasMedia || hasLinkPreview ? "px-3 pt-3" : ""}>
           <RepliedMessage
             senderName={parentSenderName}
             content={parentContent}
@@ -241,7 +241,7 @@ const ChatBubbleContent = ({
             <div
               className={`w-full ${
                 isOwn ? "bg-[#990011] dark:bg-[#FF0033] text-white" : "bg-primaryBg dark:bg-[#272727] text-gray-900 dark:text-white"
-              } px-4 py-3 rounded-b-2xl rounded-t-none text-left`}
+              } px-3 py-2 text-base rounded-b-2xl rounded-t-none text-left`}
             >
               <FormattedText
                 text={textContent}
@@ -299,7 +299,7 @@ const ChatBubbleContent = ({
                 isOwn
                   ? "bg-[#990011] dark:bg-[#FF0033] text-white"
                   : "bg-primaryBg dark:bg-[#272727] text-gray-900 dark:text-white shadow-xs"
-              } px-4 py-3 rounded-b-2xl rounded-t-none text-left`}
+              } px-3 py-2 text-base rounded-b-2xl rounded-t-none text-left`}
             >
               <FormattedText
                 text={textContent}

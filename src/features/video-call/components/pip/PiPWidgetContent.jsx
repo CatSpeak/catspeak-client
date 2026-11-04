@@ -60,7 +60,10 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
       try {
         await raiseHand({ sessionId, isRaised: newRaised }).unwrap()
       } catch (error) {
-        console.warn("Backend raiseHand notification error (LiveKit metadata active):", error)
+        console.warn(
+          "Backend raiseHand notification error (LiveKit metadata active):",
+          error,
+        )
       }
     }
   }
@@ -98,13 +101,13 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
       {/* Top Video Area */}
       <div className="relative w-full flex-1 min-h-0 bg-[#0f0f0f] flex items-center justify-center">
         {isPiPChatOpen ? (
-          <div className="absolute inset-0 bg-white overflow-hidden flex flex-col">
+          <div className="absolute inset-0 bg-white dark:bg-[#1A1A1A] overflow-hidden flex flex-col">
             <ChatBox
               messages={messages}
               currentUser={user}
               onSendMessage={handleSendMessage}
               isConnected={isConnected}
-              className="h-full w-full !bg-white"
+              className="h-full w-full !bg-white dark:!bg-[#1A1A1A]"
             />
           </div>
         ) : (
@@ -116,13 +119,13 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
 
         {/* Top overlay */}
         <div className="absolute top-0 left-0 right-0 p-2 px-3 bg-gradient-to-b from-black/55 to-transparent flex items-center justify-between pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <span className="text-[11px] font-semibold text-white drop-shadow-md max-w-[60%] truncate">
+          <span className="text-xs text-white drop-shadow-md max-w-[60%] truncate">
             {roomName}
           </span>
           {hasDuration &&
             formattedRemaining &&
             formattedRemaining !== "00:00" && (
-              <span className="text-[10px] font-medium text-white/85 bg-black/35 px-1.5 py-0.5 rounded-md tabular-nums">
+              <span className="text-xs text-white/85 bg-black/35 px-1.5 py-0.5 rounded-md tabular-nums">
                 {formattedRemaining}
               </span>
             )}
@@ -130,7 +133,7 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
       </div>
 
       {/* Bottom Controls Area */}
-      <div className="shrink-0 bg-white">
+      <div className="shrink-0 bg-white dark:bg-[#1A1A1A] border-t border-border dark:border-[#3F3F3F]">
         <PiPControlBar
           isNativeWindow={isNativeWindow}
           micOn={micOn}

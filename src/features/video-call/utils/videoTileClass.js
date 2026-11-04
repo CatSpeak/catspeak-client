@@ -39,14 +39,14 @@ const FULL_AVATAR_CLASS =
 const FULL_OVERLAY_BAR_CLASS =
   "absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-1 pointer-events-none z-20"
 const FULL_OVERLAY_PILL_CLASS =
-  "flex min-w-0 items-center gap-1 sm:gap-1.5 rounded-full bg-black/40 px-2 py-1 sm:px-3 sm:py-2 text-white backdrop-blur-sm pointer-events-auto"
-const FULL_OVERLAY_NAME_CLASS = "min-w-0 truncate font-medium text-xs sm:text-sm"
+  "flex min-w-0 items-center gap-2 rounded-full bg-black/40 px-4 h-10 text-white backdrop-blur-sm pointer-events-auto"
+const FULL_OVERLAY_NAME_CLASS = "min-w-0 truncate text-sm"
 const COMPACT_AVATAR_CLASS =
   "!w-[32px] !h-[32px] !min-w-[32px] !min-h-[32px] !max-w-[32px] !max-h-[32px] !text-xs !border-none"
 const COMPACT_OVERLAY_BAR_CLASS =
   "absolute bottom-1 left-1 right-1 flex items-center justify-between gap-1 pointer-events-none z-20"
 const COMPACT_OVERLAY_PILL_CLASS =
-  "flex min-w-0 items-center gap-1 rounded-full bg-black/40 px-1.5 py-0.5 text-white backdrop-blur-sm pointer-events-auto"
+  "flex min-w-0 items-center gap-2 rounded-full bg-black/40 px-4 text-white backdrop-blur-sm pointer-events-auto"
 const COMPACT_OVERLAY_NAME_CLASS = "min-w-0 truncate font-medium text-[10px]"
 
 /**

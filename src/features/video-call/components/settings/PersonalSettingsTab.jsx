@@ -18,13 +18,10 @@ const PersonalSettingsTab = ({
 }) => {
   const { t } = useLanguage()
   const gt = t?.rooms?.videoCall?.general || {}
-  const {
-    joinLeaveSound,
-    setJoinLeaveSound,
-  } = useVideoCallContext()
+  const { joinLeaveSound, setJoinLeaveSound } = useVideoCallContext()
 
   return (
-    <div className="flex flex-col divide-y divide-[#e5e5e5] rounded-xl border border-[#e5e5e5] bg-white">
+    <div className="flex flex-col divide-y divide-border dark:divide-[#3F3F3F]">
       <ListItem
         lines="auto"
         rightContent={
@@ -35,8 +32,10 @@ const PersonalSettingsTab = ({
           />
         }
       >
-        <span>{gt.receiveSystemMsgs || "Nhận thông báo tin nhắn hệ thống"}</span>
-        <span className="text-sm text-[#606060]">
+        <span className="text-neutral-900 dark:text-white font-medium">
+          {gt.receiveSystemMsgs || "Nhận thông báo tin nhắn hệ thống"}
+        </span>
+        <span className="text-sm text-[#606060] dark:text-[#AAAAAA]">
           {gt.receiveSystemMsgsDesc ||
             "Hiển thị các thông báo tự động từ hệ thống trong khi cuộc họp đang diễn ra."}
         </span>
@@ -52,10 +51,10 @@ const PersonalSettingsTab = ({
           />
         }
       >
-        <span>
+        <span className="text-neutral-900 dark:text-white font-medium">
           {gt.joinLeaveSound || "Âm thanh khi người dùng vào / ra phòng"}
         </span>
-        <span className="text-sm text-[#606060]">
+        <span className="text-sm text-[#606060] dark:text-[#AAAAAA]">
           {gt.joinLeaveSoundDesc ||
             "Phát chuông thông báo âm thanh khi có thành viên mới vào hoặc rời khỏi cuộc họp."}
         </span>

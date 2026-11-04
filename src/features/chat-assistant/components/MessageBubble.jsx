@@ -52,7 +52,13 @@ function TypingDots({ label }) {
  *  tra trong bảng dịch theo đúng mã này — bản tiếng Việt phải trùng nguyên văn với
  *  FEEDBACK_REASON_LABELS bên read/rag/messages.py, vì báo cáo cho nhóm quản trị đọc
  *  ra một đằng mà người dùng thấy một nẻo thì không ai đối chiếu được. */
-const REASON_CODES = ["wrong_info", "off_topic", "unclear", "incomplete", "other"]
+const REASON_CODES = [
+  "wrong_info",
+  "off_topic",
+  "unclear",
+  "incomplete",
+  "other",
+]
 
 const MAX_NOTE = 500
 
@@ -92,7 +98,11 @@ function ReasonPicker({ onPick, onClose, busy, L }) {
             className="rounded-full border px-2 py-1 text-[11px] transition"
             style={
               reason === code
-                ? { borderColor: BRAND.red, background: BRAND.redSoft, color: BRAND.red }
+                ? {
+                    borderColor: BRAND.red,
+                    background: BRAND.redSoft,
+                    color: BRAND.red,
+                  }
                 : undefined
             }
           >
@@ -131,7 +141,12 @@ function ReasonPicker({ onPick, onClose, busy, L }) {
   )
 }
 
-export default function MessageBubble({ message, onOpenSource, onContactSupport, onUpgrade }) {
+export default function MessageBubble({
+  message,
+  onOpenSource,
+  onContactSupport,
+  onUpgrade,
+}) {
   const { t } = useLanguage()
   const L = t.chatAssistant || {}
   const [vote, setVote] = useState(0)
@@ -154,9 +169,12 @@ export default function MessageBubble({ message, onOpenSource, onContactSupport,
   }
 
   const sources = message.sources || []
-  const isProblem = ["blocked", "unavailable", "error", "quota_exceeded"].includes(
-    message.status,
-  )
+  const isProblem = [
+    "blocked",
+    "unavailable",
+    "error",
+    "quota_exceeded",
+  ].includes(message.status)
 
   const react = async (value) => {
     const next = vote === value ? 0 : value
@@ -276,7 +294,9 @@ export default function MessageBubble({ message, onOpenSource, onContactSupport,
           type="button"
           onClick={onUpgrade}
           className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
-          style={{ background: `linear-gradient(90deg, ${BRAND.red}, ${BRAND.orange})` }}
+          style={{
+            background: `linear-gradient(90deg, ${BRAND.red}, ${BRAND.orange})`,
+          }}
         >
           <Sparkles size={13} /> {L.upgrade}
         </button>
@@ -303,11 +323,15 @@ export default function MessageBubble({ message, onOpenSource, onContactSupport,
           >
             <ThumbsDown
               size={13}
-              className={vote === -1 ? "" : "text-neutral-400 hover:text-neutral-600"}
+              className={
+                vote === -1 ? "" : "text-neutral-400 hover:text-neutral-600"
+              }
             />
           </button>
           {sent && (
-            <span className="pl-1 text-[11px] text-neutral-400">{L.feedback?.thanks}</span>
+            <span className="pl-1 text-[11px] text-neutral-400">
+              {L.feedback?.thanks}
+            </span>
           )}
         </div>
       )}

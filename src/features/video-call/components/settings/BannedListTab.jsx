@@ -20,8 +20,7 @@ const BannedListTab = () => {
   const currentRoomId = room?.id || roomId
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
-  // Mirror the server contract: host + co-host with remove_student (kick/ban/
-  // unban are one family; mute_all no longer grants access).
+  // Mirror the server contract: host + co-host with remove_student
   const { data: coHostData } = useGetRoomCoHostQuery(currentRoomId, {
     skip: !currentRoomId,
   })
@@ -63,48 +62,48 @@ const BannedListTab = () => {
   return (
     <div className="flex flex-col gap-4">
       {/* Subtitle description */}
-      <p className="text-sm text-[#606060] px-1">
+      <p className="text-sm text-[#606060] dark:text-[#AAAAAA] px-1">
         {pl.bannedListDesc ||
           "Danh sách các thành viên đã bị Host mời ra khỏi phòng và cấm tham gia lại."}
       </p>
 
       {/* Loading state */}
       {isBannedLoading ? (
-        <div className="bg-white rounded-xl border border-[#e5e5e5] p-8 text-center text-sm text-neutral-400">
+        <div className="bg-white dark:bg-[#272727] rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F] p-8 text-center text-sm text-neutral-400 dark:text-[#AAAAAA]">
           {t?.rooms?.waitingScreen?.loading || pl.loading || "Đang tải..."}
         </div>
       ) : isBannedError ? (
-        <div className="bg-white rounded-xl border border-[#e5e5e5] p-8 flex flex-col items-center justify-center text-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
+        <div className="bg-white dark:bg-[#272727] rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F] p-8 flex flex-col items-center justify-center text-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 flex items-center justify-center">
             <ShieldAlert size={24} />
           </div>
-          <span className="text-sm text-neutral-600 max-w-sm">
+          <span className="text-sm text-neutral-600 dark:text-[#AAAAAA] max-w-sm">
             {pl.forbiddenBannedList ||
               "Bạn không có quyền xem danh sách bị cấm của phòng này."}
           </span>
         </div>
       ) : bannedList.length === 0 ? (
         /* Clean Empty State */
-        <div className="bg-white rounded-xl border border-[#e5e5e5] p-8 flex flex-col items-center justify-center text-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+        <div className="bg-white dark:bg-[#272727] rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F] p-8 flex flex-col items-center justify-center text-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
             <ShieldCheck size={24} />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-semibold text-neutral-800">
+            <span className="text-sm font-semibold text-neutral-800 dark:text-white">
               {pl.noBannedMembersTitle || "Chưa có thành viên nào bị cấm"}
             </span>
-            <span className="text-xs text-neutral-500 max-w-sm">
+            <span className="text-xs text-neutral-500 dark:text-[#AAAAAA] max-w-sm">
               {pl.noBannedMembersDesc || "Các thành viên bị Host mời ra khỏi phòng và cấm truy cập lại sẽ hiển thị tại đây."}
             </span>
           </div>
         </div>
       ) : (
         /* Banned Users List Card */
-        <div className="bg-white rounded-xl border border-[#e5e5e5] divide-y divide-[#e5e5e5] overflow-hidden">
+        <div className="bg-white dark:bg-[#272727] rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F] divide-y divide-[#e5e5e5] dark:divide-[#3F3F3F] overflow-hidden">
           {bannedList.map((item) => (
             <div
               key={item.accountId}
-              className="flex items-center justify-between p-4 hover:bg-neutral-50/50 transition-colors"
+              className="flex items-center justify-between p-4 hover:bg-neutral-50/50 dark:hover:bg-[#333333] transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Avatar
@@ -113,11 +112,11 @@ const BannedListTab = () => {
                   size={40}
                 />
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-semibold text-neutral-900 truncate">
+                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">
                     {item.fullName || item.email || `User #${item.accountId}`}
                   </span>
                   {item.email && (
-                    <span className="text-xs text-neutral-500 truncate">
+                    <span className="text-xs text-neutral-500 dark:text-[#AAAAAA] truncate">
                       {item.email}
                     </span>
                   )}
@@ -126,7 +125,7 @@ const BannedListTab = () => {
 
               <button
                 type="button"
-                className="shrink-0 text-xs font-semibold px-3.5 py-2 rounded-lg border border-neutral-300 text-neutral-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                className="shrink-0 text-xs font-semibold px-3.5 py-2 rounded-lg border border-neutral-300 dark:border-[#3F3F3F] text-neutral-700 dark:text-neutral-200 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-900/50 transition-all disabled:opacity-50 flex items-center gap-1.5"
                 onClick={() =>
                   handleUnban(item.accountId, item.fullName || item.email)
                 }

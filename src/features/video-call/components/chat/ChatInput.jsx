@@ -1,10 +1,19 @@
 import React, { useState, useRef, useCallback, useEffect } from "react"
-import { Send, Smile, Sparkles, MessageSquareOff, Lock, Globe } from "lucide-react"
+import {
+  Send,
+  Smile,
+  Sparkles,
+  MessageSquareOff,
+  Lock,
+  Globe,
+  Check,
+} from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
-import Switch from "@/shared/components/ui/inputs/Switch"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
+import MenuList from "@/shared/components/ui/MenuList"
+import MenuItem from "@/shared/components/ui/MenuItem"
 import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
 import useEmojiPicker from "@/shared/hooks/useEmojiPicker"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
@@ -33,12 +42,19 @@ const ChatInput = ({
   const [isMultiline, setIsMultiline] = useState(false)
   const sendingRef = useRef(false)
   const editableRef = useRef(null)
-  const savedSelectionRef = useRef(null)  // saves caret when editable loses focus
+  const savedSelectionRef = useRef(null) // saves caret when editable loses focus
   const textareaRef = editableRef // alias kept for emoji hook compat
   const { t } = useLanguage()
   const { sendAiMessage, isBlocked: isAiBlocked } = useAiSend()
   const { insertEmoji, addRecent } = useEmojiPicker()
-  const { room, id: roomIdFromContext, user, participants = [], isHost: isHostFromContext, isChatRestricted } = useGlobalVideoCall()
+  const {
+    room,
+    id: roomIdFromContext,
+    user,
+    participants = [],
+    isHost: isHostFromContext,
+    isChatRestricted,
+  } = useGlobalVideoCall()
   const currentRoomId = room?.id || roomIdFromContext
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
@@ -59,11 +75,14 @@ const ChatInput = ({
     })
   }, [participants])
 
-  const allMentionItem = React.useMemo(() => ({
-    isAll: true,
-    name: "All",
-    identity: "all",
-  }), [])
+  const allMentionItem = React.useMemo(
+    () => ({
+      isAll: true,
+      name: "All",
+      identity: "all",
+    }),
+    [],
+  )
 
   const filteredMentions = React.useMemo(() => {
     if (!mentionState.isOpen) return []
@@ -78,20 +97,33 @@ const ChatInput = ({
 
     const list = availableMentionParticipants.filter((p) => {
       const meta = parseMetadata(p.metadata)
-      const name = (p.name || meta.nickname || meta.username || p.identity || "").toLowerCase()
+      const name = (
+        p.name ||
+        meta.nickname ||
+        meta.username ||
+        p.identity ||
+        ""
+      ).toLowerCase()
       const email = (meta.email || "").toLowerCase()
       return name.includes(q) || email.includes(q)
     })
 
     return matchesAll ? [allMentionItem, ...list] : list
-  }, [mentionState.isOpen, mentionState.query, availableMentionParticipants, allMentionItem])
+  }, [
+    mentionState.isOpen,
+    mentionState.query,
+    availableMentionParticipants,
+    allMentionItem,
+  ])
 
   const justSelectedMentionRef = useRef(false)
 
   const isOffsetInMentionSpan = (offset) => {
     const el = editableRef.current
     if (!el) return false
-    const spans = el.querySelectorAll('[data-mention], [contenteditable="false"]')
+    const spans = el.querySelectorAll(
+      '[data-mention], [contenteditable="false"]',
+    )
     if (spans.length === 0) return false
     let currentPos = 0
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
@@ -163,7 +195,8 @@ const ChatInput = ({
   }
 
   /** Get plain text from the contenteditable div */
-  const getPlainText = () => editableRef.current?.innerText?.replace(/\n$/, "") || ""
+  const getPlainText = () =>
+    editableRef.current?.innerText?.replace(/\n$/, "") || ""
 
   /** Get caret offset (character index) within the contenteditable's innerText */
   const getCaretOffset = () => {
@@ -173,7 +206,12 @@ const ChatInput = ({
     if (!sel || sel.rangeCount === 0) return 0
     try {
       const range = sel.getRangeAt(0)
-      const treeWalker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false)
+      const treeWalker = document.createTreeWalker(
+        el,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false,
+      )
       let caretOffset = 0
       let currentNode = treeWalker.nextNode()
 
@@ -228,15 +266,6 @@ const ChatInput = ({
     const newText = getPlainText()
     setMessage(newText)
     updateMentionTrigger(newText, getCaretOffset())
-
-    const cleaned = newText.trim()
-    if (!cleaned) {
-      setIsMultiline(false)
-    } else if (newText.includes("\n") || newText.length > 45) {
-      setIsMultiline(true)
-    } else {
-      setIsMultiline(false)
-    }
   }
 
   const handleSelectMention = (participant) => {
@@ -244,14 +273,19 @@ const ChatInput = ({
     let displayName = "All"
     if (!participant.isAll) {
       const meta = parseMetadata(participant.metadata)
-      displayName = participant.name || meta.nickname || meta.username || participant.identity || "Thành viên"
+      displayName =
+        participant.name ||
+        meta.nickname ||
+        meta.username ||
+        participant.identity ||
+        "Thành viên"
     }
 
     const el = editableRef.current
     if (!el) return
 
-    const startChar = mentionState.matchIndex   // position of the '@' character
-    const endChar = getCaretOffset()            // current caret (end of @query)
+    const startChar = mentionState.matchIndex // position of the '@' character
+    const endChar = getCaretOffset() // current caret (end of @query)
 
     // Build a Range covering exactly the "@query" text in the DOM
     const buildRange = (start, end) => {
@@ -284,7 +318,8 @@ const ChatInput = ({
     const span = document.createElement("span")
     span.textContent = `@${displayName}`
     span.contentEditable = "false"
-    span.style.cssText = "color:#990011;font-weight:700;display:inline;margin-right:2px;"
+    span.className =
+      "text-cath-red-700 dark:text-red-400 font-bold inline mr-0.5"
     span.dataset.mention = displayName
     queryRange.insertNode(span)
 
@@ -300,43 +335,55 @@ const ChatInput = ({
 
     const newText = getPlainText()
     setMessage(newText)
-    const cleaned = newText.trim()
-    if (!cleaned) {
-      setIsMultiline(false)
-    } else if (newText.includes("\n") || newText.length > 45) {
-      setIsMultiline(true)
-    } else {
-      setIsMultiline(false)
-    }
+    updateMultilineState(newText)
     justSelectedMentionRef.current = true
-    setMentionState({ isOpen: false, query: "", matchIndex: -1, selectedIndex: 0 })
+    setMentionState({
+      isOpen: false,
+      query: "",
+      matchIndex: -1,
+      selectedIndex: 0,
+    })
     el.focus()
   }
 
-  const [isMemberPrivateAiAllowed, setIsMemberPrivateAiAllowed] = React.useState(() => {
-    return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
-  })
+  const [isMemberPrivateAiAllowed, setIsMemberPrivateAiAllowed] =
+    React.useState(() => {
+      return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
+    })
 
   React.useEffect(() => {
     const handlePrivateAiChange = () => {
-      const allowed = getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
+      const allowed = getRoomSetting(
+        currentRoomId,
+        ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
+      )
       setIsMemberPrivateAiAllowed(allowed)
       if (!isHost && !allowed) {
         setIsPrivateAi(false)
       }
     }
     handlePrivateAiChange()
-    window.addEventListener("catspeak_member_private_ai_allowed_changed", handlePrivateAiChange)
+    window.addEventListener(
+      "catspeak_member_private_ai_allowed_changed",
+      handlePrivateAiChange,
+    )
     return () => {
-      window.removeEventListener("catspeak_member_private_ai_allowed_changed", handlePrivateAiChange)
+      window.removeEventListener(
+        "catspeak_member_private_ai_allowed_changed",
+        handlePrivateAiChange,
+      )
     }
   }, [isHost, currentRoomId])
 
-  const currentInputText = (message || editableRef.current?.innerText || "").replace(/\u00a0/g, " ").trim()
+  const currentInputText = (message || editableRef.current?.innerText || "")
+    .replace(/\u00a0/g, " ")
+    .trim()
   const hasContent = currentInputText.length > 0
 
   const handleSend = useCallback(async () => {
-    const text = (message || editableRef.current?.innerText || "").replace(/\u00a0/g, " ").trim()
+    const text = (message || editableRef.current?.innerText || "")
+      .replace(/\u00a0/g, " ")
+      .trim()
     if (sendingRef.current || !text) return
 
     sendingRef.current = true
@@ -350,7 +397,7 @@ const ChatInput = ({
       if (!isHost && isPrivateAi && !isMemberPrivateAiAllowed) {
         toast.error(
           t.rooms?.general?.privateAiDisabledByHost ||
-          "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên."
+            "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên.",
         )
         sendingRef.current = false
         return
@@ -449,28 +496,32 @@ const ChatInput = ({
   const roomLangType = room?.languageType || room?.language || "English"
   const langDisplayName =
     roomLangType === "en" || roomLangType === "English"
-      ? (t.rooms?.languages?.en || "tiếng Anh")
+      ? t.rooms?.languages?.en || "tiếng Anh"
       : roomLangType === "zh" || roomLangType === "Chinese"
-        ? (t.rooms?.languages?.zh || "tiếng Trung")
+        ? t.rooms?.languages?.zh || "tiếng Trung"
         : roomLangType === "ja" || roomLangType === "Japanese"
-          ? (t.rooms?.languages?.ja || "tiếng Nhật")
-          : (roomLangType || "tiếng Anh")
+          ? t.rooms?.languages?.ja || "tiếng Nhật"
+          : roomLangType || "tiếng Anh"
 
   const aiDynamicPlaceholder =
-    t.rooms?.chatBox?.aiPlaceholderDynamic?.replace("{language}", langDisplayName) ||
-    `Hỏi gì cũng được về ${langDisplayName}...`
+    t.rooms?.chatBox?.aiPlaceholderDynamic?.replace(
+      "{language}",
+      langDisplayName,
+    ) || `Hỏi về ${langDisplayName}...`
 
   const placeholderText = !isConnected
     ? t.rooms?.chatBox?.connectingPlaceholder || "Connecting..."
     : isAiInput
       ? isAiBlocked
-        ? t.rooms?.chatBox?.aiGeneratingPlaceholder || "AI is typing..."
+        ? t.rooms?.chatBox?.aiGeneratingPlaceholder ||
+          t.rooms?.chatBox?.aiTypingResponse ||
+          "AI đang soạn câu trả lời..."
         : replyTarget?.from?.isSystem
-          ? "Reply to system..."
+          ? t.rooms?.chatBox?.replyToSystemPlaceholder || "Reply to system..."
           : aiDynamicPlaceholder
       : isChatRestricted === true
         ? t.rooms?.chatBox?.chatRestrictedPlaceholder ||
-        "You are restricted from chatting"
+          "You are restricted from chatting"
         : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
 
   const isInputDisabled =
@@ -479,7 +530,7 @@ const ChatInput = ({
     (!isAiInput && isChatRestricted === true)
 
   return (
-    <div className="p-3 bg-white flex flex-col gap-2 relative shrink-0 border-t border-[#E5E5E5]">
+    <div className="p-4 bg-white dark:bg-[#1A1A1A] flex flex-col gap-2 relative shrink-0">
       {/* Mention Autocomplete Popover */}
       {mentionState.isOpen && (
         <MentionPopover
@@ -509,72 +560,17 @@ const ChatInput = ({
         </div>
       )}
 
-      {/* Unified Input Box */}
+      {/* Unified Input Box (Permanent 2-Row Composer Card) */}
       <div
         onClick={() => editableRef.current?.focus()}
-        className={`w-full grid grid-cols-[auto_1fr_auto] border focus-within:border-cath-red-700 transition-all cursor-text rounded-2xl ${isMultiline
-            ? "pb-2 pt-3 min-h-[110px] gap-y-2 px-3"
-            : "items-center h-14 pl-3 pr-1"
-          } ${isAiInput
-            ? "border-red-200 dark:border-red-900/50 bg-gradient-to-r from-red-50/40 via-white to-red-50/20 dark:from-red-950/20 dark:via-[#1A1A1A] dark:to-red-950/10 shadow-sm"
+        className={`w-full flex flex-col justify-between rounded-2xl border focus-within:border-cath-red-700 transition-colors cursor-text min-h-[92px] gap-2 ${
+          isAiInput
+            ? "border-border dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#272727] shadow-2xs"
             : "border-border dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#272727]"
-          }`}
+        }`}
       >
-        {/* Left AI Switch Control (FR-006) */}
-        {isAiInput && (
-          <div
-            className={`flex items-center gap-1.5 pr-1.5 shrink-0 select-none ${isMultiline
-                ? "col-start-1 row-start-2 self-center"
-                : "col-start-1 row-start-1 h-full"
-              }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-1.5">
-              <Switch
-                checked={isPrivateAi}
-                disabled={!isHost && !isMemberPrivateAiAllowed}
-                onChange={(e) => {
-                  if (!isHost && !isMemberPrivateAiAllowed && e.target.checked) {
-                    toast.error(
-                      t.rooms?.general?.privateAiDisabledByHost ||
-                      "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên."
-                    )
-                    return
-                  }
-                  setIsPrivateAi(e.target.checked)
-                }}
-                colorClass="peer-checked:bg-red-700"
-              />
-              <div
-                className="flex items-center gap-1 text-[11px] font-medium transition-colors cursor-pointer select-none"
-                onClick={() => {
-                  if (!isHost && !isMemberPrivateAiAllowed && !isPrivateAi) return
-                  setIsPrivateAi(!isPrivateAi)
-                }}
-              >
-                {isPrivateAi ? (
-                  <span className="inline-flex items-center gap-0.5 text-gray-700 dark:text-neutral-200">
-                    <Lock size={12} className="text-gray-500 dark:text-[#AAAAAA] shrink-0 -translate-y-[0.08em]" />
-                    <span>{t.rooms?.chatBox?.privateModeLabel || "Riêng tư"}</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-0.5 text-red-700 font-semibold">
-                    <Globe size={12} className="text-red-700 shrink-0 -translate-y-[0.08em]" />
-                    <span>{t.rooms?.chatBox?.publicModeLabel || "Công khai"}</span>
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Text Input Area – contenteditable for @mention inline color support */}
-        <div
-          className={`h-full px-1 min-w-0 relative ${isMultiline
-              ? "col-span-3 col-start-1 row-start-1"
-              : "col-start-2 row-start-1 flex items-center"
-            }`}
-        >
+        {/* Row 1: Full-Width Text Input Area */}
+        <div className="w-full min-w-0 pt-4">
           <div
             ref={editableRef}
             contentEditable={!isInputDisabled}
@@ -585,99 +581,158 @@ const ChatInput = ({
             onKeyDown={handleKeyDown}
             onBlur={saveSelection}
             data-placeholder={placeholderText}
-            className={`w-full text-base text-foreground dark:text-white focus:outline-none bg-transparent leading-normal ${isInputDisabled ? "opacity-50 cursor-not-allowed" : ""
-              } empty:before:content-[attr(data-placeholder)] empty:before:text-[#606060] dark:empty:before:text-[#AAAAAA] empty:before:pointer-events-none`}
+            className={`px-4 w-full text-base text-foreground dark:text-white focus:outline-none bg-transparent leading-normal ${
+              isInputDisabled ? "opacity-50 cursor-not-allowed" : ""
+            } empty:before:content-[attr(data-placeholder)] empty:before:text-[#606060] dark:empty:before:text-[#AAAAAA] empty:before:pointer-events-none`}
             style={{
-              minHeight: isMultiline ? "2.5rem" : "1.25rem",
-              maxHeight: isMultiline ? "120px" : "100%",
-              overflowY: isMultiline ? "auto" : "hidden",
+              minHeight: "1.5rem",
+              maxHeight: "120px",
+              overflowY: "auto",
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
             }}
           />
         </div>
 
-        {/* Right Actions: Character Counter + Emoji Picker + Send Button */}
+        {/* Row 2: Bottom Utility Toolbar */}
         <div
-          className={`flex items-center gap-0.5 shrink-0 ${isMultiline
-              ? "col-start-3 row-start-2 justify-self-end self-center"
-              : "col-start-3 row-start-1"
-            }`}
+          className="flex items-center justify-between w-full px-1 pb-1"
           onClick={(e) => e.stopPropagation()}
         >
-          {isMultiline && (
-            <span
-              className={`text-[11px] font-mono select-none px-1 ${message.length >= 500
-                  ? "text-red-500 font-bold"
-                  : message.length >= 400
-                    ? "text-amber-600 font-medium"
-                    : "text-gray-400 opacity-75"
-                }`}
-              title={`${message.length} / 500 characters`}
-            >
-              {message.length}/500
-            </span>
-          )}
-
-          {!isAiInput && (
-            <Popover
-              placement="top-right"
-              className="shrink-0"
-              triggerClassName="inline-flex items-center justify-center"
-              trigger={
-                <IconButton
-                  variant="ghost"
-                  aria-label="Emoji"
-                  type="button"
-                  disabled={isInputDisabled}
-                  className="!w-10 !h-10"
-                >
-                  <Smile size={18} />
-                </IconButton>
-              }
-              content={() => (
-                <EmojiPickerWrapper
-                  onSelect={(emoji) => {
-                    addRecent(emoji)
-                    const el = editableRef.current
-                    if (!el) return
-                    el.focus()
-                    // Restore saved caret position (lost when emoji picker got focus)
-                    restoreSelection()
-                    document.execCommand("insertText", false, emoji)
-                    const newTxt = el.innerText?.replace(/\n$/, "") || ""
-                    setMessage(newTxt)
-                    const cleaned = newTxt.trim()
-                    if (!cleaned) {
-                      setIsMultiline(false)
-                    } else if (newTxt.includes("\n") || newTxt.length > 45) {
-                      setIsMultiline(true)
-                    } else {
-                      setIsMultiline(false)
+          {/* Left Toolbar Items: AI Visibility Mode */}
+          <div className="flex items-center shrink-0">
+            {isAiInput && (
+              <Popover
+                placement="top-left"
+                className="shrink-0"
+                triggerClassName="inline-flex items-center justify-center"
+                trigger={
+                  <IconButton
+                    variant="ghost"
+                    aria-label={
+                      isPrivateAi
+                        ? t.rooms?.chatBox?.privateModeLabel || "Riêng tư"
+                        : t.rooms?.chatBox?.publicModeLabel || "Công khai"
                     }
-                    // Save the new position after insertion
-                    saveSelection()
-                  }}
-                />
-              )}
-            />
-          )}
+                    type="button"
+                    disabled={isInputDisabled}
+                    title={
+                      isPrivateAi
+                        ? t.rooms?.chatBox?.privateAiTooltip ||
+                          "Riêng tư (Chỉ bạn nhìn thấy)"
+                        : t.rooms?.chatBox?.publicAiTooltip ||
+                          "Công khai (Cả phòng nhìn thấy)"
+                    }
+                    className="text-gray-500 hover:text-gray-800 dark:text-[#AAAAAA] dark:hover:text-white"
+                  >
+                    {isPrivateAi ? <Lock size={20} /> : <Globe size={20} />}
+                  </IconButton>
+                }
+                content={(close) => (
+                  <MenuList>
+                    <MenuItem
+                      icon={<Lock size={20} />}
+                      label={t.rooms?.chatBox?.privateModeLabel || "Riêng tư"}
+                      isSelected={isPrivateAi}
+                      disabled={!isHost && !isMemberPrivateAiAllowed}
+                      onClick={() => {
+                        if (!isHost && !isMemberPrivateAiAllowed) {
+                          toast.error(
+                            t.rooms?.general?.privateAiDisabledByHost ||
+                              "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên.",
+                          )
+                          return
+                        }
+                        setIsPrivateAi(true)
+                        close?.()
+                      }}
+                    />
+                    <MenuItem
+                      icon={<Globe size={20} />}
+                      label={t.rooms?.chatBox?.publicModeLabel || "Công khai"}
+                      isSelected={!isPrivateAi}
+                      onClick={() => {
+                        setIsPrivateAi(false)
+                        close?.()
+                      }}
+                    />
+                  </MenuList>
+                )}
+              />
+            )}
+          </div>
 
-          <IconButton
-            onClick={handleSend}
-            onTouchEnd={(e) => {
-              if (!isInputDisabled && hasContent) {
-                e.preventDefault()
-                handleSend()
+          {/* Right Toolbar Items: Character Counter + Emoji + Send */}
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
+            {message.length > 0 && (
+              <span
+                className={`text-xs select-none ${
+                  message.length >= 500
+                    ? "text-red-500 dark:text-red-400"
+                    : message.length >= 400
+                      ? "text-amber-600 dark:text-amber-400"
+                      : "text-gray-400 dark:text-[#AAAAAA] opacity-75"
+                }`}
+                title={`${message.length} / 500 characters`}
+              >
+                {message.length}/500
+              </span>
+            )}
+
+            {!isAiInput && (
+              <Popover
+                placement="top-right"
+                className="shrink-0"
+                triggerClassName="inline-flex items-center justify-center"
+                trigger={
+                  <IconButton
+                    variant="ghost"
+                    aria-label="Emoji"
+                    type="button"
+                    disabled={isInputDisabled}
+                    className="text-gray-500 hover:text-gray-800 dark:text-[#AAAAAA] dark:hover:text-white"
+                  >
+                    <Smile />
+                  </IconButton>
+                }
+                content={() => (
+                  <EmojiPickerWrapper
+                    onSelect={(emoji) => {
+                      addRecent(emoji)
+                      const el = editableRef.current
+                      if (!el) return
+                      el.focus()
+                      restoreSelection()
+                      document.execCommand("insertText", false, emoji)
+                      const newTxt = el.innerText?.replace(/\n$/, "") || ""
+                      setMessage(newTxt)
+                      saveSelection()
+                    }}
+                  />
+                )}
+              />
+            )}
+
+            <IconButton
+              onClick={handleSend}
+              onTouchEnd={(e) => {
+                if (!isInputDisabled && hasContent) {
+                  e.preventDefault()
+                  handleSend()
+                }
+              }}
+              disabled={isInputDisabled || !hasContent}
+              variant={hasContent ? "primary" : "ghost"}
+              aria-label="Send message"
+              className={
+                !hasContent
+                  ? "text-gray-400 hover:text-gray-600 dark:text-[#AAAAAA] dark:hover:text-white"
+                  : ""
               }
-            }}
-            disabled={isInputDisabled || !hasContent}
-            variant={hasContent ? "primary" : "ghost"}
-            aria-label="Send message"
-            className="!w-10 !h-10"
-          >
-            <Send size={18} className="-translate-x-[1px] translate-y-[1px]" />
-          </IconButton>
+            >
+              <Send className="-translate-x-[1px] translate-y-[1px]" />
+            </IconButton>
+          </div>
         </div>
       </div>
     </div>

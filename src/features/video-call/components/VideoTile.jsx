@@ -16,7 +16,6 @@ import {
 } from "@/features/video-call/utils/videoTileClass"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { getProfilePath } from "@/shared/utils/navigation"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
@@ -289,12 +288,7 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
               name={displayName || "?"}
               src={avatarUrl}
               speaking={false}
-              accountId={
-                meta.accountId ||
-                (/^\d+$/.test(participant.identity)
-                  ? participant.identity
-                  : null)
-              }
+              clickable={false}
               className={`${getVideoTileAvatarClass({ compact })} ${
                 avatarUrl ? "shadow-xl" : ""
               } ${theme.avatarClass}`}
@@ -307,33 +301,15 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
       <div className={getVideoTileOverlayBarClass({ compact })}>
         {/* Status icons and Name */}
         <div className={getVideoTileOverlayPillClass({ compact })}>
-          <div className="flex flex-shrink-0 items-center gap-1">
-            {screenShareOn && <MonitorUp size={14} className="sm:w-4 sm:h-4" />}
-            {!micOn && <MicOff size={14} className="sm:w-4 sm:h-4" />}
-            {!webcamOn && <VideoOff size={14} className="sm:w-4 sm:h-4" />}
-          </div>
-          <div
-            onClick={(e) => {
-              const accountId =
-                meta.accountId ||
-                (/^\d+$/.test(participant.identity)
-                  ? participant.identity
-                  : null)
-              if (accountId) {
-                e.stopPropagation()
-                window.open(
-                  getProfilePath(accountId),
-                  "_blank",
-                  "noopener,noreferrer",
-                )
-              }
-            }}
-            className={`${getVideoTileOverlayNameClass({ compact })} ${
-              meta.accountId || /^\d+$/.test(participant.identity)
-                ? "cursor-pointer hover:underline"
-                : ""
-            }`}
-          >
+          {(screenShareOn || !micOn || !webcamOn) && (
+            <div className="flex flex-shrink-0 items-center gap-1">
+              {screenShareOn && <MonitorUp size={18} />}
+              {!micOn && <MicOff size={18} />}
+              {!webcamOn && <VideoOff size={18} />}
+            </div>
+          )}
+
+          <div className={getVideoTileOverlayNameClass({ compact })}>
             {displayName}{" "}
             {isLocal &&
               (t.rooms?.videoCall?.participantList?.youSuffix || "(You)")}
@@ -342,7 +318,7 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
 
         {/* Raised Hand Icon */}
         {isHandRaised && (
-          <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-full bg-yellow-500/90 text-white shadow-md backdrop-blur-sm pointer-events-auto">
+          <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-full bg-yellow-500/90 text-white shadow-md backdrop-blur-sm pointer-events-auto">
             <motion.div
               animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
               transition={{
@@ -354,7 +330,7 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
               style={{ originX: 0.7, originY: 0.7 }}
               className="flex flex-shrink-0 items-center justify-center"
             >
-              <Hand size={16} />
+              <Hand />
             </motion.div>
           </div>
         )}

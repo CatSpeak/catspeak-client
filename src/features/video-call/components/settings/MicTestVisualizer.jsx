@@ -119,7 +119,7 @@ const MicTestVisualizer = ({
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="truncate text-xs text-neutral-700 dark:text-neutral-200">
+      <span className="truncate text-xs text-neutral-700 dark:text-[#AAAAAA]">
         {label}
       </span>
 
@@ -150,7 +150,7 @@ const MicTestVisualizer = ({
           <ProgressBar
             progress={testMic ? volumeLevel : 0}
             colorClass={`${barColor} transition-all !duration-75 ease-out`}
-            trackColorClass="bg-neutral-200 dark:bg-neutral-800"
+            trackColorClass="bg-neutral-200 dark:bg-[#272727]"
           />
         </div>
       </div>

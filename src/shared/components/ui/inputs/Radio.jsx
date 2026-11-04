@@ -28,12 +28,12 @@ const Radio = ({
       ? "border-white"
       : "border-white/60 group-hover:border-white"
     : checked
-      ? "border-[#990011]"
-      : "border-black/50 group-hover:border-black"
+      ? "border-[#990011] dark:border-cath-red-1000"
+      : "border-black/50 group-hover:border-black dark:border-neutral-400 dark:group-hover:border-white"
 
   const innerDotClass = isWhite
     ? "bg-white"
-    : "bg-[#990011]"
+    : "bg-[#990011] dark:bg-cath-red-1000"
 
   const radioIndicator = (
     <div
@@ -59,7 +59,9 @@ const Radio = ({
       >
         <span
           className={`w-10 h-10 inline-flex items-center justify-center rounded-full transition-colors ${
-            disabled ? "" : "group-hover:bg-primaryBg hover:bg-primaryBg"
+            disabled
+              ? ""
+              : "group-hover:bg-primaryBg hover:bg-primaryBg dark:group-hover:bg-[#272727] dark:hover:bg-[#272727]"
           }`}
         >
           {radioIndicator}

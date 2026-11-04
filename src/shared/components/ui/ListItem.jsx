@@ -4,8 +4,17 @@ import Radio from "./inputs/Radio"
 /**
  * Shared reusable ListItem component.
  *
+ * NOTE FOR DEVELOPERS & AI AGENTS:
+ * - Do NOT manually pass light-only hover classes (e.g. `bg-gray-100` without dark variant) or
+ *   construct dynamic hover string interpolations like `hover:${color}`.
+ * - Setting `hoverEffect={true}` automatically provides full theme-aware hover tokens:
+ *     Light mode: `hover:bg-neutral-100 group-hover:bg-neutral-100`
+ *     Dark mode:  `dark:hover:bg-[#272727] dark:group-hover:bg-[#272727]` (matches `darkColors.itemHover` in @/shared/utils/colors.js)
+ * - Only pass `hoverBgColor` when a special semantic state is required (e.g. destructive red: `hover:bg-red-50 dark:hover:bg-red-950/30`).
+ *   Always provide full, explicit Tailwind class names for both light and dark modes.
+ *
  * @param {boolean} hoverEffect - Choose whether to want list item hover effect. Default to false.
- * @param {string} hoverBgColor - The background color when hovered. Default to "bg-primaryBg".
+ * @param {string} [hoverBgColor] - Optional override. MUST be complete Tailwind classes for both themes (e.g. "hover:bg-red-50 dark:hover:bg-red-950/30").
  * @param {React.ReactNode} leftContent - Left content (Avatar, icons, or no left content).
  * @param {React.ReactNode} rightContent - Right content (Switch, icon, etc.).
  * @param {string|number|React.ReactNode} rightText - Text for right content (e.g. unassignedStudents.length).
@@ -37,7 +46,7 @@ const ListItem = ({
     1: "h-14",
     2: "h-[72px]",
     3: "h-[88px]",
-    auto: "min-h-[56px] py-3 h-auto",
+    auto: "min-h-[56px] py-2 h-auto",
   }
   const heightClass =
     linesClasses[lines] ||
@@ -46,15 +55,17 @@ const ListItem = ({
   const effectiveRightContent =
     variant === "radio" ? <Radio checked={selected} /> : rightContent
 
-  const baseBgClass = selected ? "bg-itemActive" : ""
+  // Base background: itemActive token (#272727 in dark mode matching colors.js)
+  const baseBgClass = selected ? "bg-itemActive dark:bg-[#272727]" : ""
 
+  // NOTE: Keep full static Tailwind class strings here so the Tailwind compiler detects both themes.
+  // Do NOT use runtime string interpolation (e.g. `hover:${...}`) as it breaks Tailwind's JIT scanner
+  // and causes dark-mode hover contrast failures (e.g. white text on bright light hover background).
   const defaultHoverClasses = selected
-    ? "hover:bg-itemActiveHover group-hover:bg-itemActiveHover"
-    : "hover:bg-itemHover group-hover:bg-itemHover"
+    ? "hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D] group-hover:bg-itemActiveHover dark:group-hover:bg-[#3D3D3D]"
+    : "hover:bg-neutral-100 dark:hover:bg-[#272727] group-hover:bg-neutral-100 dark:group-hover:bg-[#272727]"
 
-  const hoverClasses = hoverBgColor
-    ? `hover:${hoverBgColor} group-hover:${hoverBgColor}`
-    : defaultHoverClasses
+  const hoverClasses = hoverBgColor || defaultHoverClasses
 
   const shouldHover = hoverEffect || isClickable || selected
   const innerHoverClasses = shouldHover ? hoverClasses : ""

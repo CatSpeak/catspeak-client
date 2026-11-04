@@ -1,28 +1,35 @@
 import React from "react"
 import { Circle, AlertTriangle } from "lucide-react"
-import { useRecordingStatus } from "../hooks/useRecordingStatus"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ProgressBar from "@/shared/components/ui/ProgressBar"
-import { useSelector } from "react-redux"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 
 const RecordingButton = ({
-  isRecording,
-  isTogglingRecording,
-  onToggleRecording,
-  onStopRecording,
+  isRecording: propIsRecording,
+  isTogglingRecording: propIsTogglingRecording,
+  onToggleRecording: propOnToggleRecording,
+  onStopRecording: propOnStopRecording,
 }) => {
   const { t } = useLanguage()
-  const sessionId = useSelector((s) => s.videoCall?.callInfo?.sessionId)
+  const globalCall = useGlobalVideoCall()
+
+  const isRecording = propIsRecording ?? globalCall?.isRecording ?? false
+  const isTogglingRecording =
+    propIsTogglingRecording ?? globalCall?.isTogglingRecording ?? false
+  const onToggleRecording =
+    propOnToggleRecording ?? globalCall?.handleToggleRecording
+  const onStopRecording =
+    propOnStopRecording ?? globalCall?.confirmStopRecording
 
   const {
-    formattedTime,
-    totalUsedMb,
-    limitMb,
-    usagePercent,
-    isDanger,
-    isWarning,
-  } = useRecordingStatus(isRecording, onStopRecording, sessionId)
+    formattedTime = "00:00",
+    totalUsedMb = 0,
+    limitMb = null,
+    usagePercent = 0,
+    isDanger = false,
+    isWarning = false,
+  } = globalCall?.recordingStatus || {}
 
   const title = isRecording
     ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
@@ -70,12 +77,14 @@ const RecordingButton = ({
       </button>
 
       {/* Hover Popover (Storage Details) */}
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none w-[360px]">
-        <div className="bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white border border-border dark:border-[#3F3F3F] rounded-xl p-4 shadow-xl flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <span>Storage</span>
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-3 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto w-[360px]">
+        <div className="bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white border border-border dark:border-[#3F3F3F] rounded-xl p-4 shadow-xl flex flex-col">
+          <div className="text-xs flex items-center justify-between">
+            <span className="font-medium text-gray-700 dark:text-neutral-200">
+              {t?.recordings?.storage?.title || "Storage"}
+            </span>
 
-            <span>
+            <span className="font-medium text-gray-600 dark:text-neutral-300">
               {totalUsedMb.toFixed(1)}MB{" "}
               {limitMb != null && limitMb > 0
                 ? `/ ${limitMb.toFixed(0)}MB`
@@ -83,7 +92,7 @@ const RecordingButton = ({
             </span>
           </div>
 
-          <div className="w-full h-3 flex items-center">
+          <div className="w-full flex items-center">
             <ProgressBar
               progress={usagePercent}
               heightClass="h-2"
@@ -93,14 +102,14 @@ const RecordingButton = ({
           </div>
 
           {isDanger && (
-            <div className="flex items-center gap-1 text-[9px] text-red-600 font-bold animate-pulse">
-              <AlertTriangle size={10} />
+            <div className="flex items-center gap-1 text-[11px] text-red-600 font-bold animate-pulse">
+              <AlertTriangle size={12} />
               <span>Critical Space!</span>
             </div>
           )}
           {isWarning && !isDanger && (
-            <div className="flex items-center gap-1 text-[9px] text-amber-600 font-semibold">
-              <AlertTriangle size={10} />
+            <div className="flex items-center gap-1 text-[11px] text-amber-600 font-semibold">
+              <AlertTriangle size={12} />
               <span>Approaching Limit.</span>
             </div>
           )}
