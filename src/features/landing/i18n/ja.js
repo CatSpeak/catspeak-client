@@ -1,12 +1,58 @@
 export default {
   landing: {
+    header: {
+      problem: "課題",
+      solution: "解決策",
+      features: "機能",
+      howItWorks: "利用方法",
+      faq: "FAQ",
+      contact: "お問い合わせ",
+      joinNow: "今すぐ参加",
+    },
     hero: {
-      subtitle: "言語学習の可能性を広げよう",
-      titlePrefix: "世界中をつなぐ",
-      titleHighlight: "多言語コミュニティのプラットフォーム",
+      subtitle: "英語・中国語・日本語で24時間話せるコミュニティ",
+      titlePrefix: "コミュニティと一緒に外国語を自信を持って話そう",
+      titleHighlight: "仲間",
+      titleSuffix: "とAIで",
       description:
-        "誰もが自由にコミュニケーションし、経験を共有し、文化を交流し、世界中に友達を作れる場所！",
-      ctaButton: "Cat Speakをもっと知る",
+        "知識を実際の会話につなげましょう。語学学習者とつながり、対話型の環境で練習し、AIが会話力の向上をどう支援するか体験できます。",
+      ctaButton: "CAT SPEAKに参加",
+      summary: {
+        roomLabel: "ルーム形式",
+        roomValue: "1対1・グループ",
+        languagesLabel: "重点言語3つ",
+        languagesValue: "英語・中国語・日本語",
+        aiLabel: "会話パートナー",
+        aiValue: "AI練習 24時間",
+      },
+      preview: {
+        roomTitle: "語学練習ルーム",
+        chooseLanguage: "練習する言語を選択",
+        enterRoom: "練習ルームに入る",
+        playAudio: "音声を再生",
+        stopAudio: "音声を一時停止",
+        audioUnavailable: "このブラウザーは音声再生に対応していません",
+        humanRoom: "1対1ルーム・実際のユーザー",
+        aiRoom: "AI会話 24時間",
+        topicLabel: "会話テーマ（英語）",
+        topic: "職場での交渉：プロジェクトの締め切りについて",
+        timeLeft: "残り12:00",
+        speaker: "Linh Mai（ハノイ）",
+        justNow: "たった今",
+        message:
+          "「こんにちは！新しいクライアント要件を考えると、スプリントの納品を2日延長できると思いますか？」",
+        yourTurn: "あなたの発話",
+        recognized: "認識済み",
+        reply:
+          "「賛成です。木曜日に変更すれば、チームはバグのないリリースを保証できます。」",
+        you: "あなた",
+        sampleAudio: "発音サンプルを再生（英語）",
+        audioDescription: "自然なイントネーション・実践的な会話",
+        aiFeedback: "AIのスマートな会話提案",
+        confidence: "自然さ：96%",
+        suggestion:
+          "「I agree with you」の代わりに、職場では「That sounds like a sensible adjustment」と言うとより自然です。",
+      },
       stats: {
         participants: "参加者",
         learningResources: "学習リソース",

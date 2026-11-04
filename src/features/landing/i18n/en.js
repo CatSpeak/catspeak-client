@@ -1,12 +1,59 @@
 export default {
   landing: {
+    header: {
+      problem: "Problem",
+      solution: "Solution",
+      features: "Features",
+      howItWorks: "How it works",
+      faq: "FAQ",
+      contact: "Contact",
+      joinNow: "Join now",
+    },
     hero: {
-      subtitle: "Unlock the Potential of Language Learning",
-      titlePrefix: "A platform for",
-      titleHighlight: "multilingual communities",
+      subtitle:
+        "A 24/7 speaking community in English, Chinese, and Japanese",
+      titlePrefix: "Speak foreign languages with confidence alongside the",
+      titleHighlight: "community",
+      titleSuffix: "and AI",
       description:
-        "A space where anyone can freely communicate, share experiences, exchange cultures, and make friends from all over the world!",
-      ctaButton: "Learn more about Cat Speak",
+        "Turn knowledge into real conversations. Connect with language learners, practice in an interactive environment, and discover how AI can support your speaking journey.",
+      ctaButton: "Join CAT SPEAK",
+      summary: {
+        roomLabel: "Room formats",
+        roomValue: "1-on-1 & Group",
+        languagesLabel: "3 Focus Languages",
+        languagesValue: "English · Chinese · Japanese",
+        aiLabel: "Your speaking partner",
+        aiValue: "24/7 AI practice",
+      },
+      preview: {
+        roomTitle: "Language practice room",
+        chooseLanguage: "Choose practice language",
+        enterRoom: "Enter practice room",
+        playAudio: "Play audio",
+        stopAudio: "Pause audio",
+        audioUnavailable: "Audio playback is not supported by this browser",
+        humanRoom: "Room 1-on-1 · Real people",
+        aiRoom: "AI Conversation 24/7",
+        topicLabel: "Speaking topic (English)",
+        topic: "Workplace Negotiation: Discussing Project Deadlines",
+        timeLeft: "12:00 left",
+        speaker: "Linh Mai (Hanoi)",
+        justNow: "Just now",
+        message:
+          '"Hi! Considering the new client requirements, do you think we can extend the sprint delivery by two days?"',
+        yourTurn: "Your turn",
+        recognized: "Recognized",
+        reply:
+          '"I agree with you. If we push it to Thursday, our team can guarantee zero bug releases."',
+        you: "You",
+        sampleAudio: "Play sample pronunciation (English)",
+        audioDescription: "Natural intonation · Real-world practice",
+        aiFeedback: "Smart speaking suggestion from AI",
+        confidence: "Naturalness: 96%",
+        suggestion:
+          'Instead of saying "I agree with you", you could sound more natural in a workplace context with: "That sounds like a sensible adjustment".',
+      },
       stats: {
         participants: "Participants",
         learningResources: "Learning Resources",

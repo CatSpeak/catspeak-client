@@ -10,7 +10,7 @@ const LandingHeaderLogo = () => {
         <img
           src={IconLogo}
           alt="Cat Speak logo"
-          className="block h-10 w-auto min-[1280px]:hidden"
+          className="block h-9 w-auto min-[1280px]:hidden"
           draggable={false}
         />
 
@@ -18,7 +18,7 @@ const LandingHeaderLogo = () => {
         <img
           src={LandingPageLogo}
           alt="Cat Speak logo"
-          className="hidden h-10 w-auto min-[1280px]:block"
+          className="hidden h-9 w-auto min-[1280px]:block"
           draggable={false}
         />
       </Link>

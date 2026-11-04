@@ -183,7 +183,9 @@ const MainLayout = ({
         <div className="flex flex-col flex-1 min-w-0 relative">
           {showHeader &&
             (isLandingPage ? (
-              <LandingHeader onGetStarted={() => openAuthModal("login")} />
+              <LandingHeader
+                onGetStarted={(mode) => openAuthModal(mode || "login")}
+              />
             ) : (
               <MainHeader
                 showSidebar={shouldShowSidebar}

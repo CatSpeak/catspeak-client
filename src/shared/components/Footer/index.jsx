@@ -20,7 +20,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative overflow-hidden bg-white pt-10">
+    <footer id="contact" className="relative scroll-mt-[72px] overflow-hidden bg-white pt-10">
       <div className="block lg:hidden w-full max-w-screen-xl mx-auto px-6 pb-10">
         <ContactSection isMobile={true} />
       </div>

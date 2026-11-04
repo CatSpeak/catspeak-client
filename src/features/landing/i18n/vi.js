@@ -1,12 +1,104 @@
 export default {
   landing: {
+    header: {
+      problem: "Vấn đề",
+      solution: "Giải pháp",
+      features: "Tính năng",
+      howItWorks: "Cách hoạt động",
+      faq: "FAQ",
+      contact: "Liên hệ",
+      joinNow: "Tham gia ngay",
+    },
     hero: {
-      subtitle: "Khai phá tiềm năng học ngôn ngữ",
-      titlePrefix: "Nền tảng giao tiếp",
-      titleHighlight: "cộng đồng đa ngôn ngữ",
+      subtitle:
+        "Cộng đồng luyện nói 3 ngôn ngữ Anh · Trung · Nhật · hoạt động 24/7",
+      titlePrefix: "Tự tin luyện nói ngoại ngữ cùng",
+      titleHighlight: "cộng đồng",
+      titleSuffix: "và AI",
       description:
-        "Nơi mà bất kì ai cũng có thể thoải mái giao tiếp, chia sẻ kinh nghiệm, giao lưu văn hóa và kết bạn bốn phương!",
-      ctaButton: "Tìm hiểu thêm về Cat Speak",
+        "Biến kiến thức thành những cuộc trò chuyện thực tế. Kết nối với người học ngôn ngữ, thực hành trong môi trường tương tác và khám phá cách AI hỗ trợ hành trình luyện nói của bạn.",
+      ctaButton: "Tham gia CAT SPEAK",
+      summary: {
+        roomLabel: "Hình thức phòng",
+        roomValue: "Room 1–1 & Nhóm",
+        languagesLabel: "3 Ngôn ngữ trọng tâm",
+        languagesValue: "Anh · Trung · Nhật",
+        aiLabel: "Trợ lý đồng hành",
+        aiValue: "AI phản xạ 24/7",
+      },
+      preview: {
+        roomTitle: "Phòng luyện ngôn ngữ",
+        chooseLanguage: "Chọn ngôn ngữ luyện tập",
+        enterRoom: "Vào phòng luyện ngôn ngữ",
+        playAudio: "Phát âm thanh",
+        stopAudio: "Tạm dừng âm thanh",
+        audioUnavailable: "Trình duyệt không hỗ trợ phát âm thanh",
+        humanRoom: "Room 1–1 Người Thật",
+        aiRoom: "AI Hội Thoại 24/7",
+        topicLabel: "Chủ đề buổi nói (Tiếng Anh)",
+        topic: "Workplace Negotiation: Discussing Project Deadlines",
+        timeLeft: "12:00 còn lại",
+        speaker: "Linh Mai (Hà Nội)",
+        justNow: "Vừa xong",
+        message:
+          '"Hi! Considering the new client requirements, do you think we can extend the sprint delivery by two days?"',
+        yourTurn: "Lượt nói của bạn",
+        recognized: "Đã nhận diện",
+        reply:
+          '"I agree with you. If we push it to Thursday, our team can guarantee zero bug releases."',
+        you: "Bạn",
+        sampleAudio: "Phát âm thanh mẫu (Anh)",
+        audioDescription: "Ngữ điệu tự nhiên · Phản xạ thực chiến",
+        aiFeedback: "Gợi ý phản xạ thông minh từ AI",
+        confidence: "Độ tự nhiên: 96%",
+        suggestion:
+          'Thay vì nói "I agree with you", bạn có thể diễn đạt tự nhiên hơn trong bối cảnh công sở: "That sounds like a sensible adjustment".',
+        contentByLanguage: {
+          en: {
+            topicLabel: "CHỦ ĐỀ BUỔI NÓI (TIẾNG ANH)",
+            topic: "Workplace Negotiation: Discussing Project Deadlines",
+            speakerInitials: "LM",
+            speaker: "Linh Mai (Hà Nội)",
+            message:
+              '"Hi! Considering the new client requirements, do you think we can extend the sprint delivery by two days?"',
+            reply:
+              '"I agree with you. If we push it to Thursday, our team can guarantee zero bug releases."',
+            sampleAudio: "Phát âm thanh mẫu (Anh)",
+            audioText: "That sounds like a sensible adjustment.",
+            suggestion:
+              'Thay vì nói "I agree with you", bạn có thể diễn đạt tự nhiên hơn trong bối cảnh công sở: "That sounds like a sensible adjustment".',
+          },
+          zh: {
+            topicLabel: "CHỦ ĐỀ BUỔI NÓI (TIẾNG TRUNG)",
+            topic: "职场交涉：讨论项目交付时间（Họp tiến độ công việc）",
+            speakerInitials: "LM",
+            speaker: "Linh Mai (Hà Nội)",
+            message:
+              '"你好！考虑到客户的新需求，你觉得我们可以把项目上线时间顺延两天吗？"',
+            reply:
+              '"我也这么认为。如果我们推迟到周四，团队就能保证交付时没有漏洞。"',
+            sampleAudio: "Phát âm thanh mẫu (Trung)",
+            audioText: "我也这么认为。如果我们推迟到周四，团队就能保证交付时没有漏洞。",
+            suggestion:
+              'Để câu nói trang trọng hơn, bạn có thể dùng cụm "达成共识" (dáchéng gòngshí - đạt được sự đồng thuận).',
+          },
+          ja: {
+            topicLabel: "CHỦ ĐỀ BUỔI NÓI (TIẾNG NHẬT)",
+            topic: "ビジネス会話：納期の調整と進捗報告（Đàm phán tiến độ công sở）",
+            speakerInitials: "KT",
+            speaker: "Kenji Takahashi (Tokyo/Hà Nội)",
+            message:
+              '"お疲れ様です。クライアントの追加要望について、納期を2日ほど後ろに調整できますか？"',
+            reply:
+              '"私もそう考えます。木曜日まで延長できれば、品質管理を徹底してリリースできます。"',
+            sampleAudio: "Phát âm thanh mẫu (Nhật)",
+            audioText:
+              "私もそう考えます。木曜日まで延長できれば、品質管理を徹底してリリースできます。",
+            suggestion:
+              'Trong giao tiếp công sở Nhật, câu trả lời "ご提案の通り、木曜日までの延長で調整いたします" thể hiện sự chuyên nghiệp và tôn trọng đối tác rất cao.',
+          },
+        },
+      },
       stats: {
         participants: "Người tham gia",
         learningResources: "Tài nguyên học tập",

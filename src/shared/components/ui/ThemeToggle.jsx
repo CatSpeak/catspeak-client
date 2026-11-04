@@ -3,7 +3,7 @@ import { Sun, Moon } from "lucide-react"
 import { useTheme } from "@/shared/context/ThemeContext"
 import IconButton from "./buttons/IconButton"
 
-const ThemeToggle = ({ className = "" }) => {
+const ThemeToggle = ({ className = "", innerClassName = "" }) => {
   const { isDark, toggleTheme } = useTheme()
 
   return (
@@ -13,6 +13,7 @@ const ThemeToggle = ({ className = "" }) => {
       title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
       aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
       className={`text-gray-600 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white ${className}`}
+      innerClassName={innerClassName}
     >
       {isDark ? (
         <Sun className="w-5 h-5 text-amber-400 transition-transform duration-200" />
@@ -24,4 +25,3 @@ const ThemeToggle = ({ className = "" }) => {
 }
 
 export default ThemeToggle
-

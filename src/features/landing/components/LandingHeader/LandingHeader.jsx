@@ -1,61 +1,80 @@
 import { useState } from "react"
 import { Menu } from "lucide-react"
 
-import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
 import { useAuth } from "@/features/auth"
+import ThemeToggle from "@/shared/components/ui/ThemeToggle"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import LandingHeaderLogo from "./LandingHeaderLogo"
-import DesktopNav from "../LandingDesktopNav/DesktopNav"
 import LandingHeaderGuestControls from "./LandingHeaderGuestControls"
 import LandingHeaderUserControls from "./LandingHeaderUserControls"
 import { MobileSidebar } from "@/features/navigation"
 
 const LandingHeader = ({ onGetStarted }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
+  const { t } = useLanguage()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
 
+  const headerT = t?.landing?.header || {}
+  const navItems = [
+    { label: headerT.problem || "Vấn đề", href: "#problem" },
+    { label: headerT.solution || "Giải pháp", href: "#solutions" },
+    { label: headerT.features || "Tính năng", href: "#features" },
+    { label: headerT.howItWorks || "Cách hoạt động", href: "#how-it-works" },
+    { label: headerT.faq || "FAQ", href: "#faq" },
+    { label: headerT.contact || "Liên hệ", href: "#contact" },
+  ]
+
   return (
-    <header className="sticky top-4 z-[60] flex justify-center w-full px-4">
-      <div className="mx-auto flex w-full max-w-[1400px] min-h-[60px] min-[1280px]:min-h-[72px] items-center justify-between gap-3 bg-white/70 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 py-2 px-4 min-[1280px]:px-6 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:gap-4 rounded-full border border-white/40">
-        {/* Left Section: Burger (Mobile & Tablet < 1280px) + Logo */}
-        <div className="flex min-w-0 flex-1 items-center justify-start gap-2">
+    <header className="sticky top-0 z-[60] h-[72px] w-full border-b border-gray-100 bg-white dark:border-[#272727] dark:bg-[#0F0F0F]">
+      <div className="mx-auto grid h-full w-full max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-2">
           <button
             aria-label="open drawer"
             onClick={handleDrawerToggle}
-            className="min-[1280px]:hidden p-2 -ml-1 shrink-0 text-gray-700 transition-colors hover:bg-black/[0.06] rounded-full"
+            className="shrink-0 rounded-full p-2 text-gray-700 transition-colors hover:bg-black/[0.06] dark:text-gray-200 min-[1024px]:hidden"
           >
             <Menu />
           </button>
-          <div className="flex min-w-0 shrink-0 items-center min-[1280px]:w-[160px]">
+          <div className="flex min-w-0 shrink-0 items-center">
             <LandingHeaderLogo />
           </div>
         </div>
 
-        {/* Center Section: Desktop Nav (Screen >= 1280px) */}
-        <div className="hidden shrink-0 min-[1280px]:block">
-          <DesktopNav onRequestLogin={() => onGetStarted?.("login")} />
-        </div>
+        <nav
+          aria-label="Main navigation"
+          className="hidden items-center gap-7 whitespace-nowrap text-sm text-[#292929] dark:text-gray-200 min-[1024px]:flex"
+        >
+          {navItems.map(({ label, href }) => (
+            <a
+              key={href}
+              href={href}
+              className="transition-colors hover:text-[#990011] dark:hover:text-[#FF8599]"
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
 
-        {/* Right Section: Controls */}
-        <div className="flex min-w-0 flex-1 items-center justify-end">
-          <div className="flex items-center gap-1">
-            <div className="block">
-              <LanguageSwitcher />
-            </div>
-
-            {isLoggedIn ? (
-              <LandingHeaderUserControls />
-            ) : (
-              <LandingHeaderGuestControls onGetStarted={onGetStarted} />
-            )}
-          </div>
+        <div className="flex min-w-0 items-center justify-end gap-3">
+          <ThemeToggle
+            className="!h-[38px] !w-[38px] !rounded-xl border border-gray-200 dark:border-[#3F3F3F]"
+            innerClassName="!h-[36px] !w-[36px] !rounded-[11px] [&>svg]:!h-4 [&>svg]:!w-4"
+          />
+          {isLoggedIn ? (
+            <LandingHeaderUserControls />
+          ) : (
+            <LandingHeaderGuestControls
+              onGetStarted={onGetStarted}
+              label={headerT.joinNow || "Tham gia ngay"}
+            />
+          )}
         </div>
       </div>
 
-      {/* Mobile Navigation Sidebar */}
       <MobileSidebar
         isMobileOpen={mobileOpen}
         setIsMobileOpen={setMobileOpen}
