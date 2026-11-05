@@ -1,13 +1,15 @@
-import React, { useState, forwardRef } from "react"
+import React, { useState, forwardRef, useRef, useEffect } from "react"
 import { useAuth, useGetProfileQuery } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { ChevronDown, ChevronUp, MessageSquare, Smile } from "lucide-react"
+import { MessageSquare, Smile, Send } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Popover from "@/shared/components/ui/Popover"
 import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
-import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
+import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import {
   useGetPostCommentsQuery,
@@ -38,14 +40,29 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
     ""
   const userAvatar = userAvatarRaw ? getImageUrl(userAvatarRaw) : null
 
-  const { data: comments, isLoading, isSuccess } = useGetPostCommentsQuery({ postId })
-  const [createComment] = useCreatePostCommentMutation()
+  const {
+    data: comments,
+    isLoading,
+    isSuccess,
+  } = useGetPostCommentsQuery({ postId })
+  const [createComment, { isLoading: isCreatingComment }] =
+    useCreatePostCommentMutation()
   const [deleteComment] = useDeletePostCommentMutation()
   const [editComment] = useEditPostCommentMutation()
   const [reactToComment] = useReactToCommentMutation()
   const [content, setContent] = useState("")
+  const hasContent = Boolean(content.trim())
   const [commentToDelete, setCommentToDelete] = useState(null)
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const textareaRef = useRef(null)
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"
+      if (content) {
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 140)}px`
+      }
+    }
+  }, [content])
 
   const handleSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault()
@@ -132,131 +149,206 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
 
   if (isLoading)
     return (
-      <div ref={ref} role="status" className="py-6" aria-label={t.news?.newsDetail?.loadingComments || "Loading comments..."}>
-        <LoadingSpinner className="flex flex-col items-center justify-center [&_svg]:h-6 [&_svg]:w-6" text={t.news?.newsDetail?.loadingComments || "Loading comments..."} />
+      <div
+        ref={ref}
+        role="status"
+        className="w-full max-w-full min-w-0 flex flex-col gap-4 py-1"
+        aria-label={
+          t.news?.newsDetail?.loadingComments || "Loading comments..."
+        }
+      >
+        {/* Header Skeleton */}
+        <Skeleton className="h-5 w-32 rounded-md" />
+
+        {/* Comment Input Skeleton */}
+        <div className="flex items-start gap-4 w-full mb-1">
+          <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+          <Skeleton className="min-h-[92px] flex-1 rounded-2xl" />
+        </div>
+
+        {/* Comment Items Skeletons */}
+        <div className="flex flex-col gap-4 w-full">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex gap-3 w-full">
+              <Skeleton className="w-[30px] h-[30px] rounded-full shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="p-3 rounded-2xl bg-gray-100 dark:bg-[#272727] space-y-2 w-full max-w-md">
+                  <Skeleton className="h-3.5 w-28 rounded-md" />
+                  <Skeleton className="h-3 w-full rounded-md" />
+                  <Skeleton className="h-3 w-3/4 rounded-md" />
+                </div>
+                <div className="flex gap-3 pl-2">
+                  <Skeleton className="h-2.5 w-8 rounded-sm" />
+                  <Skeleton className="h-2.5 w-8 rounded-sm" />
+                  <Skeleton className="h-2.5 w-12 rounded-sm" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     )
 
   const commentsList = Array.isArray(comments?.data) ? comments.data : []
 
   return (
-    <div ref={ref} className="w-full max-w-full min-w-0 flex flex-col justify-start">
+    <div
+      ref={ref}
+      className="w-full max-w-full min-w-0 flex flex-col justify-start"
+    >
       {/* ── Header ──────────────────────────────────────────────── */}
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="min-w-0 truncate text-base font-semibold leading-snug text-slate-900">
-          {t.news?.newsDetail?.totalComments?.replace(
-            "{{count}}",
-            totalComments,
-          ) || `Bình luận (${totalComments})`}
-        </h2>
-        <button
-          type="button"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          aria-expanded={!isCollapsed}
-          aria-controls={`news-comments-${postId}`}
-          aria-label={isCollapsed ? t.news?.newsDetail?.expandComments || "Show comments" : t.news?.newsDetail?.collapseComments || "Hide comments"}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#7b7979] transition-colors hover:bg-black/5 hover:text-black focus-visible:outline-cath-red-700"
-        >
-          {isCollapsed ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-        </button>
-      </div>
+      <h2 className="mb-4 text-base font-bold text-slate-900 dark:text-white">
+        {t.news?.newsDetail?.totalComments?.replace(
+          "{{count}}",
+          totalComments,
+        ) || `Bình luận (${totalComments})`}
+      </h2>
 
       {/* ── Comment Input ───────────────────────────────────────── */}
       {isAuthenticated ? (
-        <div className="mb-4 border-b border-[#e2e2e2] pb-3 w-full max-w-full min-w-0">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full">
+        <div className="mb-4 w-full max-w-full min-w-0">
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-start gap-4 w-full"
+          >
             <Avatar
-              size={32}
+              size={40}
               src={userAvatar}
               name={
                 user?.fullName || user?.firstName || user?.username || "User"
               }
-              accountId={user?.accountId || user?.id}
+              clickable={false}
+              hoverScale={false}
               className="shrink-0"
             />
-            <div className="flex-1 min-w-0 relative flex items-center">
-              <input
-                type="text"
-                aria-label={t.news?.newsDetail?.writeComment || "Write a comment..."}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={
-                  t.news?.newsDetail?.writeComment || "Nhập bình luận..."
-                }
-                className="min-h-[38px] w-full rounded-2xl border border-[#e2e2e2] bg-[#f5f5f5] pl-3 pr-9 py-1.5 text-sm text-slate-800 transition-colors placeholder:text-[rgba(123,121,121,0.6)] focus:border-cath-red-700 focus:outline-none"
-              />
-              <div className="absolute right-2">
-                <Popover
-                  placement="bottom-right"
-                  estimatedWidth={280}
-                  estimatedHeight={320}
-                  trigger={
-                    <button
-                      type="button"
-                      className="p-1 text-[#7b7979] hover:text-black transition-colors rounded-full hover:bg-black/5"
-                      title="Emoji"
-                    >
-                      <Smile size={18} strokeWidth={1.5} />
-                    </button>
-                  }
-                  content={(close) => (
-                    <EmojiPickerWrapper
-                      width="280px"
-                      height="320px"
-                      onSelect={(emoji) => {
-                        setContent((prev) => prev + emoji)
-                        close()
-                      }}
+            <div className="flex-1 min-w-0">
+              <div
+                onClick={() => textareaRef.current?.focus()}
+                className="w-full flex flex-col justify-between rounded-2xl border border-border dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#272727] focus-within:border-cath-red-700 dark:focus-within:border-red-400 transition-colors cursor-text min-h-[92px] gap-2"
+              >
+                {/* Row 1: Full-Width Text Input Area */}
+                <div className="w-full min-w-0 pt-4 px-4">
+                  <textarea
+                    ref={textareaRef}
+                    rows={1}
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault()
+                        handleSubmit(e)
+                      } else if (e.key === "Escape") {
+                        setContent("")
+                      }
+                    }}
+                    aria-label={
+                      t.news?.newsDetail?.writeComment || "Write a comment..."
+                    }
+                    placeholder={
+                      t.news?.newsDetail?.writeComment || "Nhập bình luận..."
+                    }
+                    className="w-full text-base text-foreground dark:text-white placeholder:text-[#606060] dark:placeholder:text-[#AAAAAA] bg-transparent outline-none resize-none max-h-[140px] overflow-y-auto leading-normal"
+                    style={{ minHeight: "1.5rem" }}
+                  />
+                </div>
+
+                {/* Row 2: Bottom Utility Toolbar */}
+                <div
+                  className="flex items-center justify-between w-full px-1 pb-1 cursor-default"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Left: Emoji Picker */}
+                  <div className="flex items-center shrink-0">
+                    <Popover
+                      placement="top-left"
+                      className="shrink-0"
+                      triggerClassName="inline-flex items-center justify-center"
+                      trigger={
+                        <IconButton
+                          variant="ghost"
+                          aria-label="Emoji"
+                          type="button"
+                          title="Emoji"
+                          className="text-gray-500 hover:text-gray-800 dark:text-[#AAAAAA] dark:hover:text-white"
+                        >
+                          <Smile />
+                        </IconButton>
+                      }
+                      content={(close) => (
+                        <EmojiPickerWrapper
+                          width="280px"
+                          height="320px"
+                          onSelect={(emoji) => {
+                            setContent((prev) => prev + emoji)
+                            close()
+                          }}
+                        />
+                      )}
                     />
-                  )}
-                />
+                  </div>
+
+                  {/* Right: Cancel + Send Buttons */}
+                  <div className="flex items-center gap-2 shrink-0 ml-auto">
+                    {hasContent && (
+                      <PillButton
+                        variant="ghost"
+                        onClick={() => setContent("")}
+                      >
+                        {t.news?.newsDetail?.cancel || "Hủy"}
+                      </PillButton>
+                    )}
+
+                    <IconButton
+                      type="submit"
+                      onClick={handleSubmit}
+                      disabled={!hasContent || isCreatingComment}
+                      variant={hasContent ? "primary" : "ghost"}
+                      aria-label={t.news?.newsDetail?.comment || "Gửi"}
+                      title={t.news?.newsDetail?.comment || "Gửi"}
+                      className={
+                        !hasContent
+                          ? "text-gray-400 hover:text-gray-600 dark:text-[#AAAAAA] dark:hover:text-white"
+                          : ""
+                      }
+                    >
+                      <Send className="-translate-x-[1px] translate-y-[1px]" />
+                    </IconButton>
+                  </div>
+                </div>
               </div>
             </div>
           </form>
-          {content.length > 0 && (
-            <div className="mt-2 flex justify-end gap-2 pl-[40px]">
-              <button
-                type="button"
-                onClick={() => setContent("")}
-                className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-medium text-xs hover:bg-cath-red-50 transition-colors"
-              >
-                {t.news?.newsDetail?.cancel || "Hủy"}
-              </button>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                disabled={!content.trim()}
-                className="px-3.5 py-1 rounded-full bg-cath-red-700 text-white font-medium text-xs hover:bg-cath-red-800 transition-colors disabled:opacity-50"
-              >
-                {t.news?.newsDetail?.comment || "Gửi"}
-              </button>
-            </div>
-          )}
         </div>
       ) : (
-        <div className="mb-4 border-b border-[#e2e2e2] pb-3 w-full max-w-full">
-          <button
-            type="button"
+        <div className="mb-4 w-full max-w-full">
+          <PillButton
+            variant="secondary"
+            className="w-full"
             onClick={() => openAuthModal("login")}
-            className="w-full py-2.5 px-3 rounded-xl border border-dashed border-gray-300 text-xs sm:text-sm text-gray-500 hover:text-cath-red-700 hover:border-cath-red-700 transition-colors text-center font-medium bg-slate-50/50"
           >
             {t.news?.newsDetail?.loginToComment || "Đăng nhập để bình luận"}
-          </button>
+          </PillButton>
         </div>
       )}
 
       {/* ── Comments List ───────────────────────────────────────── */}
-      {!isCollapsed && (
-        <div id={`news-comments-${postId}`} className="flex flex-col gap-5 sm:gap-6 w-full max-w-full min-w-0">
-          {isSuccess && commentsList.length === 0 ? (
-            <EmptyState
-              variant="component"
-              icon={MessageSquare}
-              title={t.news?.newsDetail?.noComments || "No comments yet"}
-              description={t.news?.newsDetail?.noCommentsDescription || "Be the first to share your thoughts on this article."}
-              className="px-4"
-            />
-          ) : commentsList
+      <div
+        id={`news-comments-${postId}`}
+        className="flex flex-col gap-4 w-full max-w-full min-w-0"
+      >
+        {isSuccess && commentsList.length === 0 ? (
+          <EmptyState
+            variant="component"
+            icon={MessageSquare}
+            title={t.news?.newsDetail?.noComments || "No comments yet"}
+            description={
+              t.news?.newsDetail?.noCommentsDescription ||
+              "Be the first to share your thoughts on this article."
+            }
+            className="px-4"
+          />
+        ) : (
+          commentsList
             .slice()
             .sort((a, b) => new Date(a.createDate) - new Date(b.createDate))
             .map((comment) => (
@@ -271,9 +363,9 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
                 onEdit={handleEdit}
                 onReact={handleReact}
               />
-            ))}
-        </div>
-      )}
+            ))
+        )}
+      </div>
 
       <ConfirmationModal
         open={!!commentToDelete}

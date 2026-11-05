@@ -205,7 +205,7 @@ const NewsDetailPage = () => {
               `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
             )
           }
-          className="rounded-full border border-cath-red-700 px-6 py-2 text-sm font-medium text-cath-red-700 transition-colors hover:bg-cath-red-50"
+          className="rounded-full border border-cath-red-700 dark:border-red-400 px-6 py-2 text-sm font-medium text-cath-red-700 dark:text-red-400 transition-colors hover:bg-cath-red-50 dark:hover:bg-red-950/30"
         >
           {t.news?.error?.backToNews}
         </button>
@@ -257,7 +257,7 @@ const NewsDetailPage = () => {
 
               {documentMedia.length > 0 && (
                 <section className="mt-6 flex flex-col gap-3 border-t border-border pt-4">
-                  <h2 className="text-sm font-semibold text-gray-700">
+                  <h2 className="text-sm font-semibold text-gray-700 dark:text-neutral-200">
                     {labels?.attachments || "Attachments"} ({documentMedia.length})
                   </h2>
                   {documentMedia.map((doc) => (
@@ -266,7 +266,7 @@ const NewsDetailPage = () => {
                       fileName={doc.fileName || labels?.document || "Document"}
                       fileSize={doc.fileSize}
                       onClick={() => setPreviewDoc(doc)}
-                      className="cursor-pointer transition-colors hover:bg-gray-50"
+                      className="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-[#272727]"
                       rightAction={
                         <IconButton
                           as="a"

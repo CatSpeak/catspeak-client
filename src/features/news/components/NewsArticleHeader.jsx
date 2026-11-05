@@ -13,10 +13,10 @@ const NewsArticleHeader = ({ newsItem }) => {
 
   return (
     <header className="min-w-0 text-left">
-      <h1 id="news-article-title" className="break-words text-2xl font-extrabold leading-tight text-gray-950 sm:text-3xl lg:text-[32px] [overflow-wrap:anywhere]">
+      <h1 id="news-article-title" className="break-words text-2xl font-extrabold leading-tight text-gray-950 dark:text-white sm:text-3xl lg:text-[32px] [overflow-wrap:anywhere]">
         {newsItem.title}
       </h1>
-      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 sm:text-sm">
+      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-[#AAAAAA] sm:text-sm">
         {newsItem.viewCount != null && (
           <span>{newsItem.viewCount} {t.news?.newsDetail?.views || "views"}</span>
         )}

@@ -207,11 +207,11 @@ const TopicFilter = ({
   if (isLoading && topics.length === 0) {
     return (
       <div className={`flex items-center gap-2 overflow-hidden py-1 ${className}`}>
-        <div className="h-4 w-14 rounded bg-gray-200 animate-pulse shrink-0 mr-1" />
+        <div className="h-4 w-14 rounded bg-gray-200 dark:bg-[#272727] animate-pulse shrink-0 mr-1" />
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
-            className="h-8 w-20 rounded-full bg-gray-200 animate-pulse shrink-0"
+            className="h-8 w-20 rounded-full bg-gray-200 dark:bg-[#272727] animate-pulse shrink-0"
           />
         ))}
       </div>
@@ -251,7 +251,7 @@ const TopicFilter = ({
       >
         <span
           ref={labelRef}
-          className="text-sm font-semibold text-slate-700 select-none shrink-0 flex items-center gap-1.5 mr-1"
+          className="text-sm font-semibold text-slate-700 dark:text-neutral-300 select-none shrink-0 flex items-center gap-1.5 mr-1"
         >
           {t.news?.filters?.topics || "Chủ đề"}:
         </span>
@@ -269,7 +269,7 @@ const TopicFilter = ({
               className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors shadow-none select-none cursor-pointer whitespace-nowrap shrink-0 ${
                 isSelected
                   ? "bg-primary text-white border border-primary hover:bg-primary/90"
-                  : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                  : "bg-white dark:bg-[#1A1A1A] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727] hover:border-slate-300 dark:hover:border-[#555]"
               }`}
             >
               #{title}
@@ -286,7 +286,7 @@ const TopicFilter = ({
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors shadow-none select-none cursor-pointer whitespace-nowrap ${
                 hiddenSelectedCount > 0
                   ? "bg-primary text-white border border-primary hover:bg-primary/90"
-                  : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                  : "bg-white dark:bg-[#1A1A1A] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727] hover:border-slate-300 dark:hover:border-[#555]"
               }`}
               aria-expanded={isDropdownOpen}
               aria-haspopup="true"
@@ -305,7 +305,7 @@ const TopicFilter = ({
 
             {/* ── Popover dropdown menu ── */}
             {isDropdownOpen && (
-              <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-2 w-72 sm:w-80 max-h-64 overflow-y-auto bg-white border border-slate-200 rounded-2xl p-3 shadow-xl z-50 flex flex-wrap gap-2 animate-enter">
+              <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-2 w-72 sm:w-80 max-h-64 overflow-y-auto bg-white dark:bg-[#1A1A1A] border border-slate-200 dark:border-[#3F3F3F] rounded-2xl p-3 shadow-xl z-50 flex flex-wrap gap-2 animate-enter">
                 {hiddenTopics.map((topic) => {
                   const id = topic.topicId ?? topic.TopicId ?? topic.id;
                   const title = topic.title || topic.Title || topic.slug || "";
@@ -319,7 +319,7 @@ const TopicFilter = ({
                       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors shadow-none select-none cursor-pointer whitespace-nowrap ${
                         isSelected
                           ? "bg-primary text-white border border-primary hover:bg-primary/90"
-                          : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                          : "bg-white dark:bg-[#1A1A1A] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727] hover:border-slate-300 dark:hover:border-[#555]"
                       }`}
                     >
                       #{title}

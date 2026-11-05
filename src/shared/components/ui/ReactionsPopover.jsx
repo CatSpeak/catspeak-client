@@ -12,7 +12,7 @@ export const DEFAULT_REACTIONS = [
     label: "Like",
     icon: ThumbsUp,
     colorClass: "text-blue-700 fill-blue-400",
-    hoverBgClass: "group-hover/icon:bg-blue-50",
+    hoverBgClass: "group-hover/icon:bg-blue-50 dark:group-hover/icon:bg-blue-950/40",
   },
   {
     type: "Love",
@@ -20,7 +20,7 @@ export const DEFAULT_REACTIONS = [
     label: "Love",
     icon: Heart,
     colorClass: "text-red-700 fill-red-400",
-    hoverBgClass: "group-hover/icon:bg-red-50",
+    hoverBgClass: "group-hover/icon:bg-red-50 dark:group-hover/icon:bg-red-950/40",
   },
   {
     type: "Haha",
@@ -28,7 +28,7 @@ export const DEFAULT_REACTIONS = [
     label: "Haha",
     icon: Smile,
     colorClass: "text-yellow-700 fill-yellow-400",
-    hoverBgClass: "group-hover/icon:bg-yellow-50",
+    hoverBgClass: "group-hover/icon:bg-yellow-50 dark:group-hover/icon:bg-yellow-950/40",
   },
 ];
 
@@ -39,7 +39,7 @@ export const COMMENT_REACTIONS = [
     label: "Like",
     icon: ThumbsUp,
     colorClass: "text-blue-600 fill-blue-400",
-    hoverBgClass: "group-hover/icon:bg-blue-50",
+    hoverBgClass: "group-hover/icon:bg-blue-50 dark:group-hover/icon:bg-blue-950/40",
   },
   {
     type: 2,
@@ -47,7 +47,7 @@ export const COMMENT_REACTIONS = [
     label: "Love",
     icon: Heart,
     colorClass: "text-red-600 fill-red-400",
-    hoverBgClass: "group-hover/icon:bg-red-50",
+    hoverBgClass: "group-hover/icon:bg-red-50 dark:group-hover/icon:bg-red-950/40",
   },
   {
     type: 3,
@@ -55,7 +55,7 @@ export const COMMENT_REACTIONS = [
     label: "Haha",
     icon: Smile,
     colorClass: "text-yellow-600 fill-yellow-400",
-    hoverBgClass: "group-hover/icon:bg-yellow-50",
+    hoverBgClass: "group-hover/icon:bg-yellow-50 dark:group-hover/icon:bg-yellow-950/40",
   },
 ];
 
@@ -128,13 +128,23 @@ const ReactionsPopover = ({
       {show && (
         <div
           ref={popoverRef}
-          className={`absolute bottom-full mb-1 z-50 group-hover/reactions:block ${getPlacementClass()} ${className}`}
+          className={`absolute bottom-full pb-2 z-50 group-hover/reactions:block ${getPlacementClass()} ${className}`}
           style={dynamicTransform ? { transform: dynamicTransform } : undefined}
         >
+          {/* Invisible hover bridge to eliminate dead gap between trigger and popover */}
+          <div
+            className="absolute inset-x-0 -bottom-2.5 h-4 pointer-events-auto"
+            aria-hidden="true"
+          />
           <FluentAnimation direction="up" distance={10} duration={0.2} exit>
-            <div className="bg-white rounded-full shadow-lg border border-border p-1 flex items-center">
+            <div className="bg-white dark:bg-[#272727] rounded-full shadow-lg dark:shadow-2xl border border-border dark:border-[#3F3F3F] p-1 flex items-center gap-2">
               {reactions.map((item) => {
                 const IconComp = item.icon;
+                const itemHoverClass =
+                  item.hoverBgClass && !item.hoverBgClass.includes("scale")
+                    ? item.hoverBgClass
+                    : "group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#3D3D3D] transition-colors";
+
                 return (
                   <IconButton
                     key={item.type ?? item.value}
@@ -146,8 +156,8 @@ const ReactionsPopover = ({
                     size={size}
                     variant="transparent"
                     title={item.label}
-                    className="hover:-translate-y-1 transition-transform"
-                    innerClassName={item.hoverBgClass || ""}
+                    className="group/icon"
+                    innerClassName={itemHoverClass}
                   >
                     <IconComp size={iconSize} className={item.colorClass} />
                   </IconButton>

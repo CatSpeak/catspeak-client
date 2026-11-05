@@ -33,7 +33,7 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
   if (!isLoading && !error && relatedPosts.length === 0) return null;
 
   const heading = (
-    <h2 id="related-news-heading" className="min-w-0 text-lg font-bold leading-tight text-gray-900">
+    <h2 id="related-news-heading" className="min-w-0 text-lg font-bold leading-tight text-gray-900 dark:text-white">
       {labels?.relatedNews || "Related news"}
     </h2>
   );
@@ -46,7 +46,7 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
           <LoadingSpinner className="flex justify-center [&_svg]:h-6 [&_svg]:w-6" />
         </div>
       ) : error ? (
-        <button type="button" onClick={refetch} className="text-left text-sm text-cath-red-700 hover:underline">
+        <button type="button" onClick={refetch} className="text-left text-sm text-cath-red-700 dark:text-red-400 hover:underline">
           {labels?.retryRelatedNews || "Could not load related news. Try again."}
         </button>
       ) : (

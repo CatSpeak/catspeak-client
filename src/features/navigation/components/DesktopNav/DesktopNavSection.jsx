@@ -62,13 +62,13 @@ const DesktopNavSection = ({
     <div
       className={`w-full p-4 ${
         hasTopBorder
-          ? `border-t ${isDocked ? "border-white/20" : "border-border"}`
+          ? `border-t ${isDocked ? "border-white/20 dark:border-[#3F3F3F]" : "border-border dark:border-[#3F3F3F]"}`
           : ""
       }`}
     >
       {/* Section Header Label (Expanded Mode) */}
       {sectionTitle && !isDocked && (
-        <div className="px-3 pb-2 font-bold select-none">{sectionTitle}</div>
+        <div className="px-3 pb-2 font-bold select-none text-gray-900 dark:text-white">{sectionTitle}</div>
       )}
 
       {/* Items List */}

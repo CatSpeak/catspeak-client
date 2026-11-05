@@ -88,7 +88,7 @@ export const ReactionBadge = ({ type, size = 20, className = "" }) => {
     <ThumbsUp
       size={size}
       strokeWidth={1.8}
-      className={`text-[#4b5563] ${className}`}
+      className={`text-[#4b5563] dark:text-[#AAAAAA] ${className}`}
     />
   );
 };

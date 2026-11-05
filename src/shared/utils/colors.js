@@ -9,12 +9,15 @@ export const lightColors = {
   // ── Brand & Core Palette ──
   redPrimary: "#990011",
   primaryRed: "#990011", // Cat Speak (WCAG AAA >= 7:1 on #FFFFFF)
-
+  redAccessible: "#990011", // Accessible brand red for light mode
 
   // ── Backgrounds ──
   bg: "#F5F5F7", // Main page background (primary2)
 
   // ── Text & Typography ──
+  textPrimary: "#111827",
+  textColor: "#515151",
+  headingColor: "#2e2e2e",
   secondaryGray: "#606060", // Secondary text / subtext
   textSecondary: "#606060",
 
@@ -44,6 +47,9 @@ export const darkColors = {
   bg: "#0F0F0F", // Dark page background
 
   // ── Text & Typography ──
+  textPrimary: "#FFFFFF",
+  textColor: "#E5E5E5",
+  headingColor: "#FFFFFF",
   textSecondary: "#AAAAAA", // Secondary text / subtext
   secondaryGray: "#AAAAAA", // Alias for consistent naming with light mode
 
@@ -141,6 +147,15 @@ export const cssVariables = {
   "--cath-warning": colors.warning,
   "--cath-success": colors.success,
   "--cath-dusk": colors.dusk,
+  "--cath-text-secondary": lightColors.textSecondary,
+  "--cath-secondary-gray": lightColors.secondaryGray,
+  "--cath-red-accessible": lightColors.redAccessible,
+}
+
+export const darkCssVariables = {
+  "--cath-text-secondary": darkColors.textSecondary,
+  "--cath-secondary-gray": darkColors.secondaryGray,
+  "--cath-red-accessible": darkColors.redAccessible,
 }
 
 // Export cho việc sử dụng trong JavaScript

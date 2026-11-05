@@ -24,15 +24,15 @@ const RelatedNewsCard = ({ news }) => {
       className="group grid min-w-0 grid-cols-[minmax(0,1fr)_80px] gap-x-3 gap-y-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700 focus-visible:ring-offset-4"
     >
       <div className="min-w-0">
-        <div className="mb-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] leading-4 text-gray-500">
-          <span className="font-semibold text-gray-600">{category}</span>
+        <div className="mb-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] leading-4 text-gray-500 dark:text-[#AAAAAA]">
+          <span className="font-semibold text-gray-600 dark:text-neutral-300">{category}</span>
           {timeAgo && <><span aria-hidden="true">·</span><span>{timeAgo}</span></>}
         </div>
-        <h3 className="line-clamp-3 break-words text-sm font-semibold leading-snug text-gray-900 transition-colors group-hover:text-cath-red-700">
+        <h3 className="line-clamp-3 break-words text-sm font-semibold leading-snug text-gray-900 dark:text-white transition-colors group-hover:text-cath-red-700 dark:group-hover:text-red-400">
           {news.title}
         </h3>
       </div>
-      <div className="h-20 w-20 overflow-hidden rounded-lg bg-primary2">
+      <div className="h-20 w-20 overflow-hidden rounded-lg bg-primary2 dark:bg-[#272727]">
         {imageUrl && failedImage !== imageUrl ? (
           <img
             src={imageUrl}
@@ -51,7 +51,7 @@ const RelatedNewsCard = ({ news }) => {
           </div>
         )}
       </div>
-      <div className="col-span-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs leading-5 text-gray-500">
+      <div className="col-span-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs leading-5 text-gray-500 dark:text-[#AAAAAA]">
         {news.viewCount != null && (
           <span className="inline-flex items-center gap-1">
             <Eye size={13} aria-hidden="true" />

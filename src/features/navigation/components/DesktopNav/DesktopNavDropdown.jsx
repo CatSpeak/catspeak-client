@@ -29,7 +29,7 @@ const DesktopNavDropdown = ({
         }}
         className={`relative flex items-center shrink-0 h-11 rounded-xl transition-all duration-300 group overflow-hidden w-full ${
           isDocked ? "justify-center" : "px-3 gap-3"
-        } hover:bg-itemHover`}
+        } hover:bg-neutral-100 dark:hover:bg-[#272727] text-gray-800 dark:text-neutral-200 hover:text-gray-900 dark:hover:text-white`}
         title={label}
       >
         {img && !imgError ? (
@@ -77,9 +77,9 @@ const DesktopNavDropdown = ({
 
       {/* Floating Flyout Menu (Docked) */}
       {isDocked && (
-        <div className="absolute left-full ml-2 top-0 bg-white border border-border rounded-lg shadow-lg w-56 opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-200 z-[100] flex flex-col p-2 pointer-events-auto text-gray-900">
+        <div className="absolute left-full ml-2 top-0 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-lg shadow-lg dark:shadow-2xl w-56 opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-200 z-[100] flex flex-col p-2 pointer-events-auto text-gray-900 dark:text-white">
           <div
-            className="px-3 pb-2 mb-2 border-b border-border text-sm font-medium text-gray-900 truncate"
+            className="px-3 pb-2 mb-2 border-b border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-900 dark:text-white truncate"
             style={color ? { color } : undefined}
             title={label}
           >

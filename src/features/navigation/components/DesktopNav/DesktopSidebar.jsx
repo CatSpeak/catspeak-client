@@ -335,8 +335,8 @@ const DesktopSidebar = () => {
           >
             <div className="w-[280px] h-full flex flex-col">
               {/* Secondary Header */}
-              <ListItem className="font-bold">
-                <span className="truncate text-xl">
+              <div className="p-4 flex items-center shrink-0">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">
                   {isSettingsPage
                     ? t.nav?.settings || "Settings"
                     : t.nav?.[
@@ -344,11 +344,11 @@ const DesktopSidebar = () => {
                       ] ||
                       currentSectionData?.defaultLabel ||
                       "Navigation"}
-                </span>
-              </ListItem>
+                </h2>
+              </div>
 
               {/* Content Sub-Links: Stable, instant list without stagger flicker or duplicate-key collisions */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col py-1">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
                 {isSettingsPage
                   ? settingNavLinks
                       .filter((item) =>
@@ -380,7 +380,7 @@ const DesktopSidebar = () => {
                           key={`${currentSectionKey}-${group.key}`}
                         >
                           {groupIdx > 0 && (
-                            <div className="my-1 mx-2 h-px bg-border shrink-0" />
+                            <div className="my-1 mx-2 h-px bg-border dark:bg-[#3F3F3F] shrink-0" />
                           )}
                           {group.items.map((item) => {
                             const label =

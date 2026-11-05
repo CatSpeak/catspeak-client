@@ -49,7 +49,7 @@ const TopicChips = ({ topics = [], className = "", onTopicClick }) => {
                 handleChipClick(e, topic);
               }
             }}
-            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/20 text-primary border-none shadow-none cursor-pointer transition-opacity hover:opacity-80 select-none"
+            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/20 dark:bg-red-500/20 text-primary dark:text-red-400 border-none shadow-none cursor-pointer transition-opacity hover:opacity-80 select-none"
             title={`#${title}`}
           >
             #{title}

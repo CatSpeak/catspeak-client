@@ -28,7 +28,7 @@ const ProfilePostCardSkeleton = () => {
       </div>
 
       {/* Divider */}
-      <div className="h-px bg-[#E5E5E5]" />
+      <div className="h-px bg-border dark:bg-[#3F3F3F]" />
 
       {/* Action Bar Skeleton */}
       <div className="flex items-center justify-between pt-1">

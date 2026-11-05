@@ -93,7 +93,7 @@ const DesktopNavItems = () => {
       </div>
 
       <div
-        className={`p-4 flex flex-col gap-1 mt-auto border-t ${isDesktopSidebarDocked ? "border-white/20" : "border-border"}`}
+        className={`p-4 flex flex-col gap-1 mt-auto border-t ${isDesktopSidebarDocked ? "border-white/20 dark:border-[#3F3F3F]" : "border-border dark:border-[#3F3F3F]"}`}
       >
         {footerLinks.map((item) => {
           const label = t.nav?.[item.key] || item.label || item.key;

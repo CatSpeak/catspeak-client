@@ -54,6 +54,7 @@ export const TeacherHat = ({ size = 32, className = "" }) => (
  * @param {number|string} [accountId]- If provided, clicking navigates to /workspace/profile/:accountId
  * @param {function} [onClick]       - Custom click handler
  * @param {boolean} [clickable=true] - Enable click-to-profile behavior when accountId or onClick is provided
+ * @param {boolean} [hoverScale=true]- Enable hover scale animation
  * @param {string}  [className]      - Extra classes merged onto outer wrapper
  * @param {object}  [style]          - Custom inline styles
  * @param {"default"|"teacher"} [variant="default"] - Variant style (e.g. teacher with scholar hat)
@@ -69,6 +70,7 @@ const Avatar = ({
   accountId,
   onClick,
   clickable = true,
+  hoverScale = true,
   className = "",
   style = {},
   variant = "default",
@@ -121,7 +123,7 @@ const Avatar = ({
   const speakingClass = ""
 
   const cursorClass = isClickable
-    ? "cursor-pointer hover:opacity-85 hover:scale-[1.03] transition-all"
+    ? `cursor-pointer hover:opacity-85 ${hoverScale ? "hover:scale-[1.03]" : ""} transition-all`
     : ""
 
   const showTeacherHat = variant === "teacher" || isTeacher

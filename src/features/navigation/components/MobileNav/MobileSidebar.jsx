@@ -28,7 +28,7 @@ const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
         }`}
       >
         {/* Header/Logo section */}
-        <div className="flex items-center justify-between h-14 mx-2 shrink-0">
+        <div className="flex items-center justify-between h-14 px-2 shrink-0">
           <div className="flex items-center w-full h-full relative overflow-hidden">
             <Link
               to="/"

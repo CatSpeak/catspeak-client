@@ -95,7 +95,7 @@ const NewsDetailActionBar = ({
               const type = newsItem?.currentUserReaction || "Like";
               handleReact(type);
             }}
-            className="p-1.5 -m-1.5 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-1.5 text-[#4b5563] hover:text-black cursor-pointer"
+            className="p-1.5 -m-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-[#272727] transition-colors flex items-center gap-1.5 text-secondary dark:text-[#AAAAAA] hover:text-black dark:hover:text-white cursor-pointer"
             aria-label={getReactionLabel()}
           >
             {newsItem?.currentUserReaction ? (
@@ -104,9 +104,9 @@ const NewsDetailActionBar = ({
                 size={22}
               />
             ) : (
-              <ThumbsUp size={22} strokeWidth={1.8} className="text-[#4b5563]" />
+              <ThumbsUp size={22} strokeWidth={1.8} className="text-secondary dark:text-[#AAAAAA] group-hover/reactions:text-black dark:group-hover/reactions:text-white transition-colors" />
             )}
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-[#AAAAAA]">
               {totalReactions}
             </span>
           </button>
@@ -126,11 +126,11 @@ const NewsDetailActionBar = ({
         <button
           type="button"
           onClick={onCommentClick}
-          className="p-1.5 -m-1.5 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-1.5 text-[#4b5563] hover:text-black cursor-pointer"
+          className="p-1.5 -m-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-[#272727] transition-colors flex items-center gap-1.5 text-secondary dark:text-[#AAAAAA] hover:text-black dark:hover:text-white cursor-pointer"
           title={t.news?.newsDetail?.comment || "Bình luận"}
         >
-          <MessageSquare size={22} strokeWidth={1.8} />
-          <span className="text-sm font-medium text-gray-700">
+          <MessageSquare size={22} strokeWidth={1.8} className="text-secondary dark:text-[#AAAAAA]" />
+          <span className="text-sm font-medium text-gray-700 dark:text-[#AAAAAA]">
             {totalComments}
           </span>
         </button>
@@ -139,7 +139,7 @@ const NewsDetailActionBar = ({
         <button
           type="button"
           onClick={onShareClick}
-          className="p-1.5 -m-1.5 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-1.5 text-[#4b5563] hover:text-black cursor-pointer"
+          className="p-1.5 -m-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-[#272727] transition-colors flex items-center gap-1.5 text-secondary dark:text-[#AAAAAA] hover:text-black dark:hover:text-white cursor-pointer"
           title={t.news?.newsDetail?.share || "Chia sẻ"}
         >
           {/* Curved forward / share arrow matching Figma and Image 1 */}
@@ -154,7 +154,7 @@ const NewsDetailActionBar = ({
           >
             <path d="M14 9V5L21 12L14 19V14.9C9 14.9 5.5 16.5 3 20C4 15 7 10 14 9Z" />
           </svg>
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-gray-700 dark:text-[#AAAAAA]">
             {shareCount}
           </span>
         </button>

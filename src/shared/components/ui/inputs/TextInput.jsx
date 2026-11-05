@@ -1,4 +1,4 @@
-import React, { useState, forwardRef } from "react"
+import React, { useState, forwardRef, useRef, useEffect } from "react"
 import { colors } from "@/shared/utils/colors"
 import { Eye, EyeOff } from "lucide-react"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
@@ -41,7 +41,7 @@ const TextInput = forwardRef(({
     : type
 
   const variantClasses =
-    variant === "square"
+    variant === "rounded-full" ? (multiline ? "rounded-2xl" : "rounded-full") : variant === "square"
       ? "rounded-md"
       : variant === "rounded-2xl" || variant === "round"
         ? "rounded-2xl"
@@ -80,12 +80,28 @@ const TextInput = forwardRef(({
     ? hasCustomPadding ? "" : "px-4 py-[15px]"
     : hasCustomPadding
       ? ""
-      : "px-4"
+      : variant === "rounded-full" ? "px-5" : "px-4"
   const hasCustomBg = className
     .split(" ")
     .some((c) => /(^|\s)(!?)bg-/.test(c) || /(^|\s)(!?)dark:bg-/.test(c))
   const bgClass = hasCustomBg ? "" : "bg-white dark:bg-[#272727]"
   const finalClassName = `w-full ${bgClass} text-gray-900 dark:text-white border border-border dark:border-[#3F3F3F] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 dark:disabled:bg-[#1A1A1A] placeholder-[var(--placeholder-color)] dark:placeholder-[#AAAAAA] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${paddingClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
+
+  const internalRef = useRef(null)
+  const setRefs = (node) => {
+    internalRef.current = node
+    if (typeof ref === "function") ref(node)
+    else if (ref) ref.current = node
+  }
+
+  useEffect(() => {
+    if (multiline && internalRef.current) {
+      internalRef.current.style.height = "auto"
+      if (value) {
+        internalRef.current.style.height = `${internalRef.current.scrollHeight}px`
+      }
+    }
+  }, [value, multiline])
 
   const handleInput = (e) => {
     if (multiline) {
@@ -113,7 +129,7 @@ const TextInput = forwardRef(({
         )}
         {multiline ? (
           <textarea
-            ref={ref}
+            ref={setRefs}
             id={id}
             autoFocus={autoFocus}
             required={required}
@@ -123,7 +139,7 @@ const TextInput = forwardRef(({
               "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}
-            className={`${finalClassName} resize-none overflow-y-auto`}
+            className={`${finalClassName} resize-none overflow-y-auto max-h-[140px]`}
             value={value}
             onChange={onChange}
             onInput={handleInput}
@@ -133,7 +149,7 @@ const TextInput = forwardRef(({
           />
         ) : (
           <input
-            ref={ref}
+            ref={setRefs}
             id={id}
             type={inputType}
             autoFocus={autoFocus}
@@ -173,7 +189,14 @@ const TextInput = forwardRef(({
         )}
         {rightContent && (
           <div
-            className={`absolute ${rightContentClassName} top-1/2 -translate-y-1/2 z-10 flex items-center select-none text-slate-500 font-medium text-xs`}
+            className={`absolute ${rightContentClassName} ${
+              rightContentClassName.includes("top-") ||
+              rightContentClassName.includes("bottom-")
+                ? ""
+                : multiline
+                  ? "bottom-1.5"
+                  : "top-1/2 -translate-y-1/2"
+            } z-10 flex items-center select-none text-slate-500 font-medium text-xs`}
           >
             {rightContent}
           </div>

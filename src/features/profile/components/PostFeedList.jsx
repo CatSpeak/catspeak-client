@@ -48,7 +48,7 @@ const PostFeedList = ({
         <div className="flex-1 flex flex-col items-center justify-center w-full my-auto">
           <EmptyState message={emptyMessage} icon={EmptyIcon} variant="page">
             {emptyDescription && (
-              <p className="text-sm text-[#606060] mt-1 text-center max-w-sm">
+              <p className="text-sm text-secondary dark:text-[#AAAAAA] mt-1 text-center max-w-sm">
                 {emptyDescription}
               </p>
             )}
@@ -62,7 +62,7 @@ const PostFeedList = ({
         <FluentCard>
           <EmptyState message={emptyMessage} icon={EmptyIcon} variant="simple">
             {emptyDescription && (
-              <p className="text-sm text-[#606060] mt-1 text-center max-w-sm">
+              <p className="text-sm text-secondary dark:text-[#AAAAAA] mt-1 text-center max-w-sm">
                 {emptyDescription}
               </p>
             )}

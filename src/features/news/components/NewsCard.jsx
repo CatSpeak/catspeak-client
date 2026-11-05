@@ -182,7 +182,7 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className={`group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-visible relative ${
+      className={`group flex flex-col bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-visible relative ${
         showReactions ? "z-40" : ""
       }`}
     >
@@ -217,18 +217,18 @@ const NewsCard = ({ news }) => {
         {news.topics && news.topics.length > 0 && (
           <TopicChips topics={news.topics} className="mb-0.5" />
         )}
-        <h3 className="font-bold text-base text-foreground break-words leading-snug">
+        <h3 className="font-bold text-base text-foreground dark:text-white break-words leading-snug">
           {news.title}
         </h3>
         {news.excerpt && (
-          <p className="text-sm text-[#4a4a4a] line-clamp-2">{news.excerpt}</p>
+          <p className="text-sm text-[#4a4a4a] dark:text-neutral-300 line-clamp-2">{news.excerpt}</p>
         )}
         {/* Inline dot-separated metadata row */}
-        <div className="flex items-center text-sm gap-1.5 text-[#606060] mt-auto pt-1">
+        <div className="flex items-center text-sm gap-1.5 text-secondary dark:text-[#AAAAAA] mt-auto pt-1">
           <span>
             {news.viewCount || 0} {newsCard?.views || "views"}
           </span>
-          <span className="w-[3px] h-[3px] rounded-full bg-[#606060] inline-block" />
+          <span className="w-[3px] h-[3px] rounded-full bg-secondary dark:bg-[#AAAAAA] inline-block" />
           <span>
             {getTranslatedTimeAgo(news.createDate, newsCard?.timeAgo)}
           </span>
@@ -237,7 +237,7 @@ const NewsCard = ({ news }) => {
 
       {/* ── Action bar ────────────────────────────────────────────── */}
       <div
-        className="grid grid-cols-3 border-t border-border rounded-b-xl overflow-visible"
+        className="grid grid-cols-3 border-t border-border dark:border-[#3F3F3F] rounded-b-xl overflow-visible"
         onPointerDown={(e) => e.stopPropagation()}
       >
         <div
@@ -252,10 +252,10 @@ const NewsCard = ({ news }) => {
               const type = news.currentUserReaction || "Like";
               handleReact(e, type);
             }}
-            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-bl-xl cursor-pointer"
+            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-bl-xl cursor-pointer"
           >
             <ReactionBadge type={news.currentUserReaction} size={20} />
-            <span className="text-sm text-[#606060]">
+            <span className="text-sm text-secondary dark:text-[#AAAAAA]">
               {totalReactions}
             </span>
           </button>
@@ -282,14 +282,14 @@ const NewsCard = ({ news }) => {
         {/* Comments */}
         <button
           onClick={handleCardClick}
-          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg cursor-pointer"
+          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] cursor-pointer"
         >
           <MessageSquare
             size={20}
             strokeWidth={1.5}
-            className="text-[#606060]"
+            className="text-secondary dark:text-[#AAAAAA]"
           />
-          <span className="text-sm text-[#606060]">
+          <span className="text-sm text-secondary dark:text-[#AAAAAA]">
             {totalComments}
           </span>
         </button>
@@ -297,11 +297,11 @@ const NewsCard = ({ news }) => {
         {/* Share */}
         <button
           onClick={handleShare}
-          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-br-xl cursor-pointer"
+          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] rounded-br-xl cursor-pointer"
           aria-label="Share"
         >
-          <Share size={20} strokeWidth={1.5} className="text-[#606060]" />
-          <span className="text-sm text-[#606060]">
+          <Share size={20} strokeWidth={1.5} className="text-secondary dark:text-[#AAAAAA]" />
+          <span className="text-sm text-secondary dark:text-[#AAAAAA]">
             {totalShares}
           </span>
         </button>

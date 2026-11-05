@@ -298,7 +298,7 @@ const NewsPage = ({ postType = "1" }) => {
             onKeyDown={handleSearchKeyDown}
             onBlur={handleSearchBlur}
             placeholder={t.news?.filters?.searchPlaceholder || "Search articles..."}
-            className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-9 text-sm text-foreground placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] py-2 pl-10 pr-9 text-sm text-foreground dark:text-white placeholder:text-[#9ca3af] dark:placeholder:text-[#777] focus:outline-none focus:ring-2 focus:ring-primary/40"
             aria-label={t.news?.filters?.searchPlaceholder || "Search articles..."}
           />
           {searchInput && (
@@ -306,7 +306,7 @@ const NewsPage = ({ postType = "1" }) => {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleClearSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#9ca3af] hover:text-foreground"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#9ca3af] hover:text-foreground dark:hover:text-white"
               aria-label="Clear search"
             >
               <X size={16} />
@@ -331,7 +331,7 @@ const NewsPage = ({ postType = "1" }) => {
                 className={`whitespace-nowrap shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-primary text-white"
-                    : "bg-gray-100 text-[#606060] hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-[#272727] text-secondary dark:text-neutral-300 hover:bg-gray-200 dark:hover:bg-[#333333]"
                 }`}
               >
                 {labelMap[option]}

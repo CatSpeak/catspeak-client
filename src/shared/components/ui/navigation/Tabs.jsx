@@ -190,8 +190,13 @@ const Tabs = memo(
                   </div>
                 )}
 
-                {/* Inline text & badge container with 4dp gap */}
-                <div className="flex items-center gap-1">
+                {/* Inline text & badge container with 4dp gap (8dp for non-badge elements) */}
+                <div
+                  className={`flex items-center ${
+                    tab.badgeGap ||
+                    (React.isValidElement(tab.badge) ? "gap-2" : "gap-1")
+                  }`}
+                >
                   <span className="whitespace-nowrap">{tab.label}</span>
 
                   {/* Inline badge (padding between inline text and badge: 4dp) */}

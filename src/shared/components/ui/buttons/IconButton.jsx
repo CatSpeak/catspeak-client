@@ -45,7 +45,7 @@ const IconButton = ({
     filled:
       "bg-primaryBg dark:bg-[#1A1A1A] dark:text-gray-200 hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] transition-colors",
     ghost:
-      "bg-transparent hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white transition-colors",
+      "bg-transparent hover:bg-neutral-200/80 dark:hover:bg-[#3D3D3D] active:bg-neutral-300 dark:active:bg-[#4D4D4D] text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white transition-colors",
     iconOnly:
       "bg-transparent text-white/60 hover:text-white transition-colors duration-150",
     transparent:
@@ -75,13 +75,13 @@ const IconButton = ({
   }
 
   const currentSize = sizeClasses[size] || sizeClasses.sm
-  const Component = as || (onClick ? "button" : "div")
+  const Component = as || "button"
 
   return (
     <Component
       {...(Component === "button" ? { onClick, disabled, type } : {})}
       title={title}
-      className={`inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation shrink-0 ${currentSize.button} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation shrink-0 ${currentSize.button} ${className}`}
       {...props}
     >
       <span

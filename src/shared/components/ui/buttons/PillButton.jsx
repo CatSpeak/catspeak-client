@@ -12,6 +12,8 @@ const VARIANT_CLASSES = {
     "bg-[#FFF0F2] dark:bg-[#2D0A0E] hover:bg-[#FFE5E8] dark:hover:bg-[#3D1016] active:bg-[#FFD6DC] dark:active:bg-[#4D151D] group-hover/pill:bg-[#FFE5E8] dark:group-hover/pill:bg-[#3D1016] group-active/pill:bg-[#FFD6DC] dark:group-active/pill:bg-[#4D151D] text-cath-red-700 dark:text-[#FF8599] border-cath-red-700/40 dark:border-[#66111E] hover:border-cath-red-700/70 group-hover/pill:border-cath-red-700/70",
   contrast:
     "bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 active:bg-gray-700 dark:active:bg-gray-200 group-hover/pill:bg-gray-800 dark:group-hover/pill:bg-gray-100 group-active/pill:bg-gray-700 dark:group-active/pill:bg-gray-200 text-white dark:text-gray-900 font-semibold border-transparent",
+  ghost:
+    "bg-transparent hover:bg-neutral-200/80 dark:hover:bg-[#3D3D3D] active:bg-neutral-300 dark:active:bg-[#4D4D4D] group-hover/pill:bg-neutral-200/80 dark:group-hover/pill:bg-[#3D3D3D] group-active/pill:bg-neutral-300 dark:group-active/pill:bg-[#4D4D4D] text-slate-700 dark:text-[#AAAAAA] hover:text-black dark:hover:text-white group-hover/pill:text-black dark:group-hover/pill:text-white border-transparent",
   "secondary-no-outline":
     "bg-transparent hover:bg-[#E5E5E5] dark:hover:bg-[#272727] active:bg-[#e0e0e0] dark:active:bg-[#3D3D3D] group-hover/pill:bg-[#E5E5E5] dark:group-hover/pill:bg-[#272727] group-active/pill:bg-[#e0e0e0] dark:group-active/pill:bg-[#3D3D3D] text-black dark:text-gray-200 border-transparent",
   transparent:
@@ -56,6 +58,7 @@ const PillButton = ({
   const isSecondary =
     variant === "secondary" ||
     variant === "secondary-no-outline" ||
+    variant === "ghost" ||
     variant === "outline" ||
     variant === "control"
 

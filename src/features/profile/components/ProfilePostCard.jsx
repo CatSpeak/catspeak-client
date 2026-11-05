@@ -15,6 +15,7 @@ import PostContent from "@/features/news/components/PostContent"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import PostHeader from "./PostHeader"
 import PostActionBar from "./PostActionBar"
+import ReactionStackedBadges from "@/features/news/components/ReactionStackedBadges"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfilePostCard = ({ post, isOwnProfile }) => {
@@ -87,8 +88,8 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
 
   return (
     <>
-      <FluentCard padding="p-0">
-        <div className="p-4 sm:p-6 space-y-4">
+      <FluentCard padding="p-0" rounded="rounded-2xl">
+        <div className="p-4 space-y-4">
           <PostHeader
             post={post}
             isOwnProfile={isOwnProfile}
@@ -107,7 +108,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
               }}
               className={`text-2xl font-bold ${
                 post.slug || post.postId
-                  ? "cursor-pointer hover:text-cath-red-700 transition-colors"
+                  ? "cursor-pointer hover:text-cath-red-700 dark:hover:text-red-400 transition-colors"
                   : ""
               }`}
             >
@@ -124,14 +125,19 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                 <PostContent
                   html={post?.content || (!contentUrl ? excerpt : null)}
                   contentUrl={contentUrl}
-                  className={!isExpanded ? "text-sm text-[#606060]" : ""}
+                  className={
+                    !isExpanded
+                      ? "text-sm text-secondary dark:text-neutral-300"
+                      : ""
+                  }
                 />
               </div>
+
               {(isOverflowing || isExpanded) && (
                 <button
                   type="button"
                   onClick={() => setIsExpanded((prev) => !prev)}
-                  className="inline-flex items-center min-h-[48px] -my-1.5 py-1.5 px-1 -mx-1 text-sm font-semibold text-cath-red-700 hover:text-cath-red-800 hover:underline focus:outline-none cursor-pointer touch-manipulation"
+                  className="relative inline-block mt-1 text-sm font-semibold text-cath-red-700 dark:text-red-400 hover:text-cath-red-800 dark:hover:text-red-300 hover:underline focus:outline-none cursor-pointer touch-manipulation before:absolute before:top-1/2 before:-translate-y-1/2 before:left-1/2 before:-translate-x-1/2 before:min-w-[48px] before:w-full before:h-12 before:content-['']"
                 >
                   {isExpanded
                     ? t.profile?.post?.showLess || "Thu gọn"
@@ -142,6 +148,21 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
           )}
 
           <PostMediaGallery media={post.media} />
+
+          <div className="flex items-center justify-between text-sm text-secondary dark:text-[#AAAAAA]">
+            <span>
+              {typeof post?.viewCount === "number"
+                ? post.viewCount.toLocaleString()
+                : post?.viewCount || 0}{" "}
+              {t.profile?.post?.header?.views || "lượt xem"}
+            </span>
+
+            <ReactionStackedBadges
+              postId={post?.postId || post?.id}
+              reactions={post?.reactions}
+              totalReactions={post?.totalReactions}
+            />
+          </div>
         </div>
 
         <PostActionBar
@@ -153,7 +174,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
         />
 
         {isCommentsOpen && (
-          <div className="p-4 sm:p-6 pt-3 border-t border-border">
+          <div className="p-4 border-t border-border rounded-b-2xl">
             <CommentsSection
               postId={post.postId}
               totalComments={post.totalComments || 0}
@@ -192,13 +213,10 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
           "Xóa bài viết"
         }
         message={
-          t.profile?.post?.deleteConfirm ||
-          "Bạn có chắc muốn xóa bài viết này?"
+          t.profile?.post?.deleteConfirm || "Bạn có chắc muốn xóa bài viết này?"
         }
         confirmText={
-          t.profile?.post?.deleteBtn ||
-          t.profile?.post?.header?.delete ||
-          "Xóa"
+          t.profile?.post?.deleteBtn || t.profile?.post?.header?.delete || "Xóa"
         }
         cancelText={t.profile?.post?.editor?.cancel || "Hủy"}
         confirmVariant="destructive"

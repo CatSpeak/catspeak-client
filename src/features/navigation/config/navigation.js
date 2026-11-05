@@ -309,31 +309,6 @@ export const navLinks = [
     ],
   },
   {
-    key: "horizontalBar-secondary",
-    label: "Horizontal bar",
-    isHorizontalBar: true,
-    showOnHorizontalBar: false,
-  },
-  {
-    key: "exploreCourses",
-    label: "Explore Courses",
-    path: "/explore-courses",
-    icon: Compass,
-  },
-  {
-    key: "learningResources",
-    label: "Resource Hub",
-    path: "/resources",
-    icon: LayoutDashboard,
-    isPrivate: true,
-  },
-  {
-    key: "horizontalBar-workspace",
-    label: "Horizontal bar",
-    isHorizontalBar: true,
-    showOnHorizontalBar: false,
-  },
-  {
     key: "aiTutor",
     hasDropdown: true,
     icon: Bot,
@@ -360,6 +335,31 @@ export const navLinks = [
         icon: History,
       },
     ],
+  },
+  {
+    key: "horizontalBar-secondary",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  {
+    key: "exploreCourses",
+    label: "Explore Courses",
+    path: "/explore-courses",
+    icon: Compass,
+  },
+  {
+    key: "learningResources",
+    label: "Resource Hub",
+    path: "/resources",
+    icon: LayoutDashboard,
+    isPrivate: true,
+  },
+  {
+    key: "horizontalBar-workspace",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
   },
   {
     key: "workspace",

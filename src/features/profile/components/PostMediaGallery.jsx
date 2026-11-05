@@ -380,7 +380,7 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
               fileName={doc.fileName || t.profile?.post?.document || "Tài liệu"}
               fileSize={doc.fileSize}
               onClick={() => setPreviewDoc(doc)}
-              className="cursor-pointer hover:bg-gray-50 transition-colors"
+              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors"
               rightAction={
                 <IconButton
                   as="a"
@@ -406,7 +406,7 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
                 e.stopPropagation()
                 setIsDocsExpanded((prev) => !prev)
               }}
-              className="inline-flex items-center self-start text-sm font-semibold text-cath-red-700 hover:text-cath-red-800 hover:underline cursor-pointer pt-0.5"
+              className="inline-flex items-center self-start text-sm font-semibold text-cath-red-700 dark:text-red-400 hover:text-cath-red-800 dark:hover:text-red-300 hover:underline cursor-pointer pt-0.5"
             >
               {isDocsExpanded
                 ? t.profile?.post?.showLess || "Thu gọn"

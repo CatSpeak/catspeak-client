@@ -28,6 +28,10 @@
   --cath-warning: #e7001a;
   --cath-success: #4b0008;
   --cath-dusk: #1a1a2e;
+  --cath-text-secondary: #606060;
+  --cath-red-accessible: #990011;
+  --cath-bg: #F5F5F7;
+  --cath-border: #E5E5E5;
 
   /* Shadcn UI Theme HSL Tokens */
   --background: 0 0% 100%;
@@ -76,6 +80,7 @@
   /* Dark Mode Brand & Core Tokens */
   --cath-primary: #990011;
   --cath-red-700: #990011;
+  --cath-red-accessible: #f87171;
   --cath-text-secondary: #AAAAAA;
   --cath-bg: #0F0F0F;
   --cath-border: #3F3F3F;

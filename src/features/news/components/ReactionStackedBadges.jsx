@@ -3,7 +3,6 @@ import {
   ReactionBadge,
   REACTION_CONFIG,
 } from "./FacebookReactionBadge";
-import ReactionTooltip from "./ReactionTooltip";
 import ReactionsListModal from "./ReactionsListModal";
 import {
   normalizeReactions,
@@ -17,9 +16,7 @@ const ReactionStackedBadges = ({
   totalReactions = 0,
   className = "",
 }) => {
-  const [hoveredKey, setHoveredKey] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("all");
 
   const { data: fetchedReactions } = useGetPostReactionsQuery(postId, {
     skip: !postId || Boolean(propReactions),
@@ -44,57 +41,36 @@ const ReactionStackedBadges = ({
     return null;
   }
 
-  const handleOpenModal = (tab = "all") => {
-    setSelectedTab(tab);
+  const handleOpenModal = () => {
     setModalOpen(true);
   };
 
   return (
     <>
-      <div
-        className={`relative flex items-center ${hoveredKey ? "z-50" : ""
-          } ${className}`}
-      >
+      <div className={`relative flex items-center ${className}`}>
         <div
-          className="flex items-center -space-x-1.5 cursor-pointer py-1"
+          className="relative inline-flex items-center cursor-pointer touch-manipulation before:absolute before:top-1/2 before:-translate-y-1/2 before:left-1/2 before:-translate-x-1/2 before:min-w-[48px] before:min-h-[48px] before:w-full before:h-full before:content-['']"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.stopPropagation();
+              handleOpenModal();
+            }
+          }}
+          aria-label="View reactions"
           onClick={(e) => {
             e.stopPropagation();
-            handleOpenModal("all");
+            handleOpenModal();
           }}
         >
-          {activeKeys.map((key, index) => {
+          {activeKeys.map((key) => {
             const BadgeComp = REACTION_CONFIG[key]?.badge;
             if (!BadgeComp) return null;
 
-            const zIndexClass =
-              index === 0
-                ? "z-30"
-                : index === 1
-                  ? "z-20"
-                  : index === 2
-                    ? "z-10"
-                    : "z-0";
-
             return (
-              <div
-                key={key}
-                className={`relative ${zIndexClass} rounded-full hover:scale-125 hover:z-50 transition-transform duration-150`}
-                onMouseEnter={() => setHoveredKey(key)}
-                onMouseLeave={() => setHoveredKey(null)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenModal(key);
-                }}
-              >
+              <div key={key} className="shrink-0">
                 <BadgeComp size={20} />
-
-                {/* Hover Tooltip for this reaction */}
-                {hoveredKey === key && (
-                  <ReactionTooltip
-                    type={key}
-                    users={normalized[key] || []}
-                  />
-                )}
               </div>
             );
           })}
@@ -105,7 +81,7 @@ const ReactionStackedBadges = ({
       <ReactionsListModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        initialTab={selectedTab}
+        initialTab="all"
         normalizedReactions={normalized}
         totalReactions={total}
       />
