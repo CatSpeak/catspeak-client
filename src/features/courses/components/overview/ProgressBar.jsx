@@ -9,14 +9,14 @@ const ProgressBar = ({ progress, label, className = "max-w-[220px]" }) => {
   return (
     <div className={`flex flex-col gap-0.5 mt-1 ${className}`}>
       {label && (
-        <div className="flex justify-between text-[9px] font-bold text-gray-400 leading-none">
+        <div className="flex justify-between text-[9px] font-bold text-gray-400 dark:text-gray-400 leading-none">
           <span>{label}</span>
           <span>{percent == null ? "—" : `${percent}%`}</span>
         </div>
       )}
-      <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+      <div className="w-full h-1 bg-gray-100 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-300 ${percent === 100 ? "bg-green-500" : "bg-[#990011]"
+          className={`h-full rounded-full transition-all duration-300 ${percent === 100 ? "bg-green-500 dark:bg-green-400" : "bg-[#990011] dark:bg-[#b20a1c]"
             }`}
           style={{ width: `${percent ?? 0}%` }}
           {...(percent == null ? {} : {

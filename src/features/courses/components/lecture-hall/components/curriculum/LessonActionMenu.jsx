@@ -2,7 +2,7 @@ import React from "react"
 import { Pencil, Eye, EyeOff, Trash, MoreVertical } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { IconButton, PillButton } from "@/shared/components/ui/buttons"
+import { IconButton } from "@/shared/components/ui/buttons"
 
 const LessonActionMenu = ({
   item,
@@ -19,7 +19,7 @@ const LessonActionMenu = ({
     options.push({
       value: "edit",
       label: dict.edit,
-      icon: <Pencil size={15} className="text-[#1A1A1A]" />,
+      icon: <Pencil size={15} className="text-[#1A1A1A] dark:text-gray-200" />,
       action: () => onEdit(item),
     })
   }
@@ -27,14 +27,14 @@ const LessonActionMenu = ({
   options.push({
     value: "toggleVisibility",
     label: dict.toggleVisibility,
-    icon: item?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />,
+    icon: item?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A] dark:text-gray-200" /> : <EyeOff size={15} className="text-[#1A1A1A] dark:text-gray-200" />,
     action: () => onToggleItemVisibility(item.id),
   })
 
   options.push({
     value: "delete",
     label: dict.delete,
-    icon: <Trash size={15} className="text-[#1A1A1A]" />,
+    icon: <Trash size={15} className="text-[#1A1A1A] dark:text-gray-200" />,
     action: () => onDeleteItem(item.id),
   })
 

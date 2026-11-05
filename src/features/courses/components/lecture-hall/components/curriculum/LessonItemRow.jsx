@@ -23,37 +23,37 @@ const getItemConfig = (type) => {
     case "bulletinBoard":
       return {
         leftBorder: "",
-        iconBg: "bg-[#FDE7E7] text-[#750000]",
+        iconBg: "bg-[#FDE7E7] dark:bg-red-950/40 text-[#750000] dark:text-[#FF6B6B]",
         Icon: MessageSquare,
       }
     case "material":
       return {
         leftBorder: "",
-        iconBg: "bg-[#FFE8D6] text-[#E85D04]",
+        iconBg: "bg-[#FFE8D6] dark:bg-amber-950/40 text-[#E85D04] dark:text-amber-400",
         Icon: Folder,
       }
     case "link":
       return {
         leftBorder: "",
-        iconBg: "bg-[#E0F2FE] text-[#0284C7]",
+        iconBg: "bg-[#E0F2FE] dark:bg-sky-950/40 text-[#0284C7] dark:text-sky-400",
         Icon: Link2,
       }
     case "assignment":
       return {
         leftBorder: "",
-        iconBg: "bg-[#D6E4FF] text-[#1E70F6]",
+        iconBg: "bg-[#D6E4FF] dark:bg-blue-950/40 text-[#1E70F6] dark:text-blue-400",
         Icon: ClipboardList,
       }
     case "quiz":
       return {
         leftBorder: "",
-        iconBg: "bg-[#FCE7F3] text-[#EC4899]",
+        iconBg: "bg-[#FCE7F3] dark:bg-pink-950/40 text-[#EC4899] dark:text-pink-400",
         Icon: FileText,
       }
     default:
       return {
         leftBorder: "",
-        iconBg: "bg-[#FCE7F3] text-[#EC4899]",
+        iconBg: "bg-[#FCE7F3] dark:bg-pink-950/40 text-[#EC4899] dark:text-pink-400",
         Icon: FileText,
       }
   }
@@ -61,7 +61,6 @@ const getItemConfig = (type) => {
 
 const LessonItemRow = ({
   item = {},
-  // isEdit = true,
   isStudent = false,
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
@@ -129,34 +128,11 @@ const LessonItemRow = ({
 
   const isHidden = item.isVisibleToStudents === false
 
-  const isClickable = ["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type);
-
-  const handleRowClick = () => {
-    const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
-    if (displayData.type === "bulletinBoard") {
-      navigate(`${basePath}/bulletin-board/${displayData.itemId}`, { state: { displayData } })
-    } else if (isYoutubeLink) {
-      onSelectLesson(item, "link")
-    } else if (displayData.type === "link") {
-      onSelectLesson(item, "link")
-    } else if (displayData.type === "assignment") {
-      navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
-    } else if (displayData.type === "quiz") {
-      if (isStudent) {
-        navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
-      } else {
-        navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}`)
-      }
-    } else if (displayData.type === "material") {
-      onSelectLesson(item, "material")
-    }
-  }
-
   return (
     <div
       className={`rounded-xl md:rounded-2xl p-3 md:p-5 mb-3 md:mb-4 flex flex-col relative transition-all shadow-sm ${isHidden
-        ? "bg-[#7B7979] border border-[#7B7979]"
-        : "bg-white border border-[#E2E2E2] hover:border-gray-300"
+        ? "bg-[#7B7979] dark:bg-[#2A2A2A] border border-[#7B7979] dark:border-[#3F3F3F]"
+        : "bg-white dark:bg-[#1A1A1A] border border-[#E2E2E2] dark:border-[#3F3F3F] hover:border-gray-300 dark:hover:border-gray-600"
         } ${className}`}
     >
       <div className="flex items-center justify-between gap-3 md:gap-4 w-full">
@@ -173,7 +149,7 @@ const LessonItemRow = ({
           <div className="min-w-0 space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <h4
-                className={`text-[15px] font-semibold truncate max-w-full ${isHidden ? "text-white" : "text-[#191C1D]"} ${["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type) ? "cursor-pointer hover:underline" : ""}`}
+                className={`text-[15px] font-semibold truncate max-w-full ${isHidden ? "text-white" : "text-[#191C1D] dark:text-white"} ${["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type) ? "cursor-pointer hover:underline" : ""}`}
                 onClick={() => {
                   const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
                   if (displayData.type === "bulletinBoard") {
@@ -207,9 +183,9 @@ const LessonItemRow = ({
             </div>
 
             {(displayData.meta || isHidden) && (
-              <div className={`flex items-center gap-1 text-[13px] font-normal ${isHidden ? "text-gray-200" : "text-[#7B7979]"}`}>
+              <div className={`flex items-center gap-1 text-[13px] font-normal ${isHidden ? "text-gray-200" : "text-[#7B7979] dark:text-gray-400"}`}>
                 {isHidden && (
-                  <span className="inline-flex items-center gap-1 bg-white text-[#7B7979] text-[10px] px-2.5 py-0.5 rounded-full font-bold mr-2">
+                  <span className="inline-flex items-center gap-1 bg-white dark:bg-[#1A1A1A] text-[#7B7979] dark:text-gray-300 text-[10px] px-2.5 py-0.5 rounded-full font-bold mr-2 border border-transparent dark:border-[#3F3F3F]">
                     <span className="font-bold">{dict.hiddenStatus || "Đang ẩn"}</span>
                     <EyeOff size={10} strokeWidth={3} />
                   </span>
@@ -233,11 +209,11 @@ const LessonItemRow = ({
         </div>
 
         {/* Right section: Expand Button & 3-dots Menu Button */}
-        <div className="shrink-0 flex items-center gap-1 text-gray-500">
+        <div className="shrink-0 flex items-center gap-1 text-gray-500 dark:text-gray-400">
           {isYoutubeLink && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className={`p-1.5 rounded-full transition-colors ${isHidden ? "hover:bg-gray-600 text-white" : "hover:text-[#D94C38] hover:bg-gray-100"}`}
+              className={`p-1.5 rounded-full transition-colors ${isHidden ? "hover:bg-gray-600 text-white" : "hover:text-[#D94C38] dark:hover:text-[#FF6B6B] hover:bg-gray-100 dark:hover:bg-[#2A2A2A]"}`}
             >
               {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </button>
@@ -262,7 +238,7 @@ const LessonItemRow = ({
 
       {/* Expanded Youtube Video */}
       {isExpanded && isYoutubeLink && (
-        <div className="w-full mt-4 pt-4 border-t border-[#E2E2E2] flex justify-center items-center">
+        <div className="w-full mt-4 pt-4 border-t border-[#E2E2E2] dark:border-[#3F3F3F] flex justify-center items-center">
           {youtubeId ? (
             <div className="flex flex-col items-center w-full">
               <div className="w-full max-w-3xl aspect-video rounded-xl overflow-hidden shadow-md">
@@ -274,18 +250,18 @@ const LessonItemRow = ({
                   allowFullScreen
                 />
               </div>
-              <p className="mt-3 text-sm text-[#6B7280]">
+              <p className="mt-3 text-sm text-[#6B7280] dark:text-gray-400">
                 {t.courses.lectureHall.linkPage?.videoNotLoading || "Video không hiển thị?"}{" "}
-                <a href={displayData.meta} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline font-medium">
+                <a href={displayData.meta} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline font-medium">
                   {t.courses.lectureHall.linkPage?.openInNewTab || "Mở trong tab mới"}
                 </a>
               </p>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-sm text-[#5B403C] w-full border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-              <VideoOff size={32} className="mb-3 text-[#9CA3AF] opacity-80" />
+            <div className="flex flex-col items-center justify-center py-8 text-sm text-[#5B403C] dark:text-gray-300 w-full border border-dashed border-[#E2E2E2] dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#222222]">
+              <VideoOff size={32} className="mb-3 text-[#9CA3AF] dark:text-gray-500 opacity-80" />
               <p>{t.courses.lectureHall.linkPage?.invalidYoutube || "Invalid YouTube URL"}</p>
-              <a href={displayData.meta} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline mt-2 inline-block font-medium">
+              <a href={displayData.meta} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline mt-2 inline-block font-medium">
                 {t.courses.lectureHall.linkPage?.openInNewTab || "Open in new tab"}
               </a>
             </div>

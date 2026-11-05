@@ -143,12 +143,12 @@ const TeacherPublicProfilePage = () => {
   // ─── Render Loading State ───
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#121212] py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto flex flex-col gap-6 animate-pulse">
-          <div className="h-4 w-48 bg-slate-200 rounded" />
-          <div className="h-80 bg-white rounded-2xl border border-slate-200" />
-          <div className="h-48 bg-white rounded-2xl border border-slate-200" />
-          <div className="h-64 bg-white rounded-2xl border border-slate-200" />
+          <div className="h-4 w-48 bg-slate-200 dark:bg-[#2A2A2A] rounded" />
+          <div className="h-80 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]" />
+          <div className="h-48 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]" />
+          <div className="h-64 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]" />
         </div>
       </div>
     )
@@ -157,15 +157,15 @@ const TeacherPublicProfilePage = () => {
   // ─── Render Error / Not Found State ───
   if (isError || !teacher) {
     return (
-      <div className="min-h-[70vh] bg-[#F8F9FA] flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-slate-200 p-8 text-center shadow-xs">
-          <div className="w-16 h-16 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+      <div className="min-h-[70vh] bg-[#F8F9FA] dark:bg-[#121212] flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F] p-8 text-center shadow-xs">
+          <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-[#FF6B6B] flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
             !
           </div>
-          <h2 className="text-xl font-black text-slate-900 mb-2">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">
             {t.courses?.teacherNotFound || "Không tìm thấy giảng viên"}
           </h2>
-          <p className="text-sm text-slate-500 mb-6">
+          <p className="text-sm text-slate-500 dark:text-gray-400 mb-6">
             {t.courses?.teacherNotFoundDesc ||
               "Giảng viên bạn đang tìm kiếm không tồn tại hoặc đã ngừng hoạt động."}
           </p>
@@ -173,13 +173,13 @@ const TeacherPublicProfilePage = () => {
             <button
               type="button"
               onClick={() => refetch()}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50"
+              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#3F3F3F] text-slate-700 dark:text-gray-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-[#222222] cursor-pointer"
             >
               Thử lại
             </button>
             <Link
               to="/explore-courses"
-              className="px-5 py-2 rounded-xl bg-[#990011] text-white text-xs font-bold hover:bg-[#80000e] transition-colors"
+              className="px-5 py-2 rounded-xl bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white text-xs font-bold transition-colors cursor-pointer"
             >
               {t.courses?.backToExplore || "Khám phá khóa học"}
             </Link>
@@ -198,14 +198,12 @@ const TeacherPublicProfilePage = () => {
   )
   const ratingValue = formatRating(teacher.rating)
   const reviewCount = teacher.reviewCount || 0
-  const studentCount = teacher.studentCount || 0
-  const activeClassCount = teacher.activeClassCount || 0
-  const courseCount = teacher.courseCount || activeClassCount || 0
+  const courseCount = teacher.courseCount || teacher.activeClassCount || 0
   const yearsExp = Number(
     teacher.yearsOfExperience ??
-      (Array.isArray(teacher.experience) && teacher.experience.length > 0
-        ? teacher.experience.length
-        : 0)
+    (Array.isArray(teacher.experience) && teacher.experience.length > 0
+      ? teacher.experience.length
+      : 0)
   )
   const activeClasses = teacher.activeClasses || []
   const totalOpenClasses = teacher.totalOpenClasses || activeClasses.length
@@ -216,31 +214,31 @@ const TeacherPublicProfilePage = () => {
   const totalReviewsCount = reviewCount || 1
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-16">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#121212] pb-16">
       {/* ─── Breadcrumbs ─── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
-        <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 select-none">
+        <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-gray-400 select-none">
           <Link
             to="/"
-            className="hover:text-slate-900 transition-colors"
+            className="hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             {t.courses?.home || "Trang chủ"}
           </Link>
           <ChevronRight size={13} className="text-slate-400 shrink-0" />
           <Link
             to="/explore-courses?type=teachers"
-            className="hover:text-slate-900 transition-colors"
+            className="hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             {t.courses?.student?.tabTeachers || "Giảng viên"}
           </Link>
           <ChevronRight size={13} className="text-slate-400 shrink-0" />
-          <span className="font-bold text-[#990011] truncate">{fullName}</span>
+          <span className="font-bold text-[#990011] dark:text-[#FF6B6B] truncate">{fullName}</span>
         </nav>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col gap-8">
         {/* ─── Header Card: Cover + Avatar + Bio + Follow/Chat Buttons + Stats ─── */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs overflow-hidden">
           {/* Cover Gradient */}
           <div className="relative h-48 sm:h-60 bg-gradient-to-r from-slate-900 via-slate-800 to-zinc-900 flex items-start justify-end p-4 sm:p-6 overflow-hidden">
             {/* Subtle decorative glow */}
@@ -257,11 +255,11 @@ const TeacherPublicProfilePage = () => {
           {/* Profile Overview & Stats Body */}
           <div className="relative px-6 sm:px-8 pb-6">
             {/* Profile Avatar + Identity + Action Buttons */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-slate-100 dark:border-[#2E2E2E]">
               {/* Avatar + Info */}
               <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
                 {/* Avatar (112x112 on desktop, 96x96 on mobile) */}
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 -mt-12 sm:-mt-14 rounded-full overflow-hidden bg-slate-100 border-4 border-white shadow-md shrink-0 flex items-center justify-center select-none z-10">
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 -mt-12 sm:-mt-14 rounded-full overflow-hidden bg-slate-100 dark:bg-[#222222] border-4 border-white dark:border-[#1A1A1A] shadow-md shrink-0 flex items-center justify-center select-none z-10">
                   {teacher.avatarUrl && !avatarError ? (
                     <img
                       src={teacher.avatarUrl}
@@ -279,13 +277,13 @@ const TeacherPublicProfilePage = () => {
                 {/* Name, Headline, Verified Badge Pill, Location */}
                 <div className="flex flex-col gap-1.5 pt-2 sm:pt-3">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                       {fullName}
                     </h1>
 
                     {/* Verified Badge Pill (BR-EX-GV-02) */}
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-xs font-bold select-none">
-                      <ShieldCheck size={14} className="text-emerald-600" />
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50 text-xs font-bold select-none">
+                      <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
                       <span>
                         {t.courses?.verifiedBadge ||
                           "Giảng viên được xác minh bởi Cat Speak"}
@@ -294,17 +292,17 @@ const TeacherPublicProfilePage = () => {
                   </div>
 
                   {/* Subtitle / Email */}
-                  <div className="text-xs sm:text-sm font-medium text-slate-600">
+                  <div className="text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300">
                     {headline}
                     {teacher.email && (
-                      <span className="text-slate-400"> · {teacher.email}</span>
+                      <span className="text-slate-400 dark:text-gray-500"> · {teacher.email}</span>
                     )}
                   </div>
 
                   {/* Meta items: Location & Highlight Certs */}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium pt-1">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-gray-400 font-medium pt-1">
                     <div className="flex items-center gap-1">
-                      <MapPin size={13} className="text-slate-400" />
+                      <MapPin size={13} className="text-slate-400 dark:text-gray-500" />
                       <span>
                         {teacher.address ||
                           getCountryLabel(
@@ -314,10 +312,10 @@ const TeacherPublicProfilePage = () => {
                       </span>
                     </div>
 
-                    <span className="text-slate-300">•</span>
+                    <span className="text-slate-300 dark:text-gray-600">•</span>
 
                     <div className="flex items-center gap-1">
-                      <Globe size={13} className="text-slate-400" />
+                      <Globe size={13} className="text-slate-400 dark:text-gray-500" />
                       <span>
                         {teacher.headline || "TESOL Certified · IELTS"}
                       </span>
@@ -333,7 +331,7 @@ const TeacherPublicProfilePage = () => {
                   <button
                     type="button"
                     onClick={handleMessageClick}
-                    className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl border-2 border-[#990011] text-[#990011] hover:bg-[#990011]/5 transition-colors font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs active:scale-[0.98]"
+                    className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl border-2 border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-[#990011]/5 dark:hover:bg-red-950/30 transition-colors font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs active:scale-[0.98]"
                   >
                     <MessageSquare size={16} />
                     <span>{t.courses?.sendMessage || "Nhắn tin"}</span>
@@ -344,15 +342,14 @@ const TeacherPublicProfilePage = () => {
                     type="button"
                     onClick={handleFollowClick}
                     disabled={isFollowActionPending}
-                    className={`flex-1 sm:flex-initial px-6 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs transition-all active:scale-[0.98] ${
-                      isFollowing
-                        ? "bg-slate-50 border border-slate-300 text-slate-700 hover:bg-slate-100"
-                        : "bg-[#990011] text-white hover:bg-[#80000e]"
-                    }`}
+                    className={`flex-1 sm:flex-initial px-6 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs transition-all active:scale-[0.98] ${isFollowing
+                        ? "bg-slate-50 dark:bg-[#222222] border border-slate-300 dark:border-[#3F3F3F] text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-[#2A2A2A]"
+                        : "bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white"
+                      }`}
                   >
                     {isFollowing ? (
                       <>
-                        <Check size={16} className="text-emerald-600 stroke-[2.5]" />
+                        <Check size={16} className="text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
                         <span>{t.courses?.following || "Đang theo dõi"}</span>
                       </>
                     ) : (
@@ -369,7 +366,7 @@ const TeacherPublicProfilePage = () => {
                     onClick={handleReportClick}
                     title="Báo cáo giảng viên"
                     aria-label="Báo cáo giảng viên"
-                    className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-[#990011] hover:border-red-200 hover:bg-red-50/50 transition-colors font-bold text-sm flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-[0.98]"
+                    className="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#3F3F3F] text-slate-600 dark:text-gray-300 hover:text-[#990011] dark:hover:text-[#FF6B6B] hover:border-red-200 dark:hover:border-red-900/60 hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-colors font-bold text-sm flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-[0.98]"
                   >
                     <Flag size={16} />
                     <span className="hidden sm:inline">Báo cáo</span>
@@ -379,17 +376,17 @@ const TeacherPublicProfilePage = () => {
             </div>
 
             {/* Stats Row (3 Columns: Rating, Experience, Courses) */}
-            <div className="grid grid-cols-3 divide-x divide-slate-100 pt-5">
+            <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-[#2E2E2E] pt-5">
               {/* Rating */}
               <div className="flex flex-col items-center justify-center px-2 sm:px-4 text-center">
-                <div className="flex items-center gap-1.5 text-xl sm:text-2xl font-black text-slate-900">
+                <div className="flex items-center gap-1.5 text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                   <Star
                     size={20}
                     className="text-amber-400 fill-amber-400 shrink-0"
                   />
                   <span>{ratingValue}</span>
                 </div>
-                <div className="text-[11px] sm:text-xs font-medium text-slate-500 mt-0.5 truncate">
+                <div className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-gray-400 mt-0.5 truncate">
                   {t.courses?.ratingLabel || "Đánh giá"} (
                   {formatTeacherNumber(reviewCount)} nhận xét)
                 </div>
@@ -397,28 +394,28 @@ const TeacherPublicProfilePage = () => {
 
               {/* Experience */}
               <div className="flex flex-col items-center justify-center px-2 sm:px-4 text-center">
-                <div className="flex items-center gap-1.5 text-xl sm:text-2xl font-black text-slate-900">
+                <div className="flex items-center gap-1.5 text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                   <Trophy
                     size={20}
                     className="text-amber-500 shrink-0"
                   />
                   <span>{yearsExp} Năm KN</span>
                 </div>
-                <div className="text-[11px] sm:text-xs font-medium text-slate-500 mt-0.5 truncate">
+                <div className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-gray-400 mt-0.5 truncate">
                   {t.courses?.teachingExp || "Kinh nghiệm giảng dạy"}
                 </div>
               </div>
 
               {/* Open Classes / Courses */}
               <div className="flex flex-col items-center justify-center px-2 sm:px-4 text-center">
-                <div className="flex items-center gap-1.5 text-xl sm:text-2xl font-black text-slate-900">
+                <div className="flex items-center gap-1.5 text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                   <BookOpen
                     size={20}
-                    className="text-blue-600 shrink-0"
+                    className="text-blue-600 dark:text-blue-400 shrink-0"
                   />
                   <span>{courseCount}</span>
                 </div>
-                <div className="text-[11px] sm:text-xs font-medium text-slate-500 mt-0.5 truncate">
+                <div className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-gray-400 mt-0.5 truncate">
                   {t.courses?.openedCourses || "Khóa học đã mở"}
                 </div>
               </div>
@@ -427,31 +424,31 @@ const TeacherPublicProfilePage = () => {
         </div>
 
         {/* ─── Bio Card ("Giới thiệu bản thân") ─── */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 sm:p-7 flex flex-col gap-4">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-6 sm:p-7 flex flex-col gap-4">
           <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-            <h2 className="text-lg font-extrabold text-slate-900">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] shrink-0" />
+            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
               {t.courses?.aboutMe || "Giới thiệu bản thân"}
             </h2>
           </div>
 
           {/* Bio text */}
-          <div className="text-sm text-slate-600 leading-relaxed space-y-3 whitespace-pre-line">
+          <div className="text-sm text-slate-600 dark:text-gray-300 leading-relaxed space-y-3 whitespace-pre-line">
             {teacher.introduction ||
               teacher.bio ||
               "Giảng viên chưa cập nhật thông tin giới thiệu chi tiết."}
           </div>
 
           {/* Footer of Bio Card: Update date & Link to Competency */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-medium">
+          <div className="pt-4 border-t border-slate-100 dark:border-[#2E2E2E] flex items-center justify-between text-xs">
+            <span className="text-slate-400 dark:text-gray-500 font-medium">
               {t.courses?.lastUpdated?.replace("{{time}}", "2 ngày trước") ||
                 "Cập nhật lần cuối: Gần đây"}
             </span>
 
             <Link
               to={`/explore/teachers/${encodeURIComponent(slugOrId)}/competency`}
-              className="font-bold text-[#990011] hover:text-[#80000e] transition-colors flex items-center gap-1 cursor-pointer"
+              className="font-bold text-[#990011] hover:text-[#80000e] dark:text-[#FF6B6B] dark:hover:text-[#ff8585] transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span>
                 {t.courses?.viewCompetencyProfile || "Xem thêm hồ sơ năng lực"}
@@ -465,8 +462,8 @@ const TeacherPublicProfilePage = () => {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-              <h2 className="text-lg font-extrabold text-slate-900">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] shrink-0" />
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
                 {t.courses?.openClasses || "Lớp học đang mở"}
               </h2>
             </div>
@@ -475,7 +472,7 @@ const TeacherPublicProfilePage = () => {
               <button
                 type="button"
                 onClick={() => setIsClassesModalOpen(true)}
-                className="text-xs sm:text-sm font-bold text-[#990011] hover:text-[#80000e] transition-colors flex items-center gap-1 cursor-pointer"
+                className="text-xs sm:text-sm font-bold text-[#990011] hover:text-[#80000e] dark:text-[#FF6B6B] dark:hover:text-[#ff8585] transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <span>
                   {t.courses?.viewAllClassesCount?.replace(
@@ -496,7 +493,7 @@ const TeacherPublicProfilePage = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-8 text-center text-sm text-slate-500">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] p-8 text-center text-sm text-slate-500 dark:text-gray-400">
               {t.courses?.noClassesOpen ||
                 "Hiện tại giảng viên chưa có lớp học nào đang mở."}
             </div>
@@ -504,10 +501,10 @@ const TeacherPublicProfilePage = () => {
         </div>
 
         {/* ─── Student Reviews Section ("Đánh giá từ học viên") ─── */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 sm:p-8 flex flex-col gap-6">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-6 sm:p-8 flex flex-col gap-6">
           <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-            <h2 className="text-lg font-extrabold text-slate-900">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] shrink-0" />
+            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
               {t.courses?.studentReviews || "Đánh giá từ học viên"}
             </h2>
           </div>
@@ -517,7 +514,7 @@ const TeacherPublicProfilePage = () => {
             <div className="md:col-span-5 flex flex-col gap-4">
               {/* Score & Stars */}
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-black text-slate-900">
+                <span className="text-4xl font-black text-slate-900 dark:text-white">
                   {ratingValue}
                 </span>
                 <div className="flex flex-col">
@@ -530,7 +527,7 @@ const TeacherPublicProfilePage = () => {
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-slate-500 font-medium mt-0.5">
+                  <span className="text-xs text-slate-500 dark:text-gray-400 font-medium mt-0.5">
                     {t.courses?.basedOnReviews?.replace(
                       "{{count}}",
                       formatTeacherNumber(reviewCount)
@@ -550,16 +547,16 @@ const TeacherPublicProfilePage = () => {
                   return (
                     <div
                       key={star}
-                      className="flex items-center gap-2 text-xs text-slate-600 font-semibold"
+                      className="flex items-center gap-2 text-xs text-slate-600 dark:text-gray-300 font-semibold"
                     >
                       <span className="w-10 shrink-0">{star} sao</span>
-                      <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-[#2A2A2A] overflow-hidden">
                         <div
                           className="h-full bg-[#FBBF24] rounded-full transition-all duration-300"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="w-8 text-right text-slate-400 font-medium shrink-0">
+                      <span className="w-8 text-right text-slate-400 dark:text-gray-400 font-medium shrink-0">
                         {pct}%
                       </span>
                     </div>
@@ -569,8 +566,8 @@ const TeacherPublicProfilePage = () => {
             </div>
 
             {/* Right: Featured Reviews (7 Columns) */}
-            <div className="md:col-span-7 flex flex-col gap-4 md:border-l md:border-slate-100 md:pl-8">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <div className="md:col-span-7 flex flex-col gap-4 md:border-l md:border-slate-100 dark:md:border-[#2E2E2E] md:pl-8">
+              <span className="text-xs font-bold text-slate-700 dark:text-gray-300 uppercase tracking-wider">
                 {t.courses?.featuredReviews || "NHẬN XÉT TIÊU BIỂU"}
               </span>
 
@@ -579,21 +576,21 @@ const TeacherPublicProfilePage = () => {
                   {featuredReviews.slice(0, 2).map((rev) => {
                     const revDate = rev.createdAt
                       ? new Date(rev.createdAt).toLocaleDateString("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })
                       : ""
                     return (
                       <div
                         key={rev.reviewId}
-                        className="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex flex-col gap-2"
+                        className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#222222] border border-slate-100 dark:border-[#333333] flex flex-col gap-2"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-slate-900">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white">
                             {rev.studentName}
                           </span>
-                          <span className="text-[11px] text-slate-400">
+                          <span className="text-[11px] text-slate-400 dark:text-gray-400">
                             {revDate}
                           </span>
                         </div>
@@ -607,14 +604,14 @@ const TeacherPublicProfilePage = () => {
                               className={
                                 s <= Math.round(rev.rating)
                                   ? "fill-amber-400 text-amber-400"
-                                  : "text-slate-200"
+                                  : "text-slate-200 dark:text-gray-600"
                               }
                             />
                           ))}
                         </div>
 
                         {/* Comment text */}
-                        <p className="text-xs text-slate-600 italic leading-relaxed">
+                        <p className="text-xs text-slate-600 dark:text-gray-300 italic leading-relaxed">
                           "{rev.comment}"
                         </p>
 
@@ -623,7 +620,7 @@ const TeacherPublicProfilePage = () => {
                           <div className="pt-1">
                             <Link
                               to={`/explore-courses/class/${rev.classId}`}
-                              className="text-[11px] font-bold text-[#990011] hover:underline"
+                              className="text-[11px] font-bold text-[#990011] dark:text-[#FF6B6B] hover:underline"
                             >
                               Lớp: {rev.className}
                             </Link>
@@ -634,7 +631,7 @@ const TeacherPublicProfilePage = () => {
                   })}
                 </div>
               ) : (
-                <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 rounded-xl">
+                <div className="p-6 text-center text-xs text-slate-400 dark:text-gray-500 bg-slate-50 dark:bg-[#222222] rounded-xl">
                   {t.courses?.noReviewsYet ||
                     "Chưa có nhận xét nào từ học viên."}
                 </div>
@@ -644,7 +641,7 @@ const TeacherPublicProfilePage = () => {
               <button
                 type="button"
                 onClick={() => setIsReviewsModalOpen(true)}
-                className="w-full py-2.5 px-4 rounded-xl border border-[#990011] text-[#990011] hover:bg-[#990011]/5 transition-colors text-xs sm:text-sm font-bold text-center cursor-pointer active:scale-[0.99]"
+                className="w-full py-2.5 px-4 rounded-xl border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-[#990011]/5 dark:hover:bg-red-950/30 transition-colors text-xs sm:text-sm font-bold text-center cursor-pointer active:scale-[0.99]"
               >
                 {t.courses?.viewAllReviews || "Xem tất cả nhận xét"}
               </button>

@@ -33,14 +33,14 @@ const CourseTable = ({ courses, t, onDelete }) => {
             <div
               key={`mobile-${item.id}`}
               onClick={() => navigate(`/workspace/courses/details/${encodeURIComponent(String(item.id))}`)}
-              className="bg-white rounded-3xl border border-border/90 p-4 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col gap-3 group"
+              className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border/90 dark:border-[#3F3F3F] p-4 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col gap-3 group"
             >
               {/* Header: Thumbnail + Title + Status + 3-dots */}
               <div className="flex items-start gap-3">
                 <CourseThumbnail
                   item={item}
                   title={item.title}
-                  className="w-20 h-16 min-w-[80px] max-w-[80px] rounded-2xl bg-slate-100 shadow-2xs shrink-0 overflow-hidden"
+                  className="w-20 h-16 min-w-[80px] max-w-[80px] rounded-2xl bg-slate-100 dark:bg-[#2A2A2A] shadow-2xs shrink-0 overflow-hidden"
                   imageClassName="w-full h-full object-cover"
                 />
                 <div className="flex flex-col flex-1 min-w-0 gap-1">
@@ -53,7 +53,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                     )}
                   </div>
                   <h4
-                    className="font-bold text-sm text-gray-950 truncate group-hover:text-[#990011] transition-colors leading-snug"
+                    className="font-bold text-sm text-gray-950 dark:text-white truncate group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors leading-snug"
                     title={item.title}
                   >
                     {item.title}
@@ -73,14 +73,14 @@ const CourseTable = ({ courses, t, onDelete }) => {
                     }}
                     variant="ghost"
                     size="xs"
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-200"
                   >
                     <MoreVertical size={16} />
                   </IconButton>
                   {activeDropdown === `m-${item.id}` && (
                     <div
                       role="menu"
-                      className="absolute right-0 mt-1 min-w-[152px] bg-white border border-border rounded-2xl shadow-lg py-1 z-30 text-left whitespace-nowrap"
+                      className="absolute right-0 mt-1 min-w-[152px] bg-white dark:bg-[#1E1E1E] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-lg py-1 z-30 text-left whitespace-nowrap"
                     >
                       <button
                         type="button"
@@ -90,9 +90,9 @@ const CourseTable = ({ courses, t, onDelete }) => {
                           setActiveDropdown(null)
                           navigate(`/workspace/courses/details/${encodeURIComponent(String(item.id))}`)
                         }}
-                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 cursor-pointer"
                       >
-                        <Eye size={14} className="text-gray-500 shrink-0" />
+                        <Eye size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
                         <span>{c.viewDetails || "Xem chi tiết"}</span>
                       </button>
                       <button
@@ -103,9 +103,9 @@ const CourseTable = ({ courses, t, onDelete }) => {
                           setActiveDropdown(null)
                           navigate(`/workspace/courses/edit/${encodeURIComponent(String(item.id))}`)
                         }}
-                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-t border-border/60 cursor-pointer"
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 border-t border-border/60 dark:border-[#3F3F3F] cursor-pointer"
                       >
-                        <PenSquare size={14} className="text-gray-500 shrink-0" />
+                        <PenSquare size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
                         <span>{c.editCourse || "Chỉnh sửa"}</span>
                       </button>
                       {onDelete && (
@@ -117,7 +117,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                             setActiveDropdown(null)
                             onDelete(item.id)
                           }}
-                          className="w-full px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-border/60 cursor-pointer"
+                          className="w-full px-3.5 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 border-t border-border/60 dark:border-[#3F3F3F] cursor-pointer"
                         >
                           <Trash2 size={14} className="shrink-0" />
                           <span>{c.courseDetail?.deleteCourse || "Xóa"}</span>
@@ -129,24 +129,24 @@ const CourseTable = ({ courses, t, onDelete }) => {
               </div>
 
               {/* Middle Info Panel */}
-              <div className="bg-gray-50/80 rounded-2xl p-2.5 text-xs text-gray-600 flex flex-col gap-1.5 border border-gray-100">
+              <div className="bg-gray-50/80 dark:bg-[#242424] rounded-2xl p-2.5 text-xs text-gray-600 dark:text-gray-300 flex flex-col gap-1.5 border border-gray-100 dark:border-[#333333]">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-1.5 text-gray-700 font-semibold">
-                    <Bookmark size={13} className="text-gray-400 shrink-0" />
+                  <span className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-semibold">
+                    <Bookmark size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                     <span>{item.classCount}</span>
                   </span>
                   {item.hasClasses && (
-                    <span className="flex items-center gap-1.5 font-semibold text-gray-700">
-                      <Users size={13} className="text-gray-400 shrink-0" />
+                    <span className="flex items-center gap-1.5 font-semibold text-gray-700 dark:text-gray-300">
+                      <Users size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                       <span>{item.students}</span>
                     </span>
                   )}
                 </div>
 
                 {(item.startDate || item.endDate) && (
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-200/60 text-[11px]">
-                    <span className="text-gray-400">{c.startDate || "Ngày mở"}: <strong className="text-gray-700 font-semibold">{item.startDate || "—"}</strong></span>
-                    <span className="text-gray-400">{c.endDate || "Ngày hết"}: <strong className="text-gray-700 font-semibold">{item.endDate || "—"}</strong></span>
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-200/60 dark:border-[#333333] text-[11px]">
+                    <span className="text-gray-400 dark:text-gray-400">{c.startDate || "Ngày mở"}: <strong className="text-gray-700 dark:text-gray-200 font-semibold">{item.startDate || "—"}</strong></span>
+                    <span className="text-gray-400 dark:text-gray-400">{c.endDate || "Ngày hết"}: <strong className="text-gray-700 dark:text-gray-200 font-semibold">{item.endDate || "—"}</strong></span>
                   </div>
                 )}
               </div>
@@ -154,12 +154,12 @@ const CourseTable = ({ courses, t, onDelete }) => {
               {/* Footer: Price & View Detail Action */}
               <div className="flex items-center justify-between pt-1 text-xs">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-gray-400 font-medium text-[11px]">{c.price || "Giá cả"}:</span>
-                  <span className={`text-sm font-bold ${isFree ? "text-[#16A34A]" : "text-gray-950"}`}>
+                  <span className="text-gray-400 dark:text-gray-400 font-medium text-[11px]">{c.price || "Giá cả"}:</span>
+                  <span className={`text-sm font-bold ${isFree ? "text-[#16A34A] dark:text-emerald-400" : "text-gray-950 dark:text-white"}`}>
                     {isFree ? (c.free || "Miễn phí") : (item.price || "—")}
                   </span>
                 </div>
-                <span className="text-[#b20a1c] font-bold text-xs hover:underline flex items-center gap-1">
+                <span className="text-[#b20a1c] dark:text-[#FF6B6B] font-bold text-xs hover:underline flex items-center gap-1">
                   {c.manageDetails || "Quản lý chi tiết"} →
                 </span>
               </div>
@@ -169,29 +169,29 @@ const CourseTable = ({ courses, t, onDelete }) => {
       </div>
 
       {/* ─── Desktop View (>= md): Full 6-Column Table ─── */}
-      <div className="hidden md:block w-full overflow-x-auto rounded-3xl border border-border bg-white shadow-xs">
-        <table className="w-full min-w-[920px] border-collapse text-left text-xs font-semibold text-gray-500">
+      <div className="hidden md:block w-full overflow-x-auto rounded-3xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-xs">
+        <table className="w-full min-w-[920px] border-collapse text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
           <thead>
-            <tr className="border-b border-border bg-gray-50/60 text-gray-800 font-bold">
-              <th className="p-4 border-r border-border w-[170px] min-w-[150px] whitespace-nowrap">
+            <tr className="border-b border-border dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#242424] text-gray-800 dark:text-gray-200 font-bold">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[170px] min-w-[150px] whitespace-nowrap">
                 {c.coverImage || "Ảnh đại diện"}
               </th>
-              <th className="p-4 border-r border-border min-w-[260px]">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] min-w-[260px]">
                 {c.courseInfo || "Thông tin khóa học"}
               </th>
-              <th className="p-4 border-r border-border w-[130px] min-w-[120px] text-center whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[130px] min-w-[120px] text-center whitespace-nowrap">
                 {c.startDate || "Ngày mở"}
               </th>
-              <th className="p-4 border-r border-border w-[130px] min-w-[120px] text-center whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[130px] min-w-[120px] text-center whitespace-nowrap">
                 {c.endDate || "Ngày hết"}
               </th>
-              <th className="p-4 border-r border-border w-[180px] min-w-[170px] text-center whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[180px] min-w-[170px] text-center whitespace-nowrap">
                 {c.price || "Giá cả"}
               </th>
               <th className="p-4 w-[110px] text-center whitespace-nowrap">{c.action || "Hành động"}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border text-gray-700">
+          <tbody className="divide-y divide-border dark:divide-[#3F3F3F] text-gray-700 dark:text-gray-300">
             {courses.map((item) => (
               <tr
                 key={item.id}
@@ -203,20 +203,20 @@ const CourseTable = ({ courses, t, onDelete }) => {
                   }
                 }}
                 tabIndex={0}
-                className="hover:bg-gray-50/70 cursor-pointer transition-colors group"
+                className="hover:bg-gray-50/70 dark:hover:bg-[#242424] cursor-pointer transition-colors group"
               >
                 {/* Cover Image cell with fixed frame */}
-                <td className="p-4 border-r border-border align-middle">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] align-middle">
                   <CourseThumbnail
                     item={item}
                     title={item.title}
-                    className="w-[140px] h-[88px] min-w-[140px] max-w-[140px] min-h-[88px] max-h-[88px] rounded-2xl bg-slate-100 shadow-xs shrink-0 overflow-hidden"
+                    className="w-[140px] h-[88px] min-w-[140px] max-w-[140px] min-h-[88px] max-h-[88px] rounded-2xl bg-slate-100 dark:bg-[#2A2A2A] shadow-xs shrink-0 overflow-hidden"
                     imageClassName="w-full h-full object-cover"
                   />
                 </td>
 
                 {/* Course Info cell */}
-                <td className="p-4 border-r border-border min-w-[260px] align-middle">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] min-w-[260px] align-middle">
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <CourseStatusPill status={item.status} />
@@ -227,20 +227,20 @@ const CourseTable = ({ courses, t, onDelete }) => {
                       )}
                     </div>
 
-                    <h4 className="font-bold text-sm text-gray-950 leading-snug group-hover:text-[#990011] transition-colors line-clamp-1" title={item.title}>
+                    <h4 className="font-bold text-sm text-gray-950 dark:text-white leading-snug group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors line-clamp-1" title={item.title}>
                       {item.title}
                     </h4>
 
-                    <div className="flex items-center gap-3 text-[11px] text-gray-500 font-medium">
+                    <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                       <span className="flex items-center gap-1.5">
-                        <Bookmark size={13} className="text-gray-400 shrink-0" />
+                        <Bookmark size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                         <span>{item.classCount}</span>
                       </span>
                       {item.hasClasses && (
                         <>
-                          <span className="text-gray-300">|</span>
+                          <span className="text-gray-300 dark:text-gray-600">|</span>
                           <span className="flex items-center gap-1.5">
-                            <Users size={13} className="text-gray-400 shrink-0" />
+                            <Users size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                             <span>{item.students}</span>
                           </span>
                         </>
@@ -250,19 +250,19 @@ const CourseTable = ({ courses, t, onDelete }) => {
                 </td>
 
                 {/* Start Date */}
-                <td className="p-4 border-r border-border text-center text-sm font-semibold text-gray-800 align-middle whitespace-nowrap">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-center text-sm font-semibold text-gray-800 dark:text-gray-200 align-middle whitespace-nowrap">
                   {item.startDate || "—"}
                 </td>
 
                 {/* End Date */}
-                <td className="p-4 border-r border-border text-center text-sm font-semibold text-gray-800 align-middle whitespace-nowrap">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-center text-sm font-semibold text-gray-800 dark:text-gray-200 align-middle whitespace-nowrap">
                   {item.endDate || "—"}
                 </td>
 
                 {/* Price */}
-                <td className="p-4 border-r border-border text-center text-sm sm:text-base font-bold text-gray-950 align-middle whitespace-nowrap">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-center text-sm sm:text-base font-bold text-gray-950 dark:text-white align-middle whitespace-nowrap">
                   {item.isFree || item.price === "0đ" || item.price === "Miễn phí" || item.price === "Free" || item.price === "免费" || item.price === c.free ? (
-                    <span className="text-[#16A34A]">{c.free || "Miễn phí"}</span>
+                    <span className="text-[#16A34A] dark:text-emerald-400">{c.free || "Miễn phí"}</span>
                   ) : (
                     item.price || "—"
                   )}
@@ -280,8 +280,8 @@ const CourseTable = ({ courses, t, onDelete }) => {
                       title={c.viewDetails || "Xem chi tiết"}
                       variant="ghost"
                       size="xs"
-                      className="text-[#990011]"
-                      innerClassName="hover:bg-red-50 text-[#990011]"
+                      className="text-[#990011] dark:text-[#FF6B6B]"
+                      innerClassName="hover:bg-red-50 dark:hover:bg-red-950/40 text-[#990011] dark:text-[#FF6B6B]"
                     >
                       <Eye size={17} />
                     </IconButton>
@@ -299,13 +299,13 @@ const CourseTable = ({ courses, t, onDelete }) => {
                         }}
                         variant="ghost"
                         size="xs"
-                        className="text-[#990011]"
-                        innerClassName="hover:bg-red-50 text-[#990011]"
+                        className="text-[#990011] dark:text-[#FF6B6B]"
+                        innerClassName="hover:bg-red-50 dark:hover:bg-red-950/40 text-[#990011] dark:text-[#FF6B6B]"
                       >
                         <MoreVertical size={17} />
                       </IconButton>
                       {activeDropdown === item.id && (
-                        <div role="menu" className="absolute right-0 mt-1 min-w-[152px] bg-white border border-border rounded-2xl shadow-md py-1 z-30 text-left whitespace-nowrap">
+                        <div role="menu" className="absolute right-0 mt-1 min-w-[152px] bg-white dark:bg-[#1E1E1E] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-md py-1 z-30 text-left whitespace-nowrap">
                           <button
                             type="button"
                             role="menuitem"
@@ -314,9 +314,9 @@ const CourseTable = ({ courses, t, onDelete }) => {
                               setActiveDropdown(null)
                               navigate(`/workspace/courses/edit/${encodeURIComponent(String(item.id))}`)
                             }}
-                            className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                            className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 cursor-pointer whitespace-nowrap"
                           >
-                            <PenSquare size={14} className="text-gray-500 shrink-0" />
+                            <PenSquare size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
                             <span>{c.editCourse || "Chỉnh sửa"}</span>
                           </button>
                           <button
@@ -327,7 +327,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                               setActiveDropdown(null)
                               if (onDelete) onDelete(item.id)
                             }}
-                            className="w-full px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-border cursor-pointer whitespace-nowrap"
+                            className="w-full px-3.5 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 border-t border-border dark:border-[#3F3F3F] cursor-pointer whitespace-nowrap"
                           >
                             <Trash2 size={14} className="shrink-0" />
                             <span>{c.courseDetail?.deleteCourse || "Xóa"}</span>

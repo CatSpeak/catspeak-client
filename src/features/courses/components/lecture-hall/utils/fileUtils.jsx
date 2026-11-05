@@ -37,7 +37,7 @@ export const getFileStyle = (fileName) => {
 }
 
 export const getFileIcon = (fileName) => {
-  if (!fileName) return <FileText size={20} className="text-gray-500" />
+  if (!fileName) return <FileText size={20} className="text-gray-500 dark:text-gray-400" />
   const ext = fileName.split(".").pop().toLowerCase()
   if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext)) {
     return <ImageIcon size={20} className="text-[#F59E0B]" />
@@ -54,7 +54,7 @@ export const getFileIcon = (fileName) => {
   if (["xlsx", "xls", "csv"].includes(ext)) {
     return <FileText size={20} className="text-[#16A34A]" />
   }
-  return <FileText size={20} className="text-gray-500" />
+  return <FileText size={20} className="text-gray-500 dark:text-gray-400" />
 }
 
 export const MAX_MATERIAL_SIZE = 50 * 1024 * 1024

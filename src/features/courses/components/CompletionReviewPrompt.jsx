@@ -205,7 +205,7 @@ const CompletionReviewPrompt = () => {
         showCloseButton={false}
         fullScreenOnMobile={false}
         bodyClassName="p-0 !mb-0"
-        className="max-w-[420px] w-full rounded-3xl border border-gray-100 shadow-2xl overflow-hidden bg-white mx-4"
+        className="max-w-[420px] w-full rounded-3xl border border-gray-100 dark:border-[#3F3F3F] shadow-2xl overflow-hidden bg-white dark:bg-[#1A1A1A] mx-4"
       >
         <div className="relative p-6 sm:p-7 flex flex-col items-center text-center">
           {/* Close button */}
@@ -213,31 +213,31 @@ const CompletionReviewPrompt = () => {
             type="button"
             aria-label="Close"
             onClick={close}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-full hover:bg-gray-100 cursor-pointer"
+            className="absolute right-4 top-4 text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-[#2A2A2A] cursor-pointer"
           >
             <X size={18} />
           </button>
 
           {/* Trophy Badge in soft peach/orange circle */}
-          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-[#ffedd5] flex items-center justify-center mb-4 sm:mb-5">
-            <Trophy className="w-8 h-8 sm:w-9 sm:h-9 text-[#ea580c]" strokeWidth={2.2} />
+          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-[#ffedd5] dark:bg-amber-950/60 flex items-center justify-center mb-4 sm:mb-5">
+            <Trophy className="w-8 h-8 sm:w-9 sm:h-9 text-[#ea580c] dark:text-amber-400" strokeWidth={2.2} />
           </div>
 
           {/* Title Header */}
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug tracking-tight text-center px-2">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug tracking-tight text-center px-2">
             {popupT.titlePrefix || "Chúc mừng bạn đã hoàn thành"}
             <br />
             {courseDisplayName.endsWith("!") ? courseDisplayName : `${courseDisplayName}!`}
           </h2>
 
           {/* Subtitle */}
-          <p className="mt-2 text-xs sm:text-[13px] text-gray-500 text-center max-w-[320px] mx-auto leading-relaxed px-1">
+          <p className="mt-2 text-xs sm:text-[13px] text-gray-500 dark:text-gray-400 text-center max-w-[320px] mx-auto leading-relaxed px-1">
             {popupT.subtitle ||
               "Bạn có thể chia sẻ thành tích này lên trang cá nhân như một chứng thực hoàn thành khóa học."}
           </p>
 
           {/* User & Completion Info Card */}
-          <div className="mt-5 w-full bg-[#f9fafb] border border-gray-100/90 rounded-2xl p-4 text-left">
+          <div className="mt-5 w-full bg-[#f9fafb] dark:bg-[#222222] border border-gray-100/90 dark:border-[#3F3F3F] rounded-2xl p-4 text-left">
             {/* User row */}
             <div className="flex items-center gap-3">
               {userAvatarUrl ? (
@@ -250,24 +250,24 @@ const CompletionReviewPrompt = () => {
                   }}
                 />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-[#fee2e2] text-[#dc2626] font-bold text-xs sm:text-sm flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-full bg-[#fee2e2] dark:bg-red-950/60 text-[#dc2626] dark:text-red-400 font-bold text-xs sm:text-sm flex items-center justify-center shrink-0">
                   {userInitials}
                 </div>
               )}
-              <span className="font-semibold text-gray-900 text-sm sm:text-[15px] truncate">
+              <span className="font-semibold text-gray-900 dark:text-white text-sm sm:text-[15px] truncate">
                 {displayName}
               </span>
             </div>
 
             {/* Divider line */}
-            <div className="border-t border-gray-200/60 my-3.5" />
+            <div className="border-t border-gray-200/60 dark:border-[#333333] my-3.5" />
 
             {/* Completion date row */}
             <div className="flex items-center justify-between text-xs sm:text-sm">
-              <span className="text-gray-500">
+              <span className="text-gray-500 dark:text-gray-400">
                 {popupT.completedDate || "Ngày hoàn thành"}
               </span>
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-gray-900 dark:text-white">
                 {completionDateStr}
               </span>
             </div>
@@ -278,7 +278,7 @@ const CompletionReviewPrompt = () => {
             <button
               type="button"
               onClick={close}
-              className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium text-xs sm:text-sm text-center transition-all active:scale-[0.98] cursor-pointer shadow-sm"
+              className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl border border-gray-200 dark:border-[#3F3F3F] bg-white dark:bg-[#222222] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-200 font-medium text-xs sm:text-sm text-center transition-all active:scale-[0.98] cursor-pointer shadow-sm"
             >
               {popupT.later || "Để sau"}
             </button>
@@ -286,7 +286,7 @@ const CompletionReviewPrompt = () => {
             <button
               type="button"
               onClick={goReview}
-              className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium text-xs sm:text-sm text-center transition-all active:scale-[0.98] cursor-pointer shadow-sm"
+              className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl border border-gray-200 dark:border-[#3F3F3F] bg-white dark:bg-[#222222] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-200 font-medium text-xs sm:text-sm text-center transition-all active:scale-[0.98] cursor-pointer shadow-sm"
             >
               {popupT.review || "Đánh giá"}
             </button>
@@ -295,7 +295,7 @@ const CompletionReviewPrompt = () => {
               type="button"
               onClick={handleShare}
               aria-label={popupT.share || "Chia sẻ"}
-              className="w-11 h-11 sm:w-11 sm:h-11 rounded-xl bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center shrink-0 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+              className="w-11 h-11 sm:w-11 sm:h-11 rounded-xl bg-[#990011] hover:bg-[#80000e] dark:bg-[#b20a1c] dark:hover:bg-[#c9182b] text-white flex items-center justify-center shrink-0 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
             >
               <Share2 size={18} className="text-white" />
             </button>

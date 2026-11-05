@@ -5,7 +5,11 @@ import MyLearningOverview from "./MyLearningOverview"
 const MyLearningPage = () => {
   const { language, t } = useLanguage()
 
-  return <MyLearningOverview t={t} language={language} />
+  return (
+    <div className="w-full text-slate-900 dark:text-gray-100">
+      <MyLearningOverview t={t} language={language} />
+    </div>
+  )
 }
 
 export default MyLearningPage

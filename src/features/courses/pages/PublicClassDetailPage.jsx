@@ -17,14 +17,10 @@ import {
 
 import PublicClassHero from "../components/public-class/PublicClassHero"
 import PublicClassStatsBar from "../components/public-class/PublicClassStatsBar"
-// import PublicClassOutcomes from "../components/public-class/PublicClassOutcomes"
-// import PublicClassSyllabus from "../components/public-class/PublicClassSyllabus"
 import PublicClassInstructor from "../components/public-class/PublicClassInstructor"
-// import PublicClassReviews from "../components/public-class/PublicClassReviews"
 import PublicClassSidebarCTA from "../components/public-class/PublicClassSidebarCTA"
 import PublicClassScheduleCard from "../components/public-class/PublicClassScheduleCard"
 import ClassReviewSummary from "../components/public-class/ClassReviewSummary"
-// import PublicClassFAQ from "../components/public-class/PublicClassFAQ"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 
 const PublicClassDetailPage = () => {
@@ -38,7 +34,6 @@ const PublicClassDetailPage = () => {
   const { isAuthenticated } = useAuth()
   const authModalCtx = useContext(AuthModalContext)
   const enrollmentGuardRef = useRef(false)
-  // const [conflictClasses, setConflictClasses] = useState(null)
 
   const isWorkspace = location.pathname.startsWith("/workspace")
 
@@ -55,17 +50,15 @@ const PublicClassDetailPage = () => {
     currentData: classResponse,
     isLoading,
     error,
-    // refetch
   } = useGetExploreClassDetailQuery(id, { skip: !id })
 
-  // const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
   const [{ isLoading: isEnrolling }] = useEnrollInCourseMutation()
 
   const classData =
     classResponse &&
-    typeof classResponse === "object" &&
-    !Array.isArray(classResponse) &&
-    classResponse.id
+      typeof classResponse === "object" &&
+      !Array.isArray(classResponse) &&
+      classResponse.id
       ? classResponse
       : null
 
@@ -79,13 +72,9 @@ const PublicClassDetailPage = () => {
     enrollmentIssue === "upcoming" ||
     String(classData?.status || "").toUpperCase() === "UPCOMING"
 
-  const tuitionValue = classData?.tuitionFee ?? classData?.price
-
   // Handle Enrollment Action
-  // const handleEnrollAction = async (confirmScheduleConflict = false) => {
   const handleEnrollAction = async () => {
     if (isEnrolled) {
-      // Go to learning class view
       navigate(`/workspace/learning/class/${id}`)
       return
     }
@@ -128,43 +117,6 @@ const PublicClassDetailPage = () => {
     }
     enrollmentGuardRef.current = true
 
-    // Authenticated -> Enroll
-    // try {
-    //   const result = await enrollInCourse({ classId: id, confirmScheduleConflict }).unwrap()
-    //   const resultPayload = (
-    //     result
-    //     && typeof result === "object"
-    //     && !Array.isArray(result)
-    //     && Object.prototype.hasOwnProperty.call(result, "data")
-    //   )
-    //     ? result.data
-    //     : result
-
-    //   if (resultPayload?.checkoutUrl) {
-    //     const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
-    //     if (!checkoutUrl) throw new Error("Invalid checkout URL")
-    //     toast.success("Đang chuyển hướng đến trang thanh toán...")
-    //     window.location.assign(checkoutUrl)
-    //   } else {
-    //     toast.success("Đăng ký lớp học thành công!")
-    //     refetch()
-    //   }
-    // } catch (err) {
-    //   const status = err?.status ?? err?.originalStatus
-    //   const errorCode = err?.data?.errorCode || err?.data?.data?.errorCode
-    //   if (status === 409 || errorCode === "CLASS_ENROLLMENT_SCHEDULE_CONFLICT") {
-    //     const message = err?.data?.message || err?.data?.data?.message || ""
-    //     const names = (message.match(/Lịch học trùng với lớp: (.+)/) || [])[1]
-    //     setConflictClasses({
-    //       names: names ? names.split(", ").filter(Boolean) : [],
-    //     })
-    //     return
-    //   }
-    //   toast.error(err?.data?.message || err?.data?.data?.message || "Đăng ký không thành công. Vui lòng thử lại sau.")
-    // } finally {
-    //   enrollmentGuardRef.current = false
-    // }
-    // Authenticated -> Navigate to checkout page
     const basePath = isWorkspace ? "/workspace" : ""
     navigate(`${basePath}/explore-courses/class/${id}/checkout`)
   }
@@ -172,8 +124,8 @@ const PublicClassDetailPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-[90vh] flex flex-col justify-center items-center gap-2">
-        <LoadingSpinner className="w-10 h-10 text-[#b20a1c]" />
-        <p className="text-sm font-semibold text-slate-500">
+        <LoadingSpinner className="w-10 h-10 text-[#b20a1c] dark:text-[#FF6B6B]" />
+        <p className="text-sm font-semibold text-slate-500 dark:text-gray-400">
           {pc.loading || "Đang tải thông tin lớp học..."}
         </p>
       </div>
@@ -183,20 +135,20 @@ const PublicClassDetailPage = () => {
   if (error || !classData) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center flex flex-col items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-rose-100 text-[#b20a1c] flex items-center justify-center font-bold text-xl">
+        <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-950/40 text-[#b20a1c] dark:text-[#FF6B6B] flex items-center justify-center font-bold text-xl">
           !
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
           {pc.notFoundTitle || "Không tìm thấy thông tin lớp học"}
         </h2>
-        <p className="text-slate-500 text-sm max-w-md">
+        <p className="text-slate-500 dark:text-gray-400 text-sm max-w-md">
           {pc.notFoundDesc ||
             "Lớp học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Vui lòng quay lại danh sách lớp học để khám phá thêm."}
         </p>
         <button
           type="button"
           onClick={handleBack}
-          className="mt-2 bg-[#b20a1c] hover:bg-[#960817] text-white font-bold px-6 py-3 rounded-2xl shadow-md transition-colors text-sm"
+          className="mt-2 bg-[#b20a1c] hover:bg-[#960817] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white font-bold px-6 py-3 rounded-2xl shadow-md transition-colors text-sm cursor-pointer"
         >
           {pc.exploreOtherBtn || "Khám Phá Các Lớp Học Khác"}
         </button>
@@ -206,7 +158,7 @@ const PublicClassDetailPage = () => {
 
   return (
     <>
-      <div className="min-h-screen text-slate-900 pb-12">
+      <div className="min-h-screen text-slate-900 dark:text-gray-100 pb-12">
         {/* Hero Section */}
         <PublicClassHero
           classData={classData}
@@ -235,17 +187,17 @@ const PublicClassDetailPage = () => {
             <div className="lg:col-span-8 flex flex-col gap-6">
               {/* About / Class Overview */}
               <section id="about" className="scroll-mt-24">
-                <div className="bg-white border border-border rounded-3xl p-5 sm:p-6 shadow-xs">
-                  <h2 className="text-lg sm:text-xl font-bold text-slate-950 tracking-tight mb-3">
+                <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-5 sm:p-6 shadow-xs">
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-950 dark:text-white tracking-tight mb-3">
                     {pc.overviewTitle || "Về lớp học"}
                   </h2>
                   {classData.description ? (
                     <RenderHTML
                       html={classData.description}
-                      className="prose prose-slate max-w-none text-slate-700 font-medium leading-relaxed text-sm sm:text-base"
+                      className="prose dark:prose-invert prose-slate max-w-none text-slate-700 dark:text-gray-300 font-medium leading-relaxed text-sm sm:text-base"
                     />
                   ) : (
-                    <p className="text-slate-600 font-medium leading-relaxed text-sm sm:text-base">
+                    <p className="text-slate-600 dark:text-gray-400 font-medium leading-relaxed text-sm sm:text-base">
                       {pc.defaultDescription ||
                         "Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc."}
                     </p>
@@ -255,9 +207,6 @@ const PublicClassDetailPage = () => {
 
               {/* Instructor Profile */}
               <PublicClassInstructor classData={classData} />
-
-              {/* FAQ */}
-              {/* <PublicClassFAQ /> */}
             </div>
 
             {/* Secondary Column (CTA & Schedule): Stacked below Instructor on mobile/tablet, Sticky on Desktop */}
@@ -273,48 +222,6 @@ const PublicClassDetailPage = () => {
           </div>
         </main>
       </div>
-
-      {/* {conflictClasses && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div role="alertdialog" aria-modal="true" className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-4">
-            <div className="flex items-center gap-2.5">
-              <AlertTriangle size={22} className="text-amber-500 shrink-0" />
-              <h2 className="text-lg font-bold text-gray-950">{pc.scheduleConflictTitle || "Lịch học bị trùng"}</h2>
-            </div>
-            <p className="text-sm text-gray-600 font-medium leading-relaxed">
-              {pc.scheduleConflictDesc || "Lịch học của lớp này trùng với lớp bạn đang học:"}
-            </p>
-            {(conflictClasses.names || []).length > 0 && (
-              <ul className="flex flex-col gap-1.5">
-                {conflictClasses.names.map((name) => (
-                  <li key={name} className="text-sm font-bold text-[#b20a1c] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
-                    {name}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setConflictClasses(null)}
-                className="h-10 px-4 rounded-full border border-border text-gray-700 text-sm font-bold hover:bg-gray-50"
-              >
-                {pc.cancel || "Hủy"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setConflictClasses(null)
-                  handleEnrollAction(true)
-                }}
-                className="h-10 px-4 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-bold"
-              >
-                {pc.confirmEnroll || "Vẫn đăng ký"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
     </>
   )
 }

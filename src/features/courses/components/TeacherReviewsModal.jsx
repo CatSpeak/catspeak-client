@@ -68,7 +68,6 @@ const TeacherReviewsModal = ({
   // Update accumulated list as new pages arrive
   useEffect(() => {
     if (!reviewsResponse) return
-
     const incoming = reviewsResponse.data || []
     const pagination = reviewsResponse.pagination || {}
     const totalPages = pagination.totalPages || 1
@@ -124,7 +123,7 @@ const TeacherReviewsModal = ({
   const modalTitle = (
     <div className="flex items-center gap-2">
       <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-      <span className="font-extrabold text-slate-900 text-lg sm:text-xl">
+      <span className="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl">
         {t.courses?.reviewsAboutTeacher
           ?.replace("{{name}}", teacherName)
           ?.replace("{{count}}", reviewCount) ||
@@ -140,16 +139,16 @@ const TeacherReviewsModal = ({
       title={modalTitle}
       fullScreenOnMobile={false}
       className="md:max-w-2xl lg:max-w-3xl max-h-[90vh] flex flex-col"
-      headerClassName="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white"
-      bodyClassName="p-0 flex-1 overflow-y-auto bg-[#F8F9FA] flex flex-col"
+      headerClassName="px-6 py-4 border-b border-slate-100 dark:border-[#3F3F3F] flex items-center justify-between shrink-0 bg-white dark:bg-[#1A1A1A]"
+      bodyClassName="p-0 flex-1 overflow-y-auto bg-[#F8F9FA] dark:bg-[#121212] flex flex-col"
     >
       {/* ─── Fixed Header Section: Rating Breakdown + Filters ─── */}
-      <div className="p-5 sm:p-6 bg-white border-b border-slate-200/80 shrink-0 flex flex-col gap-5">
+      <div className="p-5 sm:p-6 bg-white dark:bg-[#1A1A1A] border-b border-slate-200/80 dark:border-[#3F3F3F] shrink-0 flex flex-col gap-5">
         {/* Rating Breakdown Row */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
           {/* Big Score + Stars */}
           <div className="sm:col-span-4 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <span className="text-4xl sm:text-5xl font-black text-slate-900 leading-tight">
+            <span className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white leading-tight">
               {ratingValue}
             </span>
             <div className="flex items-center gap-1 text-amber-400 mt-1">
@@ -161,7 +160,7 @@ const TeacherReviewsModal = ({
                 />
               ))}
             </div>
-            <span className="text-xs text-slate-500 font-medium mt-1">
+            <span className="text-xs text-slate-500 dark:text-gray-400 font-medium mt-1">
               {t.courses?.basedOnReviews?.replace(
                 "{{count}}",
                 formatTeacherNumber(reviewCount)
@@ -186,17 +185,17 @@ const TeacherReviewsModal = ({
                     setSelectedStars((curr) => (curr === star ? 0 : star))
                   }
                   className={`flex items-center gap-2 text-xs font-semibold py-0.5 px-1.5 rounded-md transition-colors text-left cursor-pointer ${
-                    isSelected ? "bg-amber-50 text-amber-900" : "text-slate-600 hover:bg-slate-50"
+                    isSelected ? "bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200" : "text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-[#2A2A2A]"
                   }`}
                 >
                   <span className="w-10 shrink-0">{star} sao</span>
-                  <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-[#333333] overflow-hidden">
                     <div
                       className="h-full bg-[#FBBF24] rounded-full transition-all duration-300"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="w-8 text-right text-slate-400 font-medium shrink-0">
+                  <span className="w-8 text-right text-slate-400 dark:text-gray-500 font-medium shrink-0">
                     {pct}%
                   </span>
                 </button>
@@ -206,14 +205,14 @@ const TeacherReviewsModal = ({
         </div>
 
         {/* Filter Controls Row: Star Filter, Sort, Search */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-3 border-t border-slate-100">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-3 border-t border-slate-100 dark:border-[#333333]">
           {/* Stars Dropdown */}
           <div className="sm:col-span-4 relative">
             <select
               value={selectedStars}
               onChange={(e) => setSelectedStars(Number(e.target.value))}
               aria-label={t.courses?.filterByStars || "Lọc theo số sao"}
-              className="w-full h-10 appearance-none pl-3 pr-8 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] cursor-pointer"
+              className="w-full h-10 appearance-none pl-3 pr-8 rounded-xl border border-slate-200 dark:border-[#3F3F3F] bg-slate-50/50 dark:bg-[#242424] text-xs font-bold text-slate-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] cursor-pointer"
             >
               <option value={0}>Tất cả sao</option>
               <option value={5}>5 sao</option>
@@ -224,7 +223,7 @@ const TeacherReviewsModal = ({
             </select>
             <ChevronDown
               size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none"
             />
           </div>
 
@@ -234,7 +233,7 @@ const TeacherReviewsModal = ({
               value={selectedSort}
               onChange={(e) => setSelectedSort(e.target.value)}
               aria-label={t.courses?.sortReviews || "Sắp xếp nhận xét"}
-              className="w-full h-10 appearance-none pl-3 pr-8 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] cursor-pointer"
+              className="w-full h-10 appearance-none pl-3 pr-8 rounded-xl border border-slate-200 dark:border-[#3F3F3F] bg-slate-50/50 dark:bg-[#242424] text-xs font-bold text-slate-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] cursor-pointer"
             >
               <option value="newest">Mới nhất</option>
               <option value="highest">Đánh giá cao nhất</option>
@@ -242,7 +241,7 @@ const TeacherReviewsModal = ({
             </select>
             <ChevronDown
               size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none"
             />
           </div>
 
@@ -250,14 +249,14 @@ const TeacherReviewsModal = ({
           <div className="sm:col-span-4 relative">
             <Search
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500"
             />
             <input
               type="text"
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               placeholder="Tìm trong nhận xét..."
-              className="w-full h-10 pl-8 pr-3 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011]"
+              className="w-full h-10 pl-8 pr-3 rounded-xl border border-slate-200 dark:border-[#3F3F3F] bg-slate-50/50 dark:bg-[#242424] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011]"
             />
           </div>
         </div>
@@ -271,12 +270,12 @@ const TeacherReviewsModal = ({
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-28 bg-white rounded-2xl border border-slate-200"
+                className="h-28 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]"
               />
             ))}
           </div>
         ) : accumulatedReviews.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-400 text-xs sm:text-sm">
+          <div className="p-12 text-center bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F] text-slate-400 dark:text-gray-400 text-xs sm:text-sm">
             {t.courses?.noMatchingReviews ||
               "Không tìm thấy nhận xét phù hợp với điều kiện lọc."}
           </div>
@@ -293,14 +292,14 @@ const TeacherReviewsModal = ({
               return (
                 <div
                   key={rev.reviewId}
-                  className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col gap-2.5"
+                  className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#1A1A1A] border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs flex flex-col gap-2.5"
                 >
                   <div className="flex items-center justify-between">
                     {/* Student Real Name (BR-EX-GV-09) */}
-                    <span className="text-xs sm:text-sm font-bold text-slate-900">
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                       {rev.studentName}
                     </span>
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] text-slate-400 dark:text-gray-500">
                       {revDate}
                     </span>
                   </div>
@@ -314,14 +313,14 @@ const TeacherReviewsModal = ({
                         className={
                           s <= Math.round(rev.rating)
                             ? "fill-amber-400 text-amber-400"
-                            : "text-slate-200"
+                            : "text-slate-200 dark:text-[#333333]"
                         }
                       />
                     ))}
                   </div>
 
                   {/* Comment Body */}
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-gray-300 leading-relaxed">
                     {rev.comment}
                   </p>
 
@@ -330,7 +329,7 @@ const TeacherReviewsModal = ({
                     <div className="pt-1">
                       <Link
                         to={`/explore-courses/class/${rev.classId}`}
-                        className="text-[11px] font-bold text-[#990011] hover:underline"
+                        className="text-[11px] font-bold text-[#990011] dark:text-[#FF6B6B] hover:underline"
                       >
                         Lớp: {rev.className}
                       </Link>
@@ -345,8 +344,8 @@ const TeacherReviewsModal = ({
 
             {/* Fetching next page indicator */}
             {isFetching && (
-              <div className="flex items-center justify-center py-4 text-xs font-semibold text-slate-400 gap-2">
-                <Loader2 size={16} className="animate-spin text-[#990011]" />
+              <div className="flex items-center justify-center py-4 text-xs font-semibold text-slate-400 dark:text-gray-500 gap-2">
+                <Loader2 size={16} className="animate-spin text-[#990011] dark:text-[#FF6B6B]" />
                 <span>Đang tải thêm nhận xét...</span>
               </div>
             )}

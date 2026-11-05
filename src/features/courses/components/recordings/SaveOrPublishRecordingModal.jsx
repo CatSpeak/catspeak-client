@@ -135,14 +135,14 @@ const SaveOrPublishRecordingModal = ({
       }
       className="md:max-w-2xl"
       bodyClassName="px-4 sm:px-6 py-4 flex flex-col gap-5"
-      footerClassName="px-4 sm:px-6 py-4 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3 bg-neutral-50/50 rounded-b-2xl"
+      footerClassName="px-4 sm:px-6 py-4 border-t border-neutral-100 dark:border-[#3F3F3F] flex flex-wrap items-center justify-between gap-3 bg-neutral-50/50 dark:bg-[#1A1A1A] rounded-b-2xl"
       footer={
         <div className="flex items-center justify-between w-full flex-wrap gap-3">
           <PillButton
             variant="ghost"
             onClick={onClose}
             disabled={isLoading}
-            className="text-neutral-500 hover:text-neutral-700"
+            className="text-neutral-500 dark:text-gray-400 hover:text-neutral-700 dark:hover:text-white"
           >
             Đóng
           </PillButton>
@@ -151,10 +151,10 @@ const SaveOrPublishRecordingModal = ({
             {/* Nút 1: Lưu vào kho nháp */}
             <PillButton
               variant="secondary"
-              icon={<FileText className="w-4 h-4 text-amber-600" />}
+              icon={<FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
               onClick={() => handleSubmit(false)}
               loading={isLoading}
-              className="border-neutral-200 hover:border-amber-300 hover:bg-amber-50/50 text-neutral-700"
+              className="border-neutral-200 dark:border-[#3F3F3F] hover:border-amber-300 dark:hover:border-amber-700 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 text-neutral-700 dark:text-neutral-200"
             >
               Lưu vào kho nháp
             </PillButton>
@@ -176,19 +176,19 @@ const SaveOrPublishRecordingModal = ({
     >
       {/* Banner thông báo */}
       {isPostMeeting ? (
-        <div className="flex items-start gap-3 p-3.5 bg-emerald-50/80 border border-emerald-200/80 rounded-xl text-emerald-900 text-sm">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 p-3.5 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/50 rounded-xl text-emerald-900 dark:text-emerald-300 text-sm">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
           <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-emerald-900">
+            <p className="font-semibold text-emerald-900 dark:text-emerald-200">
               Buổi học đã hoàn tất ghi hình!
             </p>
-            <p className="text-xs text-emerald-700">
+            <p className="text-xs text-emerald-700 dark:text-emerald-400">
               Bạn có thể đăng ngay video lên Giảng đường cho học viên xem lại, hoặc lưu tạm vào kho nháp để kiểm tra trước.
             </p>
           </div>
         </div>
       ) : (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-neutral-500 dark:text-gray-400">
           Điền thông tin bản ghi hình của buổi học để xuất bản hoặc lưu trữ vào lớp học.
         </p>
       )}
@@ -197,7 +197,7 @@ const SaveOrPublishRecordingModal = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Class Session ID */}
         <div>
-          <label className="block text-xs font-semibold text-neutral-700 mb-1.5 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1.5 flex items-center gap-1.5">
             <Hash className="w-3.5 h-3.5 text-neutral-400" />
             <span>ID Buổi học (Session ID) *</span>
           </label>
@@ -208,14 +208,14 @@ const SaveOrPublishRecordingModal = ({
             onChange={handleChange}
             placeholder="Ví dụ: 12"
             disabled={isLoading}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 dark:border-[#3F3F3F] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white dark:bg-[#1A1A1A] text-neutral-800 dark:text-neutral-100"
             required
           />
         </div>
 
         {/* Recording ID (LiveKit) */}
         <div>
-          <label className="block text-xs font-semibold text-neutral-700 mb-1.5 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1.5 flex items-center gap-1.5">
             <Video className="w-3.5 h-3.5 text-neutral-400" />
             <span>LiveKit Recording ID (Tùy chọn)</span>
           </label>
@@ -226,13 +226,13 @@ const SaveOrPublishRecordingModal = ({
             onChange={handleChange}
             placeholder="Ví dụ: 42"
             disabled={isLoading}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 dark:border-[#3F3F3F] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white dark:bg-[#1A1A1A] text-neutral-800 dark:text-neutral-100"
           />
         </div>
 
         {/* Tiêu đề video */}
         <div className="sm:col-span-2">
-          <label className="block text-xs font-semibold text-neutral-700 mb-1.5 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1.5 flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5 text-neutral-400" />
             <span>Tiêu đề video (Tùy chọn)</span>
           </label>
@@ -243,13 +243,13 @@ const SaveOrPublishRecordingModal = ({
             onChange={handleChange}
             placeholder="Bỏ trống để tự động đặt theo 'Buổi X - Ngày'"
             disabled={isLoading}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 dark:border-[#3F3F3F] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white dark:bg-[#1A1A1A] text-neutral-800 dark:text-neutral-100"
           />
         </div>
 
         {/* Video URL */}
         <div className="sm:col-span-2">
-          <label className="block text-xs font-semibold text-neutral-700 mb-1.5 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1.5 flex items-center gap-1.5">
             <LinkIcon className="w-3.5 h-3.5 text-neutral-400" />
             <span>Đường dẫn Video (URL) *</span>
           </label>
@@ -260,14 +260,14 @@ const SaveOrPublishRecordingModal = ({
             onChange={handleChange}
             placeholder="https://cdn.example.com/videos/v1.mp4"
             disabled={isLoading}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 dark:border-[#3F3F3F] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white dark:bg-[#1A1A1A] text-neutral-800 dark:text-neutral-100"
             required
           />
         </div>
 
         {/* Thời lượng */}
         <div>
-          <label className="block text-xs font-semibold text-neutral-700 mb-1.5 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1.5 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-neutral-400" />
             <span>Thời lượng (Phút : Giây)</span>
           </label>
@@ -280,7 +280,7 @@ const SaveOrPublishRecordingModal = ({
               placeholder="Phút"
               min="0"
               disabled={isLoading}
-              className="w-1/2 px-3.5 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white"
+              className="w-1/2 px-3.5 py-2.5 rounded-xl border border-neutral-200 dark:border-[#3F3F3F] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white dark:bg-[#1A1A1A] text-neutral-800 dark:text-neutral-100"
             />
             <span className="text-neutral-400 font-bold">:</span>
             <input
@@ -292,14 +292,14 @@ const SaveOrPublishRecordingModal = ({
               min="0"
               max="59"
               disabled={isLoading}
-              className="w-1/2 px-3.5 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white"
+              className="w-1/2 px-3.5 py-2.5 rounded-xl border border-neutral-200 dark:border-[#3F3F3F] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white dark:bg-[#1A1A1A] text-neutral-800 dark:text-neutral-100"
             />
           </div>
         </div>
 
         {/* Dung lượng file (MB) */}
         <div>
-          <label className="block text-xs font-semibold text-neutral-700 mb-1.5 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-1.5 flex items-center gap-1.5">
             <HardDrive className="w-3.5 h-3.5 text-neutral-400" />
             <span>Dung lượng file (MB)</span>
           </label>
@@ -311,7 +311,7 @@ const SaveOrPublishRecordingModal = ({
             onChange={handleChange}
             placeholder="Ví dụ: 120"
             disabled={isLoading}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 dark:border-[#3F3F3F] text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all bg-white dark:bg-[#1A1A1A] text-neutral-800 dark:text-neutral-100"
           />
         </div>
       </div>

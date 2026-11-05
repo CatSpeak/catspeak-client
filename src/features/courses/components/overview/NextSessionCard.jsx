@@ -19,7 +19,7 @@ const NextSessionCard = ({
   const lo = t.courses?.student?.myLearningOverview || {}
 
   return (
-    <FluentCard className='space-y-3 text-[#1A1A1A]'>
+    <FluentCard className='space-y-3 text-[#1A1A1A] dark:text-gray-100 dark:bg-[#1A1A1A] dark:border-[#3F3F3F]'>
       {/* Top section: Tags and Status */}
       <div className="flex justify-between items-start w-full">
         {language && (
@@ -33,12 +33,12 @@ const NextSessionCard = ({
       </div>
 
       {/* Title */}
-      <h3 className="text-lg font-bold text-[#1A1A1A] line-clamp-1">
+      <h3 className="text-lg font-bold text-[#1A1A1A] dark:text-white line-clamp-1">
         {title}
       </h3>
 
       {/* Date & Time info */}
-      <div className="flex flex-col gap-2 text-base">
+      <div className="flex flex-col gap-2 text-base text-gray-700 dark:text-gray-300">
         <div className="flex items-center gap-2">
           <Clock size={18} />
           <span>{time}</span>

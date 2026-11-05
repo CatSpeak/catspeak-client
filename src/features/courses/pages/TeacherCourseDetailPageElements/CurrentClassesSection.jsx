@@ -37,10 +37,10 @@ const CurrentClassesSection = ({
 
   return (
     <div
-      className={`bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5 ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex flex-col gap-5 ${className}`}
     >
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-xl font-bold text-gray-950 tracking-tight">
+        <h3 className="text-xl font-bold text-gray-950 dark:text-white tracking-tight">
           {cd.currentClasses || "Current Classes"}
         </h3>
 
@@ -51,7 +51,7 @@ const CurrentClassesSection = ({
               state: { courseId },
             })
           }
-          className="px-4 py-1.5 border border-[#b20a1c] hover:bg-red-50/50 text-[#b20a1c] text-xs font-bold rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
+          className="px-4 py-1.5 border border-[#b20a1c] dark:border-[#FF6B6B] hover:bg-red-50/50 dark:hover:bg-red-950/30 text-[#b20a1c] dark:text-[#FF6B6B] text-xs font-bold rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
         >
           <span>{cd.addNewClass || "Add New Class"}</span>
           <span className="text-sm font-normal">+</span>
@@ -83,12 +83,12 @@ const CurrentClassesSection = ({
         </div>
       ) : (
         /* Empty state card */
-        <div className="text-center py-8 px-4 text-gray-400 text-xs font-medium bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white shadow-xs border border-gray-100 flex items-center justify-center text-gray-400">
+        <div className="text-center py-8 px-4 text-gray-400 dark:text-gray-400 text-xs font-medium bg-gray-50/50 dark:bg-[#222222] border border-dashed border-gray-200 dark:border-[#3F3F3F] rounded-2xl flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-white dark:bg-[#1A1A1A] shadow-xs border border-gray-100 dark:border-[#333333] flex items-center justify-center text-gray-400">
             <Pencil size={18} className="stroke-[1.8]" />
           </div>
           <div className="flex flex-col gap-0.5">
-            <h4 className="font-bold text-sm text-gray-700">
+            <h4 className="font-bold text-sm text-gray-700 dark:text-gray-200">
               {cd.noClassesYet || "No classes created yet"}
             </h4>
             <p className="text-xs text-gray-400 font-medium max-w-[260px] leading-relaxed">

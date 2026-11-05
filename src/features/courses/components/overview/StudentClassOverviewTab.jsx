@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Globe,
   GraduationCap,
@@ -39,6 +39,23 @@ const StudentClassOverviewTab = ({
   const ui = c.workspaceUi || {}
 
   const [linkCopied, setLinkCopied] = useState(false)
+  const [isDark, setIsDark] = useState(() =>
+    typeof document !== "undefined"
+      ? document.documentElement.classList.contains("dark")
+      : false,
+  )
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"))
+    })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    })
+    return () => observer.disconnect()
+  }, [])
+
   const handleCopyLink = async () => {
     const classId = classData?.id
     const shareUrl = `${window.location.origin}/explore-courses/class/${classId}`
@@ -178,14 +195,14 @@ const StudentClassOverviewTab = ({
 
         {/* Tuition Fee Card (if available) */}
         {classData.tuitionFee !== undefined && classData.tuitionFee !== null && (
-          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex items-center justify-between">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] text-[#15803D] flex items-center justify-center font-black text-lg">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] dark:bg-emerald-950/60 text-[#15803D] dark:text-emerald-400 flex items-center justify-center font-black text-lg">
                 $
               </div>
-              <span className="text-sm font-extrabold text-gray-500">{cd.classFee || "Class Fee"}</span>
+              <span className="text-sm font-extrabold text-gray-500 dark:text-gray-400">{cd.classFee || "Class Fee"}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xl font-black text-[#990011]">
+            <div className="flex items-center gap-1.5 text-xl font-black text-[#990011] dark:text-[#FF6B6B]">
               <span>
                 {Number(classData.tuitionFee) === 0
                   ? (c.student?.priceFree || "Miễn phí")
@@ -194,7 +211,7 @@ const StudentClassOverviewTab = ({
                     : `${classData.tuitionFee} VND`}
               </span>
               <span
-                className="w-5 h-5 rounded-full border border-gray-300 text-gray-400 text-xs flex items-center justify-center cursor-help shrink-0 font-medium"
+                className="w-5 h-5 rounded-full border border-gray-300 dark:border-[#3F3F3F] text-gray-400 dark:text-gray-400 text-xs flex items-center justify-center cursor-help shrink-0 font-medium"
                 title={cd.classFeeHelp || "Tuition fee charged per student"}
               >
                 ?
@@ -204,16 +221,16 @@ const StudentClassOverviewTab = ({
         )}
 
         {/* Information Card Grid */}
-        <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-6">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex flex-col gap-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* 1. Language - Blue */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] dark:bg-blue-950/60 text-[#2563EB] dark:text-blue-400 flex items-center justify-center">
                 <Globe size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">{cd.language || "—"}</span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+                <span className="text-sm text-gray-400 dark:text-gray-400 font-bold">{cd.language || "—"}</span>
+                <span className="text-gray-900 dark:text-white font-extrabold text-sm mt-0.5">
                   {getLocalizedLanguageName(classData.language, t) || "—"}
                 </span>
               </div>
@@ -221,12 +238,12 @@ const StudentClassOverviewTab = ({
 
             {/* 2. Level - Red */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFE4E6] text-[#990011] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFE4E6] dark:bg-rose-950/60 text-[#990011] dark:text-[#FF6B6B] flex items-center justify-center">
                 <GraduationCap size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">{cd.level || "Level"}</span>
-                <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-black text-white bg-[#990011] rounded-full w-fit">
+                <span className="text-sm text-gray-400 dark:text-gray-400 font-bold">{cd.level || "Level"}</span>
+                <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-black text-white bg-[#990011] dark:bg-[#b20a1c] rounded-full w-fit">
                   {classData.levels?.join(", ") || "—"}
                 </span>
               </div>
@@ -234,14 +251,14 @@ const StudentClassOverviewTab = ({
 
             {/* 3. Total Sessions - Emerald Green */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] text-[#059669] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] dark:bg-emerald-950/60 text-[#059669] dark:text-emerald-400 flex items-center justify-center">
                 <Layers size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">
+                <span className="text-sm text-gray-400 dark:text-gray-400 font-bold">
                   {cd.totalSessions || "Số buổi học"}
                 </span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+                <span className="text-gray-900 dark:text-white font-extrabold text-sm mt-0.5">
                   {totalSessions > 0
                     ? `${totalSessions} ${cd.sessionsCountLabel || "buổi"}`
                     : (classData.totalSessions ? `${classData.totalSessions} ${cd.sessionsCountLabel || "buổi"}` : "—")}
@@ -251,12 +268,12 @@ const StudentClassOverviewTab = ({
 
             {/* 4. Class Size - Amber/Yellow */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FEF3C7] dark:bg-amber-950/60 text-[#D97706] dark:text-amber-400 flex items-center justify-center">
                 <Users size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">{cd.classSize || "Class Size"}</span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+                <span className="text-sm text-gray-400 dark:text-gray-400 font-bold">{cd.classSize || "Class Size"}</span>
+                <span className="text-gray-900 dark:text-white font-extrabold text-sm mt-0.5">
                   {classData.slots ?? "—"} {cd.studentsLabel || "students"}
                 </span>
               </div>
@@ -264,12 +281,12 @@ const StudentClassOverviewTab = ({
 
             {/* 5. Admission Period - Purple */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3E8FF] text-[#7C3AED] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3E8FF] dark:bg-purple-950/60 text-[#7C3AED] dark:text-purple-400 flex items-center justify-center">
                 <Calendar size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">{cd.enrollmentPeriod || "Admission Period"}</span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+                <span className="text-sm text-gray-400 dark:text-gray-400 font-bold">{cd.enrollmentPeriod || "Admission Period"}</span>
+                <span className="text-gray-900 dark:text-white font-extrabold text-sm mt-0.5">
                   {classData.enrollmentStart && classData.enrollmentEnd
                     ? `${formatDate(classData.enrollmentStart)} - ${formatDate(classData.enrollmentEnd)}`
                     : ui.tba || "TBA"}
@@ -279,30 +296,30 @@ const StudentClassOverviewTab = ({
 
             {/* 6. Weekly Schedule - Orange */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFEDD5] text-[#EA580C] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFEDD5] dark:bg-orange-950/60 text-[#EA580C] dark:text-orange-400 flex items-center justify-center">
                 <Clock size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">
+                <span className="text-sm text-gray-400 dark:text-gray-400 font-bold">
                   {cd.weeklySchedule || "Weekly Schedule"}
                 </span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+                <span className="text-gray-900 dark:text-white font-extrabold text-sm mt-0.5">
                   {getWeeklyScheduleText ? getWeeklyScheduleText() : "—"}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 border-t border-border pt-6">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
+          <div className="flex items-start gap-3 border-t border-border dark:border-[#3F3F3F] pt-6">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] dark:bg-[#2A2A2A] text-[#4B5563] dark:text-gray-300 flex items-center justify-center">
               <AlignLeft size={18} />
             </div>
             <div className="flex flex-col gap-1 w-full min-w-0">
-              <span className="text-sm text-gray-400 font-bold">{cd.description || "Description"}</span>
+              <span className="text-sm text-gray-400 dark:text-gray-400 font-bold">{cd.description || "Description"}</span>
               <RenderHTML
                 html={classData.description}
-                className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5"
-                fallback={<span className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5">{cd.noDescription || "No description provided."}</span>}
+                className="text-gray-600 dark:text-gray-300 font-medium text-sm leading-relaxed mt-0.5"
+                fallback={<span className="text-gray-600 dark:text-gray-300 font-medium text-sm leading-relaxed mt-0.5">{cd.noDescription || "No description provided."}</span>}
               />
             </div>
           </div>
@@ -310,27 +327,27 @@ const StudentClassOverviewTab = ({
 
         {/* Lead Instructor Information */}
         {instructorName && (
-          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex flex-col sm:flex-row gap-5 items-start sm:items-center">
             {instructorAvatar ? (
               <img
-                className="w-14 h-14 rounded-full object-cover border border-border shrink-0"
+                className="w-14 h-14 rounded-full object-cover border border-border dark:border-[#3F3F3F] shrink-0"
                 src={instructorAvatar}
                 alt=""
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-gray-100 border border-border flex items-center justify-center font-black text-gray-600">
+              <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-[#2A2A2A] border border-border dark:border-[#3F3F3F] flex items-center justify-center font-black text-gray-600 dark:text-gray-300">
                 {instructorName.charAt(0).toLocaleUpperCase()}
               </div>
             )}
             <div className="flex-1 flex flex-col gap-1">
-              <span className="text-[10px] text-gray-400 font-black uppercase">
+              <span className="text-[10px] text-gray-400 dark:text-gray-400 font-black uppercase">
                 {cd.leadInstructor || "Lead Instructor"}
               </span>
-              <h4 className="font-extrabold text-gray-900 text-sm">
+              <h4 className="font-extrabold text-gray-900 dark:text-white text-sm">
                 {instructorName}
               </h4>
               {instructorBio && (
-                <p className="text-xs text-gray-500 font-semibold leading-relaxed">
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">
                   {instructorBio}
                 </p>
               )}
@@ -343,8 +360,8 @@ const StudentClassOverviewTab = ({
       {showRightColumn && (
         <div className="flex flex-col gap-4">
           {/* Upcoming Session */}
-          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5">
-            <h3 className="text-lg font-black text-gray-950 tracking-tight">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex flex-col gap-5">
+            <h3 className="text-lg font-black text-gray-950 dark:text-white tracking-tight">
               {upcomingSessionLabel}
             </h3>
 
@@ -362,12 +379,12 @@ const StudentClassOverviewTab = ({
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-wrap items-center gap-1.5">
                     {classData.language && (
-                      <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+                      <span className="bg-[#FEF3C7] dark:bg-amber-950/60 text-[#D97706] dark:text-amber-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
                         {getLocalizedLanguageName(classData.language, t)}
                       </span>
                     )}
                     {classData.levels?.[0] && (
-                      <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+                      <span className="bg-[#FEF3C7] dark:bg-amber-950/60 text-[#D97706] dark:text-amber-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
                         {classData.levels[0]}
                       </span>
                     )}
@@ -376,13 +393,13 @@ const StudentClassOverviewTab = ({
                     )}
                   </div>
 
-                  <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-2">
+                  <h4 className="font-extrabold text-base text-gray-950 dark:text-white leading-snug line-clamp-2">
                     {classData.title || ui.untitledClass || "Untitled class"}
                   </h4>
 
-                  <div className="flex flex-col gap-2 border-b border-gray-55 pb-4 text-xs font-semibold text-gray-500">
+                  <div className="flex flex-col gap-2 border-b border-gray-55 dark:border-[#333333] pb-4 text-xs font-semibold text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-2">
-                      <Clock size={14} className="text-gray-400" />
+                      <Clock size={14} className="text-gray-400 dark:text-gray-500" />
                       <span>
                         {sessionStartTime
                           ? sessionEndTime
@@ -392,7 +409,7 @@ const StudentClassOverviewTab = ({
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-gray-400" />
+                      <Calendar size={14} className="text-gray-400 dark:text-gray-500" />
                       <span>
                         {formatDateMonth(sessionDate, ui.tba)}
                       </span>
@@ -401,8 +418,8 @@ const StudentClassOverviewTab = ({
 
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-1.5">
-                      <Users size={16} className="text-gray-400" />
-                      <span className="text-[11px] font-bold text-gray-400 font-sans">
+                      <Users size={16} className="text-gray-400 dark:text-gray-500" />
+                      <span className="text-[11px] font-bold text-gray-400 dark:text-gray-400 font-sans">
                         {studentCount ?? "—"}
                       </span>
                     </div>
@@ -410,7 +427,7 @@ const StudentClassOverviewTab = ({
                     <button
                       type="button"
                       onClick={onJoinRoom}
-                      className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap ml-auto cursor-pointer"
+                      className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap ml-auto cursor-pointer"
                     >
                       <span>{joinRoomLabel}</span>
                       <span>→</span>
@@ -419,15 +436,15 @@ const StudentClassOverviewTab = ({
                 </div>
               </>
             ) : (
-              <div className="rounded-2xl bg-gray-50 p-5 flex flex-col items-center gap-3 text-center">
-                <p className="text-xs font-semibold text-gray-500">
+              <div className="rounded-2xl bg-gray-50 dark:bg-[#222222] p-5 flex flex-col items-center gap-3 text-center">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
                   {noUpcomingLabel || "No upcoming sessions"}
                 </p>
                 {isEnrolled && (
                   <button
                     type="button"
                     onClick={onJoinRoom}
-                    className="w-full h-10 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap cursor-pointer"
+                    className="w-full h-10 bg-[#b20a1c] hover:bg-[#990011] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap cursor-pointer"
                   >
                     <span>{joinRoomLabel}</span>
                     <span>→</span>
@@ -438,8 +455,8 @@ const StudentClassOverviewTab = ({
           </div>
 
           {/* Study Progress Card */}
-          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-4">
-            <h3 className="text-lg font-black text-gray-950 tracking-tight">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex flex-col gap-4">
+            <h3 className="text-lg font-black text-gray-950 dark:text-white tracking-tight">
               {c.student?.progress || cd.teachingProgress || "Study Progress"}
             </h3>
 
@@ -449,19 +466,19 @@ const StudentClassOverviewTab = ({
                   value={progressPercent ?? 0}
                   strokeWidth={8}
                   styles={buildStyles({
-                    pathColor: "#990011",
-                    trailColor: "#E5E7EB",
+                    pathColor: isDark ? "#FF6B6B" : "#990011",
+                    trailColor: isDark ? "#333333" : "#E5E7EB",
                     strokeLinecap: "round",
                   })}
                 />
                 <div className="absolute flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-black text-gray-950 leading-none">
+                  <span className="text-3xl font-black text-gray-950 dark:text-white leading-none">
                     {progressPercent == null ? "—" : `${progressPercent}%`}
                   </span>
-                  <span className="text-xs font-black text-gray-800 mt-2">
+                  <span className="text-xs font-black text-gray-800 dark:text-gray-200 mt-2">
                     {progressText}
                   </span>
-                  <span className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wider">
+                  <span className="text-[10px] text-gray-400 dark:text-gray-400 font-bold mt-0.5 uppercase tracking-wider">
                     {cd.sessionCompleted || "Session completed"}
                   </span>
                 </div>

@@ -140,8 +140,8 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
       {/* Main Charts Row */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         {/* Growth Trend */}
-        <div className="xl:col-span-7 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentGrowth || "Tăng trưởng học viên"}</h2>
+        <div className="xl:col-span-7 bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.studentGrowth || "Tăng trưởng học viên"}</h2>
           <AnalyticsLineChart
             chartLabels={chartLabels}
             series={[
@@ -157,8 +157,8 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
         </div>
 
         {/* Student By Class Bar Chart */}
-        <div className="xl:col-span-5 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm flex flex-col">
-          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
+        <div className="xl:col-span-5 bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm flex flex-col">
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
           <AnalyticsBarChart rows={barData} formatter={(val) => `${val} ${hvSuffix}`} />
         </div>
       </div>
@@ -166,8 +166,8 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
       {/* Tables Row: 2 columns in Figma */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Course Table */}
-        <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentsByCourse || "Học viên theo khóa học"}</h2>
+        <div className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.studentsByCourse || "Học viên theo khóa học"}</h2>
           <AnalyticsDataTable
             columns={[
               { key: "course", label: colT.course || "Khóa học" },
@@ -182,8 +182,8 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
         </div>
 
         {/* Class Table */}
-        <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
+        <div className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
           <AnalyticsDataTable
             columns={[
               {
@@ -197,7 +197,7 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
                         navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
                       }
                     }}
-                    className="font-bold text-left text-gray-900 hover:text-[#990011] transition-colors cursor-pointer hover:underline"
+                    className="font-bold text-left text-gray-900 dark:text-white hover:text-[#990011] dark:hover:text-[#FF6B6B] transition-colors cursor-pointer hover:underline"
                   >
                     {val}
                   </button>

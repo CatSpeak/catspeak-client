@@ -252,7 +252,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-200">
 
       {/* ─── Breadcrumbs ─── */}
       <Breadcrumb
@@ -279,7 +279,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       />
 
       {/* ─── Heading ─── */}
-      <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+      <h1 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight">
         {assignmentId
           ? ca.editTitle || "Edit Assignment"
           : ca.pageTitle || "Create Assignment"}
@@ -291,11 +291,11 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
           {/* ─── LEFT COLUMN: Main Form ─── */}
-          <div className="lg:col-span-2 flex flex-col gap-6 bg-white border border-border rounded-3xl p-6 shadow-xs">
+          <div className="lg:col-span-2 flex flex-col gap-6 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs">
 
             {/* 1. Tên bài nộp */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-gray-800">
+              <label className="text-sm font-bold text-gray-800 dark:text-gray-200">
                 {ca.assignmentName || "Tên bài nộp"} <span className="text-red-500">*</span>
               </label>
               <input
@@ -303,14 +303,14 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 value={title}
                 onChange={(e) => setField("title", e.target.value)}
                 placeholder={ca.assignmentNamePlaceholder || "Nhập tên bài nộp (VD: Bài kiểm tra giữa kỳ)"}
-                className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm"
+                className="w-full px-4 py-3 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] transition-all text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
               />
             </div>
 
             {/* 2. Mô tả / Yêu cầu */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-gray-800">{ca.descriptionLabel || "Yêu cầu bài tập"}</label>
-              <div className="assignment-editor overflow-hidden transition-all">
+              <label className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.descriptionLabel || "Yêu cầu bài tập"}</label>
+              <div className="assignment-editor overflow-hidden transition-all rounded-xl border border-border dark:border-[#3F3F3F]">
                 <Editor
                   tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
                   value={editorText}
@@ -322,8 +322,11 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                     plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
                     toolbar:
                       "bold italic underline strikethrough | emoticons link | bullist numlist",
-                    // placeholder: ca.descriptionPlaceholder || "Nhập hướng dẫn chi tiết cho học sinh...",
-                    skin: "oxide",
+                    skin: document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
+                    content_css: document.documentElement.classList.contains("dark") ? "dark" : "default",
+                    content_style: document.documentElement.classList.contains("dark")
+                      ? "body { font-family: Inter, sans-serif; font-size: 14px; color: #f3f4f6; background-color: #1A1A1A; }"
+                      : "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
                     setup: (editor) => {
                       editor.on("focus", () => { })
                     },
@@ -334,9 +337,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
             {/* 3. Tài liệu đính kèm */}
             <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center text-sm font-bold text-gray-800">
+              <div className="flex justify-between items-center text-sm font-bold text-gray-800 dark:text-gray-200">
                 <span>{ca.attachmentsLabel || "Tài liệu đính kèm"}</span>
-                <span className="text-xs text-gray-400 font-medium">{ca.maxFilesNote || "Tối đa 5 files"}</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">{ca.maxFilesNote || "Tối đa 5 files"}</span>
               </div>
 
               {/* Drag drop zone */}
@@ -354,17 +357,17 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 tabIndex={0}
                 aria-label={ca.dropzoneMainText || "Select assignment attachments"}
                 aria-describedby="assignment-attachment-limits"
-                className="border-2 border-dashed border-red-100 hover:border-[#990011] bg-red-50/10 hover:bg-red-50/20 transition-all rounded-2xl p-6 text-center cursor-pointer flex flex-col items-center justify-center gap-2 group"
+                className="border-2 border-dashed border-red-100 dark:border-[#FF6B6B]/30 hover:border-[#990011] dark:hover:border-[#FF6B6B] bg-red-50/10 dark:bg-[#FF6B6B]/5 hover:bg-red-50/20 dark:hover:bg-[#FF6B6B]/10 transition-all rounded-2xl p-6 text-center cursor-pointer flex flex-col items-center justify-center gap-2 group"
               >
-                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-[#990011] group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-red-50 dark:bg-[#FF6B6B]/20 rounded-full flex items-center justify-center text-[#990011] dark:text-[#FF6B6B] group-hover:scale-110 transition-transform">
                   <Upload size={20} />
                 </div>
-                <div className="text-sm font-bold text-[#990011] tracking-wide">
+                <div className="text-sm font-bold text-[#990011] dark:text-[#FF6B6B] tracking-wide">
                   {ca.dropzoneMainText || "Nhấn để tải lên hoặc kéo thả file vào đây"}
                 </div>
                 <div
                   id="assignment-attachment-limits"
-                  className="text-xs text-gray-400 font-medium"
+                  className="text-xs text-gray-400 dark:text-gray-500 font-medium"
                 >
                   {ca.dropzoneSubText || "Hỗ trợ PDF, DOCX, XLSX, PPTX, JPG, PNG (Max 50MB/file)"}
                 </div>
@@ -389,18 +392,18 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                     return (
                       <div
                         key={fileId}
-                        className="bg-gray-50 border border-border rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 transition-colors"
+                        className="bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 dark:hover:bg-[#2A2A2A] transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 bg-red-50 border border-red-100 rounded-lg flex items-center justify-center text-red-500">
+                          <div className="w-9 h-9 bg-red-50 dark:bg-[#FF6B6B]/20 border border-red-100 dark:border-[#FF6B6B]/30 rounded-lg flex items-center justify-center text-red-500 dark:text-[#FF6B6B]">
                             <FileText size={18} />
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-xs font-bold text-gray-800 leading-tight truncate max-w-[200px] md:max-w-md">
+                            <span className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight truncate max-w-[200px] md:max-w-md">
                               {name}
                             </span>
                             {Number.isFinite(numericSize) && numericSize > 0 && (
-                              <span className="text-[10px] text-gray-400 font-semibold">
+                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold">
                                 {formatFileSize(numericSize)}
                               </span>
                             )}
@@ -409,7 +412,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                         <button
                           type="button"
                           onClick={() => removeExistingAttachment(idx)}
-                          className="p-1.5 text-gray-400 hover:text-red-655 hover:bg-red-50 rounded-lg transition-all"
+                          className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all"
                           title={ca.deleteFile || "Delete file"}
                         >
                           <Trash2 size={16} />
@@ -422,17 +425,17 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   {attachedFiles.map((file) => (
                     <div
                       key={file.id}
-                      className="bg-gray-50 border border-border rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 transition-colors"
+                      className="bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 dark:hover:bg-[#2A2A2A] transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-red-50 border border-red-100 rounded-lg flex items-center justify-center text-red-500">
+                        <div className="w-9 h-9 bg-red-50 dark:bg-[#FF6B6B]/20 border border-red-100 dark:border-[#FF6B6B]/30 rounded-lg flex items-center justify-center text-red-500 dark:text-[#FF6B6B]">
                           <FileText size={18} />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-800 leading-tight truncate max-w-[200px] md:max-w-md">
+                          <span className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight truncate max-w-[200px] md:max-w-md">
                             {file.name}
                           </span>
-                          <span className="text-[10px] text-gray-400 font-semibold">
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold">
                             {file.size}
                           </span>
                         </div>
@@ -440,7 +443,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                       <button
                         type="button"
                         onClick={() => removeFile(file.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-650 hover:bg-red-50 rounded-lg transition-all"
+                        className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all"
                         title={ca.deleteFile || "Delete file"}
                       >
                         <Trash2 size={16} />
@@ -455,7 +458,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Ngày hết hạn */}
               <div className="flex flex-col gap-2 relative">
-                <label className="text-sm font-bold text-gray-800">
+                <label className="text-sm font-bold text-gray-800 dark:text-gray-200">
                   {ca.dueDate || "Ngày hết hạn"} <span className="text-red-500">*</span>
                 </label>
                 <DatePicker
@@ -470,7 +473,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
               {/* Giờ nộp */}
               <div className="flex flex-col gap-2 relative">
-                <label className="text-sm font-bold text-gray-800">
+                <label className="text-sm font-bold text-gray-800 dark:text-gray-200">
                   {ca.dueTime || "Giờ nộp"} <span className="text-red-500">*</span>
                 </label>
                 <DatePicker
@@ -485,10 +488,10 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
             </div>
 
             {/* 5. Cho phép nộp muộn */}
-            <div className="bg-gray-50 border border-border rounded-2xl p-4 flex justify-between items-center shadow-xs">
+            <div className="bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl p-4 flex justify-between items-center shadow-xs">
               <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-extrabold text-gray-850">{ca.allowLateSubmission || "Cho phép nộp muộn"}</span>
-                <span className="text-[11px] text-gray-400 font-semibold">
+                <span className="text-sm font-extrabold text-gray-850 dark:text-white">{ca.allowLateSubmission || "Cho phép nộp muộn"}</span>
+                <span className="text-[11px] text-gray-400 dark:text-gray-500 font-semibold">
                   {ca.allowLateSubmissionSub || "Học sinh có thể nộp bài sau hạn chót"}
                 </span>
               </div>
@@ -500,11 +503,11 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 aria-checked={allowLateSubmission}
                 aria-label={ca.allowLateSubmission || "Allow late submission"}
                 onClick={() => toggleField("allowLateSubmission")}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowLateSubmission ? "bg-[#990011]" : "bg-gray-200"
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowLateSubmission ? "bg-[#990011] dark:bg-[#FF6B6B]" : "bg-gray-200 dark:bg-[#333333]"
                   }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${allowLateSubmission ? "translate-x-5" : "translate-x-0"
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-[#1A1A1A] shadow-sm ring-0 transition duration-200 ease-in-out ${allowLateSubmission ? "translate-x-5" : "translate-x-0"
                     }`}
                 />
               </button>
@@ -513,17 +516,17 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
           </div>
 
           {/* ─── RIGHT COLUMN: Configuration Sidebar ─── */}
-          <div className="flex flex-col gap-6 bg-white border border-border rounded-3xl p-6 shadow-xs">
+          <div className="flex flex-col gap-6 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs">
 
             {/* Sidebar Title */}
             <div>
-              <h2 className="text-lg font-extrabold text-gray-900">{ca.sidebarTitle || "Cấu hình bài nộp"}</h2>
-              <div className="h-px bg-gray-200 w-full mt-4" />
+              <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">{ca.sidebarTitle || "Cấu hình bài nộp"}</h2>
+              <div className="h-px bg-gray-200 dark:bg-[#3F3F3F] w-full mt-4" />
             </div>
 
             {/* Hình thức nộp bài */}
             <div className="flex flex-col gap-3">
-              <span className="text-sm font-bold text-gray-800">{ca.submissionFormat || "Hình thức nộp bài"}</span>
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.submissionFormat || "Hình thức nộp bài"}</span>
 
               {/* Checkbox 1: Tải lên file */}
               <div className="flex items-center gap-3">
@@ -534,15 +537,15 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   aria-label={ca.uploadFile || "Allow file uploads"}
                   onClick={() => toggleField("submissionTypeFile")}
                   className={`w-5 h-5 border rounded-lg flex items-center justify-center transition-all ${submissionTypeFile
-                    ? "bg-[#990011] border-[#990011] text-white"
-                    : "border-gray-300 hover:border-[#990011]"
+                    ? "bg-[#990011] dark:bg-[#FF6B6B] border-[#990011] dark:border-[#FF6B6B] text-white dark:text-[#1A1A1A]"
+                    : "border-gray-300 dark:border-[#3F3F3F] bg-white dark:bg-[#222222] hover:border-[#990011] dark:hover:border-[#FF6B6B]"
                     }`}
                 >
                   {submissionTypeFile && <Check size={12} strokeWidth={3} />}
                 </button>
                 <span
                   onClick={() => toggleField("submissionTypeFile")}
-                  className="text-xs font-semibold text-gray-700 cursor-pointer select-none"
+                  className="text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none"
                 >
                   {ca.uploadFile || "Tải lên file"}
                 </span>
@@ -557,15 +560,15 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   aria-label={ca.directInput || "Allow direct text input"}
                   onClick={() => toggleField("submissionTypeText")}
                   className={`w-5 h-5 border rounded-lg flex items-center justify-center transition-all ${submissionTypeText
-                    ? "bg-[#990011] border-[#990011] text-white"
-                    : "border-gray-300 hover:border-[#990011]"
+                    ? "bg-[#990011] dark:bg-[#FF6B6B] border-[#990011] dark:border-[#FF6B6B] text-white dark:text-[#1A1A1A]"
+                    : "border-gray-300 dark:border-[#3F3F3F] bg-white dark:bg-[#222222] hover:border-[#990011] dark:hover:border-[#FF6B6B]"
                     }`}
                 >
                   {submissionTypeText && <Check size={12} strokeWidth={3} />}
                 </button>
                 <span
                   onClick={() => toggleField("submissionTypeText")}
-                  className="text-xs font-semibold text-gray-700 cursor-pointer select-none"
+                  className="text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none"
                 >
                   {ca.directInput || "Nhập nội dung trực tiếp"}
                 </span>
@@ -574,7 +577,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
             {/* Loại file cho phép */}
             <div className="flex flex-col gap-3">
-              <span className="text-sm font-bold text-gray-800">{ca.allowedFileTypes || "Loại file cho phép"}</span>
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.allowedFileTypes || "Loại file cho phép"}</span>
 
               <Dropdown
                 options={[
@@ -605,14 +608,14 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   {allowedFileTypes.map((type) => (
                     <span
                       key={type}
-                      className="bg-orange-50 border border-orange-100 text-orange-700 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5"
+                      className="bg-orange-50 dark:bg-amber-950/30 border border-orange-100 dark:border-amber-900/40 text-orange-700 dark:text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5"
                     >
                       {type}
                       <button
                         type="button"
                         aria-label={`${ca.removeFileType || "Remove file type"} ${type}`}
                         onClick={() => removeFileType(type)}
-                        className="hover:text-orange-950 transition-colors cursor-pointer"
+                        className="hover:text-orange-950 dark:hover:text-amber-200 transition-colors cursor-pointer"
                       >
                         <X size={10} strokeWidth={2.5} />
                       </button>
@@ -624,33 +627,33 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
             {/* Số file tối đa */}
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-bold text-gray-800">{ca.maxFilesCount || "Số file tối đa"}</span>
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.maxFilesCount || "Số file tối đa"}</span>
               <input
                 type="number"
                 min={1}
                 max={5}
                 value={maxFiles}
                 onChange={(e) => setField("maxFiles", clampMaxFiles(e.target.value))}
-                className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 shadow-xs"
+                className="w-full px-4 py-2.5 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] dark:focus:ring-[#FF6B6B] focus:border-[#990011] dark:focus:border-[#FF6B6B] text-xs font-semibold text-gray-700 dark:text-gray-200 shadow-xs"
               />
             </div>
 
-            <div className="h-px bg-gray-200 w-full my-2" />
+            <div className="h-px bg-gray-200 dark:bg-[#3F3F3F] w-full my-2" />
 
             {/* Chấm điểm toggle */}
             <div className="flex justify-between items-center py-1">
-              <span className="text-sm font-bold text-gray-800">{ca.gradingLabel || "Chấm điểm"}</span>
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.gradingLabel || "Chấm điểm"}</span>
               <button
                 type="button"
                 role="switch"
                 aria-checked={enableGrading}
                 aria-label={ca.gradingLabel || "Enable grading"}
                 onClick={() => toggleField("enableGrading")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${enableGrading ? "bg-[#990011]" : "bg-gray-200"
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${enableGrading ? "bg-[#990011] dark:bg-[#FF6B6B]" : "bg-gray-200 dark:bg-[#333333]"
                   }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${enableGrading ? "translate-x-4" : "translate-x-0"
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white dark:bg-[#1A1A1A] shadow-sm ring-0 transition duration-200 ease-in-out ${enableGrading ? "translate-x-4" : "translate-x-0"
                     }`}
                 />
               </button>
@@ -658,7 +661,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
             {/* Thang điểm */}
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-bold text-gray-800">{ca.gradingScale || "Thang điểm"}</span>
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.gradingScale || "Thang điểm"}</span>
               <Dropdown
                 options={[
                   { value: "scale10", label: ca.scale10 || "Thang điểm 10" },
@@ -675,7 +678,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
             {/* Công bố kết quả */}
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-bold text-gray-800">{ca.resultRelease || "Công bố kết quả"}</span>
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.resultRelease || "Công bố kết quả"}</span>
               <Dropdown
                 options={[
                   { value: "manual", label: ca.releaseManual || "Công bố thủ công" },
@@ -690,11 +693,11 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               />
             </div>
 
-            <div className="h-px bg-gray-200 w-full my-2" />
+            <div className="h-px bg-gray-200 dark:bg-[#3F3F3F] w-full my-2" />
 
             {/* Trạng thái đăng */}
             <div className="flex flex-col gap-3">
-              <span className="text-sm font-bold text-gray-800">{ca.publishStatus || "Trạng thái đăng"}</span>
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.publishStatus || "Trạng thái đăng"}</span>
 
               <div
                 role="radiogroup"
@@ -715,15 +718,15 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                       setField("publishStatus", "now")
                     }}
                     className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "now"
-                      ? "border-[#990011]"
-                      : "border-gray-300"
+                      ? "border-[#990011] dark:border-[#FF6B6B]"
+                      : "border-gray-300 dark:border-[#3F3F3F]"
                       }`}
                   >
                     {publishStatus === "now" && (
-                      <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
+                      <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
                     )}
                   </button>
-                  <span className="text-xs font-semibold text-gray-750">
+                  <span className="text-xs font-semibold text-gray-750 dark:text-gray-200">
                     {ca.publishNow || "Đăng ngay"}
                   </span>
                 </div>
@@ -742,15 +745,15 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                       setField("publishStatus", "draft")
                     }}
                     className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "draft"
-                      ? "border-[#990011]"
-                      : "border-gray-300"
+                      ? "border-[#990011] dark:border-[#FF6B6B]"
+                      : "border-gray-300 dark:border-[#3F3F3F]"
                       }`}
                   >
                     {publishStatus === "draft" && (
-                      <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
+                      <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
                     )}
                   </button>
-                  <span className="text-xs font-semibold text-gray-750">
+                  <span className="text-xs font-semibold text-gray-750 dark:text-gray-200">
                     {ca.saveDraft || "Lưu nháp"}
                   </span>
                 </div>
@@ -758,19 +761,19 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
             </div>
 
             {/* Đăng lên giảng đường */}
-            <div className="bg-red-50/20 border border-red-100 rounded-2xl p-4 flex justify-between items-center shadow-xs">
-              <span className="text-xs font-bold text-gray-800">{ca.postToFeed || "Đăng lên giảng đường"}</span>
+            <div className="bg-red-50/20 dark:bg-[#FF6B6B]/10 border border-red-100 dark:border-[#FF6B6B]/30 rounded-2xl p-4 flex justify-between items-center shadow-xs">
+              <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{ca.postToFeed || "Đăng lên giảng đường"}</span>
               <button
                 type="button"
                 role="switch"
                 aria-checked={postToFeed}
                 aria-label={ca.postToFeed || "Post to class feed"}
                 onClick={() => toggleField("postToFeed")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${postToFeed ? "bg-[#990011]" : "bg-gray-200"
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${postToFeed ? "bg-[#990011] dark:bg-[#FF6B6B]" : "bg-gray-200 dark:bg-[#333333]"
                   }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${postToFeed ? "translate-x-4" : "translate-x-0"
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white dark:bg-[#1A1A1A] shadow-sm ring-0 transition duration-200 ease-in-out ${postToFeed ? "translate-x-4" : "translate-x-0"
                     }`}
                 />
               </button>
@@ -781,11 +784,11 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
         </div>
 
         {/* ─── Footer Buttons ─── */}
-        <div className="flex justify-between items-center py-4 border-t border-border mt-4">
+        <div className="flex justify-between items-center py-4 border-t border-border dark:border-[#3F3F3F] mt-4">
           <button
             type="button"
             onClick={handleCancel}
-            className="text-xs font-extrabold text-gray-500 hover:text-gray-700 transition-colors uppercase tracking-wider"
+            className="text-xs font-extrabold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors uppercase tracking-wider"
           >
             {ca.btnCancel || "Hủy"}
           </button>
@@ -795,14 +798,14 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               type="button"
               onClick={handleSaveDraft}
               disabled={isSaving}
-              className="h-10 px-5 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-10 px-5 border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50/50 dark:hover:bg-[#FF6B6B]/10 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {ca.btnSaveDraft || "Lưu nháp"}
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="h-10 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-10 px-6 bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] text-white dark:text-[#1A1A1A] font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {assignmentId
                 ? ca.btnSaveChanges || "Save Changes"
@@ -881,7 +884,7 @@ const CreateAssignmentPage = () => {
     return (
       <div
         role="alert"
-        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+        className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
       >
         <span>
           {classError || assignmentError
@@ -899,7 +902,7 @@ const CreateAssignmentPage = () => {
               refetchClass()
               if (assignmentId) refetchAssignment()
             }}
-            className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+            className="rounded-xl bg-[#990011] dark:bg-[#FF6B6B] hover:bg-[#80000e] dark:hover:bg-[#ff8585] px-4 py-2 text-xs font-bold text-white dark:text-[#1A1A1A]"
           >
             {ca.retry || "Try again"}
           </button>

@@ -132,8 +132,8 @@ const CoursesTab = ({ group, queryParams = {} }) => {
       {/* Row 2: 2 tables side-by-side */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Course Performance Table */}
-        <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.coursePerformance || "Hiệu quả khóa học"}</h2>
+        <div className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.coursePerformance || "Hiệu quả khóa học"}</h2>
           <AnalyticsDataTable
             columns={[
               { key: "course", label: colT.course || "Khóa học" },
@@ -152,8 +152,8 @@ const CoursesTab = ({ group, queryParams = {} }) => {
         </div>
 
         {/* Independent Classes Table */}
-        <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.independentClasses || "Hiệu quả lớp riêng"}</h2>
+        <div className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.independentClasses || "Hiệu quả lớp riêng"}</h2>
           <AnalyticsDataTable
             columns={[
               { key: "className", label: colT.class || "Lớp học" },
@@ -169,9 +169,9 @@ const CoursesTab = ({ group, queryParams = {} }) => {
       </div>
 
       {/* Row 3: Hot Class Popularity Ranking */}
-      <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-        <h2 className="text-base font-bold text-[#14171F] mb-1">{secT.hotClassRanking || "Mức độ hot của từng lớp"}</h2>
-        <p className="text-xs text-[#6E788C] mb-3">{secT.hotClassSubtitle || "Xếp hạng theo tỷ lệ lấp đầy, đăng ký mới và doanh thu"}</p>
+      <div className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+        <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-1">{secT.hotClassRanking || "Mức độ hot của từng lớp"}</h2>
+        <p className="text-xs text-[#6E788C] dark:text-gray-400 mb-3">{secT.hotClassSubtitle || "Xếp hạng theo tỷ lệ lấp đầy, đăng ký mới và doanh thu"}</p>
         <HotClassRanking rows={hotRankingRows} pageSize={6} />
       </div>
     </div>

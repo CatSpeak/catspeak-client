@@ -34,11 +34,13 @@ const TeachingProgressSection = ({
       : null
   const progressText = `${completed ?? "—"} / ${total || "—"}`
 
+  const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark")
+
   return (
     <div
-      className={`bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5 ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex flex-col gap-5 ${className}`}
     >
-      <h3 className="text-xl font-bold text-gray-950 tracking-tight">
+      <h3 className="text-xl font-bold text-gray-950 dark:text-white tracking-tight">
         {cd.teachingProgress || "Teaching Progress"}
       </h3>
 
@@ -49,29 +51,29 @@ const TeachingProgressSection = ({
             strokeWidth={8}
             styles={buildStyles({
               pathColor: "#990011",
-              trailColor: "#E5E7EB",
+              trailColor: isDark ? "#333333" : "#E5E7EB",
               strokeLinecap: "round",
             })}
           />
           <div className="absolute flex flex-col items-center justify-center text-center">
-            <span className="text-4xl font-bold text-gray-950 leading-none">
+            <span className="text-4xl font-bold text-gray-950 dark:text-white leading-none">
               {progressPercent == null ? "—" : `${progressPercent}%`}
             </span>
-            <span className="text-sm font-bold text-gray-800 mt-2.5">
+            <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-2.5">
               {progressText}
             </span>
-            <span className="text-[11px] text-gray-400 font-bold mt-1 uppercase tracking-wider">
+            <span className="text-[11px] text-gray-400 dark:text-gray-400 font-bold mt-1 uppercase tracking-wider">
               {cd.sessionCompleted || "Session completed"}
             </span>
           </div>
         </div>
 
         <div className="flex flex-col justify-center gap-4 flex-1 max-w-sm w-full">
-          <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
+          <div className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-300">
             <span className="w-3.5 h-3.5 rounded-full bg-[#990011] shrink-0" />
             <span>{cd.completedSessionsLabel || "Completed sessions"}</span>
           </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
+          <div className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-300">
             <span className="w-3.5 h-3.5 rounded-full bg-[#9CA3AF] shrink-0" />
             <span>
               {cd.uncompletedSessionsLabel || "Uncompleted sessions"}

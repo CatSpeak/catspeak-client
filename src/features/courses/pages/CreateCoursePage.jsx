@@ -301,7 +301,7 @@ const CreateCoursePage = () => {
   ) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011] dark:border-[#FF6B6B]"></div>
       </div>
     )
   }
@@ -318,9 +318,9 @@ const CreateCoursePage = () => {
   )
   if (detailsError || hasMalformedDetails) {
     return (
-      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+      <div role="alert" className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
         <span>{cc.loadFailed || "The course form could not be loaded. Please try again."}</span>
-        <button type="button" onClick={refetchDetails} className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white">
+        <button type="button" onClick={refetchDetails} className="rounded-xl bg-[#990011] dark:bg-[#FF6B6B] hover:bg-[#80000e] dark:hover:bg-[#ff8585] px-4 py-2 text-xs font-bold text-white dark:text-[#1A1A1A]">
           {cc.retry || "Try again"}
         </button>
       </div>
@@ -328,7 +328,7 @@ const CreateCoursePage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e] flex-1">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-200 flex-1">
 
       {/* ─── Breadcrumb ─── */}
       <Breadcrumb
@@ -343,20 +343,20 @@ const CreateCoursePage = () => {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="p-2.5 border border-border hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
+          className="p-2.5 border border-border dark:border-[#3F3F3F] hover:bg-gray-100/80 dark:hover:bg-[#2A2A2A] text-gray-600 dark:text-gray-300 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
           title={t.common?.back || "Quay lại"}
         >
           <ArrowLeft size={18} />
         </button>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
           {labelCourseAction}
         </h1>
       </div>
 
       {/* ─── Form Container ─── */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-border shadow-sm flex flex-col gap-6 flex-1">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 sm:p-8 border border-border dark:border-[#3F3F3F] shadow-sm flex flex-col gap-6 flex-1">
 
-        <h2 className="text-lg font-bold text-gray-900 border-b border-border pb-3">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white border-b border-border dark:border-[#3F3F3F] pb-3">
           {labelCourseInfoTitle}
         </h2>
 
@@ -365,7 +365,7 @@ const CreateCoursePage = () => {
 
           {/* Left Column: Course Avatar / Thumbnail Card */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0 flex flex-col gap-2.5">
-            <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+            <label className="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               {cc.avatarLabel || c.avatarLabel || "Ảnh đại diện khóa học"}
             </label>
 
@@ -379,7 +379,7 @@ const CreateCoursePage = () => {
               }}
               role="button"
               tabIndex={0}
-              className="group relative w-full aspect-[4/3] rounded-xl border border-dashed border-border hover:border-gray-300 bg-gray-50/50 hover:bg-gray-100/50 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 overflow-hidden shadow-2xs"
+              className="group relative w-full aspect-[4/3] rounded-xl border border-dashed border-border dark:border-[#3F3F3F] hover:border-gray-300 dark:hover:border-gray-500 bg-gray-50/50 dark:bg-[#222222]/50 hover:bg-gray-100/50 dark:hover:bg-[#222222] flex flex-col items-center justify-center cursor-pointer transition-all duration-200 overflow-hidden shadow-2xs"
             >
               <input
                 ref={fileInputRef}
@@ -416,14 +416,14 @@ const CreateCoursePage = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 p-4 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-border shadow-2xs flex items-center justify-center text-gray-400 group-hover:text-[#990011] group-hover:scale-105 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#2A2A2A] border border-border dark:border-[#3F3F3F] shadow-2xs flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] group-hover:scale-105 transition-all">
                     <Upload size={18} />
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-xs font-semibold text-gray-800">
+                    <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
                       {cc.avatarDesc1 || c.avatarDesc1 || "Kéo & thả hoặc bấm để chọn ảnh"}
                     </p>
-                    <p className="text-[11px] text-gray-400 font-medium">
+                    <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                       {cc.avatarDesc2 || c.avatarDesc2 || "PNG, JPG, WEBP (tối đa 5MB)"}
                     </p>
                   </div>
@@ -431,7 +431,7 @@ const CreateCoursePage = () => {
               )}
             </div>
 
-            <p className="text-[11px] text-gray-400 font-medium text-center">
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium text-center">
               {cc.avatarHint || "Khuyên dùng hình ảnh tỉ lệ 4:3 sắc nét để hiển thị tối ưu nhất."}
             </p>
           </div>
@@ -441,8 +441,8 @@ const CreateCoursePage = () => {
 
             {/* Course Name */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                {cc.courseNameLabel || c.courseNameLabel || "Tên khóa học"} <span className="text-[#990011]">*</span>
+              <label className="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                {cc.courseNameLabel || c.courseNameLabel || "Tên khóa học"} <span className="text-[#990011] dark:text-[#FF6B6B]">*</span>
               </label>
               <input
                 type="text"
@@ -452,14 +452,14 @@ const CreateCoursePage = () => {
                   clearError("courseName")
                 }}
                 placeholder={cc.courseNamePlaceholder || c.courseNamePlaceholder || "Nhập tên khóa học..."}
-                className={`w-full h-11 px-4 bg-white border ${errors.courseName ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400`}
+                className={`w-full h-11 px-4 bg-white dark:bg-[#222222] border ${errors.courseName ? "border-red-500 ring-2 ring-red-200 dark:ring-red-900/30" : "border-border dark:border-[#3F3F3F] hover:border-gray-300 dark:hover:border-gray-600 focus:border-[#990011] dark:focus:border-[#FF6B6B]"} outline-none rounded-xl text-sm font-semibold text-gray-800 dark:text-gray-100 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500`}
               />
             </div>
 
             {/* Language */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                {cc.languageLabel || c.languageLabel || "Ngôn ngữ"} <span className="text-[#990011]">*</span>
+              <label className="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                {cc.languageLabel || c.languageLabel || "Ngôn ngữ"} <span className="text-[#990011] dark:text-[#FF6B6B]">*</span>
               </label>
               <Dropdown
                 options={languagesList.map((lang) => ({
@@ -477,14 +477,13 @@ const CreateCoursePage = () => {
                   <button
                     type="button"
                     onClick={toggle}
-                    className={`w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-800 hover:bg-gray-100/50 cursor-pointer text-sm font-medium ${
-                      errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border"
-                    }`}
+                    className={`w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 dark:bg-[#222222] border text-gray-800 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-[#2A2A2A] cursor-pointer text-sm font-medium ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200 dark:ring-red-900/30" : "border-border dark:border-[#3F3F3F]"
+                      }`}
                   >
-                    <span className={selectedLanguage ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
+                    <span className={selectedLanguage ? "text-gray-900 dark:text-white font-medium" : "text-gray-400 dark:text-gray-500 font-normal"}>
                       {getLocalizedLanguageName(selectedLanguage, t) || (cc.languagePlaceholder || c.languagePlaceholder || "—")}
                     </span>
-                    <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown size={16} className={`text-gray-400 dark:text-gray-500 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                   </button>
                 )}
               />
@@ -493,10 +492,10 @@ const CreateCoursePage = () => {
             {/* Description TinyMCE Editor */}
             <div className="flex flex-col gap-2 flex-1">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                <label className="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   {cc.descriptionLabel || c.descriptionLabel || "Mô tả khóa học (tùy chọn)"}
                 </label>
-                <span className="text-xs text-gray-400 font-medium">
+                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                   {cc.descriptionLimitNote || c.descriptionLimitNote || "Nội dung không quá 150 từ"}
                 </span>
               </div>
@@ -515,8 +514,11 @@ const CreateCoursePage = () => {
                   toolbar:
                     "bold italic underline strikethrough | emoticons link | bullist numlist | removeformat",
                   placeholder: cc.descriptionPlaceholder || c.descriptionPlaceholder || "Nhập thông tin mô tả tổng quan về khóa học...",
-                  skin: "oxide",
-                  content_style: "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
+                  skin: document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
+                  content_css: document.documentElement.classList.contains("dark") ? "dark" : "default",
+                  content_style: document.documentElement.classList.contains("dark")
+                    ? "body { font-family: Inter, sans-serif; font-size: 14px; color: #f3f4f6; background-color: #1A1A1A; }"
+                    : "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
                 }}
               />
             </div>
@@ -526,7 +528,7 @@ const CreateCoursePage = () => {
         </div>
 
         {/* ─── Action Buttons ─── */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t border-border mt-auto w-full">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t border-border dark:border-[#3F3F3F] mt-auto w-full">
           {/* Secondary / auxiliary actions (Delete & Clear) */}
           <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
             {isEditMode && (
@@ -535,7 +537,7 @@ const CreateCoursePage = () => {
                 variant="outline"
                 onClick={() => setShowDeleteModal(true)}
                 disabled={isDeleting}
-                className="flex-1 sm:flex-initial !border-red-500 !text-red-600 hover:!bg-red-50 whitespace-nowrap"
+                className="flex-1 sm:flex-initial !border-red-500 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-950/30 whitespace-nowrap"
               >
                 <Trash2 size={16} />
                 <span>{c.courseDetail?.deleteCourse || "Xóa khóa học"}</span>

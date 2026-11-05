@@ -3,7 +3,6 @@ import ClassCard from '../components/overview/ClassCard'
 import NextSessionCard from '../components/overview/NextSessionCard'
 import Tabs from '@/shared/components/ui/navigation/Tabs'
 import { EmptyState, LoadingSpinner } from '@/shared/components/ui/indicators'
-import { Breadcrumb } from '@/shared/components/ui/navigation'
 import PageTitle from '@/shared/components/ui/PageTitle'
 import { useNavigate } from 'react-router-dom'
 import { PillButton } from '@/shared/components/ui/buttons'
@@ -53,8 +52,6 @@ const MyLearningOverview = () => {
 
     return classes.filter(cls => {
       const status = (cls.status || "").toUpperCase()
-      // ARCHIVED is read-only but stays visible to enrolled students (per spec);
-      // only FINISHED is hidden from this tab (shown in the completed tab instead).
       return status !== "FINISHED"
     })
   }, [joinedRes])
@@ -79,11 +76,11 @@ const MyLearningOverview = () => {
   const isClassesLoading = isJoinedLoading || isCompletedLoading
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[#2e2e2e] dark:text-gray-100">
 
       {joinedClasses.length > 0 && (
         <>
-          <PageTitle className="text-[#1A1A1A]">
+          <PageTitle className="text-[#1A1A1A] dark:text-white">
             {lo.upcomingSessions || "Buổi học sắp diễn ra"}
           </PageTitle>
 
@@ -139,7 +136,7 @@ const MyLearningOverview = () => {
             <div className='col-span-full w-full flex-1'>
               <EmptyState variant="page"
                 icon={Calendar}
-                iconClassName="w-10 h-10 mb-3 text-gray-300"
+                iconClassName="w-10 h-10 mb-3 text-gray-300 dark:text-gray-600"
                 message={lo.noUpcomingSessions || "Không có lớp học nào sắp diễn ra"} />
             </div>
           )}
@@ -231,7 +228,7 @@ const MyLearningOverview = () => {
               <EmptyState
                 variant="page"
                 icon={BookOpen}
-                iconClassName="w-12 h-12 mb-3 text-gray-300"
+                iconClassName="w-12 h-12 mb-3 text-gray-300 dark:text-gray-600"
                 message={
                   activeTab === "registered" ? (lo.emptyRegistered || "Bạn chưa đăng ký lớp học nào") :
                     activeTab === "completed" ? (lo.emptyCompleted || "Bạn chưa hoàn thành lớp học nào") :
@@ -257,7 +254,11 @@ const MyLearningOverview = () => {
 
       {displayClasses.length > 3 && (
         <div className='flex justify-center items-end'>
-          <PillButton variant='secondary-no-outline' textColor={"#990011"} onClick={() => setShowAll(!showAll)}>
+          <PillButton
+            variant='secondary-no-outline'
+            className="text-[#990011] dark:text-[#FF6B6B]"
+            onClick={() => setShowAll(!showAll)}
+          >
             {showAll ? (lo.showLess || "Thu gọn") : (lo.viewAll || "Xem tất cả")}
           </PillButton>
         </div>

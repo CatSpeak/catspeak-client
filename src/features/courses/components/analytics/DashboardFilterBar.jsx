@@ -14,7 +14,7 @@ import {
 } from "./filterConstants"
 
 const selectClass =
-  "h-10 border border-[#D6D9E0] rounded-lg px-3 text-sm text-[#14171F] bg-white hover:border-[#B20514] focus:outline-none focus:ring-1 focus:ring-[#B20514] transition-all cursor-pointer font-normal"
+  "h-10 border border-[#D6D9E0] dark:border-[#3F3F3F] rounded-lg px-3 text-sm text-[#14171F] dark:text-gray-200 bg-white dark:bg-[#1A1A1A] hover:border-[#B20514] focus:outline-none focus:ring-1 focus:ring-[#B20514] transition-all cursor-pointer font-normal"
 
 const DashboardFilterBar = ({
   preset,
@@ -114,9 +114,9 @@ const DashboardFilterBar = ({
   }
 
   return (
-    <section className="bg-white border border-[#DEE0E5] rounded-xl p-3.5 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 items-end shadow-sm">
+    <section className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-3.5 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 items-end shadow-sm">
       {/* Preset selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="dash-preset">{filterT.timePeriod || "Khoảng thời gian"}</label>
         <select
           id="dash-preset"
@@ -125,7 +125,7 @@ const DashboardFilterBar = ({
           className={selectClass}
         >
           {PRESET_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+            <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {dashT.periodOptions?.[opt.key] || opt.key}
             </option>
           ))}
@@ -134,7 +134,7 @@ const DashboardFilterBar = ({
 
       {/* Date range or Custom Range */}
       {preset === "custom" ? (
-        <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+        <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
           <label>{filterT.fromDate || "Kỳ đang xem"}</label>
           <div className="grid grid-cols-2 gap-1.5">
             <DatePicker value={fromDate} onChange={(d) => setFromDate(toDateString(d))} />
@@ -142,16 +142,16 @@ const DashboardFilterBar = ({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+        <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
           <label>{filterT.currentPeriod || "Kỳ đang xem"}</label>
-          <div className="h-10 border border-[#D6D9E0] rounded-lg px-3 text-sm text-[#14171F] bg-[#FBFBFC] flex items-center font-medium truncate" title={displayedDateRange}>
+          <div className="h-10 border border-[#D6D9E0] dark:border-[#3F3F3F] rounded-lg px-3 text-sm text-[#14171F] dark:text-gray-200 bg-[#FBFBFC] dark:bg-[#222222] flex items-center font-medium truncate" title={displayedDateRange}>
             {displayedDateRange}
           </div>
         </div>
       )}
 
       {/* Compare selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="dash-compare">{filterT.compareTo || "So sánh với"}</label>
         <select
           id="dash-compare"
@@ -161,7 +161,7 @@ const DashboardFilterBar = ({
           disabled={preset === "all"}
         >
           {compareOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+            <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {opt.label}
             </option>
           ))}
@@ -169,7 +169,7 @@ const DashboardFilterBar = ({
       </div>
 
       {/* Course selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="dash-course">{filterT.course || "Khóa học"}</label>
         <select
           id="dash-course"
@@ -177,18 +177,18 @@ const DashboardFilterBar = ({
           onChange={handleCourseChange}
           className={selectClass}
         >
-          <option value={ALL_COURSES_VALUE}>{analyticsFilterT.allCourses || "Tất cả khóa học"}</option>
+          <option value={ALL_COURSES_VALUE} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">{analyticsFilterT.allCourses || "Tất cả khóa học"}</option>
           {courseList.map((item) => (
-            <option key={item.value} value={item.value}>
+            <option key={item.value} value={item.value} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {item.label}
             </option>
           ))}
-          <option value={UNASSIGNED_VALUE}>{analyticsFilterT.unassigned || "Không thuộc khóa"}</option>
+          <option value={UNASSIGNED_VALUE} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">{analyticsFilterT.unassigned || "Không thuộc khóa"}</option>
         </select>
       </div>
 
       {/* Class selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="dash-class">{filterT.class || "Lớp học"}</label>
         <select
           id="dash-class"
@@ -197,7 +197,7 @@ const DashboardFilterBar = ({
           className={selectClass}
         >
           {getClassOptions().map((item) => (
-            <option key={item.value} value={item.value}>
+            <option key={item.value} value={item.value} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {item.label}
             </option>
           ))}
@@ -209,7 +209,7 @@ const DashboardFilterBar = ({
         type="button"
         disabled={isExporting}
         onClick={() => onExport && onExport()}
-        className="h-10 border border-[#BF0514] text-[#B20514] hover:bg-[#FFEEF0] bg-white font-semibold rounded-lg flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+        className="h-10 border border-[#BF0514] dark:border-[#FF6B6B] text-[#B20514] dark:text-[#FF6B6B] hover:bg-[#FFEEF0] dark:hover:bg-[#FFEEF0]/10 bg-white dark:bg-[#1A1A1A] font-semibold rounded-lg flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
       >
         <Download size={16} />
         {isExporting ? (filterT.exporting || "Đang xuất...") : (filterT.exportReport || "Xuất báo cáo")}

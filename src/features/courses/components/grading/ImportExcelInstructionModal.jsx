@@ -8,8 +8,8 @@ const ImportExcelInstructionModal = ({ open, onClose, ce }) => {
       open={open}
       onClose={onClose}
       title={
-        <div className="flex items-center gap-2 text-gray-800">
-          <Info className="w-5 h-5 text-[#990011]" strokeWidth={2.5} />
+        <div className="flex items-center gap-2 text-gray-800 dark:text-white">
+          <Info className="w-5 h-5 text-[#990011] dark:text-[#FF6B6B]" strokeWidth={2.5} />
           <span className="text-[20px] font-bold">
             {ce.importExcelHowToTitle || "Hướng dẫn tạo câu hỏi bằng file Excel"}
           </span>
@@ -21,7 +21,7 @@ const ImportExcelInstructionModal = ({ open, onClose, ce }) => {
         <div className="flex items-center justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-[#F3F3F3] hover:bg-[#E2E2E2] text-[#1A1C1C] font-semibold rounded-xl transition-colors"
+            className="px-6 py-2 bg-[#F3F3F3] dark:bg-[#2A2A2A] hover:bg-[#E2E2E2] dark:hover:bg-[#333333] text-[#1A1C1C] dark:text-white font-semibold rounded-xl transition-colors"
           >
             {ce.close || "Đóng"}
           </button>
@@ -29,7 +29,7 @@ const ImportExcelInstructionModal = ({ open, onClose, ce }) => {
       }
     >
       <div className="pt-2 pb-6">
-        <ol className="text-sm leading-6 text-gray-700 space-y-3 list-decimal list-inside   p-5 rounded-2xl">
+        <ol className="text-sm leading-6 text-gray-700 dark:text-gray-300 space-y-3 list-decimal list-inside p-5 rounded-2xl bg-gray-50/50 dark:bg-[#222222]">
           <li>
             {ce.importExcelTip1 ||
               "Mỗi dòng là một câu hỏi. Để trống dòng nào thì dòng đó bị bỏ qua."}

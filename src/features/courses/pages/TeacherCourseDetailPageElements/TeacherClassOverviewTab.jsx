@@ -159,7 +159,7 @@ const TeacherClassOverviewTab = ({
 
   return (
     <div
-      className={`flex flex-col sm:grid sm:grid-cols-1 lg:grid-cols-3 gap-4 ${className}`}
+      className={`flex flex-col sm:grid sm:grid-cols-1 lg:grid-cols-3 gap-4 text-slate-900 dark:text-gray-100 ${className}`}
     >
       {/* LEFT COLUMN: Visual Banner + Information Card & Current Classes */}
       <div className="contents sm:flex sm:flex-col sm:gap-4 lg:col-span-2">

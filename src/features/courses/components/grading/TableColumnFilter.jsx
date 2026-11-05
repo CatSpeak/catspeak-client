@@ -87,7 +87,7 @@ const TableColumnFilter = ({
         className={`transition-all ${
           isActive
             ? "!bg-[#990011] !text-white shadow-xs"
-            : "text-gray-400 hover:!bg-gray-100"
+            : "text-gray-400 hover:!bg-gray-100 dark:hover:!bg-[#2A2A2A]"
         }`}
         onClick={handleButtonClick}
         title={filterTitle}
@@ -109,7 +109,7 @@ const TableColumnFilter = ({
               left: `${coords.left}px`,
               transform: "translateX(-50%)",
             }}
-            className="min-w-[170px] max-w-[240px] bg-white border border-border rounded-2xl shadow-xl p-2 z-[9999] text-left animate-in fade-in zoom-in-95 duration-100 origin-top font-normal"
+            className="min-w-[170px] max-w-[240px] bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-xl p-2 z-[9999] text-left animate-in fade-in zoom-in-95 duration-100 origin-top font-normal"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-1">
@@ -124,14 +124,14 @@ const TableColumnFilter = ({
                       onSelect?.(opt.value)
                       onClose?.()
                     }}
-                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-gray-50 transition-colors text-left cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors text-left cursor-pointer"
                   >
                     {/* Custom Checkbox */}
                     <div
                       className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
                         isSelected
                           ? "bg-[#990011] border-[#990011] text-white"
-                          : "border-gray-300 bg-white"
+                          : "border-gray-300 dark:border-gray-600 bg-white dark:bg-[#222222]"
                       }`}
                     >
                       {isSelected && (
@@ -157,7 +157,7 @@ const TableColumnFilter = ({
                     ) : (
                       <span
                         className={`text-xs font-semibold ${
-                          isSelected ? "text-gray-900 font-bold" : "text-gray-700"
+                          isSelected ? "text-gray-900 dark:text-white font-bold" : "text-gray-700 dark:text-gray-300"
                         }`}
                       >
                         {opt.label}

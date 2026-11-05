@@ -21,14 +21,14 @@ const CreatePostTypeModal = ({ open, onClose, onSelect }) => {
       title: ce.postTypeModalAssignmentTitle || "Bài tập",
       description: ce.postTypeModalAssignmentDesc || "Tạo bài tập tự luận hoặc nộp file cho học sinh",
       icon: FileText,
-      badgeColor: "bg-[#FFDAD6] text-[#93000A]",
+      badgeColor: "bg-[#FFDAD6] dark:bg-rose-950/50 text-[#93000A] dark:text-[#FF6B6B]",
     },
     {
       id: "exam",
       title: ce.postTypeModalExamTitle || "Bài kiểm tra",
       description: ce.postTypeModalExamDesc || "Tạo bài kiểm tra trắc nghiệm, tự luận có tính điểm và hẹn giờ",
       icon: CheckSquare,
-      badgeColor: "bg-[#FFDCBD] text-[#2C1600]",
+      badgeColor: "bg-[#FFDCBD] dark:bg-amber-950/50 text-[#2C1600] dark:text-amber-200",
     },
   ]
 
@@ -45,13 +45,13 @@ const CreatePostTypeModal = ({ open, onClose, onSelect }) => {
       onClose={onClose}
       title={
         <div className="w-full relative flex items-center justify-center">
-          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D]">
+          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D] dark:text-white">
             {ce.postTypeModalTitle || "Tạo hoạt động mới"}
           </h2>
           <button 
             type="button" 
             onClick={onClose}
-            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-full text-gray-500 dark:text-gray-400 transition-colors"
           >
             <X size={28} strokeWidth={1.5} />
           </button>
@@ -67,7 +67,7 @@ const CreatePostTypeModal = ({ open, onClose, onSelect }) => {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-[52px] rounded-full border border-[#990011] text-[#990011] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 transition-colors"
+            className="flex-1 h-[52px] rounded-full border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
           >
             {dict.cancel || "Hủy"} <X size={18} strokeWidth={2} />
           </button>
@@ -75,7 +75,7 @@ const CreatePostTypeModal = ({ open, onClose, onSelect }) => {
             type="button"
             onClick={handleSubmit}
             disabled={!selectedType}
-            className="flex-1 h-[52px] rounded-full bg-[#990011] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] transition-colors disabled:opacity-70"
+            className="flex-1 h-[52px] rounded-full bg-[#990011] dark:bg-[#b20a1c] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] dark:hover:bg-[#960817] transition-colors disabled:opacity-70"
           >
             {dict.add || "Tạo hoạt động"} <Plus size={18} strokeWidth={2} />
           </button>
@@ -92,8 +92,8 @@ const CreatePostTypeModal = ({ open, onClose, onSelect }) => {
               onClick={() => setSelectedType(opt.id)}
               className={`border rounded-lg p-5 flex items-center justify-between transition-all cursor-pointer ${
                 isChecked
-                  ? "border-[#990011] bg-red-50/20 shadow-sm"
-                  : "border-[#E2E2E2] bg-white hover:border-gray-300"
+                  ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/20 dark:bg-rose-950/20 shadow-sm"
+                  : "border-[#E2E2E2] dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] hover:border-gray-300 dark:hover:border-gray-600"
               }`}
             >
               <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -110,7 +110,7 @@ const CreatePostTypeModal = ({ open, onClose, onSelect }) => {
                       <Icon size={12} /> {opt.title}
                     </span>
                   </div>
-                  <h5 className="text-sm font-bold text-[#191C1D]">
+                  <h5 className="text-sm font-bold text-[#191C1D] dark:text-white">
                     {opt.description}
                   </h5>
                 </div>

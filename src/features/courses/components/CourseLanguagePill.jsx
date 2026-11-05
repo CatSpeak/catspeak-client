@@ -3,11 +3,11 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { getLocalizedLanguageName } from "../data/courseFormOptions"
 
 const LANGUAGE_STYLE_CONFIG = {
-  ENGLISH: { bgClass: "bg-[#DBEAFE]", textClass: "text-[#1D4ED8]" }, // Blue
-  CHINESE: { bgClass: "bg-[#FEF3C7]", textClass: "text-[#B45309]" }, // Amber/Yellow
-  VIETNAMESE: { bgClass: "bg-[#DCFCE7]", textClass: "text-[#15803D]" }, // Green
-  JAPANESE: { bgClass: "bg-[#FCE7F3]", textClass: "text-[#BE185D]" }, // Pink
-  DEFAULT: { bgClass: "bg-[#F3F4F6]", textClass: "text-[#4B5563]" }, // Gray
+  ENGLISH: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-[#1D4ED8] dark:text-blue-300" }, // Blue
+  CHINESE: { bgClass: "bg-[#FEF3C7] dark:bg-amber-950/40", textClass: "text-[#B45309] dark:text-amber-300" }, // Amber/Yellow
+  VIETNAMESE: { bgClass: "bg-[#DCFCE7] dark:bg-emerald-950/40", textClass: "text-[#15803D] dark:text-emerald-300" }, // Green
+  JAPANESE: { bgClass: "bg-[#FCE7F3] dark:bg-pink-950/40", textClass: "text-[#BE185D] dark:text-pink-300" }, // Pink
+  DEFAULT: { bgClass: "bg-[#F3F4F6] dark:bg-[#2A2A2A]", textClass: "text-[#4B5563] dark:text-gray-300" }, // Gray
 }
 
 const getCanonicalLanguage = (lang) => {

@@ -14,6 +14,7 @@ import {
 } from "@/store/api/coursesApi"
 
 const QualityTab = ({ group, queryParams = {} }) => {
+  const navigate = useNavigate()
   const { t, language } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
@@ -142,8 +143,8 @@ const QualityTab = ({ group, queryParams = {} }) => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         {/* Rating Trend Chart */}
-        <div className="xl:col-span-7 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.ratingTrend || "Xu hướng đánh giá theo thời gian"}</h2>
+        <div className="xl:col-span-7 bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.ratingTrend || "Xu hướng đánh giá theo thời gian"}</h2>
           <AnalyticsLineChart
             chartLabels={chartLabels}
             series={[{ name: kpiT.avgRating || "Đánh giá trung bình", values: seriesRating, color: "#E11D48" }]}
@@ -154,15 +155,15 @@ const QualityTab = ({ group, queryParams = {} }) => {
         </div>
 
         {/* Star Distribution Bar Chart */}
-        <div className="xl:col-span-5 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.starDistribution || "Phân bố đánh giá"}</h2>
+        <div className="xl:col-span-5 bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.starDistribution || "Phân bố đánh giá"}</h2>
           <AnalyticsBarChart rows={starDistribution} formatter={(val) => `${val}%`} />
         </div>
       </div>
 
       {/* Quality Detail Table */}
-      <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
-        <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.qualityByClass || "Chất lượng theo lớp học"}</h2>
+      <div className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm">
+        <h2 className="text-base font-bold text-[#14171F] dark:text-white mb-3">{secT.qualityByClass || "Chất lượng theo lớp học"}</h2>
         <AnalyticsDataTable
           columns={[
             {
@@ -176,7 +177,7 @@ const QualityTab = ({ group, queryParams = {} }) => {
                       navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
                     }
                   }}
-                  className="font-bold text-left text-gray-900 hover:text-[#990011] transition-colors cursor-pointer hover:underline"
+                  className="font-bold text-left text-gray-900 dark:text-white hover:text-[#990011] dark:hover:text-[#FF6B6B] transition-colors cursor-pointer hover:underline"
                 >
                   {val}
                 </button>

@@ -226,7 +226,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   const attemptActiveRef = useRef(false)
   const startGuardRef = useRef(false)
   const submitGuardRef = useRef(false)
-  const autoSubmitTriggeredRef = useRef(false)
+  const autoSubmitTriggeredRef.current = false
   const submitDialogRef = useRef(null)
   const cancelSubmitButtonRef = useRef(null)
   const previousFocusRef = useRef(null)
@@ -785,7 +785,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   if ((isQuizzesLoading || isQuizzesFetching) && quizzesResponse === undefined) {
     return (
       <div
-        className="min-h-screen bg-white flex justify-center items-center"
+        className="min-h-screen bg-white dark:bg-[#121212] flex justify-center items-center"
         role="status"
         aria-live="polite"
         aria-label={sq.loadingQuiz}
@@ -797,15 +797,15 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
   if (quizzesError || (quizzesResponse !== undefined && quizList === null)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#121212] flex items-center justify-center p-4">
         <div
-          className="max-w-lg w-full bg-white border border-red-200 rounded-2xl p-6 text-center"
+          className="max-w-lg w-full bg-white dark:bg-[#1A1A1A] border border-red-200 dark:border-red-900/40 rounded-2xl p-6 text-center"
           role="alert"
         >
-          <h1 className="text-lg font-black text-gray-900">
+          <h1 className="text-lg font-black text-gray-900 dark:text-white">
             {sq.loadQuizErrorTitle}
           </h1>
-          <p className="mt-2 text-sm font-semibold text-gray-600">
+          <p className="mt-2 text-sm font-semibold text-gray-600 dark:text-gray-300">
             {getQuizErrorMessage(
               quizzesError,
               language,
@@ -816,7 +816,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             <button
               type="button"
               onClick={handleBack}
-              className="px-4 py-2 border border-border rounded-xl text-sm font-bold"
+              className="px-4 py-2 border border-border dark:border-[#3F3F3F] rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2A2A2A]"
             >
               {sq.back}
             </button>
@@ -836,12 +836,12 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
   if (!quiz) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#121212] flex items-center justify-center p-4">
         <div
-          className="max-w-lg w-full bg-white border border-border rounded-2xl p-6 text-center"
+          className="max-w-lg w-full bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl p-6 text-center"
           role="alert"
         >
-          <h1 className="text-lg font-black text-gray-900">
+          <h1 className="text-lg font-black text-gray-900 dark:text-white">
             {sq.quizNotFound}
           </h1>
           <button
@@ -859,41 +859,41 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   // ─── STEP 1: INTRO & CONFIRMATION (Whole Page, No Workspace Sidebar) ───
   if (attemptStep === "intro") {
     return (
-      <div className="min-h-screen bg-gray-50 overflow-y-auto p-4 flex flex-col items-center justify-center font-sans">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#121212] overflow-y-auto p-4 flex flex-col items-center justify-center font-sans">
         {/* Main Info & Confirmation Card */}
-        <div className="max-w-3xl w-full bg-white rounded-3xl border border-border p-6 md:p-10 shadow-lg flex flex-col gap-6">
+        <div className="max-w-3xl w-full bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 md:p-10 shadow-lg flex flex-col gap-6">
 
           {/* Header & Badges */}
-          <div className="flex flex-col gap-2 border-b border-border pb-5">
+          <div className="flex flex-col gap-2 border-b border-border dark:border-[#3F3F3F] pb-5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="bg-red-50 text-[#990011] border border-red-100 text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
+              <span className="bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] border border-red-100 dark:border-red-900/40 text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
                 <Timer size={12} />
                 {sq.quizBadge}
               </span>
               <span
                 className={`text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider border ${quizStatus === "open"
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                  ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40"
                   : quizStatus === "upcoming"
-                    ? "bg-amber-50 text-amber-700 border-amber-100"
-                    : "bg-gray-100 text-gray-600 border-border"
+                    ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/40"
+                    : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400 border-border dark:border-[#3F3F3F]"
                   }`}
               >
                 {quizStatusLabel}
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-gray-950 tracking-tight leading-tight">
+            <h1 className="text-2xl md:text-3xl font-black text-gray-950 dark:text-white tracking-tight leading-tight">
               {quiz?.name || sq.untitledQuiz}
             </h1>
           </div>
 
           {/* Details Overview Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50/70 border border-border p-4 rounded-2xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50/70 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] p-4 rounded-2xl">
             <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+              <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                 {sq.timeLimit}
               </span>
-              <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
-                <Clock size={14} className="text-[#990011]" />
+              <span className="text-sm font-black text-gray-850 dark:text-gray-200 flex items-center gap-1.5">
+                <Clock size={14} className="text-[#990011] dark:text-[#FF6B6B]" />
                 {quiz?.timeLimitMinutes != null
                   ? interpolate(sq.minutes, { count: quiz.timeLimitMinutes })
                   : "—"}
@@ -901,11 +901,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             </div>
 
             <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+              <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                 {sq.totalQuestions}
               </span>
-              <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
-                <HelpCircle size={14} className="text-[#990011]" />
+              <span className="text-sm font-black text-gray-850 dark:text-gray-200 flex items-center gap-1.5">
+                <HelpCircle size={14} className="text-[#990011] dark:text-[#FF6B6B]" />
                 {(quiz?.totalQuestions ?? quiz?.totalQuestion ?? quiz?.questionCount ?? quiz?.questionsCount ?? quiz?.questions?.length ?? attemptData?.questions?.length) != null
                   ? interpolate(sq.questionCount, {
                     count: quiz?.totalQuestions ?? quiz?.totalQuestion ?? quiz?.questionCount ?? quiz?.questionsCount ?? quiz?.questions?.length ?? attemptData?.questions?.length,
@@ -915,11 +915,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             </div>
 
             <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+              <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                 {sq.remainingAttempts}
               </span>
-              <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
-                <RotateCcw size={14} className="text-[#990011]" />
+              <span className="text-sm font-black text-gray-850 dark:text-gray-200 flex items-center gap-1.5">
+                <RotateCcw size={14} className="text-[#990011] dark:text-[#FF6B6B]" />
                 {quiz?.remainingAttempts != null || quiz?.maxAttempts != null
                   ? interpolate(sq.attemptCount, {
                     count: quiz?.remainingAttempts ?? quiz?.maxAttempts,
@@ -929,11 +929,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             </div>
 
             <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+              <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                 {sq.maxAttempts}
               </span>
-              <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
-                <Layers size={14} className="text-[#990011]" />
+              <span className="text-sm font-black text-gray-850 dark:text-gray-200 flex items-center gap-1.5">
+                <Layers size={14} className="text-[#990011] dark:text-[#FF6B6B]" />
                 {quiz?.maxAttempts != null
                   ? interpolate(sq.attemptCount, { count: quiz.maxAttempts })
                   : "—"}
@@ -944,20 +944,20 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           {/* Description box */}
           {quiz?.description && (
             <div className="flex flex-col gap-2">
-              <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">
+              <h3 className="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
                 {sq.instructions}
               </h3>
-              <div className="bg-gray-50 border border-border rounded-2xl p-4 text-xs font-semibold text-gray-700 leading-relaxed">
+              <div className="bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl p-4 text-xs font-semibold text-gray-700 dark:text-gray-300 leading-relaxed">
                 <RenderHTML html={quiz.description} />
               </div>
             </div>
           )}
 
           {/* Important Warning Notice Box */}
-          <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex gap-3 text-amber-900">
+          <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 rounded-2xl p-4 flex gap-3 text-amber-900 dark:text-amber-300">
             <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
             <div className="flex flex-col gap-1 text-xs font-medium leading-relaxed">
-              <span className="font-extrabold text-amber-950 text-sm">
+              <span className="font-extrabold text-amber-950 dark:text-amber-200 text-sm">
                 {sq.importantNotice}
               </span>
               <ul className="list-disc pl-4 space-y-0.5">
@@ -974,8 +974,8 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           </div>
 
           {/* Confirmation Question & Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-border">
-            <span className="text-sm font-black text-gray-900 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-border dark:border-[#3F3F3F]">
+            <span className="text-sm font-black text-gray-900 dark:text-white text-center sm:text-left">
               {recordStatus === "InProgress" || recordStatus === "inprogress"
                 ? sq.resumeAttemptPrompt
                 : (recordStatus === "Submitted" || recordStatus === "submitted"
@@ -988,7 +988,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 <button
                   type="button"
                   onClick={() => setStepOverride("result")}
-                  className="flex-1 sm:flex-none px-4 py-3 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold text-xs rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1 sm:flex-none px-4 py-3 border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 font-extrabold text-xs rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Eye size={14} />
                   <span>{sq.seeResults || "View Results"}</span>
@@ -997,7 +997,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex-1 sm:flex-none px-4 py-3 border border-border hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-2xl transition-all cursor-pointer"
+                className="flex-1 sm:flex-none px-4 py-3 border border-border dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-300 font-extrabold text-xs rounded-2xl transition-all cursor-pointer"
               >
                 {sq.cancel}
               </button>
@@ -1041,11 +1041,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     if (!resultData && (isQuizResultLoading || isQuizResultFetching)) {
       return (
         <div
-          className="min-h-screen bg-[#f4f5f7] flex items-center justify-center"
+          className="min-h-screen bg-[#f4f5f7] dark:bg-[#121212] flex items-center justify-center"
           role="status"
           aria-live="polite"
         >
-          <div className="flex flex-col items-center gap-3 text-sm font-bold text-gray-500">
+          <div className="flex flex-col items-center gap-3 text-sm font-bold text-gray-500 dark:text-gray-400">
             <LoadingSpinner />
             <span>
               {sq.loadingQuizResult}
@@ -1057,15 +1057,15 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
     if (!resultData && (quizResultError || hasMalformedResult)) {
       return (
-        <div className="min-h-screen bg-[#f4f5f7] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#f4f5f7] dark:bg-[#121212] flex items-center justify-center p-4">
           <div
-            className="max-w-lg w-full bg-white border border-red-200 rounded-2xl p-6 text-center"
+            className="max-w-lg w-full bg-white dark:bg-[#1A1A1A] border border-red-200 dark:border-red-900/40 rounded-2xl p-6 text-center"
             role="alert"
           >
-            <h1 className="text-lg font-black text-gray-900">
+            <h1 className="text-lg font-black text-gray-900 dark:text-white">
               {sq.loadResultErrorTitle}
             </h1>
-            <p className="mt-2 text-sm font-semibold text-gray-600">
+            <p className="mt-2 text-sm font-semibold text-gray-600 dark:text-gray-300">
               {getQuizErrorMessage(
                 quizResultError,
                 language,
@@ -1076,7 +1076,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               <button
                 type="button"
                 onClick={handleBack}
-                className="px-4 py-2 border border-border rounded-xl text-sm font-bold"
+                className="px-4 py-2 border border-border dark:border-[#3F3F3F] rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2A2A2A]"
               >
                 {sq.back}
               </button>
@@ -1140,12 +1140,12 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     )
 
     return (
-      <div className="min-h-screen bg-[#f4f5f7] pb-24 font-sans text-gray-850">
+      <div className="min-h-screen bg-[#f4f5f7] dark:bg-[#121212] pb-24 font-sans text-gray-850 dark:text-gray-200">
         <div className="max-w-4xl mx-auto p-4 md:p-8 flex flex-col gap-6">
 
           {(quizResultError || hasMalformedResult) && (
             <div
-              className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-amber-900 dark:text-amber-300 rounded-xl p-4 text-sm font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               role="alert"
             >
               <span>{sq.resultSummaryFallback}</span>
@@ -1153,7 +1153,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 type="button"
                 onClick={refetchQuizResult}
                 disabled={isQuizResultFetching}
-                className="shrink-0 inline-flex items-center justify-center gap-2 px-3 py-2 bg-white border border-amber-300 rounded-lg font-bold disabled:opacity-50"
+                className="shrink-0 inline-flex items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-[#222222] border border-amber-300 dark:border-amber-800 rounded-lg font-bold disabled:opacity-50 text-amber-900 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-[#2A2A2A]"
               >
                 <RefreshCw
                   size={14}
@@ -1165,42 +1165,42 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           )}
 
           {/* ─── Top Result Header Banner Card ─── */}
-          <div className="bg-white rounded-2xl border border-border p-6 md:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative shadow-xs overflow-hidden">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] p-6 md:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative shadow-xs overflow-hidden">
             {/* Left Edge Accent Bar */}
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#990011] rounded-l-2xl" />
 
             {/* Title & Metadata */}
             <div className="flex flex-col gap-2 pl-2">
-              <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                 {sq.examResult}
               </h1>
 
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 flex-wrap">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 flex-wrap">
                 <span className="flex items-center gap-1.5">
-                  <Calendar size={14} className="text-gray-400" />
+                  <Calendar size={14} className="text-gray-400 dark:text-gray-500" />
                   <span>{interpolate(sq.submittedAt, { date: submittedDateStr })}</span>
                 </span>
-                <span className="text-gray-300">•</span>
+                <span className="text-gray-300 dark:text-gray-600">•</span>
                 <span className="flex items-center gap-1.5">
-                  <Clock size={14} className="text-gray-400" />
+                  <Clock size={14} className="text-gray-400 dark:text-gray-500" />
                   <span>{interpolate(sq.timeSpent, { duration: timeSpentFormatted })}</span>
                 </span>
               </div>
             </div>
 
             {/* Score & Pass Status Card (Right Box) */}
-            <div className="bg-red-50/20 border border-red-100 rounded-2xl p-4 flex items-center gap-6 shrink-0 self-stretch sm:self-auto justify-around sm:justify-start">
+            <div className="bg-red-50/20 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 rounded-2xl p-4 flex items-center gap-6 shrink-0 self-stretch sm:self-auto justify-around sm:justify-start">
               {/* Score Display */}
               <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                   {sq.score}
                 </span>
                 <div className="flex items-baseline">
-                  <span className="text-3xl md:text-4xl font-black text-[#990011] tracking-tight">
+                  <span className="text-3xl md:text-4xl font-black text-[#990011] dark:text-[#FF6B6B] tracking-tight">
                     {displayScore ?? "—"}
                   </span>
                   {maxDisplayScore != null && (
-                    <span className="text-sm font-bold text-gray-400 ml-0.5">
+                    <span className="text-sm font-bold text-gray-400 dark:text-gray-500 ml-0.5">
                       /{maxDisplayScore}
                     </span>
                   )}
@@ -1208,25 +1208,25 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               </div>
 
               {/* Vertical Divider */}
-              <div className="w-px h-10 bg-gray-200" />
+              <div className="w-px h-10 bg-gray-200 dark:bg-[#3F3F3F]" />
 
               {/* Pass Status Display */}
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                   {sq.status}
                 </span>
                 {isPassed === true ? (
-                  <span className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                  <span className="bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
                     <Check size={13} className="stroke-[3]" />
                     <span>{passStatusStr}</span>
                   </span>
                 ) : isPassed === false ? (
-                  <span className="bg-red-50 text-red-700 border border-red-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                  <span className="bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/40 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
                     <X size={13} className="stroke-[3]" />
                     <span>{passStatusStr}</span>
                   </span>
                 ) : (
-                  <span className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                  <span className="bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
                     <Clock size={13} />
                     <span>{passStatusStr}</span>
                   </span>
@@ -1237,7 +1237,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
           {/* ─── Question Details Section Header ─── */}
           <div className="flex flex-col gap-1 mt-2">
-            <h2 className="text-base font-extrabold text-gray-900 pb-2 border-b border-border">
+            <h2 className="text-base font-extrabold text-gray-900 dark:text-white pb-2 border-b border-border dark:border-[#3F3F3F]">
               {sq.questionDetails}
             </h2>
           </div>
@@ -1245,7 +1245,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           {/* ─── Question Cards List ─── */}
           <div className="flex flex-col gap-5">
             {resultQuestions.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-border p-8 text-center text-sm font-semibold text-gray-500">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] p-8 text-center text-sm font-semibold text-gray-500 dark:text-gray-400">
                 {sq.questionDetailsUnavailable}
               </div>
             ) : resultQuestions.map((q, qIdx) => {
@@ -1300,42 +1300,42 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               return (
                 <div
                   key={q.questionId || q.id || qIdx}
-                  className="bg-white rounded-2xl border border-border overflow-hidden shadow-xs"
+                  className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] overflow-hidden shadow-xs"
                 >
                   {/* Card Header Bar */}
                   <div
                     className={`px-5 py-3.5 flex justify-between items-center border-b ${isWrong
-                      ? "bg-red-50/60 border-red-150"
+                      ? "bg-red-50/60 dark:bg-red-950/40 border-red-150 dark:border-red-900/40"
                       : isPending
-                        ? "bg-amber-50/50 border-amber-150"
-                        : "bg-emerald-50/60 border-emerald-150"
+                        ? "bg-amber-50/50 dark:bg-amber-950/40 border-amber-150 dark:border-amber-900/40"
+                        : "bg-emerald-50/60 dark:bg-emerald-950/40 border-emerald-150 dark:border-emerald-900/40"
                       }`}
                   >
-                    <span className={`text-sm font-extrabold ${isWrong ? "text-red-950" : isPending ? "text-gray-900" : "text-emerald-950"}`}>
+                    <span className={`text-sm font-extrabold ${isWrong ? "text-red-950 dark:text-red-300" : isPending ? "text-gray-900 dark:text-white" : "text-emerald-950 dark:text-emerald-300"}`}>
                       {interpolate(sq.questionNumber, { number: qIdx + 1 })}
                     </span>
 
                     <div>
                       {isCorrect && (
-                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                        <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <CheckCircle2 size={14} />
                           <span>{interpolate(sq.correctScore, { earned: pointsEarnedVal, max: pointsMaxVal })}</span>
                         </span>
                       )}
                       {isWrong && (
-                        <span className="bg-red-100/70 text-red-700 border border-red-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                        <span className="bg-red-100/70 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/40 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <XCircle size={14} />
                           <span>{interpolate(sq.incorrectScore, { earned: pointsEarnedVal, max: pointsMaxVal })}</span>
                         </span>
                       )}
                       {!isCorrect && !isWrong && isGraded && (
-                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                        <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <CheckCircle2 size={14} />
                           <span>{interpolate(sq.gradedScore, { earned: pointsEarnedVal, max: pointsMaxVal })}</span>
                         </span>
                       )}
                       {isPending && (
-                        <span className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                        <span className="bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <Clock size={14} />
                           <span>{interpolate(sq.pendingScore, { earned: pointsEarnedVal, max: pointsMaxVal })}</span>
                         </span>
@@ -1344,18 +1344,18 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   </div>
 
                   {/* Question Type Info (Above question content) */}
-                  <div className="px-5 pt-4 text-base font-black text-gray-950">
+                  <div className="px-5 pt-4 text-base font-black text-gray-950 dark:text-white">
                     {getQuestionTypeLabel(q?.type, sq)}
                   </div>
 
                   {/* Question Content / Prompt */}
-                  <div className="px-5 py-2 text-sm font-bold text-gray-850 leading-relaxed">
+                  <div className="px-5 py-2 text-sm font-bold text-gray-850 dark:text-gray-200 leading-relaxed">
                     <RenderHTML html={q.content} />
                   </div>
 
                   {/* Question Image Media (Image below content, small scale, un-cropped) */}
                   {getQuestionImageUrl(q) && (
-                    <div className="mx-5 mt-2 rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center p-2">
+                    <div className="mx-5 mt-2 rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#222222] flex items-center justify-center p-2">
                       <img
                         src={getQuestionImageUrl(q)}
                         alt={interpolate(sq.questionIllustration, { number: qIdx + 1 })}
@@ -1366,7 +1366,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
                   {/* Question Audio Media (Audio play below image) */}
                   {getQuestionAudioUrl(q) && (
-                    <div className="mx-5 mt-3 p-3 bg-red-50/20 border border-red-100 rounded-2xl flex items-center gap-3 shadow-2xs">
+                    <div className="mx-5 mt-3 p-3 bg-red-50/20 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 rounded-2xl flex items-center gap-3 shadow-2xs">
                       <audio controls src={getQuestionAudioUrl(q)} className="w-full h-10 rounded-xl" />
                     </div>
                   )}
@@ -1390,23 +1390,23 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                           correctAnswers.some((ans) => String(ans).trim() === optTextStr)
                         )
 
-                        let optionStyle = "border-border bg-white text-gray-700 font-semibold"
-                        let circleStyle = "border-gray-300"
+                        let optionStyle = "border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] text-gray-700 dark:text-gray-300 font-semibold"
+                        let circleStyle = "border-gray-300 dark:border-gray-600"
                         let rightIcon = null
 
                         if (isStudentPick && !hasAnswerKey) {
-                          optionStyle = "border-2 border-gray-400 bg-gray-50 text-gray-900 font-bold"
-                          circleStyle = "border-2 border-gray-500 bg-gray-100"
+                          optionStyle = "border-2 border-gray-400 dark:border-gray-500 bg-gray-50 dark:bg-[#2A2A2A] text-gray-900 dark:text-white font-bold"
+                          circleStyle = "border-2 border-gray-500 dark:border-gray-400 bg-gray-100 dark:bg-[#333333]"
                         } else if (isStudentPick && isRightAnswer) {
                           // Student chose correct option -> Green
-                          optionStyle = "border-2 border-emerald-500 bg-emerald-50/20 text-emerald-950 font-bold"
-                          circleStyle = "border-2 border-emerald-500 bg-emerald-100"
-                          rightIcon = <Check size={18} className="text-emerald-600 shrink-0" />
+                          optionStyle = "border-2 border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-300 font-bold"
+                          circleStyle = "border-2 border-emerald-500 bg-emerald-100 dark:bg-emerald-950/50"
+                          rightIcon = <Check size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                         } else if (isStudentPick && !isRightAnswer) {
                           // Student chose wrong option -> Red
-                          optionStyle = "border-2 border-red-500 bg-red-50/20 text-red-900 font-bold"
-                          circleStyle = "border-2 border-red-500 bg-red-100"
-                          rightIcon = <X size={18} className="text-red-600 shrink-0" />
+                          optionStyle = "border-2 border-red-500 bg-red-50/20 dark:bg-red-950/30 text-red-900 dark:text-red-300 font-bold"
+                          circleStyle = "border-2 border-red-500 bg-red-100 dark:bg-red-950/50"
+                          rightIcon = <X size={18} className="text-red-600 dark:text-red-400 shrink-0" />
                         }
 
                         return (
@@ -1420,17 +1420,17 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                                 {isStudentPick && (
                                   <span
                                     className={`w-2 h-2 rounded-full ${!hasAnswerKey
-                                      ? "bg-gray-600"
+                                      ? "bg-gray-600 dark:bg-gray-400"
                                       : isRightAnswer
-                                        ? "bg-emerald-600"
-                                        : "bg-red-600"
+                                        ? "bg-emerald-600 dark:bg-emerald-400"
+                                        : "bg-red-600 dark:bg-red-400"
                                       }`}
                                   />
                                 )}
                               </div>
 
                               {/* Option Label */}
-                              <span className={isStudentPick && hasAnswerKey && !isRightAnswer ? "text-gray-600" : ""}>
+                              <span className={isStudentPick && hasAnswerKey && !isRightAnswer ? "text-gray-600 dark:text-gray-400" : ""}>
                                 <span className="font-black mr-1.5">{optLetter}.</span>
                                 {optText}
                               </span>
@@ -1445,7 +1445,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   )}
 
                   {options.length === 0 && studentAnswers.length > 0 && (
-                    <div className="px-5 pb-4 text-xs font-semibold text-gray-700">
+                    <div className="px-5 pb-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
                       <span className="font-extrabold">
                         {sq.yourSelection}
                       </span>
@@ -1463,17 +1463,17 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   {/* Essay or Fill-in Blank Student Text */}
                   {(q.type === "Essay" || q.type === "FillInBlank") && (
                     <div className="px-5 py-4 flex flex-col gap-2">
-                      <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wide">
+                      <span className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                         {sq.yourAnswer}
                       </span>
                       <div
                         className={`p-4 border rounded-xl text-xs md:text-sm flex items-center justify-between gap-3 ${q.type === "Essay"
-                          ? "bg-gray-50 border-border text-gray-800 font-semibold"
+                          ? "bg-gray-50 dark:bg-[#222222] border-border dark:border-[#3F3F3F] text-gray-800 dark:text-gray-200 font-semibold"
                           : isCorrect
-                            ? "border-2 border-emerald-500 bg-emerald-50/20 text-emerald-950 font-bold"
+                            ? "border-2 border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-300 font-bold"
                             : isWrong
-                              ? "border-2 border-red-500 bg-red-50/20 text-red-950 font-bold"
-                              : "bg-gray-50 border-border text-gray-800 font-semibold"
+                              ? "border-2 border-red-500 bg-red-50/20 dark:bg-red-950/30 text-red-950 dark:text-red-300 font-bold"
+                              : "bg-gray-50 dark:bg-[#222222] border-border dark:border-[#3F3F3F] text-gray-800 dark:text-gray-200 font-semibold"
                           }`}
                       >
                         <span>
@@ -1481,16 +1481,16 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             (typeof q.studentAnswer === "string" && q.studentAnswer.trim() ? q.studentAnswer : null) ||
                             sq.noAnswerProvided}
                         </span>
-                        {q.type !== "Essay" && isCorrect && <Check size={18} className="text-emerald-600 shrink-0" />}
-                        {q.type !== "Essay" && isWrong && <X size={18} className="text-red-600 shrink-0" />}
+                        {q.type !== "Essay" && isCorrect && <Check size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />}
+                        {q.type !== "Essay" && isWrong && <X size={18} className="text-red-600 dark:text-red-400 shrink-0" />}
                       </div>
                     </div>
                   )}
 
                   {/* Teacher Feedback Callout */}
                   {(q.essayComment || q.comment || q.feedback) && (
-                    <div className="mx-5 mb-5 bg-blue-50/80 border-l-4 border-blue-600 rounded-r-xl p-4 text-xs font-semibold text-blue-950 leading-relaxed">
-                      <span className="font-extrabold text-blue-900 mr-1.5">
+                    <div className="mx-5 mb-5 bg-blue-50/80 dark:bg-blue-950/30 border-l-4 border-blue-600 dark:border-blue-500 rounded-r-xl p-4 text-xs font-semibold text-blue-950 dark:text-blue-300 leading-relaxed">
+                      <span className="font-extrabold text-blue-900 dark:text-blue-400 mr-1.5">
                         {sq.teacherFeedback}
                       </span>
                       <span>{q.essayComment || q.comment || q.feedback}</span>
@@ -1499,11 +1499,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
                   {/* Correct Answer Display Box Below Question */}
                   {hasAnswerKey && correctAnswers.length > 0 && (
-                    <div className="mx-5 mb-5 p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-900 flex items-center gap-2.5 shadow-2xs">
-                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                    <div className="mx-5 mb-5 p-3.5 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 rounded-xl text-xs font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-2.5 shadow-2xs">
+                      <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <span>
                         {sq.correctAnswer}
-                        <strong className="text-emerald-950 font-extrabold">
+                        <strong className="text-emerald-950 dark:text-emerald-200 font-extrabold">
                           {correctAnswers
                             .map((ans) => {
                               const idx = Number(ans)
@@ -1528,8 +1528,8 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
                   {/* Explanation Callout ("Giải thích") */}
                   {q.explanation && (
-                    <div className="mx-5 mb-5 bg-gray-100/90 border-l-4 border-[#990011] rounded-r-xl p-4 text-xs font-semibold text-gray-700 leading-relaxed">
-                      <span className="font-extrabold text-gray-900 mr-1.5">
+                    <div className="mx-5 mb-5 bg-gray-100/90 dark:bg-[#222222] border-l-4 border-[#990011] dark:border-[#FF6B6B] rounded-r-xl p-4 text-xs font-semibold text-gray-700 dark:text-gray-300 leading-relaxed">
+                      <span className="font-extrabold text-gray-900 dark:text-white mr-1.5">
                         {sq.explanation}
                       </span>
                       <span>{q.explanation}</span>
@@ -1543,11 +1543,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         </div>
 
         {/* ─── Bottom Sticky Action Bar ─── */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border px-6 py-3.5 flex justify-end items-center gap-3 z-40 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#1A1A1A] border-t border-border dark:border-[#3F3F3F] px-6 py-3.5 flex justify-end items-center gap-3 z-40 shadow-lg">
           <button
             type="button"
             onClick={handleBack}
-            className="px-6 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl transition-all cursor-pointer active:scale-95"
+            className="px-6 py-2.5 bg-white dark:bg-[#222222] border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-300 font-extrabold text-xs rounded-xl transition-all cursor-pointer active:scale-95"
           >
             {sq.back}
           </button>
@@ -1569,17 +1569,17 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
   // ─── STEP 2: EXAM PROGRESSION UI (Full Page, Standalone Route, Custom Layout) ───
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col overflow-hidden font-sans text-gray-850">
+    <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#121212] flex flex-col overflow-hidden font-sans text-gray-850 dark:text-gray-200">
 
       {/* ─── TOP HEADER (Full Width) ─── */}
-      <div className="bg-white border-b border-border px-6 py-3.5 flex items-center justify-between shadow-2xs shrink-0 select-none">
+      <div className="bg-white dark:bg-[#1A1A1A] border-b border-border dark:border-[#3F3F3F] px-6 py-3.5 flex items-center justify-between shadow-2xs shrink-0 select-none">
 
         {/* Header Left: Title + Online/Status Pill */}
         <div className="flex items-center gap-4">
-          <h1 className="text-base md:text-xl font-black text-gray-950 tracking-tight truncate max-w-xs sm:max-w-md md:max-w-xl">
+          <h1 className="text-base md:text-xl font-black text-gray-950 dark:text-white tracking-tight truncate max-w-xs sm:max-w-md md:max-w-xl">
             {quiz?.name || sq.quiz}
           </h1>
-          <span className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-[10px] font-extrabold tracking-wide">
+          <span className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full text-[10px] font-extrabold tracking-wide">
             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
             <span>{sq.inProgress}</span>
           </span>
@@ -1589,14 +1589,14 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         <div className="flex items-center gap-4 shrink-0">
           {/* Auto Save timestamp info */}
           <div
-            className={`hidden md:flex items-center gap-1.5 text-xs font-bold ${saveStatus === "error" ? "text-red-600" : "text-gray-400"
+            className={`hidden md:flex items-center gap-1.5 text-xs font-bold ${saveStatus === "error" ? "text-red-600 dark:text-red-400" : "text-gray-400 dark:text-gray-500"
               }`}
             role="status"
             aria-live="polite"
           >
             <CloudCheck
               size={16}
-              className={saveStatus === "error" ? "text-red-500" : "text-emerald-500"}
+              className={saveStatus === "error" ? "text-red-500 dark:text-red-400" : "text-emerald-500 dark:text-emerald-400"}
             />
             <span>
               {saveStatus === "error"
@@ -1620,10 +1620,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
           {/* TIMER BOX (Prominently placed on RIGHT SIDE of header) */}
           <div className={`px-4 py-2 border rounded-full flex items-center gap-2 font-black tracking-wider text-base md:text-lg shadow-2xs transition-all ${isLowTime
-            ? "bg-red-50 text-red-650 border-red-200 animate-pulse"
-            : "bg-gray-50 text-gray-900 border-border"
+            ? "bg-red-50 dark:bg-red-950/30 text-red-650 dark:text-red-400 border-red-200 dark:border-red-900/40 animate-pulse"
+            : "bg-gray-50 dark:bg-[#222222] text-gray-900 dark:text-white border-border dark:border-[#3F3F3F]"
             }`}>
-            <Timer size={20} className={isLowTime ? "text-red-650" : "text-[#990011]"} />
+            <Timer size={20} className={isLowTime ? "text-red-650 dark:text-red-400" : "text-[#990011] dark:text-[#FF6B6B]"} />
             <span>{Number.isFinite(timeRemaining) ? formatTimer(timeRemaining) : "--:--"}</span>
           </div>
         </div>
@@ -1633,14 +1633,14 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       {submissionError && (
         <div
           role="alert"
-          className="mx-4 mt-4 flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800 sm:mx-6 sm:flex-row sm:items-center sm:justify-between"
+          className="mx-4 mt-4 flex flex-col gap-3 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm font-semibold text-red-800 dark:text-red-300 sm:mx-6 sm:flex-row sm:items-center sm:justify-between"
         >
           <span>{submissionError}</span>
           <button
             type="button"
             onClick={() => executeSubmit({ timedOut: timeRemaining === 0 })}
             disabled={isSubmitting}
-            className="shrink-0 rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-extrabold hover:bg-red-100 disabled:opacity-50"
+            className="shrink-0 rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-[#222222] text-red-800 dark:text-red-300 px-3 py-2 text-xs font-extrabold hover:bg-red-100 dark:hover:bg-red-950/40 disabled:opacity-50"
           >
             {isSubmitting
               ? sq.submitting
@@ -1655,25 +1655,25 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         {/* ─── LEFT COLUMN: Active Question Card ─── */}
         <div className="flex-1 flex flex-col gap-6">
           {questions.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-border p-12 text-center text-gray-400 font-bold shadow-xs">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-12 text-center text-gray-400 dark:text-gray-500 font-bold shadow-xs">
               {sq.noQuestions}
             </div>
           ) : (
-            <div className="bg-white rounded-3xl border border-border p-6 md:p-8 flex flex-col gap-6 shadow-xs relative">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 md:p-8 flex flex-col gap-6 shadow-xs relative">
 
               {/* Question Header: Number + Skill Tag Badge */}
-              <div className="flex justify-between items-center border-b border-border pb-4 select-none">
-                <h2 className="text-xl md:text-2xl font-black text-gray-950 tracking-tight">
+              <div className="flex justify-between items-center border-b border-border dark:border-[#3F3F3F] pb-4 select-none">
+                <h2 className="text-xl md:text-2xl font-black text-gray-950 dark:text-white tracking-tight">
                   {interpolate(sq.questionNumber, { number: currentIndex + 1 })}
                 </h2>
 
                 <div className="flex items-center gap-2">
                   {currentQuestion?.skillTag && (
-                    <span className="px-3 py-1 bg-gray-100 border border-border rounded-xl text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <span className="px-3 py-1 bg-gray-100 dark:bg-[#2A2A2A] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
                       <span>🧠 {currentQuestion.skillTag}</span>
                     </span>
                   )}
-                  <span className="px-3.5 py-1 bg-red-50 border border-red-100 rounded-xl text-xs font-black text-[#990011]">
+                  <span className="px-3.5 py-1 bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 rounded-xl text-xs font-black text-[#990011] dark:text-[#FF6B6B]">
                     {currentQuestion?.points != null
                       ? interpolate(sq.points, { count: currentQuestion.points })
                       : "—"}
@@ -1682,8 +1682,8 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     type="button"
                     onClick={() => toggleMarkForReview(currentQuestion?.id)}
                     className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${markedQuestions[currentQuestion?.id]
-                      ? "border-red-500 bg-red-50 text-red-500 shadow-2xs"
-                      : "border-border text-gray-400 hover:text-red-500 hover:bg-red-50/50"
+                      ? "border-red-500 bg-red-50 dark:bg-red-950/30 text-red-500 shadow-2xs"
+                      : "border-border dark:border-[#3F3F3F] text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-red-50/50 dark:hover:bg-red-950/20"
                       }`}
                     title={
                       markedQuestions[currentQuestion?.id]
@@ -1697,12 +1697,12 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               </div>
 
               {/* Question Type Info (Bold, bigger text, above question content and media) */}
-              <div className="text-base md:text-lg font-black text-gray-950">
+              <div className="text-base md:text-lg font-black text-gray-950 dark:text-white">
                 {getQuestionTypeLabel(currentQuestion?.type, sq)}
               </div>
 
               {/* Question Content / Prompt */}
-              <div className="text-sm md:text-base font-bold text-gray-850 leading-relaxed">
+              <div className="text-sm md:text-base font-bold text-gray-850 dark:text-gray-200 leading-relaxed">
                 {currentQuestion?.content ? (
                   <RenderHTML html={currentQuestion.content} />
                 ) : (
@@ -1712,7 +1712,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
               {/* Question Image Media (Image below content, small scale, un-cropped) */}
               {getQuestionImageUrl(currentQuestion) && (
-                <div className="rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center p-2">
+                <div className="rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#222222] flex items-center justify-center p-2">
                   <img
                     src={getQuestionImageUrl(currentQuestion)}
                     alt={interpolate(sq.questionIllustration, { number: currentIndex + 1 })}
@@ -1723,17 +1723,17 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
               {/* Question Audio Media (Audio play below image) */}
               {getQuestionAudioUrl(currentQuestion) && (
-                <div className="p-3 bg-red-50/20 border border-red-100 rounded-2xl flex items-center gap-3 shadow-2xs">
+                <div className="p-3 bg-red-50/20 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 rounded-2xl flex items-center gap-3 shadow-2xs">
                   <audio controls src={getQuestionAudioUrl(currentQuestion)} className="w-full h-10 rounded-xl" />
                 </div>
               )}
 
               {/* Question Tip / Hint Callout if provided */}
               {currentQuestion?.tipText && (
-                <div className="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3.5 flex items-start gap-2 text-xs font-semibold text-amber-900">
+                <div className="bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 rounded-2xl p-3.5 flex items-start gap-2 text-xs font-semibold text-amber-900 dark:text-amber-300">
                   <HelpCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-extrabold text-amber-950 mr-1">{sq.hint}</span>
+                    <span className="font-extrabold text-amber-950 dark:text-amber-200 mr-1">{sq.hint}</span>
                     <span>{currentQuestion.tipText}</span>
                   </div>
                 </div>
@@ -1755,15 +1755,15 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             onClick={() => handleSingleOptionSelect(currentQuestion.id, optIdx)}
                             aria-pressed={isSelected}
                             className={`w-full text-left flex items-center gap-4 p-4 md:p-5 border rounded-2xl cursor-pointer select-none transition-all active:scale-[0.99] ${isSelected
-                              ? "border-[#990011] bg-red-50/10 shadow-xs"
-                              : "border-border bg-white hover:bg-gray-50/80"
+                              ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-red-950/20 shadow-xs"
+                              : "border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] hover:bg-gray-50/80 dark:hover:bg-[#2A2A2A]"
                               }`}
                           >
-                            <div className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected ? "border-[#990011] bg-red-50/10" : "border-gray-300"
+                            <div className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-red-950/20" : "border-gray-300 dark:border-gray-600"
                               }`}>
-                              {isSelected && <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />}
+                              {isSelected && <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />}
                             </div>
-                            <span className={`text-xs md:text-sm font-bold ${isSelected ? "text-[#990011]" : "text-gray-750"}`}>
+                            <span className={`text-xs md:text-sm font-bold ${isSelected ? "text-[#990011] dark:text-[#FF6B6B]" : "text-gray-750 dark:text-gray-300"}`}>
                               <span className="font-extrabold mr-1.5">{String.fromCharCode(65 + optIdx)}.</span>
                               {opt}
                             </span>
@@ -1786,20 +1786,20 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             onClick={() => handleMultipleOptionToggle(currentQuestion.id, optIdx)}
                             aria-pressed={isSelected}
                             className={`w-full text-left flex items-center gap-4 p-4 md:p-5 border rounded-2xl cursor-pointer select-none transition-all active:scale-[0.99] ${isSelected
-                              ? "border-[#990011] bg-red-50/10 shadow-xs"
-                              : "border-border bg-white hover:bg-gray-50/80"
+                              ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-red-950/20 shadow-xs"
+                              : "border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] hover:bg-gray-50/80 dark:hover:bg-[#2A2A2A]"
                               }`}
                           >
                             <span
                               aria-hidden="true"
                               className={`w-5 h-5 rounded border flex items-center justify-center ${isSelected
-                                ? "border-[#990011] bg-[#990011] text-white"
-                                : "border-gray-300 bg-white"
+                                ? "border-[#990011] dark:border-[#FF6B6B] bg-[#990011] dark:bg-[#FF6B6B] text-white"
+                                : "border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1A1A1A]"
                                 }`}
                             >
                               {isSelected && <Check size={13} />}
                             </span>
-                            <span className={`text-xs md:text-sm font-bold ${isSelected ? "text-[#990011]" : "text-gray-750"}`}>
+                            <span className={`text-xs md:text-sm font-bold ${isSelected ? "text-[#990011] dark:text-[#FF6B6B]" : "text-gray-750 dark:text-gray-300"}`}>
                               <span className="font-extrabold mr-1.5">{String.fromCharCode(65 + optIdx)}.</span>
                               {opt}
                             </span>
@@ -1825,15 +1825,15 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             onClick={() => handleSingleOptionSelect(currentQuestion.id, optIdx)}
                             aria-pressed={isSelected}
                             className={`w-full text-left flex items-center gap-4 p-4 md:p-5 border rounded-2xl cursor-pointer select-none transition-all active:scale-[0.99] ${isSelected
-                              ? "border-[#990011] bg-red-50/10 shadow-xs"
-                              : "border-border bg-white hover:bg-gray-50/80"
+                              ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-red-950/20 shadow-xs"
+                              : "border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] hover:bg-gray-50/80 dark:hover:bg-[#2A2A2A]"
                               }`}
                           >
-                            <div className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected ? "border-[#990011] bg-red-50/10" : "border-gray-300"
+                            <div className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-red-950/20" : "border-gray-300 dark:border-gray-600"
                               }`}>
-                              {isSelected && <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />}
+                              {isSelected && <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />}
                             </div>
-                            <span className={`text-xs md:text-sm font-bold ${isSelected ? "text-[#990011]" : "text-gray-750"}`}>
+                            <span className={`text-xs md:text-sm font-bold ${isSelected ? "text-[#990011] dark:text-[#FF6B6B]" : "text-gray-750 dark:text-gray-300"}`}>
                               {opt}
                             </span>
                           </button>
@@ -1847,7 +1847,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     <div className="flex flex-col gap-2">
                       <label
                         htmlFor={`quiz-answer-${currentIndex}`}
-                        className="text-xs font-extrabold text-gray-500 uppercase tracking-wide"
+                        className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
                       >
                         {sq.yourAnswer}
                       </label>
@@ -1857,7 +1857,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                         value={userAnswers[currentQuestion.id] || ""}
                         onChange={(e) => handleTextAnswerChange(currentQuestion.id, e.target.value)}
                         placeholder={sq.answerPlaceholder}
-                        className="w-full p-4 border border-border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
+                        className="w-full p-4 border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] text-gray-900 dark:text-white rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] transition-all"
                       />
                     </div>
                   )}
@@ -1868,11 +1868,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       <div className="flex justify-between items-center">
                         <label
                           htmlFor={`quiz-essay-${currentIndex}`}
-                          className="text-xs font-extrabold text-gray-500 uppercase tracking-wide"
+                          className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
                         >
                           {sq.yourEssayAnswer}
                         </label>
-                        <span className="text-[11px] font-bold text-gray-400">
+                        <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500">
                           {Number.isFinite(Number(currentQuestion.maxWordCount))
                             && Number(currentQuestion.maxWordCount) > 0
                             ? interpolate(sq.wordCountWithLimit, {
@@ -1903,7 +1903,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                           }
                         }}
                         placeholder={sq.essayPlaceholder}
-                        className="w-full p-4 border border-border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] min-h-[180px] resize-y transition-all"
+                        className="w-full p-4 border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] text-gray-900 dark:text-white rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] min-h-[180px] resize-y transition-all"
                       />
                     </div>
                   )}
@@ -1917,30 +1917,30 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
         {/* ─── RIGHT COLUMN: Questions List Grid (PLACED ON RIGHT SIDE AS REQUESTED) ─── */}
         <div className="w-full lg:w-80 shrink-0 select-none">
-          <div className="bg-white rounded-3xl border border-border p-5 md:p-6 flex flex-col gap-4 shadow-xs">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-5 md:p-6 flex flex-col gap-4 shadow-xs">
 
             {/* Sidebar Title */}
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="text-sm font-black text-gray-900 tracking-tight">
+            <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pb-3">
+              <h3 className="text-sm font-black text-gray-900 dark:text-white tracking-tight">
                 {sq.questionsList}
               </h3>
-              <span className="text-xs font-extrabold text-gray-400">
+              <span className="text-xs font-extrabold text-gray-400 dark:text-gray-500">
                 {answeredCount}/{questions.length}
               </span>
             </div>
 
             {/* Legend Indicators */}
-            <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-border flex-wrap gap-1">
+            <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[#222222] p-2.5 rounded-xl border border-border dark:border-[#3F3F3F] flex-wrap gap-1">
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600 inline-block" />
                 <span>{sq.done}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full border border-gray-400 bg-white inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full border border-gray-400 dark:border-gray-500 bg-white dark:bg-[#1A1A1A] inline-block" />
                 <span>{sq.unanswered}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#990011] inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] inline-block" />
                 <span>{sq.current}</span>
               </div>
               <div className="flex items-center gap-1">
@@ -1956,11 +1956,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 const isAnswered = isQuestionAnswered(q)
                 const isMarked = Boolean(markedQuestions[q.id])
 
-                let btnStyle = "bg-white border border-border text-gray-700 font-bold hover:bg-gray-100"
+                let btnStyle = "bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-100 dark:hover:bg-[#2A2A2A]"
                 if (isCurrent) {
                   btnStyle = "bg-[#990011] text-white font-extrabold shadow-xs border-[#990011]"
                 } else if (isAnswered) {
-                  btnStyle = "bg-gray-200 border border-gray-300 text-gray-900 font-extrabold"
+                  btnStyle = "bg-gray-200 dark:bg-[#333333] border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white font-extrabold"
                 }
 
                 return (
@@ -1980,7 +1980,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   >
                     <span>{idx + 1}</span>
                     {isMarked && (
-                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-white shadow-xs">
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-white dark:border-[#1A1A1A] shadow-xs">
                         <Flag className="w-2 h-2 text-white fill-white" />
                       </span>
                     )}
@@ -1995,14 +1995,14 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       </div>
 
       {/* ─── BOTTOM FOOTER NAVIGATION BAR ─── */}
-      <div className="bg-white border-t border-border px-6 py-3.5 flex items-center justify-between shadow-xs shrink-0 select-none">
+      <div className="bg-white dark:bg-[#1A1A1A] border-t border-border dark:border-[#3F3F3F] px-6 py-3.5 flex items-center justify-between shadow-xs shrink-0 select-none">
 
         {/* Left: Previous Question */}
         <button
           type="button"
           disabled={currentIndex === 0}
           onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-          className="px-5 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+          className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-300 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
         >
           <ArrowLeft size={16} />
           <span>{sq.previousQuestion}</span>
@@ -2014,7 +2014,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             type="button"
             disabled={currentIndex === questions.length - 1}
             onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-            className="px-5 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+            className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-300 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
             <span>{sq.nextQuestion}</span>
             <ArrowRight size={16} />
@@ -2041,7 +2041,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         >
           <div
             ref={submitDialogRef}
-            className="bg-white rounded-3xl border border-border p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-5 text-center animate-in fade-in zoom-in-95 duration-150"
+            className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-5 text-center animate-in fade-in zoom-in-95 duration-150"
             role="dialog"
             aria-modal="true"
             aria-labelledby="quiz-submit-title"
@@ -2076,15 +2076,15 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               }
             }}
           >
-            <div className="w-14 h-14 bg-red-50 text-[#990011] rounded-full flex items-center justify-center mx-auto border border-red-100">
+            <div className="w-14 h-14 bg-red-50 dark:bg-red-950/40 text-[#990011] dark:text-[#FF6B6B] rounded-full flex items-center justify-center mx-auto border border-red-100 dark:border-red-900/40">
               <Send size={24} />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <h3 id="quiz-submit-title" className="text-lg font-black text-gray-950">
+              <h3 id="quiz-submit-title" className="text-lg font-black text-gray-950 dark:text-white">
                 {sq.confirmSubmissionTitle}
               </h3>
-              <p id="quiz-submit-description" className="text-xs font-bold text-gray-500">
+              <p id="quiz-submit-description" className="text-xs font-bold text-gray-500 dark:text-gray-400">
                 {interpolate(sq.confirmSubmissionDescription, {
                   answered: answeredCount,
                   total: questions.length,
@@ -2098,7 +2098,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => setShowSubmitConfirmModal(false)}
-                className="flex-1 py-3 border border-border hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
+                className="flex-1 py-3 border border-border dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-300 font-extrabold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
               >
                 {sq.cancelContinue}
               </button>
