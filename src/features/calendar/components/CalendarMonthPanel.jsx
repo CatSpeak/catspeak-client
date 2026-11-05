@@ -60,32 +60,32 @@ const CalendarMonthPanel = ({
   const datesToRender = viewType === "month" ? calendarDates : getWeekDates();
 
   return (
-    <div className="flex flex-col gap-4 bg-white p-5 md:p-6 rounded-3xl shadow-sm">
+    <div className="flex flex-col gap-4 bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] p-5 md:p-6 rounded-3xl shadow-sm">
       <div className="flex items-center justify-between   ">
         <div className="flex items-center gap-2">
           <button
             onClick={onPrevMonth}
-            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-[#272727] transition-colors"
           >
-            <ChevronLeft size={16} className="text-[#990011]" />
+            <ChevronLeft size={16} className="text-[#990011] dark:text-red-400" />
           </button>
-          <span className="text-lg font-semibold text-black min-w-[140px] text-center">
+          <span className="text-lg font-semibold text-black dark:text-white min-w-[140px] text-center">
             {localizedMonth}
           </span>
           <button
             onClick={onNextMonth}
-            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-[#272727] transition-colors"
           >
-            <ChevronRight size={16} className="text-[#990011]" />
+            <ChevronRight size={16} className="text-[#990011] dark:text-red-400" />
           </button>
         </div>
-        <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#272727] rounded-full p-1">
           <button
             onClick={() => onChangeView && onChangeView("week")}
             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
               viewType === "week"
                 ? "bg-[#990011] text-white"
-                : "hover:bg-white text-gray-400"
+                : "hover:bg-white dark:hover:bg-[#3D3D3D] text-gray-400 dark:text-neutral-400"
             }`}
           >
             <LayoutGrid size={16} />
@@ -95,17 +95,17 @@ const CalendarMonthPanel = ({
             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
               viewType === "month"
                 ? "bg-[#990011] text-white"
-                : "hover:bg-white text-gray-400"
+                : "hover:bg-white dark:hover:bg-[#3D3D3D] text-gray-400 dark:text-neutral-400"
             }`}
           >
             <CalendarIcon size={16} />
           </button>
         </div>
       </div>
-      <div className="flex items-center justify-between border-b border-black pb-2 mb-4"></div>
+      <div className="flex items-center justify-between border-b border-black dark:border-[#3F3F3F] pb-2 mb-4"></div>
       <div className="grid grid-cols-7 gap-1 text-center">
         {DAY_LABELS.map((label) => (
-          <div key={label} className="text-md  uppercase tracking-wider py-1">
+          <div key={label} className="text-md uppercase tracking-wider py-1 text-gray-700 dark:text-neutral-300">
             {label}
           </div>
         ))}
@@ -121,7 +121,7 @@ const CalendarMonthPanel = ({
                 key={`empty-${idx}`}
                 className="h-16 flex items-center justify-center"
               >
-                <span className="text-md text-gray-300">{day}</span>
+                <span className="text-md text-gray-300 dark:text-neutral-600">{day}</span>
               </div>
             );
           }
@@ -148,8 +148,8 @@ const CalendarMonthPanel = ({
                     isSelected
                       ? "bg-[#990011] text-white shadow-md"
                       : isToday
-                        ? "border border-[#990011] text-[#990011] font-bold hover:bg-[#990011] hover:text-white hover:border-[#990011]"
-                        : "text-gray-700 hover:border hover:border-[#990011] hover:text-[#990011]"
+                        ? "border border-[#990011] dark:border-red-400 text-[#990011] dark:text-red-400 font-bold hover:bg-[#990011] hover:text-white hover:border-[#990011]"
+                        : "text-gray-700 dark:text-neutral-200 hover:border hover:border-[#990011] dark:hover:border-red-400 hover:text-[#990011] dark:hover:text-red-400"
                   }
                 `}
               >
@@ -158,7 +158,7 @@ const CalendarMonthPanel = ({
               {eventCount > 0 && (
                 <span
                   className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] ${
-                    isSelected ? "bg-white" : "bg-[#990011]"
+                    isSelected ? "bg-white" : "bg-[#990011] dark:bg-red-400"
                   }`}
                 ></span>
               )}
@@ -169,25 +169,25 @@ const CalendarMonthPanel = ({
 
       <div className="flex items-center justify-between px-1 mt-1">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full border border-[#990011] flex items-center justify-center">
-            <span className="text-[10px] text-[#990011] font-semibold">01</span>
+          <div className="w-6 h-6 rounded-full border border-[#990011] dark:border-red-400 flex items-center justify-center">
+            <span className="text-[10px] text-[#990011] dark:text-red-400 font-semibold">01</span>
           </div>
-          <span className="text-[12px] text-gray-500">{todayLegend}</span>
+          <span className="text-[12px] text-gray-500 dark:text-neutral-400">{todayLegend}</span>
         </div>
         
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 flex items-center justify-center relative">
-            <span className="text-[10px] text-gray-700 font-semibold">01</span>
-            <span className="absolute bottom-[2px] w-4 h-[2px] bg-[#990011]"></span>
+            <span className="text-[10px] text-gray-700 dark:text-neutral-300 font-semibold">01</span>
+            <span className="absolute bottom-[2px] w-4 h-[2px] bg-[#990011] dark:bg-red-400"></span>
           </div>
-          <span className="text-[12px] text-gray-500">{t.calendar?.eventDayLegend || "Ngày sự kiện"}</span>
+          <span className="text-[12px] text-gray-500 dark:text-neutral-400">{t.calendar?.eventDayLegend || "Ngày sự kiện"}</span>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-[#990011] flex items-center justify-center">
             <span className="text-[10px] text-white font-semibold">01</span>
           </div>
-          <span className="text-[12px] text-gray-500">{selectedDayLegend}</span>
+          <span className="text-[12px] text-gray-500 dark:text-neutral-400">{selectedDayLegend}</span>
         </div>
       </div>
 

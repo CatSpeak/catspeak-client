@@ -200,7 +200,7 @@ const ResourceSearchInput = ({
 
       {/* Autocomplete Dropdown Menu */}
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white border border-border rounded-2xl shadow-xl overflow-hidden p-1.5 transition-all duration-200 animate-in fade-in slide-in-from-top-2 text-slate-800">
+        <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-xl overflow-hidden p-1.5 transition-all duration-200 animate-in fade-in slide-in-from-top-2 text-slate-800 dark:text-neutral-200">
           <div className="space-y-1">
             {topMatches.map((item, idx) => {
               const isSelected = idx === selectedIndex;
@@ -214,8 +214,8 @@ const ResourceSearchInput = ({
                   onMouseEnter={() => setSelectedIndex(idx)}
                   className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors duration-150 ${
                     isSelected
-                      ? "bg-slate-100 text-slate-900 border border-border shadow-xs"
-                      : "text-slate-700 hover:bg-slate-50 border border-transparent"
+                      ? "bg-slate-100 dark:bg-[#272727] text-slate-900 dark:text-white border border-border dark:border-[#3F3F3F] shadow-xs"
+                      : "text-slate-700 dark:text-neutral-300 hover:bg-slate-50 dark:hover:bg-[#222222] border border-transparent"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">

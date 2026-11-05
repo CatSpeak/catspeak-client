@@ -174,22 +174,22 @@ export default function ForYouTab({
   return (
     <div className="w-full">
       {/* Dynamic Page Banner */}
-      <div className="bg-gradient-to-r from-[#FFF1F2] to-[#FFF6ED] border border-[#f3d6a9] rounded-xl p-5 sm:p-6 md:px-8 md:py-6 mb-8 flex flex-col md:flex-row justify-between shadow-sm relative overflow-hidden transition-all duration-300">
+      <div className="bg-gradient-to-r from-[#FFF1F2] to-[#FFF6ED] dark:from-[#241719] dark:to-[#221c17] border border-[#f3d6a9] dark:border-[#443322] rounded-xl p-5 sm:p-6 md:px-8 md:py-6 mb-8 flex flex-col md:flex-row justify-between shadow-sm relative overflow-hidden transition-all duration-300">
         {/* Left Side */}
         <div className="flex flex-col flex-1 z-10 w-full">
-          <h2 className="text-xl md:text-2xl font-semibold text-headingColor mb-2 tracking-wide">
+          <h2 className="text-xl md:text-2xl font-semibold text-headingColor dark:text-white mb-2 tracking-wide">
             {t.catSpeak.reels.createOwnReels ||
               "Sáng tạo nội dung của riêng bạn"}
           </h2>
-          <p className="text-[13px] md:text-[14px] text-gray-700 mb-5 md:mb-8">
+          <p className="text-[13px] md:text-[14px] text-gray-700 dark:text-neutral-300 mb-5 md:mb-8">
             {t.catSpeak.reels.shareKnowledge ||
               "Chia sẻ kiến thức và luyện tập nhập vai cùng cộng đồng Cat Speak."}
           </p>
           <div className="flex flex-wrap items-center gap-2.5 mt-auto">
-            <span className="text-[12px] md:text-[13px] font-medium text-textColor bg-white px-3.5 md:px-4 py-1.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border">
+            <span className="text-[12px] md:text-[13px] font-medium text-textColor dark:text-neutral-200 bg-white dark:bg-[#1A1A1A] px-3.5 md:px-4 py-1.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border">
               {t.catSpeak.reels.formatLimit || "Định dạng MP4, MOV"}
             </span>
-            <span className="text-[12px] md:text-[13px] font-medium text-textColor bg-white px-3.5 md:px-4 py-1.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border">
+            <span className="text-[12px] md:text-[13px] font-medium text-textColor dark:text-neutral-200 bg-white dark:bg-[#1A1A1A] px-3.5 md:px-4 py-1.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border">
               {t.catSpeak.reels.sizeLimit || "Tối đa 5 phút, 150MB"}
             </span>
           </div>
@@ -198,7 +198,7 @@ export default function ForYouTab({
         {/* Right Side */}
         <div className="flex flex-col justify-between items-end mt-6 md:mt-0 z-10 shrink-0 min-w-[200px] w-full md:w-auto">
           <div className="flex flex-row justify-between items-center md:flex-col md:items-end mb-4 md:mb-6 w-full md:w-auto">
-            <span className="text-[13px] text-lighttextGray mb-0 md:mb-1">
+            <span className="text-[13px] text-lighttextGray dark:text-neutral-400 mb-0 md:mb-1">
               {t.catSpeak.reels.monthlyCreator || "Monthly creator"}
             </span>
             <div className="flex items-center text-[#fbbf24] font-medium text-[15px] space-x-1.5">
@@ -225,7 +225,7 @@ export default function ForYouTab({
           {/* Spinner shown while fetching next page */}
           {isFetching && allReels.length > 0 && (
             <div className="flex justify-center my-6">
-              <Loader2 className="w-8 h-8 animate-spin text-cath-red-700" />
+              <Loader2 className="w-8 h-8 animate-spin text-cath-red-700 dark:text-red-400" />
             </div>
           )}
 

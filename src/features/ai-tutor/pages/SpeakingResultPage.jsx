@@ -33,11 +33,11 @@ const SpeakingResultPage = () => {
   if (sessionFailed) {
     return (
       <div className="mx-auto max-w-xl py-20 text-center">
-        <p className="text-sm text-rose-800">{sessionError?.message || "Không thể tải trạng thái phiên."}</p>
-        <button className="mt-4 px-4 py-2 font-bold text-[#990011] underline cursor-pointer" onClick={refetchSession}>
+        <p className="text-sm text-rose-800 dark:text-red-400">{sessionError?.message || "Không thể tải trạng thái phiên."}</p>
+        <button className="mt-4 px-4 py-2 font-bold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80" onClick={refetchSession}>
           Thử lại
         </button>
-        <button className="mt-4 ml-4 px-4 py-2 font-bold text-slate-600 underline cursor-pointer" onClick={backToCatalog}>
+        <button className="mt-4 ml-4 px-4 py-2 font-bold text-slate-600 dark:text-neutral-300 underline cursor-pointer hover:opacity-80" onClick={backToCatalog}>
           Về danh mục
         </button>
       </div>
@@ -47,10 +47,10 @@ const SpeakingResultPage = () => {
   if (loadingSession || !terminal) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center gap-4 text-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-[#990011]" />
-        <h1 className="text-xl font-bold text-slate-900">Đang hoàn tất buổi luyện nói</h1>
-        <p className="text-sm text-slate-600">Báo cáo sẽ xuất hiện khi máy chủ lưu xong dữ liệu phiên.</p>
-        <button className="text-sm font-semibold text-[#990011] underline cursor-pointer" onClick={refetchSession}>
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-950 border-t-[#990011] dark:border-t-red-500" />
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Đang hoàn tất buổi luyện nói</h1>
+        <p className="text-sm text-slate-600 dark:text-neutral-400">Báo cáo sẽ xuất hiện khi máy chủ lưu xong dữ liệu phiên.</p>
+        <button className="text-sm font-semibold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80" onClick={refetchSession}>
           Kiểm tra lại
         </button>
       </div>

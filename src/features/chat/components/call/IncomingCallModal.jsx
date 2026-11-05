@@ -46,9 +46,9 @@ const IncomingCallModal = ({ open, callData, onAccept, onDecline }) => {
       bodyClassName="!p-0 !m-0 overflow-hidden"
       footer={<></>}
       footerClassName="hidden"
-      className="max-w-xs sm:max-w-sm rounded-2xl bg-white border border-border shadow-2xl !p-0 overflow-hidden"
+      className="max-w-xs sm:max-w-sm rounded-2xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] shadow-2xl !p-0 overflow-hidden"
     >
-      <div className="flex flex-col items-center text-center p-6 bg-white text-black">
+      <div className="flex flex-col items-center text-center p-6 bg-white dark:bg-[#1A1A1A] text-black dark:text-white">
         {/* Clean Static Avatar */}
         <div className="mb-6 flex items-center justify-center">
           <Avatar
@@ -60,8 +60,8 @@ const IncomingCallModal = ({ open, callData, onAccept, onDecline }) => {
         </div>
 
         {/* Caller Info */}
-        <h3 className="text-lg font-bold text-black">{callerName}</h3>
-        <p className="text-sm text-secondary mt-1">
+        <h3 className="text-lg font-bold text-black dark:text-white">{callerName}</h3>
+        <p className="text-sm text-secondary dark:text-[#AAAAAA] mt-1">
           {isVideo
             ? t?.chat?.call?.incomingVideoCall || "Incoming Video Call..."
             : t?.chat?.call?.incomingVoiceCall || "Incoming Voice Call..."}
@@ -80,7 +80,7 @@ const IncomingCallModal = ({ open, callData, onAccept, onDecline }) => {
             >
               <PhoneOff />
             </IconButton>
-            <span className="text-xs text-secondary font-medium">
+            <span className="text-xs text-secondary dark:text-[#AAAAAA] font-medium">
               {t?.chat?.call?.decline || "Decline"}
             </span>
           </div>

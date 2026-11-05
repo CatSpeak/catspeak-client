@@ -401,7 +401,7 @@ const CalendarPage = () => {
         {/* FULL WIDTH MAP */}
         <div
           ref={mapSectionRef}
-          className="relative z-0 rounded-3xl overflow-hidden bg-white p-3 shadow-sm w-full  mt-6"
+          className="relative z-0 rounded-3xl overflow-hidden bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] p-3 shadow-sm w-full mt-6"
         >
           <MapView
             dayEvents={dayEvents}

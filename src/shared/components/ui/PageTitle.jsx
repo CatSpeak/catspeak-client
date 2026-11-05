@@ -8,7 +8,7 @@ const PageTitle = ({
 }) => {
   return (
     <Component
-      className={`text-3xl font-bold text-black line-clamp-2 ${className}`}
+      className={`text-3xl font-bold text-gray-900 dark:text-white line-clamp-2 ${className}`}
       {...props}
     >
       {children}

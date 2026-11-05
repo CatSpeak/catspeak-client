@@ -79,7 +79,7 @@ const LevelChangedModal = ({
       isOpen={isOpen}
       onClose={onClose}
       fullScreenOnMobile={false}
-      className="md:max-w-xl bg-white dark:bg-gray-850 rounded-3xl overflow-hidden shadow-2xl"
+      className="md:max-w-xl bg-white dark:bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-2xl"
     >
       <div className="p-6 sm:p-7 flex flex-col gap-5">
         {/* Modal Header */}
@@ -119,7 +119,7 @@ const LevelChangedModal = ({
                 className={`relative flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer ${
                   isSelected
                     ? "bg-cath-red-50/50 dark:bg-cath-red-950/20 border-cath-red-600 ring-2 ring-cath-red-500/20"
-                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    : "bg-white dark:bg-[#242424] border-gray-200 dark:border-[#3F3F3F] hover:border-gray-300 dark:hover:border-neutral-500"
                 }`}
               >
                 <div className="flex items-start gap-3 pr-2">
@@ -165,7 +165,7 @@ const LevelChangedModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#272727] transition-colors"
           >
             Hủy bỏ
           </button>

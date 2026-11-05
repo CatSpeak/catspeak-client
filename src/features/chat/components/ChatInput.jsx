@@ -323,7 +323,7 @@ const ChatInput = ({
         <div
           onClick={() => textareaRef.current?.focus()}
           onPaste={handlePaste}
-          className={`w-full grid grid-cols-[auto_1fr_auto] border border-border focus-within:border-cath-red-700 transition-colors bg-white cursor-text rounded-[28px] ${isMultiline
+          className={`w-full grid grid-cols-[auto_1fr_auto] border border-border dark:border-[#3F3F3F] focus-within:border-cath-red-700 dark:focus-within:border-red-400 transition-colors bg-white dark:bg-[#242424] cursor-text rounded-[28px] ${isMultiline
             ? "pb-[3px] pt-3 min-h-[110px] gap-y-2"
             : "items-center h-14"
             } ${showLeftIcon ? "pl-1" : "pl-6"} ${showRightIcons ? "pr-1" : "pr-6"}`}

@@ -109,7 +109,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
     >
       {/* Media Container */}
       <div 
-        className="relative w-full min-h-[180px] rounded-[24px] overflow-hidden bg-gray-100 shadow-sm transition-transform duration-300"
+        className="relative w-full min-h-[180px] rounded-[24px] overflow-hidden bg-gray-100 dark:bg-[#1A1A1A] shadow-sm transition-transform duration-300"
         style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)', transform: 'translateZ(0)' }}
       >
         {/* Thumbnail */}
@@ -169,7 +169,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
       {/* Content Container */}
       <div className="flex flex-col px-1">
         {/* Title */}
-        <h3 className="text-[13px] sm:text-[14.5px] font-medium text-gray-800 leading-snug mb-2 line-clamp-2">
+        <h3 className="text-[13px] sm:text-[14.5px] font-medium text-gray-800 dark:text-white leading-snug mb-2 line-clamp-2">
           {reel.title}
         </h3>
 
@@ -179,7 +179,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
             {reel.tags.slice(0, 3).map((tag, idx) => (
               <span 
                 key={idx} 
-                className="px-1.5 md:px-2 py-0.5 bg-[#f59e0b] text-[#451a03] text-[9px] sm:text-[11px] font-semibold rounded"
+                className="px-1.5 md:px-2 py-0.5 bg-[#f59e0b] dark:bg-amber-950/60 text-[#451a03] dark:text-amber-300 text-[9px] sm:text-[11px] font-semibold rounded"
               >
                 {tag.startsWith("#") ? tag : `#${tag}`}
               </span>
@@ -199,7 +199,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
               accountId={reel.author.id || reel.author.accountId}
             />
             <div className="flex flex-col">
-              <span className="text-[11px] sm:text-[13px] font-medium text-gray-500 leading-none mb-1 flex items-center gap-1">
+              <span className="text-[11px] sm:text-[13px] font-medium text-gray-500 dark:text-neutral-300 leading-none mb-1 flex items-center gap-1">
                 {reel.author.name}
                 {reel.author.verified && (
                   <svg className="w-3 h-3 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
@@ -207,14 +207,14 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
                   </svg>
                 )}
               </span>
-              <span className="text-[9px] sm:text-[11px] text-gray-400 leading-none">
+              <span className="text-[9px] sm:text-[11px] text-gray-400 dark:text-neutral-400 leading-none">
                 {formatRelative(reel.createdAt)}
               </span>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-2 sm:gap-3 text-gray-400 text-[11px] sm:text-[13px] font-medium">
+          <div className="flex items-center gap-2 sm:gap-3 text-gray-400 dark:text-neutral-400 text-[11px] sm:text-[13px] font-medium">
             <span className="flex items-center gap-1 sm:gap-1.5">
               <Eye className="w-3.5 h-3.5 sm:w-[15px] sm:h-[15px]" /> 
               {formatCompactNumber(reel.views, language)}

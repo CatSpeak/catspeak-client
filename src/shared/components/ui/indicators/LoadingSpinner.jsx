@@ -13,14 +13,14 @@ const LoadingSpinner = ({
   text,
   size = "md",
   iconClassName = "",
-  textClassName = "mt-2 text-sm",
+  textClassName = "mt-2 text-sm text-neutral-600 dark:text-neutral-300",
 }) => {
   const resolvedSize = sizeClasses[size] || size
 
   return (
     <div className={className}>
       <Loader2
-        className={`animate-spin text-cath-red-700 ${resolvedSize || "h-10 w-10"} ${iconClassName}`}
+        className={`animate-spin text-cath-red-700 dark:text-red-400 ${resolvedSize || "h-10 w-10"} ${iconClassName}`}
       />
       {text && <span className={textClassName}>{text}</span>}
     </div>

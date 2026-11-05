@@ -200,8 +200,8 @@ const ProfileAvatarNCover = ({
 
   const renderCover = (hasFullBorder = false) => (
     <div
-      className={`w-full h-48 md:h-[280px] bg-gray-200 relative group/cover overflow-hidden ${
-        hasFullBorder ? "rounded-xl border border-[#e5e5e5]" : ""
+      className={`w-full h-48 md:h-[280px] bg-gray-200 dark:bg-[#242424] relative group/cover overflow-hidden ${
+        hasFullBorder ? "rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F]" : ""
       } ${coverClassName}`}
     >
       {/* Cover Photo Image */}
@@ -247,7 +247,7 @@ const ProfileAvatarNCover = ({
         isFloating
           ? "absolute -bottom-14 md:-bottom-16 left-6 sm:left-8 z-20 group"
           : "-mt-16 sm:-mt-20 md:-mt-24 mb-2 md:mb-0 relative z-10"
-      } p-1 bg-white rounded-full w-fit shadow-md shrink-0`}
+      } p-1 bg-white dark:bg-[#1A1A1A] rounded-full w-fit shadow-md shrink-0`}
     >
       <div
         className={`relative rounded-full overflow-hidden ${
@@ -358,12 +358,12 @@ const ProfileAvatarNCover = ({
   // Card mode (has children / actions - used in SocialProfileHeader)
   return (
     <div
-      className={`w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6 ${className}`}
+      className={`w-full bg-white dark:bg-[#1A1A1A] border border-[#e5e5e5] dark:border-[#3F3F3F] rounded-xl overflow-hidden mb-6 ${className}`}
     >
       {renderCover(false)}
 
       {/* Main Profile Info / Avatar Area (Facebook layout) */}
-      <div className="px-4 sm:px-6 md:px-8 pb-5 pt-0 relative border-b border-gray-100">
+      <div className="px-4 sm:px-6 md:px-8 pb-5 pt-0 relative border-b border-gray-100 dark:border-[#2A2A2A]">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           {/* Avatar + Primary Info */}
           <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-5 flex-1 min-w-0">
@@ -388,7 +388,7 @@ const ProfileAvatarNCover = ({
 
         {/* Extended Section (Bio, Motto, Badges) */}
         {headerInfo && children && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2A2A2A]">
             {children}
           </div>
         )}

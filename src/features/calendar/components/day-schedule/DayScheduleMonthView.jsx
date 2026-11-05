@@ -36,20 +36,20 @@ const DayScheduleMonthView = ({
   const totalUpcoming = totalUniqueEvents || 0;
 
   return (
-    <div className="flex flex-col h-full bg-white p-5 md:p-6 lg:p-6 rounded-3xl shadow-sm">
-      <h3 className="text-[22px] font-medium text-black mb-6">
+    <div className="flex flex-col h-full bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] p-5 md:p-6 lg:p-6 rounded-3xl shadow-sm">
+      <h3 className="text-[22px] font-medium text-black dark:text-white mb-6">
         {cal.monthSchedule || "Lịch trình sự kiện tháng"}{" "}
         {currentDate.format("M")}
       </h3>
 
       {/* Tabs */}
-      <div className="flex w-full border-b border-border mb-6">
+      <div className="flex w-full border-b border-border dark:border-[#3F3F3F] mb-6">
         <button
           onClick={() => setMonthTab("upcoming")}
           className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[16px] font-medium border-b-2 transition-all ${
             monthTab === "upcoming"
-              ? "border-[#990011] text-[#990011]"
-              : "border-transparent text-gray-400 hover:text-black"
+              ? "border-[#990011] text-[#990011] dark:border-red-400 dark:text-red-400"
+              : "border-transparent text-gray-400 hover:text-black dark:text-neutral-400 dark:hover:text-white"
           }`}
         >
           {cal.upcoming || "Sắp diễn ra"}
@@ -63,8 +63,8 @@ const DayScheduleMonthView = ({
           onClick={() => setMonthTab("registered")}
           className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[16px] font-medium border-b-2 transition-all ${
             monthTab === "registered"
-              ? "border-[#990011] text-[#990011]"
-              : "border-transparent text-gray-400 hover:text-black"
+              ? "border-[#990011] text-[#990011] dark:border-red-400 dark:text-red-400"
+              : "border-transparent text-gray-400 hover:text-black dark:text-neutral-400 dark:hover:text-white"
           }`}
         >
           {cal.registered || "Đã đăng kí"}
@@ -77,10 +77,10 @@ const DayScheduleMonthView = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto space-y-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
+      <div className="flex-1 overflow-y-auto space-y-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
         {monthTab === "upcoming" ? (
           daysWithEvents.length === 0 ? (
-            <div className="text-sm text-gray-400 py-8 text-center mt-10">
+            <div className="text-sm text-gray-400 dark:text-neutral-400 py-8 text-center mt-10">
               {cal.noEvents || "Không có sự kiện nào trong tháng này"}
             </div>
           ) : (
@@ -88,10 +88,10 @@ const DayScheduleMonthView = ({
               <div
                 key={day}
                 onClick={() => onSelectDate && onSelectDate(day)}
-                className="flex items-center justify-between px-5 py-[14px] border border-border rounded-[16px] cursor-pointer hover:border-[#990011] transition-colors"
+                className="flex items-center justify-between px-5 py-[14px] border border-border dark:border-[#3F3F3F] dark:bg-[#202020] rounded-[16px] cursor-pointer hover:border-[#990011] dark:hover:border-red-400 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-[15px] font-medium text-black">
+                  <span className="text-[15px] font-medium text-black dark:text-white">
                     {cal.day || "Ngày"} {day < 10 ? `0${day}` : day}
                   </span>
                   <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-white">
@@ -100,14 +100,14 @@ const DayScheduleMonthView = ({
                       : eventCounts[day]}
                   </span>
                 </div>
-                <ChevronDown size={20} className="text-black" />
+                <ChevronDown size={20} className="text-black dark:text-white" />
               </div>
             ))
           )
         ) : (
           // Registered tab
           daysWithRegistered.length === 0 ? (
-            <div className="text-sm text-gray-400 py-8 text-center mt-10">
+            <div className="text-sm text-gray-400 dark:text-neutral-400 py-8 text-center mt-10">
               {cal.noRegisteredEvents ||
                 "Bạn chưa đăng kí sự kiện nào trong tháng này"}
             </div>
@@ -116,10 +116,10 @@ const DayScheduleMonthView = ({
               <div
                 key={day}
                 onClick={() => onSelectDate && onSelectDate(day)}
-                className="flex items-center justify-between px-5 py-[14px] border border-[#990011]/30 rounded-[16px] cursor-pointer hover:border-[#990011] transition-colors"
+                className="flex items-center justify-between px-5 py-[14px] border border-[#990011]/30 dark:border-red-500/40 dark:bg-[#202020] rounded-[16px] cursor-pointer hover:border-[#990011] dark:hover:border-red-400 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-[15px] font-medium text-black">
+                  <span className="text-[15px] font-medium text-black dark:text-white">
                     {cal.day || "Ngày"} {day < 10 ? `0${day}` : day}
                   </span>
                   <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#990011] text-white">
@@ -128,7 +128,7 @@ const DayScheduleMonthView = ({
                       : registeredByDay[day]}
                   </span>
                 </div>
-                <ChevronDown size={20} className="text-black" />
+                <ChevronDown size={20} className="text-black dark:text-white" />
               </div>
             ))
           )

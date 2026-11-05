@@ -16,22 +16,22 @@ const ReelGridSkeleton = memo(function ReelGridSkeleton({ count = 12 }) {
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className="break-inside-avoid mb-4 sm:mb-6">
           <div
-            className="bg-gray-200 animate-pulse rounded-[20px] w-full"
+            className="bg-gray-200 dark:bg-[#272727] animate-pulse rounded-[20px] w-full"
             style={{ height: SKELETON_HEIGHTS[i % SKELETON_HEIGHTS.length] }}
           />
           {/* Footer skeleton */}
           <div className="px-3 py-2.5">
             <div
-              className="bg-gray-200 animate-pulse rounded-md w-4/5 mb-2"
+              className="bg-gray-200 dark:bg-[#272727] animate-pulse rounded-md w-4/5 mb-2"
               style={{ height: 14 }}
             />
             <div className="flex items-center gap-1.5">
               <div
-                className="bg-gray-200 animate-pulse rounded-full"
+                className="bg-gray-200 dark:bg-[#272727] animate-pulse rounded-full"
                 style={{ width: 22, height: 22 }}
               />
               <div
-                className="bg-gray-200 animate-pulse rounded-md"
+                className="bg-gray-200 dark:bg-[#272727] animate-pulse rounded-md"
                 style={{ height: 12, width: 80 }}
               />
             </div>

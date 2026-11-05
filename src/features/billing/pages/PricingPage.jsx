@@ -139,7 +139,7 @@ const PricingPage = () => {
       <button
         onClick={handleClose}
         aria-label="Đóng"
-        className="absolute top-5 right-5 sm:top-6 sm:right-6 p-2 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 active:scale-95 transition-all cursor-pointer z-50"
+        className="absolute top-5 right-5 sm:top-6 sm:right-6 p-2 rounded-full text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-[#272727] active:scale-95 transition-all cursor-pointer z-50"
       >
         <X size={24} />
       </button>
@@ -148,7 +148,7 @@ const PricingPage = () => {
       <div className="w-full max-w-6xl mx-auto flex flex-col items-center justify-center">
         {/* Centered Page Title */}
         <div className="shrink-0 text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-950 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-950 dark:text-white tracking-tight leading-tight">
             {t.billing?.pricing?.title || "Gói đăng ký"}
           </h1>
         </div>
@@ -160,20 +160,20 @@ const PricingPage = () => {
               {[1, 2].map((i) => (
                 <div
                   key={i}
-                  className="border border-border bg-white p-6 rounded-xl shadow-sm animate-pulse flex flex-col justify-between h-[calc(100dvh-11rem)] min-h-[550px] max-h-[740px]"
+                  className="border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-6 rounded-xl shadow-sm animate-pulse flex flex-col justify-between h-[calc(100dvh-11rem)] min-h-[550px] max-h-[740px]"
                 >
                 <div className="space-y-6">
-                  <div className="h-6 bg-gray-200 rounded w-1/3" />
-                  <div className="h-4 bg-gray-100 rounded w-2/3" />
-                  <div className="h-10 bg-gray-200 rounded w-1/2" />
-                  <div className="border-t border-border pt-4 space-y-3">
-                    <div className="h-4 bg-gray-200 rounded w-full" />
-                    <div className="h-4 bg-gray-200 rounded w-5/6" />
-                    <div className="h-4 bg-gray-200 rounded w-4/5" />
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-6 bg-gray-200 dark:bg-[#272727] rounded w-1/3" />
+                  <div className="h-4 bg-gray-100 dark:bg-[#242424] rounded w-2/3" />
+                  <div className="h-10 bg-gray-200 dark:bg-[#272727] rounded w-1/2" />
+                  <div className="border-t border-border dark:border-[#3F3F3F] pt-4 space-y-3">
+                    <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-full" />
+                    <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-5/6" />
+                    <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-4/5" />
+                    <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-3/4" />
                   </div>
                 </div>
-                <div className="h-12 bg-gray-200 rounded-lg w-full" />
+                <div className="h-12 bg-gray-200 dark:bg-[#272727] rounded-lg w-full" />
               </div>
             ))}
           </div>

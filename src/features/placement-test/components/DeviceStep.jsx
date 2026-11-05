@@ -23,9 +23,9 @@ import StepCard from "./StepCard"
 
 const FIX_ICONS = [VolumeX, Headphones, SlidersHorizontal]
 const FIX_TONES = [
-  "bg-amber-50 text-amber-600",
-  "bg-blue-50 text-blue-600",
-  "bg-emerald-50 text-emerald-600",
+  "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
+  "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400",
+  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
 ]
 
 // Ghi mẫu quá thời gian này thì tự dừng để đo.
@@ -120,15 +120,15 @@ const DeviceStep = ({ copy, onContinue }) => {
       : device.record
 
   const pill = isNoAudio
-    ? { className: "bg-[#FEF2F2] text-red-600", label: device.statusNoSignal }
+    ? { className: "bg-[#FEF2F2] dark:bg-rose-950/40 text-red-600 dark:text-rose-400", label: device.statusNoSignal }
     : isReady
-      ? { className: "bg-[#F0FDF4] text-[#15803D]", label: device.statusReady }
+      ? { className: "bg-[#F0FDF4] dark:bg-emerald-950/40 text-[#15803D] dark:text-emerald-400", label: device.statusReady }
       : isError
-        ? { className: "bg-[#FEF2F2] text-red-600", label: device.statusError }
+        ? { className: "bg-[#FEF2F2] dark:bg-rose-950/40 text-red-600 dark:text-rose-400", label: device.statusError }
         : recording
-          ? { className: "bg-slate-100 text-slate-600", label: device.statusListening }
+          ? { className: "bg-slate-100 dark:bg-[#272727] text-slate-600 dark:text-neutral-300", label: device.statusListening }
           : {
-              className: "bg-slate-100 text-slate-600",
+              className: "bg-slate-100 dark:bg-[#272727] text-slate-600 dark:text-neutral-300",
               label: device.statusPending || "Chưa đo tín hiệu",
             }
 
@@ -139,7 +139,7 @@ const DeviceStep = ({ copy, onContinue }) => {
     <>
       <StepCard className="gap-4 xl:w-[440px] xl:shrink-0">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-base font-semibold leading-6 text-[#09090B]">
+          <h2 className="text-base font-semibold leading-6 text-[#09090B] dark:text-white">
             {device.title}
           </h2>
           <span
@@ -165,25 +165,25 @@ const DeviceStep = ({ copy, onContinue }) => {
         <p
           className={cn(
             "text-[13px] font-medium leading-[19px]",
-            isNoAudio || isError ? "text-red-600" : "text-slate-600",
+            isNoAudio || isError ? "text-red-600 dark:text-rose-400" : "text-slate-600 dark:text-neutral-300",
           )}
         >
           {isNoAudio ? noAudio.instruction : device.instruction}
         </p>
 
-        <div className="flex flex-col gap-1.5 rounded-xl bg-[#FDFBF7] px-4 py-3.5">
-          <p className="text-[22px] font-bold leading-7 text-cath-red-700">
+        <div className="flex flex-col gap-1.5 rounded-xl bg-[#FDFBF7] dark:bg-[#242424] dark:border dark:border-[#3F3F3F] px-4 py-3.5">
+          <p className="text-[22px] font-bold leading-7 text-cath-red-700 dark:text-red-400">
             {device.sampleHanzi}
           </p>
           <p
             className={cn(
               "text-[13px] font-medium leading-[19px]",
-              isNoAudio ? "text-amber-600" : "text-slate-600",
+              isNoAudio ? "text-amber-600 dark:text-amber-400" : "text-slate-600 dark:text-neutral-300",
             )}
           >
             {device.samplePinyin}
           </p>
-          <p className="text-[11px] font-medium leading-4 text-slate-600">
+          <p className="text-[11px] font-medium leading-4 text-slate-600 dark:text-neutral-400">
             {device.sampleTranslation}
           </p>
         </div>
@@ -196,23 +196,23 @@ const DeviceStep = ({ copy, onContinue }) => {
 
         {isNoAudio ? (
           <>
-            <div className="flex items-center gap-2.5 rounded-xl bg-[#FEF2F2] px-4 py-3">
-              <MicOff size={18} strokeWidth={2} className="shrink-0 text-red-600" />
-              <span className="text-xs font-semibold leading-4 text-red-600">
+            <div className="flex items-center gap-2.5 rounded-xl bg-[#FEF2F2] dark:bg-rose-950/40 px-4 py-3">
+              <MicOff size={18} strokeWidth={2} className="shrink-0 text-red-600 dark:text-rose-400" />
+              <span className="text-xs font-semibold leading-4 text-red-600 dark:text-rose-400">
                 {noAudio.meterLabel}
               </span>
               <span className="ml-auto flex items-center gap-1">
                 {Array.from({ length: 8 }).map((_, index) => (
                   <span
                     key={index}
-                    className="h-1 w-1.5 rounded-full bg-red-200"
+                    className="h-1 w-1.5 rounded-full bg-red-200 dark:bg-rose-800"
                   />
                 ))}
               </span>
             </div>
-            <div className="flex items-start gap-2 rounded-[10px] bg-slate-50 px-3.5 py-2.5">
-              <Info size={15} className="mt-0.5 shrink-0 text-slate-500" />
-              <span className="text-xs font-medium leading-4 text-slate-600">
+            <div className="flex items-start gap-2 rounded-[10px] bg-slate-50 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] px-3.5 py-2.5">
+              <Info size={15} className="mt-0.5 shrink-0 text-slate-500 dark:text-neutral-400" />
+              <span className="text-xs font-medium leading-4 text-slate-600 dark:text-neutral-300">
                 {noAudio.info}
               </span>
             </div>
@@ -223,17 +223,17 @@ const DeviceStep = ({ copy, onContinue }) => {
             type="button"
             onClick={handleSampleAction}
             disabled={isError}
-            className="flex flex-1 items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-2.5 text-left transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex flex-1 items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] px-4 py-2.5 text-left transition-colors hover:bg-slate-100 dark:hover:bg-[#2c2c2c] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <span className="text-[13px] font-semibold leading-[19px] text-[#09090B]">
+            <span className="text-[13px] font-semibold leading-[19px] text-[#09090B] dark:text-white">
               {actionLabel}
             </span>
             <span
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
                 recording
-                  ? "bg-red-100 text-red-600"
-                  : "bg-[#FFF1F2] text-cath-red-700",
+                  ? "bg-red-100 text-red-600 dark:bg-rose-950/40 dark:text-rose-400"
+                  : "bg-[#FFF1F2] dark:bg-rose-950/40 text-cath-red-700 dark:text-red-400",
               )}
             >
               {recording ? (
@@ -249,7 +249,7 @@ const DeviceStep = ({ copy, onContinue }) => {
               onClick={beginSample}
               title={device.reRecord || "Ghi âm lại"}
               aria-label={device.reRecord || "Ghi âm lại"}
-              className="flex w-11 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-cath-red-700 transition-colors hover:bg-slate-100"
+              className="flex w-11 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] text-cath-red-700 dark:text-red-400 transition-colors hover:bg-slate-100 dark:hover:bg-[#2c2c2c]"
             >
               <RotateCcw size={16} />
             </button>
@@ -263,7 +263,7 @@ const DeviceStep = ({ copy, onContinue }) => {
       <StepCard className="min-w-0 gap-4 xl:flex-1">
         {isNoAudio ? (
           <>
-            <h2 className="text-lg font-semibold leading-7 text-[#09090B]">
+            <h2 className="text-lg font-semibold leading-7 text-[#09090B] dark:text-white">
               {noAudio.guideTitle}
             </h2>
             <DeviceSelect
@@ -281,7 +281,7 @@ const DeviceStep = ({ copy, onContinue }) => {
                 return (
                   <div
                     key={fix.title}
-                    className="flex items-center gap-3 rounded-xl bg-slate-50 px-3.5 py-2.5"
+                    className="flex items-center gap-3 rounded-xl bg-slate-50 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] px-3.5 py-2.5"
                   >
                     <span
                       className={cn(
@@ -292,10 +292,10 @@ const DeviceStep = ({ copy, onContinue }) => {
                       <Icon size={18} strokeWidth={2} />
                     </span>
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[13px] font-semibold leading-[19px] text-[#09090B]">
+                      <span className="text-[13px] font-semibold leading-[19px] text-[#09090B] dark:text-white">
                         {fix.title}
                       </span>
-                      <span className="text-[11px] font-medium leading-4 text-slate-600">
+                      <span className="text-[11px] font-medium leading-4 text-slate-600 dark:text-neutral-400">
                         {fix.desc}
                       </span>
                     </div>
@@ -314,13 +314,13 @@ const DeviceStep = ({ copy, onContinue }) => {
           </>
         ) : isError ? (
           <>
-            <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-red-50 text-red-600">
+            <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-red-50 dark:bg-rose-950/40 text-red-600 dark:text-rose-400">
               <CircleAlert size={26} strokeWidth={2} />
             </span>
-            <h2 className="text-xl font-semibold leading-7 text-[#09090B]">
+            <h2 className="text-xl font-semibold leading-7 text-[#09090B] dark:text-white">
               {device.errorTitle}
             </h2>
-            <p className="text-sm font-medium leading-[22px] text-slate-600">
+            <p className="text-sm font-medium leading-[22px] text-slate-600 dark:text-neutral-300">
               {device.errorBody}
             </p>
             <PillButton
@@ -334,7 +334,7 @@ const DeviceStep = ({ copy, onContinue }) => {
           </>
         ) : (
           <>
-            <h2 className="text-lg font-semibold leading-7 text-[#09090B]">
+            <h2 className="text-lg font-semibold leading-7 text-[#09090B] dark:text-white">
               {device.deviceTitle}
             </h2>
             <DeviceSelect
@@ -346,24 +346,24 @@ const DeviceStep = ({ copy, onContinue }) => {
               placeholder={device.devicePlaceholder}
             />
             {isReady ? (
-              <div className="flex flex-col gap-2.5 rounded-xl bg-[#F0FDF4] px-4 py-3.5">
+              <div className="flex flex-col gap-2.5 rounded-xl bg-[#F0FDF4] dark:bg-emerald-950/40 px-4 py-3.5">
                 {checklist.map((item) => (
                   <div key={item} className="flex items-center gap-2.5">
                     <CheckCircle2
                       size={16}
                       strokeWidth={2}
-                      className="shrink-0 text-green-600"
+                      className="shrink-0 text-green-600 dark:text-emerald-400"
                     />
-                    <span className="text-xs font-medium leading-[17px] text-[#15803D]">
+                    <span className="text-xs font-medium leading-[17px] text-[#15803D] dark:text-emerald-300">
                       {item}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex items-start gap-2.5 rounded-xl bg-slate-50 px-4 py-3.5">
-                <Info size={16} className="mt-0.5 shrink-0 text-slate-500" />
-                <span className="text-xs font-medium leading-[17px] text-slate-600">
+              <div className="flex items-start gap-2.5 rounded-xl bg-slate-50 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] px-4 py-3.5">
+                <Info size={16} className="mt-0.5 shrink-0 text-slate-500 dark:text-neutral-400" />
+                <span className="text-xs font-medium leading-[17px] text-slate-600 dark:text-neutral-300">
                   {device.pendingHint ||
                     "Hãy ghi âm thử câu mẫu bên trái. Hệ thống chỉ cho vào phòng kiểm tra khi đo được tín hiệu giọng nói đạt chuẩn."}
                 </span>

@@ -37,7 +37,7 @@ const ResourceCard = ({ item, resolvePath }) => {
       className="group block focus:outline-none focus:ring-2 focus:ring-rose-500/30 rounded-xl h-full"
     >
       <FluentCard
-        className="relative h-full flex flex-col overflow-hidden border border-border bg-white group-hover:border-[var(--brand-color)] shadow-none transition-colors duration-300 !p-0 !min-h-0"
+        className="relative h-full flex flex-col overflow-hidden border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] group-hover:border-[var(--brand-color)] shadow-none transition-colors duration-300 !p-0 !min-h-0"
         style={{ "--brand-color": brandColor }}
       >
         {/* Radial Ripple Fill Overlay originating from hover cursor position */}
@@ -62,7 +62,7 @@ const ResourceCard = ({ item, resolvePath }) => {
 
         {/* Top Hero Panel: Centered Brand Logo */}
         <div
-          className="w-full h-36 shrink-0 relative flex items-center justify-center p-4 transition-colors duration-300 z-10 border-b border-slate-100/80 group-hover:border-white/20"
+          className="w-full h-36 shrink-0 relative flex items-center justify-center p-4 transition-colors duration-300 z-10 border-b border-slate-100/80 dark:border-[#272727] group-hover:border-white/20"
           style={{
             background: isHovered
               ? "transparent"
@@ -71,7 +71,7 @@ const ResourceCard = ({ item, resolvePath }) => {
         >
           {/* Centered White Logo Box */}
           <div
-            className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-border/60 group-hover:border-white/50 flex items-center justify-center p-3 transition-all duration-300 shrink-0"
+            className="w-20 h-20 rounded-2xl bg-white dark:bg-[#242424] shadow-sm border border-border/60 dark:border-[#3F3F3F] group-hover:border-white/50 flex items-center justify-center p-3 transition-all duration-300 shrink-0"
             style={{
               boxShadow: `0 4px 16px 0 ${brandColor}18`,
             }}
@@ -91,11 +91,11 @@ const ResourceCard = ({ item, resolvePath }) => {
 
         {/* Bottom Content Panel: Title & Description */}
         <div className="p-4 flex-1 flex flex-col justify-start relative space-y-1 z-10">
-          <h3 className="text-base font-bold text-black group-hover:text-white transition-colors line-clamp-1">
+          <h3 className="text-base font-bold text-black dark:text-white group-hover:text-white transition-colors line-clamp-1">
             {item.label}
           </h3>
 
-          <p className="text-sm text-[#606060] group-hover:text-white/85 transition-colors line-clamp-2">
+          <p className="text-sm text-[#606060] dark:text-[#AAAAAA] group-hover:text-white/85 transition-colors line-clamp-2">
             {item.description ||
               t.websites?.card?.defaultDescription ||
               "Interactive resource for language learners to practice skills."}

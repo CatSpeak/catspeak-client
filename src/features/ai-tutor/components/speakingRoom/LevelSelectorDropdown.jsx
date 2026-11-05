@@ -23,17 +23,17 @@ const LevelSelectorDropdown = ({
         }
       }}
       align="right"
-      dropdownClassName="w-auto min-w-[170px] max-w-none p-1.5 shadow-xl border border-slate-200 rounded-xl bg-white"
+      dropdownClassName="w-auto min-w-[170px] max-w-none p-1.5 shadow-xl border border-slate-200 dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#1A1A1A]"
       trigger={(isOpen, selectedOption, onClick) => (
         <button
           type="button"
           onClick={onClick}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors whitespace-nowrap cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#1A1A1A] border border-slate-200 dark:border-[#3F3F3F] text-xs sm:text-sm font-medium text-slate-700 dark:text-neutral-200 shadow-2xs hover:bg-slate-50 dark:hover:bg-[#272727] transition-colors whitespace-nowrap cursor-pointer"
         >
           <span>
             Trình độ: <strong>{currentLevel}</strong>
           </span>
-          <span className="text-[#990011] font-semibold ml-1 flex items-center">
+          <span className="text-[#990011] dark:text-red-400 font-semibold ml-1 flex items-center">
             <ChevronDown
               className={`w-3.5 h-3.5 transition-transform duration-200 ${
                 isOpen ? "rotate-180" : ""
@@ -46,13 +46,13 @@ const LevelSelectorDropdown = ({
         <div
           className={`w-full px-3 py-2 text-xs sm:text-sm rounded-lg flex items-center justify-between gap-4 whitespace-nowrap transition-colors ${
             isSelected
-              ? "text-[#990011] font-semibold bg-rose-50/70"
-              : "text-slate-700 hover:bg-slate-50"
+              ? "text-[#990011] dark:text-red-400 font-semibold bg-rose-50/70 dark:bg-rose-950/40"
+              : "text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727]"
           }`}
         >
           <span className="whitespace-nowrap select-none">{option.label}</span>
           {isSelected && (
-            <Check className="w-4 h-4 text-[#990011] shrink-0" />
+            <Check className="w-4 h-4 text-[#990011] dark:text-red-400 shrink-0" />
           )}
         </div>
       )}

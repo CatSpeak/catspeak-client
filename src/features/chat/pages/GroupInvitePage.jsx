@@ -14,7 +14,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from "react-hot-toast"
 
 export const GroupInviteSkeleton = () => (
-  <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] text-textColor px-4">
+  <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] dark:from-[#0F0F0F] dark:to-[#2D0A0E] text-textColor dark:text-white px-4">
     {/* Logo */}
     <div className="absolute top-4 left-5 z-10">
       <img
@@ -24,7 +24,7 @@ export const GroupInviteSkeleton = () => (
       />
     </div>
 
-    <div className="relative z-10 w-full max-w-md p-4 rounded-xl bg-white border border-border shadow-xl text-center space-y-4">
+    <div className="relative z-10 w-full max-w-md p-4 rounded-xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] shadow-xl text-center space-y-4">
       {/* Avatar Skeleton */}
       <div className="flex justify-center">
         <Skeleton className="w-24 h-24 rounded-full" />
@@ -134,7 +134,7 @@ const GroupInvitePage = () => {
 
   if (isInvalid) {
     return (
-      <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] text-textColor px-4">
+      <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] dark:from-[#0F0F0F] dark:to-[#2D0A0E] text-textColor dark:text-white px-4">
         {/* Logo */}
         <div className="absolute top-4 left-5 z-10">
           <img
@@ -145,16 +145,16 @@ const GroupInvitePage = () => {
           />
         </div>
 
-        <div className="relative z-10 w-full max-w-md p-4 rounded-xl bg-white border border-border shadow-xl text-center space-y-4">
+        <div className="relative z-10 w-full max-w-md p-4 rounded-xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] shadow-xl text-center space-y-4">
           <div className="w-14 h-14 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
             <AlertTriangle className="w-8 h-8" />
           </div>
 
           <div className="space-y-1">
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {t?.chat?.inviteExpiredTitle || "Liên kết mời không khả dụng"}
             </h2>
-            <p className="text-sm text-secondary">
+            <p className="text-sm text-secondary dark:text-[#AAAAAA]">
               {t?.chat?.inviteExpiredDesc ||
                 "Liên kết mời này đã hết hạn hoặc tính năng chia sẻ liên kết đã bị tắt. Vui lòng liên hệ quản trị viên nhóm để nhận liên kết mới hoặc yêu cầu mở lại."}
             </p>
@@ -178,7 +178,7 @@ const GroupInvitePage = () => {
   const isAlreadyMember = Boolean(preview.isAlreadyMember)
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] text-textColor px-4">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] dark:from-[#0F0F0F] dark:to-[#2D0A0E] text-textColor dark:text-white px-4">
       {/* Logo */}
       <div className="absolute top-4 left-5 z-10">
         <img
@@ -189,7 +189,7 @@ const GroupInvitePage = () => {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-md p-4 rounded-xl bg-white border border-border shadow-xl text-center space-y-4">
+      <div className="relative z-10 w-full max-w-md p-4 rounded-xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] shadow-xl text-center space-y-4">
         {/* Group Avatar */}
         <div className="flex justify-center">
           <Avatar size={96} name={groupName} src={preview.groupAvatar} />
@@ -197,13 +197,13 @@ const GroupInvitePage = () => {
 
         {/* Group Details */}
         <div>
-          <span className="text-sm text-secondary">
+          <span className="text-sm text-secondary dark:text-[#AAAAAA]">
             {t?.chat?.groupInviteBadge || "Lời mời tham gia nhóm"}
           </span>
 
-          <h1 className="text-2xl font-bold mb-1">{groupName}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{groupName}</h1>
 
-          <p className="text-sm text-secondary">
+          <p className="text-sm text-secondary dark:text-[#AAAAAA]">
             {t?.chat?.memberCount
               ? t.chat.memberCount.replace("{{count}}", memberCount)
               : `${memberCount} thành viên`}
@@ -242,9 +242,8 @@ const GroupInvitePage = () => {
 
           <PillButton
             variant="secondary-no-outline"
-            textColor="#990011"
             onClick={() => navigate("/")}
-            className="w-full justify-center"
+            className="w-full justify-center !text-cath-red-700 dark:!text-red-400"
           >
             {t?.common?.backToHome || "Về trang chủ"}
           </PillButton>

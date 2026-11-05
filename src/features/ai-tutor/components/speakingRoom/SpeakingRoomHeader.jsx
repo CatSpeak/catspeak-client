@@ -11,7 +11,7 @@ const SpeakingRoomHeader = ({
   return (
     <div className="space-y-3">
       {/* 1. Title row */}
-      <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-headingColor uppercase">
+      <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-headingColor dark:text-white uppercase">
         {title}
       </h1>
 
@@ -19,7 +19,7 @@ const SpeakingRoomHeader = ({
       <div className="flex items-center justify-between gap-4">
         <div>
           {badge && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-[#272727] text-slate-600 dark:text-neutral-300 border border-slate-200 dark:border-[#3F3F3F] whitespace-nowrap">
               {badge}
             </span>
           )}

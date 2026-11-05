@@ -239,14 +239,14 @@ const SocialProfileHeader = ({
     <div className="flex flex-col gap-1.5 pt-3 md:pt-4">
       {/* Name and Badges */}
       <div className="flex items-center flex-wrap gap-2.5">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight truncate max-w-full">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight truncate max-w-full">
           {displayName}
         </h1>
 
         {/* Verified Teacher Badge */}
         {isTeacher && (
           <div
-            className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 shadow-xs select-none"
+            className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-xs select-none"
             title={
               t.profile?.badges?.verifiedTeacher || "Giảng viên đã xác thực"
             }
@@ -260,27 +260,27 @@ const SocialProfileHeader = ({
       {/* Handle & Headline */}
       <div className="flex flex-col gap-0.5">
         {showHandle && (
-          <span className="text-xs font-medium text-gray-500">@{username}</span>
+          <span className="text-xs font-medium text-gray-500 dark:text-neutral-400">@{username}</span>
         )}
         {headline && (
-          <p className="text-sm font-medium text-gray-600 line-clamp-2 max-w-2xl">
+          <p className="text-sm font-medium text-gray-600 dark:text-neutral-300 line-clamp-2 max-w-2xl">
             {headline}
           </p>
         )}
       </div>
 
       {/* Stats Meta */}
-      <div className="flex items-center flex-wrap gap-2 text-sm text-gray-500 mt-0.5">
-        <span className="font-semibold text-gray-800">
+      <div className="flex items-center flex-wrap gap-2 text-sm text-gray-500 dark:text-neutral-400 mt-0.5">
+        <span className="font-semibold text-gray-800 dark:text-neutral-200">
           {friendsCount}{" "}
-          <span className="font-normal text-gray-500 lowercase">
+          <span className="font-normal text-gray-500 dark:text-neutral-400 lowercase">
             {t.profile?.tabs?.friends || "bạn bè"}
           </span>
         </span>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
-        <span className="font-semibold text-gray-800">
+        <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-neutral-600" />
+        <span className="font-semibold text-gray-800 dark:text-neutral-200">
           {followersCount}{" "}
-          <span className="font-normal text-gray-500 lowercase">
+          <span className="font-normal text-gray-500 dark:text-neutral-400 lowercase">
             {t.profile?.friends?.subTabs?.followers || "người theo dõi"}
           </span>
         </span>
@@ -308,7 +308,7 @@ const SocialProfileHeader = ({
         <div className="flex flex-col gap-3">
           {/* Teaching Motto (Quote block) */}
           {teachingMotto && (
-            <div className="flex items-start gap-2.5 text-sm italic text-gray-700 bg-amber-50/50 border-l-3 border-amber-400 px-3.5 py-2 rounded-r-lg max-w-3xl shadow-2xs">
+            <div className="flex items-start gap-2.5 text-sm italic text-gray-700 dark:text-amber-200 bg-amber-50/50 dark:bg-amber-950/30 border-l-3 border-amber-400 dark:border-amber-500 px-3.5 py-2 rounded-r-lg max-w-3xl shadow-2xs">
               <Quote className="w-4 h-4 text-amber-500 shrink-0 mt-0.5 rotate-180" />
               <span className="font-medium">“{teachingMotto}”</span>
             </div>
@@ -316,14 +316,14 @@ const SocialProfileHeader = ({
 
           {/* Self-Introduction (Bio block with read more) */}
           {introduction && (
-            <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100 max-w-3xl">
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+            <div className="bg-gray-50/80 dark:bg-[#242424] rounded-xl p-4 border border-gray-100 dark:border-[#3F3F3F] max-w-3xl">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 <span>
                   {t.profile?.sections?.aboutMe || "Giới thiệu bản thân"}
                 </span>
               </div>
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-gray-700 dark:text-neutral-200 leading-relaxed whitespace-pre-line">
                 {isBioExpanded || introduction.length <= 220
                   ? introduction
                   : `${introduction.slice(0, 220)}...`}
@@ -332,7 +332,7 @@ const SocialProfileHeader = ({
                 <button
                   type="button"
                   onClick={() => setIsBioExpanded(!isBioExpanded)}
-                  className="mt-2 text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  className="mt-2 text-xs font-semibold text-primary dark:text-red-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
                 >
                   {isBioExpanded ? (
                     <>
@@ -351,15 +351,15 @@ const SocialProfileHeader = ({
           {/* Teaching Languages Chips */}
           {parsedLanguages.length > 0 && (
             <div className="flex items-center flex-wrap gap-2 pt-0.5">
-              <span className="text-xs font-medium text-gray-500 inline-flex items-center gap-1">
-                <Globe className="w-3.5 h-3.5 text-gray-400" />
+              <span className="text-xs font-medium text-gray-500 dark:text-neutral-400 inline-flex items-center gap-1">
+                <Globe className="w-3.5 h-3.5 text-gray-400 dark:text-neutral-400" />
                 {t.profile?.instructor?.teachingLanguages ||
                   "Ngôn ngữ giảng dạy:"}
               </span>
               {parsedLanguages.map((lang, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200"
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-[#272727] text-gray-700 dark:text-neutral-200 border border-gray-200 dark:border-[#3F3F3F]"
                 >
                   {lang.language} {lang.level ? `(${lang.level})` : ""}
                 </span>
@@ -371,7 +371,7 @@ const SocialProfileHeader = ({
           {isOwnProfile && isTeacher && !introduction && (
             <Link
               to="/setting/instructor"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-gray-300 hover:border-primary/50 bg-gray-50/50 hover:bg-primary/5 transition-all text-xs font-medium text-gray-600 hover:text-primary max-w-md group"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-gray-300 dark:border-[#3F3F3F] hover:border-primary/50 bg-gray-50/50 dark:bg-[#242424] hover:bg-primary/5 transition-all text-xs font-medium text-gray-600 dark:text-neutral-300 hover:text-primary max-w-md group"
             >
               <Sparkles className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
               <span>Thêm lời giới thiệu bản thân vào hồ sơ giáo viên</span>

@@ -28,7 +28,7 @@ const CallBottomDock = ({
 
   return (
     <div className="p-4 pt-0 bg-transparent flex items-center justify-center shrink-0 z-20">
-      <div className="flex items-center gap-2 p-2 rounded-full bg-white border border-border shadow-xl">
+      <div className="flex items-center gap-2 p-2 rounded-full bg-white dark:bg-[#272727] border border-border dark:border-[#3F3F3F] shadow-xl">
         {/* Mic Toggle */}
         <IconButton
           onClick={toggleMic}

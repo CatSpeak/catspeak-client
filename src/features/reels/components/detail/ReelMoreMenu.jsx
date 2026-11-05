@@ -153,15 +153,15 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
   }, [isOpen, onClose, showMenu])
 
   const menuContent = (
-    <div className={`w-48 bg-white rounded-xl py-2 z-50 shadow-xl border border-border text-gray-800 font-medium animate-in fade-in zoom-in-95 duration-100 ${isMobile ? 'w-full' : 'absolute top-10 right-0'}`} role="menu">
+    <div className={`w-48 bg-white dark:bg-[#1A1A1A] rounded-xl py-2 z-50 shadow-xl border border-border dark:border-[#3F3F3F] text-gray-800 dark:text-neutral-200 font-medium animate-in fade-in zoom-in-95 duration-100 ${isMobile ? 'w-full' : 'absolute top-10 right-0'}`} role="menu">
       {MENU_ITEMS_KEYS.map((item) => (
         <button
           key={item.key}
-          className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3 cursor-pointer border-none bg-transparent outline-none"
+          className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-[#272727] active:bg-gray-100 dark:active:bg-[#3D3D3D] transition-colors flex items-center gap-3 cursor-pointer border-none bg-transparent outline-none"
           role="menuitem"
           onClick={(e) => handleItemClick(e, item.key)}
         >
-          {createElement(item.icon, { size: 18, className: "text-gray-600" })}
+          {createElement(item.icon, { size: 18, className: "text-gray-600 dark:text-neutral-300" })}
           <span>{t?.catSpeak?.reels?.detail?.moreMenu?.[item.key] || item.defaultLabel}</span>
         </button>
       ))}
@@ -176,23 +176,23 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
         >
           <div className="absolute inset-0 bg-black/50" onClick={onClose} />
           <div
-            className={`absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
+            className={`absolute inset-x-0 bottom-0 bg-white dark:bg-[#1A1A1A] border-t border-border dark:border-[#3F3F3F] rounded-t-3xl shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header handle */}
-            <div className="flex items-center justify-center pt-3 pb-2 border-b border-border">
-              <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
+            <div className="flex items-center justify-center pt-3 pb-2 border-b border-border dark:border-[#3F3F3F]">
+              <div className="w-10 h-1.5 bg-gray-300 dark:bg-[#3F3F3F] rounded-full" />
             </div>
             
             <div className="py-2 pb-safe px-2 pb-8">
               {MENU_ITEMS_KEYS.map((item) => (
                 <button
                   key={item.key}
-                  className="w-full text-left px-4 py-3.5 text-[15px] font-semibold text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3 cursor-pointer border-none bg-transparent outline-none rounded-xl"
+                  className="w-full text-left px-4 py-3.5 text-[15px] font-semibold text-gray-800 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] active:bg-gray-100 dark:active:bg-[#3D3D3D] transition-colors flex items-center gap-3 cursor-pointer border-none bg-transparent outline-none rounded-xl"
                   role="menuitem"
                   onClick={(e) => handleItemClick(e, item.key)}
                 >
-                  {createElement(item.icon, { size: 22, className: "text-gray-700" })}
+                  {createElement(item.icon, { size: 22, className: "text-gray-700 dark:text-neutral-300" })}
                   <span>{t?.catSpeak?.reels?.detail?.moreMenu?.[item.key] || item.defaultLabel}</span>
                 </button>
               ))}
@@ -202,7 +202,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
       ) : (
         <div className="relative" ref={menuRef}>
           <button
-            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors border-none cursor-pointer outline-none text-gray-500 hover:text-gray-800 bg-transparent"
+            className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] flex items-center justify-center transition-colors border-none cursor-pointer outline-none text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-white bg-transparent"
             onClick={toggle}
             aria-label="More options"
             aria-expanded={isOpen}

@@ -40,11 +40,11 @@ export default function PastChallengeLeaderboardView({
   const restEntries = leaderboardEntries.slice(3)
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col">
+    <div className="w-full bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] shadow-sm overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-red-50/40 to-white">
+      <div className="p-4 sm:p-5 border-b border-border dark:border-[#3F3F3F] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-red-50/40 dark:from-red-950/20 to-white dark:to-[#1A1A1A]">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 shadow-sm border border-border bg-gray-100">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 shadow-sm border border-border dark:border-[#3F3F3F] bg-gray-100 dark:bg-[#242424]">
             <img 
               src={selectedChallenge.bannerUrl || selectedChallenge.thumbnailUrl || selectedChallenge.coverUrl || fallbackChallengeCard} 
               alt={selectedChallenge.hashtag || selectedChallenge.name} 
@@ -55,17 +55,17 @@ export default function PastChallengeLeaderboardView({
             />
           </div>
           <div className="flex flex-col min-w-0">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
               {selectedChallenge.hashtag || selectedChallenge.name}
             </h2>
             <div className="flex flex-wrap items-center gap-2 mt-1">
-              <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium whitespace-nowrap">
-                <Calendar size={13} className="text-gray-400 shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-neutral-400 font-medium whitespace-nowrap">
+                <Calendar size={13} className="text-gray-400 dark:text-neutral-500 shrink-0" />
                 <span className="whitespace-nowrap">
                   {formatDate(selectedChallenge.startDate)} - {formatDate(selectedChallenge.endDate)}
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-[11px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md shrink-0">
+              <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-neutral-300 bg-gray-100 dark:bg-[#272727] px-2 py-0.5 rounded-md shrink-0">
                 <Lock size={11} />
                 <span>{t?.catSpeak?.reels?.leaderboard?.votingClosed || "Đã đóng cổng bình chọn"}</span>
               </div>
@@ -74,21 +74,21 @@ export default function PastChallengeLeaderboardView({
         </div>
         
         {/* Kết quả chung cuộc Badge */}
-        <div className="flex items-center gap-1.5 bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs px-3 py-1.5 rounded-full shrink-0 self-start sm:self-center">
-          <Trophy size={14} className="text-amber-600" />
+        <div className="flex items-center gap-1.5 bg-amber-100 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40 text-amber-900 dark:text-amber-300 font-bold text-xs px-3 py-1.5 rounded-full shrink-0 self-start sm:self-center">
+          <Trophy size={14} className="text-amber-600 dark:text-amber-400" />
           <span>{t?.catSpeak?.reels?.leaderboard?.finalResults || "Kết quả chung cuộc"}</span>
         </div>
       </div>
 
       {isLoading ? (
         <div className="p-8 flex items-center justify-center">
-          <div className="animate-spin w-8 h-8 border-4 border-border border-t-cath-red-700 rounded-full"></div>
+          <div className="animate-spin w-8 h-8 border-4 border-border dark:border-[#3F3F3F] border-t-cath-red-700 dark:border-t-red-400 rounded-full"></div>
         </div>
       ) : leaderboardEntries.length > 0 ? (
         <div className="flex flex-col flex-1">
           {/* Podium */}
           {top3.length > 0 && (
-            <div className="flex items-end justify-center px-4 pt-10 pb-6 gap-3 sm:gap-6 border-b border-border max-w-md mx-auto w-full">
+            <div className="flex items-end justify-center px-4 pt-10 pb-6 gap-3 sm:gap-6 border-b border-border dark:border-[#3F3F3F] max-w-md mx-auto w-full">
               <PodiumItem 
                 entry={top3[2]} 
                 rank={3} 
@@ -123,7 +123,7 @@ export default function PastChallengeLeaderboardView({
           )}
 
           {/* List of remaining ranks */}
-          <div className="flex flex-col divide-y divide-gray-100">
+          <div className="flex flex-col divide-y divide-gray-100 dark:divide-[#272727]">
             {restEntries.map((entry, idx) => {
               const actualRank = entry.rank || (idx + 4)
               const username = entry.reel?.nickname || entry.reel?.username || "User name"
@@ -154,18 +154,18 @@ export default function PastChallengeLeaderboardView({
           </div>
 
           {/* Footer Info */}
-          <div className="p-4 sm:p-5 bg-gray-50 border-t border-border mt-auto flex items-start gap-2.5 text-gray-500">
+          <div className="p-4 sm:p-5 bg-gray-50 dark:bg-[#242424] border-t border-border dark:border-[#3F3F3F] mt-auto flex items-start gap-2.5 text-gray-500 dark:text-neutral-400">
             <Info size={16} className="shrink-0 mt-0.5" />
             <div className="flex flex-col text-[12px] sm:text-[13px] font-medium leading-relaxed">
               <span>{t?.catSpeak?.reels?.leaderboard?.dataFrozenAt || "Dữ liệu đã được đóng tại thời điểm kết thúc thử thách"} ({formatDate(selectedChallenge.endDate)}) 23:59</span>
-              <span className="text-gray-400">{t?.catSpeak?.reels?.leaderboard?.dataFrozenNotice || "Kết quả sẽ không thay đổi dù lượt thích có thay đổi sau thời điểm này"}</span>
+              <span className="text-gray-400 dark:text-neutral-500">{t?.catSpeak?.reels?.leaderboard?.dataFrozenNotice || "Kết quả sẽ không thay đổi dù lượt thích có thay đổi sau thời điểm này"}</span>
             </div>
           </div>
         </div>
       ) : (
-        <div className="py-20 flex flex-col items-center justify-center text-gray-500">
+        <div className="py-20 flex flex-col items-center justify-center text-gray-500 dark:text-neutral-400">
           <span className="text-4xl mb-3">👻</span>
-          <span className="font-semibold text-gray-600">{t?.catSpeak?.reels?.leaderboard?.emptyLeaderboard || "Bảng xếp hạng trống"}</span>
+          <span className="font-semibold text-gray-600 dark:text-neutral-300">{t?.catSpeak?.reels?.leaderboard?.emptyLeaderboard || "Bảng xếp hạng trống"}</span>
         </div>
       )}
     </div>

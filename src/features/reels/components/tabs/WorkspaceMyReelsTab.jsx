@@ -80,27 +80,27 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
           {[1, 2, 3].map((item) => (
             <div
               key={item}
-              className="flex flex-col gap-3 rounded-lg border border-border bg-white p-4 shadow-sm animate-pulse sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-lg border border-border bg-white dark:bg-[#1A1A1A] p-4 shadow-sm animate-pulse sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex items-center gap-3">
-                <div className="w-16 h-16 bg-gray-200 rounded flex-shrink-0" />
+                <div className="w-16 h-16 bg-gray-200 dark:bg-[#272727] rounded flex-shrink-0" />
                 <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-48" />
-                  <div className="h-3.5 bg-gray-200 rounded w-64" />
-                  <div className="h-3 bg-gray-200 rounded w-32" />
+                  <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-48" />
+                  <div className="h-3.5 bg-gray-200 dark:bg-[#272727] rounded w-64" />
+                  <div className="h-3 bg-gray-200 dark:bg-[#272727] rounded w-32" />
                 </div>
               </div>
-              <div className="h-10 w-24 bg-gray-200 rounded-full" />
+              <div className="h-10 w-24 bg-gray-200 dark:bg-[#272727] rounded-full" />
             </div>
           ))}
         </div>
       ) : error && page === 1 ? (
         <ErrorMessage message={error?.data?.message || "Failed to load reels. Please try again."} />
       ) : reels.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50">
-          <Film size={48} className="text-gray-300 mb-3" />
-          <h3 className="font-bold text-gray-700 mb-1">{ws?.noReels || "No reels uploaded yet"}</h3>
-          <p className="text-sm text-gray-400 mb-4 text-center max-w-sm">
+        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A]">
+          <Film size={48} className="text-gray-300 dark:text-neutral-500 mb-3" />
+          <h3 className="font-bold text-gray-700 dark:text-white mb-1">{ws?.noReels || "No reels uploaded yet"}</h3>
+          <p className="text-sm text-gray-400 dark:text-neutral-400 mb-4 text-center max-w-sm">
             {ws?.noReelsDesc || "Share your knowledge, tutorials, or highlights by uploading your first short video!"}
           </p>
           <button
@@ -113,7 +113,7 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
-          <p className="text-xs text-textColor mb-1">{reelsUploadedLabel}</p>
+          <p className="text-xs text-textColor dark:text-neutral-400 mb-1">{reelsUploadedLabel}</p>
 
           {reels.map((reel) => (
             <WorkspaceReelListItem
@@ -131,7 +131,7 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
               <button
                 onClick={() => setPage((currentPage) => currentPage + 1)}
                 disabled={isFetching}
-                className="rounded-full bg-blue-50 px-6 py-2 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50"
+                className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-6 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/50 disabled:opacity-50"
               >
                 {isFetching ? "..." : t.seeMore || "See more"}
               </button>
@@ -153,7 +153,7 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
         >
           <p>
             {ws?.deleteConfirm || "Are you sure you want to delete"}{" "}
-            <strong className="text-gray-700">"{deleteTarget.title}"</strong>?{" "}
+            <strong className="text-gray-700 dark:text-white">"{deleteTarget.title}"</strong>?{" "}
             {ws?.deleteWarning || "This action is permanent and cannot be undone."}
           </p>
         </ConfirmationModal>

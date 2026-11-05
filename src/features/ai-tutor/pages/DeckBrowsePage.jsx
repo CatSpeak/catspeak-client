@@ -107,15 +107,15 @@ const DeckBrowsePage = () => {
         <span className="mx-1.5">/</span>
         <button type="button" onClick={() => navigate(paths.decks)} className="hover:text-[#680411]">Bộ thẻ</button>
         <span className="mx-1.5">/</span>
-        <span className="text-slate-700">{deck.name}</span>
+        <span className="text-slate-700 dark:text-neutral-200">{deck.name}</span>
       </nav>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white">
             {deck.category === "folder" ? "Thư mục" : "Bộ thẻ"}: {deck.name}
           </h1>
-          <span className="text-sm font-semibold text-slate-500">{deckTotal} thẻ</span>
+          <span className="text-sm font-semibold text-slate-500 dark:text-neutral-400">{deckTotal} thẻ</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {isRecentWrong && (
@@ -123,7 +123,7 @@ const DeckBrowsePage = () => {
               type="button"
               disabled={deckEmpty}
               onClick={() => navigate(paths.practice("recent-wrong"))}
-              className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-5 py-2.5 font-bold text-[#680411] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/40 px-5 py-2.5 font-bold text-[#680411] dark:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Mic className="h-4 w-4" />
               Luyện phát âm
@@ -135,7 +135,7 @@ const DeckBrowsePage = () => {
             aria-disabled={deckEmpty}
             title={deckEmpty ? "Deck chưa có từ nào để ôn" : "Ôn tự do cả bộ thẻ, kể cả thẻ chưa đến hạn"}
             onClick={() => navigate(flashcardReviewPath(lang, { mode: "free", deckId }))}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#680411] px-6 py-2.5 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#680411] dark:bg-cath-red-700 px-6 py-2.5 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-[#272727]"
           >
             Ôn tập <ArrowRight className="h-4 w-4" />
           </button>
@@ -143,38 +143,38 @@ const DeckBrowsePage = () => {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-rose-50 px-3.5 py-1 text-xs font-bold text-[#680411]">
+        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 px-3.5 py-1 text-xs font-bold text-[#680411] dark:text-red-400">
           <Lock className="h-3.5 w-3.5" />
           Chỉ đọc - không ảnh hưởng lịch ôn
         </span>
         {folder?.read_only && (
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-50 px-3.5 py-1 text-xs font-bold text-amber-700">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 px-3.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-400">
             Thư mục chỉ đọc (vượt giới hạn gói Free)
           </span>
         )}
       </div>
 
       {deckEmpty ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-sm" data-testid="deck-empty">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-[#680411]">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-6 py-14 text-center shadow-sm" data-testid="deck-empty">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-950/40 text-[#680411] dark:text-red-400">
             <Layers className="h-6 w-6" />
           </div>
-          <p className="text-base font-bold text-slate-900">Deck chưa có từ nào</p>
-          <p className="max-w-sm text-sm text-slate-500">
+          <p className="text-base font-bold text-slate-900 dark:text-white">Deck chưa có từ nào</p>
+          <p className="max-w-sm text-sm text-slate-500 dark:text-neutral-400">
             Luyện nói với AI để thêm từ mới vào sổ, hoặc thêm từ thủ công.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             <button
               type="button"
               onClick={() => navigate(`/${lang}/ai-tutor/speaking-room`)}
-              className="h-10 rounded-full bg-[#990011] px-6 text-sm font-semibold text-white"
+              className="h-10 rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 text-sm font-semibold text-white"
             >
               Đi luyện nói
             </button>
             <button
               type="button"
               onClick={() => navigate(paths.add)}
-              className="h-10 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700"
+              className="h-10 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-6 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#3D3D3D]"
             >
               Thêm thủ công
             </button>
@@ -204,13 +204,13 @@ const DeckBrowsePage = () => {
             </div>
             <div className="flex items-center gap-2">
               <label className="relative flex-1 md:w-64 md:flex-none">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
                 <input
                   value={term}
                   onChange={(e) => setTerm(e.target.value)}
                   placeholder="Tìm trong bộ thẻ..."
                   aria-label="Tìm trong bộ thẻ"
-                  className="h-10 w-full rounded-xl border border-slate-200 pl-9 pr-3 text-sm outline-none focus:border-[#990011]"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] text-slate-900 dark:text-white pl-9 pr-3 text-sm outline-none focus:border-[#990011] dark:focus:border-red-400"
                 />
               </label>
               <button
@@ -219,7 +219,7 @@ const DeckBrowsePage = () => {
                   setSelecting((v) => !v)
                   setSelected(new Set())
                 }}
-                className="h-10 whitespace-nowrap rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-600 hover:bg-slate-50"
+                className="h-10 whitespace-nowrap rounded-xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-4 text-sm font-bold text-slate-600 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727]"
               >
                 {selecting ? "Bỏ chọn" : "Chọn thẻ để ôn"}
               </button>
@@ -229,13 +229,13 @@ const DeckBrowsePage = () => {
           {isLoading ? (
             <div className="flex flex-col gap-2" aria-busy="true">
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+                <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100 dark:bg-[#272727]" />
               ))}
             </div>
           ) : isError && !cardsQuery.data ? (
             <FlashcardLoadError offline={isNetworkError(error)} onRetry={refetch} what="bộ thẻ" />
           ) : data.items.length === 0 ? (
-            <div className="rounded-2xl border border-slate-100 bg-white p-8 text-center text-sm text-slate-500">
+            <div className="rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-8 text-center text-sm text-slate-500 dark:text-neutral-400">
               Không có thẻ nào khớp bộ lọc này.
             </div>
           ) : (
@@ -248,7 +248,7 @@ const DeckBrowsePage = () => {
                 {...handlers}
               />
               {data.next_cursor && limit >= 100 && (
-                <p className="text-center text-xs text-slate-500">
+                <p className="text-center text-xs text-slate-500 dark:text-neutral-400">
                   Đang hiện 100/{data.total} thẻ. Dùng ô tìm hoặc chip lọc để xem các thẻ còn lại.
                 </p>
               )}
@@ -257,7 +257,7 @@ const DeckBrowsePage = () => {
                   type="button"
                   disabled={isFetching}
                   onClick={() => setLimit((n) => Math.min(100, n + PAGE))}
-                  className="mx-auto h-10 rounded-full border border-slate-200 px-6 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-60"
+                  className="mx-auto h-10 rounded-full border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-6 text-sm font-bold text-slate-600 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727] disabled:opacity-60"
                 >
                   {isFetching ? "Đang tải..." : `Xem thêm (${data.total - data.items.length} thẻ)`}
                 </button>
@@ -268,11 +268,11 @@ const DeckBrowsePage = () => {
       )}
 
       {selecting && selected.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 z-[1100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-xl ring-1 ring-slate-200">
-          <span className="flex-1 text-sm font-semibold text-slate-700">
+        <div className="fixed bottom-6 left-1/2 z-[1100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-2xl bg-white dark:bg-[#1A1A1A] px-4 py-3 shadow-xl ring-1 ring-slate-200 dark:ring-[#3F3F3F]">
+          <span className="flex-1 text-sm font-semibold text-slate-700 dark:text-white">
             Đã chọn {selected.size}/{MAX_SELECT} thẻ
           </span>
-          <button type="button" aria-label="Bỏ chọn tất cả" onClick={() => setSelected(new Set())} className="text-slate-400 hover:text-slate-600">
+          <button type="button" aria-label="Bỏ chọn tất cả" onClick={() => setSelected(new Set())} className="text-slate-400 dark:text-neutral-400 hover:text-slate-600 dark:hover:text-white">
             <X className="h-4 w-4" />
           </button>
           <button

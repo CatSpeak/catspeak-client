@@ -17,7 +17,10 @@ const CycleProgressBar = ({
   )
 
   const normalizedLevel = hskLevel.replace("HSK ", "HSK ")
-  const remainingSessions = Math.max(0, (totalSessions || 5) - completedSessions)
+  const remainingSessions = Math.max(
+    0,
+    (totalSessions || 5) - completedSessions,
+  )
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -54,7 +57,9 @@ const CycleProgressBar = ({
 
             <div className="mt-2">
               <span className="inline-block bg-white text-[#980019] text-xs font-bold px-3.5 py-1 rounded-full shadow-xs">
-                {startsTomorrow ? "Bắt đầu mai" : `Còn ${remainingSessions} buổi`}
+                {startsTomorrow
+                  ? "Bắt đầu mai"
+                  : `Còn ${remainingSessions} buổi`}
               </span>
             </div>
           </div>
@@ -77,21 +82,21 @@ const CycleProgressBar = ({
       {/* 2. Three Metric Cards Row (Figma: Buổi hoàn thành, Điểm TB chu kỳ, Streak) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Card 1: Buổi hoàn thành */}
-        <div className="bg-white rounded-2xl p-6 shadow-xs border border-gray-100 flex flex-col justify-between">
-          <span className="text-xs sm:text-sm font-medium text-gray-500 mb-2">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 shadow-xs border border-gray-100 dark:border-[#3F3F3F] flex flex-col justify-between">
+          <span className="text-xs sm:text-sm font-medium text-gray-500 dark:text-neutral-400 mb-2">
             Buổi hoàn thành
           </span>
-          <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
             {completedSessions}/{totalSessions}
           </div>
         </div>
 
         {/* Card 2: Điểm TB chu kỳ */}
-        <div className="bg-white rounded-2xl p-6 shadow-xs border border-gray-100 flex flex-col justify-between">
-          <span className="text-xs sm:text-sm font-medium text-gray-500 mb-2">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 shadow-xs border border-gray-100 dark:border-[#3F3F3F] flex flex-col justify-between">
+          <span className="text-xs sm:text-sm font-medium text-gray-500 dark:text-neutral-400 mb-2">
             Điểm TB chu kỳ
           </span>
-          <div className="text-2xl sm:text-3xl font-extrabold text-[#980019] tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#980019] dark:text-red-400 tracking-tight">
             {averageScore !== null && averageScore !== undefined
               ? Math.round(averageScore)
               : "--"}
@@ -99,11 +104,11 @@ const CycleProgressBar = ({
         </div>
 
         {/* Card 3: Streak */}
-        <div className="bg-white rounded-2xl p-6 shadow-xs border border-gray-100 flex flex-col justify-between">
-          <span className="text-xs sm:text-sm font-medium text-gray-500 mb-2">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 shadow-xs border border-gray-100 dark:border-[#3F3F3F] flex flex-col justify-between">
+          <span className="text-xs sm:text-sm font-medium text-gray-500 dark:text-neutral-400 mb-2">
             Streak
           </span>
-          <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
             {streak || 5} ngày
           </div>
         </div>

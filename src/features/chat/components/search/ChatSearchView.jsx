@@ -126,9 +126,9 @@ const ChatSearchView = ({ conversationId, onJumpToMessage }) => {
   const trimmedQuery = query.trim()
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-white">
+    <div className="h-full flex flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]">
       {/* ── Search Input Bar ── */}
-      <div className="px-4 mb-4 flex items-center bg-white shrink-0">
+      <div className="px-4 mb-4 flex items-center bg-white dark:bg-[#1A1A1A] shrink-0">
         <SearchInput
           inputRef={inputRef}
           value={query}
@@ -148,7 +148,7 @@ const ChatSearchView = ({ conversationId, onJumpToMessage }) => {
 
       {/* ── Results count sub-bar ── */}
       {trimmedQuery.length > 0 && !isFetching && results.length > 0 && (
-        <div className="px-4 mb-1 text-xs text-secondary shrink-0 flex items-center justify-between">
+        <div className="px-4 mb-1 text-xs text-secondary dark:text-[#AAAAAA] shrink-0 flex items-center justify-between">
           <span>
             {(t?.chat?.resultsFound || "{{count}} results found").replace(
               /\{\{count\}\}|\{count\}/g,
@@ -237,17 +237,17 @@ const ChatSearchView = ({ conversationId, onJumpToMessage }) => {
                   />
                 }
                 rightContent={
-                  <span className="text-xs text-[#606060] shrink-0">
+                  <span className="text-xs text-[#606060] dark:text-[#AAAAAA] shrink-0">
                     {formatRelative(
                       item.createDate || item.createdAt || item.timestamp,
                     )}
                   </span>
                 }
               >
-                <span className="truncate font-semibold text-neutral-900">
+                <span className="truncate font-semibold text-neutral-900 dark:text-white">
                   {senderName}
                 </span>
-                <span className="text-sm text-[#606060] truncate">
+                <span className="text-sm text-[#606060] dark:text-[#AAAAAA] truncate">
                   {item.messageContent ||
                     item.content ||
                     item.fileName ||

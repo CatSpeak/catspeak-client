@@ -26,12 +26,12 @@ const PlanUsageTab = () => {
 
   if (isError || !usageData) {
     return (
-      <div className="bg-white rounded-2xl p-10 border border-gray-200 text-center max-w-md mx-auto my-12 shadow-sm">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-10 border border-gray-200 dark:border-[#3F3F3F] text-center max-w-md mx-auto my-12 shadow-sm">
         <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
           <AlertCircle className="w-6 h-6" />
         </div>
-        <h3 className="text-lg font-bold text-gray-900 mb-2">{pageT.errorTitle || "Không Thể Tải Dữ Liệu Usage"}</h3>
-        <p className="text-sm text-gray-500 mb-6">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{pageT.errorTitle || "Không Thể Tải Dữ Liệu Usage"}</h3>
+        <p className="text-sm text-gray-500 dark:text-neutral-400 mb-6">
           {pageT.errorDesc || "Đã có lỗi xảy ra khi kết nối máy chủ. Vui lòng kiểm tra lại đường truyền và thử lại."}
         </p>
         <button
@@ -58,7 +58,7 @@ const PlanUsageTab = () => {
       {/* 2. Key Quotas Cards Grid */}
       {quotaFeatures.length > 0 && (
         <div>
-          <h3 className="text-base font-bold text-gray-900 mb-4">{quotasT.title || "Hạn Ngạch Tính Năng Chính"}</h3>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">{quotasT.title || "Hạn Ngạch Tính Năng Chính"}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {quotaFeatures.map((feature) => (
               <UsageQuotaCard key={feature.featureCode} feature={feature} />

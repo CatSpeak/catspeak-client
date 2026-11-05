@@ -85,7 +85,7 @@ const StoryInputBar = ({
             <button
               type="button"
               onClick={() => setSortOpen((v) => !v)}
-              className="flex h-9 items-center gap-1.5 rounded-full border border-cath-red-700 px-3.5 text-sm font-medium text-cath-red-700 transition hover:bg-cath-red-700/5 active:bg-cath-red-700/10"
+              className="flex h-9 items-center gap-1.5 rounded-full border border-cath-red-700 dark:border-red-400 px-3.5 text-sm font-medium text-cath-red-700 dark:text-red-400 transition hover:bg-cath-red-700/5 dark:hover:bg-red-400/10 active:bg-cath-red-700/10"
             >
               {sortLabel}
               <ChevronDown
@@ -95,7 +95,7 @@ const StoryInputBar = ({
             </button>
 
             {sortOpen && (
-              <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[120px] overflow-hidden rounded-xl border border-black/8 bg-white shadow-lg">
+              <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[120px] overflow-hidden rounded-xl border border-black/8 dark:border-[#3F3F3F] bg-white dark:bg-[#1E1E1E] shadow-lg">
                 {[
                   { value: "newest", label: t.catSpeak?.mail?.sortNewest },
                   { value: "oldest", label: t.catSpeak?.mail?.sortOldest },
@@ -107,15 +107,15 @@ const StoryInputBar = ({
                       onSortChange?.(value);
                       setSortOpen(false);
                     }}
-                    className={`flex w-full items-center px-4 py-2.5 text-sm transition hover:bg-[#f5f5f5] ${
+                    className={`flex w-full items-center px-4 py-2.5 text-sm transition hover:bg-[#f5f5f5] dark:hover:bg-[#272727] ${
                       sortOrder === value
-                        ? "font-semibold text-cath-red-700"
-                        : "text-[#3d3d3d]"
+                        ? "font-semibold text-cath-red-700 dark:text-red-400"
+                        : "text-[#3d3d3d] dark:text-neutral-200"
                     }`}
                   >
                     {label}
                     {sortOrder === value && (
-                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cath-red-700" />
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cath-red-700 dark:bg-red-400" />
                     )}
                   </button>
                 ))}
@@ -124,7 +124,7 @@ const StoryInputBar = ({
           </div>
 
           {/* Display mode toggle */}
-          <div className="flex h-9 items-center rounded-full bg-primaryBg p-0.5">
+          <div className="flex h-9 items-center rounded-full bg-primaryBg dark:bg-[#272727] p-0.5 border border-transparent dark:border-[#3F3F3F]">
             <button
               type="button"
               onClick={() => onDisplayModeChange?.("grid")}
@@ -132,7 +132,7 @@ const StoryInputBar = ({
               className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-all duration-200 ${
                 displayMode === "grid"
                   ? "bg-cath-red-700 text-white shadow-sm"
-                  : "text-[#7a7574] hover:text-[#3d3d3d]"
+                  : "text-[#7a7574] hover:text-[#3d3d3d] dark:text-[#AAAAAA] dark:hover:text-white"
               }`}
             >
               <LayoutGrid size={14} />
@@ -145,7 +145,7 @@ const StoryInputBar = ({
               className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-all duration-200 ${
                 displayMode === "float"
                   ? "bg-cath-red-700 text-white shadow-sm"
-                  : "text-[#7a7574] hover:text-[#3d3d3d]"
+                  : "text-[#7a7574] hover:text-[#3d3d3d] dark:text-[#AAAAAA] dark:hover:text-white"
               }`}
             >
               <Wind size={14} />
@@ -155,7 +155,7 @@ const StoryInputBar = ({
         </div>
 
         {/* Counter */}
-        <div className="text-sm whitespace-nowrap text-[#7A7574] text-center md:text-right">
+        <div className="text-sm whitespace-nowrap text-[#7A7574] dark:text-[#AAAAAA] text-center md:text-right">
           <span className="font-semibold">{myCount}</span>{" "}
           {t.catSpeak.mail.yours} |{" "}
           <span className="font-semibold">{totalCount}</span>{" "}

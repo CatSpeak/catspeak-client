@@ -12,9 +12,9 @@ import StepCard from "./StepCard"
 
 const STEP_ICONS = [Lock, SlidersHorizontal, RotateCcw]
 const STEP_ICON_TONES = [
-  "bg-blue-50 text-blue-600",
-  "bg-amber-50 text-amber-600",
-  "bg-emerald-50 text-emerald-600",
+  "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400",
+  "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
+  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
 ]
 
 const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
@@ -25,20 +25,20 @@ const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
   return (
     <>
       <StepCard className="gap-4 xl:w-[440px] xl:shrink-0">
-        <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-red-50 text-red-600">
+        <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-red-50 dark:bg-rose-950/40 text-red-600 dark:text-rose-400">
           <MicOff size={26} strokeWidth={2} />
         </span>
-        <h1 className="text-2xl font-bold leading-8 text-[#09090B]">
+        <h1 className="text-2xl font-bold leading-8 text-[#09090B] dark:text-white">
           {blocked.title}
         </h1>
-        <p className="text-sm font-semibold leading-[22px] text-[#09090B]">
+        <p className="text-sm font-semibold leading-[22px] text-[#09090B] dark:text-neutral-200">
           {blocked.body}
         </p>
-        <div className="flex flex-col gap-2 rounded-2xl bg-red-50 px-[18px] py-4">
-          <span className="text-[13px] font-medium leading-[19px] text-red-800">
+        <div className="flex flex-col gap-2 rounded-2xl bg-red-50 dark:bg-rose-950/30 px-[18px] py-4">
+          <span className="text-[13px] font-medium leading-[19px] text-red-800 dark:text-rose-300">
             {blocked.consequencesTitle}
           </span>
-          <ul className="flex flex-col gap-2 text-xs font-medium leading-[18px] text-slate-600">
+          <ul className="flex flex-col gap-2 text-xs font-medium leading-[18px] text-slate-600 dark:text-neutral-300">
             {consequences.map((item) => (
               <li key={item}>• {item}</li>
             ))}
@@ -47,7 +47,7 @@ const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
       </StepCard>
 
       <StepCard className="min-w-0 gap-4 xl:flex-1">
-        <h2 className="text-xl font-semibold leading-7 text-[#09090B]">
+        <h2 className="text-xl font-semibold leading-7 text-[#09090B] dark:text-white">
           {blocked.stepsTitle}
         </h2>
         <div className="flex flex-col gap-3">
@@ -56,7 +56,7 @@ const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
             return (
               <div
                 key={step.title}
-                className="flex items-center gap-3.5 rounded-xl bg-slate-50 px-4 py-3"
+                className="flex items-center gap-3.5 rounded-xl bg-slate-50 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] px-4 py-3"
               >
                 <span
                   className={cn(
@@ -67,10 +67,10 @@ const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
                   <Icon size={20} strokeWidth={2} />
                 </span>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[13px] font-semibold leading-[19px] text-[#09090B]">
+                  <span className="text-[13px] font-semibold leading-[19px] text-[#09090B] dark:text-white">
                     {step.title}
                   </span>
-                  <span className="text-xs font-medium leading-[17px] text-slate-600">
+                  <span className="text-xs font-medium leading-[17px] text-slate-600 dark:text-neutral-400">
                     {step.desc}
                   </span>
                 </div>
@@ -87,9 +87,9 @@ const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
         >
           {blocked.retryCta}
         </PillButton>
-        <div className="flex items-center gap-2.5 rounded-[10px] bg-green-50 px-3.5 py-2.5">
-          <ShieldCheck className="h-[18px] w-[18px] shrink-0 text-green-600" />
-          <span className="text-[11px] font-medium leading-4 text-green-700">
+        <div className="flex items-center gap-2.5 rounded-[10px] bg-green-50 dark:bg-emerald-950/30 px-3.5 py-2.5">
+          <ShieldCheck className="h-[18px] w-[18px] shrink-0 text-green-600 dark:text-emerald-400" />
+          <span className="text-[11px] font-medium leading-4 text-green-700 dark:text-emerald-300">
             {blocked.trust}
           </span>
         </div>

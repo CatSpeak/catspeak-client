@@ -329,7 +329,7 @@ const ChatArea = ({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-white lg:border lg:border-border lg:rounded-xl">
+    <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-white dark:bg-[#1A1A1A] lg:border lg:border-border dark:lg:border-[#3F3F3F] lg:rounded-xl">
       {/* ── Chat Header ────────────────────────────── */}
       <ChatHeader
         conversation={conversation}
@@ -438,7 +438,7 @@ const ChatArea = ({
                     : t?.chat?.scrollToBottom || "Cuộn xuống"
                 }
               >
-                <ArrowDown size={20} className="text-cath-red-700" />
+                <ArrowDown size={20} className="text-cath-red-700 dark:text-red-400" />
               </IconButton>
             </FluentAnimation>
           )}

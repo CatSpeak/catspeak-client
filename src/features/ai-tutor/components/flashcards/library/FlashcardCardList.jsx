@@ -38,24 +38,24 @@ export const CardActionsMenu = ({ card, onKnown, onFolders, onDelete }) => {
         aria-label={`Thao tác với thẻ ${card.word}`}
         data-testid={`card-menu-${card.card_id}`}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-[#272727]"
       >
         <MoreHorizontal className="h-5 w-5" />
       </button>
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-10 z-30 w-56 overflow-hidden rounded-2xl border border-slate-100 bg-white py-1 text-sm shadow-xl"
+          className="absolute right-0 top-10 z-30 w-56 overflow-hidden rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] py-1 text-sm shadow-xl"
         >
-          <button type="button" role="menuitem" onClick={run(onKnown)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left hover:bg-slate-50">
-            {card.is_known ? <Undo2 className="h-4 w-4 text-slate-500" /> : <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+          <button type="button" role="menuitem" onClick={run(onKnown)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-slate-800 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727]">
+            {card.is_known ? <Undo2 className="h-4 w-4 text-slate-500 dark:text-neutral-400" /> : <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />}
             {card.is_known ? "Bỏ đánh dấu Đã biết" : "Đã biết rồi"}
           </button>
-          <button type="button" role="menuitem" onClick={run(onFolders)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left hover:bg-slate-50">
-            <FolderPlus className="h-4 w-4 text-slate-500" />
+          <button type="button" role="menuitem" onClick={run(onFolders)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-slate-800 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727]">
+            <FolderPlus className="h-4 w-4 text-slate-500 dark:text-neutral-400" />
             Thêm vào thư mục
           </button>
-          <button type="button" role="menuitem" onClick={run(onDelete)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-rose-700 hover:bg-rose-50">
+          <button type="button" role="menuitem" onClick={run(onDelete)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-rose-700 dark:text-red-400 hover:bg-rose-50 dark:hover:bg-red-950/20">
             <Trash2 className="h-4 w-4" />
             Xoá thẻ
           </button>
@@ -67,14 +67,14 @@ export const CardActionsMenu = ({ card, onKnown, onFolders, onDelete }) => {
 
 const StatusBadge = ({ card }) => {
   if (card.is_known)
-    return <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">Đã biết</span>
+    return <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">Đã biết</span>
   if (card.is_long_term)
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-[#990011]">
+      <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 text-[11px] font-bold text-[#990011] dark:text-red-400">
         <Sparkles className="h-3 w-3" /> Nhớ lâu dài
       </span>
     )
-  if (card.is_due) return <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700">Cần ôn</span>
+  if (card.is_due) return <span className="rounded-full bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-400">Cần ôn</span>
   return null
 }
 
@@ -83,8 +83,8 @@ const StatusBadge = ({ card }) => {
  * quản lý thẻ; không chấm điểm (FR-FC-016). `selectable` để chọn thẻ ôn tự do.
  */
 const FlashcardCardList = ({ items = [], selectable = false, selectedIds, onToggleSelect, onKnown, onFolders, onDelete, readOnly = false }) => (
-  <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-    <div className="hidden grid-cols-[auto_1.2fr_1fr_1.6fr_auto_auto] items-center gap-4 border-b bg-slate-50 px-5 py-3 text-sm font-bold text-slate-600 md:grid">
+  <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-sm">
+    <div className="hidden grid-cols-[auto_1.2fr_1fr_1.6fr_auto_auto] items-center gap-4 border-b border-slate-100 dark:border-[#3F3F3F] bg-slate-50 dark:bg-[#242424] px-5 py-3 text-sm font-bold text-slate-600 dark:text-neutral-300 md:grid">
       <div className="w-5">{selectable && <span className="sr-only">Chọn</span>}</div>
       <div>Hán tự</div>
       <div>Pinyin</div>
@@ -92,7 +92,7 @@ const FlashcardCardList = ({ items = [], selectable = false, selectedIds, onTogg
       <div>Audio</div>
       <div className="w-9" />
     </div>
-    <ul className="divide-y">
+    <ul className="divide-y divide-slate-100 dark:divide-[#272727]">
       {items.map((card) => {
         const checked = selectedIds?.has(card.card_id)
         return (
@@ -113,18 +113,18 @@ const FlashcardCardList = ({ items = [], selectable = false, selectedIds, onTogg
               )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-lg font-bold text-slate-900" lang="zh">{card.word}</span>
+              <span className="text-lg font-bold text-slate-900 dark:text-white" lang="zh">{card.word}</span>
               {card.card_type === "pronunciation" && (
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">Phát âm</span>
+                <span className="rounded-full bg-slate-100 dark:bg-[#272727] px-2 py-0.5 text-[11px] font-bold text-slate-600 dark:text-neutral-300">Phát âm</span>
               )}
               <StatusBadge card={card} />
             </div>
-            <div className="order-3 col-start-2 text-sm text-slate-600 md:order-none md:col-auto">{card.pinyin || "-"}</div>
+            <div className="order-3 col-start-2 text-sm text-slate-600 dark:text-neutral-300 md:order-none md:col-auto">{card.pinyin || "-"}</div>
             <div className="order-4 col-start-2 text-sm md:order-none md:col-auto">
               {card.meaning_vi ? (
-                <span className="text-slate-700">{card.meaning_vi}</span>
+                <span className="text-slate-700 dark:text-neutral-200">{card.meaning_vi}</span>
               ) : (
-                <span className="italic text-slate-400">Đang cập nhật nghĩa</span>
+                <span className="italic text-slate-400 dark:text-neutral-500">Đang cập nhật nghĩa</span>
               )}
             </div>
             <div className="row-span-2 md:row-span-1">

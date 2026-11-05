@@ -60,7 +60,7 @@ const ChatHeader = ({
       : formatRelative(lastSeenTime)
 
   return (
-    <div className="flex items-center justify-between px-4 h-[72px] border-b border-border shrink-0">
+    <div className="flex items-center justify-between px-4 h-[72px] border-b border-border dark:border-[#3F3F3F] shrink-0">
       <div className="flex items-center gap-4 min-w-0">
         {/* Back button — visible on mobile only */}
         <IconButton
@@ -90,7 +90,7 @@ const ChatHeader = ({
               }
             />
             {isOnline && (
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white ring-1 ring-white" />
+              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-[#1A1A1A] ring-1 ring-white dark:ring-[#1A1A1A]" />
             )}
           </div>
         )}
@@ -100,14 +100,14 @@ const ChatHeader = ({
           {!isGroup && friendId ? (
             <h2
               onClick={handleProfileClick}
-              className="font-semibold truncate hover:underline hover:text-primary transition-colors cursor-pointer"
+              className="font-semibold text-gray-900 dark:text-white truncate hover:underline hover:text-primary dark:hover:text-red-400 transition-colors cursor-pointer"
             >
               {name}
             </h2>
           ) : (
-            <h2 className="font-semibold truncate">{name}</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-white truncate">{name}</h2>
           )}
-          {statusText && <p className="text-sm text-[#606060]">{statusText}</p>}
+          {statusText && <p className="text-sm text-[#606060] dark:text-[#AAAAAA]">{statusText}</p>}
         </div>
       </div>
 

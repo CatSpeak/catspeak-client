@@ -175,7 +175,7 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                   type="button"
                   key={item.messageId || idx}
                   onClick={() => setSelectedMediaIndex(idx)}
-                  className="group relative aspect-square rounded-lg overflow-hidden bg-neutral-100 border border-border/40 hover:opacity-95 transition-all text-left p-0 cursor-pointer focus:outline-hidden"
+                  className="group relative aspect-square rounded-lg overflow-hidden bg-neutral-100 dark:bg-[#272727] border border-border/40 dark:border-[#3F3F3F]/40 hover:opacity-95 transition-all text-left p-0 cursor-pointer focus:outline-hidden"
                 >
                   {isVid ? (
                     <video
@@ -211,15 +211,15 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 download={item.fileName}
-                className="h-[72px] flex items-center gap-4 px-4 hover:bg-itemHover active:bg-itemActiveHover transition-colors"
+                className="h-[72px] flex items-center gap-4 px-4 hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D] transition-colors"
               >
                 <Download className="shrink-0" />
                 <div className="min-w-0">
-                  <p className="truncate">
+                  <p className="truncate text-gray-900 dark:text-white">
                     {item.fileName || t?.chat?.defaultFile || "File"}
                   </p>
                   {item.fileSize ? (
-                    <p className="text-sm text-secondary">
+                    <p className="text-sm text-secondary dark:text-[#AAAAAA]">
                       {formatFileSize(item.fileSize)}
                     </p>
                   ) : null}
@@ -253,8 +253,8 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                   onClick={() => handleTogglePlayAudio(item)}
                   className={`h-[72px] flex items-center gap-4 px-4 transition-colors cursor-pointer select-none ${
                     isActiveThisItem
-                      ? "bg-itemHover hover:bg-itemActiveHover"
-                      : "hover:bg-itemHover active:bg-itemActiveHover"
+                      ? "bg-itemHover dark:bg-[#272727] hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D]"
+                      : "hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D]"
                   }`}
                 >
                   <button
@@ -272,12 +272,12 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                     )}
                   </button>
                   <div className="min-w-0">
-                    <p className="truncate">
+                    <p className="truncate text-gray-900 dark:text-white">
                       {item.senderName ||
                         t?.chat?.voiceAudio ||
                         "Voice Message"}
                     </p>
-                    <p className="text-sm text-secondary">
+                    <p className="text-sm text-secondary dark:text-[#AAAAAA]">
                       {formatDuration(itemDur)}
                     </p>
                   </div>
@@ -297,12 +297,12 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                   href={link?.startsWith("http") ? link : `https://${link}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-[72px] flex items-center gap-4 px-4 hover:bg-itemHover active:bg-itemActiveHover transition-colors"
+                  className="h-[72px] flex items-center gap-4 px-4 hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D] transition-colors"
                 >
                   <Link2 className="shrink-0" />
                   <div className="min-w-0">
-                    <p className="truncate">{item.title || domain || link}</p>
-                    <p className="text-sm text-secondary truncate">{link}</p>
+                    <p className="truncate text-gray-900 dark:text-white">{item.title || domain || link}</p>
+                    <p className="text-sm text-secondary dark:text-[#AAAAAA] truncate">{link}</p>
                   </div>
                 </a>
               )
@@ -317,7 +317,7 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
               type="button"
               onClick={handleLoadMore}
               disabled={isFetching || isFetchingOlder}
-              className="text-xs font-semibold text-primary hover:underline disabled:opacity-50 cursor-pointer"
+              className="text-xs font-semibold text-primary dark:text-red-400 hover:underline disabled:opacity-50 cursor-pointer"
             >
               {isFetching || isFetchingOlder
                 ? t?.chat?.loading || "Loading..."

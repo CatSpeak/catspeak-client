@@ -130,7 +130,7 @@ const UsageQuotaCard = ({ feature }) => {
   }
 
   return (
-    <div className={`bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between ${borderColor}`}>
+    <div className={`bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between ${borderColor} dark:border-[#3F3F3F]`}>
       <div>
         {/* Header: Icon & Badge Status */}
         <div className="flex items-center justify-between mb-4">
@@ -154,31 +154,31 @@ const UsageQuotaCard = ({ feature }) => {
         </div>
 
         {/* Title */}
-        <h3 className="text-base font-bold text-gray-900 mb-1">{displayTitle}</h3>
+        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">{displayTitle}</h3>
         
         {/* Usage Stat Number / Capacity Display */}
         {isCapacityOnly ? (
           <div className="flex items-baseline gap-1.5 my-3">
-            <span className="text-2xl font-extrabold text-gray-900">{limitValue || "100"}</span>
-            <span className="text-gray-500 text-sm font-medium">{unit || "participants"}</span>
+            <span className="text-2xl font-extrabold text-gray-900 dark:text-white">{limitValue || "100"}</span>
+            <span className="text-gray-500 dark:text-neutral-400 text-sm font-medium">{unit || "participants"}</span>
           </div>
         ) : (
           <div className="flex items-baseline gap-1.5 my-3">
-            <span className="text-2xl font-extrabold text-gray-900">{usedValue}</span>
-            <span className="text-gray-400 text-sm font-medium">/ {showUnlimited ? (quotasT.unlimited || "Không giới hạn") : `${displayLimit} ${unit}`}</span>
+            <span className="text-2xl font-extrabold text-gray-900 dark:text-white">{usedValue}</span>
+            <span className="text-gray-400 dark:text-neutral-400 text-sm font-medium">/ {showUnlimited ? (quotasT.unlimited || "Không giới hạn") : `${displayLimit} ${unit}`}</span>
           </div>
         )}
 
         {/* Progress Bar (Only for non-capacity quantifiable features) */}
         {!isCapacityOnly && limitNum > 0 && (
           <div className="space-y-1.5 mb-4">
-            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+            <div className="w-full bg-gray-100 dark:bg-[#272727] rounded-full h-2.5 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${statusColor}`}
                 style={{ width: `${percentage}%` }}
               />
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-500 font-medium">
+            <div className="flex justify-between items-center text-xs text-gray-500 dark:text-neutral-400 font-medium">
               <span>{quotasT.used || "Đã dùng"}: {percentage}%</span>
               {remainingValue != null && (
                 <span className={textColor}>{quotasT.remaining || "Còn lại"}: {remainingValue} {unit}</span>
@@ -192,10 +192,10 @@ const UsageQuotaCard = ({ feature }) => {
       {actionPath && (
         <button
           onClick={() => navigate(actionPath)}
-          className="w-full mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-600 hover:text-cath-red-700 transition-colors group"
+          className="w-full mt-4 pt-3 border-t border-gray-100 dark:border-[#272727] flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-neutral-300 hover:text-cath-red-700 dark:hover:text-red-400 transition-colors group"
         >
           <span>{actionText}</span>
-          <ArrowUpRight className="w-4 h-4 text-gray-400 group-hover:text-cath-red-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          <ArrowUpRight className="w-4 h-4 text-gray-400 group-hover:text-cath-red-700 dark:group-hover:text-red-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
         </button>
       )}
     </div>

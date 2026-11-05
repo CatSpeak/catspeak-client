@@ -183,8 +183,8 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
                         />
                       }
                     >
-                      <p>{friend.nickname || friend.username}</p>
-                      <p className="text-sm text-[#606060]">
+                      <p className="font-semibold text-gray-900 dark:text-white truncate">{friend.nickname || friend.username}</p>
+                      <p className="text-sm text-[#606060] dark:text-[#AAAAAA]">
                         {friend.isTeacher
                           ? (t?.chat?.userPanel?.teacher || "Giảng viên")
                           : (friend.level || t?.chat?.userPanel?.student || "Student")}

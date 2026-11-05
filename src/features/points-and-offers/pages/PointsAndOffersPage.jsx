@@ -75,10 +75,10 @@ const PointsAndOffersPage = () => {
     <div className="w-full max-w-6xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
       {/* Page Title & Subtitle */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
           {pt.pageTitle || "Quản lý Điểm thưởng và Ưu đãi"}
         </h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-neutral-400 mt-1">
           {pt.pageSubtitle || "Theo dõi số dư điểm thưởng, tích lũy điểm và đổi lấy các voucher học tập giá trị."}
         </p>
       </div>
@@ -93,7 +93,7 @@ const PointsAndOffersPage = () => {
       />
 
       {/* Main Tab Navigation Bar */}
-      <div className="border-b border-gray-200/90 mb-6 overflow-x-auto scrollbar-none">
+      <div className="border-b border-gray-200/90 dark:border-[#3F3F3F] mb-6 overflow-x-auto scrollbar-none">
         <div className="flex items-center gap-6 sm:gap-8 min-w-max">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key
@@ -104,15 +104,15 @@ const PointsAndOffersPage = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`relative pb-3 text-sm font-semibold transition cursor-pointer ${
                   isActive
-                    ? "text-[#990011]"
-                    : "text-gray-500 hover:text-gray-800"
+                    ? "text-[#990011] dark:text-red-400"
+                    : "text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-white"
                 }`}
               >
                 <span>{tab.label}</span>
                 {isActive && (
                   <Motion.div
                     layoutId="activeTabUnderline"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#990011]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#990011] dark:bg-red-400"
                     transition={{ type: "spring", stiffness: 450, damping: 35 }}
                   />
                 )}

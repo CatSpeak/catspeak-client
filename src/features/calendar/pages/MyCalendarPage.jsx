@@ -96,7 +96,7 @@ const MyCalendarPage = () => {
       />
 
       <div className='flex items-center justify-between flex-col md:flex-row'>
-        <p className='text-[40px] font-semibold text-[#1A1A1A]'>{t.nav?.myCalendar || 'Lịch của tôi'}</p>
+        <p className='text-[40px] font-semibold text-[#1A1A1A] dark:text-white'>{t.nav?.myCalendar || 'Lịch của tôi'}</p>
         <div className='flex gap-4'>
           {isTeacher && (
             <PillButton

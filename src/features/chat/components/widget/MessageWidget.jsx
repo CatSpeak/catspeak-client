@@ -332,7 +332,7 @@ const MessageWidget = () => {
                     : "/chat"
                 }
                 onClick={() => dispatch(closeWidget())}
-                className="h-12 flex items-center justify-center gap-2 border-t border-border px-4 text-sm text-[#990011] hover:bg-[#f3f3f3] transition-colors shrink-0"
+                className="h-12 flex items-center justify-center gap-2 border-t border-border dark:border-[#3F3F3F] px-4 text-sm text-cath-red-700 dark:text-red-400 hover:bg-[#f3f3f3] dark:hover:bg-[#272727] transition-colors shrink-0"
               >
                 <ExternalLink size={20} />
                 {t.messages.seeAllChat}

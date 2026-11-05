@@ -281,11 +281,11 @@ const ChatBubble = ({
             isOwn ? "" : "pl-[48px]"
           }`}
         >
-          <span className="font-semibold">
+          <span className="font-semibold text-gray-900 dark:text-white">
             {isOwn ? t?.chat?.you || "You" : sender?.name || sender?.username}
           </span>
 
-          <span className="text-xs text-[#606060]">
+          <span className="text-xs text-[#606060] dark:text-[#AAAAAA]">
             {formatTime(message.timestamp || message.createDate)}
           </span>
         </div>

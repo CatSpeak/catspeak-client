@@ -150,7 +150,7 @@ const ParticipantVideoTile = ({
     <div
       className={`${getVideoTileRootClass({
         isVideoVisible: hasVideo,
-      })} border border-border bg-white shadow-sm`}
+      })} border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-sm`}
     >
       {/* Speaking Indicator Overlay */}
       <div
@@ -180,7 +180,7 @@ const ParticipantVideoTile = ({
         >
           {resolvedAvatar && (
             <>
-              <div className="absolute inset-0 z-0 bg-primaryBg" />
+              <div className="absolute inset-0 z-0 bg-primaryBg dark:bg-[#0F0F0F]" />
               <img
                 src={resolvedAvatar}
                 alt=""

@@ -334,8 +334,8 @@ const ChatUserPanel = ({
   }
 
   const containerClasses = isDrawer
-    ? "w-full sm:w-[360px] h-full flex flex-col bg-white shrink-0 overflow-hidden"
-    : "w-[360px] h-full flex flex-col shrink-0 overflow-hidden bg-white border border-border rounded-xl"
+    ? "w-full sm:w-[360px] h-full flex flex-col bg-white dark:bg-[#1A1A1A] shrink-0 overflow-hidden"
+    : "w-[360px] h-full flex flex-col shrink-0 overflow-hidden bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl"
 
   const renderViewContent = () => {
     switch (currentView) {
@@ -405,9 +405,9 @@ const ChatUserPanel = ({
 
                 {isGroup ? (
                   <div className="h-[72px] flex flex-col items-center justify-center">
-                    <h2 className="font-semibold text-center">{name}</h2>
+                    <h2 className="font-semibold text-gray-900 dark:text-white text-center">{name}</h2>
                     {statusText && (
-                      <p className="text-sm text-[#606060]">{statusText}</p>
+                      <p className="text-sm text-[#606060] dark:text-[#AAAAAA]">{statusText}</p>
                     )}
                   </div>
                 ) : (
@@ -420,16 +420,16 @@ const ChatUserPanel = ({
                       {friendId ? (
                         <h2
                           onClick={() => navigate(getProfilePath(friendId))}
-                          className="font-semibold text-center"
+                          className="font-semibold text-gray-900 dark:text-white text-center hover:underline hover:text-primary dark:hover:text-red-400 cursor-pointer"
                         >
                           {name}
                         </h2>
                       ) : (
-                        <h2 className="font-semibold text-center">{name}</h2>
+                        <h2 className="font-semibold text-gray-900 dark:text-white text-center">{name}</h2>
                       )}
 
                       {otherUser?.level && (
-                        <p className="text-sm text-secondary text-center">
+                        <p className="text-sm text-secondary dark:text-[#AAAAAA] text-center">
                           {t?.chat?.userPanel?.level || "Level"}:{" "}
                           {otherUser.level}
                         </p>
@@ -465,7 +465,7 @@ const ChatUserPanel = ({
                       onKeyDown={(e) =>
                         (e.key === "Enter" || e.key === " ") && opt.onClick()
                       }
-                      className="w-full flex items-center justify-between px-4 h-[56px] hover:bg-itemHover active:bg-itemActiveHover transition-colors cursor-pointer select-none"
+                      className="w-full flex items-center justify-between px-4 h-[56px] text-gray-900 dark:text-neutral-200 hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D] transition-colors cursor-pointer select-none"
                     >
                       <div className="flex items-center gap-4 min-w-0 mr-2">
                         <Icon className="shrink-0" />
@@ -487,8 +487,6 @@ const ChatUserPanel = ({
                   onClick={handleLeaveGroup}
                   disabled={isLeaving}
                   variant="outline"
-                  textColor="#DC2626"
-                  borderColor="#FECACA"
                   startIcon={<LogOut size={16} />}
                   className="w-full"
                 >
@@ -517,7 +515,7 @@ const ChatUserPanel = ({
               >
                 <ArrowLeft />
               </IconButton>
-              <span className="font-semibold truncate">{headerTitle}</span>
+              <span className="font-semibold text-gray-900 dark:text-white truncate">{headerTitle}</span>
             </>
           )}
         </div>

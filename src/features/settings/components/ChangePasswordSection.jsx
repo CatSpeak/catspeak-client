@@ -41,7 +41,7 @@ const ChangePasswordSection = ({ t }) => {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {t.profile?.personalInfo?.passwordTitle || t.profile?.personalInfo?.password || "Mật khẩu"}
           </h2>
           <PillButton
@@ -52,7 +52,7 @@ const ChangePasswordSection = ({ t }) => {
             {t.profile?.personalInfo?.reset || "Reset"}
           </PillButton>
         </div>
-        <div className="w-full h-11 rounded-xl border border-border bg-gray-50/50 text-gray-500 cursor-not-allowed px-3 flex items-center text-lg tracking-widest">
+        <div className="w-full h-11 rounded-xl border border-border dark:border-[#3F3F3F] bg-gray-50/50 dark:bg-[#242424] text-gray-500 dark:text-neutral-400 cursor-not-allowed px-3 flex items-center text-lg tracking-widest">
           ***********
         </div>
       </div>
@@ -62,13 +62,13 @@ const ChangePasswordSection = ({ t }) => {
   return (
     <div ref={containerRef} className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           {t.profile?.personalInfo?.passwordTitle || t.profile?.personalInfo?.password || "Mật khẩu"}
         </h2>
         <div className="flex items-center gap-2">
           <button
             onClick={handleCancel}
-            className="px-4 py-1.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50"
+            className="px-4 py-1.5 rounded-full border border-gray-300 dark:border-[#3F3F3F] text-gray-600 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors text-sm font-medium disabled:opacity-50"
             disabled={isLoading || isSendingOtp}
           >
             {t.profile?.personalInfo?.cancel || "Hủy"}
@@ -91,7 +91,7 @@ const ChangePasswordSection = ({ t }) => {
           placeholder={
             t.profile?.personalInfo?.currentPassword || "Current password"
           }
-          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-border"
+          className="!h-11 !rounded-xl bg-gray-50/50 dark:bg-[#242424] !text-sm border-border dark:border-[#3F3F3F]"
         />
 
         <PasswordInput
@@ -109,7 +109,7 @@ const ChangePasswordSection = ({ t }) => {
             t.profile?.personalInfo?.newPasswordLengthValid ||
             "Độ dài mật khẩu hợp lệ"
           }
-          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-border"
+          className="!h-11 !rounded-xl bg-gray-50/50 dark:bg-[#242424] !text-sm border-border dark:border-[#3F3F3F]"
         />
 
         <PasswordInput
@@ -127,7 +127,7 @@ const ChangePasswordSection = ({ t }) => {
           validMessage={
             t.profile?.personalInfo?.passwordsMatch || "Mật khẩu xác nhận khớp"
           }
-          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-border"
+          className="!h-11 !rounded-xl bg-gray-50/50 dark:bg-[#242424] !text-sm border-border dark:border-[#3F3F3F]"
         />
 
         {error && <p className="text-sm text-red-600 px-1">{error}</p>}

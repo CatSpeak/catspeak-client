@@ -4,18 +4,18 @@ import FluentCard from "@/shared/components/ui/FluentCard"
 import { maskAccountNumber, pick } from "./utils"
 
 const Row = ({ icon, label, value, actionLabel, onAction }) => (
-  <div className="flex items-center gap-2.5 border-b border-[#E4E7EC] py-3 pl-1.5">
-    <span className="flex shrink-0 items-center text-[#101828]">{icon}</span>
-    <span className="w-[175px] shrink-0 text-xs font-medium text-[#101828]">
+  <div className="flex items-center gap-2.5 border-b border-[#E4E7EC] dark:border-[#3F3F3F] py-3 pl-1.5">
+    <span className="flex shrink-0 items-center text-[#101828] dark:text-neutral-300">{icon}</span>
+    <span className="w-[175px] shrink-0 text-xs font-medium text-[#101828] dark:text-neutral-300">
       {label}
     </span>
-    <span className="min-w-0 flex-1 break-words text-xs text-[#101828]">
+    <span className="min-w-0 flex-1 break-words text-xs text-[#101828] dark:text-neutral-200">
       {value || "—"}
     </span>
     <button
       type="button"
       onClick={onAction}
-      className="inline-flex h-8 shrink-0 items-center rounded-[7px] border border-[#990011] px-3 text-xs font-semibold text-[#990011] transition-colors hover:bg-[#990011]/5"
+      className="inline-flex h-8 shrink-0 items-center rounded-[7px] border border-[#990011] dark:border-red-400 px-3 text-xs font-semibold text-[#990011] dark:text-red-400 transition-colors hover:bg-[#990011]/5 dark:hover:bg-red-950/30"
     >
       {actionLabel}
     </button>
@@ -24,8 +24,8 @@ const Row = ({ icon, label, value, actionLabel, onAction }) => (
 
 const IdImage = ({ label, url }) => (
   <div className="flex min-w-0 flex-1 flex-col gap-1">
-    <span className="text-[11px] text-[#101828]">{label}</span>
-    <div className="flex h-[118px] w-full items-center justify-center overflow-hidden rounded-lg border border-[#E2E2E2] bg-[#F2F4F7]">
+    <span className="text-[11px] text-[#101828] dark:text-neutral-300">{label}</span>
+    <div className="flex h-[118px] w-full items-center justify-center overflow-hidden rounded-lg border border-[#E2E2E2] dark:border-[#3F3F3F] bg-[#F2F4F7] dark:bg-[#272727]">
       {url ? (
         <img
           src={url}
@@ -33,7 +33,7 @@ const IdImage = ({ label, url }) => (
           className="h-full w-full object-cover"
         />
       ) : (
-        <ImageOff size={28} className="text-[#98A2B3]" />
+        <ImageOff size={28} className="text-[#98A2B3] dark:text-neutral-500" />
       )}
     </div>
   </div>
@@ -63,7 +63,7 @@ const VerificationCard = ({
       padding="p-5"
       className="!justify-start gap-2"
     >
-      <h2 className="text-base font-semibold text-[#101828]">
+      <h2 className="text-base font-semibold text-[#101828] dark:text-white">
         {ins.approvedVerification || "Thông tin cần xác thực"}
       </h2>
 
@@ -96,19 +96,19 @@ const VerificationCard = ({
       </div>
 
       <div className="mt-1 flex items-center justify-between gap-3">
-        <span className="text-[13px] font-semibold text-[#101828]">
+        <span className="text-[13px] font-semibold text-[#101828] dark:text-white">
           {ins.idCard || "Căn cước công dân"}
         </span>
         <div className="flex items-center gap-3">
           {showIdCardUpdated && (
-            <span className="text-[11px] text-[#667085]">
+            <span className="text-[11px] text-[#667085] dark:text-neutral-400">
               {ins.idCardUpdatedNote || "Ảnh đã cập nhật"}
             </span>
           )}
           <button
             type="button"
             onClick={onUpdateIdCard}
-            className="inline-flex h-8 shrink-0 items-center gap-2 rounded-[7px] border border-[#990011] px-3 text-xs font-semibold text-[#990011] transition-colors hover:bg-[#990011]/5"
+            className="inline-flex h-8 shrink-0 items-center gap-2 rounded-[7px] border border-[#990011] dark:border-red-400 px-3 text-xs font-semibold text-[#990011] dark:text-red-400 transition-colors hover:bg-[#990011]/5 dark:hover:bg-red-950/30"
           >
             <CreditCard size={14} />
             <span>{ins.approvedUpdate || "Cập nhật"}</span>

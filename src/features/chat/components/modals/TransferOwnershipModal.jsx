@@ -115,7 +115,7 @@ const TransferOwnershipModal = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-3 w-full pt-4 border-t border-border">
+            <div className="flex items-center gap-3 w-full pt-4 border-t border-border dark:border-[#3F3F3F]">
               <PillButton
                 type="button"
                 variant="ghost"
@@ -141,7 +141,7 @@ const TransferOwnershipModal = ({
         ) : (
           /* Member Selection Screen */
           <>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-neutral-500 dark:text-[#AAAAAA]">
               {t?.chat?.selectNewOwnerPrompt ||
                 "Select a group member to become the new owner of this group."}
             </p>
@@ -152,14 +152,14 @@ const TransferOwnershipModal = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t?.chat?.searchMembers || "Search members..."}
-                startIcon={<Search size={16} className="text-neutral-400" />}
+                startIcon={<Search size={16} className="text-neutral-400 dark:text-neutral-500" />}
               />
             </div>
 
             {/* Members List */}
-            <div className="flex flex-col gap-1 max-h-60 overflow-y-auto divide-y divide-border/30 pr-1">
+            <div className="flex flex-col gap-1 max-h-60 overflow-y-auto divide-y divide-border/30 dark:divide-[#3F3F3F]/30 pr-1">
               {filteredMembers.length === 0 ? (
-                <div className="py-8 text-center text-xs text-neutral-400">
+                <div className="py-8 text-center text-xs text-neutral-400 dark:text-[#AAAAAA]">
                   {t?.chat?.noMembersFound || "No eligible members found"}
                 </div>
               ) : (
@@ -175,7 +175,7 @@ const TransferOwnershipModal = ({
                       className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-colors ${
                         isSelected
                           ? "bg-primary/10 border border-primary/30"
-                          : "hover:bg-neutral-50 dark:hover:bg-zinc-800"
+                          : "hover:bg-neutral-50 dark:hover:bg-[#272727]"
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -186,10 +186,10 @@ const TransferOwnershipModal = ({
                           className={theme.avatarClass}
                         />
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold truncate text-neutral-800 dark:text-neutral-200">
+                          <p className="text-sm font-semibold truncate text-neutral-800 dark:text-neutral-100">
                             {member.username || member.name}
                           </p>
-                          <p className="text-[11px] text-neutral-400 truncate">
+                          <p className="text-[11px] text-neutral-400 dark:text-[#AAAAAA] truncate">
                             {member.role || "Member"}
                           </p>
                         </div>
@@ -199,7 +199,7 @@ const TransferOwnershipModal = ({
                         className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
                           isSelected
                             ? "border-primary bg-primary text-white"
-                            : "border-neutral-300 dark:border-neutral-600"
+                            : "border-neutral-300 dark:border-[#3F3F3F]"
                         }`}
                       >
                         {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
@@ -211,7 +211,7 @@ const TransferOwnershipModal = ({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border dark:border-[#3F3F3F]">
               <PillButton
                 type="button"
                 variant="ghost"

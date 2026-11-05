@@ -20,8 +20,24 @@ This document defines core behavior, efficiency standards, and coding convention
   - Colors: CatSpeak brand colors (`cath-red-700`, `bg-primaryBg`, `bg-primary2`, etc.).
   - Header height: Standard application header is `64px` (`h-[64px]` / `h-16`). All header containers must account for border box sizing to avoid layout shifts or 1px vertical overflows.
   - Shape & Corner Radius Scale: Follow Material 3 shape scale mapped to Tailwind (`rounded-lg` for items/chips, `rounded-xl` for inputs/dropdowns, `rounded-2xl` for cards, `rounded-3xl` for modals, `rounded-full` for pills/avatars). Enforce optical roundness: $\text{inner\_radius} = \text{outer\_radius} - \text{padding}$. See [.agents/rules/shape-system.md](file:///c:/Codes/catspeak-client/.agents/rules/shape-system.md).
-  - Dark Mode & Interactive Hover States:
-    - Always provide explicit theme tokens (`light` + `dark`) using static class names (e.g., `hover:bg-neutral-100 dark:hover:bg-[#272727]`).
+  - Dark Mode & Contrast Standards:
+    - Always provide explicit theme tokens (`light` + `dark`) using static class names (e.g., `text-gray-900 dark:text-white`, `bg-white dark:bg-[#1A1A1A]`, `hover:bg-neutral-100 dark:hover:bg-[#272727]`).
+    - **WCAG AA Contrast Requirements:**
+      - Normal body text must achieve $\ge 4.5:1$ contrast against its background.
+      - Large text ($\ge 18\text{pt}$ / $24\text{px}$ bold) and UI components/borders must achieve $\ge 3:1$ contrast.
+      - **Never hardcode raw black text** (e.g., `text-black`, `text-gray-900`, `text-[#1A1A1A]`, `text-[#101828]`) without an accompanying dark variant (`dark:text-white` or `dark:text-neutral-100`).
+    - **Brand Red Contrast in Dark Mode:**
+      - Deep brand red (`#990011` / `cath-red-700`) has an inaccessible contrast ratio of only $\approx 1.5:1$ against `#0F0F0F` dark canvas.
+      - **Never use `#990011` as plain text, icon, or outline border in dark mode.**
+      - Use accessible red tokens in dark mode: `dark:text-red-400` / `dark:text-[#f87171]` / `dark:border-red-400` (WCAG contrast $> 6:1$).
+      - Solid primary button fills using `#990011` with crisp white text (`text-white`) remain accessible.
+    - **Surface & Background Hierarchy (Dark Mode):**
+      - Main canvas: `bg-primaryBg dark:bg-[#0F0F0F]` (`--cath-bg`).
+      - Cards & elevated containers: `bg-white dark:bg-[#1A1A1A]` (`--cath-surface` / `dark:bg-card`).
+      - Nested sub-cards & text inputs: `bg-gray-50/50 dark:bg-[#242424]` or `dark:bg-[#272727]`.
+      - Interactive hover background: `dark:hover:bg-[#272727]`, active `dark:active:bg-[#3D3D3D]`.
+      - Borders & dividers: `border-border dark:border-[#3F3F3F]` (subtle: `dark:border-[#2A2A2A]`).
+      - Secondary subtext / metadata: `text-secondary dark:text-[#AAAAAA]` or `dark:text-neutral-400` (contrast $> 9:1$).
     - **Never construct dynamic Tailwind prefix interpolations** (e.g. `` `hover:${color}` ``) or runtime string parsers. Tailwind's JIT compiler needs complete, static class names to generate the corresponding CSS rules. Dynamic prefixes break dark mode and cause light hover backgrounds to wash out white text.
     - Common UI primitives (such as `<ListItem />`) come pre-equipped with built-in theme-aware hover defaults (`dark:hover:bg-[#272727]` matching `darkColors.itemHover` in `colors.js`). Consuming components should simply pass `hoverEffect={true}` without overriding `hoverBgColor` unless a specific semantic tint is required.
 - **Button Sizing Standards (`PillButton`, `IconButton`):**

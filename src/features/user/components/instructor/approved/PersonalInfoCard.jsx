@@ -35,9 +35,9 @@ const toCountryValue = (raw) => {
 }
 
 const Row = ({ icon, label, children }) => (
-  <div className="flex items-center gap-3 border-b border-[#E4E7EC] py-3 pl-1.5 last:border-b-0">
-    <span className="flex shrink-0 items-center text-[#101828]">{icon}</span>
-    <span className="w-[150px] shrink-0 text-xs font-medium text-[#101828]">
+  <div className="flex items-center gap-3 border-b border-[#E4E7EC] dark:border-[#3F3F3F] py-3 pl-1.5 last:border-b-0">
+    <span className="flex shrink-0 items-center text-[#101828] dark:text-neutral-300">{icon}</span>
+    <span className="w-[150px] shrink-0 text-xs font-medium text-[#101828] dark:text-neutral-300">
       {label}
     </span>
     <div className="min-w-0 flex-1">{children}</div>
@@ -211,14 +211,14 @@ const PersonalInfoCard = ({ profile, t }) => {
       className="!justify-start gap-2.5"
     >
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-[#101828]">
+        <h2 className="text-base font-semibold text-[#101828] dark:text-white">
           {ins.approvedPersonalInfo || "Thông tin cá nhân"}
         </h2>
         {!isEditing && (
           <button
             type="button"
             onClick={startEdit}
-            className="inline-flex h-9 shrink-0 items-center gap-2 rounded-[7px] border border-[#990011] px-3 text-xs font-semibold text-[#990011] transition-colors hover:bg-[#990011]/5"
+            className="inline-flex h-9 shrink-0 items-center gap-2 rounded-[7px] border border-[#990011] dark:border-red-400 px-3 text-xs font-semibold text-[#990011] dark:text-red-400 transition-colors hover:bg-[#990011]/5 dark:hover:bg-red-950/30"
           >
             <Pencil size={15} />
             <span>{ins.edit || "Chỉnh sửa"}</span>
@@ -240,7 +240,7 @@ const PersonalInfoCard = ({ profile, t }) => {
                 containerClassName="!gap-1"
                 disabled={true}
               />
-              <p className="text-[11px] text-[#667085]">
+              <p className="text-[11px] text-[#667085] dark:text-neutral-400">
                 {ins.fullNameKycNote || "Họ và tên gắn liền với định danh CCCD và không thể thay đổi."}
               </p>
             </div>
@@ -254,7 +254,7 @@ const PersonalInfoCard = ({ profile, t }) => {
                 handleChange("dateOfBirth", formattedDate)
               }}
               disabled={isSaving}
-              className={`w-full flex ${errors.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-[#D0D5DD]"} [&>button]:!h-9 [&>button]:!rounded-[7px] [&>button]:!bg-white [&>button]:w-full [&>button]:justify-between [&>button]:!text-xs`}
+              className={`w-full flex ${errors.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-[#D0D5DD] dark:[&>button]:!border-[#3F3F3F]"} [&>button]:!h-9 [&>button]:!rounded-[7px] [&>button]:!bg-white dark:[&>button]:!bg-[#242424] dark:[&>button]:!text-white [&>button]:w-full [&>button]:justify-between [&>button]:!text-xs`}
             />
             {errors.dateOfBirth && (
               <p className="mt-1 text-xs text-red-500">{errors.dateOfBirth}</p>
@@ -275,13 +275,13 @@ const PersonalInfoCard = ({ profile, t }) => {
                   type="button"
                   onClick={toggle}
                   disabled={isSaving}
-                  className={`flex h-9 w-full items-center justify-between gap-2 rounded-[7px] border bg-white px-3 text-xs transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60 ${
-                    errors.nationality ? "border-red-500" : "border-[#D0D5DD]"
+                  className={`flex h-9 w-full items-center justify-between gap-2 rounded-[7px] border border-[#D0D5DD] dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-3 text-xs transition-colors hover:bg-[#F9FAFB] dark:hover:bg-[#2c2c2c] disabled:cursor-not-allowed disabled:opacity-60 ${
+                    errors.nationality ? "border-red-500" : "border-[#D0D5DD] dark:border-[#3F3F3F]"
                   }`}
                 >
                   <span
                     className={`flex min-w-0 flex-1 items-center gap-2 truncate ${
-                      selectedOption ? "text-[#101828]" : "text-[#98A2B3]"
+                      selectedOption ? "text-[#101828] dark:text-white" : "text-[#98A2B3] dark:text-neutral-500"
                     }`}
                   >
                     {selectedOption?.icon}
@@ -317,13 +317,13 @@ const PersonalInfoCard = ({ profile, t }) => {
                   type="button"
                   onClick={toggle}
                   disabled={isSaving}
-                  className={`flex h-9 w-full items-center justify-between gap-2 rounded-[7px] border bg-white px-3 text-xs transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60 ${
-                    errors.nativeLanguage ? "border-red-500" : "border-[#D0D5DD]"
+                  className={`flex h-9 w-full items-center justify-between gap-2 rounded-[7px] border border-[#D0D5DD] dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-3 text-xs transition-colors hover:bg-[#F9FAFB] dark:hover:bg-[#2c2c2c] disabled:cursor-not-allowed disabled:opacity-60 ${
+                    errors.nativeLanguage ? "border-red-500" : "border-[#D0D5DD] dark:border-[#3F3F3F]"
                   }`}
                 >
                   <span
                     className={`flex min-w-0 flex-1 items-center gap-2 truncate ${
-                      selectedOption ? "text-[#101828]" : "text-[#98A2B3]"
+                      selectedOption ? "text-[#101828] dark:text-white" : "text-[#98A2B3] dark:text-neutral-500"
                     }`}
                   >
                     <span className="truncate">
@@ -366,7 +366,7 @@ const PersonalInfoCard = ({ profile, t }) => {
             icon={<User size={20} />}
             label={ins.fullName || "Họ và tên"}
           >
-            <span className="break-words text-xs text-[#101828]">
+            <span className="break-words text-xs text-[#101828] dark:text-neutral-200">
               {pick(profile, "fullName", "FullName") || "—"}
             </span>
           </Row>
@@ -374,7 +374,7 @@ const PersonalInfoCard = ({ profile, t }) => {
             icon={<Calendar size={20} />}
             label={t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}
           >
-            <span className="break-words text-xs text-[#101828]">
+            <span className="break-words text-xs text-[#101828] dark:text-neutral-200">
               {formatDateDisplay(pick(profile, "dateOfBirth", "DateOfBirth"))}
             </span>
           </Row>
@@ -383,12 +383,12 @@ const PersonalInfoCard = ({ profile, t }) => {
             label={ins.nationality || "Quốc tịch"}
           >
             {nationalityOption ? (
-              <span className="inline-flex items-center gap-2 text-xs text-[#101828]">
+              <span className="inline-flex items-center gap-2 text-xs text-[#101828] dark:text-neutral-200">
                 {nationalityOption.icon}
                 <span>{nationalityOption.label}</span>
               </span>
             ) : (
-              <span className="break-words text-xs text-[#101828]">
+              <span className="break-words text-xs text-[#101828] dark:text-neutral-200">
                 {rawNationality || "—"}
               </span>
             )}
@@ -397,19 +397,19 @@ const PersonalInfoCard = ({ profile, t }) => {
             icon={<Languages size={20} />}
             label={ins.nativeLanguage || "Ngôn ngữ mẹ đẻ"}
           >
-            <span className="break-words text-xs text-[#101828]">
+            <span className="break-words text-xs text-[#101828] dark:text-neutral-200">
               {pick(profile, "nativeLanguage", "NativeLanguage") || "—"}
             </span>
           </Row>
           <Row icon={<MapPin size={20} />} label={ins.address || "Địa chỉ"}>
-            <span className="break-words text-xs text-[#101828]">
+            <span className="break-words text-xs text-[#101828] dark:text-neutral-200">
               {pick(profile, "address", "Address") || "—"}
             </span>
           </Row>
         </div>
       )}
 
-      <div className="text-[13px] font-semibold text-[#101828]">
+      <div className="text-[13px] font-semibold text-[#101828] dark:text-white">
         {ins.introduceYourself || "Giới thiệu bản thân"}
       </div>
 
@@ -432,7 +432,7 @@ const PersonalInfoCard = ({ profile, t }) => {
               type="button"
               onClick={cancelEdit}
               disabled={isSaving}
-              className="h-9 w-[90px] shrink-0 rounded-[7px] border border-[#990011] bg-white text-xs font-semibold text-[#990011] transition-colors hover:bg-[#990011]/5 disabled:opacity-50"
+              className="h-9 w-[90px] shrink-0 rounded-[7px] border border-[#990011] dark:border-red-400 bg-white dark:bg-[#242424] text-xs font-semibold text-[#990011] dark:text-red-400 transition-colors hover:bg-[#990011]/5 dark:hover:bg-red-950/30 disabled:opacity-50"
             >
               {ins.approvedCancelEdit || "Hủy"}
             </button>
@@ -450,7 +450,7 @@ const PersonalInfoCard = ({ profile, t }) => {
           </div>
         </div>
       ) : (
-        <div className="min-h-[132px] whitespace-pre-wrap rounded-[7px] border border-[#D0D5DD] p-3.5 text-xs text-[#101828]">
+        <div className="min-h-[132px] whitespace-pre-wrap rounded-[7px] border border-[#D0D5DD] dark:border-[#3F3F3F] p-3.5 text-xs text-[#101828] dark:text-neutral-200">
           {pick(profile, "introduction", "Introduction") || "—"}
         </div>
       )}

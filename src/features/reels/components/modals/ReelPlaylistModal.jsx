@@ -11,7 +11,7 @@ const PlaylistCountItem = ({ playlist, lang }) => {
   const label = count === 1
     ? (lang?.itemCountSingular || "1 video")
     : (lang?.itemCount || "{{count}} videos").replace("{{count}}", count)
-  return <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+  return <div className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">{label}</div>
 }
 
 export default function ReelPlaylistModal({ reelId, onClose }) {
@@ -50,13 +50,13 @@ export default function ReelPlaylistModal({ reelId, onClose }) {
   return (
     <Modal open={true} onClose={onClose} showCloseButton={false} className="max-w-sm w-full p-0">
       <div className="flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-          <h2 className="text-lg font-bold text-gray-900">
+        <div className="flex items-center justify-between p-4 border-b border-border dark:border-[#3F3F3F] shrink-0">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {lang.title || "Save to Playlist"}
           </h2>
           <button 
             onClick={onClose}
-            className="p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors outline-none"
+            className="p-2 -mr-2 text-gray-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-[#272727] rounded-full transition-colors outline-none cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -68,7 +68,7 @@ export default function ReelPlaylistModal({ reelId, onClose }) {
               <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
             </div>
           ) : playlists?.length === 0 ? (
-            <div className="text-center p-6 text-sm text-gray-500">
+            <div className="text-center p-6 text-sm text-gray-500 dark:text-neutral-400">
               {lang.empty || "You don't have any playlists yet."}
             </div>
           ) : (
@@ -76,13 +76,13 @@ export default function ReelPlaylistModal({ reelId, onClose }) {
               <button
                 key={playlist.playlistId}
                 onClick={() => handleSelectPlaylist(playlist.playlistId)}
-                className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors text-left mt-1"
+                className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-[#272727] rounded-xl transition-colors text-left mt-1 cursor-pointer"
               >
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                  <ListPlus size={20} className="text-gray-600" />
+                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-[#242424] flex items-center justify-center shrink-0">
+                  <ListPlus size={20} className="text-gray-600 dark:text-neutral-300" />
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  <div className="font-medium text-gray-900 text-sm truncate">{playlist.name}</div>
+                  <div className="font-medium text-gray-900 dark:text-white text-sm truncate">{playlist.name}</div>
                   <PlaylistCountItem playlist={playlist} lang={lang} />
                 </div>
               </button>
@@ -90,13 +90,13 @@ export default function ReelPlaylistModal({ reelId, onClose }) {
           )}
         </div>
 
-        <div className="p-4 border-t border-border bg-gray-50 shrink-0">
+        <div className="p-4 border-t border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#1f1f1f] shrink-0">
           <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showCreateInput ? 'max-h-24 opacity-100 mb-2' : 'max-h-0 opacity-0 mb-0'}`}>
             <div className="flex gap-2 items-center">
               <input 
                 type="text" 
                 placeholder={lang.placeholder || "Enter playlist name..."}
-                className="flex-1 px-4 py-2.5 bg-white border border-border rounded-xl text-sm outline-none focus:border-cath-red-500 focus:ring-0"
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-[#242424] border border-border dark:border-[#3F3F3F] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-neutral-500 rounded-xl text-sm outline-none focus:border-cath-red-500 dark:focus:border-red-400 focus:ring-0"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreatePlaylist()}
@@ -105,7 +105,7 @@ export default function ReelPlaylistModal({ reelId, onClose }) {
               <button 
                 onClick={handleCreatePlaylist}
                 disabled={!newPlaylistName.trim() || isCreating}
-                className="px-4 py-2.5 bg-cath-red-700 text-white rounded-xl text-sm font-semibold hover:bg-cath-red-600 transition-colors disabled:opacity-50 flex items-center gap-2 h-[42px]"
+                className="px-4 py-2.5 bg-cath-red-700 text-white rounded-xl text-sm font-semibold hover:bg-cath-red-600 transition-colors disabled:opacity-50 flex items-center gap-2 h-[42px] cursor-pointer"
               >
                 {isCreating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                 <span className="hidden sm:inline">
@@ -118,7 +118,7 @@ export default function ReelPlaylistModal({ reelId, onClose }) {
           {!showCreateInput && (
             <button
               onClick={() => setShowCreateInput(true)}
-              className="w-full flex items-center justify-center gap-2 p-3 text-sm font-semibold text-gray-700 hover:bg-gray-200 bg-gray-100 rounded-xl transition-colors"
+              className="w-full flex items-center justify-center gap-2 p-3 text-sm font-semibold text-gray-700 dark:text-neutral-200 hover:bg-gray-200 dark:hover:bg-[#2e2e2e] bg-gray-100 dark:bg-[#272727] rounded-xl transition-colors cursor-pointer"
             >
               <Plus size={18} />
               {lang.createNew || "Create new playlist"}

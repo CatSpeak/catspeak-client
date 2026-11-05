@@ -150,7 +150,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
     <div className="w-full h-full flex items-center justify-center p-0 md:py-6 md:px-20 lg:py-8 lg:px-24 relative">
       <div
         ref={containerRef}
-        className={`flex flex-col md:flex-row w-full h-full md:max-h-[85vh] max-w-5xl bg-white md:rounded-2xl overflow-hidden relative shadow-lg border border-border ${isFullscreen ? "!max-w-none !rounded-none !border-none !max-h-none !h-screen fixed inset-0 z-[9999] !p-0" : ""}`}
+        className={`flex flex-col md:flex-row w-full h-full md:max-h-[85vh] max-w-5xl bg-white dark:bg-[#1A1A1A] md:rounded-2xl overflow-hidden relative shadow-lg border border-border dark:border-[#3F3F3F] ${isFullscreen ? "!max-w-none !rounded-none !border-none !max-h-none !h-screen fixed inset-0 z-[9999] !p-0" : ""}`}
       >
         {/* Left area: dark background containing video */}
         <div className="relative shrink-0 h-[45vh] md:h-auto md:flex-1 lg:flex-[1.5] bg-[#111] flex flex-col justify-center min-w-0 group">
@@ -246,26 +246,26 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         </div>
 
         {/* Right panel: info + comments */}
-        <div className="flex flex-col w-full md:w-[340px] lg:w-[380px] shrink-0 h-auto md:h-full overflow-y-auto border-l-0 md:border-l border-border">
+        <div className="flex flex-col w-full md:w-[340px] lg:w-[380px] shrink-0 h-auto md:h-full overflow-y-auto border-l-0 md:border-l border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A]">
           {/* Top Header & Details (ReelCaption) */}
           <ReelCaption reel={reel} />
 
           {/* Comments List */}
-          <div className={`flex-1 overflow-y-auto px-4 bg-white border-b border-border ${showComments ? "block" : "hidden md:block"}`}>
-            <h3 className="text-[13px] font-semibold text-gray-500 py-3 sticky top-0 bg-white z-10 border-b border-border mb-3 flex justify-between items-center">
+          <div className={`flex-1 overflow-y-auto px-4 bg-white dark:bg-[#1A1A1A] border-b border-border dark:border-[#3F3F3F] ${showComments ? "block" : "hidden md:block"}`}>
+            <h3 className="text-[13px] font-semibold text-gray-500 dark:text-neutral-400 py-3 sticky top-0 bg-white dark:bg-[#1A1A1A] z-10 border-b border-border dark:border-[#3F3F3F] mb-3 flex justify-between items-center">
               <span>{formatCompactNumber(reel.comments, language)} {t?.catSpeak?.reels?.detail?.commentsTotal || "comments in total"}</span>
               <button
-                className="md:hidden p-1 bg-gray-100 rounded-full cursor-pointer border-none"
+                className="md:hidden p-1 bg-gray-100 dark:bg-[#272727] rounded-full cursor-pointer border-none"
                 onClick={() => setShowComments(false)}
               >
-                <X size={16} className="text-gray-600" />
+                <X size={16} className="text-gray-600 dark:text-white" />
               </button>
             </h3>
 
             {isCommentsLoading ? (
               <CommentsSkeleton />
             ) : comments.length === 0 ? (
-              <p className="text-gray-400 text-center text-[13px] my-10">{t?.catSpeak?.reels?.detail?.beFirstToComment || "Be the first to comment."}</p>
+              <p className="text-gray-400 dark:text-neutral-500 text-center text-[13px] my-10">{t?.catSpeak?.reels?.detail?.beFirstToComment || "Be the first to comment."}</p>
             ) : (
               <div className="flex flex-col gap-4 pb-4">
                 {comments.map((comment) => (
@@ -283,9 +283,9 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
           </div>
 
           {/* Action Bar (Like, Bookmark, Message, Share) */}
-          <div className="bg-white p-3 flex items-center justify-between shrink-0">
+          <div className="bg-white dark:bg-[#1A1A1A] p-3 flex items-center justify-between shrink-0">
             <div className="flex items-center w-full min-w-0 gap-2">
-              <form onSubmit={handlePostComment} className="flex flex-1 min-w-0 items-center bg-[#f3f4f6] rounded-full px-4 py-2">
+              <form onSubmit={handlePostComment} className="flex flex-1 min-w-0 items-center bg-[#f3f4f6] dark:bg-[#242424] rounded-full px-4 py-2 border border-transparent dark:border-[#3F3F3F]">
                 <input
                   ref={commentInputRef}
                   type="text"
@@ -298,7 +298,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                   }
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  className="w-full bg-transparent border-none text-[14px] outline-none text-gray-800 placeholder-gray-500 min-w-0"
+                  className="w-full bg-transparent border-none text-[14px] outline-none text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-neutral-400 min-w-0"
                   disabled={isAuthenticated && isPostingComment}
                   readOnly={!isAuthenticated}
                   onClick={() => {
@@ -311,7 +311,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                   <button
                     type="submit"
                     disabled={isPostingComment}
-                    className="bg-transparent border-none text-cath-red-700 font-semibold text-[14px] cursor-pointer ml-2"
+                    className="bg-transparent border-none text-cath-red-700 dark:text-red-400 font-semibold text-[14px] cursor-pointer ml-2"
                   >
                     {isPostingComment ? <Loader2 className="h-4 w-4 animate-spin" /> : (t?.catSpeak?.reels?.detail?.send || "Send")}
                   </button>
@@ -319,17 +319,17 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
               </form>
 
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={handleLikeToggle} className="p-2 cursor-pointer rounded-full hover:bg-gray-100 flex items-center gap-1 group border-none bg-transparent outline-none">
-                  <Heart size={22} className={reel.isLiked ? "text-[#e11d48] fill-[#e11d48]" : "text-gray-700"} />
-                  <span className="text-[12px] font-semibold text-gray-700 group-hover:text-black">{formatCompactNumber(reel.likes, language)}</span>
+                <button onClick={handleLikeToggle} className="p-2 cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] flex items-center gap-1 group border-none bg-transparent outline-none">
+                  <Heart size={22} className={reel.isLiked ? "text-[#e11d48] fill-[#e11d48]" : "text-gray-700 dark:text-neutral-300"} />
+                  <span className="text-[12px] font-semibold text-gray-700 dark:text-neutral-300 group-hover:text-black dark:group-hover:text-white">{formatCompactNumber(reel.likes, language)}</span>
                 </button>
                 <button
                   onClick={handleBookmarkToggle}
-                  className="p-2 cursor-pointer rounded-full hover:bg-gray-100 flex items-center gap-1 group border-none bg-transparent outline-none"
+                  className="p-2 cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] flex items-center gap-1 group border-none bg-transparent outline-none"
                 >
                   <Bookmark 
                     size={22} 
-                    className={isBookmarked ? "text-[#fbbf24]" : "text-gray-700"}
+                    className={isBookmarked ? "text-[#fbbf24]" : "text-gray-700 dark:text-neutral-300"}
                     fill={isBookmarked ? "currentColor" : "none"}
                   />
                 </button>
@@ -338,9 +338,9 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                     e.stopPropagation()
                     handleShare()
                   }}
-                  className="p-2 cursor-pointer rounded-full hover:bg-gray-100 flex items-center group border-none bg-transparent outline-none"
+                  className="p-2 cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] flex items-center group border-none bg-transparent outline-none"
                 >
-                  <Share size={22} className="text-gray-700" />
+                  <Share size={22} className="text-gray-700 dark:text-neutral-300" />
                 </button>
               </div>
             </div>

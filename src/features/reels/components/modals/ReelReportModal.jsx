@@ -71,21 +71,21 @@ export default function ReelReportModal({ reel, onClose }) {
         </div>
       }
     >
-      <h3 className="font-medium mb-4 text-[15px]">{lang.question || "Why are you reporting this reel?"}</h3>
+      <h3 className="font-medium mb-4 text-[15px] text-gray-900 dark:text-white">{lang.question || "Why are you reporting this reel?"}</h3>
       <div className="space-y-1">
         {reasonKeys.map((key) => {
           const reasonText = lang.reasons?.[key] || key
           return (
-                <label key={key} className="flex items-center gap-3 p-2.5 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+            <label key={key} className="flex items-center gap-3 p-2.5 hover:bg-gray-50 dark:hover:bg-[#272727] rounded-lg cursor-pointer transition-colors">
               <input
                 type="radio"
                 name="reason"
                 value={key}
                 checked={reason === key}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-4 h-4 text-cath-red-700 focus:ring-cath-red-700 accent-cath-red-700 cursor-pointer"
+                className="w-4 h-4 text-cath-red-700 dark:text-red-400 focus:ring-cath-red-700 dark:focus:ring-red-400 accent-cath-red-700 dark:accent-red-400 cursor-pointer"
               />
-              <span className="text-[14px] text-gray-800">{reasonText}</span>
+              <span className="text-[14px] text-gray-800 dark:text-neutral-200">{reasonText}</span>
             </label>
           )
         })}
@@ -93,11 +93,11 @@ export default function ReelReportModal({ reel, onClose }) {
 
       {reason && (
         <div className="mt-5 mb-2">
-          <label className="block text-[14px] font-semibold mb-2">{lang.details || "Additional Details (Optional)"}</label>
+          <label className="block text-[14px] font-semibold mb-2 text-gray-900 dark:text-white">{lang.details || "Additional Details (Optional)"}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full border border-border rounded-xl p-3 text-[14px] focus:outline-none focus:border-cath-red-500 transition-colors"
+            className="w-full border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#242424] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-neutral-500 rounded-xl p-3 text-[14px] focus:outline-none focus:border-cath-red-500 dark:focus:border-red-400 transition-colors"
             rows={3}
             placeholder={lang.placeholder || "Provide more context to help us understand..."}
           />

@@ -67,7 +67,7 @@ const BillingPage = () => {
       {/* Header */}
       <div className="mb-6 flex flex-col gap-1">
         <PageTitle>{getPageTitle()}</PageTitle>
-        <p className="text-gray-500 text-sm">{getPageSubtitle()}</p>
+        <p className="text-gray-500 dark:text-neutral-400 text-sm">{getPageSubtitle()}</p>
       </div>
 
       {/* Tabs */}

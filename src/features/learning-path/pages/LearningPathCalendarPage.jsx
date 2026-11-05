@@ -292,14 +292,14 @@ const LearningPathCalendarPage = () => {
 
       {/* Top Tab Bar: [ Chu kỳ ] vs [ Hôm nay ] - Figma screen 10 */}
       <div className="flex items-center justify-between">
-        <div className="inline-flex p-1 bg-gray-100 rounded-xl shadow-2xs">
+        <div className="inline-flex p-1 bg-gray-100 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] rounded-xl shadow-2xs">
           <button
             type="button"
             onClick={() => setActiveTab("cycle")}
             className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
               activeTab === "cycle"
-                ? "bg-white text-gray-900 shadow-xs"
-                : "text-gray-500 hover:text-gray-900"
+                ? "bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white shadow-xs"
+                : "text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             Chu kỳ
@@ -309,8 +309,8 @@ const LearningPathCalendarPage = () => {
             onClick={() => setActiveTab("today")}
             className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
               activeTab === "today"
-                ? "bg-white text-gray-900 shadow-xs"
-                : "text-gray-500 hover:text-gray-900"
+                ? "bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white shadow-xs"
+                : "text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             Hôm nay
@@ -321,10 +321,10 @@ const LearningPathCalendarPage = () => {
         <button
           type="button"
           onClick={() => setIsLevelModalOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-neutral-200 bg-white dark:bg-[#1A1A1A] hover:bg-gray-50 dark:hover:bg-[#272727] border border-gray-200 dark:border-[#3F3F3F] shadow-2xs transition-all cursor-pointer"
         >
           <span>{calendarData?.hskLevel || "HSK 2"}</span>
-          <span className="text-gray-400 font-normal">· Đổi trình độ</span>
+          <span className="text-gray-400 dark:text-neutral-400 font-normal">· Đổi trình độ</span>
         </button>
       </div>
 
@@ -355,10 +355,10 @@ const LearningPathCalendarPage = () => {
 
           {/* 2. Five-Card Calendar Header */}
           <div className="flex flex-col text-left mt-2">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tracking-tight">
               Buổi học trong chu kỳ
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-400 dark:text-neutral-400 mt-0.5">
               Bấm vào buổi để vào học · Học sớm hoặc học bù trong chu kỳ
             </p>
           </div>

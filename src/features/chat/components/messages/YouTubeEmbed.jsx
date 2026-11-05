@@ -49,7 +49,7 @@ const YouTubeEmbed = ({ videoId, originalUrl, timestamp = null, hasCaption = fal
 
   return (
     <div
-      className={`w-full max-w-[360px] ${roundedClass} overflow-hidden shadow-xs bg-primaryBg text-gray-900`}
+      className={`w-full max-w-[360px] ${roundedClass} overflow-hidden shadow-xs bg-primaryBg dark:bg-[#272727] text-gray-900 dark:text-white`}
       onClick={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
     >

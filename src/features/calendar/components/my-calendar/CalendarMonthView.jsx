@@ -55,9 +55,9 @@ const CalendarMonthView = ({
   return (
     <div className="w-full h-full flex flex-col min-h-0 overflow-y-auto scrollbar-app pr-2">
       {/* Days Header */}
-      <div className="grid grid-cols-7 gap-1 text-center border-b border-border pb-4 mb-4">
+      <div className="grid grid-cols-7 gap-1 text-center border-b border-border dark:border-[#3F3F3F] pb-4 mb-4">
         {DAY_LABELS.map((label, idx) => (
-          <div key={label} className="text-base text-[#1A1A1A] font-medium tracking-wider">
+          <div key={label} className="text-base text-[#1A1A1A] dark:text-neutral-300 font-medium tracking-wider">
             <span className="hidden sm:inline">{label}</span>
             <span className="sm:hidden">{t.calendar?.weekDaysShort?.[idx] || label}</span>
           </div>
@@ -72,7 +72,7 @@ const CalendarMonthView = ({
           if (!isCurrentMonth) {
             return (
               <div key={`empty-${idx}`} className="min-h-[64px] flex flex-col items-center justify-start pt-2">
-                <div className="w-10 h-10 flex shrink-0 items-center justify-center text-base text-gray-300 font-medium">
+                <div className="w-10 h-10 flex shrink-0 items-center justify-center text-base text-gray-300 dark:text-neutral-600 font-medium">
                   {String(day).padStart(2, '0')}
                 </div>
               </div>
@@ -95,8 +95,8 @@ const CalendarMonthView = ({
                 onClick={() => onSelectDate(day)}
                 className={`
                   w-10 h-10 flex shrink-0 items-center justify-center rounded-full text-base font-medium transition-all
-                  ${isSelected ? 'bg-[#990011] text-white border border-[#990011]' :
-                    isToday ? 'text-[#1A1A1A] border border-[#990011]' : 'text-[#1A1A1A] hover:bg-[#F5F5F5]'}
+                  ${isSelected ? 'bg-[#990011] text-white border border-[#990011] dark:bg-red-600 dark:border-red-500' :
+                    isToday ? 'text-[#1A1A1A] dark:text-white border border-[#990011] dark:border-red-400' : 'text-[#1A1A1A] dark:text-white hover:bg-[#F5F5F5] dark:hover:bg-[#272727]'}
                 `}
               >
                 {String(day).padStart(2, '0')}

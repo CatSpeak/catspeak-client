@@ -199,7 +199,7 @@ const ResourcesHubPage = () => {
             icon={Compass}
             variant="detailed"
           >
-            <p className="text-sm text-[#606060] mt-1 text-center max-w-sm">
+            <p className="text-sm text-[#606060] dark:text-[#AAAAAA] mt-1 text-center max-w-sm">
               {t.websites?.empty?.description ||
                 "We couldn't find any resources matching your search query or selected category filters."}
             </p>

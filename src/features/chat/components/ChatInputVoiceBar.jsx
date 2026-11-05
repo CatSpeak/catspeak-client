@@ -60,7 +60,7 @@ const ChatInputVoiceBar = ({
   const activeBarCount = Math.round(progressRatio * displayBars.length)
 
   return (
-    <div className="w-full flex items-center justify-between px-1 h-14 border border-cath-red-700 bg-red-50/50 rounded-[28px] transition-all duration-200">
+    <div className="w-full flex items-center justify-between px-1 h-14 border border-cath-red-700 dark:border-red-400 bg-red-50/50 dark:bg-red-950/20 rounded-[28px] transition-all duration-200">
       {/* ── Left Section: Dynamic Action Button (Stop <-> Play/Pause) & Timer ── */}
       <div className="flex items-center gap-1 shrink-0">
         {isReviewing ? (
@@ -98,7 +98,7 @@ const ChatInputVoiceBar = ({
         )}
 
         {/* Timers */}
-        <span className="text-xs select-none shrink-0 pr-1">
+        <span className="text-xs text-gray-900 dark:text-neutral-200 select-none shrink-0 pr-1">
           {isReviewing
             ? `${formatRecordTime(playbackCurrentTime)} / ${formatRecordTime(recordingSeconds)}`
             : formatRecordTime(recordingSeconds)}
@@ -120,7 +120,7 @@ const ChatInputVoiceBar = ({
                 key={idx}
                 style={{ height: `${height}%` }}
                 className={`w-1 sm:w-1.5 rounded-full transition-all duration-75 ${
-                  isPlayed ? "bg-cath-red-700" : "bg-red-200"
+                  isPlayed ? "bg-cath-red-700 dark:bg-red-400" : "bg-red-200 dark:bg-red-900/40"
                 } group-hover/wave:opacity-90`}
               />
             )
@@ -132,7 +132,7 @@ const ChatInputVoiceBar = ({
             <div
               key={idx}
               style={{ height: `${height}%` }}
-              className="w-1 sm:w-1.5 bg-red-500/80 rounded-full transition-all duration-75"
+              className="w-1 sm:w-1.5 bg-red-500/80 dark:bg-red-400/80 rounded-full transition-all duration-75"
             />
           ))}
         </div>

@@ -77,16 +77,16 @@ const PassConfirmationModal = ({ open, story, onConnect, onReport, onClose }) =>
             size={56}
           />
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="font-semibold text-lg text-[#1a1a1a] truncate">
+            <span className="font-semibold text-lg text-[#1a1a1a] dark:text-white truncate">
               {story.username || t.catSpeak?.anonymous || "Anonymous"}
             </span>
-            <div className="flex items-center gap-4 text-sm text-secondary">
+            <div className="flex items-center gap-4 text-sm text-secondary dark:text-[#AAAAAA]">
               <span>{t.story?.posted} {formatRelative(story.createDate)}</span>
             </div>
           </div>
         </div>
 
-        <div className="w-full break-words text-base whitespace-pre-wrap">
+        <div className="w-full break-words text-base whitespace-pre-wrap text-gray-800 dark:text-neutral-200">
           {story.storyContent}
         </div>
       </div>

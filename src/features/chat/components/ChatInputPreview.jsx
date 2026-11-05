@@ -37,7 +37,7 @@ const ChatInputPreview = ({ selectedFile, filePreviewUrl, onClear }) => {
           title={t?.chat?.removeAttachment || "Remove attachment"}
           className="absolute -top-5 -right-5 w-12 h-12 flex items-center justify-center focus:outline-none cursor-pointer"
         >
-          <span className="w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:bg-primaryBg">
+          <span className="w-7 h-7 rounded-full bg-white dark:bg-[#272727] border border-border dark:border-[#3F3F3F] text-gray-900 dark:text-white flex items-center justify-center hover:bg-primaryBg dark:hover:bg-[#3D3D3D]">
             <X size={14} />
           </span>
         </button>
@@ -49,7 +49,7 @@ const ChatInputPreview = ({ selectedFile, filePreviewUrl, onClear }) => {
     <div className="max-w-[320px] w-full">
       <ListItem
         lines={2}
-        className="bg-primaryBg rounded-xl border border-border overflow-hidden"
+        className="bg-primaryBg dark:bg-[#272727] rounded-xl border border-border dark:border-[#3F3F3F] overflow-hidden"
         leftContent={<FileIcon />}
         rightContent={
           <IconButton
@@ -63,8 +63,8 @@ const ChatInputPreview = ({ selectedFile, filePreviewUrl, onClear }) => {
           </IconButton>
         }
       >
-        <p className="font-semibold truncate m-0">{selectedFile.name}</p>
-        <p className="text-sm text-[#606060] m-0">
+        <p className="font-semibold text-gray-900 dark:text-white truncate m-0">{selectedFile.name}</p>
+        <p className="text-sm text-[#606060] dark:text-[#AAAAAA] m-0">
           {(selectedFile.size / 1024).toFixed(1)} KB
         </p>
       </ListItem>

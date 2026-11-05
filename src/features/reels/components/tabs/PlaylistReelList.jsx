@@ -37,14 +37,14 @@ const PlaylistReelList = ({ playlistId, formatNumber, navigate }) => {
   }
 
   return (
-    <div className="flex flex-col gap-1 pl-4 border-l-2 border-border">
+    <div className="flex flex-col gap-1 pl-4 border-l-2 border-border dark:border-[#3F3F3F]">
       {reels.map((reel) => (
         <div
           key={reel.reelId}
           onClick={() => navigate(`${reel.reelId}?playlistId=${playlistId}`)}
-          className="flex items-center gap-3 p-2.5 hover:bg-gray-50 rounded-lg transition-colors text-left w-full group cursor-pointer"
+          className="flex items-center gap-3 p-2.5 hover:bg-gray-50 dark:hover:bg-[#272727] rounded-lg transition-colors text-left w-full group cursor-pointer"
         >
-          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0 relative">
+          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-[#242424] shrink-0 relative">
             {reel.coverUrl ? (
               <>
                 <img 
@@ -55,21 +55,21 @@ const PlaylistReelList = ({ playlistId, formatNumber, navigate }) => {
                     e.target.style.display = 'none'
                   }}
                 />
-                <div className="w-full h-full flex items-center justify-center absolute inset-0 bg-gray-100">
-                  <Film size={16} className="text-gray-300" />
+                <div className="w-full h-full flex items-center justify-center absolute inset-0 bg-gray-100 dark:bg-[#242424]">
+                  <Film size={16} className="text-gray-300 dark:text-neutral-500" />
                 </div>
               </>
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                <Film size={16} className="text-gray-300" />
+              <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-[#242424]">
+                <Film size={16} className="text-gray-300 dark:text-neutral-500" />
               </div>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-gray-800 truncate">
+            <div className="text-sm font-medium text-gray-800 dark:text-white truncate">
               {reel.title || "Untitled"}
             </div>
-            <div className="flex items-center gap-3 text-xs text-gray-400 mt-0.5">
+            <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-neutral-400 mt-0.5">
               <span className="flex items-center gap-1"><Eye size={12} /> {formatNumber(reel.viewCount)}</span>
               <span className="flex items-center gap-1"><Heart size={12} /> {formatNumber(reel.likesCount)}</span>
             </div>
@@ -81,14 +81,14 @@ const PlaylistReelList = ({ playlistId, formatNumber, navigate }) => {
                 e.stopPropagation()
                 navigate(`${reel.reelId}?playlistId=${playlistId}`)
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-[#242424] hover:bg-gray-200 dark:hover:bg-[#333] transition-colors cursor-pointer"
               title="Watch Reel"
             >
-              <Play size={14} className="text-gray-700" />
+              <Play size={14} className="text-gray-700 dark:text-neutral-300" />
             </button>
             <button
               onClick={(e) => handleRemove(reel.reelId, e)}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 hover:bg-[#ffdede] hover:text-red-600 text-gray-700 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-[#242424] hover:bg-[#ffdede] dark:hover:bg-red-950/40 hover:text-red-600 dark:hover:text-red-400 text-gray-700 dark:text-neutral-300 transition-colors cursor-pointer"
               title="Remove from playlist"
             >
               <Trash2 size={14} />

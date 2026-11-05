@@ -18,22 +18,22 @@ const PlanFeaturesTable = ({ features = [] }) => {
 
   if (!features || features.length === 0) {
     return (
-      <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm text-center text-gray-500">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-8 border border-gray-100 dark:border-[#3F3F3F] shadow-sm text-center text-gray-500 dark:text-neutral-400">
         {tableT.noData || "Chưa có dữ liệu tính năng gói dịch vụ."}
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden mt-8">
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-gray-200/80 dark:border-[#3F3F3F] shadow-sm overflow-hidden mt-8">
       {/* Header */}
-      <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="p-6 border-b border-gray-100 dark:border-[#272727] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
             {tableT.title || "Chi Tiết Hạn Ngạch & Đặc Quyền Gói"}
           </h3>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-neutral-400 mt-1">
             {tableT.subtitle || "Danh sách đầy đủ các thông số giới hạn và tính năng đi kèm trong tài khoản của bạn."}
           </p>
         </div>
@@ -46,15 +46,15 @@ const PlanFeaturesTable = ({ features = [] }) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={tableT.searchPlaceholder || "Tìm kiếm tính năng..."}
-            className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cath-red-700/20 focus:border-cath-red-700 transition-all"
+            className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-gray-200 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-cath-red-700/20 focus:border-cath-red-700 transition-all"
           />
         </div>
       </div>
 
       {/* Table Content */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-gray-600">
-          <thead className="bg-gray-50/80 text-gray-700 text-xs font-semibold uppercase tracking-wider border-b border-gray-100">
+        <table className="w-full text-left text-sm text-gray-600 dark:text-neutral-300">
+          <thead className="bg-gray-50/80 dark:bg-[#202020] text-gray-700 dark:text-neutral-300 text-xs font-semibold uppercase tracking-wider border-b border-gray-100 dark:border-[#272727]">
             <tr>
               <th className="px-6 py-3.5 whitespace-nowrap">{tableT.colCodeName || "Mã & Tên Tính Năng"}</th>
               <th className="px-6 py-3.5 whitespace-nowrap">{tableT.colLimit || "Mức Giới Hạn"}</th>
@@ -63,10 +63,10 @@ const PlanFeaturesTable = ({ features = [] }) => {
               <th className="px-6 py-3.5 text-center whitespace-nowrap">{tableT.colStatus || "Trạng Thái"}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-[#272727]">
             {filteredFeatures.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-400 dark:text-neutral-500">
                   {tableT.noData || "Không tìm thấy tính năng khớp với"} "{searchTerm}"
                 </td>
               </tr>
@@ -76,15 +76,15 @@ const PlanFeaturesTable = ({ features = [] }) => {
                 const isBoolAllowed = f.limitValue?.toLowerCase() === "true"
 
                 return (
-                  <tr key={f.featureCode || idx} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={f.featureCode || idx} className="hover:bg-gray-50/50 dark:hover:bg-[#222222] transition-colors">
                     {/* Feature Name & Code */}
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-gray-900">{f.featureName || f.featureCode}</div>
+                      <div className="font-semibold text-gray-900 dark:text-white">{f.featureName || f.featureCode}</div>
                       <span className="text-[11px] font-mono text-gray-400 uppercase tracking-tight">{f.featureCode}</span>
                     </td>
 
                     {/* Limit Value */}
-                    <td className="px-6 py-4 font-medium text-gray-700 whitespace-nowrap">
+                    <td className="px-6 py-4 font-medium text-gray-700 dark:text-neutral-300 whitespace-nowrap">
                       {isBoolean ? (
                         isBoolAllowed ? (
                           <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold text-xs whitespace-nowrap">
@@ -101,16 +101,16 @@ const PlanFeaturesTable = ({ features = [] }) => {
                     </td>
 
                     {/* Used Value */}
-                    <td className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">
+                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white whitespace-nowrap">
                       {isBoolean ? "N/A" : `${f.usedValue || "0"} ${f.unit || ""}`}
                     </td>
 
                     {/* Remaining Value */}
-                    <td className="px-6 py-4 font-medium text-gray-600 whitespace-nowrap">
+                    <td className="px-6 py-4 font-medium text-gray-600 dark:text-neutral-300 whitespace-nowrap">
                       {isBoolean ? (
                         "N/A"
                       ) : f.remainingValue != null ? (
-                        <span className={f.isExceeded ? "text-rose-600 font-bold" : "text-emerald-600"}>
+                        <span className={f.isExceeded ? "text-rose-600 font-bold" : "text-emerald-600 dark:text-emerald-400"}>
                           {f.remainingValue} {f.unit || ""}
                         </span>
                       ) : (
@@ -122,20 +122,20 @@ const PlanFeaturesTable = ({ features = [] }) => {
                     <td className="px-6 py-4 text-center whitespace-nowrap min-w-[130px]">
                       {isBoolean ? (
                         isBoolAllowed ? (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap inline-block">
+                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 whitespace-nowrap inline-block">
                             {tableT.statusActive || "Kích Hoạt"}
                           </span>
                         ) : (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200 whitespace-nowrap inline-block">
+                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-[#272727] text-gray-500 dark:text-neutral-400 border border-gray-200 dark:border-[#3F3F3F] whitespace-nowrap inline-block">
                             {tableT.statusLocked || "Khóa"}
                           </span>
                         )
                       ) : f.isExceeded ? (
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap inline-block">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 whitespace-nowrap inline-block">
                           {tableT.statusExceeded || "Hết Hạn Ngạch"}
                         </span>
                       ) : (
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap inline-block">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 whitespace-nowrap inline-block">
                           {tableT.statusNormal || "Bình Thường"}
                         </span>
                       )}

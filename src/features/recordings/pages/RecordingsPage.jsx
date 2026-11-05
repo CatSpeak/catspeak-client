@@ -182,7 +182,7 @@ const RecordingsPage = () => {
             <RecordingsEmptyState t={t} />
           ) : (
             <div className="flex flex-col">
-              <p className="text-sm font-medium text-[#606060] mb-2">
+              <p className="text-sm font-medium text-[#606060] dark:text-[#AAAAAA] mb-2">
                 {recordings.length === 1
                   ? t?.recordings?.list?.count_one || "1 recording"
                   : t?.recordings?.list?.count_other?.replace(

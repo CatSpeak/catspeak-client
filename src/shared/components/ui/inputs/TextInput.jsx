@@ -81,10 +81,13 @@ const TextInput = forwardRef(({
     : hasCustomPadding
       ? ""
       : variant === "rounded-full" ? "px-5" : "px-4"
-  const hasCustomBg = className
+  const hasDarkBg = className
     .split(" ")
-    .some((c) => /(^|\s)(!?)bg-/.test(c) || /(^|\s)(!?)dark:bg-/.test(c))
-  const bgClass = hasCustomBg ? "" : "bg-white dark:bg-[#272727]"
+    .some((c) => /(^|\s)(!?)dark:bg-/.test(c))
+  const hasLightBg = className
+    .split(" ")
+    .some((c) => /(^|\s)(!?)bg-/.test(c) && !/(^|\s)(!?)dark:bg-/.test(c))
+  const bgClass = `${hasLightBg ? "" : "bg-white"} ${hasDarkBg ? "" : "dark:bg-[#272727]"}`
   const finalClassName = `w-full ${bgClass} text-gray-900 dark:text-white border border-border dark:border-[#3F3F3F] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 dark:disabled:bg-[#1A1A1A] placeholder-[var(--placeholder-color)] dark:placeholder-[#AAAAAA] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${paddingClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const internalRef = useRef(null)

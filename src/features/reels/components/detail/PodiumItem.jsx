@@ -31,13 +31,13 @@ export default function PodiumItem({ entry, rank, onClick }) {
             name={username || handle}
             src={entry.reel?.avatarUrl}
             accountId={entry.reel?.accountId}
-            className={`border-2 ${isRank1 ? "border-[#F59E0B]" : "border-border"} shadow-sm`}
+            className={`border-2 ${isRank1 ? "border-[#F59E0B]" : "border-border dark:border-[#3F3F3F]"} shadow-sm`}
           />
         </div>
-        <span className="font-bold text-gray-900 text-[12px] sm:text-[13px] text-center leading-tight mb-0.5 break-words max-w-[100px]">{username}</span>
-        <span className="text-gray-500 text-[10px] sm:text-[11px] text-center leading-tight break-words max-w-[100px]">@{handle}</span>
-        <span className="font-bold text-[11px] sm:text-[12px] mt-1 flex items-center gap-1 text-gray-900">
-          {formatScore(score)} <Heart size={12} className="text-cath-red-700 fill-cath-red-700" />
+        <span className="font-bold text-gray-900 dark:text-white text-[12px] sm:text-[13px] text-center leading-tight mb-0.5 break-words max-w-[100px]">{username}</span>
+        <span className="text-gray-500 dark:text-neutral-400 text-[10px] sm:text-[11px] text-center leading-tight break-words max-w-[100px]">@{handle}</span>
+        <span className="font-bold text-[11px] sm:text-[12px] mt-1 flex items-center gap-1 text-gray-900 dark:text-white">
+          {formatScore(score)} <Heart size={12} className="text-cath-red-700 dark:text-red-400 fill-cath-red-700 dark:fill-red-400" />
         </span>
       </div>
       <div className={`w-16 sm:w-24 bg-[#FCE38A] flex items-center justify-center font-bold text-lg sm:text-xl text-[#92400E] rounded-xl shadow-sm ${heights[rank]} relative mt-1`}>

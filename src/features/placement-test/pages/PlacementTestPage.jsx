@@ -96,8 +96,8 @@ const PlacementTestPage = () => {
 
   if (isPlanLoading || (canAccessPlacement && retakeLoading) || shouldOpenProfile) {
     return (
-      <div className="min-h-[calc(100vh-200px)] bg-primaryBg flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cath-red-600 border-t-transparent" />
+      <div className="min-h-[calc(100vh-200px)] bg-primaryBg dark:bg-[#0F0F0F] flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cath-red-600 dark:border-red-400 border-t-transparent" />
       </div>
     )
   }
@@ -118,7 +118,7 @@ const PlacementTestPage = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-200px)] bg-primaryBg px-4 py-8 md:px-8">
+    <div className="min-h-[calc(100vh-200px)] bg-primaryBg dark:bg-[#0F0F0F] px-4 py-8 md:px-8">
       {/* Hai cột chỉ đặt cạnh nhau từ xl: ở 1024px vùng nội dung chỉ ~670px (BUG-PT-17) */}
       <div className="mx-auto flex w-full max-w-[960px] flex-col items-stretch gap-6 xl:flex-row xl:items-start">
         {step === PLACEMENT_TEST_STEPS.CONSENT && (

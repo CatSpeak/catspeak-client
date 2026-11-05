@@ -71,7 +71,7 @@ const CycleSummaryModal = ({
         isOpen={isOpen}
         onClose={onClose}
         fullScreenOnMobile={false}
-        className="md:max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl"
+        className="md:max-w-md bg-white dark:bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-2xl"
       >
         <div className="p-7 sm:p-8 flex flex-col items-center text-center">
           {/* CASE A: 0/5 Buổi Completed (Figma screen 05 lp04b-cycle-restart) */}
@@ -80,16 +80,16 @@ const CycleSummaryModal = ({
               {/* Muscle Emoji Icon */}
               <div className="text-4xl mb-3">💪</div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-1">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                 Chu kỳ {summary.cycleId || 2}: 0/5 buổi
               </h3>
 
-              <p className="text-xs text-gray-500 mb-6">
+              <p className="text-xs text-gray-500 dark:text-neutral-400 mb-6">
                 Đừng nản — mỗi buổi chỉ ~10 phút. Bắt đầu lại nhé!
               </p>
 
               {/* Tip Box */}
-              <div className="w-full bg-[#F8F9FA] rounded-xl p-4 text-xs text-gray-600 mb-6 text-center">
+              <div className="w-full bg-[#F8F9FA] dark:bg-[#242424] rounded-xl p-4 text-xs text-gray-600 dark:text-neutral-300 mb-6 text-center">
                 Mẹo: bật nhắc học để không quên buổi nào.
               </div>
 
@@ -106,7 +106,7 @@ const CycleSummaryModal = ({
                 <button
                   type="button"
                   onClick={handleGoHome}
-                  className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 font-medium px-2 py-2.5 transition-colors cursor-pointer"
+                  className="text-xs sm:text-sm text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white font-medium px-2 py-2.5 transition-colors cursor-pointer"
                 >
                   Về trang chủ
                 </button>
@@ -118,11 +118,11 @@ const CycleSummaryModal = ({
               {/* Confetti Popper Emoji */}
               <div className="text-4xl mb-3">🎉</div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-1">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                 Chu kỳ {summary.cycleId || 2} hoàn thành!
               </h3>
 
-              <p className="text-xs text-gray-400 mb-6">
+              <p className="text-xs text-gray-400 dark:text-neutral-400 mb-6">
                 {summary.startDate && summary.endDate
                   ? `${summary.startDate} – ${summary.endDate}`
                   : "08/10 – 12/10"}{" "}
@@ -131,36 +131,36 @@ const CycleSummaryModal = ({
 
               {/* 3 Metric Summary Boxes */}
               <div className="grid grid-cols-3 gap-2.5 w-full mb-5">
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 flex flex-col justify-between">
-                  <span className="text-[11px] text-gray-500 font-medium mb-1">
+                <div className="bg-[#F8F9FA] dark:bg-[#242424] rounded-2xl p-3.5 flex flex-col justify-between">
+                  <span className="text-[11px] text-gray-500 dark:text-neutral-400 font-medium mb-1">
                     Buổi hoàn thành
                   </span>
-                  <span className="text-lg font-bold text-gray-900">
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
                     {completed}/{total}
                   </span>
                 </div>
 
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 flex flex-col justify-between">
-                  <span className="text-[11px] text-gray-500 font-medium mb-1">
+                <div className="bg-[#F8F9FA] dark:bg-[#242424] rounded-2xl p-3.5 flex flex-col justify-between">
+                  <span className="text-[11px] text-gray-500 dark:text-neutral-400 font-medium mb-1">
                     Điểm TB
                   </span>
-                  <span className="text-lg font-bold text-[#980019]">
+                  <span className="text-lg font-bold text-[#980019] dark:text-red-400">
                     {avgScore !== null ? avgScore : 80}
                   </span>
                 </div>
 
-                <div className="bg-[#F8F9FA] rounded-2xl p-3.5 flex flex-col justify-between">
-                  <span className="text-[11px] text-gray-500 font-medium mb-1">
+                <div className="bg-[#F8F9FA] dark:bg-[#242424] rounded-2xl p-3.5 flex flex-col justify-between">
+                  <span className="text-[11px] text-gray-500 dark:text-neutral-400 font-medium mb-1">
                     Điểm cao nhất
                   </span>
-                  <span className="text-lg font-bold text-gray-900">
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
                     {highestScore}
                   </span>
                 </div>
               </div>
 
               {/* Yellow Highlight Feedback Box */}
-              <div className="w-full bg-[#FEFDF0] border border-[#FEEA75] rounded-xl p-3.5 text-xs text-[#93370D] leading-relaxed mb-6 text-center">
+              <div className="w-full bg-[#FEFDF0] dark:bg-amber-950/30 border border-[#FEEA75] dark:border-amber-800/40 rounded-xl p-3.5 text-xs text-[#93370D] dark:text-amber-300 leading-relaxed mb-6 text-center">
                 Cần luyện thêm: {focusTopic} — sẽ ưu tiên trong chu kỳ sau
               </div>
 

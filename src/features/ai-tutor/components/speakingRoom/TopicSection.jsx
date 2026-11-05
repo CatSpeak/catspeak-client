@@ -12,11 +12,11 @@ const TopicSection = ({
     <div className="space-y-3.5">
       {/* Section Header */}
       <div className="flex items-center gap-2.5">
-        <h2 className="text-sm sm:text-base font-bold text-slate-900 uppercase tracking-tight">
+        <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white uppercase tracking-tight">
           {section.typeTitle}
         </h2>
         {section.badge && (
-          <span className="inline-block px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-200 text-slate-700">
+          <span className="inline-block px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-200 dark:bg-[#272727] text-slate-700 dark:text-neutral-200">
             {section.badge}
           </span>
         )}

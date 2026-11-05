@@ -43,28 +43,28 @@ const DayScheduleDayView = ({
   cal = {},
 }) => {
   return (
-    <div className="flex flex-col h-full bg-white p-5 md:p-6 lg:p-6 rounded-3xl shadow-sm">
+    <div className="flex flex-col h-full bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] p-5 md:p-6 lg:p-6 rounded-3xl shadow-sm">
       {/* Title */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-black min-w-[140px]">
+        <h3 className="text-lg font-semibold text-black dark:text-white min-w-[140px]">
           {dateLabel}
         </h3>
         <button
           onClick={() => onSelectDate && onSelectDate(null)}
-          className="text-[13px] font-medium text-[#990011] hover:underline"
+          className="text-[13px] font-medium text-[#990011] dark:text-red-400 hover:underline"
         >
           {cal.backToMonth || "Quay lại tháng"}
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex w-full border-b border-border mb-5">
+      <div className="flex w-full border-b border-border dark:border-[#3F3F3F] mb-5">
         <button
           onClick={() => setTab("unregistered")}
           className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[15px] font-medium border-b-2 transition-all ${
             tab === "unregistered"
-              ? "border-[#990011] text-[#990011]"
-              : "border-transparent text-gray-500 hover:text-black"
+              ? "border-[#990011] text-[#990011] dark:border-red-400 dark:text-red-400"
+              : "border-transparent text-gray-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
           }`}
         >
           {cal.unregistered || "Chưa đăng ký"}
@@ -78,8 +78,8 @@ const DayScheduleDayView = ({
           onClick={() => setTab("registered")}
           className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[15px] font-medium border-b-2 transition-all ${
             tab === "registered"
-              ? "border-[#990011] text-[#990011]"
-              : "border-transparent text-gray-500 hover:text-black"
+              ? "border-[#990011] text-[#990011] dark:border-red-400 dark:text-red-400"
+              : "border-transparent text-gray-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
           }`}
         >
           {cal.registered || "Đã đăng ký"}
@@ -92,17 +92,17 @@ const DayScheduleDayView = ({
       </div>
 
       {/* Events List */}
-      <div className="flex-1 overflow-y-auto space-y-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
+      <div className="flex-1 overflow-y-auto space-y-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
         {isLoading ? (
-          <div className="text-sm text-gray-400 py-8 text-center">
+          <div className="text-sm text-gray-400 dark:text-neutral-400 py-8 text-center">
             {cal.loadingEvents || "Đang tải sự kiện..."}
           </div>
         ) : !selectedDate ? (
-          <div className="text-sm text-gray-400 py-8 text-center">
+          <div className="text-sm text-gray-400 dark:text-neutral-400 py-8 text-center">
             {cal.selectDayToView || "Chọn một ngày trên lịch để xem sự kiện"}
           </div>
         ) : displayEvents.length === 0 ? (
-          <div className="text-sm text-gray-400 py-8 text-center">
+          <div className="text-sm text-gray-400 dark:text-neutral-400 py-8 text-center">
             {cal.noEvents || "Không có sự kiện nào trong ngày này"}
           </div>
         ) : (
@@ -113,7 +113,7 @@ const DayScheduleDayView = ({
               <div key={section} className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 px-1 mb-1">
                   <TimeSectionIcon section={section} />
-                  <span className="text-sm font-medium text-black">
+                  <span className="text-sm font-medium text-black dark:text-white">
                     {sectionLabels[section]}
                   </span>
                 </div>

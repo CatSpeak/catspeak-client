@@ -88,7 +88,7 @@ const StoryInterestMessage = memo(({ message, sender }) => {
           >
             <BookOpen
               size={14}
-              className="shrink-0 mt-0.5 text-[#990011] opacity-70"
+              className="shrink-0 mt-0.5 text-[#990011] dark:text-red-400 opacity-70"
             />
             <p className="text-xs text-[#444] dark:text-zinc-300 leading-relaxed break-words line-clamp-3 italic">
               "{storySnippet}"

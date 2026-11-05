@@ -47,20 +47,20 @@ const CalendarTab = ({
   const LEGEND = getEventTypeOptions(t, isTeacher)
 
   return (
-    <div className="bg-white p-4 md:p-6 lg:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] p-4 md:p-6 lg:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-border">
+      <div className="flex items-center justify-between pb-4 border-b border-border dark:border-[#3F3F3F]">
         <div className="flex items-center gap-2">
           <IconButton
             onClick={onPrev}
             variant="ghost"
-            innerClassName="!text-[#990011] !w-8 !h-8"
+            innerClassName="!text-[#990011] dark:!text-red-400 !w-8 !h-8"
             className='!w-10 !h-10'
           >
             <ChevronLeft />
           </IconButton>
           <div className='flex'>
-            <span className="text-lg md:text-xl font-semibold text-[#1A1A1A] min-w-[80px] md:min-w-[150px] text-center flex items-center justify-center gap-2">
+            <span className="text-lg md:text-xl font-semibold text-[#1A1A1A] dark:text-white min-w-[80px] md:min-w-[150px] text-center flex items-center justify-center gap-2">
               <span className="hidden md:inline">{localizedMonth}</span>
               <span className="md:hidden">{monthNum.padStart(2, '0')}/{yearNum}</span>
             </span>
@@ -82,19 +82,19 @@ const CalendarTab = ({
           <IconButton
             onClick={onNext}
             variant="ghost"
-            innerClassName="!text-[#990011] !w-8 !h-8"
+            innerClassName="!text-[#990011] dark:!text-red-400 !w-8 !h-8"
             className='!w-10 !h-10'
           >
             <ChevronRight />
           </IconButton>
         </div>
         <div className='flex items-center gap-2'>
-          <div className="flex items-center gap-1 bg-[#f5f5f5] rounded-full py-1 px-2">
+          <div className="flex items-center gap-1 bg-[#f5f5f5] dark:bg-[#272727] rounded-full py-1 px-2">
             <IconButton
               onClick={() => onChangeView('week')}
               variant={viewType === 'week' ? 'primary' : 'transparent'}
               className="!w-10 !h-10"
-              innerClassName={`!w-8 !h-8 ${viewType === 'week' ? '' : '!text-gray-400 hover:!bg-white'}`}
+              innerClassName={`!w-8 !h-8 ${viewType === 'week' ? '' : '!text-gray-400 hover:!bg-white dark:hover:!bg-[#333333]'}`}
             >
               <Table2 />
             </IconButton>
@@ -102,7 +102,7 @@ const CalendarTab = ({
               onClick={() => onChangeView('month')}
               variant={viewType === 'month' ? 'primary' : 'transparent'}
               className="!w-10 !h-10"
-              innerClassName={`!w-8 !h-8 ${viewType === 'month' ? '' : '!text-gray-400 hover:!bg-white'}`}
+              innerClassName={`!w-8 !h-8 ${viewType === 'month' ? '' : '!text-gray-400 hover:!bg-white dark:hover:!bg-[#333333]'}`}
             >
               <CalendarIcon />
             </IconButton>
@@ -143,11 +143,11 @@ const CalendarTab = ({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-border">
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-border dark:border-[#3F3F3F]">
         {LEGEND.map((item) => (
           <div key={item.key} className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-full" style={{ backgroundColor: item.color }} />
-            <span className="text-sm text-gray-500">{item.label}</span>
+            <span className="text-sm text-gray-500 dark:text-neutral-400">{item.label}</span>
           </div>
         ))}
       </div>

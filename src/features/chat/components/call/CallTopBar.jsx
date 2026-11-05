@@ -23,12 +23,12 @@ const CallTopBar = ({
   }
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-border shrink-0 z-20">
+    <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-[#1A1A1A] border-b border-border dark:border-[#3F3F3F] shrink-0 z-20">
       <div className="flex flex-col min-w-0">
-        <h4 className="text-black font-semibold truncate max-w-[200px] sm:max-w-xs text-sm sm:text-base">
+        <h4 className="text-black dark:text-white font-semibold truncate max-w-[200px] sm:max-w-xs text-sm sm:text-base">
           {chatTitle}
         </h4>
-        <div className="text-xs sm:text-sm text-secondary font-mono">
+        <div className="text-xs sm:text-sm text-secondary dark:text-[#AAAAAA] font-mono">
           {formatDuration(callDuration)}
         </div>
       </div>

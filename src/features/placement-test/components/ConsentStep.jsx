@@ -7,9 +7,9 @@ import StepCard from "./StepCard"
 
 const FEATURE_ICONS = [Target, Mic, BarChart3]
 const FEATURE_ICON_TONES = [
-  "bg-red-50 text-rose-500",
-  "bg-blue-50 text-blue-600",
-  "bg-emerald-50 text-emerald-600",
+  "bg-red-50 text-rose-500 dark:bg-rose-950/40 dark:text-rose-400",
+  "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400",
+  "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
 ]
 
 const ConsentStep = ({
@@ -45,13 +45,13 @@ const ConsentStep = ({
   return (
     <>
       <StepCard className="gap-4 xl:w-[440px] xl:shrink-0">
-        <span className="inline-flex h-[26px] w-fit items-center rounded-full bg-red-50 px-2.5 text-[11px] font-medium text-cath-red-700">
+        <span className="inline-flex h-[26px] w-fit items-center rounded-full bg-red-50 dark:bg-red-950/40 px-2.5 text-[11px] font-medium text-cath-red-700 dark:text-red-400">
           {consent.pill}
         </span>
-        <h1 className="text-2xl font-bold leading-8 text-[#09090B]">
+        <h1 className="text-2xl font-bold leading-8 text-[#09090B] dark:text-white">
           {consent.heading}
         </h1>
-        <p className="text-sm font-bold leading-[22px] text-[#09090B]">
+        <p className="text-sm font-bold leading-[22px] text-[#09090B] dark:text-neutral-200">
           {consent.intro}
         </p>
         <div className="flex flex-col gap-3">
@@ -60,7 +60,7 @@ const ConsentStep = ({
             return (
               <div
                 key={feature.title}
-                className="flex items-center gap-3.5 rounded-2xl bg-slate-50 px-4 py-3"
+                className="flex items-center gap-3.5 rounded-2xl bg-slate-50 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] px-4 py-3"
               >
                 <span
                   className={cn(
@@ -71,8 +71,8 @@ const ConsentStep = ({
                   <Icon size={22} strokeWidth={2} />
                 </span>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm text-[#09090B]">{feature.title}</span>
-                  <span className="text-xs font-medium leading-[17px] text-slate-600">
+                  <span className="text-sm text-[#09090B] dark:text-white">{feature.title}</span>
+                  <span className="text-xs font-medium leading-[17px] text-slate-600 dark:text-neutral-400">
                     {feature.desc}
                   </span>
                 </div>
@@ -83,17 +83,17 @@ const ConsentStep = ({
       </StepCard>
 
       <StepCard className="min-w-0 gap-5 xl:flex-1">
-        <h2 className="text-xl font-bold leading-7 text-[#09090B]">
+        <h2 className="text-xl font-bold leading-7 text-[#09090B] dark:text-white">
           {consent.agreementTitle}
         </h2>
-        <p className="text-[13px] font-medium leading-5 text-slate-600">
+        <p className="text-[13px] font-medium leading-5 text-slate-600 dark:text-neutral-300">
           {consent.agreementBody}
         </p>
-        <div className="flex flex-col gap-1.5 rounded-xl bg-slate-50 px-4 py-3.5">
-          <span className="text-xs font-medium text-slate-600">
+        <div className="flex flex-col gap-1.5 rounded-xl bg-slate-50 dark:bg-[#242424] dark:border dark:border-[#3F3F3F] px-4 py-3.5">
+          <span className="text-xs font-medium text-slate-600 dark:text-neutral-300">
             {consent.privacyTitle}
           </span>
-          <ul className="flex flex-col gap-1 text-[11px] font-medium leading-4 text-slate-600">
+          <ul className="flex flex-col gap-1 text-[11px] font-medium leading-4 text-slate-600 dark:text-neutral-400">
             <li>• {consent.bulletAudioOnly}</li>
             <li>• {consent.bulletNoShare}</li>
           </ul>
@@ -109,7 +109,7 @@ const ConsentStep = ({
             id="placement-consent-label"
             htmlFor="placement-consent-checkbox"
             onClick={handleCheckboxChange}
-            className="cursor-pointer text-xs font-semibold leading-[18px] text-[#09090B]"
+            className="cursor-pointer text-xs font-semibold leading-[18px] text-[#09090B] dark:text-white"
           >
             {consent.checkbox}
           </label>
@@ -123,11 +123,11 @@ const ConsentStep = ({
         >
           {consent.startCta}
         </PillButton>
-        <div className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2.5">
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-100 text-amber-600">
+        <div className="flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
             <Lightbulb size={14} />
           </span>
-          <span className="text-[11px] font-medium leading-4 text-slate-600">
+          <span className="text-[11px] font-medium leading-4 text-slate-600 dark:text-amber-200">
             {consent.recommend}
           </span>
         </div>

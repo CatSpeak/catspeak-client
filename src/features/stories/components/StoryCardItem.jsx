@@ -78,7 +78,7 @@ const StoryCardItem = ({ story, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`relative flex md:max-w-[240px] w-full max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all backdrop-blur-sm ${bgClass} ${borderClass}`}
+      className={`relative flex md:max-w-[240px] w-full max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all backdrop-blur-sm dark:bg-[#1E1E1E] dark:hover:bg-[#252525] dark:border-[#3F3F3F] ${bgClass} ${borderClass}`}
     >
       {story.isReported && (
         <span
@@ -99,12 +99,12 @@ const StoryCardItem = ({ story, onClick }) => {
                 navigate(`/workspace/profile/${authorAccountId}`);
               }
             }}
-            className={`truncate text-sm font-semibold text-[#1a1a1a] ${authorAccountId ? "hover:underline hover:text-cath-red-700 transition-colors cursor-pointer" : ""}`}
+            className={`truncate text-sm font-semibold text-[#1a1a1a] dark:text-white ${authorAccountId ? "hover:underline hover:text-cath-red-700 dark:hover:text-red-400 transition-colors cursor-pointer" : ""}`}
           >
             {username || "Anonymous"}
           </p>
           {username && (
-            <p className="truncate text-xs text-[#9e9e9e]">
+            <p className="truncate text-xs text-[#9e9e9e] dark:text-[#AAAAAA]">
               @{username.toLowerCase().replace(/\s+/g, "")}
             </p>
           )}
@@ -112,12 +112,12 @@ const StoryCardItem = ({ story, onClick }) => {
       </div>
 
       {/* Story content */}
-      <p className="line-clamp-3 flex-1 break-words text-sm leading-[1.4] text-[#3d3d3d]">
+      <p className="line-clamp-3 flex-1 break-words text-sm leading-[1.4] text-[#3d3d3d] dark:text-neutral-200">
         {storyContent}
       </p>
 
       {/* Footer: time */}
-      <div className="flex items-center gap-4 text-xs text-[#9e9e9e] mt-auto">
+      <div className="flex items-center gap-4 text-xs text-[#9e9e9e] dark:text-[#AAAAAA] mt-auto">
         {relativeCreatedAt && (
           <span className="ml-auto shrink-0">{relativeCreatedAt}</span>
         )}

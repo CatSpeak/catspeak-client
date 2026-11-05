@@ -10,7 +10,7 @@ const CommentsSkeleton = () => {
         <div key={n} className="flex gap-2 items-start transition-colors duration-200 rounded-lg hover:bg-black/5" style={{ gap: "12px", padding: "4px 0" }}>
           {/* Avatar Skeleton */}
           <div
-            className="rounded-2xl bg-gray-200 animate-pulse"
+            className="rounded-2xl bg-gray-200 dark:bg-[#272727] animate-pulse"
             style={{
               width: "36px",
               height: "36px",
@@ -23,7 +23,7 @@ const CommentsSkeleton = () => {
             <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
               {/* Nickname Skeleton */}
               <div
-                className="rounded-2xl bg-gray-200 animate-pulse"
+                className="rounded-2xl bg-gray-200 dark:bg-[#272727] animate-pulse"
                 style={{
                   width: "90px",
                   height: "14px",
@@ -32,7 +32,7 @@ const CommentsSkeleton = () => {
               />
               {/* Time Skeleton */}
               <div
-                className="rounded-2xl bg-gray-200 animate-pulse"
+                className="rounded-2xl bg-gray-200 dark:bg-[#272727] animate-pulse"
                 style={{
                   width: "40px",
                   height: "12px",
@@ -43,7 +43,7 @@ const CommentsSkeleton = () => {
             </div>
             {/* Content line 1 Skeleton */}
             <div
-              className="rounded-2xl bg-gray-200 animate-pulse"
+              className="rounded-2xl bg-gray-200 dark:bg-[#272727] animate-pulse"
               style={{
                 width: "90%",
                 height: "14px",
@@ -53,7 +53,7 @@ const CommentsSkeleton = () => {
             />
             {/* Content line 2 Skeleton */}
             <div
-              className="rounded-2xl bg-gray-200 animate-pulse"
+              className="rounded-2xl bg-gray-200 dark:bg-[#272727] animate-pulse"
               style={{
                 width: "70%",
                 height: "14px",

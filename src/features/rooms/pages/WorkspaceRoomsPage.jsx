@@ -298,7 +298,7 @@ const WorkspaceRoomsContent = () => {
   }, [isMyRoomsError, myRoomsError, t.rooms?.loadError]);
 
   return (
-    <div className="flex flex-col gap-5 text-gray-800">
+    <div className="flex flex-col gap-5 text-gray-800 dark:text-neutral-200">
       <CreateRoomModal
         open={isCreateModalOpen}
         onCancel={() => setIsCreateModalOpen(false)}
@@ -340,7 +340,7 @@ const WorkspaceRoomsContent = () => {
             className="w-full"
           >
             {/* Top Bar: Tabs & Create Room Button */}
-            <div className="flex justify-between items-center border-b border-border mb-4">
+            <div className="flex justify-between items-center border-b border-border dark:border-[#3F3F3F] mb-4">
               <Tabs
                 tabs={tabs}
                 activeTab={activeTab}
@@ -380,12 +380,12 @@ const WorkspaceRoomsContent = () => {
                 <button
                   type="button"
                   onClick={() => setIsFilterOpen(true)}
-                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 font-medium transition-colors shrink-0 gap-2 text-sm"
+                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg dark:bg-[#272727] hover:bg-gray-200 dark:hover:bg-[#333333] text-gray-700 dark:text-neutral-200 font-medium transition-colors shrink-0 gap-2 text-sm"
                   title={t.rooms?.filters?.filterTooltip || t.rooms?.filters?.filterModalTitle || t.rooms?.filters?.title || "Bộ lọc"}
                 >
                   <SlidersHorizontal size={18} strokeWidth={2} />
                   {activeFilterCount > 0 && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-[11px] font-bold text-white shadow-sm ring-2 ring-white">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-[11px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-[#0F0F0F]">
                       {activeFilterCount}
                     </span>
                   )}
@@ -395,7 +395,7 @@ const WorkspaceRoomsContent = () => {
                 <button
                   type="button"
                   onClick={() => setIsSortOpen(true)}
-                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 font-medium transition-colors shrink-0 gap-2 text-sm"
+                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg dark:bg-[#272727] hover:bg-gray-200 dark:hover:bg-[#333333] text-gray-700 dark:text-neutral-200 font-medium transition-colors shrink-0 gap-2 text-sm"
                   title={t.rooms?.sortTooltip || t.rooms?.sortTitle || "Sắp xếp"}
                 >
                   <ArrowUpDown size={18} strokeWidth={2} />
@@ -417,7 +417,7 @@ const WorkspaceRoomsContent = () => {
 
             {/* Room Quota Counter (for Created Tab) */}
             {activeTab === "created" && (
-              <p className="text-sm font-medium text-[#606060] mb-4 text-left">
+              <p className="text-sm font-medium text-[#606060] dark:text-[#AAAAAA] mb-4 text-left">
                 {(ct.quota || "{{used}}/{{max}} phòng đã dùng")
                   .replace("{{used}}", quota.used)
                   .replace("{{max}}", quota.max)}
@@ -428,8 +428,8 @@ const WorkspaceRoomsContent = () => {
             {isLoading ? (
               <RoomsListSkeleton />
             ) : isMyRoomsError ? (
-              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50 my-4">
-                <p className="text-sm text-gray-600 mb-4">{t.rooms?.loadError || "Không thể tải danh sách phòng. Vui lòng thử lại."}</p>
+              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border dark:border-[#3F3F3F] rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A] my-4">
+                <p className="text-sm text-gray-600 dark:text-neutral-300 mb-4">{t.rooms?.loadError || "Không thể tải danh sách phòng. Vui lòng thử lại."}</p>
                 <button
                   onClick={() => refetchMyRooms()}
                   className="bg-cath-red-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cath-red-600 transition-colors text-sm shadow"
@@ -438,14 +438,14 @@ const WorkspaceRoomsContent = () => {
                 </button>
               </div>
             ) : displayedRooms.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50 my-4">
+              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border dark:border-[#3F3F3F] rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A] my-4">
                 {activeTab === "created" ? (
-                  <Crown size={48} className="text-gray-300 mb-3" />
+                  <Crown size={48} className="text-gray-300 dark:text-neutral-600 mb-3" />
                 ) : (
-                  <Bookmark size={48} className="text-gray-300 mb-3" />
+                  <Bookmark size={48} className="text-gray-300 dark:text-neutral-600 mb-3" />
                 )}
 
-                <h3 className="font-bold text-gray-700 mb-1 text-center">
+                <h3 className="font-bold text-gray-700 dark:text-neutral-200 mb-1 text-center">
                   {appliedSearch || activeFilterCount > 0
                     ? t.rooms?.noSearchResults || "Không tìm thấy kết quả phù hợp"
                     : activeTab === "created"
@@ -454,7 +454,7 @@ const WorkspaceRoomsContent = () => {
                         "Chưa có phòng nào được lưu"}
                 </h3>
 
-                <p className="text-sm text-gray-400 mb-4 text-center max-w-sm">
+                <p className="text-sm text-gray-400 dark:text-neutral-400 mb-4 text-center max-w-sm">
                   {appliedSearch || activeFilterCount > 0
                     ? t.rooms?.noSearchResultsDesc ||
                       "Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc của bạn."

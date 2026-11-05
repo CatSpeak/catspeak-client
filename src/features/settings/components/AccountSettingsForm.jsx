@@ -42,7 +42,7 @@ const AccountSettingsForm = ({
       {/* 1. THÔNG TIN CÁ NHÂN */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {t.profile?.personalInfo?.title || "Thông tin cá nhân"}
           </h2>
           {!isEditingPersonal ? (
@@ -57,7 +57,7 @@ const AccountSettingsForm = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={onCancel}
-                className="px-4 py-1.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50"
+                className="px-4 py-1.5 rounded-full border border-gray-300 dark:border-[#3F3F3F] text-gray-600 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors text-sm font-medium disabled:opacity-50"
                 disabled={isUpdating}
               >
                 {t.profile?.personalInfo?.cancel || "Hủy"}
@@ -74,8 +74,8 @@ const AccountSettingsForm = ({
         </div>
 
         {isTeacherAccount && (
-          <div className="rounded-xl bg-blue-50/70 border border-blue-200/80 p-3.5 text-xs text-blue-800 flex items-start gap-2.5">
-            <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-600" />
+          <div className="rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800 p-3.5 text-xs text-blue-800 dark:text-blue-300 flex items-start gap-2.5">
+            <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
             <div>
               <span>
                 {t.profile?.personalInfo?.teacherManagedNotice ||
@@ -83,7 +83,7 @@ const AccountSettingsForm = ({
               </span>
               <Link
                 to="/setting/instructor"
-                className="font-semibold text-cath-red-700 hover:underline"
+                className="font-semibold text-cath-red-700 dark:text-red-400 hover:underline"
               >
                 {t.nav?.instructor || "Hồ sơ giáo viên"}
               </Link>
@@ -96,7 +96,7 @@ const AccountSettingsForm = ({
           <>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-800">
+                <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
                   {t.profile?.personalInfo?.country || "Quốc tịch"}
                 </label>
                 <Dropdown
@@ -112,11 +112,11 @@ const AccountSettingsForm = ({
                       type="button"
                       onClick={toggle}
                       disabled={!isEditingPersonal || isUpdating}
-                      className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${
-                        errors?.country ? "border-red-500" : "border-border"
+                      className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 dark:bg-[#242424] border text-gray-700 dark:text-neutral-200 hover:bg-gray-100/50 dark:hover:bg-[#2c2c2c] disabled:opacity-50 ${
+                        errors?.country ? "border-red-500" : "border-border dark:border-[#3F3F3F]"
                       }`}
                     >
-                      <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400" : ""}`}>
+                      <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400 dark:text-neutral-500" : ""}`}>
                         {selectedOption?.icon}
                         <span className="truncate">
                           {selectedOption ? selectedOption.label : (t.profile?.personalInfo?.selectCountry || "Chọn quốc gia")}
@@ -129,7 +129,7 @@ const AccountSettingsForm = ({
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-800">
+                <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
                   {t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}
                 </label>
                 <DatePicker
@@ -140,13 +140,13 @@ const AccountSettingsForm = ({
                     onChange({ target: { name: "dateOfBirth", value: formattedDate } })
                   }}
                   disabled={!isEditingPersonal || isUpdating}
-                  className={`w-full flex ${errors?.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-border"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 [&>button]:w-full [&>button]:justify-between`}
+                  className={`w-full flex ${errors?.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-border dark:[&>button]:!border-[#3F3F3F]"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 dark:[&>button]:!bg-[#242424] dark:[&>button]:!text-white [&>button]:w-full [&>button]:justify-between`}
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-800">
+              <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
                 {t.profile?.personalInfo?.address || "Địa chỉ"}
               </label>
               <TextInput
@@ -156,7 +156,7 @@ const AccountSettingsForm = ({
                 disabled={!isEditingPersonal || isUpdating}
                 placeholder={t.profile?.personalInfo?.enterAddress || "Nhập địa chỉ của bạn..."}
                 error={errors?.address}
-                className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.address ? "border-red-500" : "border-border"}`}
+                className={`!h-11 !rounded-xl bg-gray-50/50 dark:bg-[#242424] border px-3 ${errors?.address ? "border-red-500" : "border-border dark:border-[#3F3F3F]"}`}
                 containerClassName="!gap-0"
               />
             </div>
@@ -172,7 +172,7 @@ const AccountSettingsForm = ({
       <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-border rounded-xl shadow-sm !justify-start">
         <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {t.profile?.personalInfo?.accountAndPrivacy || "Tài khoản và bảo mật"}
           </h2>
           {!isEditingSecurity ? (
@@ -187,7 +187,7 @@ const AccountSettingsForm = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={onCancel}
-                className="px-4 py-1.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50"
+                className="px-4 py-1.5 rounded-full border border-gray-300 dark:border-[#3F3F3F] text-gray-600 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors text-sm font-medium disabled:opacity-50"
                 disabled={isUpdating}
               >
                 {t.profile?.personalInfo?.cancel || "Hủy"}
@@ -205,7 +205,7 @@ const AccountSettingsForm = ({
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {t.profile?.personalInfo?.email || "Email"}
             </label>
             <TextInput
@@ -216,13 +216,13 @@ const AccountSettingsForm = ({
               disabled={!isEditingSecurity || isUpdating}
               placeholder={t.profile?.personalInfo?.enterEmail || "Nhập địa chỉ email..."}
               error={errors?.email}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.email ? "border-red-500" : "border-border"}`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 dark:bg-[#242424] border px-3 ${errors?.email ? "border-red-500" : "border-border dark:border-[#3F3F3F]"}`}
               containerClassName="!gap-0"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {t.profile?.personalInfo?.phoneNumber || "Số điện thoại"}
             </label>
             <Dropdown
@@ -242,7 +242,7 @@ const AccountSettingsForm = ({
                   disabled={!isEditingSecurity || isUpdating}
                   placeholder={t.profile?.personalInfo?.enterPhoneNumber || "Nhập số điện thoại..."}
                   error={errors?.phoneNumber}
-                  className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.phoneNumber ? "border-red-500" : "border-border"}`}
+                  className={`!h-11 !rounded-xl bg-gray-50/50 dark:bg-[#242424] border px-3 ${errors?.phoneNumber ? "border-red-500" : "border-border dark:border-[#3F3F3F]"}`}
                   containerClassName="!gap-0"
                   leftContentWidthClass={plClass}
                   leftContent={
@@ -261,7 +261,7 @@ const AccountSettingsForm = ({
                         </span>
                         <ChevronDown size={14} className="text-gray-500" />
                       </button>
-                      <span className="text-[#606060] text-sm ml-1">
+                      <span className="text-[#606060] dark:text-[#AAAAAA] text-sm ml-1">
                         {formData.phonePrefix}
                       </span>
                     </div>
@@ -269,10 +269,10 @@ const AccountSettingsForm = ({
                 />
               )}
               renderOption={(option, isSelected) => (
-                <div className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"}`}>
+                <div className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${isSelected ? "bg-[#F6F6F6] dark:bg-[#272727] dark:text-white font-semibold" : "hover:bg-[#F6F6F6] dark:hover:bg-[#272727] dark:text-neutral-200"}`}>
                   <span className="text-base shrink-0">{option.icon}</span>
                   <span className="truncate flex-1">{option.label}</span>
-                  <span className="text-[#606060] shrink-0">{option.value}</span>
+                  <span className="text-[#606060] dark:text-[#AAAAAA] shrink-0">{option.value}</span>
                 </div>
               )}
             />

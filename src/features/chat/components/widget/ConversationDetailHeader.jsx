@@ -103,7 +103,7 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
           <div className="flex flex-col min-w-0">
             <span
               className={`truncate font-semibold text-gray-900 dark:text-white transition-colors ${
-                friendId ? "group-hover:underline group-hover:text-primary dark:group-hover:text-[#FF0033]" : ""
+                friendId ? "group-hover:underline group-hover:text-primary dark:group-hover:text-red-400" : ""
               }`}
             >
               {name}

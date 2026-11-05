@@ -24,13 +24,13 @@ const FileSizeLimitModal = ({ open, onClose }) => {
       bodyClassName="p-4 sm:p-6 flex-1 overflow-y-auto"
     >
       <div className="flex flex-col items-center justify-center text-center">
-        <AlertCircle className="w-14 h-14 text-[#990011] mb-6 shrink-0" />
+        <AlertCircle className="w-14 h-14 text-[#990011] dark:text-red-400 mb-6 shrink-0" />
 
-        <h3 className="font-bold text-xl text-center mb-1">
+        <h3 className="font-bold text-xl text-gray-900 dark:text-white text-center mb-1">
           {modalsT.fileSizeLimitTitle || "File size exceeds limit"}
         </h3>
 
-        <p className="text-sm text-[#606060] text-center max-w-sm leading-relaxed mb-6">
+        <p className="text-sm text-[#606060] dark:text-[#AAAAAA] text-center max-w-sm leading-relaxed mb-6">
           {modalsT.fileSizeLimitDesc ||
             "Your file exceeds the maximum allowed limit of 25MB for your current account. Upgrade your plan to enjoy larger upload limits and more premium features."}
         </p>

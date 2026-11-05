@@ -138,30 +138,30 @@ const PointsOverviewTab = ({
       {/* 3 Summary Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Card 1: Tổng điểm đã tích lũy */}
-        <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl p-5 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center text-amber-500 shrink-0">
             <Star size={24} className="fill-amber-400 text-amber-500" />
           </div>
           <div>
             <span className="text-xs text-gray-400 font-medium block">
               {ov.stats?.totalAccumulated || "Tổng điểm đã tích lũy"}
             </span>
-            <div className="text-xl font-bold text-gray-900 mt-0.5">
+            <div className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">
               {(userPoints.totalAccumulated ?? 0).toLocaleString("vi-VN")} {ov.stats?.pointsUnit || "điểm"}
             </div>
           </div>
         </div>
 
         {/* Card 2: Đã đổi */}
-        <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 shrink-0">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl p-5 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center text-rose-500 shrink-0">
             <ArrowLeftRight size={22} />
           </div>
           <div>
             <span className="text-xs text-gray-400 font-medium block">
               {ov.stats?.redeemed || "Đã đổi"}
             </span>
-            <div className="text-xl font-bold text-gray-900 mt-0.5">
+            <div className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">
               {(userPoints.totalRedeemed ?? 0).toLocaleString("vi-VN")} {ov.stats?.pointsUnit || "điểm"}
             </div>
           </div>
@@ -169,8 +169,8 @@ const PointsOverviewTab = ({
 
         {/* Card 3: Sắp hết hạn */}
         {userPoints.expiringSoon > 0 && (
-          <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl p-5 shadow-xs flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center text-amber-600 shrink-0">
               <Clock size={22} />
             </div>
             <div>
@@ -196,7 +196,7 @@ const PointsOverviewTab = ({
 
       {/* "Cách nhận điểm" Section */}
       <div>
-        <h3 className="text-base font-bold text-gray-900 mb-4">
+        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">
           {ov.earningMethods?.title || "Cách nhận điểm"}
         </h3>
 
@@ -217,7 +217,7 @@ const PointsOverviewTab = ({
             return (
               <div
                 key={method.id}
-                className="bg-white border border-gray-200/90 rounded-2xl p-5 sm:p-6 text-center shadow-xs flex flex-col items-center justify-between"
+                className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl p-5 sm:p-6 text-center shadow-xs flex flex-col items-center justify-between"
               >
                 <div className="flex flex-col items-center">
                   <div
@@ -225,15 +225,15 @@ const PointsOverviewTab = ({
                   >
                     <IconComponent size={22} />
                   </div>
-                  <h4 className="font-bold text-gray-900 text-sm mb-1">
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
                     {localized.title}
                   </h4>
-                  <p className="text-xs text-gray-500 mb-3">
+                  <p className="text-xs text-gray-500 dark:text-neutral-400 mb-3">
                     {localized.subtitle}
                   </p>
                 </div>
 
-                <span className="inline-block text-xs font-semibold text-[#990011] bg-rose-50 border border-rose-200/90 px-3 py-1 rounded-full">
+                <span className="inline-block text-xs font-semibold text-[#990011] dark:text-red-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200/90 dark:border-rose-900/40 px-3 py-1 rounded-full">
                   +{method.points} {ov.stats?.pts || "pts"}
                 </span>
               </div>
@@ -245,13 +245,13 @@ const PointsOverviewTab = ({
       {/* "Hoạt động gần đây" Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-bold text-gray-900">
+          <h3 className="text-base font-bold text-gray-900 dark:text-white">
             {ov.recentActivities?.title || "Hoạt động gần đây"}
           </h3>
           <button
             type="button"
             onClick={() => onNavigateTab("history")}
-            className="text-xs font-semibold text-[#990011] hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs font-semibold text-[#990011] dark:text-red-400 hover:underline flex items-center gap-1 cursor-pointer"
           >
             <span>{ov.recentActivities?.viewAll || "Xem tất cả"}</span>
             <ArrowRight size={14} />
@@ -259,7 +259,7 @@ const PointsOverviewTab = ({
         </div>
 
         {recentActivities.length > 0 ? (
-          <div className="bg-white border border-gray-200/90 rounded-2xl divide-y divide-gray-100 shadow-xs overflow-hidden">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl divide-y divide-gray-100 dark:divide-[#272727] shadow-xs overflow-hidden">
             {recentActivities.map((act) => {
               const isSpend =
                 act.type === "spend" ||
@@ -270,14 +270,14 @@ const PointsOverviewTab = ({
               return (
                 <div
                   key={act.id}
-                  className="p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-gray-50/60 transition"
+                  className="p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-gray-50/60 dark:hover:bg-[#272727] transition"
                 >
                   <div className="flex items-center gap-3 sm:gap-4">
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                         isSpend
-                          ? "bg-rose-50 text-rose-600"
-                          : "bg-emerald-50 text-emerald-600"
+                          ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                          : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
                       }`}
                     >
                       {isSpend ? (
@@ -289,7 +289,7 @@ const PointsOverviewTab = ({
                       )}
                     </div>
                     <div>
-                      <h5 className="font-bold text-gray-900 text-sm">
+                      <h5 className="font-bold text-gray-900 dark:text-white text-sm">
                         {getLocalizedActivityTitle(act)}
                       </h5>
                       <p className="text-xs text-gray-400 mt-0.5">
@@ -300,7 +300,7 @@ const PointsOverviewTab = ({
 
                   <div
                     className={`text-sm font-bold flex items-center gap-1 shrink-0 ${
-                      isSpend ? "text-[#990011]" : "text-emerald-600"
+                      isSpend ? "text-[#990011] dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
                     }`}
                   >
                     <span>{act.points > 0 ? `+${act.points}` : act.points}</span>
@@ -308,7 +308,7 @@ const PointsOverviewTab = ({
                       size={14}
                       className={
                         isSpend
-                          ? "fill-[#990011] text-[#990011]"
+                          ? "fill-[#990011] dark:fill-red-400 text-[#990011] dark:text-red-400"
                           : "fill-emerald-500 text-emerald-500"
                       }
                     />
@@ -318,7 +318,7 @@ const PointsOverviewTab = ({
             })}
           </div>
         ) : (
-          <div className="bg-white border border-gray-200/90 rounded-2xl p-6 text-center shadow-xs">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl p-6 text-center shadow-xs">
             <p className="text-xs text-gray-400">
               {ov.recentActivities?.empty || "Chưa có hoạt động điểm nào gần đây."}
             </p>
@@ -330,10 +330,10 @@ const PointsOverviewTab = ({
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">
               {ov.readyToRedeem?.title || "Có thể đổi ngay"}
             </h3>
-            <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+            <span className="text-xs font-semibold text-gray-600 dark:text-neutral-300 bg-gray-100 dark:bg-[#272727] px-2 py-0.5 rounded-md flex items-center gap-1">
               <span>{userPoints.availablePoints ?? 0}</span>
               <Star size={12} className="fill-amber-500 text-amber-500" />
             </span>
@@ -342,7 +342,7 @@ const PointsOverviewTab = ({
           <button
             type="button"
             onClick={() => onNavigateTab("exchange")}
-            className="text-xs font-semibold text-[#990011] hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs font-semibold text-[#990011] dark:text-red-400 hover:underline flex items-center gap-1 cursor-pointer"
           >
             <span>{ov.readyToRedeem?.viewAll || "Xem tất cả"}</span>
             <ArrowRight size={14} />
@@ -362,7 +362,7 @@ const PointsOverviewTab = ({
             ))}
           </div>
         ) : (
-          <div className="bg-white border border-gray-200/90 rounded-2xl p-6 text-center shadow-xs">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl p-6 text-center shadow-xs">
             <p className="text-xs text-gray-400">
               {ov.readyToRedeem?.empty || "Chưa có voucher phù hợp với số điểm hiện có. Hãy tích thêm điểm nhé!"}
             </p>

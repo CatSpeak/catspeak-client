@@ -49,7 +49,7 @@ const WorkspaceReelsContent = ({ userId }) => {
   }, [])
 
   return (
-    <div className="flex flex-col gap-5 text-gray-800">
+    <div className="flex flex-col gap-5 text-gray-800 dark:text-neutral-200">
       {!id && (
         <div className="hidden">
         </div>

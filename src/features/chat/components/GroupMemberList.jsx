@@ -260,7 +260,7 @@ const GroupMemberList = ({
                             "Remove from group"}
                         </span>
                       }
-                      hoverBg="hover:bg-red-50 group-hover:bg-red-50"
+                      hoverBg="hover:bg-red-50 dark:hover:bg-red-950/20 group-hover:bg-red-50 dark:group-hover:bg-red-950/20"
                       onClick={() => {
                         close?.()
                         onRemoveMember?.(pId)
@@ -274,10 +274,10 @@ const GroupMemberList = ({
         }
       >
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="truncate font-medium text-neutral-900 group-hover:text-cath-red-700 transition-colors">
+          <span className="truncate font-medium text-neutral-900 dark:text-white group-hover:text-cath-red-700 dark:group-hover:text-red-400 transition-colors">
             {participant.username}
             {isMe && (
-              <span className="text-[#606060] font-normal">
+              <span className="text-[#606060] dark:text-[#AAAAAA] font-normal">
                 {" "}
                 ({t?.chat?.you || "You"})
               </span>
@@ -285,7 +285,7 @@ const GroupMemberList = ({
           </span>
         </div>
 
-        <span className="text-xs text-[#606060] truncate">
+        <span className="text-xs text-[#606060] dark:text-[#AAAAAA] truncate">
           {participant.level || t?.chat?.userPanel?.student || "Student"}
         </span>
       </ListItem>
@@ -300,13 +300,13 @@ const GroupMemberList = ({
         hoverEffect={true}
         lines={2}
         leftContent={
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#990011] text-white shrink-0">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#990011] dark:bg-cath-red-700 text-white shrink-0">
             <UserPlus />
           </div>
         }
       >
-        <span>{t?.chat?.userPanel?.addMembers || "Add members"}</span>
-        <span className="text-sm text-[#606060]">
+        <span className="font-medium text-gray-900 dark:text-white">{t?.chat?.userPanel?.addMembers || "Add members"}</span>
+        <span className="text-sm text-[#606060] dark:text-[#AAAAAA]">
           {t?.chat?.userPanel?.inviteFriends || "Invite friends to this group"}
         </span>
       </ListItem>
@@ -315,7 +315,7 @@ const GroupMemberList = ({
       {sections.map((section) => (
         <div key={section.id} className="mt-4">
           <div className="px-4 mb-1 select-none">
-            <h5 className="text-xs text-[#606060]">
+            <h5 className="text-xs text-[#606060] dark:text-[#AAAAAA]">
               {section.title} - {section.items.length}
             </h5>
           </div>

@@ -21,7 +21,7 @@ const AccountCredentialsForm = ({
     <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-border rounded-xl shadow-sm !justify-start">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {t.profile?.personalInfo?.title || "Thông tin cá nhân"}
           </h2>
           {!isEditing ? (
@@ -36,7 +36,7 @@ const AccountCredentialsForm = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={onCancel}
-                className="px-4 py-1.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50"
+                className="px-4 py-1.5 rounded-full border border-gray-300 dark:border-[#3F3F3F] text-gray-600 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors text-sm font-medium disabled:opacity-50"
                 disabled={isUpdating}
               >
                 {t.profile?.personalInfo?.cancel || "Hủy"}
@@ -54,7 +54,7 @@ const AccountCredentialsForm = ({
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {t.profile?.personalInfo?.username || "Tên đăng nhập"}
             </label>
             <TextInput
@@ -64,13 +64,13 @@ const AccountCredentialsForm = ({
               disabled={!isEditing || isUpdating}
               placeholder={t.profile?.personalInfo?.enterUsername || "Nhập tên đăng nhập..."}
               error={errors?.username}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.username ? "border-red-500" : "border-border"}`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 dark:bg-[#242424] border px-3 ${errors?.username ? "border-red-500" : "border-border dark:border-[#3F3F3F]"}`}
               containerClassName="!gap-0"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {t.profile?.personalInfo?.nickname || "Biệt danh"}
             </label>
             <TextInput
@@ -80,7 +80,7 @@ const AccountCredentialsForm = ({
               disabled={!isEditing || isUpdating}
               placeholder={t.profile?.personalInfo?.enterNickname || "Nhập biệt danh..."}
               error={errors?.nickname}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.nickname ? "border-red-500" : "border-border"}`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 dark:bg-[#242424] border px-3 ${errors?.nickname ? "border-red-500" : "border-border dark:border-[#3F3F3F]"}`}
               containerClassName="!gap-0"
             />
           </div>

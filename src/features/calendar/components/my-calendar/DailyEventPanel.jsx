@@ -21,17 +21,17 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
 
   if (selectedEvent) {
     return (
-      <div className="flex flex-col min-h-0 w-full border bg-white rounded-xl h-full flex-1">
+      <div className="flex flex-col min-h-0 w-full border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] rounded-xl h-full flex-1">
         <EventCardDetail event={selectedEvent} onBack={() => setSelectedEvent(null)} onShareEvent={onShareEvent} />
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col min-h-0 space-y-4 w-full border p-6 bg-white rounded-xl h-full flex-1">
+    <div className="flex flex-col min-h-0 space-y-4 w-full border border-border dark:border-[#3F3F3F] p-6 bg-white dark:bg-[#1A1A1A] rounded-xl h-full flex-1">
       {/* Panel Header */}
       <div className="flex items-center justify-between">
-        <p className="text-lg font-semibold text-[#1A1A1A]">
+        <p className="text-lg font-semibold text-[#1A1A1A] dark:text-white">
           {t.calendar?.daySchedule || 'Lịch trình sự kiện ngày'} {date}
         </p>
         <IconButton
@@ -52,7 +52,7 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
             <EventCard key={event.id} event={event} onClick={setSelectedEvent} />
           ))
         ) : (
-          <p className="text-center text-[#7B7979] py-8">
+          <p className="text-center text-[#7B7979] dark:text-neutral-400 py-8">
             {t.calendar?.noEvents || 'Không có sự kiện nào'}
           </p>
         )}

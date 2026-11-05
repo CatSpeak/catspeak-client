@@ -44,45 +44,45 @@ const NetworkDisconnectedModal = ({
 
       {/* Dialog Container */}
       <div
-        className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 text-center max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-lg bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-3xl p-6 sm:p-7 shadow-2xl z-10 text-center max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
       >
         {/* Center Icon */}
-        <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3.5 shadow-2xs">
+        <div className="w-16 h-16 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3.5 shadow-2xs">
           <WifiOff className="w-8 h-8" />
         </div>
 
         {/* Title */}
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Mất Kết Nối Đường Truyền
         </h2>
 
         {/* Subtitle */}
-        <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed max-w-sm mx-auto">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-neutral-400 mt-1.5 leading-relaxed max-w-sm mx-auto">
           Tín hiệu âm thanh với phòng luyện nói AI bị gián đoạn do mạng không ổn định.
         </p>
 
         {/* Reconnecting Progress Box */}
-        <div className="mt-5 p-4 sm:p-4.5 rounded-2xl bg-rose-50/40 border border-rose-100 flex flex-col items-center justify-center text-center space-y-2">
-          <div className="w-13 h-13 rounded-full border-2 border-[#990011] flex items-center justify-center font-bold text-sm text-[#990011] bg-white shadow-2xs">
+        <div className="mt-5 p-4 sm:p-4.5 rounded-2xl bg-rose-50/40 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 flex flex-col items-center justify-center text-center space-y-2">
+          <div className="w-13 h-13 rounded-full border-2 border-[#990011] dark:border-red-400 flex items-center justify-center font-bold text-sm text-[#990011] dark:text-red-400 bg-white dark:bg-[#272727] shadow-2xs">
             {seconds}s
           </div>
 
           <div
             role="alert"
             aria-live="assertive"
-            className="text-xs sm:text-sm font-semibold text-[#990011]"
+            className="text-xs sm:text-sm font-semibold text-[#990011] dark:text-red-400"
           >
             Mất kết nối âm thanh. Đang kết nối lại... ({seconds}s)
           </div>
 
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-neutral-400">
             Vui lòng giữ nguyên màn hình, AI sẽ tiếp tục ngay khi có mạng.
           </p>
         </div>
 
         {/* Safety status alert */}
-        <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center gap-2.5 text-xs text-emerald-800 text-left">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 flex items-center gap-2.5 text-xs text-emerald-800 dark:text-emerald-300 text-left">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>
             Dữ liệu thoại trước đó đã được lưu an toàn. Quá {maxSeconds}s sẽ tự động tổng kết buổi học.
           </span>
@@ -96,7 +96,7 @@ const NetworkDisconnectedModal = ({
               onEndAndSave?.()
               onClose?.()
             }}
-            className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
+            className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-white dark:bg-[#272727] border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#3D3D3D] text-slate-700 dark:text-neutral-200 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
           >
             Kết thúc & Lưu kết quả
           </button>
@@ -107,7 +107,7 @@ const NetworkDisconnectedModal = ({
               onRetry?.()
               onClose?.()
             }}
-            className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
+            className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-[#990011] dark:bg-cath-red-700 hover:bg-[#85000f] dark:hover:bg-red-800 text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
           >
             Thử kết nối lại ngay
           </button>

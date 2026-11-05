@@ -65,11 +65,11 @@ const CalendarWeekView = ({
     <div className="w-full h-full min-h-0 max-h-[500px] overflow-x-auto scrollbar-app">
       <div className="flex flex-col min-w-[700px] h-full min-h-0">
         {/* Week Header */}
-        <div className="flex border-b border-border pb-4 items-center relative">
+        <div className="flex border-b border-border dark:border-[#3F3F3F] pb-4 items-center relative">
         <IconButton
           onClick={onPrev}
           variant="ghost"
-          className="text-gray-400 hover:text-[#990011]"
+          className="text-gray-400 hover:text-[#990011] dark:hover:text-red-400"
           title={t.calendar?.prevWeek || "Tuần trước"}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -95,11 +95,11 @@ const CalendarWeekView = ({
               }}
             >
               <div className={`w-16 h-16 flex items-center justify-center rounded-full text-sm font-semibold tracking-wider transition-all 
-                ${isActive ? 'text-white bg-[#990011] shadow-md' : 'text-[#1A1A1A] group-hover:bg-gray-100'}`}>
+                ${isActive ? 'text-white bg-[#990011] dark:bg-red-600 shadow-md' : 'text-[#1A1A1A] dark:text-neutral-200 group-hover:bg-gray-100 dark:group-hover:bg-[#272727]'}`}>
                 <span className="hidden sm:inline">{DAY_LABELS[idx]}</span>
                 <span className="sm:hidden">{t.calendar?.weekDaysShort?.[idx] || DAY_LABELS[idx]}</span>
               </div>
-              <div className={`text-lg font-medium ${isActive ? 'text-[#990011]' : 'text-gray-600'}`}>
+              <div className={`text-lg font-medium ${isActive ? 'text-[#990011] dark:text-red-400' : 'text-gray-600 dark:text-neutral-400'}`}>
                 {dateObj.formatted}
               </div>
             </div>
@@ -108,7 +108,7 @@ const CalendarWeekView = ({
         <IconButton
           onClick={onNext}
           variant="ghost"
-          className="text-gray-400 hover:text-[#990011]"
+          className="text-gray-400 hover:text-[#990011] dark:hover:text-red-400"
           title={t.calendar?.nextWeek || "Tuần sau"}
         >
           <ChevronRight className="w-5 h-5" />
@@ -137,7 +137,7 @@ const CalendarWeekView = ({
             {/* Horizontal Lines */}
             <div className="flex-1 relative">
               {HOURS.map((_, i) => (
-                <div key={i} className="h-[60px] border-t border-[#F5F5F5] w-full" />
+                <div key={i} className="h-[60px] border-t border-[#F5F5F5] dark:border-[#272727] w-full" />
               ))}
 
               {/* Events Overlay */}
@@ -148,7 +148,7 @@ const CalendarWeekView = ({
                   layoutEventClusters(parsedEvents)
 
                   return (
-                    <div key={colIdx} className="flex-1 relative pointer-events-auto border-r border-[#F5F5F5] last:border-r-0">
+                    <div key={colIdx} className="flex-1 relative pointer-events-auto border-r border-[#F5F5F5] dark:border-[#272727] last:border-r-0">
                       {parsedEvents.map(pEv => (
                         <EventBlock
                           key={`${pEv.originalId}-${dateObj.dateStr}`}
@@ -172,7 +172,7 @@ const CalendarWeekView = ({
                 className="absolute left-0 right-0 border-t border-red-500 flex items-center pointer-events-none z-[5]"
                 style={{ top: `${(currentHour * 60) + currentMin}px` }}
               >
-                <span className="absolute text-xs font-bold text-red-500 bg-white pr-1">
+                <span className="absolute text-xs font-bold text-red-500 bg-white dark:bg-[#1A1A1A] pr-1">
                   {now.format('H:mm')}
                 </span>
               </div>

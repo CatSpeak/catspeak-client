@@ -29,10 +29,10 @@ const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
       >
         {/* Header/Logo section */}
         <div className="flex items-center justify-between h-14 px-2 shrink-0">
-          <div className="flex items-center w-full h-full relative overflow-hidden">
+          <div className="flex items-center w-full h-full relative">
             <Link
               to="/"
-              className="flex items-center h-full flex-1"
+              className="flex items-center h-full flex-1 min-w-0 overflow-hidden"
               onClick={() => setIsMobileOpen(false)}
             >
               <div className="flex items-center justify-center shrink-0 w-[64px]">

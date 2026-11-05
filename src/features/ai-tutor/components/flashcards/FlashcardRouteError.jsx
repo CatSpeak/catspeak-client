@@ -22,13 +22,13 @@ const FlashcardRouteError = () => {
 
   return (
     <div role="alert" className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center gap-3 px-4 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 text-amber-600">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
         {offline ? <CloudOff className="h-7 w-7" /> : <AlertTriangle className="h-7 w-7" />}
       </div>
-      <h2 className="text-xl font-bold text-slate-900">
+      <h2 className="text-xl font-bold text-slate-900 dark:text-white">
         {offline ? "Bạn đang offline" : "Sổ tay từ vựng gặp sự cố"}
       </h2>
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-500 dark:text-neutral-400">
         {offline
           ? "Không tải được màn này vì mất kết nối mạng. Kết quả ôn đã lưu trên máy vẫn an toàn và sẽ đồng bộ khi có mạng lại."
           : "Có lỗi khi hiển thị màn này. Bạn tải lại trang hoặc quay về Sổ tay từ vựng nhé."}
@@ -37,7 +37,7 @@ const FlashcardRouteError = () => {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#990011] px-6 text-sm font-semibold text-white"
+          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 text-sm font-semibold text-white cursor-pointer"
         >
           <RefreshCw className="h-4 w-4" />
           Thử lại
@@ -45,7 +45,7 @@ const FlashcardRouteError = () => {
         <button
           type="button"
           onClick={() => navigate(`/${lang}/ai-tutor/vocabulary-notebook`)}
-          className="h-10 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700"
+          className="h-10 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-6 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727] cursor-pointer"
         >
           Về Sổ tay từ vựng
         </button>

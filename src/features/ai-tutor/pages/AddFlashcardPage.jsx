@@ -103,16 +103,16 @@ const AddFlashcardPage = () => {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="inline-flex w-fit items-center gap-2 text-sm font-bold text-slate-600 hover:text-[#680411]"
+        className="inline-flex w-fit items-center gap-2 text-sm font-bold text-slate-600 dark:text-neutral-400 hover:text-[#680411] dark:hover:text-red-400 cursor-pointer"
       >
         <ArrowLeft className="h-4 w-4" />
         Quay lại
       </button>
-      <h1 className="text-2xl font-black text-slate-900">Thêm từ thủ công</h1>
+      <h1 className="text-2xl font-black text-slate-900 dark:text-white">Thêm từ thủ công</h1>
 
-      <form onSubmit={submit} className="flex flex-col gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
+      <form onSubmit={submit} className="flex flex-col gap-4 rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-5 shadow-sm sm:p-6">
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-bold text-slate-700">Từ (chữ Hán) *</span>
+          <span className="text-sm font-bold text-slate-700 dark:text-neutral-300">Từ (chữ Hán) *</span>
           <div className="relative">
             <input
               value={word}
@@ -125,7 +125,7 @@ const AddFlashcardPage = () => {
                 setMeaning("")
               }}
               placeholder="Ví dụ: 学习"
-              className="h-12 w-full rounded-xl border border-slate-300 px-4 text-xl outline-none focus:border-[#990011]"
+              className="h-12 w-full rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-xl text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
             />
             {looking && <Loader2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-slate-400" />}
           </div>
@@ -134,15 +134,15 @@ const AddFlashcardPage = () => {
         {validWord && info && info.word === clean && (
           <div className="flex flex-wrap items-center gap-2 text-sm" data-testid="lookup-result">
             {info.in_dictionary ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 font-bold text-emerald-700">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1 font-bold text-emerald-700 dark:text-emerald-400">
                 <BookOpen className="h-4 w-4" /> HSK {info.hsk_level}
               </span>
             ) : (
-              <span className="rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-600">Ngoài HSK - tự nhập nghĩa</span>
+              <span className="rounded-full bg-slate-100 dark:bg-[#272727] px-3 py-1 font-bold text-slate-600 dark:text-neutral-300">Ngoài HSK - tự nhập nghĩa</span>
             )}
-            {info.definition_en && <span className="text-slate-500">({info.definition_en})</span>}
+            {info.definition_en && <span className="text-slate-500 dark:text-neutral-400">({info.definition_en})</span>}
             {info.in_notebook && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 font-bold text-amber-700">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/30 px-3 py-1 font-bold text-amber-700 dark:text-amber-400">
                 <Check className="h-4 w-4" /> Đã có trong sổ
               </span>
             )}
@@ -150,30 +150,30 @@ const AddFlashcardPage = () => {
         )}
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-bold text-slate-700">Pinyin</span>
+          <span className="text-sm font-bold text-slate-700 dark:text-neutral-300">Pinyin</span>
           <input
             value={pinyin}
             maxLength={80}
             onChange={(e) => setPinyin(e.target.value)}
             placeholder="Tự điền khi tra được, có thể sửa"
-            className="h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-[#990011]"
+            className="h-11 rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
           />
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-bold text-slate-700">Nghĩa tiếng Việt *</span>
+          <span className="text-sm font-bold text-slate-700 dark:text-neutral-300">Nghĩa tiếng Việt *</span>
           <input
             value={meaning}
             maxLength={200}
             onChange={(e) => setMeaning(e.target.value)}
             placeholder="Ví dụ: học, học tập"
-            className="h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-[#990011]"
+            className="h-11 rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
           />
         </label>
 
         {folders?.items?.length > 0 && (
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1.5 text-sm font-bold text-slate-700">Thêm vào thư mục (tuỳ chọn)</legend>
+            <legend className="mb-1.5 text-sm font-bold text-slate-700 dark:text-neutral-300">Thêm vào thư mục (tuỳ chọn)</legend>
             <div className="flex flex-wrap gap-2">
               {folders.items.map((f) => (
                 <button
@@ -182,8 +182,10 @@ const AddFlashcardPage = () => {
                   disabled={f.read_only}
                   aria-pressed={folderIds.has(f.id)}
                   onClick={() => toggleFolder(f.id)}
-                  className={`rounded-full px-3.5 py-1.5 text-sm font-bold ${
-                    folderIds.has(f.id) ? "bg-[#680411] text-white" : "bg-slate-100 text-slate-600"
+                  className={`rounded-full px-3.5 py-1.5 text-sm font-bold cursor-pointer ${
+                    folderIds.has(f.id)
+                      ? "bg-[#680411] dark:bg-cath-red-700 text-white"
+                      : "bg-slate-100 dark:bg-[#272727] text-slate-600 dark:text-neutral-300 hover:bg-slate-200 dark:hover:bg-[#323232]"
                   } disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   {f.name}
@@ -194,7 +196,7 @@ const AddFlashcardPage = () => {
         )}
 
         {error && (
-          <p role="alert" className="text-sm font-medium text-rose-700">
+          <p role="alert" className="text-sm font-medium text-rose-700 dark:text-red-400">
             {error}
           </p>
         )}
@@ -204,14 +206,14 @@ const AddFlashcardPage = () => {
             type="button"
             disabled={saving}
             onClick={(e) => submit(e, { stay: true })}
-            className="h-11 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            className="h-11 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-6 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#3D3D3D] disabled:opacity-60 cursor-pointer transition-colors"
           >
             Lưu và thêm từ khác
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="h-11 rounded-full bg-[#990011] px-6 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-60"
+            className="h-11 rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 text-sm font-semibold text-white hover:brightness-95 dark:hover:bg-red-800 disabled:opacity-60 cursor-pointer transition-colors"
           >
             {saving ? "Đang lưu..." : "Thêm vào sổ"}
           </button>

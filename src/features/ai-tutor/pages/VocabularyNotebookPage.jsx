@@ -36,17 +36,17 @@ const VocabularyNotebookPage = () => {
   const title = (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-800">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300">
           <Layers className="h-5 w-5" />
         </div>
-        <h1 className="text-2xl font-black text-slate-900">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white">
           {t?.aiTutor?.vocabularyNotebook?.title || "Sổ tay từ vựng"}
         </h1>
       </div>
       <button
         type="button"
         onClick={() => navigate(paths.add)}
-        className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-[#680411] shadow-xs hover:bg-rose-50"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-white dark:bg-[#1A1A1A] px-4 py-2 text-sm font-bold text-[#680411] dark:text-red-400 shadow-xs hover:bg-rose-50 dark:hover:bg-[#272727]"
       >
         <Plus className="h-4 w-4" />
         Thêm thủ công
@@ -101,7 +101,7 @@ const VocabularyNotebookPage = () => {
         <button
           type="button"
           onClick={() => navigate(paths.decks)}
-          className="ml-auto inline-flex items-center gap-1 text-sm font-bold text-slate-600 hover:text-[#680411]"
+          className="ml-auto inline-flex items-center gap-1 text-sm font-bold text-slate-600 dark:text-neutral-300 hover:text-[#680411] dark:hover:text-red-400"
         >
           Xem tất cả bộ thẻ và thư mục
           <ChevronRight className="h-4 w-4" />

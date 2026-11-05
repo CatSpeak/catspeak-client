@@ -28,9 +28,14 @@
   --cath-warning: #e7001a;
   --cath-success: #4b0008;
   --cath-dusk: #1a1a2e;
+  --cath-text-primary: #111827;
   --cath-text-secondary: #606060;
+  --cath-secondary-gray: #606060;
+  --cath-text-muted: #9CA3AF;
   --cath-red-accessible: #990011;
   --cath-bg: #F5F5F7;
+  --cath-surface: #FFFFFF;
+  --cath-card: #FFFFFF;
   --cath-border: #E5E5E5;
 
   /* Shadcn UI Theme HSL Tokens */
@@ -81,8 +86,14 @@
   --cath-primary: #990011;
   --cath-red-700: #990011;
   --cath-red-accessible: #f87171;
+  --cath-red-high-contrast: #e7001a;
+  --cath-text-primary: #FFFFFF;
   --cath-text-secondary: #AAAAAA;
+  --cath-secondary-gray: #AAAAAA;
+  --cath-text-muted: #888888;
   --cath-bg: #0F0F0F;
+  --cath-surface: #1A1A1A;
+  --cath-card: #1A1A1A;
   --cath-border: #3F3F3F;
 }
 

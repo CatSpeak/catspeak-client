@@ -54,9 +54,9 @@ const SpeakingRoomPage = () => {
     <div className="relative">
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
-          <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-[#990011]" />
-            <p className="text-sm font-bold text-slate-800">Đang chuẩn bị phòng luyện nói...</p>
+          <div className="flex flex-col items-center gap-3 rounded-2xl bg-white dark:bg-[#1A1A1A] dark:border dark:border-[#3F3F3F] p-6 shadow-2xl">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-900/50 border-t-[#990011] dark:border-t-red-400" />
+            <p className="text-sm font-bold text-slate-800 dark:text-white">Đang chuẩn bị phòng luyện nói...</p>
           </div>
         </div>
       )}

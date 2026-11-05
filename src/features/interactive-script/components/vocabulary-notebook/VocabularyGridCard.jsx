@@ -38,14 +38,14 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
     (word.relatedWords && word.relatedWords.length > 0);
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-4 hover:shadow-md transition-shadow flex flex-col h-fit self-start w-full">
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] p-4 hover:shadow-md transition-shadow flex flex-col h-fit self-start w-full">
       <div className="space-y-1">
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            <h3 className="text-lg font-bold text-gray-900 leading-tight break-words truncate">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight break-words truncate">
               {word.word}
             </h3>
-            <div className="bg-[#EFF6FF] border border-[#BFDBFE] text-[#1D4ED8] text-xs uppercase px-2 py-0.5 font-semibold rounded shrink-0">
+            <div className="bg-[#EFF6FF] dark:bg-blue-950/40 border border-[#BFDBFE] dark:border-blue-800 text-[#1D4ED8] dark:text-blue-300 text-xs uppercase px-2 py-0.5 font-semibold rounded shrink-0">
               {mappedLang}
             </div>
           </div>
@@ -55,21 +55,21 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
         </div>
 
         <div className="flex items-center gap-1">
-          {ipa && <span className="text-[#6B7280] font-mono">{ipa}</span>}
+          {ipa && <span className="text-[#6B7280] dark:text-neutral-400 font-mono">{ipa}</span>}
           <IconButton
             variant="ghost"
             size="xs"
             onClick={() => onPlayAudio(word.word, mappedLang, word.audioUrl)}
           >
-            <Volume2 className="w-4 h-4 text-[#990011]" />
+            <Volume2 className="w-4 h-4 text-[#990011] dark:text-red-400" />
           </IconButton>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-1">
-          <div className="bg-[#F3F4F6] border border-[#D1D5DB] text-[#4B5563] text-xs uppercase px-2 py-0.5 font-semibold rounded shrink-0">
+          <div className="bg-[#F3F4F6] dark:bg-[#272727] border border-[#D1D5DB] dark:border-[#3F3F3F] text-[#4B5563] dark:text-neutral-300 text-xs uppercase px-2 py-0.5 font-semibold rounded shrink-0">
             {type ? v?.[type] || type : v?.noun || "Danh từ"}
           </div>
           {word.teacherNote && (
-            <div className="flex items-center gap-1 bg-[#FFF7ED] border border-[#FED7AA] text-[#C2410C] text-xs px-2 py-0.5 font-semibold rounded shrink-0">
+            <div className="flex items-center gap-1 bg-[#FFF7ED] dark:bg-amber-950/40 border border-[#FED7AA] dark:border-amber-800 text-[#C2410C] dark:text-amber-300 text-xs px-2 py-0.5 font-semibold rounded shrink-0">
               <GraduationCap className="w-3 h-3 shrink-0" />
               <span>{v?.hasTeacherNote || "Có ghi chú GV"}</span>
             </div>
@@ -77,7 +77,7 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
         </div>
       </div>
 
-      <p className="font-medium text-[#4B5563] mt-2 line-clamp-3 mb-3">
+      <p className="font-medium text-[#4B5563] dark:text-neutral-200 mt-2 line-clamp-3 mb-3">
         {word.meaning}
       </p>
 
@@ -86,8 +86,8 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
-                <Book className="w-4 h-4 text-primary shrink-0" />
-                <span className="text-xs text-[#9CA3AF] font-medium">
+                <Book className="w-4 h-4 text-primary dark:text-red-400 shrink-0" />
+                <span className="text-xs text-[#9CA3AF] dark:text-neutral-400 font-medium">
                   {v?.scriptLabel || "Script:"}{" "}
                   {word.scriptName ||
                     (word.scriptId
@@ -98,7 +98,7 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
             </div>
 
             <button
-              className="text-xs text-[#990011] font-bold flex items-center transition-colors hover:underline"
+              className="text-xs text-[#990011] dark:text-red-400 font-bold flex items-center transition-colors hover:underline"
               onClick={() => setExpanded(!expanded)}
             >
               {expanded ? v?.collapse || "Thu gọn" : v?.expand || "Chi tiết"}
@@ -107,25 +107,25 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
         )}
 
         <div
-          className={`grid transition-all duration-300 ease-in-out ${expanded ? "grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-gray-100" : "grid-rows-[0fr] opacity-0 mt-0 pt-0 border-t-0"}`}
+          className={`grid transition-all duration-300 ease-in-out ${expanded ? "grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-gray-100 dark:border-[#3F3F3F]" : "grid-rows-[0fr] opacity-0 mt-0 pt-0 border-t-0"}`}
         >
           <div className="overflow-hidden">
             <div className="flex flex-col gap-3">
               {example && (
-                <div className="text-sm bg-gray-50 rounded-xl p-2 text-[#1F2937] italic border-l-4 border-primary">
+                <div className="text-sm bg-gray-50 dark:bg-[#242424] rounded-xl p-2 text-[#1F2937] dark:text-neutral-200 italic border-l-4 border-primary">
                   "{example}"
                 </div>
               )}
 
               {word.teacherNote && (
-                <div className="bg-[#fffcf1] p-2 rounded-xl border-l-4 border-[#f59e0b]">
+                <div className="bg-[#fffcf1] dark:bg-amber-950/30 p-2 rounded-xl border-l-4 border-[#f59e0b] dark:border-amber-600">
                   <div className="flex items-center gap-1">
-                    <GraduationCap className="w-4 h-4 text-[#92400E] shrink-0" />
-                    <p className="text-xs font-semibold text-orange-700 mb-1">
+                    <GraduationCap className="w-4 h-4 text-[#92400E] dark:text-amber-400 shrink-0" />
+                    <p className="text-xs font-semibold text-orange-700 dark:text-amber-400 mb-1">
                       {v?.teacherNote || "Ghi chú từ giáo viên"}
                     </p>
                   </div>
-                  <p className="text-xs text-gray-700">{word.teacherNote}</p>
+                  <p className="text-xs text-gray-700 dark:text-amber-200">{word.teacherNote}</p>
                 </div>
               )}
 
@@ -134,7 +134,7 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
                   {word.relatedWords.map((related, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-1 bg-[#F3F4F6] rounded-md text-xs text-[#4B5563] font-medium"
+                      className="px-2 py-1 bg-[#F3F4F6] dark:bg-[#272727] rounded-md text-xs text-[#4B5563] dark:text-neutral-300 font-medium"
                     >
                       {related}
                     </span>

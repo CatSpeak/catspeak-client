@@ -127,17 +127,17 @@ export default function SharedChallengeLayout({
       {/* Horizontal List of Challenges */}
       <div className="mb-6 w-full">
         <div className="flex justify-between items-center mb-4 gap-3">
-          <h2 className="text-base sm:text-lg font-bold text-gray-900">
+          <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
             {challengeStatus === "active"
               ? t.catSpeak.reels.activeEvent || "Thử thách đang diễn ra"
               : t.catSpeak.reels.pastEvents || "Thử thách đã diễn ra"}
           </h2>
-          <div className="flex items-center text-[12px] sm:text-[13px] font-semibold text-gray-500 gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center text-[12px] sm:text-[13px] font-semibold text-gray-500 dark:text-neutral-400 gap-2 sm:gap-3 shrink-0">
             <button
               onClick={handlePrevPage}
               disabled={page === 0}
               aria-label="Previous challenges"
-              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] dark:bg-[#1A1A1A] shadow-sm border border-[#C6C6C6] dark:border-[#3F3F3F] text-gray-700 dark:text-neutral-200 transition-all duration-200 hover:bg-primaryBg dark:hover:bg-[#272727] active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
             >
               <ChevronLeft size={18} />
             </button>
@@ -150,7 +150,7 @@ export default function SharedChallengeLayout({
               onClick={handleNextPage}
               disabled={page >= totalPages - 1}
               aria-label="Next challenges"
-              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] dark:bg-[#1A1A1A] shadow-sm border border-[#C6C6C6] dark:border-[#3F3F3F] text-gray-700 dark:text-neutral-200 transition-all duration-200 hover:bg-primaryBg dark:hover:bg-[#272727] active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
             >
               <ChevronRight size={18} />
             </button>
@@ -184,15 +184,15 @@ export default function SharedChallengeLayout({
             ))}
           </div>
         ) : (
-          <div className="w-full flex flex-col items-center justify-center py-16 px-4 bg-gray-50 rounded-2xl border-2 border-dashed border-border my-4">
-            <div className="w-16 h-16 bg-white shadow-sm rounded-full flex items-center justify-center mb-4">
+          <div className="w-full flex flex-col items-center justify-center py-16 px-4 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border-2 border-dashed border-border dark:border-[#3F3F3F] my-4">
+            <div className="w-16 h-16 bg-white dark:bg-[#242424] shadow-sm rounded-full flex items-center justify-center mb-4">
               <span className="text-3xl block">🎈</span>
             </div>
-            <p className="text-[15px] font-semibold text-gray-600 text-center">
+            <p className="text-[15px] font-semibold text-gray-600 dark:text-neutral-300 text-center">
               {t.catSpeak.reels.noActiveChallenges ||
                 "Không tìm thấy thử thách nào."}
             </p>
-            <p className="text-[13px] text-gray-400 text-center mt-1">
+            <p className="text-[13px] text-gray-400 dark:text-neutral-500 text-center mt-1">
               {challengeStatus === "active"
                 ? "Các thử thách mới đang được chuẩn bị. Hãy quay lại sau nhé!"
                 : "Chưa có thử thách nào đã kết thúc."}

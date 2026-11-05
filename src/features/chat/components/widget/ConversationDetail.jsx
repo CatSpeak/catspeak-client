@@ -139,7 +139,7 @@ const ConversationDetail = ({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto overflow-x-hidden p-3 min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-cath-red-700"
+        className="flex-1 overflow-y-auto overflow-x-hidden p-3 min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-cath-red-700 dark:hover:[&::-webkit-scrollbar-thumb]:bg-red-400"
       >
         {isLoading ? (
           <div className="flex h-full items-center justify-center py-4">
@@ -161,7 +161,7 @@ const ConversationDetail = ({
             <div className="flex-1" />
             {isLoadingMore && (
               <div className="flex items-center justify-center py-2 shrink-0">
-                <Loader2 className="h-5 w-5 animate-spin text-cath-red-700" />
+                <Loader2 className="h-5 w-5 animate-spin text-cath-red-700 dark:text-red-400" />
               </div>
             )}
             {renderMessages()}
