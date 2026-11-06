@@ -336,7 +336,20 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
         id={`news-comments-${postId}`}
         className="flex flex-col gap-4 w-full max-w-full min-w-0"
       >
-        {isSuccess && commentsList.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col gap-4 py-2">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="flex gap-3">
+                <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                <div className="flex-1 space-y-2 pt-1">
+                  <Skeleton className="h-4 w-32 rounded" />
+                  <Skeleton className="h-3.5 w-full rounded" />
+                  <Skeleton className="h-3.5 w-4/5 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : isSuccess && commentsList.length === 0 ? (
           <EmptyState
             variant="component"
             icon={MessageSquare}

@@ -13,20 +13,28 @@ const NewsArticleHeader = ({ newsItem }) => {
 
   return (
     <header className="min-w-0 text-left">
-      <h1 id="news-article-title" className="break-words text-2xl font-extrabold leading-tight text-gray-950 dark:text-white sm:text-3xl lg:text-[32px] [overflow-wrap:anywhere]">
+      <h1 id="news-article-title" className="break-words text-3xl font-bold tracking-tight text-gray-950 dark:text-white [overflow-wrap:anywhere]">
         {newsItem.title}
       </h1>
-      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-[#AAAAAA] sm:text-sm">
-        {newsItem.viewCount != null && (
-          <span>{newsItem.viewCount} {t.news?.newsDetail?.views || "views"}</span>
+      <div className="mt-2 flex items-center flex-wrap gap-x-2 text-sm text-secondary dark:text-[#AAAAAA]">
+        {timeAgo && (
+          <span className="whitespace-nowrap">{timeAgo}</span>
         )}
-        {newsItem.viewCount != null && timeAgo && <span aria-hidden="true">·</span>}
-        {timeAgo && <span>{timeAgo}</span>}
+        {timeAgo && newsItem.viewCount != null && (
+          <span className="w-1 h-1 rounded-full bg-secondary dark:bg-[#AAAAAA] shrink-0" />
+        )}
+        {newsItem.viewCount != null && (
+          <span className="whitespace-nowrap">
+            {newsItem.viewCount} {t.news?.newsDetail?.views || "views"}
+          </span>
+        )}
       </div>
       {images.length > 0 && (
-        <Carousel images={images} className="mt-5 aspect-video rounded-none bg-black/5 sm:mt-6" objectFit="cover" autoPlay={false} />
+        <Carousel images={images} className="mt-4 aspect-video rounded-2xl bg-black/5" objectFit="cover" autoPlay={false} />
       )}
-      {newsItem.topics?.length > 0 && <TopicChips topics={newsItem.topics} className="mt-4" />}
+      {newsItem.topics?.length > 0 && (
+        <TopicChips topics={newsItem.topics} color="cath-red" className="mt-4" />
+      )}
     </header>
   );
 };

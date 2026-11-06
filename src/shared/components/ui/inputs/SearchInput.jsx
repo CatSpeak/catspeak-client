@@ -80,7 +80,7 @@ const SearchInput = ({
           }}
           variant="ghost"
           size="sm"
-          className="mr-2 shrink-0"
+          className="mr-1 shrink-0"
           innerClassName={buttonClassName}
           aria-label="Clear search"
         >
@@ -94,7 +94,7 @@ const SearchInput = ({
           }}
           variant="ghost"
           size="sm"
-          className="mr-2 shrink-0"
+          className="mr-1 shrink-0"
           innerClassName={buttonClassName}
           aria-label="Search"
         >

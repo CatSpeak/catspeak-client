@@ -6,7 +6,7 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import MenuItem from "@/shared/components/ui/MenuItem"
+import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 
 const removeDiacritics = (str) => {
@@ -24,6 +24,7 @@ const removeDiacritics = (str) => {
  */
 const Dropdown = ({
   options = [],
+  children,
   value,
   onChange,
   trigger,
@@ -58,7 +59,8 @@ const Dropdown = ({
 
   const isMultiple = mode === "multiple"
   const isSearchActive = enableSearch || Boolean(handleSearch)
-  const hasOptions = options.length > 0 || Boolean(handleSearch) || loading
+  const hasOptions =
+    options.length > 0 || Boolean(children) || Boolean(handleSearch) || loading
   const isInteractive = !disabled && hasOptions
 
   // Normalize selected values for multiple and single mode
@@ -468,123 +470,137 @@ const Dropdown = ({
                       portalCoords.flipUp
                         ? "bottom-full mb-1 origin-bottom"
                         : "top-full mt-1"
-                    } flex flex-col pointer-events-auto shadow-lg border border-border dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-gray-100 ${maxHeightClass} overflow-hidden ${alignClass} ${resolvedDropdownClassName}`}
+                    } pointer-events-auto ${alignClass}`}
                     data-dropdown-portal="true"
                   >
-                    {isSearchActive && (
-                      <div className="px-3 py-2 shrink-0 bg-white dark:bg-[#1A1A1A] z-10 border-b border-border dark:border-[#3F3F3F]">
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            {loading && handleSearch ? (
-                              <Loader2
-                                size={14}
-                                className="text-gray-400 dark:text-[#AAAAAA] animate-spin"
-                              />
-                            ) : (
-                              <Search
-                                size={14}
-                                className="text-gray-400 dark:text-[#AAAAAA]"
-                              />
-                            )}
-                          </div>
-                          <input
-                            ref={searchInputRef}
-                            type="text"
-                            className="w-full pl-9 pr-3 py-1.5 text-sm bg-white dark:bg-[#272727] text-gray-900 dark:text-white border border-border dark:border-[#3F3F3F] rounded-md focus:outline-none focus:border-cath-red-700 dark:focus:border-cath-red-700 placeholder:text-gray-400 dark:placeholder:text-[#AAAAAA]"
-                            placeholder={resolvedSearchPlaceholder}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex-1 py-[2px] overflow-y-auto overflow-x-hidden">
-                      {loading ? (
-                        <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500 dark:text-[#AAAAAA]">
-                          <Loader2
-                            size={16}
-                            className="animate-spin text-[#990011] dark:text-red-400"
-                          />
-                          <span>{resolvedLoading}</span>
-                        </div>
-                      ) : filteredOptions.length > 0 ? (
-                        filteredOptions.map((option, idx) => {
-                          if (option.type === "divider") {
-                            return (
-                              <hr
-                                key={`divider-${idx}`}
-                                className="border-t border-gray-200 dark:border-[#3F3F3F] my-1 w-full"
-                              />
-                            )
-                          }
-
-                          const isSelected = isOptionSelected(option.value)
-                          const optionKey =
-                            option.key ||
-                            option.code ||
-                            (option.value !== undefined && option.value !== null
-                              ? `${option.value}-${idx}`
-                              : idx)
-
-                          return renderOption ? (
-                            <button
-                              key={optionKey}
-                              type="button"
-                              disabled={option.disabled}
-                              onClick={() => handleSelect(option)}
-                              className="group w-full flex items-center focus:outline-none px-1 h-12 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:text-gray-200 hover:bg-primaryBg dark:hover:bg-[#272727]"
-                            >
-                              {renderOption(option, isSelected, {
-                                isMultiple,
-                                isSelected,
-                              })}
-                            </button>
-                          ) : (
-                            <MenuItem
-                              key={optionKey}
-                              onClick={() =>
-                                !option.disabled && handleSelect(option)
-                              }
-                              isSelected={isSelected}
-                              activeColor={option.color || activeColor}
-                              icon={option.icon}
-                              label={option.label}
-                              rightText={option.rightText}
-                              rightContent={
-                                isMultiple ? (
-                                  <div className="flex items-center ml-2">
-                                    <div
-                                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
-                                        isSelected
-                                          ? "bg-[#990011] border-[#990011] text-white"
-                                          : "border-gray-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] group-hover:border-gray-400 dark:group-hover:border-[#555555]"
-                                      }`}
-                                    >
-                                      {isSelected && (
-                                        <Check size={12} strokeWidth={3} />
-                                      )}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  option.rightContent
-                                )
-                              }
-                              className={
-                                option.disabled
-                                  ? "opacity-50 pointer-events-none"
-                                  : ""
-                              }
+                    <MenuList
+                      className={`${maxHeightClass} overflow-hidden ${resolvedDropdownClassName}`}
+                      data-dropdown-portal="true"
+                    >
+                      {isSearchActive && (
+                        <div className="px-3 py-2 shrink-0 bg-white dark:bg-[#1A1A1A] z-10 border-b border-border dark:border-[#3F3F3F]">
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              {loading && handleSearch ? (
+                                <Loader2
+                                  size={14}
+                                  className="text-gray-400 dark:text-[#AAAAAA] animate-spin"
+                                />
+                              ) : (
+                                <Search
+                                  size={14}
+                                  className="text-gray-400 dark:text-[#AAAAAA]"
+                                />
+                              )}
+                            </div>
+                            <input
+                              ref={searchInputRef}
+                              type="text"
+                              className="w-full pl-9 pr-3 py-1.5 text-sm bg-white dark:bg-[#272727] text-gray-900 dark:text-white border border-border dark:border-[#3F3F3F] rounded-md focus:outline-none focus:border-cath-red-700 dark:focus:border-cath-red-700 placeholder:text-gray-400 dark:placeholder:text-[#AAAAAA]"
+                              placeholder={resolvedSearchPlaceholder}
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
                             />
-                          )
-                        })
-                      ) : (
-                        <div className="px-3 py-6 text-sm text-center text-gray-500 dark:text-[#AAAAAA]">
-                          {resolvedNoOptionsFound}
+                          </div>
                         </div>
                       )}
-                    </div>
+
+                      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                        {children ? (
+                          typeof children === "function"
+                            ? children({
+                                close: () => setIsOpen(false),
+                                isOpen,
+                                selectedOption,
+                                selectedOptions: selectedOptionsList,
+                              })
+                            : children
+                        ) : loading ? (
+                          <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500 dark:text-[#AAAAAA]">
+                            <Loader2
+                              size={16}
+                              className="animate-spin text-[#990011] dark:text-red-400"
+                            />
+                            <span>{resolvedLoading}</span>
+                          </div>
+                        ) : filteredOptions.length > 0 ? (
+                          filteredOptions.map((option, idx) => {
+                            if (option.type === "divider") {
+                              return (
+                                <hr
+                                  key={`divider-${idx}`}
+                                  className="border-t border-gray-200 dark:border-[#3F3F3F] my-1 w-full"
+                                />
+                              )
+                            }
+
+                            const isSelected = isOptionSelected(option.value)
+                            const optionKey =
+                              option.key ||
+                              option.code ||
+                              (option.value !== undefined && option.value !== null
+                                ? `${option.value}-${idx}`
+                                : idx)
+
+                            return renderOption ? (
+                              <button
+                                key={optionKey}
+                                type="button"
+                                disabled={option.disabled}
+                                onClick={() => handleSelect(option)}
+                                className="group w-full flex items-center focus:outline-none px-1 h-12 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:text-gray-200 hover:bg-primaryBg dark:hover:bg-[#272727]"
+                              >
+                                {renderOption(option, isSelected, {
+                                  isMultiple,
+                                  isSelected,
+                                })}
+                              </button>
+                            ) : (
+                              <MenuItem
+                                key={optionKey}
+                                onClick={() =>
+                                  !option.disabled && handleSelect(option)
+                                }
+                                isSelected={isSelected}
+                                activeColor={option.color || activeColor}
+                                icon={option.icon}
+                                label={option.label}
+                                rightText={option.rightText}
+                                rightContent={
+                                  isMultiple ? (
+                                    <div className="flex items-center ml-2">
+                                      <div
+                                        className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
+                                          isSelected
+                                            ? "bg-[#990011] border-[#990011] text-white"
+                                            : "border-gray-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] group-hover:border-gray-400 dark:group-hover:border-[#555555]"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check size={12} strokeWidth={3} />
+                                        )}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    option.rightContent
+                                  )
+                                }
+                                className={
+                                  option.disabled
+                                    ? "opacity-50 pointer-events-none"
+                                    : ""
+                                }
+                              />
+                            )
+                          })
+                        ) : (
+                          <div className="px-3 py-6 text-sm text-center text-gray-500 dark:text-[#AAAAAA]">
+                            {resolvedNoOptionsFound}
+                          </div>
+                        )}
+                      </div>
+                    </MenuList>
                   </FluentAnimation>
                 </div>
               </div>

@@ -9,7 +9,7 @@ const VARIANT_CLASSES = {
   outline:
     "bg-transparent hover:bg-primaryBg dark:hover:bg-red-950/20 active:bg-[#e5e5e5] dark:active:bg-red-950/40 group-hover/pill:bg-primaryBg dark:group-hover/pill:bg-red-950/20 group-active/pill:bg-[#e5e5e5] dark:group-active/pill:bg-red-950/40 text-cath-red-700 dark:text-[#FF6B6B] border-cath-red-700 dark:border-[#FF6B6B]/70 border-[1.5px] hover:border-cath-red-800 dark:hover:border-[#FF6B6B] group-hover/pill:border-cath-red-800 dark:group-hover/pill:border-[#FF6B6B]",
   subtle:
-    "bg-[#FFF0F2] dark:bg-[#2D0A0E] hover:bg-[#FFE5E8] dark:hover:bg-[#3D1016] active:bg-[#FFD6DC] dark:active:bg-[#4D151D] group-hover/pill:bg-[#FFE5E8] dark:group-hover/pill:bg-[#3D1016] group-active/pill:bg-[#FFD6DC] dark:group-active/pill:bg-[#4D151D] text-cath-red-700 dark:text-[#FF8599] border-cath-red-700/40 dark:border-[#66111E] hover:border-cath-red-700/70 group-hover/pill:border-cath-red-700/70",
+    "bg-gray-100/90 dark:bg-[#272727] hover:bg-gray-200/90 dark:hover:bg-[#333333] active:bg-gray-300/80 dark:active:bg-[#3D3D3D] group-hover/pill:bg-gray-200/90 dark:group-hover/pill:bg-[#333333] group-active/pill:bg-gray-300/80 dark:group-active/pill:bg-[#3D3D3D] text-gray-800 dark:text-neutral-200 border-gray-200/60 dark:border-[#383838]",
   contrast:
     "bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 active:bg-gray-700 dark:active:bg-gray-200 group-hover/pill:bg-gray-800 dark:group-hover/pill:bg-gray-100 group-active/pill:bg-gray-700 dark:group-active/pill:bg-gray-200 text-white dark:text-gray-900 font-semibold border-transparent",
   ghost:
@@ -47,6 +47,8 @@ const PillButton = ({
   textColor,
   borderColor,
   className = "",
+  innerClassName = "",
+  isActive = false,
   roundedClass = "rounded-full",
   type = "button",
   style,
@@ -78,6 +80,14 @@ const PillButton = ({
       }
     : style
 
+  const activeStyle = isActive
+    ? variant === "ghost"
+      ? "!bg-neutral-200/80 dark:!bg-[#3D3D3D] !text-black dark:!text-white"
+      : variant === "secondary" || variant === "secondary-no-outline"
+      ? "!bg-[#E5E5E5] dark:!bg-[#3D3D3D] !text-black dark:!text-white"
+      : ""
+    : ""
+
   const wrapperHeight = isSnackbar ? "h-auto" : "h-12"
   const innerDimensions = isSnackbar ? "" : "h-10 px-4"
 
@@ -106,7 +116,7 @@ const PillButton = ({
     >
       <div
         style={customStyle}
-        className={`w-full ${innerDimensions} ${roundedClass} border text-sm transition-colors duration-150 flex items-center justify-center gap-2 whitespace-nowrap select-none ${variantStyle} ${disabledStyle}`}
+        className={`w-full ${innerDimensions} ${roundedClass} border text-sm transition-colors duration-150 flex items-center justify-center gap-2 whitespace-nowrap select-none ${variantStyle} ${activeStyle} ${disabledStyle} ${innerClassName}`}
       >
         {loading ? (
           <>

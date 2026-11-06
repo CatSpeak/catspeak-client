@@ -23,7 +23,7 @@ import React from "react"
  * @param {boolean} wrapDesktop - Whether chips wrap on lg screens (default true)
  * @param {string} className - Optional wrapper CSS classes
  * @param {string} buttonClassName - Optional CSS classes for each chip button
- * @param {string} selectedVariant - Selected styling: "contrast" | "subtle" | "primary" (defaults to "contrast")
+ * @param {string} selectedVariant - Selected styling: "primary" | "contrast" | "subtle" (defaults to "primary")
  */
 const ChipFilter = ({
   options,
@@ -35,7 +35,7 @@ const ChipFilter = ({
   wrapDesktop = true,
   className = "",
   buttonClassName = "",
-  selectedVariant = "contrast",
+  selectedVariant = "primary",
 }) => {
   const chipItems = items || options || []
   const currentActive = activeKey !== undefined ? activeKey : value
@@ -60,18 +60,18 @@ const ChipFilter = ({
 
   const getVariantClasses = (isSelected, variant) => {
     if (!isSelected) {
-      return "bg-white dark:bg-[#272727] text-gray-700 dark:text-[#AAAAAA] border border-border dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#333333] hover:text-gray-900 dark:hover:text-white"
+      return "bg-white dark:bg-[#1A1A1A] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727] hover:border-slate-300 dark:hover:border-[#555]"
     }
 
     switch (variant) {
+      case "primary":
+        return "bg-primary text-white border border-primary hover:bg-primary/90 dark:bg-primary dark:text-white dark:border-primary"
       case "contrast":
         return "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border border-gray-900 dark:border-white"
       case "subtle":
-        return "bg-[#FFF0F2] dark:bg-[#2D0A0E] text-cath-red-700 dark:text-[#FF8599] border border-cath-red-700/40 dark:border-[#66111E]"
-      case "primary":
-        return "bg-cath-red-700 dark:bg-cath-red-700 text-white border border-cath-red-700 dark:border-cath-red-700"
+        return "bg-red-50/50 dark:bg-red-950/20 text-cath-red-700 dark:text-red-400 border border-red-200/70 dark:border-red-900/40"
       default:
-        return "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border border-gray-900 dark:border-white"
+        return "bg-primary text-white border border-primary hover:bg-primary/90 dark:bg-primary dark:text-white dark:border-primary"
     }
   }
 

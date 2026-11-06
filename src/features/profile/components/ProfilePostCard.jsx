@@ -89,7 +89,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
   return (
     <>
       <FluentCard padding="p-0" rounded="rounded-2xl">
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-2">
           <PostHeader
             post={post}
             isOwnProfile={isOwnProfile}

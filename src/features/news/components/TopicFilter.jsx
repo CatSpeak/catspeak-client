@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetTopicsQuery } from "@/store/api/social/postsApi";
 import { getCommunityName, getCommunityLanguageId } from "../utils/newsUtils";
+import ChipFilter from "@/shared/components/ChipFilter";
 
 
 const TopicFilter = ({
@@ -236,7 +237,7 @@ const TopicFilter = ({
           return (
             <span
               key={idx}
-              className="inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-medium border whitespace-nowrap"
+              className="inline-flex items-center h-8 px-4 rounded-lg text-sm font-medium border whitespace-nowrap"
             >
               #{title}
             </span>
@@ -256,26 +257,16 @@ const TopicFilter = ({
           {t.news?.filters?.topics || "Chủ đề"}:
         </span>
 
-        {visibleTopics.map((topic) => {
-          const id = topic.topicId ?? topic.TopicId ?? topic.id;
-          const title = topic.title || topic.Title || topic.slug || "";
-          const isSelected = localSelectedIds.includes(id);
-
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => handleToggleTopic(id)}
-              className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors shadow-none select-none cursor-pointer whitespace-nowrap shrink-0 ${
-                isSelected
-                  ? "bg-primary text-white border border-primary hover:bg-primary/90"
-                  : "bg-white dark:bg-[#1A1A1A] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727] hover:border-slate-300 dark:hover:border-[#555]"
-              }`}
-            >
-              #{title}
-            </button>
-          );
-        })}
+        <ChipFilter
+          items={visibleTopics.map((topic) => {
+            const id = topic.topicId ?? topic.TopicId ?? topic.id;
+            const title = topic.title || topic.Title || topic.slug || "";
+            return { key: id, label: `#${title}` };
+          })}
+          value={localSelectedIds}
+          onChange={handleToggleTopic}
+          className="flex items-center gap-2 flex-nowrap shrink-0"
+        />
 
         {/* ── "Xem thêm" / See more Dropdown Chip ── */}
         {hiddenTopics.length > 0 && (
@@ -283,9 +274,9 @@ const TopicFilter = ({
             <button
               type="button"
               onClick={() => setIsDropdownOpen((prev) => !prev)}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors shadow-none select-none cursor-pointer whitespace-nowrap ${
+              className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-lg text-sm font-medium transition-colors shadow-none select-none cursor-pointer whitespace-nowrap ${
                 hiddenSelectedCount > 0
-                  ? "bg-primary text-white border border-primary hover:bg-primary/90"
+                  ? "bg-primary text-white border border-primary hover:bg-primary/90 dark:bg-primary dark:text-white dark:border-primary"
                   : "bg-white dark:bg-[#1A1A1A] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727] hover:border-slate-300 dark:hover:border-[#555]"
               }`}
               aria-expanded={isDropdownOpen}
@@ -316,9 +307,9 @@ const TopicFilter = ({
                       key={id}
                       type="button"
                       onClick={() => handleToggleTopic(id)}
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors shadow-none select-none cursor-pointer whitespace-nowrap ${
+                      className={`h-7 inline-flex items-center px-2.5 rounded-lg text-xs font-medium transition-colors shadow-none select-none cursor-pointer whitespace-nowrap ${
                         isSelected
-                          ? "bg-primary text-white border border-primary hover:bg-primary/90"
+                          ? "bg-primary text-white border border-primary hover:bg-primary/90 dark:bg-primary dark:text-white dark:border-primary"
                           : "bg-white dark:bg-[#1A1A1A] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727] hover:border-slate-300 dark:hover:border-[#555]"
                       }`}
                     >
