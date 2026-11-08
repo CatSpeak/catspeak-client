@@ -166,11 +166,11 @@ const ConversationItem = ({
 
   const rightContent = (
     <div className="flex flex-col items-end gap-1 justify-center shrink-0">
-      <span className="text-xs text-[#606060] dark:text-[#AAAAAA]">
+      <span className="text-xs text-secondary dark:text-[#AAAAAA]">
         {formatRelative(timestamp)}
       </span>
       {unreadCount > 0 ? (
-        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#990011] dark:bg-[#FF0033] px-1.5 text-xs text-white">
+        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-cath-red-700 px-1.5 text-xs font-bold text-white shadow-xs">
           {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       ) : (
@@ -190,7 +190,7 @@ const ConversationItem = ({
       <span
         className={`truncate ${
           unreadCount > 0
-            ? "font-semibold text-black dark:text-white"
+            ? "font-semibold text-gray-900 dark:text-white"
             : "font-medium text-gray-900 dark:text-gray-100"
         }`}
       >
@@ -198,7 +198,9 @@ const ConversationItem = ({
       </span>
       <span
         className={`text-sm truncate ${
-          unreadCount > 0 ? "font-medium text-black dark:text-gray-200" : "text-[#606060] dark:text-[#AAAAAA]"
+          unreadCount > 0
+            ? "font-medium text-gray-900 dark:text-gray-200"
+            : "text-secondary dark:text-[#AAAAAA]"
         }`}
       >
         {preview ||

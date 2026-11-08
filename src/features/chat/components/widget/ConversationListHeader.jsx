@@ -8,7 +8,7 @@ const ConversationListHeader = ({ onClose, isLoading }) => {
   const { t } = useLanguage()
 
   return (
-    <div className="border-b border-border dark:border-[#3F3F3F]">
+    <div className="border-b border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A]">
       <div className="flex items-center justify-between px-4 h-14">
         <div className="flex items-center gap-4">
           <IconButton
@@ -23,7 +23,7 @@ const ConversationListHeader = ({ onClose, isLoading }) => {
           <h3 className="text-gray-900 dark:text-white font-semibold text-lg">{t.messages.title}</h3>
 
           {isLoading && (
-            <span className="text-xs text-gray-400 dark:text-neutral-500">{t.messages.loading}</span>
+            <span className="text-xs text-secondary dark:text-[#AAAAAA]">{t.messages.loading}</span>
           )}
         </div>
       </div>

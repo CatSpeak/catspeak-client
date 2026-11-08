@@ -69,7 +69,7 @@ const MessageModal = ({ isOpen, children }) => {
           direction="down"
           distance={12}
           exit={true}
-          className="absolute right-0 top-full mt-2 z-[1200] flex h-[480px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-lg "
+          className="absolute right-0 top-full mt-2 z-[1200] flex h-[480px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-lg"
         >
           {children}
         </FluentAnimation>

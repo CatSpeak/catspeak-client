@@ -15,7 +15,7 @@ import NewsPage from "@/features/news/pages/NewsPage"
 import GlobalNewsPage from "@/features/news/pages/GlobalNewsPage"
 import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
 import DiscoverPage from "@/features/discover/DiscoverPage"
-import MailPage from "@/features/mail/pages/MailPage"
+import LettersPage from "@/features/stories/pages/LettersPage.jsx"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
 import CalendarPage from "@/features/calendar/pages/CalendarPage"
 import CreateEventPage from "@/features/calendar/pages/CreateEventPage"
@@ -510,7 +510,7 @@ const routesConfig = [
                   },
                   {
                     path: "letters",
-                    element: <MailPage />,
+                    element: <LettersPage />,
                   },
                   {
                     path: "calendar",

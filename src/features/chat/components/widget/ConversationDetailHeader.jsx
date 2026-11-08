@@ -42,7 +42,7 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
   // ── Group Conversation Header (Height: 72px) ──────────────────────────
   if (isGroup) {
     return (
-      <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pl-1 pr-4 h-[72px] shrink-0">
+      <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pl-1 pr-4 h-[72px] shrink-0 bg-white dark:bg-[#1A1A1A]">
         <div className="flex items-center gap-1 min-w-0 flex-1">
           <IconButton
             onClick={onBack}
@@ -79,7 +79,7 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
 
   // ── Normal 1:1 Conversation Header (Height: 56px / h-14) ──────────────
   return (
-    <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pr-4 pl-1 h-14 shrink-0">
+    <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pr-4 pl-1 h-14 shrink-0 bg-white dark:bg-[#1A1A1A]">
       <div className="flex items-center gap-1 min-w-0 flex-1">
         <IconButton
           onClick={onBack}

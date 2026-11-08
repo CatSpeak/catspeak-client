@@ -304,6 +304,8 @@ const MessageWidget = () => {
         <StackTransition
           activeKey={view}
           direction={slideDirection}
+          className="relative flex-1 w-full h-full min-h-0 overflow-hidden bg-white dark:bg-[#1A1A1A]"
+          screenClassName="absolute inset-0 flex flex-col w-full h-full bg-white dark:bg-[#1A1A1A] overflow-hidden"
           onExitComplete={() => {
             if (view === "list") {
               dispatch(setActiveConversation(null))
@@ -311,7 +313,7 @@ const MessageWidget = () => {
           }}
         >
           {view === "list" ? (
-            <div className="flex flex-col flex-1 h-full w-full overflow-hidden">
+            <div className="flex flex-col flex-1 h-full w-full overflow-hidden bg-white dark:bg-[#1A1A1A]">
               <ConversationListHeader
                 onClose={() => dispatch(closeWidget())}
                 isLoading={isLoading}
@@ -332,14 +334,14 @@ const MessageWidget = () => {
                     : "/chat"
                 }
                 onClick={() => dispatch(closeWidget())}
-                className="h-12 flex items-center justify-center gap-2 border-t border-border dark:border-[#3F3F3F] px-4 text-sm text-cath-red-700 dark:text-red-400 hover:bg-[#f3f3f3] dark:hover:bg-[#272727] transition-colors shrink-0"
+                className="h-12 flex items-center justify-center gap-2 border-t border-border dark:border-[#3F3F3F] px-4 text-sm font-medium text-cath-red-700 dark:text-red-400 hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] transition-colors shrink-0"
               >
                 <ExternalLink size={20} />
                 {t.messages.seeAllChat}
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col flex-1 h-full w-full overflow-hidden">
+            <div className="flex flex-col flex-1 h-full w-full overflow-hidden bg-white dark:bg-[#1A1A1A]">
               <ConversationDetailHeader
                 conversation={displayedConversation}
                 onBack={handleBackToList}
@@ -396,10 +398,10 @@ const MessageWidget = () => {
           dispatch(toggleWidget())
         }}
         variant="ghost"
-        aria-label="Tin nhắn"
+        aria-label={t?.messages?.title || "Messages"}
         badge={
           totalUnreadCount > 0 && (
-            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-2 border-white bg-cath-red-700 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none dark:border-gray-800">
+            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-2 border-white dark:border-[#0F0F0F] bg-cath-red-700 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none">
               {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
             </span>
           )

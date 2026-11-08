@@ -16,7 +16,7 @@ const ConversationList = ({
   const { t } = useLanguage()
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]">
       <div className="flex-1 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-cath-red-700 dark:hover:[&::-webkit-scrollbar-thumb]:bg-red-400">
         {isLoading ? (
           <LoadingSpinner className="flex items-center justify-center py-4" />

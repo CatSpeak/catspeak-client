@@ -18,15 +18,15 @@ const CatSpeakLayout = () => {
   const animationKey = getAnimationKey(location.pathname)
 
   return (
-    <div className="flex flex-col lg:flex-row w-full items-start bg-primaryBg min-h-[calc(100vh-64px)]">
+    <div className="flex flex-col lg:flex-row w-full flex-1 self-stretch items-stretch bg-primaryBg dark:bg-[#0F0F0F]">
       {/* Main Content */}
-      <main className="flex-1 min-w-0 w-full relative flex flex-col">
+      <main className="flex-1 min-w-0 w-full relative flex flex-col self-stretch">
         <AnimatePresence mode="wait">
           <div
             key={animationKey}
-            className="mx-auto w-full  h-full"
+            className="mx-auto w-full h-full flex-1 flex flex-col"
           >
-            <FluentAnimation animationKey={animationKey}>
+            <FluentAnimation animationKey={animationKey} className="w-full h-full flex-1 flex flex-col">
               <Outlet />
             </FluentAnimation>
           </div>

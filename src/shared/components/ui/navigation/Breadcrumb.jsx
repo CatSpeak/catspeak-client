@@ -11,7 +11,7 @@ const Breadcrumb = ({ items, separator = "/", className = "" }) => {
         return (
           <React.Fragment key={index}>
             {isLast ? (
-              <span className="min-w-[120px] flex-1 truncate font-semibold text-cath-red-700 dark:text-[#FF0033]">
+              <span className="min-w-[120px] flex-1 truncate font-semibold text-cath-red-700 dark:text-red-400">
                 {item.label}
               </span>
             ) : (
