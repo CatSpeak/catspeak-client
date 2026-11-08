@@ -8,6 +8,8 @@ import ExploreEcosystemSection from "@/features/landing/components/ExploreEcosys
 import ResponseSection from "@/features/landing/components/ResponseSection"
 import ValuesSection from "@/features/landing/components/ValuesSection"
 import AISection from "@/features/landing/components/AISection"
+import TrustSection from "@/features/landing/components/TrustSection"
+import AchievementsSection from "@/features/landing/components/AchievementsSection"
 import FAQSection from "@/features/landing/components/FAQSection"
 
 const LandingPage = () => {
@@ -111,22 +113,28 @@ const LandingPage = () => {
       {/* 2. Partner network */}
       <PartnerNetworkSection />
 
-      {/* 3. News */}
+      {/* 3. Trust / proof section */}
+      <TrustSection />
+
+      {/* 4. Achievements */}
+      <AchievementsSection />
+
+      {/* 5. News */}
       <NewsSection />
 
-      {/* 4. Explore Ecosystem */}
+      {/* 6. Explore Ecosystem */}
       <ExploreEcosystemSection />
 
-      {/* 5. Response (Testimonials) */}
+      {/* 7. Response (Testimonials) */}
       <ResponseSection />
 
-      {/* 6. Values */}
+      {/* 8. Values */}
       <ValuesSection />
 
-      {/* 7. AI Section */}
+      {/* 9. AI Section */}
       <AISection />
 
-      {/* 8. FAQ */}
+      {/* 10. FAQ */}
       <FAQSection />
 
       {/* Auth Modal */}
