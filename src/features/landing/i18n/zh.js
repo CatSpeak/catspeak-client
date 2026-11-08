@@ -148,6 +148,14 @@ export default {
     partner: {
       title: "合作机构",
     },
+    partnerNetwork: {
+      eyebrow: "合作伙伴与协作网络",
+      title: "与大学及语言社团携手同行",
+      description:
+        "CAT SPEAK 与学术社团和教育机构合作，为全国年轻学习者带来真实的口语练习环境。",
+      cta: "申请成为学校 / 社团合作伙伴",
+      partnersLabel: "合作伙伴网络",
+    },
     response: {
       title: "反馈",
       subtitle: "看看大家在说什么 Cat Speak！",

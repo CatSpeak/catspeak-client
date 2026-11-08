@@ -4,6 +4,7 @@ export { default as FAQSection } from "./components/FAQSection"
 export { default as LanguageBar } from "./components/LanguageBar"
 export { default as ValuesSection } from "./components/ValuesSection"
 export { default as LeadingTeamSection } from "./components/LeadingTeamSection"
+export { default as PartnerNetworkSection } from "./components/PartnerNetworkSection"
 export { default as InstructorCard } from "./components/InstructorCard"
 export { default as InstructorSkeletonCard } from "./components/InstructorSkeletonCard"
 export { default as NewsSection } from "./components/NewsSection"
@@ -12,5 +13,4 @@ export { default as LandingNewsSkeletonCard } from "./components/LandingNewsSkel
 export { default as AnimatedCounter } from "./components/AnimatedCounter"
 export { default as ScrollReveal } from "./components/ScrollReveal"
 export { landingTranslations } from "./i18n"
-
 
