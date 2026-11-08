@@ -149,6 +149,14 @@ export default {
     partner: {
       title: "提携機関",
     },
+    partnerNetwork: {
+      eyebrow: "パートナー・ネットワーク",
+      title: "大学・語学クラブとともに",
+      description:
+        "CAT SPEAKは学術クラブや教育機関と連携し、全国の若い学習者に実践的な会話環境を提供します。",
+      cta: "学校・クラブとして提携する",
+      partnersLabel: "パートナーネットワーク",
+    },
     response: {
       title: "お客様の声",
       subtitle: "Cat Speakについてみんなが語る声をご覧ください！",

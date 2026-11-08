@@ -198,6 +198,14 @@ export default {
     partner: {
       title: "Đơn vị kết nối",
     },
+    partnerNetwork: {
+      eyebrow: "ĐỐI TÁC & MẠNG LƯỚI ĐỒNG HÀNH",
+      title: "Đồng hành cùng các trường đại học & câu lạc bộ ngôn ngữ",
+      description:
+        "CAT SPEAK hợp tác cùng các câu lạc bộ học thuật và tổ chức giáo dục để mang môi trường luyện nói thực tế đến cộng đồng người học trẻ trên toàn quốc.",
+      cta: "Đăng ký đối tác trường / CLB",
+      partnersLabel: "Mạng lưới đối tác",
+    },
     response: {
       title: "Phản hồi",
       subtitle: "Hãy xem mọi người đang nói gì về Cat Speak!",

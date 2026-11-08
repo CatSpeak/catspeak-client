@@ -153,6 +153,14 @@ export default {
     partner: {
       title: "Partner Organizations",
     },
+    partnerNetwork: {
+      eyebrow: "OUR PARTNERS & NETWORK",
+      title: "Partnering with universities & language clubs",
+      description:
+        "CAT SPEAK works with academic clubs and educational organizations to bring real speaking practice to young learners nationwide.",
+      cta: "Become a school / club partner",
+      partnersLabel: "Partner network",
+    },
     response: {
       title: "Feedback",
       subtitle: "See what people are saying about Cat Speak!",

@@ -2,10 +2,9 @@ import { useState } from "react"
 import { motion as Motion } from "framer-motion"
 import { LoginPopup, RegisterPopup, VerifyEmailOtpPopup } from "@/features/auth"
 import HeroSection from "@/features/landing/components/HeroSection"
-import LeadingTeamSection from "@/features/landing/components/LeadingTeamSection"
+import PartnerNetworkSection from "@/features/landing/components/PartnerNetworkSection"
 import NewsSection from "@/features/landing/components/NewsSection"
 import ExploreEcosystemSection from "@/features/landing/components/ExploreEcosystemSection"
-import PartnerSection from "@/features/landing/components/PartnerSection"
 import ResponseSection from "@/features/landing/components/ResponseSection"
 import ValuesSection from "@/features/landing/components/ValuesSection"
 import AISection from "@/features/landing/components/AISection"
@@ -109,8 +108,8 @@ const LandingPage = () => {
         <HeroSection openAuthModal={openAuthModal} />
       </Motion.div>
 
-      {/* 2. Leading Team */}
-      <LeadingTeamSection openAuthModal={openAuthModal} />
+      {/* 2. Partner network */}
+      <PartnerNetworkSection />
 
       {/* 3. News */}
       <NewsSection />
@@ -118,19 +117,16 @@ const LandingPage = () => {
       {/* 4. Explore Ecosystem */}
       <ExploreEcosystemSection />
 
-      {/* 5. Partner */}
-      <PartnerSection />
-
-      {/* 6. Response (Testimonials) */}
+      {/* 5. Response (Testimonials) */}
       <ResponseSection />
 
-      {/* 7. Values */}
+      {/* 6. Values */}
       <ValuesSection />
 
-      {/* 8. AI Section */}
+      {/* 7. AI Section */}
       <AISection />
 
-      {/* 9. FAQ */}
+      {/* 8. FAQ */}
       <FAQSection />
 
       {/* Auth Modal */}
