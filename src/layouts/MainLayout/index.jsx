@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import {
   Outlet,
   useLocation,
+  useNavigate,
   useSearchParams,
   ScrollRestoration,
 } from "react-router-dom"
@@ -15,6 +16,7 @@ import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
 import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader"
+import { getCommunityPath } from "@/shared/utils/navigation"
 import {
   TourGuideProvider,
   TourGuideContainer,
@@ -45,6 +47,7 @@ const MainLayout = ({
   })
 
   const location = useLocation()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isLandingPage = location.pathname === "/"
   const isCommunityPage = location.pathname.includes("/community")
@@ -184,7 +187,7 @@ const MainLayout = ({
           {showHeader &&
             (isLandingPage ? (
               <LandingHeader
-                onGetStarted={(mode) => openAuthModal(mode || "login")}
+                onGetStarted={() => navigate(getCommunityPath())}
               />
             ) : (
               <MainHeader

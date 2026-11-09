@@ -20,17 +20,17 @@ const Footer = () => {
       id="contact"
       className="scroll-mt-[72px] border-t border-white/10 bg-[#242424] text-white"
     >
-      <div className="mx-auto max-w-[1280px] px-6 pb-7 pt-10 sm:px-8 sm:pt-12 lg:px-10">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.25fr_0.85fr_1.15fr] lg:gap-16">
+      <div className="mx-auto max-w-[1226px] px-6 pb-7 pt-10 sm:px-8 lg:px-6 xl:px-0">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[34%_18%_32%] lg:justify-between lg:gap-0">
           <div>
             <a
               href="/"
               aria-label="CAT SPEAK - Trang chủ"
-              className="inline-flex rounded-lg bg-white px-3 py-2"
+              className="inline-flex h-12 w-[152px] items-center justify-center rounded-lg bg-white px-3"
             >
-              <img src={MainLogo} alt="CAT SPEAK" className="h-8 w-auto" />
+              <img src={MainLogo} alt="CAT SPEAK" className="h-auto w-32" />
             </a>
-            <p className="mt-5 max-w-[430px] text-sm leading-[1.7] text-gray-300">
+            <p className="mt-5 max-w-[390px] text-sm leading-[1.7] text-gray-300">
               Nền tảng cộng đồng luyện nói 3 ngôn ngữ Anh - Trung - Nhật cùng
               người thật và AI linh hoạt theo nhu cầu. Biến kiến thức thành
               những cuộc trò chuyện thực tế.
@@ -50,7 +50,7 @@ const Footer = () => {
                 <li key={label}>
                   <a
                     href={href}
-                    className="text-sm text-gray-300 transition-colors hover:text-white"
+                    className="text-xs text-gray-300 transition-colors hover:text-white"
                   >
                     {label}
                   </a>
@@ -59,7 +59,7 @@ const Footer = () => {
             </ul>
             <a
               href="mailto:catspeak.vn@gmail.com?subject=Li%C3%AAn%20h%E1%BB%87%20h%E1%BB%A3p%20t%C3%A1c"
-              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-amber-400 transition-colors hover:text-amber-300"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-400 transition-colors hover:text-amber-300"
             >
               Trang liên hệ & hợp tác
               <span aria-hidden="true">→</span>
@@ -70,7 +70,7 @@ const Footer = () => {
             <h2 className="text-xs font-bold uppercase tracking-wide text-white">
               Thông tin liên hệ & kênh chính thức
             </h2>
-            <ul className="mt-4 space-y-2.5 text-sm text-gray-300">
+            <ul className="mt-4 space-y-2.5 text-xs text-gray-300">
               <li>
                 <a
                   href="mailto:catspeak.vn@gmail.com"
@@ -104,14 +104,14 @@ const Footer = () => {
                 </a>
               </li>
             </ul>
-            <p className="mt-5 inline-flex items-center gap-2 text-xs text-gray-400">
+            <p className="mt-5 inline-flex items-center gap-2 text-[11px] text-gray-400">
               <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
               Thời gian hỗ trợ: 08:30 - 21:00 (Thứ Hai - Chủ Nhật)
             </p>
           </div>
         </div>
 
-        <div className="mt-10 border-t border-white/10 pt-4 sm:mt-12">
+        <div className="mt-14 border-t border-white/10 pt-4">
           <div className="flex flex-col items-start justify-between gap-4 text-xs text-gray-400 sm:flex-row sm:items-center">
             <p>
               © {currentYear} CAT SPEAK Community. Bản quyền thuộc về CAT SPEAK.

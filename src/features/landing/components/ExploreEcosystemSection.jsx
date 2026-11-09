@@ -9,7 +9,7 @@ const ECOSYSTEM_CONFIGS = [
     key: "ai",
     icon: Bot,
     cardClass:
-      "bg-[#F4EEFF]/75 backdrop-blur-md border border-purple-200/60 shadow-sm",
+      "bg-[#F4EEFF]/75 backdrop-blur-md border border-purple-200/60 shadow-sm dark:bg-[#24212d]/90 dark:border-[#463e59]",
     accentBgClass: "bg-[#DDD6FE]/80",
     iconColorClass: "text-[#7C3AED]",
     accentTextColorClass: "text-[#6D28D9]",
@@ -22,7 +22,7 @@ const ECOSYSTEM_CONFIGS = [
     key: "gamification",
     icon: Crown,
     cardClass:
-      "bg-[#FEFCE8]/75 backdrop-blur-md border border-yellow-200/60 shadow-sm",
+      "bg-[#FEFCE8]/75 backdrop-blur-md border border-yellow-200/60 shadow-sm dark:bg-[#2b281d]/90 dark:border-[#5b4e2c]",
     accentBgClass: "bg-[#FEF08A]/80",
     iconColorClass: "text-[#CA8A04]",
     accentTextColorClass: "text-[#A16207]",
@@ -35,7 +35,7 @@ const ECOSYSTEM_CONFIGS = [
     key: "resources",
     icon: BookOpen,
     cardClass:
-      "bg-[#F0FDF4]/75 backdrop-blur-md border border-emerald-200/60 shadow-sm",
+      "bg-[#F0FDF4]/75 backdrop-blur-md border border-emerald-200/60 shadow-sm dark:bg-[#1d2b23]/90 dark:border-[#355843]",
     accentBgClass: "bg-[#BBF7D0]/80",
     iconColorClass: "text-[#16A34A]",
     accentTextColorClass: "text-[#15803D]",
@@ -48,7 +48,7 @@ const ECOSYSTEM_CONFIGS = [
     key: "community",
     icon: Users,
     cardClass:
-      "bg-[#FDF2F8]/75 backdrop-blur-md border border-pink-200/60 shadow-sm",
+      "bg-[#FDF2F8]/75 backdrop-blur-md border border-pink-200/60 shadow-sm dark:bg-[#2c2029]/90 dark:border-[#59384d]",
     accentBgClass: "bg-[#FBCFE8]/80",
     iconColorClass: "text-[#DB2777]",
     accentTextColorClass: "text-[#BE185D]",
@@ -70,7 +70,7 @@ const ExploreEcosystemSection = () => {
   return (
     <section
       id="features"
-      className="w-full scroll-mt-[72px] py-8 sm:py-10 md:py-14 lg:py-16 bg-white relative overflow-hidden"
+      className="relative w-full scroll-mt-[72px] overflow-hidden bg-white py-8 transition-colors dark:bg-[#0F0F0F] sm:py-10 md:py-14 lg:py-16"
     >
       {/* Hand-drawn SVG Doodle — Organic Loop path across and behind the cards */}
       <PencilDoodle
@@ -88,17 +88,17 @@ const ExploreEcosystemSection = () => {
           <ScrollItem>
             <div className="relative w-[370px] h-[120px] mx-auto mb-8 select-none">
               {/* Bubble 1: Top Left (Soft Pink Fill, Overlaps Bubble 2) */}
-              <div className="absolute top-0 left-0 z-20 bg-[#FEECEF] text-[#800A08] font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 rounded-[22px] rounded-bl-[4px] shadow-sm whitespace-nowrap">
+              <div className="absolute top-0 left-0 z-20 whitespace-nowrap rounded-[22px] rounded-bl-[4px] bg-[#FEECEF] px-5 py-2.5 text-sm font-bold text-[#800A08] shadow-sm dark:bg-[#3a2225] dark:text-[#ffb8bf] sm:px-6 sm:py-3 sm:text-base">
                 {bubblesT.naturalCommunication || "Giao tiếp tự nhiên"}
               </div>
 
               {/* Bubble 2: Middle Right (Red Outline, Underneath 1 & 3) */}
-              <div className="absolute top-[18px] left-[140px] z-10 bg-white border-2 border-[#910B09] text-[#800A08] font-bold text-sm sm:text-base pl-8 pr-6 sm:pl-9 sm:pr-7 py-2.5 sm:py-3 rounded-[22px] rounded-tr-[36px] rounded-l-[8px] whitespace-nowrap">
+              <div className="absolute top-[18px] left-[140px] z-10 whitespace-nowrap rounded-[22px] rounded-l-[8px] rounded-tr-[36px] border-2 border-[#910B09] bg-white py-2.5 pl-8 pr-6 text-sm font-bold text-[#800A08] dark:bg-[#222] dark:text-[#ffb8bf] sm:py-3 sm:pl-9 sm:pr-7 sm:text-base">
                 {bubblesT.communityCommunication || "Giao tiếp cộng đồng"}
               </div>
 
               {/* Bubble 3: Bottom Center/Left (Soft Cream Fill, Overlaps Bubble 2) */}
-              <div className="absolute top-[64px] left-[35px] z-30 bg-[#FFF8E7] text-[#800A08] font-bold text-sm sm:text-base px-6 sm:px-7 py-2.5 sm:py-3 rounded-[22px] rounded-bl-[4px] shadow-sm whitespace-nowrap">
+              <div className="absolute top-[64px] left-[35px] z-30 whitespace-nowrap rounded-[22px] rounded-bl-[4px] bg-[#FFF8E7] px-6 py-2.5 text-sm font-bold text-[#800A08] shadow-sm dark:bg-[#382e1e] dark:text-[#ffdda0] sm:px-7 sm:py-3 sm:text-base">
                 {bubblesT.realtimePractice || "Thực Hành Real-time"}
               </div>
             </div>
@@ -107,12 +107,12 @@ const ExploreEcosystemSection = () => {
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-14">
             <ScrollItem>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
+              <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl lg:text-5xl">
                 {ecoT.title || "Khám phá hệ sinh thái học tập"}
               </h2>
             </ScrollItem>
             <ScrollItem>
-              <p className="text-gray-600 text-base sm:text-lg mt-4 leading-relaxed">
+              <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-gray-300 sm:text-lg">
                 {ecoT.subtitle ||
                   "Kết nối tri thức, tối ưu lộ trình và phát triển ngôn ngữ bền vững."}
               </p>
@@ -148,8 +148,8 @@ const ExploreEcosystemSection = () => {
                         </span>
                       </div>
 
-                      <h3 className="text-2xl font-bold mt-6 mb-2">{title}</h3>
-                      <p className="text-secondary">{description}</p>
+                      <h3 className="mb-2 mt-6 text-2xl font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+                      <p className="text-secondary dark:text-gray-300">{description}</p>
                     </div>
                   </div>
                 </ScrollItem>

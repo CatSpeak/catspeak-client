@@ -50,7 +50,7 @@ const ResponseSection = () => {
             </h2>
           </ScrollItem>
           <ScrollItem>
-            <p className="text-secondary leading-relaxed mb-8">
+            <p className="mb-8 leading-relaxed text-secondary dark:text-gray-300">
               {respT.subtitle}
             </p>
           </ScrollItem>
@@ -89,16 +89,16 @@ const ResponseSection = () => {
             {reviews.map((review, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-[min(390px,85vw)] bg-white/80 backdrop-blur-md border border-[#990011] rounded-xl p-4 sm:p-6 flex flex-col gap-6 shadow-sm snap-start transition-all"
+                className="flex w-[min(390px,85vw)] flex-shrink-0 snap-start flex-col gap-6 rounded-xl border border-[#990011] bg-white/80 p-4 shadow-sm backdrop-blur-md transition-all dark:border-[#702630] dark:bg-[#1c1c1c]/90 sm:p-6"
               >
-                <p className="leading-relaxed flex-1">"{review.text}"</p>
+                <p className="flex-1 leading-relaxed text-gray-800 dark:text-gray-200">"{review.text}"</p>
                 <div className="flex items-center gap-4">
                   <AvatarPlaceholder
                     name={review.name}
                     color={avatarColors[i % avatarColors.length]}
                   />
                   <div className="flex flex-col">
-                    <span className="font-bold">{review.name}</span>
+                    <span className="font-bold text-gray-900 dark:text-gray-100">{review.name}</span>
                     <span className="text-sm text-secondary">
                       {review.role}
                     </span>

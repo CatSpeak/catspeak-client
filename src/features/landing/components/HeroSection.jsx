@@ -28,7 +28,7 @@ const HeroSection = ({ openAuthModal }) => {
   return (
     <section
       id="problem"
-      className="w-full scroll-mt-[72px] bg-white px-5 py-8 sm:px-8 sm:py-10 lg:px-8 lg:py-0"
+      className="w-full scroll-mt-[72px] bg-white px-5 py-8 transition-colors sm:px-8 sm:py-10 dark:bg-[#0F0F0F] lg:px-8 lg:py-0"
     >
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-10 lg:min-h-[560px] lg:grid-cols-[minmax(0,1.35fr)_minmax(420px,0.95fr)] lg:gap-8 xl:gap-10">
         <div className="flex flex-col justify-center lg:py-10">
@@ -50,7 +50,7 @@ const HeroSection = ({ openAuthModal }) => {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, delay: 0.16 }}
-            className="max-w-[720px] text-[clamp(2.35rem,4.2vw,3.35rem)] font-bold leading-[1.08] tracking-[-0.045em] text-[#171717]"
+            className="max-w-[720px] text-[clamp(2.35rem,4.2vw,3.35rem)] font-bold leading-[1.08] tracking-[-0.045em] text-[#171717] dark:text-white"
           >
             {heroT.titlePrefix || homeT.heroTitle1 || "Tự tin luyện nói ngoại ngữ cùng"}{" "}
             <span className="text-[#A90016]">
@@ -63,7 +63,7 @@ const HeroSection = ({ openAuthModal }) => {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, delay: 0.24 }}
-            className="mt-6 max-w-[680px] text-base leading-[1.75] text-[#555] sm:text-lg"
+            className="mt-6 max-w-[680px] text-base leading-[1.75] text-[#555] dark:text-gray-300 sm:text-lg"
           >
             {heroT.description ||
               homeT.heroSubtitle ||
@@ -94,7 +94,7 @@ const HeroSection = ({ openAuthModal }) => {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-6 grid grid-cols-3 border-t border-[#EEEEEE] pt-4"
+            className="mt-6 grid grid-cols-3 border-t border-[#EEEEEE] pt-4 dark:border-[#333]"
           >
             {[
               {
@@ -111,10 +111,12 @@ const HeroSection = ({ openAuthModal }) => {
               },
             ].map(({ label, value }, index) => (
               <div key={label} className="min-w-0 pr-2 sm:pr-4">
-                <p className="text-xs leading-5 text-[#777] sm:text-sm">{label}</p>
+                <p className="text-xs leading-5 text-[#777] dark:text-gray-400 sm:text-sm">{label}</p>
                 <p
                   className={`mt-0.5 text-xs font-semibold leading-5 sm:text-sm ${
-                    index === 1 ? "text-[#A90016]" : "text-[#171717]"
+                    index === 1
+                      ? "text-[#A90016] dark:text-[#FF7A8A]"
+                      : "text-[#171717] dark:text-gray-100"
                   }`}
                 >
                   {value}

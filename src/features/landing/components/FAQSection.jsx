@@ -42,11 +42,11 @@ const FAQSection = () => {
         src={Element6}
         alt=""
         aria-hidden="true"
-        className="absolute bottom-0 left-0 w-[500px] sm:w-[700px] md:w-[900px] lg:w-[1100px] opacity-60 pointer-events-none select-none z-0"
+        className="absolute bottom-0 left-0 z-0 w-[500px] select-none opacity-60 pointer-events-none dark:opacity-20 sm:w-[700px] md:w-[900px] lg:w-[1100px]"
       />
 
       {/* Main Container - Edge-to-edge on the right, aligned with breathing room on the left */}
-      <div className="relative z-10 ml-4 sm:ml-8 md:ml-12 lg:ml-[max(2.5rem,calc((100vw-1280px)/2+2.5rem))] xl:ml-[max(3.5rem,calc((100vw-1320px)/2+3.5rem))] mr-0 rounded-l-3xl md:rounded-l-[40px] rounded-r-none border-y border-l border-[#E29B9F] bg-[#FFF0EE] min-h-[500px]">
+      <div className="relative z-10 ml-4 mr-0 min-h-[500px] rounded-l-3xl rounded-r-none border-y border-l border-[#E29B9F] bg-[#FFF0EE] transition-colors dark:border-[#633238] dark:bg-[#21191a] sm:ml-8 md:ml-12 md:rounded-l-[40px] lg:ml-[max(2.5rem,calc((100vw-1280px)/2+2.5rem))] xl:ml-[max(3.5rem,calc((100vw-1320px)/2+3.5rem))]">
         {/* Inner Content Grid */}
         <ScrollReveal
           stagger
@@ -61,13 +61,13 @@ const FAQSection = () => {
                 </span>
               </ScrollItem>
               <ScrollItem>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-black mb-4 leading-tight text-balance">
+                <h2 className="mb-4 text-balance text-3xl font-extrabold leading-tight text-black dark:text-gray-100 sm:text-4xl lg:text-5xl">
                   {faqTitle}
                 </h2>
               </ScrollItem>
               {faqDescription && (
                 <ScrollItem>
-                  <p className="text-gray-600 leading-relaxed max-w-md">
+                  <p className="max-w-md leading-relaxed text-gray-600 dark:text-gray-300">
                     {faqDescription}
                   </p>
                 </ScrollItem>
@@ -87,14 +87,14 @@ const FAQSection = () => {
 
           {/* Right Column: Accordion */}
           <ScrollItem className="lg:col-span-7 xl:col-span-8 flex flex-col justify-center w-full">
-            <div className="border-t border-[#E6C6C6] w-full">
+            <div className="w-full border-t border-[#E6C6C6] dark:border-[#4a3436]">
               {questions.map((item, originalIndex) => {
                 const isExpanded = expandedQuestions.has(originalIndex)
 
                 return (
                   <div
                     key={originalIndex}
-                    className="border-b border-[#E6C6C6] py-3.5 sm:py-4.5 transition-all"
+                    className="border-b border-[#E6C6C6] py-3.5 transition-all dark:border-[#4a3436] sm:py-4.5"
                   >
                     <button
                       type="button"
@@ -102,9 +102,9 @@ const FAQSection = () => {
                       aria-controls={`panel${originalIndex}-content`}
                       id={`panel${originalIndex}-header`}
                       onClick={() => toggleQuestion(originalIndex)}
-                      className="flex w-full items-center justify-between outline-none py-1 text-left group cursor-pointer"
+                      className="group flex w-full cursor-pointer items-center justify-between py-1 text-left outline-none"
                     >
-                      <span className="flex-1 font-medium text-black text-left pr-4 sm:pr-6 leading-snug transition-colors group-hover:text-[#990011]">
+                      <span className="flex-1 pr-4 text-left font-medium leading-snug text-black transition-colors group-hover:text-[#990011] dark:text-gray-100 dark:group-hover:text-[#ff7a8a] sm:pr-6">
                         {item.question}
                       </span>
 
@@ -112,7 +112,11 @@ const FAQSection = () => {
                         as="div"
                         size="sm"
                         variant={isExpanded ? "white" : "primary"}
-                        className="ml-2 shrink-0"
+                        className={`ml-2 shrink-0 ${
+                          isExpanded
+                            ? "dark:border-[#444] dark:bg-[#2b2b2b] dark:text-gray-100"
+                            : ""
+                        }`}
                       >
                         {isExpanded ? <Minus /> : <Plus />}
                       </IconButton>

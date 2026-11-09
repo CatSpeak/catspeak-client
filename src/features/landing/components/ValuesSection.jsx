@@ -126,12 +126,12 @@ const ValuesSection = () => {
           {/* Header */}
           <div className="mb-12 sm:mb-16 flex flex-col items-center justify-center space-y-3 text-center max-w-3xl mx-auto">
             <ScrollItem>
-              <span className="text-sm font-semibold text-secondary tracking-wider uppercase">
+              <span className="text-sm font-semibold uppercase tracking-wider text-secondary dark:text-gray-400">
                 {whyChooseUs}
               </span>
             </ScrollItem>
             <ScrollItem>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#910B09] tracking-tight leading-tight">
+              <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-[#910B09] dark:text-[#ff7a8a] sm:text-4xl lg:text-5xl">
                 {valuesTitle}
               </h2>
             </ScrollItem>

@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom"
 import { ArrowRight, Newspaper } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetLandingPostsQuery } from "@/store/api/social/postsApi"
-import { getCommunityName } from "@/features/news/utils/newsUtils"
 import { PillButton } from "@/shared/components/ui/buttons"
 import LandingNewsCard from "./LandingNewsCard"
 import LandingNewsSkeletonCard from "./LandingNewsSkeletonCard"
@@ -50,7 +49,7 @@ const NewsSection = () => {
   const newsT = t?.landing?.news || {}
 
   return (
-    <section className="relative w-full py-8 sm:py-10 md:py-14 lg:py-16 bg-white overflow-hidden">
+    <section className="relative w-full overflow-hidden bg-white py-8 transition-colors dark:bg-[#0F0F0F] sm:py-10 md:py-14 lg:py-16">
       {/* Background Translucent Watermark Text */}
       <div className="absolute top-12 left-0 right-0 pointer-events-none select-none overflow-hidden z-0 opacity-15 whitespace-nowrap">
         <span className="text-[120px] font-black text-rose-300 tracking-wider">
@@ -63,12 +62,12 @@ const NewsSection = () => {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-6">
           <div>
             <ScrollItem>
-              <p className="text-sm font-semibold text-gray-500 tracking-wide uppercase mb-1">
+              <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 {newsT.subtitle || "Theo dòng sự kiện"}
               </p>
             </ScrollItem>
             <ScrollItem>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900">
+              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl lg:text-5xl">
                 {newsT.titlePrefix || "Bản tin"}{" "}
                 <span className="text-[#910B09]">
                   {newsT.titleSuffix || "Cat Speak"}
@@ -101,9 +100,9 @@ const NewsSection = () => {
         ) : displayPosts.length === 0 ? (
           /* Empty State */
           <ScrollItem>
-            <div className="flex flex-col items-center justify-center py-16 text-center text-gray-500">
-              <Newspaper size={48} className="text-gray-300 mb-3" />
-              <p className="font-medium text-gray-600">
+            <div className="flex flex-col items-center justify-center py-16 text-center text-gray-500 dark:text-gray-400">
+              <Newspaper size={48} className="mb-3 text-gray-300 dark:text-gray-600" />
+              <p className="font-medium text-gray-600 dark:text-gray-300">
                 {newsT.emptyText || "Chưa có bài viết tin tức nào"}
               </p>
             </div>

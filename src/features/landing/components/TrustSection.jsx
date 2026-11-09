@@ -1,3 +1,4 @@
+import { createElement } from "react"
 import { BadgeCheck, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react"
 
 const trustItems = [
@@ -7,7 +8,7 @@ const trustItems = [
     description:
       "Nền tảng đã chính thức được hoạt động, luôn sẵn sàng hỗ trợ người học mọi lúc, mọi nơi với độ ổn định cao.",
     accent: "text-[#B3261E]",
-    iconWrap: "bg-[#FDECEC] border-[#F3D0CD]",
+    iconWrap: "bg-[#FDECEC] border-[#F3D0CD] dark:bg-[#3A2225] dark:border-[#633238]",
   },
   {
     icon: LockKeyhole,
@@ -15,7 +16,7 @@ const trustItems = [
     description:
       "Thông tin cá nhân và dữ liệu học tập được bảo vệ nghiêm ngặt, không chia sẻ cho bên thứ ba mà không có sự đồng ý.",
     accent: "text-[#B3261E]",
-    iconWrap: "bg-[#FDECEC] border-[#F3D0CD]",
+    iconWrap: "bg-[#FDECEC] border-[#F3D0CD] dark:bg-[#3A2225] dark:border-[#633238]",
   },
   {
     icon: BadgeCheck,
@@ -23,7 +24,7 @@ const trustItems = [
     description:
       "Quy chuẩn phòng luyện văn minh, tôn trọng lẫn nhau, tạo ra không gian học tập tích cực và chuyên nghiệp.",
     accent: "text-[#2F8F5B]",
-    iconWrap: "bg-[#ECF9F1] border-[#CCECD7]",
+    iconWrap: "bg-[#ECF9F1] border-[#CCECD7] dark:bg-[#1D3328] dark:border-[#315A43]",
   },
   {
     icon: Sparkles,
@@ -31,25 +32,25 @@ const trustItems = [
     description:
       "Cam kết nội dung học tập đi đúng hướng, giảm vòng lặp giả tạo và mang lại kết quả rõ ràng cho mỗi người học.",
     accent: "text-[#D97706]",
-    iconWrap: "bg-[#FFF7E8] border-[#F5E3B8]",
+    iconWrap: "bg-[#FFF7E8] border-[#F5E3B8] dark:bg-[#382E1E] dark:border-[#62502B]",
   },
 ]
 
 const TrustSection = () => {
   return (
-    <section className="w-full border-t border-[#d9d9d9] bg-[#f3f3f3] px-4 py-8 sm:px-6 lg:px-8 xl:px-10">
+    <section className="w-full border-t border-[#d9d9d9] bg-[#f3f3f3] px-4 py-8 transition-colors dark:border-[#303030] dark:bg-[#171717] sm:px-6 lg:px-8 xl:px-10">
       <div className="mx-auto max-w-[1280px]">
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-[760px]">
-            <p className="text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-[#B3261E] sm:text-xs">
+            <p className="text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-[#B3261E] dark:text-[#ff7a8a] sm:text-xs">
               MINH BẠCH & ĐỘT TIN CÂY
             </p>
-            <h2 className="mt-3 text-[clamp(2rem,3.2vw,3rem)] font-black leading-tight tracking-[-0.04em] text-[#121212]">
+            <h2 className="mt-3 text-[clamp(2rem,3.2vw,3rem)] font-black leading-tight tracking-[-0.04em] text-[#121212] dark:text-white">
               Cam kết trải nghiệm học tập an toàn và trung thực
             </h2>
           </div>
 
-          <div className="inline-flex w-fit items-center gap-3 rounded-[14px] border border-[#d8d8d8] bg-[#f7f7f7] px-4 py-2.5 text-sm text-[#222] shadow-sm">
+          <div className="inline-flex w-fit items-center gap-3 rounded-[14px] border border-[#d8d8d8] bg-[#f7f7f7] px-4 py-2.5 text-sm text-[#222] shadow-sm dark:border-[#3d3d3d] dark:bg-[#222] dark:text-gray-200">
             <span className="inline-block h-3.5 w-3.5 rounded-full bg-[#2FBF71] shadow-[0_0_0_5px_rgba(47,191,113,0.14)]" />
             <span>Trạng thái hệ thống: Đang hoạt động trực tuyến 24/7</span>
           </div>
@@ -59,18 +60,21 @@ const TrustSection = () => {
           {trustItems.map(({ icon: Icon, title, description, accent, iconWrap }) => (
             <article
               key={title}
-              className="flex min-h-[250px] flex-col rounded-[22px] border border-[#d8d8d8] bg-[#f8f8f8] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+              className="flex min-h-[250px] flex-col rounded-[22px] border border-[#d8d8d8] bg-[#f8f8f8] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors dark:border-[#3b3b3b] dark:bg-[#222] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
             >
               <div
                 className={`mb-8 flex h-12 w-12 items-center justify-center rounded-xl border ${iconWrap}`}
               >
-                <Icon className={`h-5 w-5 ${accent}`} strokeWidth={2.2} />
+                {createElement(Icon, {
+                  className: `h-5 w-5 ${accent}`,
+                  strokeWidth: 2.2,
+                })}
               </div>
 
-              <h3 className="text-[1.03rem] font-semibold leading-snug text-[#171717]">
+              <h3 className="text-[1.03rem] font-semibold leading-snug text-[#171717] dark:text-gray-100">
                 {title}
               </h3>
-              <p className="mt-3 text-[0.95rem] leading-[1.7] text-[#4a4a4a]">
+              <p className="mt-3 text-[0.95rem] leading-[1.7] text-[#4a4a4a] dark:text-gray-300">
                 {description}
               </p>
             </article>
