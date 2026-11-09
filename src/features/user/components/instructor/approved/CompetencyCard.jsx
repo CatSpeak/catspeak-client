@@ -41,16 +41,16 @@ const CompetencyCard = ({
   return (
     <FluentCard className="p-5 sm:p-6 flex flex-col gap-5">
       {/* ─── Card Header: Title + Public Link + Edit Button ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-[#2E2E2E]">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-red-50 text-[#990011] flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-rose-950/40 text-[#990011] dark:text-red-400 flex items-center justify-center shrink-0">
             <Sparkles size={18} />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white leading-tight">
               {ins.competencyProfileTitle || "Hồ sơ năng lực giảng dạy"}
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
               {ins.competencyProfileSubtitle ||
                 "Quản lý chuyên môn, triết lý giảng dạy, học vấn, kinh nghiệm và chứng chỉ công khai."}
             </p>
@@ -64,7 +64,7 @@ const CompetencyCard = ({
               href={`/explore/teachers/${encodeURIComponent(teacherSlugOrId)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-9 items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#990011] transition-colors px-3 rounded-[7px] border border-slate-200 hover:bg-slate-50 shadow-2xs"
+              className="inline-flex h-9 items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-neutral-300 hover:text-[#990011] dark:hover:text-red-400 transition-colors px-3 rounded-[7px] border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727] shadow-2xs"
             >
               <span>
                 {ins.viewPublicProfile || "Xem trang cá nhân công khai"}
@@ -77,7 +77,7 @@ const CompetencyCard = ({
           <button
             type="button"
             onClick={onEdit}
-            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-[7px] border border-[#990011] px-3 text-xs font-semibold text-[#990011] transition-colors hover:bg-[#990011]/5 active:bg-[#990011]/10 shadow-2xs cursor-pointer"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-[7px] border border-[#990011] dark:border-red-400 px-3 text-xs font-semibold text-[#990011] dark:text-red-400 transition-colors hover:bg-[#990011]/5 dark:hover:bg-red-950/30 active:bg-[#990011]/10 shadow-2xs cursor-pointer"
           >
             <Pencil size={14} className="shrink-0" />
             <span className="whitespace-nowrap">{ins.edit || "Chỉnh sửa"}</span>
@@ -89,16 +89,16 @@ const CompetencyCard = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5 pt-1">
         {/* Row 1 Left: Headline */}
         <div className="flex flex-col">
-          <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          <div className="text-xs font-bold text-slate-700 dark:text-neutral-300 uppercase tracking-wide">
             {ins.headlineLabel || "Chuyên môn hiển thị"}
           </div>
           <div className="mt-1.5">
             {comp.headline ? (
-              <span className="text-sm font-bold text-slate-900">
+              <span className="text-sm font-bold text-slate-900 dark:text-white">
                 {comp.headline}
               </span>
             ) : (
-              <span className="text-xs text-slate-400 italic">
+              <span className="text-xs text-slate-400 dark:text-neutral-500 italic">
                 {ins.notSet || "Chưa thiết lập"}
               </span>
             )}
@@ -107,21 +107,21 @@ const CompetencyCard = ({
 
         {/* Row 1 Right: Counts of Credentials */}
         <div className="flex flex-col">
-          <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          <div className="text-xs font-bold text-slate-700 dark:text-neutral-300 uppercase tracking-wide">
             {ins.credentialsSummary || "Tóm tắt hồ sơ chuyên môn"}
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs font-bold border border-blue-100 dark:border-blue-900/40">
               <GraduationCap size={13} />
               <span>{educationCount} học vấn</span>
             </span>
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-100 dark:border-emerald-900/40">
               <Briefcase size={13} />
               <span>{experienceCount} kinh nghiệm</span>
             </span>
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 text-xs font-bold border border-amber-100">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-100 dark:border-amber-900/40">
               <Award size={13} />
               <span>{certsCount} chứng chỉ</span>
             </span>
@@ -130,16 +130,16 @@ const CompetencyCard = ({
 
         {/* Row 2 Left: Teaching Motto */}
         <div className="flex flex-col">
-          <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          <div className="text-xs font-bold text-slate-700 dark:text-neutral-300 uppercase tracking-wide">
             {ins.teachingMottoLabel || "Phương châm giảng dạy"}
           </div>
           <div className="mt-1.5">
             {teachingMotto ? (
-              <div className="text-sm text-slate-800 leading-relaxed italic">
+              <div className="text-sm text-slate-800 dark:text-neutral-200 leading-relaxed italic">
                 "{teachingMotto}"
               </div>
             ) : (
-              <div className="text-xs text-slate-400 italic">
+              <div className="text-xs text-slate-400 dark:text-neutral-500 italic">
                 {ins.teachingMottoEmpty || "Chưa cập nhật phương châm giảng dạy."}
               </div>
             )}
@@ -148,7 +148,7 @@ const CompetencyCard = ({
 
         {/* Row 2 Right: Teaching Methods Tags */}
         <div className="flex flex-col">
-          <div className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+          <div className="text-xs font-bold text-slate-700 dark:text-neutral-300 uppercase tracking-wide">
             {ins.teachingMethodsLabel || "Phương pháp giảng dạy"}
           </div>
           <div className="mt-1.5">
@@ -157,14 +157,14 @@ const CompetencyCard = ({
                 {methodTags.map((tag, i) => (
                   <span
                     key={i}
-                    className="px-2.5 py-0.5 rounded-md bg-red-50 text-[#990011] text-xs font-bold border border-red-100/80"
+                    className="px-2.5 py-0.5 rounded-md bg-red-50 dark:bg-rose-950/40 text-[#990011] dark:text-red-400 text-xs font-bold border border-red-100/80 dark:border-rose-900/40"
                   >
                     {tag}
                   </span>
                 ))}
               </div>
             ) : (
-              <span className="text-xs text-slate-400 italic">
+              <span className="text-xs text-slate-400 dark:text-neutral-500 italic">
                 {ins.teachingMethodsEmpty || "Chưa khai báo phương pháp giảng dạy."}
               </span>
             )}

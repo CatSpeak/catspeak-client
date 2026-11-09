@@ -148,7 +148,7 @@ const CompletedClass = ({ isOwnProfile }) => {
   const renderContent = () => {
     if (!isOwnProfile) {
       return (
-        <FluentCard className="bg-white">
+        <FluentCard className="bg-white dark:bg-[#1A1A1A]">
           <EmptyState
             icon={BookOpen}
             title={cc.title || "Lớp học đã hoàn thành"}
@@ -167,7 +167,7 @@ const CompletedClass = ({ isOwnProfile }) => {
 
     if (isError) {
       return (
-        <div className="py-12 text-center text-red-500 font-medium w-full bg-red-50/50 rounded-2xl border border-red-100">
+        <div className="py-12 text-center text-red-500 dark:text-red-400 font-medium w-full bg-red-50/50 dark:bg-red-950/20 rounded-2xl border border-red-100 dark:border-red-900/30">
           {cc.errorLoading ||
             "Đã xảy ra lỗi khi tải danh sách lớp học đã hoàn thành."}
         </div>
@@ -176,7 +176,7 @@ const CompletedClass = ({ isOwnProfile }) => {
 
     if (filteredClasses.length === 0) {
       return (
-        <FluentCard className="bg-white py-8">
+        <FluentCard className="bg-white dark:bg-[#1A1A1A] py-8">
           <EmptyState
             icon={Compass}
             title={
@@ -289,7 +289,7 @@ const CompletedClass = ({ isOwnProfile }) => {
                 className="relative flex flex-col h-full overflow-hidden !p-0"
               >
                 {/* 1. Top Cover / Hero Panel */}
-                <div className="relative w-full h-44 bg-slate-100 overflow-hidden shrink-0">
+                <div className="relative w-full h-44 bg-slate-100 dark:bg-[#242424] overflow-hidden shrink-0">
                   {thumbnail ? (
                     <img
                       src={thumbnail}
@@ -300,9 +300,9 @@ const CompletedClass = ({ isOwnProfile }) => {
                       }}
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 text-gray-400 gap-2">
-                      <GraduationCap className="w-12 h-12 text-gray-300" />
-                      <span className="text-xs font-medium text-gray-400">
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-[#242424] dark:to-[#1A1A1A] text-gray-400 dark:text-neutral-500 gap-2">
+                      <GraduationCap className="w-12 h-12 text-gray-300 dark:text-neutral-600" />
+                      <span className="text-xs font-medium text-gray-400 dark:text-neutral-500">
                         {languageLabel}
                       </span>
                     </div>
@@ -347,7 +347,7 @@ const CompletedClass = ({ isOwnProfile }) => {
                       <div className="flex-1 min-w-0">
                         {/* Class Title */}
                         <h3
-                          className="font-bold line-clamp-2"
+                          className="font-bold line-clamp-2 text-gray-900 dark:text-white"
                           title={classTitle}
                         >
                           {classTitle}
@@ -355,7 +355,7 @@ const CompletedClass = ({ isOwnProfile }) => {
 
                         {/* Teacher Name Subtitle */}
                         <span
-                          className="text-sm text-secondary line-clamp-1 truncate cursor-pointer hover:underline"
+                          className="text-sm text-secondary dark:text-[#AAAAAA] line-clamp-1 truncate cursor-pointer hover:underline"
                           title={teacherName}
                           onClick={(e) => {
                             if (teacherId) {
@@ -370,12 +370,12 @@ const CompletedClass = ({ isOwnProfile }) => {
                     </div>
 
                     {/* Metadata Details: 2 clean lines */}
-                    <div className="space-y-1 text-sm text-secondary">
+                    <div className="space-y-1 text-sm text-secondary dark:text-[#AAAAAA]">
                       {/* Course */}
                       <div className="truncate">
                         <span>{cc.course || "Khóa học"}: </span>
                         <span
-                          className="font-medium text-gray-900"
+                          className="font-medium text-gray-900 dark:text-white"
                           title={
                             courseTitle ||
                             cc.standaloneClass ||
@@ -391,7 +391,7 @@ const CompletedClass = ({ isOwnProfile }) => {
                       {/* Completed Date */}
                       <div className="truncate">
                         <span>{cc.completedOn || "Ngày hoàn thành"}: </span>
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-900 dark:text-white">
                           {formatDisplayDate(cls?.completedAtUtc, formatDate)}
                         </span>
                       </div>

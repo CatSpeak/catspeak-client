@@ -228,9 +228,9 @@ const ProfileFriendCard = memo(
         )}
         {activeSubTab === "followers" && !isSelf && isFollowing && (
           <MenuItem
-            icon={<UserMinus className="text-red-600" />}
+            icon={<UserMinus className="text-red-600 dark:text-red-400" />}
             label={t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
-            className="text-red-600"
+            className="text-red-600 dark:text-red-400"
             onClick={() => {
               handleFollowToggle(user.accountId, false)
               close()
@@ -250,9 +250,9 @@ const ProfileFriendCard = memo(
         {/* Hủy kết bạn: only in 'all' subtab for own profile */}
         {activeSubTab === "all" && isOwnProfile && (
           <MenuItem
-            icon={<UserMinus className="text-red-600" />}
+            icon={<UserMinus className="text-red-600 dark:text-red-400" />}
             label={t.profile?.friends?.actions?.unfriend || "Hủy kết bạn"}
-            className="text-red-600"
+            className="text-red-600 dark:text-red-400"
             onClick={() =>
               handleUnfriend(
                 {
@@ -282,9 +282,9 @@ const ProfileFriendCard = memo(
         {/* Hủy kết bạn: only in 'all' subtab for own profile */}
         {activeSubTab === "all" && isOwnProfile && (
           <MenuItem
-            icon={<UserMinus className="text-red-600" />}
+            icon={<UserMinus className="text-red-600 dark:text-red-400" />}
             label={t.profile?.friends?.actions?.unfriend || "Hủy kết bạn"}
-            className="text-red-600"
+            className="text-red-600 dark:text-red-400"
             onClick={() =>
               handleUnfriend(
                 {
@@ -306,7 +306,7 @@ const ProfileFriendCard = memo(
     return (
       <div
         onClick={() => onNavigate?.(user.accountId)}
-        className="group/card flex flex-col overflow-hidden rounded-xl bg-white border border-border cursor-pointer select-none"
+        className="group/card flex flex-col overflow-hidden rounded-xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] cursor-pointer select-none"
       >
         {/* Mobile View: ListItem */}
         <ListItem
@@ -332,7 +332,7 @@ const ProfileFriendCard = memo(
               resolvedFriendshipId ? (
                 <PillButton
                   variant="secondary"
-                  className="!h-8 !px-3 !text-xs !text-red-600"
+                  className="!h-8 !px-3 !text-xs !text-red-600 dark:!text-red-400"
                   onClick={() => handleCancel()}
                 >
                   {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
@@ -361,8 +361,8 @@ const ProfileFriendCard = memo(
             </div>
           }
         >
-          <span className="font-semibold truncate">{displayName}</span>
-          <span className="text-sm text-secondary truncate">{userRole}</span>
+          <span className="font-semibold truncate text-gray-900 dark:text-white">{displayName}</span>
+          <span className="text-sm text-secondary dark:text-[#AAAAAA] truncate">{userRole}</span>
         </ListItem>
 
         {/* Desktop Card Cover: Full 1:1 square photo with AnimatedNameFallback */}
@@ -385,10 +385,10 @@ const ProfileFriendCard = memo(
           {/* Header info with 3-dot Popover */}
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-base text-gray-900 truncate">
+              <h3 className="font-semibold text-base text-gray-900 dark:text-white truncate">
                 {displayName}
               </h3>
-              <p className="text-sm text-secondary truncate">{userRole}</p>
+              <p className="text-sm text-secondary dark:text-[#AAAAAA] truncate">{userRole}</p>
             </div>
 
             {/* Context Menu inline with Name */}
@@ -439,7 +439,7 @@ const ProfileFriendCard = memo(
                 {resolvedFriendshipId && (
                   <PillButton
                     variant="secondary"
-                    className="flex-1 !text-red-600"
+                    className="flex-1 !text-red-600 dark:!text-red-400"
                     onClick={() => handleCancel()}
                   >
                     {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
@@ -452,7 +452,7 @@ const ProfileFriendCard = memo(
             {(isOutgoingRequest || user?.isOutgoingRequest) && (
               <PillButton
                 variant="secondary"
-                className="w-full !text-red-600"
+                className="w-full !text-red-600 dark:!text-red-400"
                 onClick={() => handleCancel()}
               >
                 {t.profile?.friends?.actions?.cancelRequest ||
@@ -551,7 +551,7 @@ const ProfileFriendCard = memo(
             </div>
           }
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-[#AAAAAA]">
             {(
               t.profile?.friends?.actions?.cancelMessage ||
               "Thu hồi lời mời kết bạn đã gửi tới {name}? Bạn sẽ đồng thời bỏ theo dõi người này."

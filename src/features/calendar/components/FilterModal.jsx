@@ -80,26 +80,26 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
       open={open}
       onClose={onClose}
       showCloseButton={false}
-      className="flex flex-col p-0 w-[92vw] max-w-[560px] max-h-[85vh] bg-white rounded-[32px] lg:rounded-2xl overflow-hidden shadow-2xl mx-auto my-auto"
+      className="flex flex-col p-0 w-[92vw] max-w-[560px] max-h-[85vh] bg-white dark:bg-[#1A1A1A] rounded-[32px] lg:rounded-2xl overflow-hidden shadow-2xl mx-auto my-auto"
       bodyClassName="flex-1 flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden"
     >
       <div className="flex flex-col p-6 lg:p-8 gap-7 shrink-0">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-black">
+          <h2 className="text-xl font-semibold text-black dark:text-white">
             {cal.filterTitle || "Bộ lọc"}
           </h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] transition-colors"
           >
-            <X size={18} className="text-gray-600" />
+            <X size={18} className="text-gray-600 dark:text-[#AAAAAA]" />
           </button>
         </div>
 
         {/* Event type */}
         <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium text-black">
+          <span className="text-sm font-medium text-black dark:text-white">
             {cal.filterEventType || "Loại sự kiện"}
           </span>
           <div className="grid grid-cols-2 gap-3">
@@ -109,8 +109,8 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
               }
               className={`flex items-center justify-center gap-2.5 h-14 rounded-xl border text-base font-medium transition-all ${
                 eventType === "online"
-                  ? "border-[#990011] bg-[#990011]/5 text-[#990011]"
-                  : "border-border text-black hover:border-gray-400"
+                  ? "border-[#990011] dark:border-red-400 bg-[#990011]/5 dark:bg-red-950/20 text-[#990011] dark:text-red-400"
+                  : "border-border dark:border-[#3F3F3F] text-black dark:text-white hover:border-gray-400 dark:hover:border-neutral-500"
               }`}
             >
               <Link2 size={18} />
@@ -122,8 +122,8 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
               }
               className={`flex items-center justify-center gap-2.5 h-14 rounded-xl border text-base font-medium transition-all ${
                 eventType === "offline"
-                  ? "border-[#990011] bg-[#990011]/5 text-[#990011]"
-                  : "border-border text-black hover:border-gray-400"
+                  ? "border-[#990011] dark:border-red-400 bg-[#990011]/5 dark:bg-red-950/20 text-[#990011] dark:text-red-400"
+                  : "border-border dark:border-[#3F3F3F] text-black dark:text-white hover:border-gray-400 dark:hover:border-neutral-500"
               }`}
             >
               <MapPin size={18} />
@@ -134,15 +134,15 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
 
         {/* Price Range */}
         <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium text-black">
+          <span className="text-sm font-medium text-black dark:text-white">
             {cal.filterPrice || "Giá cả"}
           </span>
           <div className="relative h-5 flex items-center">
             {/* Track background */}
-            <div className="absolute w-full h-1 bg-gray-200 rounded-full" />
+            <div className="absolute w-full h-1 bg-gray-200 dark:bg-[#272727] rounded-full" />
             {/* Active track */}
             <div
-              className="absolute h-1 rounded-full bg-[#990011]"
+              className="absolute h-1 rounded-full bg-[#990011] dark:bg-red-500"
               style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
             />
             {/* Min slider */}
@@ -168,7 +168,7 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
               style={{ zIndex: 4 }}
             />
           </div>
-          <div className="flex items-center justify-between text-sm text-black/70 font-medium">
+          <div className="flex items-center justify-between text-sm text-black/70 dark:text-[#AAAAAA] font-medium">
             <span>{formatPrice(priceMin)}</span>
             <span>{formatPrice(priceMax)}</span>
           </div>
@@ -197,17 +197,17 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
 
         {/* Date filter */}
         <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium text-black">
+          <span className="text-sm font-medium text-black dark:text-white">
             {cal.filterTime || cal.filterDate || "Thời gian"}
           </span>
 
           <div className="flex w-full gap-3">
             <div className="flex w-full flex-col gap-2">
-              <label className="text-xs text-gray-500">{cal.from}</label>
+              <label className="text-xs text-gray-500 dark:text-[#AAAAAA]">{cal.from}</label>
 
               <div
                 onClick={() => startTimeRef.current?.showPicker?.()}
-                className="flex items-center w-full h-12 rounded-xl border border-border px-4 cursor-pointer hover:border-[#990011] focus-within:border-[#990011] transition-colors"
+                className="flex items-center w-full h-12 rounded-xl border border-border dark:border-[#3F3F3F] px-4 cursor-pointer hover:border-[#990011] dark:hover:border-red-400 focus-within:border-[#990011] dark:focus-within:border-red-400 transition-colors bg-white dark:bg-[#272727]"
               >
                 <input
                   ref={startTimeRef}
@@ -220,17 +220,17 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
                     validateTimeRange(value, endTime);
                     if (endTime && endTime < value) setEndTime("");
                   }}
-                  className="w-full bg-transparent outline-none cursor-pointer text-sm text-gray-700"
+                  className="w-full bg-transparent outline-none cursor-pointer text-sm text-gray-700 dark:text-white"
                 />
               </div>
             </div>
 
             <div className="flex w-full flex-col gap-2">
-              <label className="text-xs text-gray-500">{cal.to}</label>
+              <label className="text-xs text-gray-500 dark:text-[#AAAAAA]">{cal.to}</label>
 
               <div
                 onClick={() => endTimeRef.current?.showPicker?.()}
-                className="flex items-center w-full h-12 rounded-xl border border-border px-4 cursor-pointer hover:border-[#990011] focus-within:border-[#990011] transition-colors"
+                className="flex items-center w-full h-12 rounded-xl border border-border dark:border-[#3F3F3F] px-4 cursor-pointer hover:border-[#990011] dark:hover:border-red-400 focus-within:border-[#990011] dark:focus-within:border-red-400 transition-colors bg-white dark:bg-[#272727]"
               >
                 <input
                   ref={endTimeRef}
@@ -252,13 +252,13 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
                     setTimeError("");
                     setEndTime(value);
                   }}
-                  className="w-full bg-transparent outline-none cursor-pointer text-sm text-gray-700"
+                  className="w-full bg-transparent outline-none cursor-pointer text-sm text-gray-700 dark:text-white"
                 />
               </div>
             </div>
           </div>
           {timeError && (
-            <p className="text-sm text-[#990011] leading-snug">{timeError}</p>
+            <p className="text-sm text-[#990011] dark:text-red-400 leading-snug">{timeError}</p>
           )}
         </div>
 
@@ -269,7 +269,7 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
           className={`w-full h-12 rounded-xl text-white font-medium text-base transition-colors ${
             timeError
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#3B3B3B] hover:bg-[#222]"
+              : "bg-[#3B3B3B] dark:bg-white dark:text-black hover:bg-[#222] dark:hover:bg-neutral-200"
           }`}
         >
           {cal.filterApply || "Áp dụng"}

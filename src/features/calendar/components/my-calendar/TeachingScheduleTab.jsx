@@ -73,7 +73,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
     {
       key: 'class',
       label: t.courses?.class || 'Lớp học',
-      render: (row) => <span className="font-medium text-gray-900">{row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}</span>
+      render: (row) => <span className="font-medium text-gray-900 dark:text-white">{row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}</span>
     },
     {
       key: 'sessionNumber',
@@ -103,7 +103,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
       key: 'roomName',
       label: t.calendar?.room || 'Phòng',
       render: (row) => row.class?.id ? (
-        <Link to={`/${encodeURIComponent(getClassLanguageCode(row.class?.language) || 'en')}/meet/class-${row.class.id}`} className="text-[#990011] hover:underline font-medium hover:text-[#80000e]">
+        <Link to={`/${encodeURIComponent(getClassLanguageCode(row.class?.language) || 'en')}/meet/class-${row.class.id}`} className="text-[#990011] dark:text-red-400 hover:underline font-medium hover:text-[#80000e] dark:hover:text-red-300">
           {row.roomName || t.calendar?.classRoom || 'Phòng học'}
         </Link>
       ) : (
@@ -122,7 +122,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
               </IconButton>
             }
             content={(close) => (
-              <div className="flex flex-col min-w-[200px] p-1 bg-white rounded-xl shadow-lg border border-border">
+              <div className="flex flex-col min-w-[200px] p-1 bg-white dark:bg-[#1A1A1A] rounded-xl shadow-lg border border-border dark:border-[#3F3F3F]">
                 <MenuItem
                   onClick={() => {
                     navigate(`/workspace/courses/class/${row.class?.id}`)
@@ -172,16 +172,16 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
     const timeText = startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
 
     return (
-      <div className="bg-gray-50 border border-border p-4 rounded-xl flex flex-col gap-2">
+      <div className="bg-gray-50 dark:bg-[#242424] border border-border dark:border-[#3F3F3F] p-4 rounded-xl flex flex-col gap-2">
         <div className="flex justify-between items-baseline gap-4">
           <Link
             to={row.class?.id ? `/workspace/courses/class/${row.class.id}` : '#'}
-            className="font-semibold text-[#1A1C1C] hover:text-[#990011] hover:underline line-clamp-2 mt-1 truncate"
+            className="font-semibold text-[#1A1C1C] dark:text-white hover:text-[#990011] dark:hover:text-red-400 hover:underline line-clamp-2 mt-1 truncate"
           >
             {row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}
           </Link>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-medium bg-[#990011]/10 text-[#990011] px-2 py-1 rounded-full whitespace-nowrap">
+            <span className="text-xs font-medium bg-[#990011]/10 dark:bg-red-950/40 text-[#990011] dark:text-red-400 px-2 py-1 rounded-full whitespace-nowrap">
               {t.calendar?.session || 'Buổi'} {row.sessionNumber ? `${row.sessionNumber}/${row.totalSessions || '?'}` : '-'}
             </span>
             <div onClick={(e) => e.stopPropagation()}>
@@ -192,7 +192,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
                   </IconButton>
                 }
                 content={(close) => (
-                  <div className="flex flex-col min-w-[200px] p-1 bg-white rounded-xl shadow-lg border border-border">
+                  <div className="flex flex-col min-w-[200px] p-1 bg-white dark:bg-[#1A1A1A] rounded-xl shadow-lg border border-border dark:border-[#3F3F3F]">
                     <MenuItem
                       onClick={() => {
                         navigate(`/workspace/courses/class/${row.class?.id}`)
@@ -220,7 +220,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
             </div>
           </div>
         </div>
-        <div className="text-sm text-gray-600 space-y-2 mt-2">
+        <div className="text-sm text-gray-600 dark:text-[#AAAAAA] space-y-2 mt-2">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
             <span>{isoStart ? formatDate(isoStart) : '-'}</span>
@@ -232,7 +232,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           <div className="flex items-center gap-2">
             <Video className="w-4 h-4 text-gray-400 shrink-0" />
             {row.class?.id ? (
-              <Link to={`/${encodeURIComponent(getClassLanguageCode(row.class?.language) || 'en')}/meet/class-${row.class.id}`} className="text-[#990011] hover:underline hover:text-[#80000e]">
+              <Link to={`/${encodeURIComponent(getClassLanguageCode(row.class?.language) || 'en')}/meet/class-${row.class.id}`} className="text-[#990011] dark:text-red-400 hover:underline hover:text-[#80000e] dark:hover:text-red-300">
                 {row.roomName || t.calendar?.classRoom || 'Phòng học'}
               </Link>
             ) : (
@@ -245,24 +245,24 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   }
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-sm border border-border p-6 flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-border gap-4">
+    <div className="w-full bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-sm border border-border dark:border-[#3F3F3F] p-6 flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-border dark:border-[#3F3F3F] gap-4">
         <div className="flex items-center gap-2">
           <IconButton
             onClick={onPrev}
             variant="ghost"
-            innerClassName="!text-[#990011]"
+            innerClassName="!text-[#990011] dark:!text-red-400"
           >
             <ChevronLeft />
           </IconButton>
-          <span className="text-lg sm:text-xl font-semibold text-[#1A1A1A] min-w-[100px] sm:min-w-[150px] text-center">
+          <span className="text-lg sm:text-xl font-semibold text-[#1A1A1A] dark:text-white min-w-[100px] sm:min-w-[150px] text-center">
             <span className="hidden sm:inline">{localizedMonth}</span>
             <span className="sm:hidden">{monthNum.padStart(2, '0')}/{yearNum}</span>
           </span>
           <IconButton
             onClick={onNext}
             variant="ghost"
-            innerClassName="!text-[#990011]"
+            innerClassName="!text-[#990011] dark:!text-red-400"
           >
             <ChevronRight />
           </IconButton>

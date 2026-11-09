@@ -52,8 +52,8 @@ const PictureItActionPanel = ({
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-center gap-2"
           >
-            <Loader2 size={16} className="animate-spin text-cath-red-700" />
-            <span className="text-sm md:text-base font-medium text-secondary">
+            <Loader2 size={16} className="animate-spin text-cath-red-700 dark:text-red-400" />
+            <span className="text-sm md:text-base font-medium text-secondary dark:text-neutral-300">
               {(ap.ratersAreScoring || 'Raters are scoring... ({0}s)').replace('{0}', ratingCountdownSec)}
             </span>
           </motion.div>

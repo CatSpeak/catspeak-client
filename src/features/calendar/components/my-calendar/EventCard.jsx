@@ -8,11 +8,11 @@ import { useTimezone } from '@/shared/hooks/useTimezone'
 import { getClassLanguageCode, getCommunityLang } from '@/shared/utils/navigation'
 
 const EVENT_STYLES = {
-  "teaching-schedule": { background: "#f1fff8", border: "" },
-  "student-schedule": { background: "#f0f5ff", border: "" },
-  "my-event": { background: "#ffeef0", border: "" },
-  "registered-event": { background: "#fffceb", border: "" },
-  "other": { background: "#ffffff", border: "#E2E2E2" },
+  "teaching-schedule": { background: "#f1fff8", border: "", darkClass: "dark:!bg-emerald-950/30 dark:!border-emerald-800/40" },
+  "student-schedule": { background: "#f0f5ff", border: "", darkClass: "dark:!bg-blue-950/30 dark:!border-blue-800/40" },
+  "my-event": { background: "#ffeef0", border: "", darkClass: "dark:!bg-red-950/30 dark:!border-red-800/40" },
+  "registered-event": { background: "#fffceb", border: "", darkClass: "dark:!bg-amber-950/30 dark:!border-amber-800/40" },
+  "other": { background: "#ffffff", border: "#E2E2E2", darkClass: "dark:!bg-[#1A1A1A] dark:!border-[#3F3F3F]" },
 };
 
 const EventCard = ({ event, onClick }) => {
@@ -21,7 +21,7 @@ const EventCard = ({ event, onClick }) => {
   const { formatTime } = useTimezone()
 
   if (!event) return;
-  const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
+  const { background, border, darkClass = "" } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
 
   const handleNavigate = (event) => {
     switch (event.eventType) {
@@ -41,17 +41,17 @@ const EventCard = ({ event, onClick }) => {
   return (
     <div
       onClick={() => onClick && onClick(event)}
-      className={`max-w-[290px] w-full h-fit p-4 space-y-2 rounded-xl border relative transition-shadow ${onClick ? 'cursor-pointer hover:shadow-md' : ''}`}
+      className={`max-w-[290px] w-full h-fit p-4 space-y-2 rounded-xl border relative transition-shadow ${darkClass} ${onClick ? 'cursor-pointer hover:shadow-md' : ''}`}
       style={{ backgroundColor: background, borderColor: border || 'transparent' }}
     >
       {/* Heading */}
       <div className='space-y-1'>
-        <p className='font-semibold text-[#1A1A1A] text-base'>{event.title}</p>
-        {event.subtitle && <p className='text-[#7B7979] text-sm'>{event.subtitle}</p>}
+        <p className='font-semibold text-[#1A1A1A] dark:text-white text-base'>{event.title}</p>
+        {event.subtitle && <p className='text-[#7B7979] dark:text-[#AAAAAA] text-sm'>{event.subtitle}</p>}
       </div>
       {/* Info + Button */}
       <div className='flex items-center justify-between'>
-        <div className='space-y-1 text-sm text-[#1A1A1A]'>
+        <div className='space-y-1 text-sm text-[#1A1A1A] dark:text-neutral-300'>
           <p className='flex items-center gap-2'>
             <Clock size={14} />
             {event.startTime ? formatTime(event.startTime) : ''}

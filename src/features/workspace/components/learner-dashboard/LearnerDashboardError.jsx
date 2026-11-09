@@ -9,17 +9,17 @@ const LearnerDashboardError = ({ message, onRetry }) => {
   return (
     <div
       role="alert"
-      className="w-full bg-white border border-rose-200 rounded-xl p-8 text-center flex flex-col items-center justify-center my-8 shadow-xs"
+      className="w-full bg-white dark:bg-[#1A1A1A] border border-rose-200 dark:border-rose-900/40 rounded-xl p-8 text-center flex flex-col items-center justify-center my-8 shadow-xs"
     >
-      <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+      <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
         <AlertCircle className="w-6 h-6" />
       </div>
 
-      <h2 className="text-base sm:text-lg font-bold text-[#14171F]">
+      <h2 className="text-base sm:text-lg font-bold text-[#14171F] dark:text-white">
         {isEn ? "Unable to Load Dashboard" : "Không thể tải dữ liệu Bảng điều khiển"}
       </h2>
 
-      <p className="text-xs sm:text-sm text-[#6E788C] mt-1 max-w-md">
+      <p className="text-xs sm:text-sm text-[#6E788C] dark:text-neutral-400 mt-1 max-w-md">
         {message || (isEn
           ? "A temporary system or connection error occurred. Please try again."
           : "Đã xảy ra lỗi tạm thời khi đồng bộ dữ liệu của học viên. Vui lòng tải lại trang.")}

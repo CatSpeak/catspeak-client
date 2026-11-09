@@ -42,11 +42,11 @@ const TeacherTalkRatioCard = ({
         </span>
         <div className="bg-gray-200 dark:bg-neutral-800 rounded-full h-2 overflow-hidden w-full">
           <div
-            className="bg-cath-red-700 h-full rounded-full transition-all duration-500"
+            className="bg-cath-red-700 dark:bg-red-500 h-full rounded-full transition-all duration-500"
             style={{ width: `${Math.min(100, Math.max(0, gvPercent))}%` }}
           />
         </div>
-        <span className="text-xs font-bold text-cath-red-700 font-mono text-right min-w-[2.5rem]">
+        <span className="text-xs font-bold text-cath-red-700 dark:text-red-400 font-mono text-right min-w-[2.5rem]">
           {gvPercent}%
         </span>
 

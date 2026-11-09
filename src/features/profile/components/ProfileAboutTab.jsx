@@ -20,7 +20,7 @@ const ProfileAboutTab = ({
       {/* Top Header Card */}
       <FluentCard className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {t.profile?.personalInfo?.title || "Personal Information"}
           </h2>
         </div>
@@ -41,7 +41,7 @@ const ProfileAboutTab = ({
       {/* Account and Privacy Header Card */}
       <FluentCard className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {t.profile?.personalInfo?.accountAndPrivacy ||
               "Account and Privacy"}
           </h2>

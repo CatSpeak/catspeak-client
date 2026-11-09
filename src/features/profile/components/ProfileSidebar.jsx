@@ -70,7 +70,7 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
       <FluentCard padding="p-0" className="overflow-hidden flex flex-col">
         {/* Header */}
         <div className="h-14 px-4 sm:px-6 flex items-center justify-between">
-          <h2 className="font-bold">
+          <h2 className="font-bold text-gray-900 dark:text-white">
             {t.profile?.sidebar?.suggestedFriends || "Đề xuất bạn bè"}
           </h2>
         </div>
@@ -143,7 +143,7 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
                   {user?.isTeacher && <TeacherBadge />}
                 </div>
 
-                <span className="text-sm text-[#606060] truncate">
+                <span className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
                   {getUserRoleLabel(user, t)}
                 </span>
               </ListItem>

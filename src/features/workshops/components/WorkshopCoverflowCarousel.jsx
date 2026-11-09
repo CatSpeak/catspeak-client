@@ -127,7 +127,7 @@ const WorkshopCoverflowCarousel = ({ slides: propSlides = [] }) => {
             type="button"
             onClick={goPrev}
             aria-label="Previous workshop"
-            className="absolute left-2 sm:left-4 md:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-40 flex h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-white text-[#990011] shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
+            className="absolute left-2 sm:left-4 md:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-40 flex h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-white dark:bg-[#272727] text-[#990011] dark:text-red-400 border border-transparent dark:border-[#3F3F3F] shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
           >
             <ChevronLeft size={22} strokeWidth={2.5} />
           </button>
@@ -136,7 +136,7 @@ const WorkshopCoverflowCarousel = ({ slides: propSlides = [] }) => {
             type="button"
             onClick={goNext}
             aria-label="Next workshop"
-            className="absolute right-2 sm:right-4 md:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-40 flex h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-white text-[#990011] shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
+            className="absolute right-2 sm:right-4 md:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-40 flex h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-white dark:bg-[#272727] text-[#990011] dark:text-red-400 border border-transparent dark:border-[#3F3F3F] shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
           >
             <ChevronRight size={22} strokeWidth={2.5} />
           </button>

@@ -40,7 +40,7 @@ const InteractiveScriptWidget = ({
       return (
         <span className="inline-flex flex-wrap gap-2 md:gap-4">
           <span>{firstPart}</span>
-          <span className="text-cath-red-700">{secondPart}</span>
+          <span className="text-cath-red-700 dark:text-red-400">{secondPart}</span>
         </span>
       )
     }
@@ -81,9 +81,9 @@ const InteractiveScriptWidget = ({
           trigger={
             <span
               className={cn(
-                "font-bold text-cath-red-700 cursor-pointer transition-all rounded px-1 py-0.5 inline-block",
-                "hover:underline hover:decoration-dotted hover:decoration-cath-red-700 hover:bg-rose-50/60",
-                isActive && "border border-[#990011]/80 bg-[#FFDAD6]"
+                "font-bold text-cath-red-700 dark:text-red-400 cursor-pointer transition-all rounded px-1 py-0.5 inline-block",
+                "hover:underline hover:decoration-dotted hover:decoration-cath-red-700 dark:hover:decoration-red-400 hover:bg-rose-50/60 dark:hover:bg-rose-950/30",
+                isActive && "border border-[#990011]/80 dark:border-red-400/80 bg-[#FFDAD6] dark:bg-rose-950/50"
               )}
             >
               {segment.text}
@@ -135,7 +135,7 @@ const InteractiveScriptWidget = ({
                   className={cn(
                     "cursor-pointer transition-all rounded px-0.5 py-0.5 inline-block",
                     "hover:underline hover:decoration-dotted hover:decoration-slate-400 ",
-                    isActive && "border border-[#990011]/80 bg-[#FFDAD6]"
+                    isActive && "border border-[#990011]/80 dark:border-red-400/80 bg-[#FFDAD6] dark:bg-rose-950/50"
                   )}
                 >
                   {chunk}
@@ -158,7 +158,7 @@ const InteractiveScriptWidget = ({
       )}
     >
       <div className="flex flex-wrap items-center gap-2 mb-3">
-        <span className="inline-flex items-center px-3 py-1 rounded-xl text-sm font-bold bg-[#FFDAD6] dark:bg-[#370006] text-cath-red-700 dark:text-[#FF0033]">
+        <span className="inline-flex items-center px-3 py-1 rounded-xl text-sm font-bold bg-[#FFDAD6] dark:bg-[#370006] text-cath-red-700 dark:text-red-400">
           {currentScript.topic}
         </span>
 

@@ -118,7 +118,7 @@ const ProfileMediaTab = ({ targetAccountId }) => {
                   <div
                     key={media.postMediaId}
                     onClick={() => setFullscreenMedia(media)}
-                    className="relative group cursor-pointer rounded-xl overflow-hidden bg-gray-100 border border-border"
+                    className="relative group cursor-pointer rounded-xl overflow-hidden bg-gray-100 dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F]"
                   >
                     {media.mediaType === "Image" ? (
                       <img

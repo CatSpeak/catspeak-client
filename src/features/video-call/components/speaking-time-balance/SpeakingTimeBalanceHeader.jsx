@@ -41,7 +41,7 @@ const SpeakingTimeBalanceHeader = ({
                 <RotateCw
                   size={12}
                   className={`text-gray-400 shrink-0 ${
-                    isFetching ? "animate-spin text-cath-red-700" : ""
+                    isFetching ? "animate-spin text-cath-red-700 dark:text-red-400" : ""
                   }`}
                 />
                 <span>

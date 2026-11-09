@@ -134,7 +134,7 @@ const PricingPage = () => {
   });
 
   return (
-    <div className="relative w-full h-screen max-h-screen overflow-hidden bg-primaryBg flex items-center justify-center px-4 sm:px-6 lg:px-8 select-none animate-in fade-in duration-300">
+    <div className="relative w-full h-screen max-h-screen overflow-hidden bg-primaryBg dark:bg-[#0F0F0F] flex items-center justify-center px-4 sm:px-6 lg:px-8 select-none animate-in fade-in duration-300">
       {/* Top-Right Close Button (X) */}
       <button
         onClick={handleClose}

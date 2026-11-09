@@ -491,11 +491,11 @@ const WorkspaceRoomsContent = () => {
                     <button
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
+                      className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
                     >
                       {t.rooms?.pagination?.prev || "Trước"}
                     </button>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-[#AAAAAA]">
                       {(t.rooms?.pagination?.pageOf || "Trang {page} / {totalPages}")
                         .replace("{page}", currentPage)
                         .replace("{totalPages}", totalPages)} {activeTab !== "bookmark" && `(${totalCount} ${t.rooms?.filters?.room || "phòng"})`}
@@ -503,7 +503,7 @@ const WorkspaceRoomsContent = () => {
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
+                      className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
                     >
                       {t.rooms?.pagination?.next || "Tiếp"}
                     </button>
@@ -534,11 +534,11 @@ const WorkspaceRoomsContent = () => {
                     <button
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
+                      className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
                     >
                       {t.rooms?.pagination?.prev || "Trước"}
                     </button>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-[#AAAAAA]">
                       {(t.rooms?.pagination?.pageOf || "Trang {page} / {totalPages}")
                         .replace("{page}", currentPage)
                         .replace("{totalPages}", totalPages)} ({totalCount} {t.rooms?.filters?.room || "phòng"})
@@ -546,7 +546,7 @@ const WorkspaceRoomsContent = () => {
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
+                      className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
                     >
                       {t.rooms?.pagination?.next || "Tiếp"}
                     </button>
@@ -566,14 +566,14 @@ const RoomsListSkeleton = () => (
     {Array.from({ length: 8 }).map((_, i) => (
       <div
         key={i}
-        className="rounded-2xl border border-border bg-white overflow-hidden animate-pulse flex flex-col"
+        className="rounded-2xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] overflow-hidden animate-pulse flex flex-col"
       >
-        <div className="aspect-video w-full bg-gray-200" />
+        <div className="aspect-video w-full bg-gray-200 dark:bg-[#272727]" />
         <div className="p-4 flex flex-col gap-3 flex-1 justify-between">
-          <div className="h-5 bg-gray-200 rounded w-3/4" />
+          <div className="h-5 bg-gray-200 dark:bg-[#272727] rounded w-3/4" />
           <div className="flex justify-between items-center pt-2">
-            <div className="h-4 bg-gray-100 rounded w-20" />
-            <div className="h-4 bg-gray-100 rounded w-24" />
+            <div className="h-4 bg-gray-100 dark:bg-[#242424] rounded w-20" />
+            <div className="h-4 bg-gray-100 dark:bg-[#242424] rounded w-24" />
           </div>
         </div>
       </div>

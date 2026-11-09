@@ -350,7 +350,7 @@ const CheckoutClassPage = () => {
 
   if (isLoadingClass) {
     return (
-      <div className="min-h-screen bg-[#f3f3f3] flex items-center justify-center">
+      <div className="min-h-screen bg-primaryBg dark:bg-[#0F0F0F] flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B20000]" />
       </div>
     );
@@ -358,13 +358,13 @@ const CheckoutClassPage = () => {
 
   if (classError && !classDetail) {
     return (
-      <div className="min-h-screen bg-[#f3f3f3] flex items-center justify-center">
-        <div className="text-center p-6 bg-white rounded-xl shadow">
-          <h2 className="text-xl font-bold text-[#B20000] mb-2">
+      <div className="min-h-screen bg-primaryBg dark:bg-[#0F0F0F] flex items-center justify-center">
+        <div className="text-center p-6 bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-xl shadow">
+          <h2 className="text-xl font-bold text-[#B20000] dark:text-red-400 mb-2">
             {tc.classNotFound}
           </h2>
-          <p className="text-gray-600 mb-4">{tc.classNotFoundDesc}</p>
-          <Link to="/" className="text-[#1864AB] font-semibold hover:underline">
+          <p className="text-gray-600 dark:text-neutral-300 mb-4">{tc.classNotFoundDesc}</p>
+          <Link to="/" className="text-[#1864AB] dark:text-blue-400 font-semibold hover:underline">
             {tc.backToHome}
           </Link>
         </div>
@@ -373,7 +373,7 @@ const CheckoutClassPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3]">
+    <div className="min-h-screen bg-primaryBg dark:bg-[#0F0F0F]">
       <div className="p-4 md:p-6 space-y-6">
         <Breadcrumb
           className="flex-wrap"
@@ -392,7 +392,7 @@ const CheckoutClassPage = () => {
           ]}
         />
 
-        <h1 className="text-3xl font-bold text-[#1A1C1C]">{tc.pageTitle}</h1>
+        <h1 className="text-3xl font-bold text-[#1A1C1C] dark:text-white">{tc.pageTitle}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
@@ -453,7 +453,7 @@ const CheckoutClassPage = () => {
         title={
           <div className="flex items-center gap-2.5">
             <AlertTriangle size={22} className="text-amber-500 shrink-0" />
-            <span className="text-lg font-black text-gray-950">
+            <span className="text-lg font-black text-gray-950 dark:text-white">
               {tc.scheduleConflictTitle || "Lịch học bị trùng"}
             </span>
           </div>
@@ -463,7 +463,7 @@ const CheckoutClassPage = () => {
         confirmVariant="primary"
       >
         <div className="flex flex-col gap-4 mt-2">
-          <p className="text-sm text-gray-600 font-medium leading-relaxed">
+          <p className="text-sm text-gray-600 dark:text-neutral-300 font-medium leading-relaxed">
             {tc.scheduleConflictDesc ||
               "Lịch học của lớp này trùng với lớp bạn đang học:"}
           </p>
@@ -472,7 +472,7 @@ const CheckoutClassPage = () => {
               {conflictClasses.names.map((name) => (
                 <li
                   key={name}
-                  className="text-sm font-bold text-[#b20a1c] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2"
+                  className="text-sm font-bold text-[#b20a1c] dark:text-red-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/40 rounded-xl px-3 py-2"
                 >
                   {name}
                 </li>

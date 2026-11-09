@@ -214,10 +214,10 @@ const PictureITOverlay = ({ mode = "fullscreen", isMain = true }) => {
           />
 
           {showForceStopped && (
-            <div className="absolute inset-0 z-[1200] flex items-center justify-center bg-white/95">
+            <div className="absolute inset-0 z-[1200] flex items-center justify-center bg-white/95 dark:bg-[#1A1A1A]/95">
               <div className="text-center space-y-3">
-                <p className="text-2xl font-bold text-cath-red-700">{t.rooms?.game?.pictureIt?.modals?.gameEnded || 'Game Ended'}</p>
-                <p className="text-secondary">{t.rooms?.game?.pictureIt?.modals?.notEnoughPlayers || 'Không đủ người chơi tiếp tục.'}</p>
+                <p className="text-2xl font-bold text-cath-red-700 dark:text-red-400">{t.rooms?.game?.pictureIt?.modals?.gameEnded || 'Game Ended'}</p>
+                <p className="text-secondary dark:text-neutral-400">{t.rooms?.game?.pictureIt?.modals?.notEnoughPlayers || 'Không đủ người chơi tiếp tục.'}</p>
                 <PillButton onClick={handleGameOverClose}>{t.rooms?.game?.pictureIt?.modals?.close || 'Close'}</PillButton>
               </div>
             </div>

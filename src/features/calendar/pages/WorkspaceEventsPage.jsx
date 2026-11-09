@@ -152,20 +152,20 @@ const WorkspaceEventsContent = ({ userId }) => {
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="bg-white rounded-2xl p-4 border border-border shadow-sm animate-pulse"
+              className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-4 border border-border dark:border-[#3F3F3F] shadow-sm animate-pulse"
             >
               <div className="flex items-start gap-3">
-                <div className="w-14 h-14 rounded-full bg-gray-200 shrink-0" />
+                <div className="w-14 h-14 rounded-full bg-gray-200 dark:bg-[#272727] shrink-0" />
                 <div className="flex-1 space-y-2 pt-1">
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-100 rounded w-1/2" />
-                  <div className="h-3 bg-gray-100 rounded w-2/3" />
+                  <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 dark:bg-[#242424] rounded w-1/2" />
+                  <div className="h-3 bg-gray-100 dark:bg-[#242424] rounded w-2/3" />
                 </div>
               </div>
               <div className="flex gap-2 mt-4">
-                <div className="flex-1 h-9 bg-gray-100 rounded-xl" />
-                <div className="flex-1 h-9 bg-gray-100 rounded-xl" />
-                <div className="flex-1 h-9 bg-gray-100 rounded-xl" />
+                <div className="flex-1 h-9 bg-gray-100 dark:bg-[#242424] rounded-xl" />
+                <div className="flex-1 h-9 bg-gray-100 dark:bg-[#242424] rounded-xl" />
+                <div className="flex-1 h-9 bg-gray-100 dark:bg-[#242424] rounded-xl" />
               </div>
             </div>
           ))}

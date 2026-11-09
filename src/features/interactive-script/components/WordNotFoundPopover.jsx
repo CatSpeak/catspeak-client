@@ -94,14 +94,14 @@ const WordNotFoundPopover = ({
     <FluentAnimation direction="up" distance={10} duration={0.2} exit>
       <div
         className={cn(
-          "relative w-full max-w-[520px] sm:w-[520px] bg-white rounded-3xl shadow-faq-card border border-border p-3 sm:p-4 select-none z-50 transition-all",
+          "relative w-full max-w-[520px] sm:w-[520px] bg-white dark:bg-[#1A1A1A] rounded-3xl shadow-faq-card border border-border dark:border-[#3F3F3F] p-3 sm:p-4 select-none z-50 transition-all",
           className
         )}
         style={style}
       >
         {/* Header: Tên từ + Nút Đóng */}
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-lg sm:text-xl font-bold text-[#1F2937] tracking-tight truncate leading-tight">
+          <h3 className="text-lg sm:text-xl font-bold text-[#1F2937] dark:text-white tracking-tight truncate leading-tight">
             {word}
           </h3>
 
@@ -110,7 +110,7 @@ const WordNotFoundPopover = ({
             size="xs"
             variant="ghost"
             title={t.widget?.lookup?.closeBtn || "Đóng popup"}
-            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
+            className="text-slate-400 dark:text-neutral-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#272727] shrink-0"
           >
             <X className="w-4 h-4" />
           </IconButton>
@@ -124,16 +124,16 @@ const WordNotFoundPopover = ({
               <IconButton
                 size="md"
                 variant="secondary"
-                innerClassName="!rounded-2xl !bg-amber-50 !border !border-amber-100/80 !text-amber-600"
+                innerClassName="!rounded-2xl !bg-amber-50 dark:!bg-amber-950/40 !border !border-amber-100/80 dark:!border-amber-900/40 !text-amber-600 dark:!text-amber-400"
               >
                 <SearchX className="w-5 h-5 stroke-[2.2]" />
               </IconButton>
 
               <div className="flex flex-col gap-1">
-                <h4 className="text-base sm:text-base font-semibold text-[#374151] leading-snug">
+                <h4 className="text-base sm:text-base font-semibold text-[#374151] dark:text-white leading-snug">
                   {t.widget?.notFound?.title || "Không tìm thấy định nghĩa cho từ này."}
                 </h4>
-                <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#6B7280] dark:text-neutral-400 leading-relaxed">
                   {t.widget?.notFound?.desc || "Hệ thống chưa có dữ liệu giải nghĩa cho từ đơn này trong từ điển hiện tại."}
                 </p>
               </div>
@@ -141,7 +141,7 @@ const WordNotFoundPopover = ({
 
             {/* Gợi ý thử ngôn ngữ khác */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs sm:text-sm font-medium text-[#6B7280]">
+              <span className="text-xs sm:text-sm font-medium text-[#6B7280] dark:text-neutral-400">
                 {t.widget?.notFound?.tryOther || "Thử ngôn ngữ khác:"}
               </span>
               <div className="flex items-center gap-2 flex-wrap">
@@ -153,7 +153,7 @@ const WordNotFoundPopover = ({
                     onClick={() => onSelectLanguage?.(lang)}
                     className="!h-auto shrink-0"
                   >
-                    <span className="text-xs sm:text-sm font-medium text-[#374151]">
+                    <span className="text-xs sm:text-sm font-medium text-[#374151] dark:text-neutral-200">
                       {lang.label}
                     </span>
                   </PillButton>
@@ -163,14 +163,14 @@ const WordNotFoundPopover = ({
 
             {/* Footer: Đóng góp định nghĩa + Tra cứu từ điển mở */}
             <div className="flex flex-col gap-3 pt-1">
-              <Divider className="bg-[#F3F4F6]" />
+              <Divider className="bg-[#F3F4F6] dark:bg-[#3F3F3F]" />
               <div className="flex items-center justify-between gap-3">
                 <PillButton
                   variant="secondary-no-outline"
                   onClick={() => setIsContributing(true)}
                   startIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
                   textColor="#990011"
-                  className="!h-auto !p-0"
+                  className="!h-auto !p-0 dark:!text-red-400"
                 >
                   {t.widget?.notFound?.contribute || "Đóng góp định nghĩa"}
                 </PillButton>
@@ -180,7 +180,7 @@ const WordNotFoundPopover = ({
                   onClick={handleOpenExternalDictionary}
                   endIcon={<ExternalLink className="w-3.5 h-3.5" />}
                   textColor="#6B7280"
-                  className="!h-auto !p-0"
+                  className="!h-auto !p-0 dark:!text-neutral-400"
                 >
                   {t.widget?.notFound?.openDict || "Tra cứu trên từ điển mở"}
                 </PillButton>
@@ -194,32 +194,32 @@ const WordNotFoundPopover = ({
             onSubmit={handleSubmitContributionForm}
             className="flex flex-col gap-3 py-2 animate-fadeIn"
           >
-            <div className="flex items-center gap-1.5 text-sm font-semibold text-cath-red-700 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-sm font-semibold text-cath-red-700 dark:text-red-400 uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
               <span>{t.widget?.notFound?.contributeNew || "Đóng góp định nghĩa mới"}</span>
             </div>
 
             {/* Dropdown loại đóng góp */}
             <div className="flex flex-col gap-1 relative">
-              <span className="text-sm font-medium text-[#374151]">
+              <span className="text-sm font-medium text-[#374151] dark:text-neutral-200">
                 {t.widget?.notFound?.type || "Loại đóng góp:"}
               </span>
               <div
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
-                className="w-full flex items-center justify-between px-3.5 py-2 text-xs sm:text-sm font-medium text-[#374151] bg-slate-50/70 border border-slate-200 rounded-xl hover:bg-white hover:border-slate-300 transition-colors cursor-pointer select-none"
+                className="w-full flex items-center justify-between px-3.5 py-2 text-xs sm:text-sm font-medium text-[#374151] dark:text-neutral-200 bg-slate-50/70 dark:bg-[#272727] border border-slate-200 dark:border-[#3F3F3F] rounded-xl hover:bg-white dark:hover:bg-[#333333] hover:border-slate-300 dark:hover:border-neutral-500 transition-colors cursor-pointer select-none"
               >
                 <span>{selectedTypeLabel}</span>
                 <ChevronDown
                   className={cn(
                     "w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200",
-                    isDropdownOpen && "rotate-180 text-cath-red-700"
+                    isDropdownOpen && "rotate-180 text-cath-red-700 dark:text-red-400"
                   )}
                 />
               </div>
 
               {/* Menu danh sách lựa chọn dạng Inline trong cây DOM của Popover */}
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 z-30 max-h-44 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl py-1 animate-fadeIn">
+                <div className="absolute top-full left-0 right-0 mt-1.5 z-30 max-h-44 overflow-y-auto bg-white dark:bg-[#1A1A1A] border border-slate-200 dark:border-[#3F3F3F] rounded-xl shadow-xl py-1 animate-fadeIn">
                   {CONTRIBUTION_TYPE_OPTIONS.map((opt) => {
                     const isSelected = contributionType === opt.value
                     return (
@@ -233,13 +233,13 @@ const WordNotFoundPopover = ({
                         className={cn(
                           "px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between cursor-pointer transition-colors",
                           isSelected
-                            ? "bg-rose-50 text-cath-red-700 font-semibold"
-                            : "text-[#374151] hover:bg-slate-50 hover:text-cath-red-700"
+                            ? "bg-rose-50 dark:bg-rose-950/40 text-cath-red-700 dark:text-red-400 font-semibold"
+                            : "text-[#374151] dark:text-neutral-300 hover:bg-slate-50 dark:hover:bg-[#272727] hover:text-cath-red-700 dark:hover:text-red-400"
                         )}
                       >
                         <span>{opt.label}</span>
                         {isSelected && (
-                          <Check className="w-3.5 h-3.5 text-cath-red-700 stroke-[2.5]" />
+                          <Check className="w-3.5 h-3.5 text-cath-red-700 dark:text-red-400 stroke-[2.5]" />
                         )}
                       </div>
                     )

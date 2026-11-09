@@ -111,21 +111,21 @@ const UsageQuotaCard = ({ feature }) => {
 
   // Color Coding Status
   let statusColor = "bg-emerald-500"
-  let textColor = "text-emerald-600"
+  let textColor = "text-emerald-600 dark:text-emerald-400"
   let borderColor = "border-emerald-100"
-  let badgeBg = "bg-emerald-50 text-emerald-700 border-emerald-200"
+  let badgeBg = "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
 
   if (!isCapacityOnly) {
     if (isExceeded || percentage >= 90) {
       statusColor = "bg-rose-500"
-      textColor = "text-rose-600"
+      textColor = "text-rose-600 dark:text-rose-400"
       borderColor = "border-rose-200"
-      badgeBg = "bg-rose-50 text-rose-700 border-rose-200"
+      badgeBg = "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800"
     } else if (percentage >= 75) {
       statusColor = "bg-amber-500"
-      textColor = "text-amber-600"
+      textColor = "text-amber-600 dark:text-amber-400"
       borderColor = "border-amber-200"
-      badgeBg = "bg-amber-50 text-amber-700 border-amber-200"
+      badgeBg = "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
     }
   }
 

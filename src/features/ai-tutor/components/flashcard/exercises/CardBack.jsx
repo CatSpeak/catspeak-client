@@ -7,25 +7,25 @@ const CardBack = ({ card, highlight = true }) => {
 
   return (
     <div className="flex flex-col items-center gap-2 text-center">
-      <div className="text-4xl sm:text-5xl font-semibold text-slate-900" lang="zh">
+      <div className="text-4xl sm:text-5xl font-semibold text-slate-900 dark:text-white" lang="zh">
         {card.word}
       </div>
-      {card.pinyin && <div className="text-base text-slate-600">{card.pinyin}</div>}
+      {card.pinyin && <div className="text-base text-slate-600 dark:text-neutral-300">{card.pinyin}</div>}
       <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
-        <span className="text-lg font-medium text-slate-800">{card.meaning_vi || "Chưa có nghĩa"}</span>
+        <span className="text-lg font-medium text-slate-800 dark:text-white">{card.meaning_vi || "Chưa có nghĩa"}</span>
         {card.part_of_speech_vi && (
-          <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+          <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-[#272727] text-slate-600 dark:text-neutral-300 border border-slate-200 dark:border-[#3F3F3F]">
             {card.part_of_speech_vi}
           </span>
         )}
       </div>
       {sentence && (
-        <p className="mt-2 max-w-md rounded-xl bg-slate-50 border border-slate-100 px-3 py-2 text-base text-slate-700" lang="zh">
+        <p className="mt-2 max-w-md rounded-xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#3F3F3F] px-3 py-2 text-base text-slate-700 dark:text-neutral-200" lang="zh">
           {parts
             ? parts.map((p, i) => (
                 <React.Fragment key={i}>
                   {p}
-                  {i < parts.length - 1 && <strong className="text-[#990011]">{card.word}</strong>}
+                  {i < parts.length - 1 && <strong className="text-[#990011] dark:text-red-400">{card.word}</strong>}
                 </React.Fragment>
               ))
             : sentence}

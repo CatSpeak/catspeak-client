@@ -182,10 +182,10 @@ const EventRecurrenceSection = ({
             </div>
 
             {estimatedOccurrences > 24 && (
-              <div className="flex items-start gap-2 mt-1 p-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-sm">
+              <div className="flex items-start gap-2 mt-1 p-3 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 rounded-lg text-orange-800 dark:text-orange-200 text-sm">
                 <AlertCircle
                   size={18}
-                  className="shrink-0 mt-0.5 text-orange-500"
+                  className="shrink-0 mt-0.5 text-orange-500 dark:text-orange-400"
                 />
                 <span>{cal.maxOccurrencesWarning}</span>
               </div>

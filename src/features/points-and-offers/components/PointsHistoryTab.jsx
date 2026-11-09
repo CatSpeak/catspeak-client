@@ -73,7 +73,7 @@ const PointsHistoryTab = ({
             className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
               historyFilter === "all"
                 ? "bg-[#990011] text-white shadow-xs"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                : "bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#3F3F3F] text-gray-600 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727]"
             }`}
           >
             {ht.filters?.all || "Tất cả"}
@@ -84,7 +84,7 @@ const PointsHistoryTab = ({
             className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
               historyFilter === "earn"
                 ? "bg-[#990011] text-white shadow-xs"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                : "bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#3F3F3F] text-gray-600 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727]"
             }`}
           >
             {ht.filters?.earn || "Nhận điểm (+)"}
@@ -95,7 +95,7 @@ const PointsHistoryTab = ({
             className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
               historyFilter === "spend"
                 ? "bg-[#990011] text-white shadow-xs"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                : "bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#3F3F3F] text-gray-600 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727]"
             }`}
           >
             {ht.filters?.spend || "Sử dụng (-)"}
@@ -105,30 +105,30 @@ const PointsHistoryTab = ({
 
       {/* Loading Skeleton */}
       {isLoading ? (
-        <div className="bg-white border border-gray-200/90 rounded-2xl shadow-xs overflow-hidden animate-pulse">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl shadow-xs overflow-hidden animate-pulse">
           <div className="bg-[#990011]/80 h-10 w-full" />
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-[#272727]">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="px-5 py-4 grid grid-cols-12 items-center">
                 <div className="col-span-6 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                  <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-[#272727] shrink-0" />
                   <div className="space-y-1.5 flex-1">
-                    <div className="h-3.5 bg-gray-200 rounded w-36" />
-                    <div className="h-2.5 bg-gray-100 rounded w-20" />
+                    <div className="h-3.5 bg-gray-200 dark:bg-[#272727] rounded w-36" />
+                    <div className="h-2.5 bg-gray-100 dark:bg-[#242424] rounded w-20" />
                   </div>
                 </div>
                 <div className="col-span-4 text-center sm:text-left">
-                  <div className="h-3 bg-gray-200 rounded w-24 mx-auto sm:mx-0" />
+                  <div className="h-3 bg-gray-200 dark:bg-[#272727] rounded w-24 mx-auto sm:mx-0" />
                 </div>
                 <div className="col-span-2 text-right">
-                  <div className="h-4 bg-gray-200 rounded w-12 ml-auto" />
+                  <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-12 ml-auto" />
                 </div>
               </div>
             ))}
           </div>
         </div>
       ) : hasItems ? (
-        <div className="bg-white border border-gray-200/90 rounded-2xl shadow-xs overflow-hidden">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl shadow-xs overflow-hidden">
           {/* Table Header */}
           <div className="bg-[#990011] text-white px-5 py-3.5 grid grid-cols-12 text-xs font-bold uppercase tracking-wider">
             <div className="col-span-6 sm:col-span-6">
@@ -143,26 +143,26 @@ const PointsHistoryTab = ({
           </div>
 
           {/* Table Rows */}
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-[#272727]">
             {pointHistory.map((item) => {
               const isSpend = item.type === "spend" || item.points < 0
 
               return (
                 <div
                   key={item.id}
-                  className="px-5 py-4 grid grid-cols-12 items-center hover:bg-gray-50/70 transition"
+                  className="px-5 py-4 grid grid-cols-12 items-center hover:bg-gray-50/70 dark:hover:bg-[#272727] transition"
                 >
                   {/* Activity with Icon */}
                   <div className="col-span-6 sm:col-span-6 flex items-center gap-3">
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                         isSpend
-                          ? "bg-rose-50 text-rose-600"
+                          ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
                           : item.icon === "trophy"
-                          ? "bg-emerald-50 text-emerald-600"
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
                           : item.icon === "cap"
-                          ? "bg-blue-50 text-blue-600"
-                          : "bg-emerald-50 text-emerald-600"
+                          ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400"
+                          : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
                       }`}
                     >
                       {isSpend ? (
@@ -177,17 +177,17 @@ const PointsHistoryTab = ({
                     </div>
 
                     <div className="min-w-0">
-                      <div className="font-semibold text-gray-900 text-xs sm:text-sm truncate">
+                      <div className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate">
                         {getLocalizedHistoryTitle(item)}
                       </div>
-                      <div className="text-[11px] text-gray-400 mt-0.5 truncate">
+                      <div className="text-[11px] text-gray-400 dark:text-neutral-400 mt-0.5 truncate">
                         {getLocalizedHistorySubtitle(item)}
                       </div>
                     </div>
                   </div>
 
                   {/* Timestamp */}
-                  <div className="col-span-4 sm:col-span-4 text-center sm:text-left text-xs text-gray-500">
+                  <div className="col-span-4 sm:col-span-4 text-center sm:text-left text-xs text-gray-500 dark:text-neutral-400">
                     {item.date}
                   </div>
 
@@ -195,7 +195,7 @@ const PointsHistoryTab = ({
                   <div className="col-span-2 sm:col-span-2 text-right">
                     <span
                       className={`text-xs sm:text-sm font-bold ${
-                        isSpend ? "text-[#990011]" : "text-emerald-600"
+                        isSpend ? "text-[#990011] dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
                       }`}
                     >
                       {item.points > 0 ? `+${item.points}` : item.points}
@@ -207,7 +207,7 @@ const PointsHistoryTab = ({
           </div>
 
           {/* Pagination Controls */}
-          <div className="p-4 flex items-center justify-between text-xs text-gray-500 border-t border-gray-100 bg-gray-50/50">
+          <div className="p-4 flex items-center justify-between text-xs text-gray-500 dark:text-neutral-400 border-t border-gray-100 dark:border-[#272727] bg-gray-50/50 dark:bg-[#242424]">
             <span>{paginationText}</span>
 
             <div className="flex items-center gap-2">
@@ -217,8 +217,8 @@ const PointsHistoryTab = ({
                 onClick={() => onPageChange?.(Math.max(1, historyPage - 1))}
                 className={`p-1.5 rounded-lg border flex items-center gap-1 transition ${
                   historyPage <= 1
-                    ? "opacity-50 cursor-not-allowed border-gray-200 text-gray-400"
-                    : "border-gray-300 text-gray-700 hover:bg-white cursor-pointer shadow-2xs"
+                    ? "opacity-50 cursor-not-allowed border-gray-200 dark:border-[#3F3F3F] text-gray-400 dark:text-neutral-500"
+                    : "border-gray-300 dark:border-[#3F3F3F] text-gray-700 dark:text-neutral-200 hover:bg-white dark:hover:bg-[#1A1A1A] cursor-pointer shadow-2xs"
                 }`}
               >
                 <ChevronLeft size={14} />
@@ -231,8 +231,8 @@ const PointsHistoryTab = ({
                 onClick={() => onPageChange?.(historyPage + 1)}
                 className={`p-1.5 rounded-lg border flex items-center gap-1 transition ${
                   pointHistory.length < historyPageSize
-                    ? "opacity-50 cursor-not-allowed border-gray-200 text-gray-400"
-                    : "border-gray-300 text-gray-700 hover:bg-white cursor-pointer shadow-2xs"
+                    ? "opacity-50 cursor-not-allowed border-gray-200 dark:border-[#3F3F3F] text-gray-400 dark:text-neutral-500"
+                    : "border-gray-300 dark:border-[#3F3F3F] text-gray-700 dark:text-neutral-200 hover:bg-white dark:hover:bg-[#1A1A1A] cursor-pointer shadow-2xs"
                 }`}
               >
                 <span>{ht.pagination?.next || "Sau"}</span>
@@ -243,14 +243,14 @@ const PointsHistoryTab = ({
         </div>
       ) : (
         /* Empty State */
-        <div className="bg-white border border-gray-200/90 rounded-2xl p-16 sm:p-20 text-center shadow-xs">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center text-gray-300 mx-auto mb-4">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] rounded-2xl p-16 sm:p-20 text-center shadow-xs">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-gray-300 dark:text-neutral-600 mx-auto mb-4">
             <Star size={48} strokeWidth={1.2} />
           </div>
-          <h4 className="text-base sm:text-lg font-bold text-gray-800 mb-1.5">
+          <h4 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-1.5">
             {ht.empty?.title || "Không có lịch sử biến động điểm"}
           </h4>
-          <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-gray-400 dark:text-neutral-400 max-w-md mx-auto leading-relaxed">
             {ht.empty?.subtitle || "Hoàn thành các khóa học hoặc tham gia hoạt động để kiếm điểm thưởng nhé!"}
           </p>
         </div>

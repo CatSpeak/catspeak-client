@@ -103,7 +103,7 @@ const HistoryMatchDetail = ({ match }) => {
                     </div>
 
                     <div
-                      className={`flex items-center text-cath-red-700 dark:text-cath-red-1000 text-base shrink-0 ${match.gameType === "crack_it" ? "" : "flex items-center"} gap-1`}
+                      className={`flex items-center text-cath-red-700 dark:text-red-400 text-base shrink-0 ${match.gameType === "crack_it" ? "" : "flex items-center"} gap-1`}
                     >
                       {item.totalScore}{" "}
                       <span className="text-xs text-slate-400 dark:text-slate-500">

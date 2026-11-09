@@ -15,7 +15,7 @@ const TopicFilter = () => {
     <div className="w-full">
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between h-10 px-2 text-sm font-semibold text-gray-800 hover:text-cath-red-700 transition-colors duration-200 cursor-pointer select-none group"
+        className="flex w-full items-center justify-between h-10 px-2 text-sm font-semibold text-gray-800 dark:text-white hover:text-cath-red-700 dark:hover:text-red-400 transition-colors duration-200 cursor-pointer select-none group"
       >
         <div className="flex items-center gap-2">
           <span>{t.rooms?.filters?.topicsHeading || "Topics"}</span>
@@ -33,7 +33,7 @@ const TopicFilter = () => {
                 e.stopPropagation()
                 clearAll()
               }}
-              className="px-3 h-10 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-cath-red-700 rounded-md transition-colors"
+              className="px-3 h-10 text-sm font-medium text-gray-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-[#272727] hover:text-cath-red-700 dark:hover:text-red-400 rounded-md transition-colors"
             >
               {t.rooms?.filters?.clear || "Clear"}
             </button>
@@ -57,17 +57,17 @@ const TopicFilter = () => {
                 key={topic}
                 className={`h-10 shrink-0 flex items-center gap-3 cursor-pointer rounded-md px-2 transition-colors ${
                   isChecked
-                    ? "bg-primaryBg hover:bg-[#E5E5E5]"
-                    : "hover:bg-primaryBg"
+                    ? "bg-primaryBg dark:bg-[#272727] hover:bg-[#E5E5E5] dark:hover:bg-[#333333]"
+                    : "hover:bg-primaryBg dark:hover:bg-[#242424]"
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={isChecked}
                   onChange={(e) => toggleValue(topic, e.target.checked)}
-                  className="w-4 h-4 text-cath-red-700 bg-white accent-cath-red-700 cursor-pointer"
+                  className="w-4 h-4 text-cath-red-700 bg-white dark:bg-[#272727] accent-cath-red-700 cursor-pointer"
                 />
-                <span className="text-sm">
+                <span className="text-sm text-gray-800 dark:text-neutral-200">
                   {t.rooms?.createRoom?.topics?.[topic.toLowerCase()] || topic}
                 </span>
               </label>

@@ -30,22 +30,22 @@ const FlashcardModal = ({ isOpen, title, onClose, children, footer, labelledBy, 
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`relative z-10 w-full ${maxWidth} max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl outline-none`}
+        className={`relative z-10 w-full ${maxWidth} max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] p-6 shadow-2xl outline-none`}
       >
         <div className="flex items-start justify-between gap-4">
-          <h2 id={titleId} className="text-lg font-bold text-slate-900">
+          <h2 id={titleId} className="text-lg font-bold text-slate-900 dark:text-white">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-[#272727] text-slate-500 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-[#333]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="mt-3 text-sm text-slate-600">{children}</div>
+        <div className="mt-3 text-sm text-slate-600 dark:text-neutral-300">{children}</div>
         {footer && <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">{footer}</div>}
       </div>
     </div>,

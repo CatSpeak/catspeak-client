@@ -116,7 +116,7 @@ const CustomRoomsPage = () => {
           </div>
 
           {/* Room Quota Counter */}
-          <p className="text-sm font-medium text-[#606060] mb-2 text-center sm:text-left">
+          <p className="text-sm font-medium text-[#606060] dark:text-[#AAAAAA] mb-2 text-center sm:text-left">
             {(ct.quota || "{{used}}/{{max}} rooms used")
               .replace("{{used}}", quota.used)
               .replace("{{max}}", quota.max)}
@@ -166,14 +166,14 @@ const RoomsListSkeleton = () => (
     {Array.from({ length: 8 }).map((_, i) => (
       <div
         key={i}
-        className="rounded-2xl border border-border bg-white overflow-hidden animate-pulse flex flex-col"
+        className="rounded-2xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] overflow-hidden animate-pulse flex flex-col"
       >
-        <div className="aspect-video w-full bg-gray-200" />
+        <div className="aspect-video w-full bg-gray-200 dark:bg-[#272727]" />
         <div className="p-4 flex flex-col gap-3 flex-1 justify-between">
-          <div className="h-5 bg-gray-200 rounded w-3/4" />
+          <div className="h-5 bg-gray-200 dark:bg-[#272727] rounded w-3/4" />
           <div className="flex justify-between items-center pt-2">
-            <div className="h-4 bg-gray-100 rounded w-20" />
-            <div className="h-4 bg-gray-100 rounded w-24" />
+            <div className="h-4 bg-gray-100 dark:bg-[#242424] rounded w-20" />
+            <div className="h-4 bg-gray-100 dark:bg-[#242424] rounded w-24" />
           </div>
         </div>
       </div>

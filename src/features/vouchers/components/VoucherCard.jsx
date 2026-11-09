@@ -72,19 +72,19 @@ const VoucherCard = ({
   return (
     <div
       onClick={() => onViewDetails?.(voucher)}
-      className="rounded-xl bg-white border border-border cursor-pointer"
+      className="rounded-xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] cursor-pointer"
     >
       {/* Header: Code & Status Badge */}
       <div className="h-[56px] px-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="font-bold">{voucher.code || "-"}</span>
+          <span className="font-bold text-gray-900 dark:text-white">{voucher.code || "-"}</span>
           <IconButton
             size="sm"
             variant="ghost"
             onClick={handleCopy}
             title={vt.actions?.copy || "Sao chép"}
           >
-            {copied ? <Check className="text-emerald-600" /> : <Copy />}
+            {copied ? <Check className="text-emerald-600 dark:text-emerald-400" /> : <Copy className="dark:text-neutral-300" />}
           </IconButton>
         </div>
 
@@ -95,36 +95,36 @@ const VoucherCard = ({
       <div className="px-4 flex flex-col gap-1">
         {/* Tên voucher */}
         <div className="flex items-center justify-between gap-4">
-          <span className="text-secondary shrink-0">
+          <span className="text-secondary dark:text-neutral-400 shrink-0">
             {vt.table?.title || "Tên voucher"}
           </span>
-          <span className="text-right truncate">{voucher.title}</span>
+          <span className="text-right truncate text-gray-800 dark:text-neutral-200">{voucher.title}</span>
         </div>
 
         {/* Mức giảm */}
         <div className="flex items-center justify-between gap-4">
-          <span className="text-secondary shrink-0">
+          <span className="text-secondary dark:text-neutral-400 shrink-0">
             {vt.table?.discount || "Mức giảm"}
           </span>
-          <span className="text-cath-red-700 text-right truncate">
+          <span className="text-cath-red-700 dark:text-red-400 font-medium text-right truncate">
             {formatDiscountBadgeText(voucher)}
           </span>
         </div>
 
         {/* Hiệu lực */}
         <div className="flex items-center justify-between gap-4">
-          <span className="text-secondary shrink-0">
+          <span className="text-secondary dark:text-neutral-400 shrink-0">
             {vt.table?.validity || "Hiệu lực"}
           </span>
-          <span className="text-right truncate">{renderValidity()}</span>
+          <span className="text-right truncate text-gray-800 dark:text-neutral-200">{renderValidity()}</span>
         </div>
 
         {/* Đã dùng */}
         <div className="flex items-center justify-between gap-4">
-          <span className="text-secondary shrink-0">
+          <span className="text-secondary dark:text-neutral-400 shrink-0">
             {vt.table?.usage || "Đã dùng"}
           </span>
-          <span className="text-right truncate">
+          <span className="text-right truncate text-gray-800 dark:text-neutral-200">
             {used} / {limit > 0 ? limit : "∞"}
           </span>
         </div>

@@ -211,7 +211,7 @@ const SpeakingTimeBalancePanel = ({
       {activeIsLoading ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-[#272727] flex items-center justify-center mb-3">
-            <Loader2 className="w-6 h-6 text-cath-red-700 animate-spin" />
+            <Loader2 className="w-6 h-6 text-cath-red-700 dark:text-red-400 animate-spin" />
           </div>
           <p className="text-sm text-gray-600 dark:text-[#AAAAAA] font-medium">
             {stbT.loadingData || "Đang tải dữ liệu"}

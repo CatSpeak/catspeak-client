@@ -322,7 +322,7 @@ const CalendarPage = () => {
 
   return (
     <MapFocusContext.Provider value={mapFocusValue}>
-    <div className="w-full flex flex-col gap-4 overflow-hidden bg-primaryBg min-h-screen">
+    <div className="w-full flex flex-col gap-4 overflow-hidden bg-primaryBg dark:bg-[#0F0F0F] min-h-screen">
       <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>

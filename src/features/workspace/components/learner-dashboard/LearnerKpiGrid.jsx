@@ -78,16 +78,16 @@ export const LearnerKpiCard = ({ kpiKey, data }) => {
 
   return (
     <article
-      className="bg-white border border-[#DEE0E5] rounded-xl p-3.5 sm:p-4 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between min-w-0"
+      className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-3.5 sm:p-4 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between min-w-0"
       aria-label={title}
     >
       {/* Top Header inside card */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-xs font-semibold text-[#6E788C] truncate" title={title}>
+        <span className="text-xs font-semibold text-[#6E788C] dark:text-neutral-400 truncate" title={title}>
           {title}
         </span>
         <div
-          className={`w-7 h-7 rounded-lg ${config.bgLight} flex items-center justify-center shrink-0`}
+          className={`w-7 h-7 rounded-lg ${config.bgLight} dark:bg-white/5 flex items-center justify-center shrink-0`}
           style={{ color: config.color }}
         >
           <Icon className="w-4 h-4" />
@@ -96,22 +96,22 @@ export const LearnerKpiCard = ({ kpiKey, data }) => {
 
       {/* Main Metric Value */}
       <div className="flex items-baseline gap-1 my-1">
-        <span className="text-xl sm:text-2xl font-bold text-[#14171F] tabular-nums tracking-tight">
+        <span className="text-xl sm:text-2xl font-bold text-[#14171F] dark:text-white tabular-nums tracking-tight">
           {typeof value === "number" ? value.toLocaleString() : value}
         </span>
-        {unit && <span className="text-[11px] font-medium text-[#6E788C]">{unit}</span>}
+        {unit && <span className="text-[11px] font-medium text-[#6E788C] dark:text-neutral-400">{unit}</span>}
       </div>
 
       {/* Bottom Growth / Delta Indicator */}
-      <div className="mt-2 pt-2 border-t border-[#DEE0E5]/60 flex items-center justify-between text-[11px]">
+      <div className="mt-2 pt-2 border-t border-[#DEE0E5]/60 dark:border-[#2E2E2E] flex items-center justify-between text-[11px]">
         {delta !== undefined && delta !== null ? (
           <div
             className={`inline-flex items-center gap-0.5 font-semibold ${
               delta > 0
-                ? "text-emerald-600"
+                ? "text-emerald-600 dark:text-emerald-400"
                 : delta < 0
-                ? "text-rose-600"
-                : "text-gray-500"
+                ? "text-rose-600 dark:text-rose-400"
+                : "text-gray-500 dark:text-neutral-400"
             }`}
           >
             {delta > 0 ? (
@@ -124,21 +124,21 @@ export const LearnerKpiCard = ({ kpiKey, data }) => {
             <span>
               {delta > 0 ? `+${delta}%` : `${delta}%`}
             </span>
-            <span className="text-gray-400 font-normal ml-0.5 hidden xs:inline">
+            <span className="text-gray-400 dark:text-neutral-500 font-normal ml-0.5 hidden xs:inline">
               {isEn ? "vs prev" : "so kỳ trước"}
             </span>
           </div>
         ) : badgeText ? (
-          <span className="inline-flex items-center gap-1 text-orange-600 font-semibold">
+          <span className="inline-flex items-center gap-1 text-orange-600 dark:text-orange-400 font-semibold">
             <Flame className="w-3 h-3" />
             <span>{badgeText}</span>
           </span>
         ) : (
-          <span className="text-gray-400 font-medium">N/A</span>
+          <span className="text-gray-400 dark:text-neutral-500 font-medium">N/A</span>
         )}
 
         {data?.tier && (
-          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
             {data.tier}
           </span>
         )}

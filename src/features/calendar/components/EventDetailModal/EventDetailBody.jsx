@@ -56,13 +56,13 @@ const EventDetailBody = ({
   const tzOffsetLabel = isKnownTz ? `(${getTimezoneOffset(eventTzId)})` : `(${eventTzId})`
 
   return (
-    <div className="relative bg-white text-base  [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+    <div className="relative bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white text-base  [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
       {/* Thumbnail banner */}
       {ev.thumbnailUrl && (
         <button
           type="button"
           onClick={() => setIsViewerOpen(true)}
-          className="w-full h-40 overflow-hidden bg-neutral-100 cursor-zoom-in"
+          className="w-full h-40 overflow-hidden bg-neutral-100 dark:bg-[#242424] cursor-zoom-in"
         >
           <img
             src={ev.thumbnailUrl}
@@ -79,8 +79,8 @@ const EventDetailBody = ({
             <span
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                 ev.isOnline
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-600"
+                  ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400"
+                  : "bg-gray-100 dark:bg-[#272727] text-gray-600 dark:text-[#AAAAAA]"
               }`}
             >
               <span
@@ -106,7 +106,7 @@ const EventDetailBody = ({
             <span className="font-bold min-w-max">
               {t.calendar?.timeLabel || "Time"}:
             </span>
-            <span className="text-[#60060]">
+            <span className="text-[#606060] dark:text-[#AAAAAA]">
               {formatDateTime(ev.startTime)} –{" "}
               {formatDateTime(ev.endTime)} {tzOffsetLabel}
             </span>
@@ -127,7 +127,7 @@ const EventDetailBody = ({
                     <span className="font-bold min-w-max">
                       {t.calendar?.location || "Location"}:
                     </span>
-                    <span className="text-[#60060]">
+                    <span className="text-[#606060] dark:text-[#AAAAAA]">
                       {t.calendar?.notAssigned || "Not assigned"}
                     </span>
                   </div>
@@ -150,7 +150,7 @@ const EventDetailBody = ({
               );
 
               const linkClass =
-                "flex flex-col hover:opacity-80 transition-opacity text-[#990011] text-left";
+                "flex flex-col hover:opacity-80 transition-opacity text-[#990011] dark:text-red-400 text-left";
 
               return (
                 <div className="flex items-start gap-2">
@@ -172,7 +172,7 @@ const EventDetailBody = ({
             <span className="font-bold">
               {t.calendar?.description || "Description"}:
             </span>
-            <p className="text-[#60060] whitespace-pre-wrap leading-relaxed">
+            <p className="text-[#606060] dark:text-[#AAAAAA] whitespace-pre-wrap leading-relaxed">
               {ev.description}
             </p>
           </div>
@@ -185,7 +185,7 @@ const EventDetailBody = ({
               <span className="font-bold min-w-max">
                 {t.calendar?.registeredCount || "Registered amount"}:
               </span>
-              <span className="text-[#60060]">
+              <span className="text-[#606060] dark:text-[#AAAAAA]">
                 {ev.currentParticipants ?? 0}/{ev.maxParticipants ?? "∞"}
               </span>
             </div>
@@ -202,8 +202,7 @@ const EventDetailBody = ({
                 <span
                   key={c.id || `cond-${index}`}
                   title={c.description || undefined}
-                  className="px-3 py-1 rounded-full text-[#990011] text-sm flex items-center justify-center"
-                  // style={{ backgroundColor: headerColor }}
+                  className="px-3 py-1 rounded-full text-[#990011] dark:text-red-400 bg-red-50 dark:bg-red-950/30 text-sm flex items-center justify-center"
                 >
                   {c.title || c.conditionType || c.category || `#${c.id}`}
                 </span>
@@ -218,7 +217,7 @@ const EventDetailBody = ({
             <span className="font-bold min-w-max">
               {t.calendar?.repeatLabel || "Repeat"}:
             </span>
-            <div className="text-[#60060] flex gap-1">
+            <div className="text-[#606060] dark:text-[#AAAAAA] flex gap-1">
               <span>
                 {ev.recurrenceRule.frequency &&
                 t.calendar?.recurrence?.[
@@ -239,7 +238,7 @@ const EventDetailBody = ({
               </span>
               {ev.recurrenceRule.recurrenceStartDate &&
                 ev.recurrenceRule.recurrenceEndDate && (
-                  <span className="text-[#60060]">
+                  <span className="text-[#606060] dark:text-[#AAAAAA]">
                     {formatDate(ev.recurrenceRule.recurrenceStartDate)}{" "}
                     –{" "}
                     {formatDate(ev.recurrenceRule.recurrenceEndDate)}
@@ -254,7 +253,7 @@ const EventDetailBody = ({
           ev.subOccurrences &&
           ev.subOccurrences.length > 0 && (
             <div className="flex flex-col gap-3">
-              <span className="font-bold text-lg">
+              <span className="font-bold text-lg text-gray-900 dark:text-white">
                 {t.calendar?.occurrencesList || "Các buổi trong chuỗi"}:
               </span>
 
@@ -265,13 +264,13 @@ const EventDetailBody = ({
                     onClick={() =>
                       onSelectOccurrence && onSelectOccurrence(sub)
                     }
-                    className="flex items-center justify-between p-4 rounded-2xl border border-[#F5F5F5] bg-[#F5F5F5] hover:border-[#990011] text-left"
+                    className="flex items-center justify-between p-4 rounded-2xl border border-[#F5F5F5] dark:border-[#3F3F3F] bg-[#F5F5F5] dark:bg-[#242424] hover:border-[#990011] dark:hover:border-red-400 text-left"
                   >
                     <div className="flex flex-col">
-                      <span className="font-medium">
+                      <span className="font-medium text-gray-900 dark:text-white">
                         {sub.title || ev.title}
                       </span>
-                      <span className="text-[#606060]">
+                      <span className="text-[#606060] dark:text-[#AAAAAA]">
                         {formatDateTime(sub.startTime)} –{" "}
                         {formatDateTime(sub.endTime)}{" "}
                         ({formatDate(sub.startTime)})
@@ -292,7 +291,7 @@ const EventDetailBody = ({
         className="max-w-sm"
       >
         <div className="py-2">
-          <p className="text-black">
+          <p className="text-black dark:text-white">
             {t.calendar?.confirmDeleteOccurrence ||
               "Bạn có chắc chắn muốn xóa buổi này?"}
           </p>
@@ -301,7 +300,7 @@ const EventDetailBody = ({
           <button
             onClick={() => setConfirmDeleteId(null)}
             disabled={isCancelling}
-            className="px-4 py-2 text-sm font-medium text-black bg-primaryBg rounded-lg hover:bg-[#d9d9d9] transition-colors"
+            className="px-4 py-2 text-sm font-medium text-black dark:text-white bg-primaryBg dark:bg-[#272727] rounded-lg hover:bg-[#d9d9d9] dark:hover:bg-[#3D3D3D] transition-colors"
           >
             {t.calendar?.cancel || "Hủy"}
           </button>

@@ -85,7 +85,7 @@ const AnswerInput = ({ isMain = true }) => {
   }
 
   return (
-    <div className="relative shrink-0 border-t border-slate-100 px-2 md:px-3 py-2 flex items-center justify-center w-full min-h-[52px] md:min-h-[60px] bg-white">
+    <div className="relative shrink-0 border-t border-slate-100 dark:border-[#2E2E2E] px-2 md:px-3 py-2 flex items-center justify-center w-full min-h-[52px] md:min-h-[60px] bg-white dark:bg-[#1A1A1A]">
       {/* Cửa sổ nháy flash khi có người trả lời đúng - Đưa lên góc trên bên phải */}
       <AnimatePresence mode="wait">
         {showFlash && lastCorrectAnswer && (
@@ -96,15 +96,15 @@ const AnswerInput = ({ isMain = true }) => {
             exit={{ opacity: 0, x: 50, scale: 0.8 }}
             className="fixed top-24 md:top-28 right-4 z-[200] pointer-events-none"
           >
-            <div className="bg-white/95 backdrop-blur-md text-slate-800 px-4 py-3 rounded-2xl shadow-xl border border-green-100 flex items-center gap-3 min-w-[200px]">
-              <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+            <div className="bg-white/95 dark:bg-[#242424]/95 backdrop-blur-md text-slate-800 dark:text-white px-4 py-3 rounded-2xl shadow-xl border border-green-100 dark:border-green-900/40 flex items-center gap-3 min-w-[200px]">
+              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-950/50 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
                 <CheckCircle2 size={20} />
               </div>
               <div className="flex flex-col text-left">
                 <span className="font-bold text-sm leading-tight max-w-[150px] truncate">
                   {lastCorrectAnswer.player_name}
                 </span>
-                <span className="text-xs text-slate-500 font-medium mt-0.5">
+                <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium mt-0.5">
                   {t.rooms?.game?.crackIt?.gotItRight || "đã đoán chính xác!"}
                 </span>
               </div>
@@ -123,9 +123,9 @@ const AnswerInput = ({ isMain = true }) => {
                 initial={{ opacity: 0, x: -30, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: -20, scale: 0.9, filter: "blur(4px)" }}
-                className="bg-white/95 backdrop-blur-md text-slate-700 px-4 py-2 rounded-xl text-sm font-medium shadow-[0_4px_12px_rgb(239,68,68,0.15)] flex items-center gap-2 border border-red-100"
+                className="bg-white/95 dark:bg-[#242424]/95 backdrop-blur-md text-slate-700 dark:text-neutral-200 px-4 py-2 rounded-xl text-sm font-medium shadow-[0_4px_12px_rgb(239,68,68,0.15)] flex items-center gap-2 border border-red-100 dark:border-red-900/40"
               >
-                <span className="text-red-500 font-bold text-xs flex items-center justify-center bg-red-50 w-5 h-5 rounded-full">
+                <span className="text-red-500 dark:text-red-400 font-bold text-xs flex items-center justify-center bg-red-50 dark:bg-rose-950/40 w-5 h-5 rounded-full">
                   ✕
                 </span>
                 {toast.text}
@@ -139,11 +139,11 @@ const AnswerInput = ({ isMain = true }) => {
         onSubmit={handleSubmit}
         animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
         transition={{ duration: 0.4 }}
-        className={`flex items-center w-full rounded-full shadow-sm border-2 p-1.5  transition-all ${shake
-            ? "bg-red-50 border-red-500 shadow-red-100"
+        className={`flex items-center w-full rounded-full shadow-sm border-2 p-1.5 transition-all ${shake
+            ? "bg-red-50 dark:bg-rose-950/30 border-red-500 shadow-red-100 dark:shadow-none"
             : isCorrect
-              ? "bg-green-50 border-green-500 shadow-green-100"
-              : "bg-white border-gray-300 focus-within:border-cath-red-400 focus-within:shadow-md"
+              ? "bg-green-50 dark:bg-emerald-950/30 border-green-500 shadow-green-100 dark:shadow-none"
+              : "bg-white dark:bg-[#242424] border-gray-300 dark:border-[#3F3F3F] focus-within:border-cath-red-400 dark:focus-within:border-red-400 focus-within:shadow-md"
           }`}
       >
         <input
@@ -159,8 +159,8 @@ const AnswerInput = ({ isMain = true }) => {
                 ? (t.rooms?.game?.crackIt?.spectatorPlaceholder || "Bạn đang xem dưới dạng người quan sát...")
                 : (t.rooms?.game?.crackIt?.typeAnswer || "Nhập đáp án của bạn...")
           }
-          className={`flex-1 min-w-0 bg-transparent px-2 md:px-6 h-10 outline-none text-lg font-medium tracking-wide ${isCorrect ? "text-green-700" : "text-slate-800 disabled:text-slate-500"
-            } placeholder-gray-400`}
+          className={`flex-1 min-w-0 bg-transparent px-2 md:px-6 h-10 outline-none text-lg font-medium tracking-wide ${isCorrect ? "text-green-700 dark:text-green-400" : "text-slate-800 dark:text-white disabled:text-slate-500 dark:disabled:text-neutral-500"
+            } placeholder-gray-400 dark:placeholder-neutral-500`}
         />
 
         {/* Score Pop-up for correct answer */}
@@ -169,7 +169,7 @@ const AnswerInput = ({ isMain = true }) => {
             <motion.div
               initial={{ opacity: 0, scale: 0.5, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="mr-3 font-black text-green-600 drop-shadow-sm flex items-center gap-1 shrink-0"
+              className="mr-3 font-black text-green-600 dark:text-green-400 drop-shadow-sm flex items-center gap-1 shrink-0"
             >
               <span className="text-xl">+{myScoreEarned}</span>
               <span className="text-xs uppercase tracking-wider mt-1">điểm</span>
@@ -180,7 +180,7 @@ const AnswerInput = ({ isMain = true }) => {
         <button
           type="submit"
           disabled={isDisabled || !inputValue.trim()}
-          className="w-10 h-10 rounded-full bg-cath-red-600 text-white flex items-center justify-center hover:scale-105 hover:bg-cath-red-700 disabled:opacity-50 disabled:hover:scale-100 disabled:bg-gray-300 disabled:text-gray-500 transition-all shrink-0 shadow-md"
+          className="w-10 h-10 rounded-full bg-cath-red-600 text-white flex items-center justify-center hover:scale-105 hover:bg-cath-red-700 disabled:opacity-50 disabled:hover:scale-100 disabled:bg-gray-300 dark:disabled:bg-[#333333] disabled:text-gray-500 dark:disabled:text-neutral-500 transition-all shrink-0 shadow-md cursor-pointer disabled:cursor-not-allowed"
         >
           <Send size={22} />
         </button>

@@ -66,10 +66,10 @@ const CalendarToolBar = () => {
           */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center justify-center h-10 w-10 rounded-full bg-primaryBg hover:bg-[#D9D9D9] transition-all shrink-0"
+            className="flex items-center justify-center h-10 w-10 rounded-full bg-primaryBg dark:bg-[#272727] hover:bg-[#D9D9D9] dark:hover:bg-[#3D3D3D] transition-all shrink-0"
             title="Create New"
           >
-            <Plus size={24} color="#8e0000" strokeWidth={1.5} />
+            <Plus size={24} className="text-[#8e0000] dark:text-red-400" strokeWidth={1.5} />
           </button>
         </div>
       </div>

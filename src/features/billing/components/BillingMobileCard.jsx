@@ -38,7 +38,7 @@ const BillingMobileCard = ({
     <FluentCard padding="p-4">
       {/* Top row: order code + status */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-gray-800">
+        <span className="text-sm font-semibold text-gray-800 dark:text-white">
           #{invoice.orderCode}
         </span>
         <span
@@ -51,29 +51,29 @@ const BillingMobileCard = ({
       {/* Info rows */}
       <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm mb-3">
         <div>
-          <span className="text-gray-400 text-xs">{cols.date || "Date"}</span>
-          <p className="text-gray-600 mt-0.5">
+          <span className="text-gray-400 dark:text-neutral-500 text-xs">{cols.date || "Date"}</span>
+          <p className="text-gray-600 dark:text-neutral-300 mt-0.5">
             {formatDate(invoice.createDate)}
           </p>
         </div>
         <div>
-          <span className="text-gray-400 text-xs">
+          <span className="text-gray-400 dark:text-neutral-500 text-xs">
             {cols.amount || "Amount"}
           </span>
-          <p className="text-gray-800 font-medium mt-0.5">
+          <p className="text-gray-800 dark:text-white font-medium mt-0.5">
             {formatAmount(invoice.amount)}
           </p>
         </div>
         <div>
-          <span className="text-gray-400 text-xs">
+          <span className="text-gray-400 dark:text-neutral-500 text-xs">
             {cols.method || "Method"}
           </span>
-          <p className="text-gray-600 mt-0.5">{invoice.method}</p>
+          <p className="text-gray-600 dark:text-neutral-300 mt-0.5">{invoice.method}</p>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end pt-3 mt-1 border-t border-border">
+      <div className="flex items-center justify-end pt-3 mt-1 border-t border-border dark:border-[#3F3F3F]">
         <Popover
           placement="bottom-right"
           trigger={
@@ -86,19 +86,19 @@ const BillingMobileCard = ({
             </IconButton>
           }
           content={(close) => (
-            <MenuList className="!border-border shadow-lg min-w-[150px]">
+            <MenuList className="!border-border dark:!border-[#3F3F3F] shadow-lg min-w-[150px]">
               {isPending && (
                 <MenuItem
                   label={actionsText.repay || "Thanh toán lại"}
                   icon={
                     isRepayingThis ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-cath-red-700" />
+                      <Loader2 className="w-4 h-4 animate-spin text-cath-red-700 dark:text-red-400" />
                     ) : (
-                      <RotateCcw className="w-4 h-4 text-cath-red-700" />
+                      <RotateCcw className="w-4 h-4 text-cath-red-700 dark:text-red-400" />
                     )
                   }
-                  hoverBg="hover:bg-red-50"
-                  className="font-semibold text-cath-red-700"
+                  hoverBg="hover:bg-red-50 dark:hover:bg-red-950/30"
+                  className="font-semibold text-cath-red-700 dark:text-red-400"
                   onClick={() => {
                     close()
                     onRepay && onRepay(invoice)
@@ -109,9 +109,9 @@ const BillingMobileCard = ({
               {isSuccess && (
                 <MenuItem
                   label={actionsText.refund || "Hoàn tiền"}
-                  icon={<Undo2 className="w-4 h-4 text-amber-700" />}
-                  hoverBg="hover:bg-amber-50"
-                  className="font-medium text-amber-900"
+                  icon={<Undo2 className="w-4 h-4 text-amber-700 dark:text-amber-400" />}
+                  hoverBg="hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                  className="font-medium text-amber-900 dark:text-amber-200"
                   onClick={() => {
                     close()
                     onRefund && onRefund(invoice)

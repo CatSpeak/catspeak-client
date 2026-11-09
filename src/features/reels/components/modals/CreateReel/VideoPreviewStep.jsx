@@ -15,20 +15,20 @@ export const VideoPreviewStep = () => {
   } = useCreateReelContext()
 
   return (
-    <div className={`flex-col gap-4 text-left border-l-0 md:border-l border-border pl-0 md:pl-6 h-full ${mobileTab === "preview" ? "flex" : "hidden md:flex"}`}>
-      <div className="flex flex-col gap-1 border-b border-border pb-2">
-        <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+    <div className={`flex-col gap-4 text-left border-l-0 md:border-l border-border dark:border-[#3F3F3F] pl-0 md:pl-6 h-full ${mobileTab === "preview" ? "flex" : "hidden md:flex"}`}>
+      <div className="flex flex-col gap-1 border-b border-border dark:border-[#3F3F3F] pb-2">
+        <h3 className="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider">
           {t?.catSpeak?.reels?.createModal?.preview || "Preview"}
         </h3>
 
         {/* Live Feed Mode Tabs selector */}
-        <div className="flex bg-gray-200/60 p-1 rounded-xl text-xs font-bold shadow-sm mt-1.5">
+        <div className="flex bg-gray-200/60 dark:bg-[#272727] p-1 rounded-xl text-xs font-bold shadow-sm mt-1.5">
           <button
             type="button"
             onClick={() => setPreviewMode("video")}
             className={`flex-1 py-1.5 rounded-lg transition-all ${previewMode === "video"
-              ? "bg-white text-gray-800 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white shadow-sm"
+              : "text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-white"
               }`}
           >
             {t?.catSpeak?.reels?.createModal?.videoPlayback || "Video Playback"}
@@ -37,8 +37,8 @@ export const VideoPreviewStep = () => {
             type="button"
             onClick={() => setPreviewMode("cover")}
             className={`flex-1 py-1.5 rounded-lg transition-all ${previewMode === "cover"
-              ? "bg-white text-gray-800 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white shadow-sm"
+              : "text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-white"
               }`}
           >
             {t?.catSpeak?.reels?.createModal?.coverThumbnailTab || t?.catSpeak?.reels?.createModal?.coverThumbnail || "Cover Thumbnail"}

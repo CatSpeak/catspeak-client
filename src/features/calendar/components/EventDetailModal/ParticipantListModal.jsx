@@ -23,32 +23,32 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
       open={open}
       onClose={onClose}
       showCloseButton={false}
-      className="!max-w-[500px] w-full p-0 bg-white rounded-none min-[426px]:rounded-2xl shadow-xl overflow-visible"
+      className="!max-w-[500px] w-full p-0 bg-white dark:bg-[#1A1A1A] rounded-none min-[426px]:rounded-2xl shadow-xl overflow-visible"
       bodyClassName="flex-1"
     >
-      <div className="relative flex flex-col w-full h-full bg-white rounded-none min-[426px]:rounded-2xl max-h-[80vh]">
+      <div className="relative flex flex-col w-full h-full bg-white dark:bg-[#1A1A1A] rounded-none min-[426px]:rounded-2xl max-h-[80vh]">
         {/* Floating close button */}
         <button
           onClick={onClose}
-          className="hidden min-[426px]:block absolute -top-4 -right-4 bg-[#B81919] text-white p-1.5 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.3)] z-50 hover:bg-red-800 transition-colors border-[3px] border-white"
+          className="hidden min-[426px]:block absolute -top-4 -right-4 bg-[#B81919] text-white p-1.5 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.3)] z-50 hover:bg-red-800 transition-colors border-[3px] border-white dark:border-[#1A1A1A]"
         >
           <X size={18} strokeWidth={4} />
         </button>
 
-        <div className="p-6 border-b border-border shrink-0 flex flex-col gap-1">
+        <div className="p-6 border-b border-border dark:border-[#3F3F3F] shrink-0 flex flex-col gap-1">
           <div className="flex items-start justify-between">
-            <h3 className="text-xl font-bold text-gray-800">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white">
               {t.calendar?.participantList || "Danh sách người đăng ký"}
             </h3>
             {/* Mobile close button */}
             <button
               onClick={onClose}
-              className="max-[425px]:flex hidden -mt-1 -mr-2 bg-gray-100 text-gray-500 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+              className="max-[425px]:flex hidden -mt-1 -mr-2 bg-gray-100 dark:bg-[#272727] text-gray-500 dark:text-neutral-400 p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-[#333333] transition-colors"
             >
               <X size={18} strokeWidth={3} />
             </button>
           </div>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-neutral-400">
             {totalCount} {t.calendar?.people || "người"}
           </span>
         </div>
@@ -60,7 +60,7 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
               text={t.calendar?.loadingParticipants || "Đang tải..."}
             />
           ) : participants.length === 0 ? (
-            <div className="text-center text-gray-500 py-10 italic">
+            <div className="text-center text-gray-500 dark:text-neutral-400 py-10 italic">
               {t.calendar?.noParticipants || "Chưa có người đăng ký"}
             </div>
           ) : (
@@ -70,7 +70,7 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
                   key={p.accountId || idx}
                   className="flex items-center gap-3"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 shrink-0 overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-[#272727] flex items-center justify-center text-gray-500 dark:text-neutral-400 shrink-0 overflow-hidden">
                     {p.avatarImageUrl ? (
                       <img
                         src={p.avatarImageUrl}
@@ -83,13 +83,13 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
                   </div>
 
                   <div className="flex flex-col flex-1 min-w-0">
-                    <span className="truncate">
+                    <span className="truncate text-gray-900 dark:text-white">
                       {p.username ||
                         t.calendar?.unknownUser ||
                         "Người dùng ẩn danh"}
                     </span>
                     {p.email && (
-                      <span className="text-sm text-[#606060] truncate">
+                      <span className="text-sm text-[#606060] dark:text-neutral-400 truncate">
                         {p.email}
                       </span>
                     )}

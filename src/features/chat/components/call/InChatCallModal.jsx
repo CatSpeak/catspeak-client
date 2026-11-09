@@ -140,7 +140,7 @@ const CallControlsInner = ({
   }, [isDirect1on1, remoteParticipants, localParticipant, lastSpeakerId])
 
   return (
-    <div className="flex flex-col h-full w-full justify-between bg-white text-black select-none">
+    <div className="flex flex-col h-full w-full justify-between bg-white dark:bg-[#1A1A1A] text-black dark:text-white select-none">
       {/* ── Top Bar ── */}
       <CallTopBar
         chatTitle={chatTitle}
@@ -152,7 +152,7 @@ const CallControlsInner = ({
       />
 
       {/* ── Main View (Single Spotlight Tile when Minimized, Grid when Expanded) ── */}
-      <div className="flex-1 p-4 overflow-y-auto min-h-0 bg-primaryBg">
+      <div className="flex-1 p-4 overflow-y-auto min-h-0 bg-primaryBg dark:bg-[#0F0F0F]">
         {isMinimized ? (
           <div className="w-full h-full">
             {isWaitingForFriend ? (

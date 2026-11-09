@@ -32,19 +32,19 @@ const PolicyModal = ({ open, onClose, title }) => {
       role="presentation"
     >
       <div 
-        className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-[24px] p-6 flex flex-col"
+        className="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-[24px] p-6 flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           aria-label="Close"
-          className="absolute right-6 top-6 z-10 text-2xl text-gray-500 transition hover:text-gray-700"
+          className="absolute right-6 top-6 z-10 text-2xl text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-white transition"
           onClick={onClose}
         >
           <FiX />
         </button>
 
-        <h2 className="text-center text-primary text-2xl font-bold pb-4 pr-6">
+        <h2 className="text-center text-primary dark:text-red-400 text-2xl font-bold pb-4 pr-6">
           {title}
         </h2>
 
@@ -53,7 +53,7 @@ const PolicyModal = ({ open, onClose, title }) => {
              <PolicyComponent />
           ) : (
             <div className="flex justify-center items-center min-h-[200px]">
-              <p className="text-lg text-gray-600 font-medium">
+              <p className="text-lg text-gray-600 dark:text-neutral-300 font-medium">
                 {t.comingSoon.badge}
               </p>
             </div>

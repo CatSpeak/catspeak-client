@@ -16,15 +16,15 @@ const RoomsMobileDrawer = ({ isOpen, onClose, title, children }) => {
       )}
       {/* Drawer Panel */}
       <div
-        className={`fixed top-0 right-0 z-[1301] h-full w-full sm:w-[320px] bg-white shadow-xl transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 z-[1301] h-full w-full sm:w-[320px] bg-white dark:bg-[#1A1A1A] border-l border-border dark:border-[#3F3F3F] shadow-xl transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex h-[56px] items-center justify-between border-b border-border px-4">
-          <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+        <div className="flex h-[56px] items-center justify-between border-b border-border dark:border-[#3F3F3F] px-4">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            className="rounded-full p-2 text-gray-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-[#272727] hover:text-gray-700 dark:hover:text-white transition-colors"
           >
             <X className="h-5 w-5" />
           </button>

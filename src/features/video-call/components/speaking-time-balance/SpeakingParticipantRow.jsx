@@ -37,9 +37,9 @@ const SpeakingParticipantRow = ({
       </span>
     )
   } else if (isTooLow) {
-    containerClass += " bg-[#FFF8F8] dark:bg-red-950/20 border-l-4 border-l-cath-red-700"
-    barFillColor = "bg-cath-red-700"
-    percentColor = "text-cath-red-700"
+    containerClass += " bg-[#FFF8F8] dark:bg-red-950/20 border-l-4 border-l-cath-red-700 dark:border-l-red-500"
+    barFillColor = "bg-cath-red-700 dark:bg-red-500"
+    percentColor = "text-cath-red-700 dark:text-red-400"
     badge = (
       <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-cath-red-700 text-white font-bold text-xs shrink-0">
         !!

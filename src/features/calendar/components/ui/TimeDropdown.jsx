@@ -123,12 +123,12 @@ const TimeDropdown = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`hover:bg-primaryBg flex items-center justify-center rounded-md px-4 h-12 outline-none bg-white min-w-[90px] transition-all border ${
-          isOpen ? "border-2" : "border-border"
+        className={`hover:bg-primaryBg dark:hover:bg-[#272727] flex items-center justify-center rounded-md px-4 h-12 outline-none bg-white dark:bg-[#272727] text-gray-900 dark:text-white min-w-[90px] transition-all border ${
+          isOpen ? "border-2" : "border-border dark:border-[#3F3F3F]"
         }`}
         style={isOpen ? { borderColor: color } : {}}
       >
-        <span className={`text-base ${!selectedTime ? "text-[#7A7574]" : ""}`}>
+        <span className={`text-base ${!selectedTime ? "text-[#7A7574] dark:text-neutral-400" : ""}`}>
           {selectedTime || "Chọn giờ"}
         </span>
       </button>
@@ -164,7 +164,7 @@ const TimeDropdown = ({
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto w-full h-full flex flex-col bg-white border border-border rounded-2xl shadow-lg overflow-hidden"
+                      className="pointer-events-auto w-full h-full flex flex-col bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-lg overflow-hidden"
                     >
                       <div
                         ref={listRef}
@@ -179,8 +179,8 @@ const TimeDropdown = ({
                                 onClick={() => handleTimeSelect(time)}
                                 className={`w-full h-12 px-4 text-left text-base rounded-md flex items-center cursor-pointer transition-colors ${
                                   isSelected
-                                    ? "bg-[#F6F6F6] font-semibold selected-time"
-                                    : "hover:bg-[#F6F6F6]"
+                                    ? "bg-[#F6F6F6] dark:bg-[#272727] font-semibold selected-time"
+                                    : "hover:bg-[#F6F6F6] dark:hover:bg-[#272727] text-gray-900 dark:text-neutral-200"
                                 }`}
                                 style={isSelected ? { color: color } : {}}
                               >

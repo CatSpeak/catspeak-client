@@ -51,11 +51,11 @@ const EventBlockDetail = ({ event, open, onClose }) => {
     return (
       <div>
         {['registered-event', 'my-event'].includes(event.eventType) && event.thumbnailUrl ? (
-          <div className="w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
+          <div className="w-full h-44 bg-[#F8F9FA] dark:bg-[#242424] rounded-2xl flex items-center justify-center overflow-hidden border border-border dark:border-[#3F3F3F] mt-2 shrink-0">
             <img src={event.thumbnailUrl} alt="thumbnail" className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-full h-44 bg-[#F8F9FA] text-[#7B7979] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
+          <div className="w-full h-44 bg-[#F8F9FA] dark:bg-[#242424] text-[#7B7979] dark:text-[#AAAAAA] rounded-2xl flex items-center justify-center overflow-hidden border border-border dark:border-[#3F3F3F] mt-2 shrink-0">
             No Image
           </div>
         )}
@@ -87,7 +87,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
         }
 
         return (
-          <div className="p-4 border-t border-border flex items-center justify-center gap-3 bg-white shrink-0">
+          <div className="p-4 border-t border-border dark:border-[#3F3F3F] flex items-center justify-center gap-3 bg-white dark:bg-[#1A1A1A] shrink-0">
             <PillButton bgColor={isPast ? "#d1d5db" : undefined}>
               {statusLabel}
             </PillButton>
@@ -105,7 +105,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
       }
       case "teaching-schedule": case "student-schedule":
         return (
-          <div className="p-4 border-t border-border flex items-center justify-center gap-3 bg-white shrink-0">
+          <div className="p-4 border-t border-border dark:border-[#3F3F3F] flex items-center justify-center gap-3 bg-white dark:bg-[#1A1A1A] shrink-0">
             <PillButton
               variant='outline'
               onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(event?.classLanguage) || 'en')}/meet/class-${event?.classId}`)}
@@ -132,15 +132,15 @@ const EventBlockDetail = ({ event, open, onClose }) => {
     >
       {/* Header section with event specific color background */}
       <div
-        className="p-6 border-b border-border shrink-0"
+        className="p-6 border-b border-border dark:border-[#3F3F3F] shrink-0 dark:!bg-[#242424]"
         style={{ backgroundColor: style.background }}
       >
         <div className="flex items-center gap-2 mb-2">
           <span className="w-3 h-3 rounded-full" style={{ backgroundColor: style.color }}></span>
-          <span className="text-sm font-medium text-gray-700">{style.label}</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{style.label}</span>
         </div>
-        <h2 className="text-2xl font-bold text-[#1A1A1A]">{event.title}</h2>
-        {event.subtitle && <p className="text-gray-600 mt-1">{event.subtitle}</p>}
+        <h2 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">{event.title}</h2>
+        {event.subtitle && <p className="text-gray-600 dark:text-[#AAAAAA] mt-1">{event.subtitle}</p>}
       </div>
 
       {/* Content section */}
@@ -148,41 +148,41 @@ const EventBlockDetail = ({ event, open, onClose }) => {
         {/* Status */}
         {event.status && (
           <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-gray-500 dark:text-[#AAAAAA] shrink-0 mt-0.5" />
             <div>
-              <p className="text-[#1A1A1A] font-medium">{t.courses?.student?.classStatuses?.[event.status] || event.status}</p>
-              <p className="text-sm text-gray-500">{t.calendar?.statusLabel || 'Trạng thái'}</p>
+              <p className="text-[#1A1A1A] dark:text-white font-medium">{t.courses?.student?.classStatuses?.[event.status] || event.status}</p>
+              <p className="text-sm text-gray-500 dark:text-[#AAAAAA]">{t.calendar?.statusLabel || 'Trạng thái'}</p>
             </div>
           </div>
         )}
 
         {/* Time */}
         <div className="flex items-start gap-3">
-          <Clock className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
+          <Clock className="w-5 h-5 text-gray-500 dark:text-[#AAAAAA] shrink-0 mt-0.5" />
           <div>
-            <p className="text-[#1A1A1A] font-medium">
+            <p className="text-[#1A1A1A] dark:text-white font-medium">
               {event.startTime ? formatTime(event.startTime) : ''}
               {event.endTime ? ` - ${formatTime(event.endTime)}` : ''}
               {event.startTime ? `, (${formatDate(event.startTime)})` : ''}
             </p>
-            <p className="text-sm text-gray-500">{t.calendar?.timeLabel || 'Thời gian'}</p>
+            <p className="text-sm text-gray-500 dark:text-[#AAAAAA]">{t.calendar?.timeLabel || 'Thời gian'}</p>
           </div>
         </div>
 
         {/* Location */}
         {event.location && (
           <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
+            <MapPin className="w-5 h-5 text-gray-500 dark:text-[#AAAAAA] shrink-0 mt-0.5" />
             <div>
               <a
                 href={getAddressHref(event)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#990011] font-medium hover:opacity-80 transition-opacity"
+                className="text-[#990011] dark:text-red-400 font-medium hover:opacity-80 transition-opacity"
               >
                 {event.location}
               </a>
-              <p className="text-sm text-gray-500">{t.calendar?.location || 'Địa điểm'}</p>
+              <p className="text-sm text-gray-500 dark:text-[#AAAAAA]">{t.calendar?.location || 'Địa điểm'}</p>
             </div>
           </div>
         )}
@@ -190,10 +190,10 @@ const EventBlockDetail = ({ event, open, onClose }) => {
         {/* Price */}
         {['registered-event', 'my-event'].includes(event.eventType) && (
           <div className="flex items-start gap-3">
-            <Tag className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
+            <Tag className="w-5 h-5 text-gray-500 dark:text-[#AAAAAA] shrink-0 mt-0.5" />
             <div>
-              <p className="text-[#1A1A1A] font-medium">{event.ticketPrice ? event.ticketPrice + "K" : (t.calendar?.free || 'Miễn phí')}</p>
-              <p className="text-sm text-gray-500">{t.calendar?.ticketPrice || 'Giá vé'}</p>
+              <p className="text-[#1A1A1A] dark:text-white font-medium">{event.ticketPrice ? event.ticketPrice + "K" : (t.calendar?.free || 'Miễn phí')}</p>
+              <p className="text-sm text-gray-500 dark:text-[#AAAAAA]">{t.calendar?.ticketPrice || 'Giá vé'}</p>
             </div>
           </div>
         )}

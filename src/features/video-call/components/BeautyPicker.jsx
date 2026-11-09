@@ -220,8 +220,8 @@ const BeautyPicker = ({
               value={beautyOptions[key] ?? 0}
               onChange={(e) => handleChange(key, Number(e.target.value))}
               trackColor="bg-gray-200 dark:bg-neutral-700"
-              activeColor="bg-cath-red-700 dark:bg-cath-red-1000"
-              thumbColor="bg-cath-red-700 dark:bg-cath-red-1000"
+              activeColor="bg-cath-red-700 dark:bg-red-400"
+              thumbColor="bg-cath-red-700 dark:bg-red-400"
             />
           </div>
         ))}

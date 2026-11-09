@@ -103,7 +103,7 @@ const Profile = () => {
   ]
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg">
+    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg dark:bg-[#0F0F0F]">
       <FluentAnimation
         duration={0.28}
         direction="up"

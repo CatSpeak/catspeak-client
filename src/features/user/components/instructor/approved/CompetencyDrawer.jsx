@@ -198,7 +198,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
       <div className="flex flex-col gap-6 py-2">
         {/* ─── 1. Chuyên môn hiển thị ─── */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+          <label className="text-xs font-bold text-slate-800 dark:text-neutral-200 uppercase tracking-wider">
             {ins.headlineLabel || "Chuyên môn hiển thị (Headline)"}
           </label>
           <input
@@ -207,16 +207,16 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
             value={headline}
             onChange={(e) => setHeadline(e.target.value)}
             placeholder="Ví dụ: Giảng viên chuyên môn IELTS & Giao tiếp quốc tế"
-            className="w-full h-10 px-3.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011]"
+            className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011]"
           />
-          <span className="text-[11px] text-slate-400 text-right">
+          <span className="text-[11px] text-slate-400 dark:text-neutral-500 text-right">
             {headline.length}/250
           </span>
         </div>
 
         {/* ─── 2. Phương châm / Trích dẫn giảng dạy ─── */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+          <label className="text-xs font-bold text-slate-800 dark:text-neutral-200 uppercase tracking-wider">
             {ins.teachingMottoLabel || "Phương châm / Triết lý giảng dạy"}
           </label>
           <textarea
@@ -225,26 +225,26 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
             value={teachingMotto}
             onChange={(e) => setTeachingMotto(e.target.value)}
             placeholder="Ví dụ: Học thật, ứng dụng thật và tạo dựng tư duy phản xạ ngôn ngữ tự nhiên lên hàng đầu."
-            className="w-full p-3 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] resize-none"
+            className="w-full p-3 rounded-xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] resize-none"
           />
-          <span className="text-[11px] text-slate-400 text-right">
+          <span className="text-[11px] text-slate-400 dark:text-neutral-500 text-right">
             {teachingMotto.length}/1000
           </span>
         </div>
 
         {/* ─── 3. Chứng chỉ & Bằng cấp (Certificates Repeater) ─── */}
-        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100">
+        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 dark:border-[#2E2E2E]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Award size={16} className="text-amber-500" />
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-slate-800 dark:text-neutral-200 uppercase tracking-wider">
                 {ins.certificatesLabel || "Chứng chỉ & Bằng cấp"}
               </h4>
             </div>
             <button
               type="button"
               onClick={handleAddCertificate}
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#990011] hover:underline cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#990011] dark:text-red-400 hover:underline cursor-pointer"
             >
               <Plus size={14} />
               <span>{ins.addCertificate || "Thêm chứng chỉ"}</span>
@@ -252,7 +252,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
           </div>
 
           {certificates.length === 0 ? (
-            <div className="p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-400">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#202020] border border-dashed border-slate-200 dark:border-[#3F3F3F] text-center text-xs text-slate-400 dark:text-neutral-500">
               Chưa có chứng chỉ nào. Nhấn "Thêm chứng chỉ" để bắt đầu.
             </div>
           ) : (
@@ -260,12 +260,12 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
               {certificates.map((cert, index) => (
                 <div
                   key={index}
-                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-3 relative"
+                  className="p-4 rounded-xl bg-slate-50 dark:bg-[#202020] border border-slate-200 dark:border-[#333333] flex flex-col gap-3 relative"
                 >
                   <button
                     type="button"
                     onClick={() => handleRemoveCertificate(index)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                    className="absolute right-3 top-3 text-slate-400 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
                     title="Xóa"
                   >
                     <Trash2 size={15} />
@@ -279,7 +279,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                       onChange={(e) =>
                         handleUpdateCertificate(index, "name", e.target.value)
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -292,7 +292,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                           e.target.value
                         )
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -305,7 +305,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                           e.target.value
                         )
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -318,7 +318,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                           e.target.value
                         )
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                   </div>
                 </div>
@@ -328,18 +328,18 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
         </div>
 
         {/* ─── 4. Học vấn (Education Repeater) ─── */}
-        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100">
+        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 dark:border-[#2E2E2E]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <GraduationCap size={16} className="text-blue-600" />
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-slate-800 dark:text-neutral-200 uppercase tracking-wider">
                 {ins.educationLabel || "Học vấn"}
               </h4>
             </div>
             <button
               type="button"
               onClick={handleAddEducation}
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#990011] hover:underline cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#990011] dark:text-red-400 hover:underline cursor-pointer"
             >
               <Plus size={14} />
               <span>{ins.addEducation || "Thêm học vấn"}</span>
@@ -347,7 +347,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
           </div>
 
           {education.length === 0 ? (
-            <div className="p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-400">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#202020] border border-dashed border-slate-200 dark:border-[#3F3F3F] text-center text-xs text-slate-400 dark:text-neutral-500">
               Chưa có thông tin học vấn nào. Nhấn "Thêm học vấn" để bắt đầu.
             </div>
           ) : (
@@ -355,12 +355,12 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
               {education.map((edu, index) => (
                 <div
                   key={index}
-                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-3 relative"
+                  className="p-4 rounded-xl bg-slate-50 dark:bg-[#202020] border border-slate-200 dark:border-[#333333] flex flex-col gap-3 relative"
                 >
                   <button
                     type="button"
                     onClick={() => handleRemoveEducation(index)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                    className="absolute right-3 top-3 text-slate-400 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
                     title="Xóa"
                   >
                     <Trash2 size={15} />
@@ -374,7 +374,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                       onChange={(e) =>
                         handleUpdateEducation(index, "school", e.target.value)
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -383,7 +383,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                       onChange={(e) =>
                         handleUpdateEducation(index, "major", e.target.value)
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -392,7 +392,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                       onChange={(e) =>
                         handleUpdateEducation(index, "period", e.target.value)
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -405,7 +405,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                           e.target.value
                         )
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                   </div>
                 </div>
@@ -415,18 +415,18 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
         </div>
 
         {/* ─── 5. Kinh nghiệm giảng dạy (Experience Repeater) ─── */}
-        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100">
+        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 dark:border-[#2E2E2E]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Briefcase size={16} className="text-emerald-600" />
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-slate-800 dark:text-neutral-200 uppercase tracking-wider">
                 {ins.experienceLabel || "Kinh nghiệm giảng dạy"}
               </h4>
             </div>
             <button
               type="button"
               onClick={handleAddExperience}
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#990011] hover:underline cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#990011] dark:text-red-400 hover:underline cursor-pointer"
             >
               <Plus size={14} />
               <span>{ins.addExperience || "Thêm kinh nghiệm"}</span>
@@ -434,7 +434,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
           </div>
 
           {experience.length === 0 ? (
-            <div className="p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-400">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#202020] border border-dashed border-slate-200 dark:border-[#3F3F3F] text-center text-xs text-slate-400 dark:text-neutral-500">
               Chưa có thông tin kinh nghiệm nào. Nhấn "Thêm kinh nghiệm" để bắt đầu.
             </div>
           ) : (
@@ -442,12 +442,12 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
               {experience.map((exp, index) => (
                 <div
                   key={index}
-                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-3 relative"
+                  className="p-4 rounded-xl bg-slate-50 dark:bg-[#202020] border border-slate-200 dark:border-[#333333] flex flex-col gap-3 relative"
                 >
                   <button
                     type="button"
                     onClick={() => handleRemoveExperience(index)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                    className="absolute right-3 top-3 text-slate-400 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
                     title="Xóa"
                   >
                     <Trash2 size={15} />
@@ -461,7 +461,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                       onChange={(e) =>
                         handleUpdateExperience(index, "role", e.target.value)
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -474,7 +474,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                           e.target.value
                         )
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -483,7 +483,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                       onChange={(e) =>
                         handleUpdateExperience(index, "period", e.target.value)
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="number"
@@ -496,7 +496,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                           e.target.value ? Number(e.target.value) : undefined
                         )
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
                     />
                     <input
                       type="text"
@@ -505,12 +505,12 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                       onChange={(e) =>
                         handleUpdateExperience(index, "location", e.target.value)
                       }
-                      className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900 sm:col-span-2"
+                      className="h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500 sm:col-span-2"
                     />
                   </div>
 
                   {/* Checkbox Hiện đang làm việc */}
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-700 font-medium">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-700 dark:text-neutral-300 font-medium">
                     <input
                       type="checkbox"
                       checked={Boolean(exp.isCurrent)}
@@ -530,7 +530,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                     onChange={(e) =>
                       handleUpdateExperience(index, "description", e.target.value)
                     }
-                    className="p-2.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900 resize-none"
+                    className="p-2.5 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500 resize-none"
                   />
                 </div>
               ))}
@@ -539,10 +539,10 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
         </div>
 
         {/* ─── 6. Phương pháp giảng dạy (Teaching Methods) ─── */}
-        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100">
+        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 dark:border-[#2E2E2E]">
           <div className="flex items-center gap-2">
             <Lightbulb size={16} className="text-amber-500" />
-            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            <h4 className="text-xs font-bold text-slate-800 dark:text-neutral-200 uppercase tracking-wider">
               {ins.teachingMethodsLabel || "Phương pháp giảng dạy"}
             </h4>
           </div>
@@ -556,12 +556,12 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagKeyDown}
-                className="flex-1 h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-900"
+                className="flex-1 h-9 px-3 rounded-lg border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
               />
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="px-3.5 h-9 rounded-lg bg-slate-800 text-white text-xs font-bold hover:bg-slate-900 transition-colors"
+                className="px-3.5 h-9 rounded-lg bg-slate-800 dark:bg-[#333333] text-white text-xs font-bold hover:bg-slate-900 dark:hover:bg-[#444444] transition-colors cursor-pointer"
               >
                 Thêm
               </button>
@@ -572,13 +572,13 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
                 {methodTags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 text-[#990011] text-xs font-bold border border-red-100"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 dark:bg-rose-950/40 text-[#990011] dark:text-red-400 text-xs font-bold border border-red-100 dark:border-rose-900/40"
                   >
                     <span>{tag}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-red-800 cursor-pointer"
+                      className="hover:text-red-800 dark:hover:text-red-300 cursor-pointer"
                     >
                       <X size={12} />
                     </button>
@@ -594,7 +594,7 @@ const CompetencyDrawer = ({ open, onClose, competencyData, t }) => {
             placeholder="Mô tả chi tiết phương pháp, kỹ thuật và cách tiếp cận trong giờ dạy..."
             value={methodDescription}
             onChange={(e) => setMethodDescription(e.target.value)}
-            className="p-3 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] resize-none mt-1"
+            className="p-3 rounded-xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] resize-none mt-1"
           />
         </div>
       </div>

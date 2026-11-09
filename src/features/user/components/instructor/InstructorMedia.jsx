@@ -48,7 +48,7 @@ const InstructorMedia = ({
     <div className="flex flex-col gap-6">
       {/* Introduction */}
       <FluentCard className="gap-6 !justify-start">
-        <h2 className="text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           {ins.introduceYourself || "Giới thiệu bản thân"}
         </h2>
 
@@ -63,13 +63,13 @@ const InstructorMedia = ({
               ins.introPlaceholder ||
               "Để duy trì hình ảnh chuyên nghiệp và phản ánh những phẩm chất lý tưởng của một giáo viên. (≤ 200-300 ký tự)"
             }
-            className={`w-full bg-gray-50/50 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-0 transition-all duration-200 resize-none disabled:text-gray-500 ${errors.introduction ? "border-red-500 focus:border-red-500 hover:!border-red-500" : "border-border focus:border-border hover:!border-cath-red-700"}`}
+            className={`w-full bg-gray-50/50 dark:bg-[#272727] border text-gray-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-0 transition-all duration-200 resize-none disabled:text-gray-500 border-border dark:border-[#3F3F3F] ${errors.introduction ? "border-red-500 focus:border-red-500 hover:!border-red-500" : "hover:!border-cath-red-700 dark:hover:!border-red-400"}`}
           />
           {errors.introduction && (
             <p className="text-xs text-red-500">{errors.introduction}</p>
           )}
           {!errors.introduction && (
-            <p className="text-[11px] text-gray-400">
+            <p className="text-[11px] text-gray-400 dark:text-neutral-400">
               {ins.introPlaceholder ||
                 "Để duy trì hình ảnh chuyên nghiệp và phản ánh những phẩm chất lý tưởng của một giáo viên. (≤ 200-300 ký tự)"}
             </p>
@@ -80,7 +80,7 @@ const InstructorMedia = ({
       {/* Video */}
       <FluentCard id="field-videoFile" className="gap-4 !justify-start">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {ins.uploadVideo || "Video giới thiệu bản thân"}
           </h2>
           {!readOnly && (
@@ -89,7 +89,7 @@ const InstructorMedia = ({
                 <button
                   type="button"
                   onClick={onUndoVideo}
-                  className="inline-flex items-center gap-1.5 h-9 px-3 text-sm font-medium text-gray-600 bg-white hover:bg-gray-100 border border-border rounded-full transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 h-9 px-3 text-sm font-medium text-gray-600 dark:text-neutral-200 bg-white dark:bg-[#272727] hover:bg-gray-100 dark:hover:bg-[#333333] border border-border dark:border-[#3F3F3F] rounded-full transition cursor-pointer"
                 >
                   <Undo2 className="w-4 h-4" />
                   {ins.undo || "Hoàn tác"}
@@ -99,7 +99,7 @@ const InstructorMedia = ({
                 <button
                   type="button"
                   onClick={onRemoveVideo}
-                  className="inline-flex items-center gap-1.5 h-9 px-3 text-sm font-medium text-red-600 bg-white hover:bg-red-50 border border-red-200 rounded-full transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 h-9 px-3 text-sm font-medium text-red-600 dark:text-red-400 bg-white dark:bg-[#272727] hover:bg-red-50 dark:hover:bg-rose-950/40 border border-red-200 dark:border-red-900/40 rounded-full transition cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                   {ins.deleteVideo || "Xóa"}
@@ -129,11 +129,11 @@ const InstructorMedia = ({
               className="w-full max-h-[360px] rounded-xl bg-black"
             />
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-medium text-gray-600 truncate">
+              <span className="text-sm font-medium text-gray-600 dark:text-neutral-300 truncate">
                 {fileName}
               </span>
               {videoFile instanceof File && (
-                <span className="text-[11px] text-amber-600 shrink-0">
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 shrink-0">
                   {ins.unsavedVideoHint || "Chưa lưu — nhấn Lưu để tải lên."}
                 </span>
               )}
@@ -145,10 +145,10 @@ const InstructorMedia = ({
         ) : (
           <div className="flex flex-col gap-1 w-full">
             <div
-              className={`flex flex-col items-center justify-center w-full bg-gray-50/50 border rounded-xl py-8 px-4 text-center ${errors.videoFile ? "border-red-500 bg-red-50/10 border-solid" : "border-border"}`}
+              className={`flex flex-col items-center justify-center w-full bg-gray-50/50 dark:bg-[#272727] border border-border dark:border-[#3F3F3F] rounded-xl py-8 px-4 text-center ${errors.videoFile ? "border-red-500 bg-red-50/10 border-solid" : ""}`}
             >
               <p
-                className={`text-[12px] max-w-lg ${errors.videoFile ? "text-red-500" : "text-gray-400"}`}
+                className={`text-[12px] max-w-lg ${errors.videoFile ? "text-red-500" : "text-gray-400 dark:text-neutral-400"}`}
               >
                 {ins.videoNote ||
                   "Chúng tôi khuyến khích bạn tải lên video ngắn 1-3 phút giới thiệu bản thân để thu hút và gây ấn tượng với học viên tiềm năng. Video nên ở định dạng ngang (mp4) và dưới 500MB."}

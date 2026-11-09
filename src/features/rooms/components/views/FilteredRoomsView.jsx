@@ -130,7 +130,7 @@ const FilteredRoomsView = ({
               {search ? (
                 <>
                   <span>{t.rooms?.filters?.search || "Tìm kiếm"}:</span>
-                  <span className="text-cath-red-700 dark:text-cath-red-700">
+                  <span className="text-cath-red-700 dark:text-red-400">
                     &ldquo;{search}&rdquo;
                   </span>
                 </>

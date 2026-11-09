@@ -261,34 +261,34 @@ const MoveMaterialModal = ({
     >
       <div className="space-y-4">
         <div>
-          <p className="text-secondary text-sm">
+          <p className="text-secondary dark:text-neutral-400 text-sm">
             {t.materials.selectDestination
               .split('"{{name}}"')
               .map((part, index, array) => (
                 <React.Fragment key={index}>
                   {part}
                   {index < array.length - 1 && (
-                    <span className="font-medium text-black">
+                    <span className="font-medium text-black dark:text-white">
                       "{currentName}"
                     </span>
                   )}
                 </React.Fragment>
               ))}
           </p>
-          <p className="text-secondary text-sm">
+          <p className="text-secondary dark:text-neutral-400 text-sm">
             {t.materials.currentLocationLabel}{" "}
-            <span className="font-medium text-black">{currentLocation}</span>
+            <span className="font-medium text-black dark:text-white">{currentLocation}</span>
           </p>
         </div>
 
-        <div className="border border-border rounded-xl overflow-y-auto min-h-[250px] max-h-[400px] flex flex-col">
+        <div className="border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1E1E1E] rounded-xl overflow-y-auto min-h-[250px] max-h-[400px] flex flex-col">
           {isFetchingTree ? (
-            <div className="flex flex-col items-center justify-center flex-1 text-sm text-secondary gap-2 opacity-70">
+            <div className="flex flex-col items-center justify-center flex-1 text-sm text-secondary dark:text-neutral-400 gap-2 opacity-70">
               <LoadingSpinner />
               <span>{t.materials.loadingFolderTree}</span>
             </div>
           ) : folders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center flex-1 text-sm text-secondary gap-2 opacity-70">
+            <div className="flex flex-col items-center justify-center flex-1 text-sm text-secondary dark:text-neutral-400 gap-2 opacity-70">
               <FolderOpen className="w-8 h-8" />
               <span>{t.materials.noFolders}</span>
             </div>

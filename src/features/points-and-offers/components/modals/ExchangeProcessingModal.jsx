@@ -25,17 +25,17 @@ const ExchangeProcessingModal = ({ isOpen }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center justify-center text-center z-10"
+          className="relative w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-2xl border border-transparent dark:border-[#3F3F3F] p-8 flex flex-col items-center justify-center text-center z-10"
         >
           {/* Animated Spinner with gradient accent */}
           <div className="relative w-16 h-16 mb-5 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full border-4 border-rose-100 border-t-[#990011] animate-spin" />
+            <div className="w-16 h-16 rounded-full border-4 border-rose-100 dark:border-rose-950/40 border-t-[#990011] dark:border-t-red-400 animate-spin" />
           </div>
 
-          <h3 className="text-base font-bold text-gray-900 mb-1">
+          <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
             {pr.title || "Đang xử lý đổi voucher..."}
           </h3>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-neutral-400">
             {pr.subtitle || "Vui lòng đợi trong giây lát và không đóng cửa sổ này"}
           </p>
         </Motion.div>

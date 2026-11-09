@@ -128,7 +128,7 @@ const CalendarWeekView = ({
             {/* Y-Axis */}
             <div className="w-16 flex flex-col shrink-0">
               {HOURS.map((hour) => (
-                <div key={hour} className="h-[60px] text-xs text-gray-400 font-medium relative -top-2">
+                <div key={hour} className="h-[60px] text-xs text-gray-400 dark:text-neutral-500 font-medium relative -top-2">
                   {hour}:00
                 </div>
               ))}

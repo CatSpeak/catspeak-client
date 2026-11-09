@@ -10,9 +10,9 @@ const InstructorIdentity = ({ formData, onEdit, readOnly = false, errors = {}, t
       <div id={`field-${fieldName}File`} className="flex flex-col gap-1 w-full max-w-[220px]">
         <div
         onClick={() => !readOnly && onEdit(fieldName)}
-        className={`relative flex flex-col items-center justify-center w-full aspect-[4/3] bg-white rounded-2xl overflow-hidden group ${
-          fileData ? "border border-solid border-border shadow-sm" : `border-2 border-dashed ${errorText ? "border-red-500 bg-red-50/10" : "border-gray-300"}`
-        } ${!readOnly ? "cursor-pointer hover:border-red-300 hover:bg-red-50/10 transition-colors" : ""}`}
+        className={`relative flex flex-col items-center justify-center w-full aspect-[4/3] bg-white dark:bg-[#1A1A1A] rounded-2xl overflow-hidden group ${
+          fileData ? "border border-solid border-border dark:border-[#3F3F3F] shadow-sm" : `border-2 border-dashed ${errorText ? "border-red-500 bg-red-50/10 dark:bg-rose-950/20" : "border-gray-300 dark:border-[#3F3F3F]"}`
+        } ${!readOnly ? "cursor-pointer hover:border-red-300 dark:hover:border-red-500 hover:bg-red-50/10 dark:hover:bg-rose-950/20 transition-colors" : ""}`}
       >
         {fileData ? (
           <>
@@ -41,7 +41,7 @@ const InstructorIdentity = ({ formData, onEdit, readOnly = false, errors = {}, t
 
   return (
     <FluentCard className="gap-4 !justify-start h-full min-h-[320px]">
-      <h2 className="text-xl font-bold text-gray-900">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
         {ins.idCard || "Căn cước công dân"}
       </h2>
       
@@ -50,7 +50,7 @@ const InstructorIdentity = ({ formData, onEdit, readOnly = false, errors = {}, t
         {renderUploadBox(ins.idBack || "Mặt sau", "idBack", formData.idBackFile, errors.idBackFile)}
       </div>
       
-      <p className="text-[11px] text-gray-400">
+      <p className="text-[11px] text-gray-400 dark:text-neutral-400">
         {ins.idWarning || "Sau khi xác nhận và gửi thông tin, thông tin nhận dạng của bạn không thể thay đổi!"}
       </p>
     </FluentCard>

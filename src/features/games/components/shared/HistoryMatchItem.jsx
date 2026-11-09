@@ -61,7 +61,7 @@ const HistoryMatchItem = ({ match, onSelect }) => {
               clickable={false}
             />
 
-            <span className="text-xs text-cath-red-700 dark:text-cath-red-1000">
+            <span className="text-xs font-semibold text-cath-red-700 dark:text-red-400">
               {winner.totalScore}{" "}
               {match.gameType === "crack_it"
                 ? t.rooms?.game?.crackIt?.score || "pts"

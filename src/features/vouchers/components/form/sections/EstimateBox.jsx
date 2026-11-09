@@ -29,7 +29,7 @@ export const EstimateBox = ({
           <span>{formatCurrency(sampleOriginalTuition)}</span>
         </div>
 
-        <div className="flex justify-between text-cath-red-700">
+        <div className="flex justify-between text-cath-red-700 dark:text-red-400">
           <span>
             {vf.discountForOne || "Giảm giá học viên"} (
             {isPercent ? `${form.discountValue || 0}%` : (vf.fixedShort || "Cố định")}):

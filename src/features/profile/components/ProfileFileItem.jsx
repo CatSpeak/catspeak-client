@@ -92,9 +92,9 @@ const ProfileFileItem = ({
               {
                 value: "delete",
                 label: (
-                  <span className="text-[#BA1A1A]">{t.materials.delete}</span>
+                  <span className="text-[#BA1A1A] dark:text-red-400">{t.materials.delete}</span>
                 ),
-                icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />,
+                icon: <Trash2 className="w-4 h-4 text-[#BA1A1A] dark:text-red-400" />,
               },
             ]
           : [
@@ -142,8 +142,8 @@ const ProfileFileItem = ({
     <div
       className={`group relative border rounded-xl p-4 flex ${isList ? "flex-row items-center" : "flex-col"} w-full cursor-pointer transition-all select-none ${
         isSelected
-          ? "bg-[#FFF5F5] border-[#990011]"
-          : "bg-white border-border hover:bg-primaryBg"
+          ? "bg-[#FFF5F5] dark:bg-red-950/20 border-[#990011] dark:border-red-500"
+          : "bg-white dark:bg-[#1A1A1A] border-border dark:border-[#3F3F3F] hover:bg-primaryBg dark:hover:bg-[#242424]"
       }`}
       {...handlers}
     >
@@ -153,14 +153,14 @@ const ProfileFileItem = ({
             {getFileTypeIcon(title, fileUrl)}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="truncate" title={title}>
+                <h3 className="truncate text-gray-900 dark:text-white" title={title}>
                   {title}
                 </h3>
                 {isOwnProfile && isBookmarked && (
                   <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F] shrink-0" />
                 )}
               </div>
-              <div className="flex items-center gap-2 text-sm text-secondary">
+              <div className="flex items-center gap-2 text-sm text-secondary dark:text-[#AAAAAA]">
                 <span>{size}</span>
                 {date && (
                   <>
@@ -200,14 +200,14 @@ const ProfileFileItem = ({
               {getFileTypeIcon(title, fileUrl)}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
-                  <h3 className="truncate" title={title}>
+                  <h3 className="truncate text-gray-900 dark:text-white" title={title}>
                     {title}
                   </h3>
                   {isOwnProfile && isBookmarked && (
                     <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F] shrink-0" />
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-secondary">
+                <div className="flex items-center gap-2 text-sm text-secondary dark:text-[#AAAAAA]">
                   <span>{size}</span>
                   {date && (
                     <>
@@ -242,7 +242,7 @@ const ProfileFileItem = ({
           </div>
 
           {/* Large Preview Thumbnail */}
-          <div className="relative w-full aspect-video rounded-xl border border-border flex items-center justify-center overflow-hidden bg-[#F3F3F3]">
+          <div className="relative w-full aspect-video rounded-xl border border-border dark:border-[#3F3F3F] flex items-center justify-center overflow-hidden bg-[#F3F3F3] dark:bg-[#242424]">
             <FilePreview url={fileUrl} fileName={title} isThumbnail={true} />
           </div>
         </div>

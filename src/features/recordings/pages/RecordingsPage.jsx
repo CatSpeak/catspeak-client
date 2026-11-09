@@ -136,12 +136,12 @@ const RecordingsPage = () => {
           <p>
             {t?.recordings?.deleteModal?.description || "This will permanently delete the recording"}
             {deleteTarget.meetingId && (
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-gray-900 dark:text-white">
                 {" "}{deleteTarget.meetingId}
               </span>
             )}
             {deleteTarget.fileSizeBytes > 0 && (
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-gray-700 dark:text-neutral-300">
                 {" "}({(deleteTarget.fileSizeBytes / (1024 * 1024)).toFixed(1)} MB)
               </span>
             )}

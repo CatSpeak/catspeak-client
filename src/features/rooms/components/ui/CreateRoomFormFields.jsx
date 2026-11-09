@@ -11,7 +11,7 @@ import { TOPICS, LEVELS } from "../../config/constants"
 import { Crown } from "lucide-react"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 
-const labelClass = "text-xs"
+const labelClass = "text-xs text-gray-700 dark:text-neutral-200"
 
 /**
  * A centralized, DRY form component for room creation.
@@ -247,7 +247,7 @@ const CreateRoomFormFields = ({
                     variant="square"
                     aria-label={ct.maxParticipantsLabel || "Max Participants"}
                   />
-                  <span>/ {maxParticipantsLimit}</span>
+                  <span className="text-gray-600 dark:text-neutral-400">/ {maxParticipantsLimit}</span>
                 </div>
               </div>
             </div>

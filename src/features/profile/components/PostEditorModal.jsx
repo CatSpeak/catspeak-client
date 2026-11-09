@@ -354,14 +354,14 @@ const PostEditorModal = ({
           ? t.profile?.post?.editor?.editTitle || "Chỉnh sửa bài viết"
           : t.profile?.post?.editor?.createTitle || "Tạo bài viết"
       }
-      className="md:max-w-2xl w-full bg-white relative"
+      className="md:max-w-2xl w-full bg-white dark:bg-[#1A1A1A] relative"
       bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
       fullScreenOnMobile={true}
       footer={renderFooter()}
     >
       {/* Full Modal Loading Overlay */}
       {isSubmitting && (
-        <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3">
+        <div className="absolute inset-0 z-50 bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3">
           <LoadingSpinner
             text={
               isEditMode
@@ -422,7 +422,7 @@ const PostEditorModal = ({
         />
 
         <div className="flex flex-col gap-1">
-          <span className="text-xs">
+          <span className="text-xs text-[#14171F] dark:text-neutral-200">
             {t.profile?.post?.editor?.contentLabel || "Nội dung bài viết"}
             <span className="text-red-500 ml-0.5">*</span>
           </span>
@@ -448,7 +448,8 @@ const PostEditorModal = ({
                   ? t.profile?.post?.editor?.editPlaceholder ||
                     "Chỉnh sửa bài viết..."
                   : t.profile?.post?.editor?.placeholder || "Bạn đang nghĩ gì?",
-                skin: "oxide",
+                skin: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
+                content_css: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "dark" : "default",
                 setup: (editor) => {
                   editor.on("focus", () => {})
                 },
@@ -464,7 +465,7 @@ const PostEditorModal = ({
 
         {(files.length > 0 || existingMedias.length > 0) && (
           <div className="flex flex-col gap-2">
-            <span className="text-xs">
+            <span className="text-xs text-[#14171F] dark:text-neutral-200">
               {t.profile?.post?.editor?.attachmentsLabel || "Tệp đính kèm"}
             </span>
             <PostEditorPreviews

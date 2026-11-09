@@ -249,7 +249,7 @@ const CommunityRoomCard = ({ room }) => {
         }`}
         containerClassName="h-full w-full"
       >
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border dark:border-[#3F3F3F]">
           {/* Blurred Background Image */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"

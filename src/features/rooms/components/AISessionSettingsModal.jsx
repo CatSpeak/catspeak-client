@@ -126,7 +126,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
       <div className="flex flex-col gap-6 pb-2 max-h-[60vh] overflow-y-auto -mx-3 px-3 scrollbar-app-transparent max-[425px]:max-h-none max-[425px]:flex-1">
         {/* Learning Language — read-only, derived from URL */}
         <div className="text-left flex flex-col">
-          <label className="text-sm mb-2">{s.learningLanguage}</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">{s.learningLanguage}</label>
           <div className="flex flex-wrap gap-2">
             <span className={pillClass(true)}>{languageLabel(foreignLanguage)}</span>
           </div>
@@ -134,7 +134,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
 
         {/* Support Language — optional */}
         <div className="text-left flex flex-col">
-          <label className="text-sm mb-2">{s.supportLanguage}</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">{s.supportLanguage}</label>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -159,8 +159,8 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
         {/* Speed */}
         <div className="text-left flex flex-col">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm">{s.speed}</label>
-            <span className="text-sm font-medium tabular-nums">
+            <label className="text-sm font-medium text-gray-700 dark:text-neutral-200">{s.speed}</label>
+            <span className="text-sm font-medium tabular-nums text-gray-900 dark:text-white">
               {speed.toFixed(1)}×
             </span>
           </div>
@@ -181,7 +181,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
         {/* Proficiency Level — optional, matches Create Room levels */}
         <div className="text-left flex flex-col">
           <div className="flex items-center justify-between gap-3 mb-2">
-            <label className="text-sm">{s.proficiencyLabel}</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-neutral-200">{s.proficiencyLabel}</label>
             <span className="text-xs text-[#7A7574] dark:text-[#AAAAAA]">{s.proficiencyOptional}</span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -203,7 +203,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
 
         {/* Voice */}
         <div className="text-left flex flex-col">
-          <label className="text-sm mb-2">{s.voice}</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">{s.voice}</label>
           <div className="flex flex-wrap gap-2">
             {VOICES.map((v) => {
               const isAvailable = availableVoices.includes(v)

@@ -5,7 +5,7 @@ const EventFooter = ({ eventColor, isLoading, isEditing }) => {
   const cal = t.calendar
 
   return (
-    <div className="p-6 bg-white rounded-none min-[426px]:rounded-b-[20px]">
+    <div className="p-6 bg-white dark:bg-[#1A1A1A] rounded-none min-[426px]:rounded-b-[20px]">
       <button
         type="submit"
         disabled={isLoading}

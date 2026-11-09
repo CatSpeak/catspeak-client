@@ -46,7 +46,7 @@ const BillingTable = ({
       key: "orderCode",
       label: cols.orderCode || "Order Code",
       headerClassName: "!py-2.5 !px-4 w-[16%]",
-      className: "!py-2.5 !px-4 w-[16%] font-medium text-gray-800",
+      className: "!py-2.5 !px-4 w-[16%] font-medium text-gray-800 dark:text-neutral-200",
       render: (row) => `#${row.orderCode}`,
     },
     {
@@ -59,7 +59,7 @@ const BillingTable = ({
       key: "amount",
       label: cols.amount || "Amount",
       headerClassName: "!py-2.5 !px-4 w-[17%]",
-      className: "!py-2.5 !px-4 w-[17%] font-medium text-gray-800",
+      className: "!py-2.5 !px-4 w-[17%] font-medium text-gray-800 dark:text-neutral-200",
       render: (row) => formatAmount(row.amount),
     },
     {
@@ -111,19 +111,19 @@ const BillingTable = ({
                 </IconButton>
               }
               content={(close) => (
-                <MenuList className="!border-border shadow-lg min-w-[150px]">
+                <MenuList className="!border-border dark:!border-[#3F3F3F] shadow-lg min-w-[150px]">
                   {isPending && (
                     <MenuItem
                       label={actionsText.repay || "Thanh toán lại"}
                       icon={
                         isRepayingThis ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-cath-red-700" />
+                          <Loader2 className="w-4 h-4 animate-spin text-cath-red-700 dark:text-red-400" />
                         ) : (
-                          <RotateCcw className="w-4 h-4 text-cath-red-700" />
+                          <RotateCcw className="w-4 h-4 text-cath-red-700 dark:text-red-400" />
                         )
                       }
-                      hoverBg="hover:bg-red-50"
-                      className="font-semibold text-cath-red-700"
+                      hoverBg="hover:bg-red-50 dark:hover:bg-red-950/30"
+                      className="font-semibold text-cath-red-700 dark:text-red-400"
                       onClick={() => {
                         close()
                         onRepay && onRepay(row)
@@ -134,9 +134,9 @@ const BillingTable = ({
                   {isSuccess && (
                     <MenuItem
                       label={actionsText.refund || "Hoàn tiền"}
-                      icon={<Undo2 className="w-4 h-4 text-amber-700" />}
-                      hoverBg="hover:bg-amber-50"
-                      className="font-medium text-amber-900"
+                      icon={<Undo2 className="w-4 h-4 text-amber-700 dark:text-amber-400" />}
+                      hoverBg="hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                      className="font-medium text-amber-900 dark:text-amber-200"
                       onClick={() => {
                         close()
                         onRefund && onRefund(row)

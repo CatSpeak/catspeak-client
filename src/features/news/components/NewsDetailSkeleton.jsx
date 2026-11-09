@@ -7,7 +7,7 @@ import Skeleton from "@/shared/components/ui/indicators/Skeleton"
  */
 const NewsDetailSkeleton = () => {
   return (
-    <div className="min-h-screen w-full bg-primaryBg">
+    <div className="min-h-screen w-full bg-primaryBg dark:bg-[#0F0F0F]">
       <div className="mx-auto w-full max-w-7xl p-4">
         {/* ── Back Navigation Placeholder ── */}
         <div className="mb-2 relative z-10 flex items-center gap-2 py-3">

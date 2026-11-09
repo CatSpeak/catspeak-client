@@ -72,7 +72,7 @@ const CountdownCircle = ({ duration = 3, onComplete, label }) => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.4 }}
               transition={{ duration: 0.25, ease: fluentEaseOut }}
-              className="text-xl font-bold text-cath-red-700 tabular-nums select-none"
+              className="text-xl font-bold text-cath-red-700 dark:text-red-400 tabular-nums select-none"
             >
               {remaining}
             </motion.span>
@@ -80,7 +80,7 @@ const CountdownCircle = ({ duration = 3, onComplete, label }) => {
         </div>
       </div>
 
-      <p className="text-lg md:text-2xl font-bold text-slate-800 tracking-tight text-center">
+      <p className="text-lg md:text-2xl font-bold text-slate-800 dark:text-white tracking-tight text-center">
         {label || "Vòng tiếp theo bắt đầu sau..."}
       </p>
     </div>

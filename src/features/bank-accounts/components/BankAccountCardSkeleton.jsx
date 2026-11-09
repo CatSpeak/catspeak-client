@@ -12,7 +12,7 @@ export default function BankAccountCardSkeleton({ count = 3 }) {
         <FluentCard
           key={i}
           padding="p-4"
-          className="flex flex-col justify-between h-[180px] border-neutral-200/80"
+          className="flex flex-col justify-between h-[180px] border-neutral-200/80 dark:border-[#3F3F3F]"
         >
           {/* Section 1: Header (Radio, Bank Name & Status Badge) */}
           <div className="flex items-start justify-between gap-4">

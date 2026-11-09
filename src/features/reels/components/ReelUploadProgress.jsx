@@ -47,7 +47,7 @@ const ReelUploadProgress = () => {
           <motion.button
             layoutId="upload-panel"
             onClick={() => dispatch(toggleMinimize())}
-            className="flex items-center gap-3 bg-white/95 border border-border/80 shadow-lg hover:shadow-xl rounded-full px-4 py-2.5 cursor-pointer select-none transition-all active:scale-[0.98] focus:outline-none"
+            className="flex items-center gap-3 bg-white/95 dark:bg-[#1A1A1A]/95 border border-border/80 dark:border-[#3F3F3F] shadow-lg hover:shadow-xl rounded-full px-4 py-2.5 cursor-pointer select-none transition-all active:scale-[0.98] focus:outline-none"
           >
             {isUploading && (
               <div className="relative w-5 h-5 flex items-center justify-center">
@@ -56,7 +56,7 @@ const ReelUploadProgress = () => {
                     cx="10"
                     cy="10"
                     r="9"
-                    className="stroke-gray-200"
+                    className="stroke-gray-200 dark:stroke-neutral-700"
                     strokeWidth="2"
                     fill="transparent"
                   />
@@ -64,7 +64,7 @@ const ReelUploadProgress = () => {
                     cx="10"
                     cy="10"
                     r="9"
-                    className="stroke-[#990011]"
+                    className="stroke-[#990011] dark:stroke-red-400"
                     strokeWidth="2"
                     fill="transparent"
                     strokeDasharray="56.55"
@@ -73,7 +73,7 @@ const ReelUploadProgress = () => {
                     style={{ transition: "stroke-dashoffset 0.3s ease" }}
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-gray-600 font-mono">
+                <div className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-gray-600 dark:text-neutral-300 font-mono">
                   {progress}
                 </div>
               </div>
@@ -87,30 +87,30 @@ const ReelUploadProgress = () => {
               <AlertTriangle size={18} className="text-red-500 shrink-0" />
             )}
 
-            <div className="text-xs font-bold text-gray-700 max-w-[150px] truncate">
+            <div className="text-xs font-bold text-gray-700 dark:text-neutral-200 max-w-[150px] truncate">
               {isUploading ? `Uploading: ${progress}%` : success ? "Upload complete" : "Upload failed"}
             </div>
             
-            <ChevronUp size={14} className="text-gray-400" />
+            <ChevronUp size={14} className="text-gray-400 dark:text-neutral-400" />
           </motion.button>
         ) : (
           /* EXPANDED DETAILED CARD VIEW */
           <motion.div
             layoutId="upload-panel"
-            className="w-80 bg-white/95 backdrop-blur-md border border-border/80 shadow-2xl rounded-2xl p-4 flex flex-col gap-3.5 select-none"
+            className="w-80 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-md border border-border/80 dark:border-[#3F3F3F] shadow-2xl rounded-2xl p-4 flex flex-col gap-3.5 select-none"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border/70 pb-2">
+            <div className="flex items-center justify-between border-b border-border/70 dark:border-[#3F3F3F] pb-2">
               <div className="flex items-center gap-2">
-                <Film size={16} className={error ? "text-red-500" : success ? "text-emerald-500" : "text-[#990011]"} />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <Film size={16} className={error ? "text-red-500" : success ? "text-emerald-500" : "text-[#990011] dark:text-red-400"} />
+                <span className="text-xs font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wider">
                   {isUploading ? "Uploading Reel" : success ? "Upload Complete" : "Upload Failed"}
                 </span>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => dispatch(toggleMinimize())}
-                  className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none"
+                  className="p-1 text-gray-400 dark:text-neutral-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#272727] rounded-lg transition-colors focus:outline-none"
                   title="Minimize"
                 >
                   <ChevronDown size={16} />
@@ -118,7 +118,7 @@ const ReelUploadProgress = () => {
                 {(success || error) && (
                   <button
                     onClick={handleClose}
-                    className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none"
+                    className="p-1 text-gray-400 dark:text-neutral-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#272727] rounded-lg transition-colors focus:outline-none"
                     title="Close"
                   >
                     <X size={16} />
@@ -130,7 +130,7 @@ const ReelUploadProgress = () => {
             {/* Content Area */}
             <div className="flex flex-col gap-3">
               {/* Title */}
-              <div className="text-sm font-bold text-gray-800 line-clamp-1 text-left">
+              <div className="text-sm font-bold text-gray-800 dark:text-white line-clamp-1 text-left">
                 {title || "Untitled Reel"}
               </div>
 
@@ -138,7 +138,7 @@ const ReelUploadProgress = () => {
               {isUploading && (
                 <div className="flex flex-col gap-2">
                   {/* Progress Bar Container */}
-                  <div className="relative w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-border/20">
+                  <div className="relative w-full bg-gray-100 dark:bg-[#272727] h-2 rounded-full overflow-hidden border border-border/20 dark:border-[#3F3F3F]">
                     <div
                       className="bg-gradient-to-r from-[#990011] to-[#b30018] h-full rounded-full transition-all duration-300"
                       style={{ width: `${progress}%` }}
@@ -146,13 +146,13 @@ const ReelUploadProgress = () => {
                   </div>
                   {/* Info Row */}
                   <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-gray-400">Uploading video files...</span>
-                    <span className="text-[#990011] font-mono font-bold">{progress}%</span>
+                    <span className="text-gray-400 dark:text-neutral-400">Uploading video files...</span>
+                    <span className="text-[#990011] dark:text-red-400 font-mono font-bold">{progress}%</span>
                   </div>
                   {/* Cancel Button */}
                   <button
                     onClick={handleCancel}
-                    className="mt-1.5 self-center text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/70 border border-red-100/40 rounded-xl px-4 py-1.5 transition-all active:scale-[0.98] w-full text-center focus:outline-none"
+                    className="mt-1.5 self-center text-xs font-bold text-red-600 dark:text-red-400 hover:text-red-700 bg-red-50 dark:bg-rose-950/40 hover:bg-red-100/70 dark:hover:bg-rose-900/50 border border-red-100/40 dark:border-rose-900/40 rounded-xl px-4 py-1.5 transition-all active:scale-[0.98] w-full text-center focus:outline-none"
                   >
                     Cancel upload
                   </button>
@@ -161,15 +161,15 @@ const ReelUploadProgress = () => {
 
               {success && (
                 <div className="flex flex-col items-center gap-2.5 py-1">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500">
+                  <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/40 flex items-center justify-center text-emerald-500">
                     <CheckCircle2 size={24} />
                   </div>
-                  <div className="text-xs text-gray-500 text-center font-medium">
+                  <div className="text-xs text-gray-500 dark:text-neutral-400 text-center font-medium">
                     Your Reel is posted and live now!
                   </div>
                   <button
                     onClick={handleClose}
-                    className="w-full mt-1.5 text-xs font-bold text-gray-700 hover:text-gray-800 bg-gray-100 hover:bg-gray-200/80 border border-border/50 rounded-xl py-2 transition-all active:scale-[0.98] text-center focus:outline-none"
+                    className="w-full mt-1.5 text-xs font-bold text-gray-700 dark:text-neutral-200 hover:text-gray-800 dark:hover:text-white bg-gray-100 dark:bg-[#272727] hover:bg-gray-200/80 dark:hover:bg-[#333] border border-border/50 dark:border-[#3F3F3F] rounded-xl py-2 transition-all active:scale-[0.98] text-center focus:outline-none"
                   >
                     Done
                   </button>

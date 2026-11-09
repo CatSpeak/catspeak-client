@@ -41,8 +41,8 @@ const VoucherSection = ({
   }
 
   const renderDropdownContent = (close) => (
-    <div className="w-[340px] bg-white border border-border rounded-xl shadow-lg flex flex-col max-h-[400px]">
-      <div className="p-3 border-b border-border">
+    <div className="w-[340px] bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl shadow-lg flex flex-col max-h-[400px]">
+      <div className="p-3 border-b border-border dark:border-[#3F3F3F]">
         <TextInput
           icon={Search}
           placeholder={tc.searchVoucher}
@@ -58,7 +58,7 @@ const VoucherSection = ({
           return (
             <div
               key={voucher.id}
-              className={`p-3 border-b border-border flex items-start gap-3 cursor-pointer last:border-0 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+              className={`p-3 border-b border-border dark:border-[#3F3F3F] flex items-start gap-3 cursor-pointer last:border-0 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-[#272727]'}`}
               onClick={() => !isDisabled && handleToggle(voucher)}
             >
               <div className="mt-0.5">
@@ -69,25 +69,25 @@ const VoucherSection = ({
                 />
               </div>
               <div>
-                <p className="font-bold text-sm text-[#111827]">{voucher.code}</p>
-                <p className="text-xs text-[#6B7280] mt-1">{voucher.title}</p>
+                <p className="font-bold text-sm text-[#111827] dark:text-white">{voucher.code}</p>
+                <p className="text-xs text-[#6B7280] dark:text-neutral-400 mt-1">{voucher.title}</p>
                 {voucher.maxDiscountAmount && voucher.discountType?.toLowerCase() === 'percentage' && (
-                  <p className="text-xs text-[#6B7280] mt-1">{tc.maxDiscount} {formatCurrency(voucher.maxDiscountAmount)}</p>
+                  <p className="text-xs text-[#6B7280] dark:text-neutral-400 mt-1">{tc.maxDiscount} {formatCurrency(voucher.maxDiscountAmount)}</p>
                 )}
-                <p className="text-xs text-[#6B7280] mt-1">{tc.expiry} {voucher.isNeverExpired ? tc.neverExpires : formatDate(voucher.validTo)}</p>
+                <p className="text-xs text-[#6B7280] dark:text-neutral-400 mt-1">{tc.expiry} {voucher.isNeverExpired ? tc.neverExpires : formatDate(voucher.validTo)}</p>
               </div>
             </div>
           )
         })}
       </div>
-      <div className="p-3 border-t border-border text-center shrink-0">
+      <div className="p-3 border-t border-border dark:border-[#3F3F3F] text-center shrink-0">
         <button
           onClick={(e) => {
             e.stopPropagation();
             close();
             onOpenModal();
           }}
-          className="text-[#B20000] text-sm font-semibold hover:underline"
+          className="text-[#B20000] dark:text-red-400 text-sm font-semibold hover:underline"
         >
           {tc.viewAllOffers}
         </button>
@@ -100,12 +100,12 @@ const VoucherSection = ({
     return (
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-[#111827]">{tc.voucherCode}</h3>
-          {isLoading && <Loader2 size={16} className="animate-spin text-[#B20000]" />}
+          <h3 className="font-bold text-[#111827] dark:text-white">{tc.voucherCode}</h3>
+          {isLoading && <Loader2 size={16} className="animate-spin text-[#B20000] dark:text-red-400" />}
         </div>
-        <div className="bg-[#E8F8F0] border border-[#A7E3C3] rounded-xl p-4">
+        <div className="bg-[#E8F8F0] dark:bg-emerald-950/20 border border-[#A7E3C3] dark:border-emerald-800/40 rounded-xl p-4">
           <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center gap-2 text-[#00A854] font-bold mt-0.5">
+            <div className="flex items-center gap-2 text-[#00A854] dark:text-emerald-400 font-bold mt-0.5">
               <Check size={18} />
               <span>{tc.appliedCount.replace('{{count}}', selectedVouchers.length)}</span>
             </div>
@@ -117,7 +117,7 @@ const VoucherSection = ({
                 // Pass the first selected voucher to be removed
                 onRemoveVoucher(selectedVouchers[0]);
               }}
-              className="text-gray-400 hover:text-[#B20000] transition-colors p-1"
+              className="text-gray-400 hover:text-[#B20000] dark:hover:text-red-400 transition-colors p-1"
               title={tc.removeVoucherConfirm || tc.removeVoucherTitle || "Remove"}
             >
               <X size={16} />
@@ -128,11 +128,11 @@ const VoucherSection = ({
             {selectedVouchers.map(voucher => (
               <div key={voucher.id} className="flex justify-between items-center text-sm">
                 <div>
-                  <span className="font-bold text-[#111827] mr-2">{voucher.code}</span>
-                  <span className="text-[#6B7280]">({voucher.sponsorType === 'CatSpeak' ? 'CatSpeak' : tc.sponsorInstructor})</span>
+                  <span className="font-bold text-[#111827] dark:text-white mr-2">{voucher.code}</span>
+                  <span className="text-[#6B7280] dark:text-neutral-400">({voucher.sponsorType === 'CatSpeak' ? 'CatSpeak' : tc.sponsorInstructor})</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[#111827]">
+                  <span className="text-[#111827] dark:text-white">
                     - {voucher.discountType?.toLowerCase() === 'percentage' ? `${voucher.discountValue}%` : `${voucher.discountValue / 1000}k`}
                   </span>
                 </div>
@@ -147,7 +147,7 @@ const VoucherSection = ({
   // Default state: no vouchers selected
   return (
     <div>
-      <h3 className="font-bold text-[#111827] mb-3">{tc.voucherCode}</h3>
+      <h3 className="font-bold text-[#111827] dark:text-white mb-3">{tc.voucherCode}</h3>
 
       {isLoading ? (
         <LoadingSpinner />
@@ -160,7 +160,7 @@ const VoucherSection = ({
                 <button
                   key={voucher.id}
                   onClick={() => handleToggle(voucher)}
-                  className="flex items-center gap-1 px-3 py-1.5 border border-[#A7E3C3] text-[#00A854] bg-[#E8F8F0] rounded-full text-xs font-semibold hover:bg-[#d1f0df] transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 border border-[#A7E3C3] dark:border-emerald-800/40 text-[#00A854] dark:text-emerald-400 bg-[#E8F8F0] dark:bg-emerald-950/30 rounded-full text-xs font-semibold hover:bg-[#d1f0df] dark:hover:bg-emerald-900/40 transition-colors"
                 >
                   <Tag size={12} />
                   {voucher.code}
@@ -174,21 +174,21 @@ const VoucherSection = ({
               placement="top-right"
               triggerClassName="w-full flex-1"
               trigger={
-                <div className="w-full flex items-center justify-between p-3 border border-border rounded-xl text-sm bg-[#f3f3f3] hover:bg-[#e5e5e5] transition-colors">
-                  <span className="flex items-center gap-2 text-[#B20000] font-semibold">
+                <div className="w-full flex items-center justify-between p-3 border border-border dark:border-[#3F3F3F] rounded-xl text-sm bg-[#f3f3f3] dark:bg-[#242424] hover:bg-[#e5e5e5] dark:hover:bg-[#2c2c2c] transition-colors">
+                  <span className="flex items-center gap-2 text-[#B20000] dark:text-red-400 font-semibold">
                     <Tag size={16} /> {tc.selectFromMyVouchers}
                   </span>
-                  <ChevronDown size={16} />
+                  <ChevronDown size={16} className="text-gray-500 dark:text-neutral-400" />
                 </div>
               }
               content={renderDropdownContent}
             />
           ) : (
-            <div className="p-4 border border-border rounded-xl text-center bg-[#f3f3f3]">
-              <p className="text-sm text-[#6B7280] mb-2">{tc.noVouchersForClass}</p>
+            <div className="p-4 border border-border dark:border-[#3F3F3F] rounded-xl text-center bg-[#f3f3f3] dark:bg-[#242424]">
+              <p className="text-sm text-[#6B7280] dark:text-neutral-400 mb-2">{tc.noVouchersForClass}</p>
               <button
                 onClick={onOpenModal}
-                className="text-[#B20000] text-sm font-semibold hover:underline"
+                className="text-[#B20000] dark:text-red-400 text-sm font-semibold hover:underline"
               >
                 {tc.viewAllOffers}
               </button>

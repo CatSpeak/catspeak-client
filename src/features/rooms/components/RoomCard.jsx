@@ -307,8 +307,8 @@ const RoomCard = ({ room }) => {
                 size={16}
                 className={`transition-all duration-200 ${
                   isBookmarked
-                    ? "text-cath-red-700 fill-cath-red-700 scale-110"
-                    : "text-cath-red-800 fill-none"
+                    ? "text-cath-red-700 dark:text-red-400 fill-cath-red-700 dark:fill-red-400 scale-110"
+                    : "text-cath-red-800 dark:text-red-300 fill-none"
                 }`}
               />
             </div>
@@ -319,13 +319,13 @@ const RoomCard = ({ room }) => {
         <div className={`flex flex-1 flex-col p-4 pb-4 ${isExpired ? "opacity-60" : ""}`}>
           {/* Title & Link */}
           <div className="flex items-start justify-between gap-3 mb-2">
-            <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">
+            <h3 className="text-lg font-bold line-clamp-1 text-black dark:text-white leading-snug">
               {translatedName}
             </h3>
             <div
               onClick={handleCopyLink}
               title={t?.rooms?.copyLinkTooltip || "Sao chép liên kết"}
-              className="flex items-center justify-center text-cath-red-800 shrink-0 hover:scale-110 transition-all active:scale-95 cursor-pointer p-1.5 rounded-full hover:bg-red-50"
+              className="flex items-center justify-center text-cath-red-800 dark:text-red-400 shrink-0 hover:scale-110 transition-all active:scale-95 cursor-pointer p-1.5 rounded-full hover:bg-red-50 dark:hover:bg-rose-950/40"
             >
               <LinkIcon size={18} />
             </div>
@@ -333,25 +333,25 @@ const RoomCard = ({ room }) => {
           <div className="flex flex-wrap gap-1.5 mb-3">
             {!isWorkspaceBookmark && (
               <>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isCustomType ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isCustomType ? "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/40" : "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/40"}`}>
                   {t.rooms?.filters?.roomTypes?.[roomTypeBadge] || roomTypeBadge}
                 </span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isPrivateRoom ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isPrivateRoom ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/40" : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40"}`}>
                   {t.rooms?.filters?.visibilities?.[visibilityBadge] || visibilityBadge}
                 </span>
               </>
             )}
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 dark:bg-[#272727] text-gray-700 dark:text-neutral-300 border border-gray-200 dark:border-[#3F3F3F]">
               {t.rooms?.aiSettings?.[languageBadge?.toLowerCase()] || languageBadge}
             </span>
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${activityBadge === "InUse" ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${activityBadge === "InUse" ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40" : "bg-gray-100 dark:bg-[#272727] text-gray-600 dark:text-neutral-300 border-gray-200 dark:border-[#3F3F3F]"}`}>
               {activityBadge === "InUse" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
               {t.rooms?.filters?.activities?.[activityBadge] || (activityBadge === "InUse" ? "In Use" : "Empty")}
             </span>
           </div>
 
           {isExpired && (
-            <div className="mb-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1 text-center">
+            <div className="mb-2 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-rose-950/40 border border-red-200 dark:border-rose-900/40 rounded-lg px-2 py-1 text-center">
               {t.rooms?.expiredBadge || "Đã hết hạn"}
             </div>
           )}
@@ -360,10 +360,10 @@ const RoomCard = ({ room }) => {
           <div className="mt-auto flex justify-between items-center gap-3 sm:gap-4 flex-wrap">
             {/* Participants */}
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
-                <Users size={14} className="text-[#8B5A2B]" />
+              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-[#EDC589] dark:border-amber-800/40">
+                <Users size={14} className="text-[#8B5A2B] dark:text-amber-300" />
               </div>
-              <span className="text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
+              <span className="text-[13px] sm:text-[14px] font-medium text-black dark:text-white whitespace-nowrap">
                 {isUnlimitedParticipants
                   ? `${room.currentParticipantCount || 0} ${t.rooms.people}`
                   : `${room.currentParticipantCount || 0}/${room.maxParticipants} ${t.rooms.people}`}
@@ -372,10 +372,10 @@ const RoomCard = ({ room }) => {
 
             {/* Date/Time */}
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
-                <Clock size={14} className="text-[#8B5A2B]" />
+              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-[#EDC589] dark:border-amber-800/40">
+                <Clock size={14} className="text-[#8B5A2B] dark:text-amber-300" />
               </div>
-              <div className="flex items-center text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
+              <div className="flex items-center text-[13px] sm:text-[14px] font-medium text-black dark:text-white whitespace-nowrap">
                 <span>{timeStr}</span>
               </div>
             </div>

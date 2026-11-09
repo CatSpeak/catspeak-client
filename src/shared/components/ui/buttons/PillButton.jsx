@@ -5,7 +5,7 @@ const VARIANT_CLASSES = {
   primary:
     "bg-cath-red-700 hover:bg-cath-red-800 active:bg-cath-red-900 group-hover/pill:bg-cath-red-800 group-active/pill:bg-cath-red-900 text-white border-transparent",
   secondary:
-    "bg-white dark:bg-[#272727] hover:bg-primaryBg dark:hover:bg-[#3D3D3D] active:bg-[#e0e0e0] dark:active:bg-[#333333] group-hover/pill:bg-primaryBg dark:group-hover/pill:bg-[#3D3D3D] group-active/pill:bg-[#e0e0e0] dark:group-active/pill:bg-[#333333] text-black dark:text-[#AAAAAA] hover:text-black dark:hover:text-white group-hover/pill:text-black dark:group-hover/pill:text-white border-[#e5e5e5] dark:border-[#3F3F3F]",
+    "bg-white dark:bg-[#272727] hover:bg-primaryBg dark:hover:bg-[#3D3D3D] active:bg-[#e0e0e0] dark:active:bg-[#333333] group-hover/pill:bg-primaryBg dark:group-hover/pill:bg-[#3D3D3D] group-active/pill:bg-[#e0e0e0] dark:group-active/pill:bg-[#333333] text-black dark:text-neutral-200 hover:text-black dark:hover:text-white group-hover/pill:text-black dark:group-hover/pill:text-white border-[#e5e5e5] dark:border-[#3F3F3F]",
   outline:
     "bg-transparent hover:bg-primaryBg dark:hover:bg-red-950/20 active:bg-[#e5e5e5] dark:active:bg-red-950/40 group-hover/pill:bg-primaryBg dark:group-hover/pill:bg-red-950/20 group-active/pill:bg-[#e5e5e5] dark:group-active/pill:bg-red-950/40 text-cath-red-700 dark:text-[#FF6B6B] border-cath-red-700 dark:border-[#FF6B6B]/70 border-[1.5px] hover:border-cath-red-800 dark:hover:border-[#FF6B6B] group-hover/pill:border-cath-red-800 dark:group-hover/pill:border-[#FF6B6B]",
   subtle:
@@ -21,9 +21,9 @@ const VARIANT_CLASSES = {
   snackbar:
     "bg-transparent hover:text-[#FF9999] active:text-[#FF4D4D] group-hover/pill:text-[#FF9999] group-active/pill:text-[#FF4D4D] text-[#FF6B6B] border-none p-0 h-auto font-semibold",
   control:
-    "bg-primaryBg hover:bg-[#E6E6E6] text-black dark:bg-[#272727] dark:hover:bg-[#3D3D3D] dark:text-white border-transparent transition-colors",
+    "bg-primaryBg hover:bg-[#E6E6E6] group-hover/pill:bg-[#E6E6E6] text-black dark:bg-[#272727] dark:hover:bg-[#3D3D3D] dark:group-hover/pill:bg-[#3D3D3D] dark:text-white border-transparent",
   controlActive:
-    "bg-cath-red-600 hover:bg-cath-red-700 active:bg-cath-red-800 text-white border-transparent transition-colors",
+    "bg-cath-red-600 hover:bg-cath-red-700 active:bg-cath-red-800 group-hover/pill:bg-cath-red-700 group-active/pill:bg-cath-red-800 text-white border-transparent",
 }
 
 /**
@@ -94,7 +94,7 @@ const PillButton = ({
   const renderIcon = (icon) => {
     if (!icon) return null
     return (
-      <span className="flex items-center justify-center shrink-0">
+      <span className="flex items-center justify-center shrink-0 pointer-events-none">
         {React.isValidElement(icon)
           ? React.cloneElement(icon, {
               size: icon.props.size || 20,
@@ -116,7 +116,7 @@ const PillButton = ({
     >
       <div
         style={customStyle}
-        className={`w-full ${innerDimensions} ${roundedClass} border text-sm transition-colors duration-150 flex items-center justify-center gap-2 whitespace-nowrap select-none ${variantStyle} ${activeStyle} ${disabledStyle} ${innerClassName}`}
+        className={`w-full ${innerDimensions} ${roundedClass} border text-sm pointer-events-none flex items-center justify-center gap-2 whitespace-nowrap select-none ${variantStyle} ${activeStyle} ${disabledStyle} ${innerClassName}`}
       >
         {loading ? (
           <>

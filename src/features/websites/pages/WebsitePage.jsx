@@ -73,10 +73,10 @@ const WebsitePage = () => {
   return (
     <div className="relative h-[calc(100dvh-64px)] w-full px-4 lg:h-full flex flex-col gap-2 pb-4">
       {/* Top Header Bar with Back Button */}
-      <div className="flex items-center justify-between bg-white px-4 py-2 rounded-xl border border-border shadow-sm shrink-0">
+      <div className="flex items-center justify-between bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-xl border border-border dark:border-[#3F3F3F] shadow-sm shrink-0">
         <Link
           to={resolvePath("/resources")}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-cath-red-700 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-neutral-200 hover:text-cath-red-700 dark:hover:text-red-400 transition-colors"
         >
           <ArrowLeft size={16} />
           <span>{t.websites?.detail?.backToHub || "Back to Resource Hub"}</span>
@@ -87,7 +87,7 @@ const WebsitePage = () => {
             href={website.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-800 dark:hover:text-neutral-200 transition-colors"
           >
             <span>
               {t.websites?.detail?.openExternally || "Open externally"}
@@ -98,7 +98,7 @@ const WebsitePage = () => {
       </div>
 
       {/* Container chứa iframe */}
-      <div className="relative flex-1 w-full overflow-hidden rounded-xl border-2 border-border/80 shadow-md">
+      <div className="relative flex-1 w-full overflow-hidden rounded-xl border-2 border-border/80 dark:border-[#3F3F3F] shadow-md">
         {/* Overlay loading / button */}
         {(isIframeLoading || showOverlay) && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/80">

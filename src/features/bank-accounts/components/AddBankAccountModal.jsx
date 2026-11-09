@@ -47,7 +47,7 @@ function BankLogo({ logo, name }) {
   }
 
   return (
-    <div className="w-14 h-14 shrink-0 flex items-center justify-center rounded-xl border border-border bg-white">
+    <div className="w-14 h-14 shrink-0 flex items-center justify-center rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727]">
       <Building2 className="w-6 h-6 text-neutral-400" />
     </div>
   )
@@ -306,7 +306,7 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                   helperTextClassName="text-amber-600"
                   rightIcon={
                     isVerifying || isChecking ? (
-                      <Loader2 className="animate-spin text-[#990011]" />
+                      <Loader2 className="animate-spin text-[#990011] dark:text-red-400" />
                     ) : verifiedName ? (
                       <CheckCircle2 className="text-emerald-500" />
                     ) : null

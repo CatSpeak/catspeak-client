@@ -50,7 +50,7 @@ export default function RefundEligibleModal({
               <p className="text-[11px] uppercase tracking-wider font-semibold text-gray-400 mb-0.5">
                 {refundT.maxRefundAmount || "Số tiền hoàn tối đa"}
               </p>
-              <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
+              <p className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                 {formatAmount(eligibility.maxRefundAmount)}
               </p>
             </>
@@ -59,13 +59,13 @@ export default function RefundEligibleModal({
 
         {/* Transaction Details (strictly from API data) */}
         {(orderCode || eligibility?.paymentType) && (
-          <div className="bg-gray-50 border border-gray-200/70 rounded-2xl p-4 space-y-2.5 text-xs text-gray-600">
+          <div className="bg-gray-50 dark:bg-[#242424] border border-gray-200/70 dark:border-[#3F3F3F] rounded-2xl p-4 space-y-2.5 text-xs text-gray-600 dark:text-neutral-300">
             {orderCode && (
               <div className="flex justify-between items-center">
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-neutral-400">
                   {refundT.columns?.orderCode || "Mã đơn hàng"}
                 </span>
-                <span className="font-mono font-medium text-gray-800">
+                <span className="font-mono font-medium text-gray-800 dark:text-white">
                   #{orderCode}
                 </span>
               </div>
@@ -73,13 +73,13 @@ export default function RefundEligibleModal({
             {eligibility?.paymentType && (
               <div
                 className={`flex justify-between items-center ${
-                  orderCode ? "pt-2 border-t border-gray-200/60" : ""
+                  orderCode ? "pt-2 border-t border-gray-200/60 dark:border-[#3F3F3F]" : ""
                 }`}
               >
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-neutral-400">
                   {refundT.paymentType || "Loại giao dịch"}
                 </span>
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-gray-800 dark:text-white">
                   {eligibility.paymentType}
                 </span>
               </div>

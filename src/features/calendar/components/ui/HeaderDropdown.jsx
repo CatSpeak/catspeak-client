@@ -14,7 +14,7 @@ const HeaderDropdown = ({ triggerIcon, label, children }) => {
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 border border-white rounded-full px-3 py-1.5 bg-white transition text-black"
+        className="flex items-center gap-2 border border-transparent dark:border-[#3F3F3F] rounded-full px-3 py-1.5 bg-white dark:bg-[#272727] text-black dark:text-white hover:bg-gray-50 dark:hover:bg-[#333333] transition-colors"
         type="button"
       >
         {triggerIcon}
@@ -33,7 +33,7 @@ const HeaderDropdown = ({ triggerIcon, label, children }) => {
             <FluentAnimation
               direction="down"
               exit={true}
-              className="pointer-events-auto rounded-[12px] bg-white shadow-lg border border-border ring-1 ring-black ring-opacity-5 overflow-hidden"
+              className="pointer-events-auto rounded-[12px] bg-white dark:bg-[#1A1A1A] shadow-lg border border-border dark:border-[#3F3F3F] ring-1 ring-black/5 dark:ring-white/5 overflow-hidden"
             >
               {typeof children === "function"
                 ? children(() => setIsOpen(false))

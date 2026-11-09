@@ -90,24 +90,24 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white border-b border-slate-100 shrink-0">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white dark:bg-[#1A1A1A] border-b border-slate-100 dark:border-[#3F3F3F] shrink-0">
         <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-          <Gamepad2 className="text-cath-red-700 w-5 h-5 md:w-6 md:h-6 shrink-0" />
-          <h2 className="text-cath-red-700 font-bold text-sm md:text-base whitespace-nowrap uppercase tracking-tight truncate">
+          <Gamepad2 className="text-cath-red-700 dark:text-red-400 w-5 h-5 md:w-6 md:h-6 shrink-0" />
+          <h2 className="text-cath-red-700 dark:text-red-400 font-bold text-sm md:text-base whitespace-nowrap uppercase tracking-tight truncate">
             {gameName}
           </h2>
 
           {currentRound && (
-            <div className="flex items-center gap-1 font-bold border border-cath-red-700/70 px-2.5 py-0.5 rounded-full text-xs md:text-sm whitespace-nowrap shrink-0">
-              <span className="text-slate-500 font-medium">{isPictureIt ? (topBar.round || 'Round') : (t.rooms?.game?.crackIt?.round || "Ván")}: </span>
-              <span className="font-semibold text-cath-red-700">{currentRound.round}/{currentRound.total}</span>
+            <div className="flex items-center gap-1 font-bold border border-cath-red-700/70 dark:border-red-400/50 px-2.5 py-0.5 rounded-full text-xs md:text-sm whitespace-nowrap shrink-0">
+              <span className="text-slate-500 dark:text-neutral-400 font-medium">{isPictureIt ? (topBar.round || 'Round') : (t.rooms?.game?.crackIt?.round || "Ván")}: </span>
+              <span className="font-semibold text-cath-red-700 dark:text-red-400">{currentRound.round}/{currentRound.total}</span>
             </div>
           )}
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {currentRound && (
-            <div className={`text-lg md:text-2xl font-black tabular-nums ${isLowTime ? "text-cath-red-600" : "text-slate-800"}`}>
+            <div className={`text-lg md:text-2xl font-black tabular-nums ${isLowTime ? "text-cath-red-600 dark:text-red-400" : "text-slate-800 dark:text-white"}`}>
               00:{timeLeft.toString().padStart(2, "0")}
             </div>
           )}
@@ -116,7 +116,7 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
           {onOpenMobileLeaderboard && (
             <button
               onClick={onOpenMobileLeaderboard}
-              className="sm:hidden ml-1 p-1.5 rounded-lg bg-white text-cath-red-700 transition-colors border border-cath-red-200"
+              className="sm:hidden ml-1 p-1.5 rounded-lg bg-white dark:bg-[#272727] text-cath-red-700 dark:text-red-400 transition-colors border border-cath-red-200 dark:border-[#3F3F3F]"
               title="Bảng xếp hạng"
               aria-label="Mở bảng xếp hạng"
             >
@@ -128,7 +128,7 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
           {!isSpectator && (
             <button
               onClick={() => setShowExitConfirm(true)}
-              className="ml-1 md:ml-2 flex items-center gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-xl bg-red-50 hover:bg-red-100 active:scale-95 text-cath-red-700 font-bold text-xs transition-all border border-red-200 shrink-0 cursor-pointer shadow-2xs"
+              className="ml-1 md:ml-2 flex items-center gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-xl bg-red-50 dark:bg-rose-950/40 hover:bg-red-100 dark:hover:bg-rose-950/60 active:scale-95 text-cath-red-700 dark:text-red-400 font-bold text-xs transition-all border border-red-200 dark:border-rose-900/50 shrink-0 cursor-pointer shadow-2xs"
               title={t.rooms?.game?.exitGame || "Thoát game"}
               aria-label="Thoát game"
             >

@@ -119,7 +119,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
         onClose={onCancel}
         title={cr.title || "Create Room"}
         showCloseButton={true}
-        className="md:max-w-3xl rounded-none md:rounded-xl md:border md:border-border"
+        className="md:max-w-3xl rounded-none md:rounded-xl md:border md:border-border dark:md:border-[#3F3F3F]"
         headerClassName="flex items-center justify-between p-4"
         subHeader={
           <RoomTypeSelector

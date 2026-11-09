@@ -25,7 +25,7 @@ const LearnerFilterBar = ({
   ]
 
   const selectClassName =
-    "h-9 w-full appearance-none truncate rounded-lg border border-[#DEE0E5] bg-white py-1.5 pl-9 pr-8 text-xs font-medium text-[#303747] outline-none transition-colors hover:border-[#B8BBC4] focus:border-[#72000D] focus:ring-2 focus:ring-[#72000D]/10 sm:text-sm"
+    "h-9 w-full appearance-none truncate rounded-lg border border-[#DEE0E5] dark:border-[#3F3F3F] bg-white dark:bg-[#242424] py-1.5 pl-9 pr-8 text-xs font-medium text-[#303747] dark:text-neutral-200 outline-none transition-colors hover:border-[#B8BBC4] dark:hover:border-neutral-500 focus:border-[#72000D] dark:focus:border-red-400 focus:ring-2 focus:ring-[#72000D]/10 sm:text-sm cursor-pointer"
 
   return (
     <section
@@ -37,7 +37,7 @@ const LearnerFilterBar = ({
           <span className="sr-only">
             {isEn ? "Time range" : "Khoảng thời gian"}
           </span>
-          <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#72000D]" />
+          <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#72000D] dark:text-red-400" />
           <select
             value={preset}
             onChange={(event) => onFilterChange({ p: event.target.value })}
@@ -49,12 +49,12 @@ const LearnerFilterBar = ({
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8496]" />
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8496] dark:text-neutral-400" />
         </label>
 
         <label className="relative block sm:w-60">
           <span className="sr-only">{isEn ? "Course" : "Khóa học"}</span>
-          <BookOpen className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#72000D]" />
+          <BookOpen className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#72000D] dark:text-red-400" />
           <select
             value={courseId}
             onChange={(event) => onFilterChange({ course: event.target.value })}
@@ -71,7 +71,7 @@ const LearnerFilterBar = ({
                 </option>
               ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8496]" />
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8496] dark:text-neutral-400" />
         </label>
       </div>
     </section>

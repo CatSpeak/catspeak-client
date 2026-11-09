@@ -54,12 +54,12 @@ const EventFilter = ({ open, onClose, onApply, activeFilters, classesOptions = [
     >
       <div className="space-y-6">
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-[#1A1A1A]">{t.calendar?.eventType || "Loại lịch"}</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.calendar?.eventType || "Loại lịch"}</p>
           <div className="grid grid-cols-2 gap-3">
             {EVENT_TYPE_OPTIONS.map((opt) => (
               <label
                 key={opt.key}
-                className="flex items-center gap-2.5 text-sm text-[#4E4E4E] cursor-pointer"
+                className="flex items-center gap-2.5 text-sm text-[#4E4E4E] dark:text-neutral-300 cursor-pointer"
               >
                 <Checkbox
                   checked={selected?.eventTypes?.includes(opt.key)}
@@ -82,7 +82,7 @@ const EventFilter = ({ open, onClose, onApply, activeFilters, classesOptions = [
 
         {isTeacher && (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-[#1A1A1A]">{t.calendar?.classOrCourse || "Lớp học"}</h4>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{t.calendar?.classOrCourse || "Lớp học"}</h4>
             <Dropdown
               options={classesOptions.map(opt => ({ label: opt.title, value: opt.id }))}
               value={selected.classIds}

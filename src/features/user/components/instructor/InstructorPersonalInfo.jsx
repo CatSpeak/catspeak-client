@@ -39,14 +39,14 @@ const InstructorPersonalInfo = ({
   return (
     <FluentCard className="gap-6 !justify-start h-full min-h-[365px]">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           {ins.yourInfo || "Thông tin của bạn"}
         </h2>
         {canSectionEdit && !isSectionEditing && (
           <button
             type="button"
             onClick={onStartSectionEdit}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#990011] hover:text-white bg-[#990011]/10 hover:bg-[#990011] border border-[#990011]/20 rounded-lg transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#990011] dark:text-red-400 hover:text-white dark:hover:text-white bg-[#990011]/10 dark:bg-red-950/40 hover:bg-[#990011] dark:hover:bg-[#990011] border border-[#990011]/20 dark:border-red-900/40 rounded-lg transition-all cursor-pointer"
           >
             <Pencil size={13} />
             <span>{ins.editInfo || "Chỉnh sửa"}</span>
@@ -58,7 +58,7 @@ const InstructorPersonalInfo = ({
               type="button"
               disabled={isSavingSection}
               onClick={onCancelSectionEdit}
-              className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 border border-border rounded-lg transition cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-[#272727] border border-border dark:border-[#3F3F3F] rounded-lg transition cursor-pointer disabled:opacity-50"
             >
               {ins.cancel || "Hủy"}
             </button>
@@ -80,7 +80,7 @@ const InstructorPersonalInfo = ({
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div id="field-fullName" className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {ins.fullName || "Họ và tên"}
             </label>
             <TextInput
@@ -96,7 +96,7 @@ const InstructorPersonalInfo = ({
           </div>
 
           <div id="field-email" className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {ins.email || "Email"}
             </label>
             <TextInput
@@ -115,7 +115,7 @@ const InstructorPersonalInfo = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div id="field-phoneNumber" className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {ins.phoneNumber || "Số điện thoại"}
             </label>
             <Dropdown
@@ -125,7 +125,7 @@ const InstructorPersonalInfo = ({
               disabled={effectiveReadOnly}
               enableSearch={true}
               searchPlaceholder={ins.searchPhoneCode || "Tìm kiếm mã vùng..."}
-              dropdownClassName="w-full min-w-[260px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+              dropdownClassName="w-full min-w-[260px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
               trigger={(isOpen, selectedOption, toggleDropdown) => (
                 <TextInput
                   type="tel"
@@ -161,10 +161,10 @@ const InstructorPersonalInfo = ({
                 />
               )}
               renderOption={(option, isSelected) => (
-                <div className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"}`}>
+                <div className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${isSelected ? "bg-[#F6F6F6] dark:bg-[#272727] font-semibold text-gray-900 dark:text-white" : "hover:bg-[#F6F6F6] dark:hover:bg-[#272727] text-gray-700 dark:text-neutral-200"}`}>
                   <span className="text-base shrink-0">{option.icon}</span>
                   <span className="truncate flex-1">{option.label}</span>
-                  <span className="text-[#606060] shrink-0">{option.value}</span>
+                  <span className="text-[#606060] dark:text-neutral-400 shrink-0">{option.value}</span>
                 </div>
               )}
             />
@@ -172,7 +172,7 @@ const InstructorPersonalInfo = ({
           </div>
 
           <div id="field-nationality" className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {ins.nationality || "Quốc tịch"}
             </label>
             <Dropdown
@@ -188,15 +188,15 @@ const InstructorPersonalInfo = ({
                   type="button"
                   onClick={toggle}
                   disabled={effectiveReadOnly}
-                  className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.nationality ? "border-red-500" : "border-border"}`}
+                  className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 dark:bg-[#272727] border text-gray-700 dark:text-white hover:bg-gray-100/50 dark:hover:bg-[#333333] disabled:opacity-50 ${errors.nationality ? "border-red-500" : "border-border dark:border-[#3F3F3F]"}`}
                 >
-                  <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400" : ""}`}>
+                  <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400 dark:text-neutral-400" : ""}`}>
                     {selectedOption?.icon}
                     <span className="truncate">
                       {selectedOption ? selectedOption.label : (ins.selectNationality || "Chọn quốc tịch")}
                     </span>
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-neutral-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                 </button>
               )}
             />
@@ -206,7 +206,7 @@ const InstructorPersonalInfo = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div id="field-dateOfBirth" className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {ins.dateOfBirth || t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}
             </label>
             <DatePicker
@@ -225,13 +225,13 @@ const InstructorPersonalInfo = ({
                 onChange({ target: { name: "dateOfBirth", value: formattedDate } })
               }}
               disabled={effectiveReadOnly}
-              className={`w-full flex ${errors.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-border"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 [&>button]:w-full [&>button]:justify-between [&>button]:!text-sm`}
+              className={`w-full flex ${errors.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-border dark:[&>button]:!border-[#3F3F3F]"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 dark:[&>button]:!bg-[#272727] dark:[&>button]:!text-white [&>button]:w-full [&>button]:justify-between [&>button]:!text-sm`}
             />
             {errors.dateOfBirth && <p className="text-xs text-red-500">{errors.dateOfBirth}</p>}
           </div>
 
           <div id="field-address" className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {ins.address || "Địa chỉ của bạn"}
             </label>
             <TextInput

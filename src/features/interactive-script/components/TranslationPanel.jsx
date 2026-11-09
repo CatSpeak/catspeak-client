@@ -117,7 +117,7 @@ const TranslationPanel = ({
       )
       if (isMatch) {
         return (
-          <strong key={idx} className="font-semibold text-cath-red-700">
+          <strong key={idx} className="font-semibold text-cath-red-700 dark:text-red-400">
             {part}
           </strong>
         )

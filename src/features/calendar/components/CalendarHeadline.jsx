@@ -14,36 +14,36 @@ const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
   return (
     <div className="flex flex-col h-full w-full sm:w-[260px] shrink-0">
       <div className="flex flex-col gap-0.5">
-        <h2 className="text-[38px] leading-[1.1] font-bold text-black tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-black dark:text-white tracking-tight">
           {t.calendar?.calendar || "LỊCH"}
         </h2>
-        <h2 className="text-[38px] leading-[1.1] font-bold text-black tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-black dark:text-white tracking-tight">
           {t.calendar?.offline || "OFFLINE"}
         </h2>
-        <h2 className="text-[38px] leading-[1.1] font-bold text-black tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-black dark:text-white tracking-tight">
           {t.calendar?.meeting || "MEETING"}
         </h2>
-        <h2 className="text-[38px] leading-[1.1] font-bold text-cath-red-700 tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-cath-red-700 dark:text-red-400 tracking-tight">
           {t.calendar?.month || "THÁNG"} {monthString}
         </h2>
         <div className="flex items-center gap-3">
-          <h2 className="text-[38px] leading-[1.1] font-bold text-cath-red-700 tracking-tight">
+          <h2 className="text-[38px] leading-[1.1] font-bold text-cath-red-700 dark:text-red-400 tracking-tight">
             {yearString}
           </h2>
           <div className="flex items-center gap-1 mt-1">
             <Play
               onClick={onPrevMonth}
-              className="w-5 h-5 fill-black rotate-180 cursor-pointer hover:scale-110 transition-transform"
+              className="w-5 h-5 fill-black dark:fill-white text-black dark:text-white rotate-180 cursor-pointer hover:scale-110 transition-transform"
             />
             <Play
               onClick={onNextMonth}
-              className="w-5 h-5 fill-black cursor-pointer hover:scale-110 transition-transform"
+              className="w-5 h-5 fill-black dark:fill-white text-black dark:text-white cursor-pointer hover:scale-110 transition-transform"
             />
           </div>
         </div>
       </div>
 
-      <div className="w-full h-[1px] bg-[#E5E5E5] my-5" />
+      <div className="w-full h-[1px] bg-[#E5E5E5] dark:bg-[#3F3F3F] my-5" />
 
       {/* <div className="flex flex-col">
         <h3 className="text-[32px] leading-[1.1] font-bold text-cath-red-700 tracking-tight">

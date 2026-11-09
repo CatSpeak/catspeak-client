@@ -50,29 +50,29 @@ const CompletePage = ({
   return (
     <div className="w-full max-w-3xl mx-auto py-8 sm:py-12 px-4 sm:px-6 space-y-8 flex flex-col items-center justify-center min-h-[70vh]">
       {/* Top Completion Icon */}
-      <div className="w-20 h-20 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-3xl shadow-xs">
+      <div className="w-20 h-20 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 flex items-center justify-center text-3xl shadow-xs">
         🎉
       </div>
 
       {/* Main Title & Subtitle */}
       <div className="text-center space-y-2 max-w-xl">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           BUỔI LUYỆN NÓI ĐÃ HOÀN TẤT!
         </h1>
-        <p className="text-slate-500 text-sm sm:text-base font-normal">
+        <p className="text-slate-500 dark:text-neutral-400 text-sm sm:text-base font-normal">
           Gia sư AI đang tính toán điểm số và trích xuất từ vựng vào Flashcard...
         </p>
       </div>
 
       {/* Progress Bar & Status Text */}
       <div className="w-full max-w-xl space-y-3">
-        <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden relative shadow-inner">
+        <div className="w-full h-3.5 bg-slate-100 dark:bg-[#272727] rounded-full overflow-hidden relative shadow-inner">
           <div
-            className="h-full bg-[#990011] rounded-full transition-all duration-500"
+            className="h-full bg-[#990011] dark:bg-red-500 rounded-full transition-all duration-500"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
-        <div className="text-center text-sm font-bold text-[#990011]">
+        <div className="text-center text-sm font-bold text-[#990011] dark:text-red-400">
           Đang xử lý {progressPercent}% ({estimatedTime})
         </div>
       </div>
@@ -84,13 +84,13 @@ const CompletePage = ({
             return (
               <div
                 key={item.id}
-                className="w-full bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 sm:p-4.5 flex items-center justify-between text-emerald-800 transition-all"
+                className="w-full bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/50 rounded-2xl p-4 sm:p-4.5 flex items-center justify-between text-emerald-800 dark:text-emerald-300 transition-all"
               >
                 <div className="flex items-center gap-2.5 font-semibold text-xs sm:text-sm">
-                  <span className="text-emerald-700 font-bold">{item.icon}</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">{item.icon}</span>
                   <span>{item.title}</span>
                 </div>
-                <span className="text-xs sm:text-sm font-bold text-emerald-700 shrink-0 ml-3">
+                <span className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400 shrink-0 ml-3">
                   {item.statusText}
                 </span>
               </div>
@@ -100,13 +100,13 @@ const CompletePage = ({
           return (
             <div
               key={item.id}
-              className="w-full bg-blue-50/60 border border-blue-200/80 rounded-2xl p-4 sm:p-4.5 flex items-center justify-between text-blue-900 transition-all"
+              className="w-full bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-800/50 rounded-2xl p-4 sm:p-4.5 flex items-center justify-between text-blue-900 dark:text-blue-300 transition-all"
             >
               <div className="flex items-center gap-2.5 font-semibold text-xs sm:text-sm">
-                <span className="text-blue-700">{item.icon}</span>
+                <span className="text-blue-700 dark:text-blue-400">{item.icon}</span>
                 <span>{item.title}</span>
               </div>
-              <span className="text-xs sm:text-sm font-bold text-blue-600 shrink-0 ml-3 animate-pulse">
+              <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 shrink-0 ml-3 animate-pulse">
                 {item.statusText}
               </span>
             </div>

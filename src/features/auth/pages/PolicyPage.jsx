@@ -29,7 +29,7 @@ const PolicyPage = () => {
       className="flex min-h-screen items-center justify-center bg-white px-4 py-10 text-white"
       style={{ background: cinematicBg }}
     >
-      <div className="relative w-full max-w-screen-xl rounded-[40px] border border-white/5 bg-white/95 text-[#121212] shadow-[0_45px_120px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+      <div className="relative w-full max-w-screen-xl rounded-[40px] border border-white/5 dark:border-[#3F3F3F] bg-white/95 dark:bg-[#1A1A1A]/95 text-[#121212] dark:text-white shadow-[0_45px_120px_rgba(0,0,0,0.55)] backdrop-blur-sm">
         <div className="absolute right-6 top-6 flex flex-col items-end gap-3">
           <button
             type="button"
@@ -62,12 +62,12 @@ const PolicyPage = () => {
           {policy.sections.map(({ title, intro, bullets }) => (
             <article
               key={title}
-              className="rounded-2xl border border-black/5 bg-white/80 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)]"
+              className="rounded-2xl border border-black/5 dark:border-[#3F3F3F] bg-white/80 dark:bg-[#242424]/80 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)]"
             >
-              <h2 className="text-xl font-bold text-[#8f0d15]">{title}</h2>
-              {intro && <p className="mt-3 text-sm text-gray-700">{intro}</p>}
+              <h2 className="text-xl font-bold text-[#8f0d15] dark:text-red-400">{title}</h2>
+              {intro && <p className="mt-3 text-sm text-gray-700 dark:text-neutral-300">{intro}</p>}
               {bullets && (
-                <ul className="mt-4 space-y-2 text-sm text-gray-700">
+                <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-neutral-300">
                   {bullets.map((item) => (
                     <li key={item} className="flex gap-2">
                       <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#c4161c]" />
@@ -80,7 +80,7 @@ const PolicyPage = () => {
           ))}
         </div>
 
-        <div className="border-t border-black/5 px-8 py-6 text-center text-sm text-gray-600">
+        <div className="border-t border-black/5 dark:border-[#3F3F3F] px-8 py-6 text-center text-sm text-gray-600 dark:text-neutral-400">
           {policy.footer}
         </div>
       </div>

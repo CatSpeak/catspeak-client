@@ -5,35 +5,35 @@ import { useTimezone } from "@/shared/hooks/useTimezone";
 const STATUS_CONFIG = {
   Pending: {
     icon: Clock,
-    bgColor: "bg-amber-50",
-    borderColor: "border-amber-200",
-    iconColor: "text-amber-500",
-    titleColor: "text-amber-800",
-    textColor: "text-amber-700",
+    bgColor: "bg-amber-50 dark:bg-amber-950/30",
+    borderColor: "border-amber-200 dark:border-amber-800/40",
+    iconColor: "text-amber-500 dark:text-amber-400",
+    titleColor: "text-amber-800 dark:text-amber-200",
+    textColor: "text-amber-700 dark:text-amber-300",
   },
   Approved: {
     icon: CheckCircle,
-    bgColor: "bg-emerald-50",
-    borderColor: "border-emerald-200",
-    iconColor: "text-emerald-500",
-    titleColor: "text-emerald-800",
-    textColor: "text-emerald-700",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
+    borderColor: "border-emerald-200 dark:border-emerald-800/40",
+    iconColor: "text-emerald-500 dark:text-emerald-400",
+    titleColor: "text-emerald-800 dark:text-emerald-200",
+    textColor: "text-emerald-700 dark:text-emerald-300",
   },
   Rejected: {
     icon: XCircle,
-    bgColor: "bg-red-50",
-    borderColor: "border-red-200",
-    iconColor: "text-red-500",
-    titleColor: "text-red-800",
-    textColor: "text-red-700",
+    bgColor: "bg-red-50 dark:bg-red-950/30",
+    borderColor: "border-red-200 dark:border-red-800/40",
+    iconColor: "text-red-500 dark:text-red-400",
+    titleColor: "text-red-800 dark:text-red-200",
+    textColor: "text-red-700 dark:text-red-300",
   },
   RequestEdit: {
     icon: AlertTriangle,
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    iconColor: "text-blue-500",
-    titleColor: "text-blue-800",
-    textColor: "text-blue-700",
+    bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    borderColor: "border-blue-200 dark:border-blue-800/40",
+    iconColor: "text-blue-500 dark:text-blue-400",
+    titleColor: "text-blue-800 dark:text-blue-200",
+    textColor: "text-blue-700 dark:text-blue-300",
   },
 };
 
@@ -80,7 +80,7 @@ const InstructorStatusBanner = ({
           onClick={onDismiss}
           aria-label={dismissLabel || "Đóng"}
           title={dismissLabel || "Đóng"}
-          className="absolute top-3 right-3 inline-flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold text-gray-400 hover:bg-white/70 hover:text-gray-600 transition cursor-pointer"
+          className="absolute top-3 right-3 inline-flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold text-gray-400 dark:text-neutral-400 hover:bg-white/70 dark:hover:bg-neutral-800/70 hover:text-gray-600 dark:hover:text-white transition cursor-pointer"
         >
           ✕
         </button>
@@ -102,8 +102,8 @@ const InstructorStatusBanner = ({
           Revision-based Pending rows already use the new queue — no nudge. */}
       {status === "Pending" && !isRevision && onReapply && !isReapplying && (
         <div className="mt-3 ml-8">
-          <div className="bg-white/60 rounded-lg px-4 py-3 border border-amber-100">
-            <p className="text-sm text-amber-800">
+          <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-3 border border-amber-100 dark:border-amber-900/40">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
               {ins.legacyPendingHint ||
                 "Hồ sơ cũ của bạn chưa được xử lý qua hệ thống mới. Hãy gửi lại đơn để tiếp tục."}
             </p>
@@ -123,15 +123,15 @@ const InstructorStatusBanner = ({
       {status === "Rejected" && (
         <div className="mt-3 ml-8 space-y-2">
           {rejectReason && (
-            <div className="bg-white/60 rounded-lg px-4 py-3 border border-red-100">
-              <span className="text-xs font-semibold text-red-600 uppercase tracking-wide">
+            <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-3 border border-red-100 dark:border-red-900/40">
+              <span className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide">
                 {ins.rejectReason}
               </span>
-              <p className="text-sm text-red-800 mt-1">{rejectReason}</p>
+              <p className="text-sm text-red-800 dark:text-red-200 mt-1">{rejectReason}</p>
             </div>
           )}
           {banUntil && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-red-600 dark:text-red-400">
               {ins.bannedUntil}:{" "}
               <span className="font-semibold">{formatDate(banUntil)}</span>
             </p>
@@ -152,11 +152,11 @@ const InstructorStatusBanner = ({
       {/* RequestEdit: note from admin */}
       {status === "RequestEdit" && editRequestNote && (
         <div className="mt-3 ml-8">
-          <div className="bg-white/60 rounded-lg px-4 py-3 border border-blue-100">
-            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+          <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-3 border border-blue-100 dark:border-blue-900/40">
+            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide">
               {ins.editNote}
             </span>
-            <p className="text-sm text-blue-800 mt-1">{editRequestNote}</p>
+            <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">{editRequestNote}</p>
           </div>
         </div>
       )}

@@ -16,7 +16,7 @@ const TILE_BASE =
 
 const TILE_DISABLED = "opacity-70 cursor-not-allowed pointer-events-none"
 
-const TILE_SELECTED = "border-cath-red-700 dark:border-cath-red-1000"
+const TILE_SELECTED = "border-cath-red-700 dark:border-red-400 ring-2 ring-cath-red-700/50 dark:ring-red-400/50"
 
 const TILE_UNSELECTED =
   "border-border dark:border-[#3F3F3F] hover:border-neutral-400 dark:hover:border-neutral-500"

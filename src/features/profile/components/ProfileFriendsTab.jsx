@@ -132,7 +132,7 @@ const ProfileFriendsTab = ({
                     className={`ml-1 inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full text-xs font-semibold ${
                       isActive
                         ? "bg-white/25 text-white"
-                        : "bg-gray-100 text-gray-700"
+                        : "bg-gray-100 dark:bg-[#272727] text-gray-700 dark:text-gray-200"
                     }`}
                   >
                     {tab.badge}
@@ -168,14 +168,14 @@ const ProfileFriendsTab = ({
                 onClick={() => setShowFilter(false)}
               />
               {/* Panel: bottom-sheet on mobile, popover on desktop */}
-              <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white border border-border p-4 shadow-xl sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:rounded-xl sm:z-30">
+              <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] p-4 shadow-xl sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:rounded-xl sm:z-30">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-sm">
+                  <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
                     {t.profile?.friends?.filterTitle || "Lọc bạn bè"}
                   </h4>
                   <button
                     onClick={() => setShowFilter(false)}
-                    className="p-1 rounded-full hover:bg-gray-100"
+                    className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] text-gray-500 dark:text-[#AAAAAA]"
                     aria-label="Close"
                   >
                     <X size={16} />
@@ -183,20 +183,20 @@ const ProfileFriendsTab = ({
                 </div>
                 <div className="flex flex-col gap-3">
                   <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-gray-600">{t.profile?.friends?.searchPlaceholder || "Tìm kiếm (tên...)"}</span>
+                    <span className="text-gray-600 dark:text-[#AAAAAA]">{t.profile?.friends?.searchPlaceholder || "Tìm kiếm (tên...)"}</span>
                     <input
                       value={draft.keyword || ""}
                       onChange={(e) => setDraft((d) => ({ ...d, keyword: e.target.value }))}
                       placeholder={t.profile?.friends?.searchPlaceholder || "Tìm kiếm bạn bè..."}
-                      className="h-10 px-3 rounded-lg border border-border outline-none focus:border-gray-400"
+                      className="h-10 px-3 rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-gray-900 dark:text-white outline-none focus:border-gray-400 dark:focus:border-neutral-500"
                     />
                   </label>
                   <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-gray-600">{t.profile?.friends?.accountType || "Vai trò"}</span>
+                    <span className="text-gray-600 dark:text-[#AAAAAA]">{t.profile?.friends?.accountType || "Vai trò"}</span>
                     <select
                       value={draft.accountType || "all"}
                       onChange={(e) => setDraft((d) => ({ ...d, accountType: e.target.value }))}
-                      className="h-10 px-2 rounded-lg border border-border bg-white outline-none"
+                      className="h-10 px-2 rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-gray-900 dark:text-white outline-none"
                     >
                       <option value="all">{t.profile?.friends?.allRoles || "Tất cả"}</option>
                       <option value="teacher">{t.profile?.friends?.teacher || "Giảng viên"}</option>
@@ -204,12 +204,12 @@ const ProfileFriendsTab = ({
                     </select>
                   </label>
                   <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-gray-600">Level</span>
+                    <span className="text-gray-600 dark:text-[#AAAAAA]">Level</span>
                     <input
                       value={draft.level || ""}
                       onChange={(e) => setDraft((d) => ({ ...d, level: e.target.value }))}
                       placeholder="vd: N5, N4..."
-                      className="h-10 px-3 rounded-lg border border-border outline-none focus:border-gray-400"
+                      className="h-10 px-3 rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-gray-900 dark:text-white outline-none focus:border-gray-400 dark:focus:border-neutral-500"
                     />
                   </label>
                   <div className="flex items-center gap-2 mt-1">
@@ -234,7 +234,7 @@ const ProfileFriendsTab = ({
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="flex flex-row sm:flex-col items-center sm:items-stretch p-3 sm:p-0 gap-3.5 sm:gap-0 overflow-hidden rounded-xl bg-white border border-border/80"
+                className="flex flex-row sm:flex-col items-center sm:items-stretch p-3 sm:p-0 gap-3.5 sm:gap-0 overflow-hidden rounded-xl bg-white dark:bg-[#1A1A1A] border border-border/80 dark:border-[#3F3F3F]"
               >
                 <Skeleton className="w-12 h-12 shrink-0 rounded-full sm:w-full sm:h-auto sm:aspect-square sm:rounded-none" />
                 <div className="flex-1 min-w-0 sm:p-4 space-y-2">
@@ -251,7 +251,7 @@ const ProfileFriendsTab = ({
         ) : isPendingTab ? (
           <div className="flex flex-col gap-6">
             <section>
-              <h4 className="font-semibold text-sm mb-2">
+              <h4 className="font-semibold text-sm mb-2 text-gray-900 dark:text-white">
                 {t.profile?.friends?.pendingIncoming || "Chờ bạn duyệt"} ({pendingIncomingList.length})
               </h4>
               {pendingIncomingList.length === 0 ? (
@@ -263,7 +263,7 @@ const ProfileFriendsTab = ({
               )}
             </section>
             <section>
-              <h4 className="font-semibold text-sm mb-2">
+              <h4 className="font-semibold text-sm mb-2 text-gray-900 dark:text-white">
                 {t.profile?.friends?.pendingOutgoing || "Bạn đã gửi"} ({pendingOutgoingList.length})
               </h4>
               {pendingOutgoingList.length === 0 ? (
@@ -288,7 +288,7 @@ const ProfileFriendsTab = ({
             {renderGrid(list)}
             {hasMore && <div ref={bottomSentinelRef} className="h-4 w-full" />}
             {fetchingRecs && (
-              <div className="text-center text-sm text-gray-500 py-2">...</div>
+              <div className="text-center text-sm text-gray-500 dark:text-[#AAAAAA] py-2">...</div>
             )}
           </>
         )}

@@ -8,10 +8,10 @@ import { isNetworkFailure, reportNetworkError } from "../../utils/onlineStatus"
 import { OfflineBanner, SyncToast } from "./SyncStatus"
 
 const TONE = {
-  main: { icon: CheckCircle2, cls: "text-slate-900" },
-  good: { icon: TrendingUp, cls: "text-emerald-700" },
-  warn: { icon: RotateCcw, cls: "text-amber-700" },
-  celebrate: { icon: Sparkles, cls: "text-[#990011]" },
+  main: { icon: CheckCircle2, cls: "text-slate-900 dark:text-white" },
+  good: { icon: TrendingUp, cls: "text-emerald-700 dark:text-emerald-400" },
+  warn: { icon: RotateCcw, cls: "text-amber-700 dark:text-amber-400" },
+  celebrate: { icon: Sparkles, cls: "text-[#990011] dark:text-red-400" },
 }
 
 // Có mạng mà máy chủ chưa trả số liệu sau chừng này thì hiện tạm số liệu trên máy.
@@ -97,23 +97,23 @@ const ReviewResult = ({ sessionId, localResults = [], totalCards = 0, onContinue
       {streakDays > 0 && (
         <div
           data-testid="flashcard-streak-banner"
-          className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-rose-50 px-4 py-3"
+          className="flex items-center gap-3 rounded-2xl border border-amber-200 dark:border-amber-800 bg-gradient-to-r from-amber-50 to-rose-50 dark:from-amber-950/40 dark:to-rose-950/40 px-4 py-3"
         >
           <Flame className="h-6 w-6 shrink-0 text-amber-500" aria-hidden="true" />
           <div className="text-sm">
-            <p className="font-bold text-slate-900">Chuỗi {streakDays} ngày học liên tiếp</p>
-            <p className="text-slate-600">
+            <p className="font-bold text-slate-900 dark:text-white">Chuỗi {streakDays} ngày học liên tiếp</p>
+            <p className="text-slate-600 dark:text-neutral-300">
               {metrics?.studied_today ? "Hôm nay bạn đã ôn rồi, giữ nhịp này nhé!" : "Ôn mỗi ngày để giữ chuỗi."}
             </p>
           </div>
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs p-6 flex flex-col items-center gap-4 text-center">
-        <div className="w-14 h-14 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center">
-          {celebrate ? <Sparkles className="w-7 h-7 text-[#990011]" /> : <Brain className="w-7 h-7 text-[#990011]" />}
+      <div className="rounded-2xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-2xs p-6 flex flex-col items-center gap-4 text-center">
+        <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 flex items-center justify-center">
+          {celebrate ? <Sparkles className="w-7 h-7 text-[#990011] dark:text-red-400" /> : <Brain className="w-7 h-7 text-[#990011] dark:text-red-400" />}
         </div>
-        <h2 className="text-xl font-bold text-slate-900">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
           {celebrate ? "Tuyệt vời, có từ đã nhớ lâu rồi!" : "Hoàn thành phiên ôn"}
         </h2>
 
@@ -131,10 +131,10 @@ const ReviewResult = ({ sessionId, localResults = [], totalCards = 0, onContinue
 
         {shown.forgot_words?.length > 0 && (
           <div className="w-full text-left">
-            <p className="text-xs font-medium text-slate-500 mb-1.5">Từ sẽ gặp lại sớm:</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-neutral-400 mb-1.5">Từ sẽ gặp lại sớm:</p>
             <div className="flex flex-wrap gap-2">
               {shown.forgot_words.map((w) => (
-                <span key={w.card_id} lang="zh" className="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
+                <span key={w.card_id} lang="zh" className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40 text-sm text-amber-900 dark:text-amber-300">
                   {w.word}
                 </span>
               ))}
@@ -144,10 +144,10 @@ const ReviewResult = ({ sessionId, localResults = [], totalCards = 0, onContinue
 
         {metrics?.long_term_words?.length > 0 && (
           <div className="w-full text-left">
-            <p className="text-xs font-medium text-slate-500 mb-1.5">Vào bộ nhớ dài hạn:</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-neutral-400 mb-1.5">Vào bộ nhớ dài hạn:</p>
             <div className="flex flex-wrap gap-2">
               {metrics.long_term_words.map((w) => (
-                <span key={w.card_id} lang="zh" className="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-sm text-[#990011]">
+                <span key={w.card_id} lang="zh" className="px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-sm text-[#990011] dark:text-red-400">
                   {w.word}
                 </span>
               ))}
@@ -156,7 +156,7 @@ const ReviewResult = ({ sessionId, localResults = [], totalCards = 0, onContinue
         )}
 
         {waiting && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-neutral-400">
             {error ? "Chưa tổng kết được trên máy chủ, đang thử lại..." : "Số liệu đang được cập nhật khi kết quả đồng bộ xong."}
           </p>
         )}
@@ -178,7 +178,7 @@ const ReviewResult = ({ sessionId, localResults = [], totalCards = 0, onContinue
           aria-label="Về trang chủ Sổ tay từ vựng"
           className={`flex-1 h-11 rounded-full text-sm font-semibold ${
             nextBatch > 0
-              ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              ? "border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#3D3D3D]"
               : "bg-[#990011] text-white hover:brightness-95"
           }`}
         >

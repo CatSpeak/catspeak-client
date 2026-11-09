@@ -6,13 +6,13 @@ const TermsOfService = () => {
   const terms = t.termsOfService
 
   return (
-    <div className="space-y-4 text-gray-700">
+    <div className="space-y-4 text-gray-700 dark:text-neutral-300">
       {/* Intro */}
       <p className="leading-relaxed italic">{terms.intro}</p>
 
       {/* Section 1: Information Security */}
-      <div className="pt-6 border-t border-border">
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+      <div className="pt-6 border-t border-border dark:border-[#3F3F3F]">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section1.title}
         </h3>
         {terms.section1.paragraphs.map((para, i) => (
@@ -24,7 +24,7 @@ const TermsOfService = () => {
 
       {/* Section 2: Scope of Services */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section2.title}
         </h3>
         <ul className="list-disc list-inside text-base space-y-1 ml-2">
@@ -36,7 +36,7 @@ const TermsOfService = () => {
 
       {/* Section 3: Service Availability */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section3.title}
         </h3>
         <ul className="list-disc list-inside text-base space-y-1 ml-2">
@@ -48,7 +48,7 @@ const TermsOfService = () => {
 
       {/* Section 4: Service Fees */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section4.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">{terms.section4.intro}</p>
@@ -79,7 +79,7 @@ const TermsOfService = () => {
 
       {/* Section 5: Information Provision */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section5.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">{terms.section5.intro}</p>
@@ -93,7 +93,7 @@ const TermsOfService = () => {
 
       {/* Section 6: User Rights */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section6.title}
         </h3>
         <ul className="list-disc list-inside text-base space-y-1 ml-2">
@@ -105,7 +105,7 @@ const TermsOfService = () => {
 
       {/* Section 7: User Obligations */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section7.title}
         </h3>
         <ul className="list-disc list-inside text-base space-y-1 ml-2">
@@ -118,7 +118,7 @@ const TermsOfService = () => {
 
       {/* Section 8: CAT SPEAK's Rights */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section8.title}
         </h3>
         <ul className="list-disc list-inside text-base space-y-1 ml-2">
@@ -130,7 +130,7 @@ const TermsOfService = () => {
 
       {/* Section 9: CAT SPEAK's Rights and Obligations */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section9.title}
         </h3>
         <ul className="list-disc list-inside text-base space-y-1 ml-2">
@@ -142,7 +142,7 @@ const TermsOfService = () => {
 
       {/* Section 10: Limitation of Liability */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section10.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">
@@ -158,7 +158,7 @@ const TermsOfService = () => {
 
       {/* Section 11: Governing Law and Dispute Resolution */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section11.title}
         </h3>
         {terms.section11.paragraphs.map((para, i) => (
@@ -170,7 +170,7 @@ const TermsOfService = () => {
 
       {/* Section 12: General Provisions */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.section12.title}
         </h3>
         {terms.section12.paragraphs.map((para, i) => (
@@ -182,7 +182,7 @@ const TermsOfService = () => {
 
       {/* Contact */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {terms.contact.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">{terms.contact.intro}</p>
@@ -219,7 +219,7 @@ const TermsOfService = () => {
           </li>
         </ul>
 
-        <p className="text-sm mt-8 text-center uppercase text-[#7A7574]">
+        <p className="text-sm mt-8 text-center uppercase text-[#7A7574] dark:text-neutral-400">
           {terms.contact.copyright}
         </p>
       </div>

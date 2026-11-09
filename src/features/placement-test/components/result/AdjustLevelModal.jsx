@@ -93,10 +93,10 @@ const AdjustLevelModal = ({
               className={cn(
                 "flex items-center justify-between gap-3 rounded-[10px] border-[1.5px] px-4 py-3 transition-colors",
                 isDisabled
-                  ? "cursor-not-allowed border-[#E2E8F0] bg-slate-100 opacity-60"
+                  ? "cursor-not-allowed border-[#E2E8F0] dark:border-[#3F3F3F] bg-slate-100 dark:bg-[#202020] opacity-60"
                   : isSelected
-                    ? "cursor-pointer border-cath-red-700 bg-[#FEF2F2]"
-                    : "cursor-pointer border-[#E2E8F0] bg-[#F8FAFC] hover:bg-white",
+                    ? "cursor-pointer border-cath-red-700 dark:border-red-400 bg-[#FEF2F2] dark:bg-rose-950/30"
+                    : "cursor-pointer border-[#E2E8F0] dark:border-[#3F3F3F] bg-[#F8FAFC] dark:bg-[#1A1A1A] hover:bg-white dark:hover:bg-[#242424]",
               )}
             >
               <span className="flex flex-wrap items-center gap-1.5">
@@ -112,7 +112,7 @@ const AdjustLevelModal = ({
                 <span
                   className={cn(
                     "text-[13.5px] font-bold leading-5",
-                    isSelected ? "text-cath-red-700" : "text-[#1E293B]",
+                    isSelected ? "text-cath-red-700 dark:text-red-400" : "text-[#1E293B] dark:text-white",
                   )}
                 >
                   HSK {option.level}
@@ -121,19 +121,19 @@ const AdjustLevelModal = ({
                   className={cn(
                     "text-xs leading-[17px]",
                     isSelected
-                      ? "font-semibold text-cath-red-700"
-                      : "font-normal text-slate-500",
+                      ? "font-semibold text-cath-red-700 dark:text-red-400"
+                      : "font-normal text-slate-500 dark:text-neutral-400",
                   )}
                 >
                   · {copy[OPTION_COPY_KEYS[option.key]]}
                 </span>
                 {isDisabled && (
-                  <span className="w-full text-[11px] font-medium leading-4 text-slate-500">
+                  <span className="w-full text-[11px] font-medium leading-4 text-slate-500 dark:text-neutral-400">
                     {disabledNote}
                   </span>
                 )}
                 {isRecommended && (
-                  <span className="rounded-[4px] bg-[#FEE2E2] px-1.5 py-0.5 text-[10px] font-bold leading-4 text-cath-red-700">
+                  <span className="rounded-[4px] bg-[#FEE2E2] dark:bg-rose-950/40 px-1.5 py-0.5 text-[10px] font-bold leading-4 text-cath-red-700 dark:text-red-400">
                     {copy.recommended}
                   </span>
                 )}
@@ -142,9 +142,9 @@ const AdjustLevelModal = ({
               {isSelected && (
                 <span
                   aria-hidden="true"
-                  className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-cath-red-700"
+                  className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-cath-red-700 dark:border-red-400"
                 >
-                  <span className="h-2 w-2 rounded-full bg-cath-red-700" />
+                  <span className="h-2 w-2 rounded-full bg-cath-red-700 dark:bg-red-400" />
                 </span>
               )}
             </label>
@@ -152,13 +152,13 @@ const AdjustLevelModal = ({
         })}
       </div>
 
-      <div className="mt-4 flex items-start gap-2 rounded-[10px] border border-[#FEF3C7] bg-[#FFFBEB] px-3 py-2.5">
+      <div className="mt-4 flex items-start gap-2 rounded-[10px] border border-[#FEF3C7] dark:border-amber-900/40 bg-[#FFFBEB] dark:bg-amber-950/30 px-3 py-2.5">
         <AlertTriangle
           size={15}
           strokeWidth={2}
-          className="mt-0.5 shrink-0 text-[#B45309]"
+          className="mt-0.5 shrink-0 text-[#B45309] dark:text-amber-400"
         />
-        <p className="text-[11.5px] leading-[16.7px] text-[#92400E]">
+        <p className="text-[11.5px] leading-[16.7px] text-[#92400E] dark:text-amber-300">
           {copy.warning}
         </p>
       </div>

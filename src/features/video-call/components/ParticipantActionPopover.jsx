@@ -153,10 +153,10 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
   return (
     <div className={`p-3 w-60 flex flex-col gap-2 bg-white dark:bg-[#1A1A1A] rounded-xl text-foreground dark:text-white border border-border dark:border-[#3F3F3F] ${className}`}>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <span className="text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider">
           {pl.volume}
         </span>
-        <span className="text-sm font-bold text-gray-900">
+        <span className="text-sm font-bold text-gray-900 dark:text-white">
           {formatPercent(volume)}%
         </span>
       </div>
@@ -164,7 +164,7 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
         <button
           type="button"
           onClick={toggleMute}
-          className="text-gray-500 hover:text-gray-900 transition-colors"
+          className="text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           title={volume === 0 ? pl.unmute : pl.mute}
         >
           {volume === 0 ? (

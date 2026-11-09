@@ -19,16 +19,16 @@ const RegistrationsModal = memo(function RegistrationsModal({
     <Modal
       open={!!occurrenceId}
       onClose={onClose}
-      className="w-[90vw] sm:w-full max-w-md rounded-2xl bg-white shadow-xl min-[426px]:border min-[426px]:border-border flex flex-col overflow-hidden max-h-[70vh] sm:max-h-[80vh]"
-      headerClassName="flex items-center justify-between px-5 py-4 border-b border-border"
+      className="w-[90vw] sm:w-full max-w-md rounded-2xl bg-white dark:bg-[#1A1A1A] shadow-xl min-[426px]:border min-[426px]:border-border dark:min-[426px]:border-[#3F3F3F] flex flex-col overflow-hidden max-h-[70vh] sm:max-h-[80vh]"
+      headerClassName="flex items-center justify-between px-5 py-4 border-b border-border dark:border-[#3F3F3F]"
       bodyClassName="overflow-y-auto flex-1 p-5 min-h-[200px]"
       title={
         <div className="min-w-0">
-          <span className="text-base font-bold text-gray-800 block">
+          <span className="text-base font-bold text-gray-800 dark:text-white block">
             {cal?.workspaceRegistrationsModal || "Registrations for"}{" "}
-            <span className="text-[#990011] truncate">{eventTitle}</span>
+            <span className="text-[#990011] dark:text-red-400 truncate">{eventTitle}</span>
           </span>
-          <span className="text-xs text-gray-400 mt-0.5 block font-normal">
+          <span className="text-xs text-gray-400 dark:text-neutral-400 mt-0.5 block font-normal">
             {registrants.length}{" "}
             {registrants.length !== 1
               ? (cal?.workspaceRegistrant || "Registrant") + "s"
@@ -41,18 +41,18 @@ const RegistrationsModal = memo(function RegistrationsModal({
         <div className="flex flex-col gap-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-3 animate-pulse">
-              <div className="w-9 h-9 rounded-full bg-gray-200 flex-shrink-0" />
+              <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-[#272727] flex-shrink-0" />
               <div className="flex-1 space-y-1.5">
-                <div className="h-3 bg-gray-200 rounded w-32" />
-                <div className="h-2.5 bg-gray-100 rounded w-24" />
+                <div className="h-3 bg-gray-200 dark:bg-[#272727] rounded w-32" />
+                <div className="h-2.5 bg-gray-100 dark:bg-[#242424] rounded w-24" />
               </div>
             </div>
           ))}
         </div>
       ) : registrants.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 text-center">
-          <Users size={36} className="text-gray-300 mb-2" />
-          <p className="text-sm text-gray-400">
+          <Users size={36} className="text-gray-300 dark:text-neutral-600 mb-2" />
+          <p className="text-sm text-gray-400 dark:text-neutral-400">
             {cal?.workspaceNoRegistrations || "No registrations yet"}
           </p>
         </div>
@@ -61,9 +61,9 @@ const RegistrationsModal = memo(function RegistrationsModal({
           {registrants.map((r, idx) => (
             <div
               key={r.accountId || idx}
-              className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors"
             >
-              <div className="w-9 h-9 rounded-full bg-[#990011]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="w-9 h-9 rounded-full bg-[#990011]/10 dark:bg-red-950/40 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {r.avatarImageUrl || r.avatarUrl ? (
                   <img
                     src={r.avatarImageUrl || r.avatarUrl}
@@ -71,17 +71,17 @@ const RegistrationsModal = memo(function RegistrationsModal({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-sm font-bold text-[#990011]">
+                  <span className="text-sm font-bold text-[#990011] dark:text-red-400">
                     {(r.username || r.fullName || "?")[0].toUpperCase()}
                   </span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-gray-800 truncate">
+                <p className="text-sm font-semibold text-gray-800 dark:text-white truncate">
                   {r.fullName || r.username || "Unknown"}
                 </p>
                 {r.username && r.fullName && (
-                  <p className="text-xs text-gray-400 truncate">
+                  <p className="text-xs text-gray-400 dark:text-neutral-400 truncate">
                     @{r.username}
                   </p>
                 )}

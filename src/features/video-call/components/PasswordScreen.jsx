@@ -46,8 +46,8 @@ const PasswordScreen = ({ room, error, isLoading, onSubmit }) => {
           className="hidden"
         />
 
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cath-red-700/10 mb-2">
-          <Lock size={36} className="text-cath-red-700" />
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cath-red-700/10 dark:bg-red-950/40 mb-2">
+          <Lock size={36} className="text-cath-red-700 dark:text-red-400" />
         </div>
 
         <div className="text-center">

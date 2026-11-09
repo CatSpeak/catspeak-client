@@ -81,19 +81,19 @@ const DeepPronunciationAnalysisModal = ({
 
       {/* Dialog Container */}
       <div
-        className="relative w-full max-w-xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-xl bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-3xl p-6 sm:p-7 shadow-2xl z-10 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
       >
 
             {/* Header */}
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 uppercase">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">
                 Phân tích ngữ âm chuyên sâu
               </h2>
 
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors shrink-0 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#272727] hover:bg-slate-200 dark:hover:bg-[#333] flex items-center justify-center text-slate-500 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-white transition-colors shrink-0 cursor-pointer"
                 aria-label="Close dialog"
               >
                 <X className="w-4 h-4" />
@@ -101,13 +101,13 @@ const DeepPronunciationAnalysisModal = ({
             </div>
 
             {loading && (
-              <div className="mt-6 py-10 text-center text-sm text-slate-500 animate-pulse">
+              <div className="mt-6 py-10 text-center text-sm text-slate-500 dark:text-neutral-400 animate-pulse">
                 Đang phân tích từng âm tiết trong buổi nói của bạn...
               </div>
             )}
 
             {!loading && errorText && (
-              <div className="mt-6 py-8 px-4 rounded-2xl bg-slate-50 border border-slate-100 text-center text-sm text-slate-600">
+              <div className="mt-6 py-8 px-4 rounded-2xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#3F3F3F] text-center text-sm text-slate-600 dark:text-neutral-300">
                 {errorText}
               </div>
             )}
@@ -124,7 +124,7 @@ const DeepPronunciationAnalysisModal = ({
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
                       idx === selectedIndex
                         ? "bg-[#990011] border-[#990011] text-white"
-                        : "bg-white border-slate-200 text-slate-700 hover:border-rose-200"
+                        : "bg-white dark:bg-[#242424] border-slate-200 dark:border-[#3F3F3F] text-slate-700 dark:text-neutral-200 hover:border-rose-200 dark:hover:border-rose-900/50"
                     }`}
                   >
                     {w.word}
@@ -134,12 +134,12 @@ const DeepPronunciationAnalysisModal = ({
             )}
 
             {/* Word Banner */}
-            <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-rose-50/40 border border-rose-100 flex items-center justify-between gap-3">
+            <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-rose-50/40 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 flex items-center justify-between gap-3">
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-[#990011] tracking-wide">
+                <span className="text-2xl font-bold text-[#990011] dark:text-red-400 tracking-wide">
                   {analysis.hanzi}
                 </span>
-                <span className="text-xs sm:text-sm text-slate-600">
+                <span className="text-xs sm:text-sm text-slate-600 dark:text-neutral-300">
                   ({analysis.pinyin} - {analysis.meaning})
                 </span>
               </div>
@@ -150,8 +150,8 @@ const DeepPronunciationAnalysisModal = ({
             </div>
 
             {/* Syllables & Tones Breakdown */}
-            <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
-              <h3 className="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wide">
+            <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#3F3F3F] space-y-2">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white uppercase tracking-wide">
                 Bóc tách âm tiết & thanh điệu:
               </h3>
 
@@ -160,7 +160,7 @@ const DeepPronunciationAnalysisModal = ({
                   <div
                     key={s.index}
                     className={`flex items-start gap-1.5 ${
-                      s.isCorrect ? "text-emerald-700 font-medium" : "text-rose-700 font-medium"
+                      s.isCorrect ? "text-emerald-700 dark:text-emerald-400 font-medium" : "text-rose-700 dark:text-rose-400 font-medium"
                     }`}
                   >
                     <span>•</span>
@@ -178,7 +178,7 @@ const DeepPronunciationAnalysisModal = ({
 
             {/* Pitch Curve Comparison */}
             <div className="mt-4 space-y-2 text-left">
-              <h3 className="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wide">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white uppercase tracking-wide">
                 So sánh đường cong cao độ:
               </h3>
 
@@ -190,14 +190,14 @@ const DeepPronunciationAnalysisModal = ({
                     onClick={onPlayUser}
                     disabled={!onPlayUser}
                     title="Nghe lại giọng bạn"
-                    className="w-24 shrink-0 flex items-center gap-1.5 text-slate-600 font-medium enabled:cursor-pointer enabled:hover:text-[#990011]"
+                    className="w-24 shrink-0 flex items-center gap-1.5 text-slate-600 dark:text-neutral-300 font-medium enabled:cursor-pointer enabled:hover:text-[#990011] dark:enabled:hover:text-red-400"
                   >
-                    <Play className="w-3.5 h-3.5 text-slate-400" />
+                    <Play className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500" />
                     <span>Giọng bạn:</span>
                   </button>
-                  <div className="flex-1 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 font-mono">
+                  <div className="flex-1 p-2.5 rounded-xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#3F3F3F] text-slate-600 dark:text-neutral-300 font-mono">
                     <span className="font-bold tracking-widest">{analysis.pitchComparison.userPitch}</span>{" "}
-                    <span className="text-slate-500 font-sans text-xs">
+                    <span className="text-slate-500 dark:text-neutral-400 font-sans text-xs">
                       ({analysis.pitchComparison.userNote})
                     </span>
                   </div>
@@ -210,12 +210,12 @@ const DeepPronunciationAnalysisModal = ({
                     onClick={onPlayModel}
                     disabled={!onPlayModel}
                     title="Nghe phát âm mẫu tốc độ chậm"
-                    className="w-24 shrink-0 flex items-center gap-1.5 text-[#990011] font-semibold enabled:cursor-pointer enabled:hover:underline"
+                    className="w-24 shrink-0 flex items-center gap-1.5 text-[#990011] dark:text-red-400 font-semibold enabled:cursor-pointer enabled:hover:underline"
                   >
-                    <Bot className="w-3.5 h-3.5 text-[#990011]" />
+                    <Bot className="w-3.5 h-3.5 text-[#990011] dark:text-red-400" />
                     <span>AI mẫu:</span>
                   </button>
-                  <div className="flex-1 p-2.5 rounded-xl bg-rose-50/50 border border-rose-100 text-[#990011] font-mono">
+                  <div className="flex-1 p-2.5 rounded-xl bg-rose-50/50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 text-[#990011] dark:text-red-400 font-mono">
                     <span className="font-bold tracking-widest">{analysis.pitchComparison.aiPitch}</span>{" "}
                     <span className="font-sans text-xs font-semibold">
                       ({analysis.pitchComparison.aiNote})
@@ -226,8 +226,8 @@ const DeepPronunciationAnalysisModal = ({
             </div>
 
             {/* Retake / Record Box */}
-            <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-rose-50/30 border border-rose-100/80 flex flex-col items-center justify-center text-center space-y-2.5">
-              <h4 className="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wide">
+            <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-rose-50/30 dark:bg-rose-950/20 border border-rose-100/80 dark:border-rose-900/40 flex flex-col items-center justify-center text-center space-y-2.5">
+              <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white uppercase tracking-wide">
                 Thu âm luyện lại âm tiết này ngay:
               </h4>
 
@@ -243,10 +243,10 @@ const DeepPronunciationAnalysisModal = ({
               </button>
 
               {isRecording && (
-                <p className="text-xs text-slate-500">Đang thu âm... bấm lần nữa để dừng</p>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">Đang thu âm... bấm lần nữa để dừng</p>
               )}
               {analysis.lastRetestScore != null ? (
-                <p className="text-xs font-semibold text-emerald-700">
+                <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                   Kết quả chấm lại vừa thực hiện: {analysis.lastRetestScore}%
                   {typeof analysis.lastRetestDelta === "number" && analysis.lastRetestDelta !== 0
                     ? ` (${analysis.lastRetestDelta > 0 ? "+" : ""}${analysis.lastRetestDelta})`
@@ -254,7 +254,7 @@ const DeepPronunciationAnalysisModal = ({
                   - {analysis.lastRetestResult}
                 </p>
               ) : analysis.lastRetestResult ? (
-                <p className="text-xs font-semibold text-amber-700">{analysis.lastRetestResult}</p>
+                <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">{analysis.lastRetestResult}</p>
               ) : null}
             </div>
             </>
@@ -265,8 +265,10 @@ const DeepPronunciationAnalysisModal = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
+                className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-slate-50 dark:bg-[#242424] hover:bg-slate-100 dark:hover:bg-[#2c2c2c] text-slate-700 dark:text-neutral-200 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
               >
+                Đóng cửa sổ
+              </button>
                 Đóng cửa sổ
               </button>
 

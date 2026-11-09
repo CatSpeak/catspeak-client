@@ -126,7 +126,7 @@ const EventDetailFooter = ({
 
   return (
     <>
-      <div className="p-4 min-[426px]:p-6 rounded-none min-[426px]:rounded-b-[24px] flex flex-col min-[426px]:flex-row items-center justify-between gap-3 min-[426px]:gap-2 bg-white">
+      <div className="p-4 min-[426px]:p-6 rounded-none min-[426px]:rounded-b-[24px] flex flex-col min-[426px]:flex-row items-center justify-between gap-3 min-[426px]:gap-2 bg-white dark:bg-[#1A1A1A]">
         {/* Register / Unregister */}
         {!confirmDelete &&
           (isCreator ? (

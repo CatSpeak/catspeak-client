@@ -83,10 +83,10 @@ const AddressAutocomplete = ({
         <div className="absolute top-full left-0 w-full z-50 mt-2">
           <FluentAnimation
             direction="down"
-            className="shadow-lg border border-border rounded-2xl bg-white max-h-60 overflow-y-auto"
+            className="shadow-lg border border-border dark:border-[#3F3F3F] rounded-2xl bg-white dark:bg-[#242424] max-h-60 overflow-y-auto"
           >
             {isLoading ? (
-              <div className="p-4 text-sm text-center text-gray-500">
+              <div className="p-4 text-sm text-center text-gray-500 dark:text-neutral-400">
                 Đang tìm kiếm...
               </div>
             ) : suggestions.length > 0 ? (
@@ -96,20 +96,20 @@ const AddressAutocomplete = ({
                     <button
                       type="button"
                       onClick={() => handleSelect(feature)}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-start gap-3 border-b border-border last:border-0"
+                      className="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-start gap-3 border-b border-border dark:border-[#333333] last:border-0"
                     >
                       <MapPin
                         size={16}
-                        className="shrink-0 mt-0.5 text-gray-400"
+                        className="shrink-0 mt-0.5 text-gray-400 dark:text-neutral-500"
                       />
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-black">
+                        <span className="text-sm font-medium text-black dark:text-white">
                           {feature.properties.address_line1 ||
                             feature.properties.name ||
                             feature.properties.city}
                         </span>
                         {feature.properties.address_line2 && (
-                          <span className="text-xs text-gray-500 mt-0.5">
+                          <span className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
                             {feature.properties.address_line2}
                           </span>
                         )}

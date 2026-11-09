@@ -178,7 +178,7 @@ const CustomRoomCard = ({
         className="h-full w-full"
         containerClassName="h-full w-full"
       >
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-border">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-border dark:border-[#3F3F3F]">
           {/* Blurred Background Image */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
@@ -252,7 +252,7 @@ const CustomRoomCard = ({
               >
                 <Bookmark
                   size={16}
-                  className="text-cath-red-700 fill-cath-red-700 scale-110 transition-all duration-200"
+                  className="text-cath-red-700 fill-cath-red-700 dark:text-red-400 dark:fill-red-400 scale-110 transition-all duration-200"
                 />
               </div>
             ) : (
@@ -342,7 +342,7 @@ const CustomRoomCard = ({
           </div>
 
           {isExpired && (
-            <div className="mb-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1 text-center">
+            <div className="mb-2 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-2 py-1 text-center">
               {customRooms.expiredWarning || "Đã hết hạn — sẽ được xóa"}
             </div>
           )}

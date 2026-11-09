@@ -265,7 +265,7 @@ const WordLookupPopover = ({
                 <ChevronDown
                   className={cn(
                     "w-3.5 h-3.5 text-slate-400 transition-transform duration-200",
-                    isLangDropdownOpen && "rotate-180 text-cath-red-700"
+                    isLangDropdownOpen && "rotate-180 text-cath-red-700 dark:text-red-400"
                   )}
                 />
               </div>
@@ -286,13 +286,13 @@ const WordLookupPopover = ({
                         className={cn(
                           "px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between cursor-pointer transition-colors",
                           isSelected
-                            ? "bg-rose-50 text-cath-red-700 font-semibold"
-                            : "text-[#374151] dark:text-[#AAAAAA] hover:bg-slate-50 dark:hover:bg-[#272727] hover:text-cath-red-700 dark:hover:text-[#FF0033]"
+                            ? "bg-rose-50 dark:bg-rose-950/40 text-cath-red-700 dark:text-red-400 font-semibold"
+                            : "text-[#374151] dark:text-[#AAAAAA] hover:bg-slate-50 dark:hover:bg-[#272727] hover:text-cath-red-700 dark:hover:text-red-400"
                         )}
                       >
                         <span>{pair.label}</span>
                         {isSelected && (
-                          <Check className="w-3.5 h-3.5 text-cath-red-700 stroke-[2.5]" />
+                          <Check className="w-3.5 h-3.5 text-cath-red-700 dark:text-red-400 stroke-[2.5]" />
                         )}
                       </div>
                     )
@@ -312,7 +312,7 @@ const WordLookupPopover = ({
             <div className="mt-1 text-[15px] font-medium text-slate-800 dark:text-gray-100 leading-snug">
               {meaning}{" "}
               {meaningSecondary && (
-                <span className="font-semibold text-cath-red-700 dark:text-[#FF0033]">
+                <span className="font-semibold text-cath-red-700 dark:text-red-400">
                   {meaningSecondary}
                 </span>
               )}

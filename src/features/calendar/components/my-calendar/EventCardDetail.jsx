@@ -46,12 +46,12 @@ const EventCardDetail = ({ event, onBack }) => {
           <button
             type="button"
             onClick={() => setIsViewerOpen(true)}
-            className="w-full h-48 bg-neutral-100 rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0 cursor-zoom-in"
+            className="w-full h-48 bg-neutral-100 dark:bg-[#242424] rounded-2xl flex items-center justify-center overflow-hidden border border-border dark:border-[#3F3F3F] mt-2 shrink-0 cursor-zoom-in"
           >
             <img src={event.thumbnailUrl} alt="thumbnail" className="w-full h-full object-contain" />
           </button>
         ) : (
-          <div className="w-full h-48 bg-[#F8F9FA] text-[#7B7979] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
+          <div className="w-full h-48 bg-[#F8F9FA] dark:bg-[#242424] text-[#7B7979] dark:text-[#AAAAAA] rounded-2xl flex items-center justify-center overflow-hidden border border-border dark:border-[#3F3F3F] mt-2 shrink-0">
             No Image
           </div>
         )}
@@ -82,7 +82,7 @@ const EventCardDetail = ({ event, onBack }) => {
         }
 
         return (
-          <div className="p-4 border-t border-border flex items-center justify-center gap-3 bg-white shrink-0">
+          <div className="p-4 border-t border-border dark:border-[#3F3F3F] flex items-center justify-center gap-3 bg-white dark:bg-[#1A1A1A] shrink-0">
             <PillButton bgColor={isPast ? "#d1d5db" : undefined}>
               {statusLabel}
             </PillButton>
@@ -100,7 +100,7 @@ const EventCardDetail = ({ event, onBack }) => {
       }
       case "teaching-schedule": case "student-schedule":
         return (
-          <div className="p-4 border-t border-border flex items-center justify-center gap-3 bg-white shrink-0">
+          <div className="p-4 border-t border-border dark:border-[#3F3F3F] flex items-center justify-center gap-3 bg-white dark:bg-[#1A1A1A] shrink-0">
             <PillButton
               variant='outline'
               onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(event?.classLanguage) || 'en')}/meet/class-${event?.classId}`)}
@@ -119,13 +119,13 @@ const EventCardDetail = ({ event, onBack }) => {
   }
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-border flex flex-col relative shadow-sm h-full max-h-[600px] overflow-hidden">
+    <div className="w-full bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] flex flex-col relative shadow-sm h-full max-h-[600px] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border bg-white z-10 shrink-0">
-        <IconButton variant="ghost" onClick={onBack} innerClassName="!text-[#990011] !w-8 !h-8 shrink-0">
+      <div className="flex items-center gap-3 p-4 border-b border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] z-10 shrink-0">
+        <IconButton variant="ghost" onClick={onBack} innerClassName="!text-[#990011] dark:!text-red-400 !w-8 !h-8 shrink-0">
           <ChevronLeft size={20} />
         </IconButton>
-        <h3 className="font-bold text-[15px] text-[#1A1A1A] line-clamp-1">{event.title || t.calendar?.noTitle || 'Không có tiêu đề'}</h3>
+        <h3 className="font-bold text-[15px] text-[#1A1A1A] dark:text-white line-clamp-1">{event.title || t.calendar?.noTitle || 'Không có tiêu đề'}</h3>
         <CommunityBadge languageCommunity={event.languageCommunity} />
       </div>
 
@@ -133,11 +133,11 @@ const EventCardDetail = ({ event, onBack }) => {
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 relative">
         {/* Subtitle */}
         {event.subtitle && (
-          <p className="text-[15px] text-[#7B7979] font-medium pr-12">{event.subtitle}</p>
+          <p className="text-[15px] text-[#7B7979] dark:text-[#AAAAAA] font-medium pr-12">{event.subtitle}</p>
         )}
 
         {event.status && (
-          <div className="flex items-start gap-3 text-[#7B7979] text-[15px]">
+          <div className="flex items-start gap-3 text-[#7B7979] dark:text-[#AAAAAA] text-[15px]">
             <Info size={18} className="shrink-0 mt-0.5" />
             <span className="leading-tight">{t.courses?.student?.classStatuses?.[event.status] || event.status}</span>
           </div>
@@ -146,7 +146,7 @@ const EventCardDetail = ({ event, onBack }) => {
         {/* Details List */}
         <div className="flex flex-col gap-4 mt-2">
           {/* Time */}
-          <div className="flex items-start gap-3 text-[#7B7979] text-[15px]">
+          <div className="flex items-start gap-3 text-[#7B7979] dark:text-[#AAAAAA] text-[15px]">
             <Clock size={18} className="shrink-0 mt-0.5" />
             <span className="leading-tight">
               {event.startTime ? `${formatTime(event.startTime)} (${formatDate(event.startTime)})` : ''}
@@ -156,13 +156,13 @@ const EventCardDetail = ({ event, onBack }) => {
 
           {/* Location */}
           {event.location && (
-            <div className="flex items-start gap-3 text-[#7B7979] text-[15px]">
+            <div className="flex items-start gap-3 text-[#7B7979] dark:text-[#AAAAAA] text-[15px]">
               <MapPin size={18} className="shrink-0 mt-0.5" />
               <a
                 href={getAddressHref(event)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="leading-tight text-[#990011] hover:opacity-80 transition-opacity"
+                className="leading-tight text-[#990011] dark:text-red-400 hover:opacity-80 transition-opacity"
               >
                 {event.location || t.calendar?.notAssigned || 'Chưa cập nhật'}
               </a>
@@ -172,11 +172,11 @@ const EventCardDetail = ({ event, onBack }) => {
           {/* Price */}
           {['registered-event', 'my-event'].includes(event.eventType) && (
             <div className="flex items-center justify-between text-[15px] w-full">
-              <div className="flex items-center gap-3 text-[#7B7979]">
+              <div className="flex items-center gap-3 text-[#7B7979] dark:text-[#AAAAAA]">
                 <Tag size={18} className="shrink-0" />
                 <span>{t.calendar?.ticketPrice || 'Giá vé'}</span>
               </div>
-              <span className="font-bold text-[#990011]">{event.ticketPrice ? event.ticketPrice + "K" : (t.calendar?.free || 'Miễn phí')}</span>
+              <span className="font-bold text-[#990011] dark:text-red-400">{event.ticketPrice ? event.ticketPrice + "K" : (t.calendar?.free || 'Miễn phí')}</span>
             </div>
           )}
         </div>

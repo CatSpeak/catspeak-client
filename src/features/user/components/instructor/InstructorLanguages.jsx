@@ -45,20 +45,20 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
     <div ref={ref} className="relative">
       <div
         onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        className="flex flex-wrap items-center gap-2 min-h-[44px] py-2 w-full bg-gray-50/50 border border-border rounded-xl px-3 cursor-pointer text-sm transition-colors hover:border-gray-300"
+        className="flex flex-wrap items-center gap-2 min-h-[44px] py-2 w-full bg-gray-50/50 dark:bg-[#272727] border border-border dark:border-[#3F3F3F] rounded-xl px-3 cursor-pointer text-sm transition-colors hover:border-gray-300 dark:hover:border-neutral-500"
       >
         {selected.length === 0 && (
-          <span className="text-gray-400">{options.length ? placeholder : ""}</span>
+          <span className="text-gray-400 dark:text-neutral-400">{options.length ? placeholder : ""}</span>
         )}
         {selected.map((item) => (
           <span
             key={item.language}
-            className="inline-flex items-center gap-1 bg-cath-red-700/10 text-cath-red-700 px-2 py-1 rounded-full text-[13px] font-medium"
+            className="inline-flex items-center gap-1 bg-cath-red-700/10 dark:bg-red-950/40 text-cath-red-700 dark:text-red-400 px-2 py-1 rounded-full text-[13px] font-medium"
           >
             {localizedLabel(item.language)}
             {!disabled && (
               <X
-                className="w-3.5 h-3.5 cursor-pointer hover:text-red-800 transition"
+                className="w-3.5 h-3.5 cursor-pointer hover:text-red-800 dark:hover:text-red-300 transition"
                 onClick={(e) => {
                   e.stopPropagation()
                   removeLanguage(item.language)
@@ -73,15 +73,15 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
       </div>
 
       {isOpen && (
-        <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-border rounded-xl shadow-lg max-h-52 overflow-y-auto">
+        <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl shadow-lg max-h-52 overflow-y-auto">
           {options.map((lang) => {
             const isSelected = selectedLanguages.includes(lang)
             return (
               <label
                 key={lang}
-                className={`flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer text-sm transition-colors ${isSelected ? "bg-cath-red-700/5 font-medium text-cath-red-700" : "hover:bg-gray-50"}`}
+                className={`flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer text-sm transition-colors ${isSelected ? "bg-cath-red-700/5 dark:bg-red-950/40 font-medium text-cath-red-700 dark:text-red-400" : "hover:bg-gray-50 dark:hover:bg-[#272727] text-gray-700 dark:text-neutral-200"}`}
               >
-<input
+                <input
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => toggleLanguage(lang)}
@@ -137,12 +137,12 @@ const LanguageLevelDropdown = ({
             type="button"
             onClick={toggle}
             disabled={readOnly}
-            className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${(errors.languagesTeachLevel || errors.languagesTeach) && !item.level ? "border-red-500" : "border-border"}`}
+            className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 dark:bg-[#272727] border text-gray-700 dark:text-white hover:bg-gray-100/50 dark:hover:bg-[#333333] disabled:opacity-50 ${(errors.languagesTeachLevel || errors.languagesTeach) && !item.level ? "border-red-500" : "border-border dark:border-[#3F3F3F]"}`}
           >
-            <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
+            <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400 dark:text-neutral-400" : ""}`}>
               {selectedOption ? selectedOption.label : (ins.selectLevel || "Chọn trình độ")}
             </span>
-            <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-neutral-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
           </button>
         )}
       />
@@ -173,13 +173,13 @@ const InstructorLanguages = ({
 
   return (
     <FluentCard className="gap-6 !justify-start h-full min-h-[365px]">
-      <h2 className="text-xl font-bold text-gray-900">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
         {ins.languageTeach || "Ngôn ngữ giảng dạy"}
       </h2>
 
       <div className="flex flex-col gap-5">
         <div id="field-languagesTeach" className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-800">
+          <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
             {ins.chooseLanguage || "Chọn ngôn ngữ bạn sẽ dạy"}
           </label>
           <LanguageMultiSelect
@@ -195,7 +195,7 @@ const InstructorLanguages = ({
 
         {formData.languagesTeach && formData.languagesTeach.length > 0 && (
           <div className="flex flex-col gap-3">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
               {ins.yourLevel || "Trình độ của bạn"}
             </label>
             <div className="grid grid-cols-1 gap-3">
@@ -206,9 +206,9 @@ const InstructorLanguages = ({
                 const languageId = match ? (match.id ?? match.Id) : undefined
 
                 return (
-                  <div key={item.language} className="flex flex-col gap-2 rounded-xl border border-border bg-white p-3">
+                  <div key={item.language} className="flex flex-col gap-2 rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#202020] p-3">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-semibold text-gray-800 truncate">
+                      <span className="text-sm font-semibold text-gray-800 dark:text-white truncate">
                         {getLocalizedLanguageLabel(t, item.language)}
                       </span>
                     </div>
@@ -230,7 +230,7 @@ const InstructorLanguages = ({
         )}
 
         <div id="field-nativeLanguage" className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-800">
+          <label className="text-sm font-semibold text-gray-800 dark:text-neutral-200">
             {ins.nativeLanguage || "Ngôn ngữ mẹ đẻ"}
           </label>
           <Dropdown
@@ -266,12 +266,12 @@ const InstructorLanguages = ({
                 type="button"
                 onClick={toggle}
                 disabled={readOnly}
-                className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.nativeLanguage ? "border-red-500" : "border-border"}`}
+                className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 dark:bg-[#272727] border text-gray-700 dark:text-white hover:bg-gray-100/50 dark:hover:bg-[#333333] disabled:opacity-50 ${errors.nativeLanguage ? "border-red-500" : "border-border dark:border-[#3F3F3F]"}`}
               >
-                <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
+                <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400 dark:text-neutral-400" : ""}`}>
                   {selectedOption ? selectedOption.label : (ins.selectNativeLanguage || "Chọn ngôn ngữ mẹ đẻ")}
                 </span>
-                <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-neutral-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
               </button>
             )}
           />

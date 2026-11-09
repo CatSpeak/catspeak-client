@@ -234,8 +234,8 @@ const FormDatePicker = ({
     >
       <div
         className={`h-14 w-full flex items-center justify-between rounded-md border px-4 text-left transition-colors focus-within:border-primary hover:border-primary
-        ${showParentError || showInvalidInput ? "!border-red-500 focus-within:!border-red-500 animate-shake" : "border-border"}
-        ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "bg-white"}`}
+        ${showParentError || showInvalidInput ? "!border-red-500 focus-within:!border-red-500 animate-shake" : "border-border dark:border-[#3F3F3F]"}
+        ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50 dark:bg-[#202020]" : "bg-white dark:bg-[#272727]"}`}
         onClick={() => {
           if (!disabled && !isOpen) setIsOpen(true)
         }}
@@ -270,7 +270,7 @@ const FormDatePicker = ({
           }}
           placeholder={`${placeholder} (dd/mm/yyyy)`}
           disabled={disabled}
-          className="w-full h-full outline-none bg-transparent text-gray-800 placeholder-[#9e9e9e]"
+          className="w-full h-full outline-none bg-transparent text-gray-800 dark:text-white placeholder-[#9e9e9e] dark:placeholder-neutral-500"
         />
         <button
           type="button"
@@ -280,10 +280,10 @@ const FormDatePicker = ({
           }}
           className="p-1 outline-none"
         >
-          <Calendar size={18} className="text-gray-400 shrink-0" />
+          <Calendar size={18} className="text-gray-400 dark:text-neutral-400 shrink-0" />
         </button>
       </div>
-      {displayedHelper && <p className="mt-1 text-xs text-red-600">{displayedHelper}</p>}
+      {displayedHelper && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{displayedHelper}</p>}
 
       {typeof document !== "undefined" &&
         createPortal(
@@ -309,7 +309,7 @@ const FormDatePicker = ({
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto bg-white border border-border rounded-xl shadow-lg p-4 flex flex-col w-full"
+                      className="pointer-events-auto bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl shadow-lg p-4 flex flex-col w-full"
                     >
                       {view === "days" ? (
                         <>
@@ -318,17 +318,17 @@ const FormDatePicker = ({
                             <button
                               type="button"
                               onClick={handlePreviousMonth}
-                              className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-[#272727] rounded-md transition-colors"
                             >
                               <ChevronLeft
                                 size={18}
-                                className="text-gray-600"
+                                className="text-gray-600 dark:text-neutral-300"
                               />
                             </button>
                             <button
                               type="button"
                               onClick={openYearPicker}
-                              className="font-bold text-gray-800 text-[14px] hover:underline"
+                              className="font-bold text-gray-800 dark:text-white text-[14px] hover:underline"
                             >
                               Tháng {currentViewDate.format("M")},{" "}
                               {currentViewDate.format("YYYY")}
@@ -336,11 +336,11 @@ const FormDatePicker = ({
                             <button
                               type="button"
                               onClick={handleNextMonth}
-                              className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-[#272727] rounded-md transition-colors"
                             >
                               <ChevronRight
                                 size={18}
-                                className="text-gray-600"
+                                className="text-gray-600 dark:text-neutral-300"
                               />
                             </button>
                           </div>
@@ -350,7 +350,7 @@ const FormDatePicker = ({
                             {weekDays.map((day) => (
                               <div
                                 key={day}
-                                className="text-center text-[12px] font-bold text-gray-400 pb-2 border-b border-border"
+                                className="text-center text-[12px] font-bold text-gray-400 dark:text-neutral-500 pb-2 border-b border-border dark:border-[#3F3F3F]"
                               >
                                 {day}
                               </div>
@@ -381,7 +381,7 @@ const FormDatePicker = ({
                                   onClick={() => handleSelectDate(item.day)}
                                   className={`
                                     w-8 h-8 flex items-center justify-center text-[13px] rounded-md mx-auto transition-colors font-medium
-                                    ${isSelected ? "text-white font-bold hover:brightness-90" : "text-gray-700 hover:bg-gray-100"}
+                                    ${isSelected ? "text-white font-bold hover:brightness-90" : "text-gray-700 dark:text-neutral-200 hover:bg-gray-100 dark:hover:bg-[#272727]"}
                                   `}
                                   style={{
                                     ...(isSelected
@@ -408,24 +408,24 @@ const FormDatePicker = ({
                             <button
                               type="button"
                               onClick={handlePreviousYearBlock}
-                              className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-[#272727] rounded-md transition-colors"
                             >
                               <ChevronLeft
                                 size={18}
-                                className="text-gray-600"
+                                className="text-gray-600 dark:text-neutral-300"
                               />
                             </button>
-                            <div className="font-bold text-gray-800 text-[14px]">
+                            <div className="font-bold text-gray-800 dark:text-white text-[14px]">
                               {yearBlockStart} - {yearBlockStart + 11}
                             </div>
                             <button
                               type="button"
                               onClick={handleNextYearBlock}
-                              className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-[#272727] rounded-md transition-colors"
                             >
                               <ChevronRight
                                 size={18}
-                                className="text-gray-600"
+                                className="text-gray-600 dark:text-neutral-300"
                               />
                             </button>
                           </div>
@@ -440,7 +440,7 @@ const FormDatePicker = ({
                                   key={year}
                                   onClick={() => handleSelectYear(year)}
                                   className={`h-9 flex items-center justify-center text-[13px] rounded-md transition-colors font-medium
-                                    ${isSelectedYear ? "text-white font-bold hover:brightness-90" : "text-gray-700 hover:bg-gray-100"}`}
+                                    ${isSelectedYear ? "text-white font-bold hover:brightness-90" : "text-gray-700 dark:text-neutral-200 hover:bg-gray-100 dark:hover:bg-[#272727]"}`}
                                   style={
                                     isSelectedYear
                                       ? { backgroundColor: color }

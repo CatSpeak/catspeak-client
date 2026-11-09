@@ -131,17 +131,17 @@ const ProfileFolderItem = ({
       {...handlers}
       className={`relative group border rounded-xl p-4 flex flex-col justify-between transition-all select-none ${
         isSelected
-          ? "bg-[#FFF5F5] border-[#990011]"
-          : "bg-white border-border hover:bg-primaryBg"
+          ? "bg-[#FFF5F5] dark:bg-red-950/20 border-[#990011] dark:border-red-500"
+          : "bg-white dark:bg-[#1A1A1A] border-border dark:border-[#3F3F3F] hover:bg-primaryBg dark:hover:bg-[#242424]"
       } ${isOwnProfile || isSelectionMode ? "cursor-pointer" : "cursor-default"}`}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           <FcFolder className="text-2xl shrink-0" />
           <div>
-            <h3 className="line-clamp-2">{title}</h3>
+            <h3 className="line-clamp-2 text-gray-900 dark:text-white">{title}</h3>
 
-            <div className="flex items-center gap-2 text-sm text-secondary">
+            <div className="flex items-center gap-2 text-sm text-secondary dark:text-[#AAAAAA]">
               <span>
                 {t.materials.itemsCount?.replace(
                   "{{count}}",

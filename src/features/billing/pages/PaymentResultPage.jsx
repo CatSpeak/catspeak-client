@@ -54,8 +54,8 @@ const PaymentResultPage = () => {
   if (isHistoryLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in duration-500">
-        <Loader2 className="w-12 h-12 text-cath-red-700 animate-spin mb-4" />
-        <p className="text-[#7A7574]">{t.billing.result.processing}</p>
+        <Loader2 className="w-12 h-12 text-cath-red-700 dark:text-red-400 animate-spin mb-4" />
+        <p className="text-[#7A7574] dark:text-neutral-400">{t.billing.result.processing}</p>
       </div>
     )
   }
@@ -63,11 +63,11 @@ const PaymentResultPage = () => {
   if (!isCancelled) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in zoom-in duration-500">
-        <div className="w-20 h-20 bg-[#E5F7ED] text-green-600 rounded-full flex items-center justify-center mb-6">
+        <div className="w-20 h-20 bg-[#E5F7ED] dark:bg-emerald-950/40 text-green-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-6">
           <CheckCircle2 size={40} />
         </div>
-        <h1 className="text-3xl font-bold mb-4">{t.billing.result.successTitle}</h1>
-        <p className="text-[#7A7574] mb-8 text-center max-w-md">
+        <h1 className="text-3xl font-bold mb-4 dark:text-white">{t.billing.result.successTitle}</h1>
+        <p className="text-[#7A7574] dark:text-neutral-400 mb-8 text-center max-w-md">
           {t.billing.result.successSubtitle}
           {orderCode && (
             <span className="block mt-2 font-mono text-xs">
@@ -84,8 +84,8 @@ const PaymentResultPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in duration-500">
-      <Loader2 className="w-12 h-12 text-cath-red-700 animate-spin mb-4" />
-      <p className="text-[#7A7574]">{t.billing.result.cancelling}</p>
+      <Loader2 className="w-12 h-12 text-cath-red-700 dark:text-red-400 animate-spin mb-4" />
+      <p className="text-[#7A7574] dark:text-neutral-400">{t.billing.result.cancelling}</p>
     </div>
   )
 }

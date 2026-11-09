@@ -41,9 +41,9 @@ const CountryDropdown = ({ value, onChange, className = "" }) => {
             e.stopPropagation()
             toggleDropdown()
           }}
-          className="bg-white border border-[#e2e2e2] hover:bg-gray-50 transition-colors duration-200 rounded-2xl h-12 flex items-center px-4 cursor-pointer w-full focus:outline-none"
+          className="bg-white dark:bg-[#272727] border border-[#e2e2e2] dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#333333] transition-colors duration-200 rounded-2xl h-12 flex items-center px-4 cursor-pointer w-full focus:outline-none"
         >
-          <div className="flex items-center gap-3 text-base text-gray-900 justify-between w-full">
+          <div className="flex items-center gap-3 text-base text-gray-900 dark:text-white justify-between w-full">
             <span className="truncate">{getDisplayLabel()}</span>
 
             <ChevronDown

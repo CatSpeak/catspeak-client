@@ -243,7 +243,7 @@ const EventDetailsSection = ({
                 containerClassName="w-24"
                 error={errors.maxParticipants}
               />
-              <span className="text-[#606060] mt-[10px]">{cal.guest}</span>
+              <span className="text-[#606060] dark:text-neutral-400 mt-[10px]">{cal.guest}</span>
             </div>
           </div>
         </div>
@@ -290,13 +290,13 @@ const EventDetailsSection = ({
         </div>
         <div className="flex  gap-2 w-full min-w-0">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 h-11 px-4 rounded-xl border border-[#C6C6C6] bg-gray-50 text-sm text-gray-400 cursor-not-allowed select-none">
+            <div className="flex items-center gap-2 h-11 px-4 rounded-xl border border-[#C6C6C6] dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#272727] text-sm text-gray-400 dark:text-neutral-500 cursor-not-allowed select-none">
               <span>{cal.free || "Miễn phí"}</span>
             </div>
           </div>
           <div className="flex items-center gap-2   px-3 py-2">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-yellow-500" />
-            <p className="text-xs text-yellow-700 leading-relaxed">
+            <p className="text-xs text-yellow-700 dark:text-yellow-400 leading-relaxed">
               {cal.paidEventComingSoon ||
                 "Chức năng sự kiện thu phí đang phát triển."}
             </p>

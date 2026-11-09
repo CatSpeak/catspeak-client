@@ -38,7 +38,7 @@ export const TourGuideModal = ({
           duration: 0.3,
           ease: "easeOut",
         }}
-        className="relative bg-white rounded-[32px] p-7 sm:p-9 md:p-10 shadow-[0_25px_60px_rgba(0,0,0,0.25)] border border-[#ffe6ea] max-w-[660px] w-full text-left select-none"
+        className="relative bg-white dark:bg-[#1A1A1A] rounded-[32px] p-7 sm:p-9 md:p-10 shadow-[0_25px_60px_rgba(0,0,0,0.25)] border border-[#ffe6ea] dark:border-[#3F3F3F] max-w-[660px] w-full text-left select-none"
       >
         {/* Content body with Mascot on left and text on right */}
         <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
@@ -53,31 +53,31 @@ export const TourGuideModal = ({
           <div className="flex-1 min-w-0">
             {step.stepIndex === 1 ? (
               <h2 className="text-xl sm:text-2xl md:text-[28px] font-extrabold tracking-tight leading-snug">
-                <div className="text-gray-900">{step.titleLine1}</div>
-                <div className="text-gray-900">
-                  với <span className="text-[#980019]">Cat Speak</span> 👋
+                <div className="text-gray-900 dark:text-white">{step.titleLine1}</div>
+                <div className="text-gray-900 dark:text-white">
+                  với <span className="text-[#980019] dark:text-red-400">Cat Speak</span> 👋
                 </div>
               </h2>
             ) : (
-              <h2 className="text-xl sm:text-2xl md:text-[28px] font-extrabold text-[#980019] tracking-tight leading-snug">
+              <h2 className="text-xl sm:text-2xl md:text-[28px] font-extrabold text-[#980019] dark:text-red-400 tracking-tight leading-snug">
                 {step.titleLine1}
               </h2>
             )}
 
-            <p className="text-gray-600 text-xs sm:text-[13.5px] md:text-[14.5px] leading-relaxed mt-3">
+            <p className="text-gray-600 dark:text-neutral-300 text-xs sm:text-[13.5px] md:text-[14.5px] leading-relaxed mt-3">
               {step.description}
             </p>
 
             {/* Footer: Step Counter on left, Action buttons on right (NO divider line) */}
             <div className="flex items-center justify-between mt-6">
-              <span className="text-xs sm:text-[13px] font-medium text-gray-400">
+              <span className="text-xs sm:text-[13px] font-medium text-gray-400 dark:text-neutral-400">
                 {step.stepIndex}/{totalSteps}
               </span>
 
               <div className="flex items-center gap-3">
                 <button
                   onClick={onSkip}
-                  className="px-5 sm:px-6 py-2 rounded-full border-[1.5px] border-[#980019] text-[#980019] bg-white hover:bg-rose-50 font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
+                  className="px-5 sm:px-6 py-2 rounded-full border-[1.5px] border-[#980019] dark:border-red-400 text-[#980019] dark:text-red-400 bg-white dark:bg-[#272727] hover:bg-rose-50 dark:hover:bg-rose-950/30 font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
                 >
                   {step.secondaryText}
                 </button>

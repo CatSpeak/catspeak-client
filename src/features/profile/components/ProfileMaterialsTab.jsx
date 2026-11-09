@@ -399,7 +399,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         <div className="flex flex-col gap-6">
           {filteredFolders.length > 0 && (
             <div>
-              <h3 className="text-xl font-bold mb-4">{t.materials.folders}</h3>
+              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t.materials.folders}</h3>
               <div
                 className={`grid gap-2 ${viewLayout === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
               >
@@ -480,7 +480,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
 
           {filteredFiles.length > 0 && (
             <div>
-              <h3 className="text-xl font-bold mb-4">{t.materials.files}</h3>
+              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t.materials.files}</h3>
               <div
                 className={`grid gap-2 ${viewLayout === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
               >

@@ -54,14 +54,14 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
 
   return (
     <div className="flex flex-col items-center gap-5">
-      <div className="w-full rounded-2xl border border-slate-200 bg-white shadow-2xs px-4 py-6 flex flex-col items-center gap-4 text-center">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Điền từ còn thiếu</span>
-        <p className="text-2xl sm:text-3xl text-slate-900 leading-relaxed" lang="zh">
+      <div className="w-full rounded-2xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-2xs px-4 py-6 flex flex-col items-center gap-4 text-center">
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">Điền từ còn thiếu</span>
+        <p className="text-2xl sm:text-3xl text-slate-900 dark:text-white leading-relaxed" lang="zh">
           {card.example_blank}
         </p>
-        <p className="text-sm text-slate-600">
-          Gợi ý nghĩa: <span className="font-medium text-slate-800">{card.meaning_vi || "..."}</span>
-          {card.part_of_speech_vi && <span className="text-slate-500"> ({card.part_of_speech_vi})</span>}
+        <p className="text-sm text-slate-600 dark:text-neutral-400">
+          Gợi ý nghĩa: <span className="font-medium text-slate-800 dark:text-neutral-200">{card.meaning_vi || "..."}</span>
+          {card.part_of_speech_vi && <span className="text-slate-500 dark:text-neutral-400"> ({card.part_of_speech_vi})</span>}
         </p>
 
         <input
@@ -77,18 +77,18 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
           autoCorrect="off"
           spellCheck={false}
           autoFocus
-          className={`w-full max-w-xs h-12 rounded-xl border px-4 text-center text-xl outline-none transition-colors ${
+          className={`w-full max-w-xs h-12 rounded-xl border px-4 text-center text-xl outline-none transition-colors text-slate-900 dark:text-white ${
             state === "correct" || state === "overridden"
-              ? "border-emerald-400 bg-emerald-50"
+              ? "border-emerald-400 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-200"
               : state === "wrong" || state === "blank"
-                ? "border-rose-400 bg-rose-50"
-                : "border-slate-300 focus:border-[#990011]"
+                ? "border-rose-400 dark:border-rose-600 bg-rose-50 dark:bg-rose-950/40 text-rose-950 dark:text-rose-200"
+                : "border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] focus:border-[#990011] dark:focus:border-red-400"
           }`}
         />
 
         {state === "correct" && (
           <div className="flex flex-col items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
               <Check className="w-4 h-4" /> Chính xác!
             </span>
             <AudioButton audioPath={card.audio_url} pinyin={card.pinyin} audio={audio} />
@@ -99,19 +99,19 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
         {(state === "wrong" || state === "overridden" || state === "blank") && (
           <div className="flex flex-col items-center gap-3">
             {state === "blank" ? (
-              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-700">
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-700 dark:text-rose-400">
                 <X className="w-4 h-4" /> Bạn chưa điền - thẻ này được đánh dấu Quên
               </span>
             ) : state === "wrong" ? (
-              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-700">
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-700 dark:text-rose-400">
                 <X className="w-4 h-4" /> Chưa đúng - thẻ này được đánh dấu Quên
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
                 <Check className="w-4 h-4" /> Đã sửa thành Nhớ
               </span>
             )}
-            <span className="text-sm text-slate-600">Đáp án đúng:</span>
+            <span className="text-sm text-slate-600 dark:text-neutral-400">Đáp án đúng:</span>
             <CardBack card={card} />
           </div>
         )}
@@ -121,7 +121,7 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
         <button
           type="button"
           onClick={check}
-          className="h-11 px-8 rounded-full bg-[#990011] text-sm font-semibold text-white hover:brightness-95"
+          className="h-11 px-8 rounded-full bg-[#990011] text-sm font-semibold text-white hover:brightness-95 cursor-pointer"
         >
           Kiểm tra
         </button>
@@ -131,7 +131,7 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
             <button
               type="button"
               onClick={override}
-              className="h-11 px-5 rounded-full border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="h-11 px-5 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#3D3D3D] cursor-pointer"
             >
               Tôi đúng rồi
             </button>
@@ -139,7 +139,7 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
           <button
             type="button"
             onClick={onNext}
-            className="h-11 px-8 rounded-full bg-[#990011] text-sm font-semibold text-white hover:brightness-95"
+            className="h-11 px-8 rounded-full bg-[#990011] text-sm font-semibold text-white hover:brightness-95 cursor-pointer"
           >
             Tiếp tục
           </button>

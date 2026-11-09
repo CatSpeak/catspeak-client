@@ -23,7 +23,7 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ duration: 0.4, ease: [0.175, 0.885, 0.32, 1.275] }}
-            className="relative z-10 bg-white p-6 md:p-8 rounded-[2rem] shadow-2xl max-w-lg w-full text-center border border-border mx-4 flex flex-col max-h-[85vh]"
+            className="relative z-10 bg-white dark:bg-[#1A1A1A] p-6 md:p-8 rounded-[2rem] shadow-2xl max-w-lg w-full text-center border border-border dark:border-[#3F3F3F] mx-4 flex flex-col max-h-[85vh]"
           >
             <div className="flex flex-col items-center gap-1 text-center mt-2 mb-6">
               <motion.div
@@ -35,14 +35,14 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
                 <div className="absolute w-12 h-12 bg-yellow-500/20 rounded-full blur-xl animate-pulse" />
                 <span className="text-3xl md:text-5xl">🏆</span>
               </motion.div>
-              <h2 className="text-2xl md:text-3xl font-black text-cath-red-600 mt-2 uppercase tracking-widest drop-shadow-sm shrink-0">
+              <h2 className="text-2xl md:text-3xl font-black text-cath-red-600 dark:text-red-400 mt-2 uppercase tracking-widest drop-shadow-sm shrink-0">
                 {title || t.rooms?.game?.crackIt?.gameOver || "KẾT THÚC!"}
               </h2>
             </div>
 
             {finalResults?.final_scores && (
               <>
-                <h3 className="text-base md:text-xl font-bold text-slate-800 mb-4 flex items-center justify-center gap-2 shrink-0 border-b border-border pb-3">
+                <h3 className="text-base md:text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center justify-center gap-2 shrink-0 border-b border-border dark:border-[#3F3F3F] pb-3">
                   {t.rooms?.game?.crackIt?.finalLeaderboard || "Bảng Xếp Hạng Chung Cuộc"}
                 </h3>
 
@@ -60,24 +60,24 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.35, delay: 0.2 + index * 0.05 }}
                           className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${isWinner
-                            ? "bg-yellow-50 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.2)]"
-                            : "bg-gray-50 border-border"
+                            ? "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-400 dark:border-yellow-600 shadow-[0_0_15px_rgba(250,204,21,0.2)]"
+                            : "bg-gray-50 dark:bg-[#272727] border-border dark:border-[#3F3F3F]"
                             }`}
                         >
                           <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                            <div className={`font-bold text-lg md:text-xl w-6 md:w-8 shrink-0 text-center ${isWinner ? 'text-yellow-600' : 'text-slate-400'}`}>
+                            <div className={`font-bold text-lg md:text-xl w-6 md:w-8 shrink-0 text-center ${isWinner ? 'text-yellow-600 dark:text-yellow-400' : 'text-slate-400 dark:text-neutral-500'}`}>
                               {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
                             </div>
-                            <div className="font-semibold text-slate-800 text-base md:text-lg flex items-center flex-1 min-w-0 gap-2">
+                            <div className="font-semibold text-slate-800 dark:text-white text-base md:text-lg flex items-center flex-1 min-w-0 gap-2">
                               <span className="truncate min-w-0 max-w-full">{player.name}</span>
                               {player.isYou && (
-                                <span className="font-normal text-slate-500 text-xs bg-slate-200/60 px-2 py-0.5 rounded-full shrink-0">
+                                <span className="font-normal text-slate-500 dark:text-neutral-400 text-xs bg-slate-200/60 dark:bg-neutral-800 px-2 py-0.5 rounded-full shrink-0">
                                   {t.rooms?.game?.crackIt?.you || "Bạn"}
                                 </span>
                               )}
                             </div>
                           </div>
-                          <div className={`font-bold flex items-center gap-2 text-xl md:text-2xl shrink-0 ml-2 ${isWinner ? 'text-yellow-600' : 'text-cath-red-600'}`}>
+                          <div className={`font-bold flex items-center gap-2 text-xl md:text-2xl shrink-0 ml-2 ${isWinner ? 'text-yellow-600 dark:text-yellow-400' : 'text-cath-red-600 dark:text-red-400'}`}>
                             <span>{score}</span>
                             <span className="text-xs md:text-sm font-semibold opacity-70">{scoreUnit || "pts"}</span>
                           </div>

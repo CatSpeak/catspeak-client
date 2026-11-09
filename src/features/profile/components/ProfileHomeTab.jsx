@@ -84,13 +84,13 @@ const ProfileHomeTab = ({
                 />
                 <button
                   onClick={handleOpenEditorEmpty}
-                  className="flex-1 h-10 pl-5 text-left text-gray-500 bg-transparent border border-border hover:border-cath-red-700 rounded-full outline-none cursor-pointer text-sm transition-colors"
+                  className="flex-1 h-10 pl-5 text-left text-gray-500 dark:text-neutral-400 bg-transparent border border-border dark:border-[#3F3F3F] hover:border-cath-red-700 dark:hover:border-red-400 rounded-full outline-none cursor-pointer text-sm transition-colors"
                 >
                   {t.profile?.home?.whatOnYourMind || "Bạn đang nghĩ gì?"}
                 </button>
               </div>
 
-              <div className="h-px bg-[#e5e5e5]" />
+              <div className="h-px bg-[#e5e5e5] dark:bg-[#3F3F3F]" />
 
               <div className="flex items-center gap-2 w-full">
                 <input
@@ -104,7 +104,7 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerImageRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-primaryBg active:bg-green-100 transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-green-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <Image size={20} className="text-[#16a34a]" />
                   <span>{t.profile?.home?.photo || "Ảnh"}</span>
@@ -121,7 +121,7 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerVideoRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#e11d48] hover:bg-primaryBg active:bg-rose-100 transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#e11d48] hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-rose-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <Video size={20} className="text-[#e11d48]" />
                   <span>{t.profile?.home?.video || t.profile?.post?.editor?.video || "Video"}</span>
@@ -138,7 +138,7 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerFileRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#2563eb] hover:bg-primaryBg active:bg-blue-100 transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#2563eb] hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-blue-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <FileText size={20} className="text-[#2563eb]" />
                   <span>{t.profile?.home?.document || t.profile?.post?.editor?.document || "Tài liệu"}</span>

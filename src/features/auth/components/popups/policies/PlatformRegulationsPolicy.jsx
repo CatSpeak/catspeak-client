@@ -18,15 +18,15 @@ const PlatformRegulationsPolicy = () => {
 
   return (
     <div className="flex flex-col h-full mt-2">
-      <div className="flex border-b border-border mb-6 overflow-x-auto scrollbar-none scroll-smooth [-webkit-overflow-scrolling:touch] overscroll-x-contain">
+      <div className="flex border-b border-border dark:border-[#3F3F3F] mb-6 overflow-x-auto scrollbar-none scroll-smooth [-webkit-overflow-scrolling:touch] overscroll-x-contain">
         {tabs.map((tab, index) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(index)}
             className={`whitespace-nowrap py-3 px-4 font-semibold text-sm transition-colors border-b-2 ${
               activeTab === index
-                ? "border-[#8f0d15] text-[#8f0d15]"
-                : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
+                ? "border-[#8f0d15] dark:border-red-400 text-[#8f0d15] dark:text-red-400"
+                : "border-transparent text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-white hover:border-gray-300 dark:hover:border-neutral-600"
             }`}
           >
             {tab.label}
