@@ -12,13 +12,28 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_APPID,
 }
 
-// Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
+const hasValidConfig = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId)
 
-// Initialize Firebase services
-const auth = getAuth(app)
-const db = getFirestore(app)
-const storage = getStorage(app)
+let app = null
+let auth = null
+let db = null
+let storage = null
+
+if (hasValidConfig) {
+  try {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
+    auth = getAuth(app)
+    db = getFirestore(app)
+    storage = getStorage(app)
+  } catch (err) {
+    console.warn('[Firebase] Initialization error:', err)
+  }
+} else {
+  console.warn(
+    '[Firebase] Missing or invalid Firebase configuration (VITE_API_KEY). Firebase features will be safely disabled.',
+  )
+}
 
 export { app, auth, db, storage }
+
 
