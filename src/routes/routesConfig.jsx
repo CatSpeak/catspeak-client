@@ -69,6 +69,9 @@ const AiPronunciationPracticePage = lazy(
 const AiFlashcardLayout = lazy(
   () => import("@/features/ai-tutor/layouts/FlashcardLayout"),
 )
+const AiVocabularyGalaxyPage = lazy(
+  () => import("@/features/ai-tutor/pages/VocabularyGalaxyPage"),
+)
 const AiHistoryProgressPage = lazy(
   () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
 )
@@ -959,6 +962,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <VocabularyNotebookPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "vocabulary-galaxy",
+                element: (
+                  <LazyRoute>
+                    <AiVocabularyGalaxyPage />
                   </LazyRoute>
                 ),
               },
