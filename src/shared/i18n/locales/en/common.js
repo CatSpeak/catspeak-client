@@ -73,6 +73,7 @@ export default {
     speakingRoom: "Speaking Room",
     vocabularyNotebook: "Vocabulary Notebook",
     historyProgress: "History & Progress",
+    vocabularyGalaxy: "Vocabulary Galaxy",
     messages: "Messages",
     settings: "Settings",
     help: "Help",

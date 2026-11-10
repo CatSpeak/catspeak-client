@@ -26,6 +26,7 @@ import {
   Target,
   Layers,
   History,
+  Orbit,
 } from "lucide-react"
 import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
@@ -153,6 +154,12 @@ export const navSections = [
             label: "Sổ từ vựng",
             path: "/workspace/vocabulary",
             icon: Bookmark,
+          },
+          {
+            key: "vocabularyGalaxy",
+            path: "/workspace/vocabulary-galaxy",
+            icon: Orbit,
+            lang: "zh",
           },
           {
             key: "myCalendar",
@@ -421,6 +428,12 @@ export const navLinks = [
             label: "Sổ từ vựng",
             path: "/workspace/vocabulary",
             icon: Bookmark,
+          },
+          {
+            key: "vocabularyGalaxy",
+            path: "/workspace/vocabulary-galaxy",
+            icon: Orbit,
+            lang: "zh",
           },
           {
             key: "myCalendar",
