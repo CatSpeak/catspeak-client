@@ -4,7 +4,7 @@ import { auth as firebaseAuth } from "./firebase";
 let failedToken = null;
 
 export async function initFirebaseSession(internalJwt) {
-  if (!internalJwt) return null;
+  if (!internalJwt || !firebaseAuth) return null;
 
   // Tránh gọi lại liên tục nếu token này đã thất bại.
   if (failedToken === internalJwt) return null;

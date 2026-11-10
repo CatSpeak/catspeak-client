@@ -38,7 +38,7 @@ export function useNotifications() {
   }, [t]);
 
   useEffect(() => {
-    if (!token) {
+    if (!token || !firebaseAuth || !firestore) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -238,8 +238,8 @@ export function useNotifications() {
   }, [token, dispatch]);
 
   const markAsRead = async (notificationId) => {
-    const user = firebaseAuth.currentUser;
-    if (!user) return;
+    const user = firebaseAuth?.currentUser;
+    if (!user || !firestore) return;
     await updateDoc(
       doc(firestore, "users", user.uid, "notifications", notificationId),
       {
@@ -249,8 +249,8 @@ export function useNotifications() {
   };
 
   const markAllAsRead = async () => {
-    const user = firebaseAuth.currentUser;
-    if (!user) return;
+    const user = firebaseAuth?.currentUser;
+    if (!user || !firestore) return;
 
     const notifRef = collection(firestore, "users", user.uid, "notifications");
     const unreadQuery = query(notifRef, where("isRead", "==", false));
