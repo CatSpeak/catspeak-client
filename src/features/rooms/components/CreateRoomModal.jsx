@@ -91,7 +91,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
       value: "group",
       label: cr.typeGroup || "Group",
       description: cr.typeGroupDesc || "Temporary room, up to 5 people",
-      icon: <Users size={18} />,
+      icon: <Users size={24} />,
     },
     {
       value: "custom",
@@ -99,7 +99,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
       description: (
         cr.typeCustomDesc || "Persistent room, up to {max} people"
       ).replace("{max}", maxParticipantsLimit),
-      icon: <Sparkles size={18} />,
+      icon: <Sparkles size={24} />,
       badge: ct.proBadge || "PRO",
       locked: !isPro,
     },
@@ -119,21 +119,10 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
         onClose={onCancel}
         title={cr.title || "Create Room"}
         showCloseButton={true}
-        className="md:max-w-3xl rounded-none md:rounded-xl md:border md:border-border dark:md:border-[#3F3F3F]"
-        headerClassName="flex items-center justify-between p-4"
-        subHeader={
-          <RoomTypeSelector
-            options={roomTypeOptions}
-            value={mode}
-            onChange={handleModeChange}
-            ariaLabel={cr.roomTypeLabel || "Room type"}
-          />
-        }
-        subHeaderClassName="px-4 mb-4 shrink-0"
-        bodyClassName="px-4 flex flex-col flex-1 min-h-0 overflow-y-auto"
-        footerClassName="p-4"
+        className="md:max-w-3xl"
+        bodyClassName="flex flex-col gap-4 min-h-0"
         footer={
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2 w-full">
             <PillButton
               onClick={handleCreateSubmit}
               loading={isCreating}
@@ -152,6 +141,13 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
           </div>
         }
       >
+        <RoomTypeSelector
+          options={roomTypeOptions}
+          value={mode}
+          onChange={handleModeChange}
+          ariaLabel={cr.roomTypeLabel || "Room type"}
+        />
+
         <CreateRoomFormFields
           mode={mode}
           formData={activeForm.formData}

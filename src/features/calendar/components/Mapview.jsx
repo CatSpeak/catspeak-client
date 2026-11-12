@@ -1,103 +1,108 @@
-import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import MapControl from "./MapControl";
-import { geocodeAddress } from "@/shared/utils/geocode";
+import React, { useState, useEffect } from "react"
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
+import L from "leaflet"
+import "leaflet/dist/leaflet.css"
+import MapControl from "./MapControl"
+import { geocodeAddress } from "@/shared/utils/geocode"
 
 // Fix Leaflet default marker icon
-delete L.Icon.Default.prototype._getIconUrl;
+delete L.Icon.Default.prototype._getIconUrl
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+})
 
-const DEFAULT_POS = [10.8385, 106.6764];
+const DEFAULT_POS = [10.8385, 106.6764]
 
 // Cache geocode theo địa chỉ
-const geocodeCache = {};
+const geocodeCache = {}
 
 function MapFlyTo({ center }) {
-  const map = useMap();
+  const map = useMap()
 
   useEffect(() => {
     if (center) {
       map.flyTo(center, 15, {
         animate: true,
         duration: 1.2,
-      });
+      })
     }
-  }, [center, map]);
+  }, [center, map])
 
-  return null;
+  return null
 }
 
-export default function MapView({ dayEvents = [], selectedEvent = null, focusLocation = null }) {
-  const [markers, setMarkers] = useState([]);
-  const [activeCenter, setActiveCenter] = useState(DEFAULT_POS);
-  const [flyTrigger, setFlyTrigger] = useState(0);
+export default function MapView({
+  dayEvents = [],
+  selectedEvent = null,
+  focusLocation = null,
+}) {
+  const [markers, setMarkers] = useState([])
+  const [activeCenter, setActiveCenter] = useState(DEFAULT_POS)
+  const [flyTrigger, setFlyTrigger] = useState(0)
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
 
     async function loadMarkers() {
-      const result = [];
+      const result = []
 
       for (const ev of dayEvents) {
         // Kiểm tra cancelled ngay đầu mỗi vòng lặp
-        if (cancelled) break;
+        if (cancelled) break
 
-        if (ev.isOnline) continue;
+        if (ev.isOnline) continue
 
-        const parts = [];
-        const baseLocation = ev.location || ev.address;
-        if (baseLocation && baseLocation.trim()) parts.push(baseLocation.trim());
-        if (ev.cityName && ev.cityName.trim()) parts.push(ev.cityName.trim());
-        if (ev.countryName && ev.countryName.trim()) parts.push(ev.countryName.trim());
-        
-        const address = parts.join(", ");
-        console.log("Address:", address);
-        if (!address.trim()) continue;
+        const parts = []
+        const baseLocation = ev.location || ev.address
+        if (baseLocation && baseLocation.trim()) parts.push(baseLocation.trim())
+        if (ev.cityName && ev.cityName.trim()) parts.push(ev.cityName.trim())
+        if (ev.countryName && ev.countryName.trim())
+          parts.push(ev.countryName.trim())
 
-        const cacheKey = address.toLowerCase().trim();
+        const address = parts.join(", ")
+        console.log("Address:", address)
+        if (!address.trim()) continue
 
-        let coords = geocodeCache[cacheKey];
+        const cacheKey = address.toLowerCase().trim()
+
+        let coords = geocodeCache[cacheKey]
 
         if (coords === undefined) {
           try {
-            console.log("Geocoding:", address);
-            coords = await geocodeAddress(address);
+            console.log("Geocoding:", address)
+            coords = await geocodeAddress(address)
 
-            console.log("Geocode result:", coords);
+            console.log("Geocode result:", coords)
 
-            geocodeCache[cacheKey] = coords ?? null;
+            geocodeCache[cacheKey] = coords ?? null
           } catch (err) {
-            console.error("Geocode failed:", err);
-            geocodeCache[cacheKey] = null;
-            coords = null;
+            console.error("Geocode failed:", err)
+            geocodeCache[cacheKey] = null
+            coords = null
           }
         }
 
-        if (cancelled) break;
+        if (cancelled) break
 
         if (coords) {
           // Check for exact coordinate overlaps to offset markers slightly
           const overlapCount = result.filter(
-            (m) => m.lat === coords.lat && m.lng === coords.lng
-          ).length;
-          
-          let lat = coords.lat;
-          let lng = coords.lng;
-          
+            (m) => m.lat === coords.lat && m.lng === coords.lng,
+          ).length
+
+          let lat = coords.lat
+          let lng = coords.lng
+
           if (overlapCount > 0) {
             // Add a tiny offset (~5-10 meters) so markers don't perfectly overlap
-            const offsetLat = (Math.random() - 0.5) * 0.00015;
-            const offsetLng = (Math.random() - 0.5) * 0.00015;
-            lat += offsetLat;
-            lng += offsetLng;
+            const offsetLat = (Math.random() - 0.5) * 0.00015
+            const offsetLng = (Math.random() - 0.5) * 0.00015
+            lat += offsetLat
+            lng += offsetLng
           }
 
           result.push({
@@ -108,25 +113,25 @@ export default function MapView({ dayEvents = [], selectedEvent = null, focusLoc
             lng,
             originalLat: coords.lat,
             originalLng: coords.lng,
-          });
+          })
         }
       }
 
       if (!cancelled) {
-        setMarkers(result);
+        setMarkers(result)
       }
     }
 
     if (dayEvents.length) {
-      loadMarkers();
+      loadMarkers()
     } else {
-      setMarkers([]);
+      setMarkers([])
     }
 
     return () => {
-      cancelled = true;
-    };
-  }, [dayEvents]);
+      cancelled = true
+    }
+  }, [dayEvents])
 
   useEffect(() => {
     // An explicit focus (from an address click) takes priority.
@@ -135,27 +140,27 @@ export default function MapView({ dayEvents = [], selectedEvent = null, focusLoc
       focusLocation.lat != null &&
       focusLocation.lng != null
     ) {
-      setActiveCenter([focusLocation.lat, focusLocation.lng]);
-      setFlyTrigger((prev) => prev + 1);
-      return;
+      setActiveCenter([focusLocation.lat, focusLocation.lng])
+      setFlyTrigger((prev) => prev + 1)
+      return
     }
 
     if (!selectedEvent) {
-      return;
+      return
     }
 
-    const selectedId = selectedEvent.id;
+    const selectedId = selectedEvent.id
 
-    const marker = markers.find((m) => String(m.id) === String(selectedId));
+    const marker = markers.find((m) => String(m.id) === String(selectedId))
 
     if (marker) {
-      setActiveCenter([marker.lat, marker.lng]);
-      setFlyTrigger((prev) => prev + 1);
+      setActiveCenter([marker.lat, marker.lng])
+      setFlyTrigger((prev) => prev + 1)
     }
-  }, [selectedEvent, markers, focusLocation]);
+  }, [selectedEvent, markers, focusLocation])
 
   return (
-    <div className="relative w-full h-[600px] rounded-3xl overflow-hidden">
+    <div className="relative w-full h-[600px] overflow-hidden">
       <MapContainer
         center={activeCenter}
         zoom={15}
@@ -217,5 +222,5 @@ export default function MapView({ dayEvents = [], selectedEvent = null, focusLoc
         <MapControl />
       </MapContainer>
     </div>
-  );
+  )
 }

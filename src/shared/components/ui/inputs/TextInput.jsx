@@ -277,7 +277,7 @@ const TextInput = forwardRef(({
 
       {/* Helper text, Character count, or Error message below the input */}
       {(showCount && props.maxLength) || error || helperText ? (
-        <div className="flex justify-between items-start gap-4 px-4 pt-1 w-full">
+        <div className="flex justify-between items-start gap-4 px-4 w-full">
           <div className="flex-1 min-w-0">
             {error ? (
               <span

@@ -4,7 +4,7 @@ import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 
 const ProfilePostCardSkeleton = () => {
   return (
-    <FluentCard className="space-y-4">
+    <FluentCard className="flex flex-col gap-2">
       {/* Header Skeleton */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

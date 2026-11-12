@@ -267,7 +267,7 @@ const CategoryRoomSection = ({
             Array.from({ length: 3 }).map((_, idx) => (
               <div
                 key={`loading-${idx}`}
-                className="h-[280px] w-[85%] sm:w-[45%] flex-shrink-0 animate-pulse rounded-2xl bg-gray-200 dark:bg-[#272727] snap-start"
+                className="h-[280px] w-[85%] sm:w-[45%] flex-shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-[#272727] snap-start"
               />
             ))}
           {/* Trailing spacer so the last card has padding when scrolled to the end */}
@@ -286,7 +286,7 @@ const CategoryRoomSection = ({
 
   const slideVariants = {
     enter: (dir) => ({
-      x: dir > 0 ? "100%" : "-100%",
+      x: dir > 0 ? "calc(100% + 8px)" : "calc(-100% - 8px)",
       opacity: 0.9,
     }),
     center: {
@@ -295,7 +295,7 @@ const CategoryRoomSection = ({
       zIndex: 1,
     },
     exit: (dir) => ({
-      x: dir < 0 ? "100%" : "-100%",
+      x: dir < 0 ? "calc(100% + 8px)" : "calc(-100% - 8px)",
       opacity: 0.9,
       zIndex: 0,
     }),
@@ -325,7 +325,7 @@ const CategoryRoomSection = ({
               ? Array.from({ length: itemsPerPage }).map((_, idx) => (
                   <div
                     key={`desktop-loading-${idx}`}
-                    className="h-[280px] w-full animate-pulse rounded-2xl bg-gray-200 dark:bg-[#272727]"
+                    className="h-[280px] w-full animate-pulse rounded-xl bg-gray-200 dark:bg-[#272727]"
                   />
                 ))
               : displayRooms

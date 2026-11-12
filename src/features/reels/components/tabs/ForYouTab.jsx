@@ -1,56 +1,50 @@
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
-import { Upload, Users } from "lucide-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import ReelGrid from "../grid/ReelGrid";
-import ReelGridSkeleton from "../grid/ReelGridSkeleton";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react"
+import { Upload, Users } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import ReelGrid from "../grid/ReelGrid"
+import ReelGridSkeleton from "../grid/ReelGridSkeleton"
 import {
   useLazyGetReelsFeedQuery,
   useGetCreatorCountQuery,
-} from "@/store/api/reelsApi";
-import { mapReelDtoToFrontend } from "../../utils/mappers";
-import { Loader2 } from "lucide-react";
+} from "@/store/api/reelsApi"
+import { mapReelDtoToFrontend } from "../../utils/mappers"
+import { Loader2 } from "lucide-react"
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 20
 
 export default function ForYouTab({
   onReelClick,
   onUploadClick,
   searchQuery = "",
 }) {
-  const { t } = useLanguage();
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const { t } = useLanguage()
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
   // Accumulate reels across pages to avoid relying solely on RTK merge
-  const [allReels, setAllReels] = useState([]);
-  const seenIdsRef = useRef(new Set());
+  const [allReels, setAllReels] = useState([])
+  const seenIdsRef = useRef(new Set())
   // Sentinel element at the bottom — watched by IntersectionObserver
-  const sentinelRef = useRef(null);
+  const sentinelRef = useRef(null)
   // Guard: track whether a page-increment request is already in-flight
-  const isFetchingNextRef = useRef(false);
+  const isFetchingNextRef = useRef(false)
 
   // Reset everything when searchQuery changes
   useEffect(() => {
-    setAllReels([]);
-    setHasMore(true);
-    setHasLoadedOnce(false);
-    seenIdsRef.current = new Set();
-    isFetchingNextRef.current = false;
-  }, [searchQuery]);
+    setAllReels([])
+    setHasMore(true)
+    setHasLoadedOnce(false)
+    seenIdsRef.current = new Set()
+    isFetchingNextRef.current = false
+  }, [searchQuery])
 
   const [fetchReels, { data: feedResponse, isLoading, isFetching }] =
-    useLazyGetReelsFeedQuery();
+    useLazyGetReelsFeedQuery()
 
   const requestNextReels = useCallback(
     async (excludeIds) => {
-      if (isFetchingNextRef.current || !hasMore) return;
+      if (isFetchingNextRef.current || !hasMore) return
 
-      isFetchingNextRef.current = true;
+      isFetchingNextRef.current = true
 
       try {
         const response = await fetchReels({
@@ -58,40 +52,40 @@ export default function ForYouTab({
           pageSize: PAGE_SIZE,
           search: searchQuery,
           excludeReelIds: excludeIds,
-        }).unwrap();
+        }).unwrap()
 
-        const incoming = Array.isArray(response?.data) ? response.data : [];
+        const incoming = Array.isArray(response?.data) ? response.data : []
 
         const mapped = incoming.map(mapReelDtoToFrontend).filter((reel) => {
-          const id = String(reel.id ?? reel.reelId);
+          const id = String(reel.id ?? reel.reelId)
 
-          if (seenIdsRef.current.has(id)) return false;
+          if (seenIdsRef.current.has(id)) return false
 
-          seenIdsRef.current.add(id);
-          return true;
-        });
+          seenIdsRef.current.add(id)
+          return true
+        })
 
         if (mapped.length > 0) {
-          setAllReels((previous) => [...previous, ...mapped]);
+          setAllReels((previous) => [...previous, ...mapped])
         }
 
         // BE trả ít hơn PAGE_SIZE nghĩa là đã hết dữ liệu
-        setHasMore(incoming.length === PAGE_SIZE);
-        setHasLoadedOnce(true);
+        setHasMore(incoming.length === PAGE_SIZE)
+        setHasLoadedOnce(true)
       } catch (error) {
-        console.error("Load reels failed:", error);
+        console.error("Load reels failed:", error)
       } finally {
-        isFetchingNextRef.current = false;
+        isFetchingNextRef.current = false
       }
     },
     [fetchReels, searchQuery, hasMore],
-  );
+  )
 
   useEffect(() => {
     if (!hasLoadedOnce && allReels.length === 0 && hasMore) {
-      requestNextReels([]);
+      requestNextReels([])
     }
-  }, [hasLoadedOnce, allReels.length, hasMore, requestNextReels]);
+  }, [hasLoadedOnce, allReels.length, hasMore, requestNextReels])
 
   // Accumulate incoming reels; detect end-of-feed
   // useEffect(() => {
@@ -125,23 +119,23 @@ export default function ForYouTab({
 
   // IntersectionObserver — fires once when sentinel enters viewport
   const loadMore = useCallback(() => {
-    if (isFetchingNextRef.current || isFetching || !hasMore) return;
+    if (isFetchingNextRef.current || isFetching || !hasMore) return
 
     const excludeIds = allReels
       .map((reel) => reel.reelId ?? reel.id)
-      .filter(Boolean);
+      .filter(Boolean)
 
-    requestNextReels(excludeIds);
-  }, [allReels, isFetching, hasMore, requestNextReels]);
+    requestNextReels(excludeIds)
+  }, [allReels, isFetching, hasMore, requestNextReels])
 
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          loadMore();
+          loadMore()
         }
       },
       {
@@ -149,15 +143,15 @@ export default function ForYouTab({
         rootMargin: "0px 0px 400px 0px",
         threshold: 0,
       },
-    );
+    )
 
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [loadMore]);
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [loadMore])
 
   const dateParams = useMemo(() => {
-    const now = new Date();
-    const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const now = new Date()
+    const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
     const to = new Date(
       now.getFullYear(),
       now.getMonth() + 1,
@@ -166,15 +160,15 @@ export default function ForYouTab({
       59,
       59,
       999,
-    ).toISOString();
-    return { from, to };
-  }, []);
-  const { data: creatorCount } = useGetCreatorCountQuery(dateParams);
+    ).toISOString()
+    return { from, to }
+  }, [])
+  const { data: creatorCount } = useGetCreatorCountQuery(dateParams)
 
   return (
     <div className="w-full">
       {/* Dynamic Page Banner */}
-      <div className="bg-gradient-to-r from-[#FFF1F2] to-[#FFF6ED] dark:from-[#241719] dark:to-[#221c17] border border-[#f3d6a9] dark:border-[#443322] rounded-xl p-5 sm:p-6 md:px-8 md:py-6 mb-8 flex flex-col md:flex-row justify-between shadow-sm relative overflow-hidden transition-all duration-300">
+      <div className="bg-gradient-to-r from-[#FFF1F2] to-[#FFF6ED] dark:from-[#241719] dark:to-[#221c17] border border-[#f3d6a9] dark:border-[#443322] rounded-xl p-4 mb-4 flex flex-col md:flex-row justify-between shadow-sm relative overflow-hidden transition-all duration-300">
         {/* Left Side */}
         <div className="flex flex-col flex-1 z-10 w-full">
           <h2 className="text-xl md:text-2xl font-semibold text-headingColor dark:text-white mb-2 tracking-wide">
@@ -243,5 +237,5 @@ export default function ForYouTab({
         </>
       )}
     </div>
-  );
+  )
 }

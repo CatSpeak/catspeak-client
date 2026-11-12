@@ -12,6 +12,7 @@ import OnlinePresence from "./OnlinePresence"
 import HeaderSearchBar from "./HeaderSearchBar"
 import { Link, useLocation } from "react-router-dom"
 import { MainLogo, IconLogo } from "@/shared/assets/icons/logo"
+import { IconButton } from "../ui/buttons"
 
 const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
@@ -48,16 +49,17 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
           : "bg-white dark:bg-[#0F0F0F]"
       }`}
     >
-      <div className="flex w-full h-full items-center justify-between px-4">
+      <div className="flex w-full h-full items-center justify-between px-1">
         {/* Left Section: Mobile Menu + Community Switcher + Online count */}
         <div className="flex items-center gap-2 shrink-0">
           {showSidebar && (
-            <button
+            <IconButton
               onClick={handleDrawerToggle}
-              className="lg:hidden p-2 -ml-2 text-gray-600 dark:text-[#AAAAAA] hover:bg-gray-100 dark:hover:bg-[#272727] rounded-md shrink-0 cursor-pointer"
+              variant="ghost"
+              className="lg:hidden"
             >
               <Menu />
-            </button>
+            </IconButton>
           )}
 
           {/* Logo */}

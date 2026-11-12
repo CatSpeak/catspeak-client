@@ -6,7 +6,6 @@ import Switch from "@/shared/components/ui/inputs/Switch"
 import Slider from "@/shared/components/ui/Slider"
 import TopicSelect from "./TopicSelect"
 import LevelSelector from "./LevelSelector"
-import LanguageSelect from "./LanguageSelect"
 import { TOPICS, LEVELS } from "../../config/constants"
 import { Crown } from "lucide-react"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
@@ -39,7 +38,7 @@ const CreateRoomFormFields = ({
   const maxParticipantsLimit = limits.maxParticipantsInCustomRooms
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {isCustomMode && isQuotaFull && (
         <Banner
           variant="danger"
@@ -83,17 +82,6 @@ const CreateRoomFormFields = ({
           maxLength={isCustomMode ? 50 : 100}
           showCount
         />
-
-        {/* Language Selection (Custom Mode Only, optional) */}
-        {isCustomMode && (
-          <LanguageSelect
-            value={formData.languageType}
-            onChange={(language) => handleChange("languageType", language)}
-            disabled={isDisabled}
-            labelClassName={labelClass}
-            t={t}
-          />
-        )}
 
         {/* Topics Selection (Shared) */}
         <TopicSelect

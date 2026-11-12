@@ -35,14 +35,17 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
       <Carousel
         key={lang}
         items={slides}
-        className="aspect-video rounded-2xl min-h-[200px]"
-        indicatorClassName="mb-2"
+        className="aspect-video min-h-[200px]"
         autoPlay
         interval={5000}
         gap={8}
         allowFullscreen={false}
         renderItem={(slide) => (
-          <WorkshopCard slide={slide} onCtaClick={setModalType} />
+          <WorkshopCard
+            slide={slide}
+            onCtaClick={setModalType}
+            variant="carousel"
+          />
         )}
       />
 

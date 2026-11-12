@@ -55,7 +55,7 @@ const DaySchedule = ({
   totalUniqueRegisteredEvents,
   onSelectDate,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { lang } = useParams();
   const { formatCustom } = useTimezone();
   const cal = t.calendar || {};
@@ -101,10 +101,14 @@ const DaySchedule = ({
   // Registered events for the month (month view only)
   // Pull the full registered list and filter locally so month view stays
   // consistent with the day/week registered state.
-  const { data: registeredMonthData } = useGetRegisteredEventsQuery(undefined, {
-    skip: !isMonthView,
-  });
-  const { data: studentRegisteredMonthData } = useGetStudentRegisteredEventsQuery(undefined, {
+  const { data: registeredMonthData, isLoading: isLoadingRegisteredMonth } =
+    useGetRegisteredEventsQuery(undefined, {
+      skip: !isMonthView,
+    });
+  const {
+    data: studentRegisteredMonthData,
+    isLoading: isLoadingStudentMonth,
+  } = useGetStudentRegisteredEventsQuery(undefined, {
     skip: !isMonthView,
   });
   const mergedRegisteredMonthData = (() => {
@@ -299,8 +303,20 @@ const DaySchedule = ({
     evening: cal.evening || "Tối",
   };
 
+  const weekdayStr = displayDate.isValid()
+    ? displayDate
+        .toDate()
+        .toLocaleDateString(language || "vi", { weekday: "long" })
+    : "";
+  const formattedWeekday = weekdayStr
+    ? weekdayStr
+        .split(" ")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ")
+    : "";
+
   const dateLabel = selectedDate
-    ? `${cal.daySchedule || "Lịch trình sự kiện ngày"} ${displayDate.format("D/M")}`
+    ? `${formattedWeekday}, ${displayDate.format("DD/MM")}`
     : cal.selectDayToView || "Chọn ngày để xem";
 
   const displayEventIds = displayEvents.map((e) => e.id).join(",");
@@ -331,9 +347,9 @@ const DaySchedule = ({
   };
 
   return (
-    <div className="relative flex flex-col h-full">
+    <div className="relative flex flex-col h-full flex-1">
       <div
-        className={`flex-col h-full ${selectedEvent ? "flex lg:hidden" : "flex"}`}
+        className={`flex-col h-full flex-1 ${selectedEvent ? "flex lg:hidden" : "flex"}`}
       >
         {isMonthView ? (
           <DayScheduleMonthView
@@ -346,12 +362,17 @@ const DaySchedule = ({
             monthTab={monthTab}
             setMonthTab={setMonthTab}
             onSelectDate={onSelectDate}
+            isLoading={
+              monthTab === "registered" &&
+              (isLoadingRegisteredMonth || isLoadingStudentMonth)
+            }
             cal={cal}
           />
         ) : (
           <DayScheduleDayView
             dateLabel={dateLabel}
             selectedDate={selectedDate}
+            currentDate={currentDate}
             tab={tab}
             setTab={setTab}
             unregistered={unregistered}

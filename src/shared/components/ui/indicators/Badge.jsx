@@ -7,6 +7,8 @@ const colorVariants = {
   red: "bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-400",
   yellow:
     "bg-yellow-100 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-400",
+  amber:
+    "bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300",
   gray: "bg-gray-100 dark:bg-[#272727] text-gray-700 dark:text-[#AAAAAA]",
   dark: "bg-black/60 text-white backdrop-blur-sm",
   "dark-solid": "bg-gray-900 text-white",

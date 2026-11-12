@@ -16,7 +16,6 @@ import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
 import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg"
 import RoomBadges from "./RoomBadges"
 import Badge from "@/shared/components/ui/indicators/Badge"
-import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import { motion as Motion } from "framer-motion"
 
@@ -233,21 +232,17 @@ const CommunityRoomCard = ({ room }) => {
 
   return (
     <>
-      <Animated3DCard
+      <div
         onClick={handleRoomClick}
-        liftOnHover={false}
-        disableHover={isActionHovered}
-        rounded="rounded-2xl"
         style={{
           fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
-        className={`h-full w-full transition-colors duration-200 ease-out ${
+        className={`relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out ${
           !isActionHovered
-            ? "hover:bg-gray-200/80 dark:hover:bg-[#272727] active:bg-gray-300/80 dark:active:bg-[#333333]"
+            ? "hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D]"
             : ""
         }`}
-        containerClassName="h-full w-full"
       >
         <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border dark:border-[#3F3F3F]">
           {/* Blurred Background Image */}
@@ -373,7 +368,7 @@ const CommunityRoomCard = ({ room }) => {
             </div>
           </div>
         </div>
-      </Animated3DCard>
+      </div>
 
       <RoomFullModal
         open={showFullModal}

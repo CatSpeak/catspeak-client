@@ -1,7 +1,12 @@
-import React from "react";
-import EventCard from "../EventCard";
-import TimeSectionIcon from "./TimeSectionIcon";
-import DayScheduleActionModal from "./DayScheduleActionModal";
+import React, { useMemo } from "react"
+import { ChevronLeft, CalendarX } from "lucide-react"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
+import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
+import EventCard from "../EventCard"
+import TimeSectionIcon from "./TimeSectionIcon"
+import DayScheduleActionModal from "./DayScheduleActionModal"
 
 /**
  * View ngày: hiển thị danh sách sự kiện theo buổi trong ngày.
@@ -27,6 +32,7 @@ import DayScheduleActionModal from "./DayScheduleActionModal";
 const DayScheduleDayView = ({
   dateLabel,
   selectedDate,
+  currentDate,
   tab,
   setTab,
   unregistered,
@@ -42,73 +48,93 @@ const DayScheduleDayView = ({
   onEventClick,
   cal = {},
 }) => {
-  return (
-    <div className="flex flex-col h-full bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] p-5 md:p-6 lg:p-6 rounded-3xl shadow-sm">
-      {/* Title */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-black dark:text-white min-w-[140px]">
-          {dateLabel}
-        </h3>
-        <button
-          onClick={() => onSelectDate && onSelectDate(null)}
-          className="text-[13px] font-medium text-[#990011] dark:text-red-400 hover:underline"
-        >
-          {cal.backToMonth || "Quay lại tháng"}
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex w-full border-b border-border dark:border-[#3F3F3F] mb-5">
-        <button
-          onClick={() => setTab("unregistered")}
-          className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[15px] font-medium border-b-2 transition-all ${
-            tab === "unregistered"
-              ? "border-[#990011] text-[#990011] dark:border-red-400 dark:text-red-400"
-              : "border-transparent text-gray-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
-          }`}
-        >
-          {cal.unregistered || "Chưa đăng ký"}
-          {unregistered.length > 0 && (
-            <span className="w-6 h-6 rounded-full text-xs flex items-center justify-center bg-[#F4AB1B] text-black">
+  const tabs = useMemo(
+    () => [
+      {
+        id: "unregistered",
+        label: cal.unregistered || "Chưa đăng ký",
+        badge:
+          unregistered?.length > 0 ? (
+            <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center bg-[#F4AB1B] text-black">
               {unregistered.length}
             </span>
-          )}
-        </button>
-        <button
-          onClick={() => setTab("registered")}
-          className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[15px] font-medium border-b-2 transition-all ${
-            tab === "registered"
-              ? "border-[#990011] text-[#990011] dark:border-red-400 dark:text-red-400"
-              : "border-transparent text-gray-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
-          }`}
-        >
-          {cal.registered || "Đã đăng ký"}
-          {registered.length > 0 && (
+          ) : null,
+      },
+      {
+        id: "registered",
+        label: cal.registered || "Đã đăng ký",
+        badge:
+          registered?.length > 0 ? (
             <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center bg-[#F4AB1B] text-black">
               {registered.length}
             </span>
-          )}
-        </button>
+          ) : null,
+      },
+    ],
+    [cal.unregistered, cal.registered, unregistered, registered],
+  )
+
+  return (
+    <div className="flex flex-col h-full flex-1 bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-xl shadow-sm">
+      {/* Title */}
+      <div className="flex items-center gap-2 h-[56px] pl-1 pr-4">
+        <IconButton
+          variant="ghost"
+          onClick={() => onSelectDate && onSelectDate(null)}
+          title={cal.backToMonth || "Quay lại tháng"}
+          aria-label={cal.backToMonth || "Quay lại tháng"}
+        >
+          <ChevronLeft />
+        </IconButton>
+
+        <h3 className="text-xl font-bold text-black dark:text-white min-w-[140px]">
+          {dateLabel}
+        </h3>
       </div>
 
+      {/* Tabs */}
+      <Tabs
+        tabs={tabs}
+        activeTab={tab}
+        onChange={setTab}
+        fullWidth={false}
+        className="mb-4"
+      />
+
       {/* Events List */}
-      <div className="flex-1 overflow-y-auto space-y-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
+      <div className="flex-1 flex flex-col overflow-y-auto px-4 pb-4 space-y-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
         {isLoading ? (
-          <div className="text-sm text-gray-400 dark:text-neutral-400 py-8 text-center">
-            {cal.loadingEvents || "Đang tải sự kiện..."}
-          </div>
+          <LoadingSpinner
+            className="flex-1 flex flex-col items-center justify-center py-8"
+            text={cal.loadingEvents || "Đang tải sự kiện..."}
+          />
         ) : !selectedDate ? (
-          <div className="text-sm text-gray-400 dark:text-neutral-400 py-8 text-center">
-            {cal.selectDayToView || "Chọn một ngày trên lịch để xem sự kiện"}
-          </div>
+          <EmptyState
+            variant="component"
+            icon={CalendarX}
+            title={
+              cal.selectDayToView || "Chọn một ngày trên lịch để xem sự kiện"
+            }
+            className="flex-1 my-auto"
+          />
         ) : displayEvents.length === 0 ? (
-          <div className="text-sm text-gray-400 dark:text-neutral-400 py-8 text-center">
-            {cal.noEvents || "Không có sự kiện nào trong ngày này"}
-          </div>
+          <EmptyState
+            variant="component"
+            icon={CalendarX}
+            title={
+              tab === "registered"
+                ? cal.noRegisteredEventsDay ||
+                  "Bạn chưa đăng ký sự kiện nào trong ngày này"
+                : cal.noEventsDay ||
+                  cal.noEvents ||
+                  "Không có sự kiện nào trong ngày này"
+            }
+            className="flex-1 my-auto"
+          />
         ) : (
           ["morning", "noon", "afternoon", "evening"].map((section) => {
-            const events = grouped[section];
-            if (!events.length) return null;
+            const events = grouped[section]
+            if (!events.length) return null
             return (
               <div key={section} className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 px-1 mb-1">
@@ -129,7 +155,7 @@ const DayScheduleDayView = ({
                   />
                 ))}
               </div>
-            );
+            )
           })
         )}
       </div>
@@ -140,7 +166,7 @@ const DayScheduleDayView = ({
         cal={cal}
       />
     </div>
-  );
-};
+  )
+}
 
-export default DayScheduleDayView;
+export default DayScheduleDayView

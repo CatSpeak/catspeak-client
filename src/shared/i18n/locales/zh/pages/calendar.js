@@ -39,6 +39,8 @@ export default {
   loadingDetails: "正在加载详情...",
   loadingEvents: "正在加载活动...",
   noEvents: "今天没有活动",
+  noEventsDay: "今天没有活动",
+  noEventsMonth: "本月没有活动",
   timeLabel: "时间",
   description: "描述",
   registeredCount: "已报名人数",
@@ -237,6 +239,8 @@ export default {
   // Event detail
   noDescription: "此活动没有描述。",
   noRegisteredEvents: "您本月尚未报名任何活动。",
+  noRegisteredEventsMonth: "您本月尚未报名任何活动",
+  noRegisteredEventsDay: "您今天尚未报名任何活动",
   day: "日",
   // Workspace Events Page
   workspaceEventsTitle: "我的活动",

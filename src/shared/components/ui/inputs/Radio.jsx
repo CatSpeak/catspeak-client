@@ -9,6 +9,7 @@ import React from "react"
  * @param {boolean} disabled - Disabled state.
  * @param {"default" | "white"} variant - Styling variant ("default" or "white").
  * @param {boolean} withWrapper - Optional 48px click target with 40px hover circle.
+ * @param {number} [size] - Ignored: Radio indicator size is always 20x20.
  * @param {string} className - Optional styling overrides.
  */
 const Radio = ({
@@ -18,6 +19,7 @@ const Radio = ({
   disabled = false,
   variant = "default",
   withWrapper = false,
+  size = 20,
   className = "",
   ...props
 }) => {
@@ -37,11 +39,11 @@ const Radio = ({
 
   const radioIndicator = (
     <div
-      className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all duration-200 ${outerBorderClass}`}
+      className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all duration-200 ${outerBorderClass}`}
     >
       {checked && (
         <div
-          className={`h-3 w-3 rounded-full transition-transform duration-150 scale-100 ${innerDotClass}`}
+          className={`h-2.5 w-2.5 rounded-full transition-transform duration-150 scale-100 ${innerDotClass}`}
         />
       )}
     </div>

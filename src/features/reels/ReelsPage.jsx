@@ -1,126 +1,120 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react"
 import {
   useNavigate,
   useSearchParams,
   Outlet,
   useParams,
-} from "react-router-dom";
-import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { useAuth } from "@/features/auth";
-import { useAuthModal } from "@/shared/context/AuthModalContext";
-import toast from "react-hot-toast";
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
-import ReelTagBar from "./components/navigation/ReelTagBar";
-import CreateReelModal from "./components/modals/CreateReelModal";
-import ForYouTab from "./components/tabs/ForYouTab";
-import ChallengesTab from "./components/tabs/ChallengesTab";
-import LeaderboardTab from "./components/tabs/LeaderboardTab";
+} from "react-router-dom"
+import { useMediaQuery } from "@/shared/hooks/useMediaQuery"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
+import toast from "react-hot-toast"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
+import { getReelTabsConfig } from "./config/tabs"
+import CreateReelModal from "./components/modals/CreateReelModal"
+import ForYouTab from "./components/tabs/ForYouTab"
+import ChallengesTab from "./components/tabs/ChallengesTab"
+import LeaderboardTab from "./components/tabs/LeaderboardTab"
 
 const ReelsPage = () => {
-  const { t, language } = useLanguage();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [uploadChallenge, setUploadChallenge] = useState(null);
-  const { isAuthenticated } = useAuth();
-  const { openAuthModal } = useAuthModal();
-  const { id, lang: paramLang } = useParams();
-  const lang = paramLang || language || "vi";
+  const { t, language } = useLanguage()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isUploadOpen, setIsUploadOpen] = useState(false)
+  const [uploadChallenge, setUploadChallenge] = useState(null)
+  const { isAuthenticated } = useAuth()
+  const { openAuthModal } = useAuthModal()
+  const { id, lang: paramLang } = useParams()
+  const lang = paramLang || language || "vi"
 
   // State for Tabs
+  const tabsConfig = useMemo(() => getReelTabsConfig(t), [t])
   const [activeTab, setActiveTab] = useState(() => {
-    return (searchParams.get("challenge") || searchParams.get("challengeId")) ? "challenges" : "foryou";
-  }); // "foryou" | "challenges" | "leaderboard"
-  const [challengeStatus, setChallengeStatus] = useState("active"); // "active" | "past"
+    return searchParams.get("challenge") || searchParams.get("challengeId")
+      ? "challenges"
+      : "foryou"
+  }) // "foryou" | "challenges" | "leaderboard"
+  const [challengeStatus, setChallengeStatus] = useState("active") // "active" | "past"
   const [challengeId, setChallengeId] = useState(() => {
-    const id = searchParams.get("challenge") || searchParams.get("challengeId");
-    return id ? parseInt(id, 10) : null;
-  });
-  const [showMobileDetail, setShowMobileDetail] = useState(false);
-  const isLg = useMediaQuery("(min-width: 1024px)");
+    const id = searchParams.get("challenge") || searchParams.get("challengeId")
+    return id ? parseInt(id, 10) : null
+  })
+  const [showMobileDetail, setShowMobileDetail] = useState(false)
+  const isLg = useMediaQuery("(min-width: 1024px)")
 
   const handleReelClick = useCallback(
     (reel) => {
-      if (!reel || !reel.id) return;
+      if (!reel || !reel.id) return
 
       // Use query string to allow back navigation to the same state
-      const newSearchParams = new URLSearchParams(searchParams);
+      const newSearchParams = new URLSearchParams(searchParams)
 
       // If we are viewing a specific challenge, pass it to the detail page
       if (
         (activeTab === "challenges" || activeTab === "leaderboard") &&
         challengeId
       ) {
-        newSearchParams.set("challengeId", challengeId);
+        newSearchParams.set("challengeId", challengeId)
         if (activeTab === "leaderboard") {
-          newSearchParams.set("source", "leaderboard");
+          newSearchParams.set("source", "leaderboard")
         }
       }
 
-      const queryString = newSearchParams.toString();
+      const queryString = newSearchParams.toString()
       navigate({
         pathname: String(reel.id),
         search: queryString ? `?${queryString}` : "",
-      });
+      })
     },
     [navigate, searchParams, activeTab, challengeId],
-  );
+  )
 
   const handleUploadClick = useCallback(
     (challengeObj = null) => {
       if (!isAuthenticated) {
         toast.error(
           t.catSpeak.reels.loginRequired || "Please log in to upload a Reel.",
-        );
-        openAuthModal("login");
-        return;
+        )
+        openAuthModal("login")
+        return
       }
-      setUploadChallenge(challengeObj);
-      setIsUploadOpen(true);
+      setUploadChallenge(challengeObj)
+      setIsUploadOpen(true)
     },
     [isAuthenticated, openAuthModal, t.catSpeak.reels.loginRequired],
-  );
+  )
 
   const handleUploadClose = useCallback(() => {
-    setIsUploadOpen(false);
-    setTimeout(() => setUploadChallenge(null), 300);
-  }, []);
+    setIsUploadOpen(false)
+    setTimeout(() => setUploadChallenge(null), 300)
+  }, [])
 
   const handleSelectTab = useCallback((tabId) => {
-    setActiveTab(tabId);
+    setActiveTab(tabId)
     // Reset challengeId when switching tabs
-    setChallengeId(null);
-    setShowMobileDetail(false);
-  }, []);
+    setChallengeId(null)
+    setShowMobileDetail(false)
+  }, [])
 
   return (
-    <div className="flex flex-col p-6 pb-12">
-      {/* Breadcrumbs always visible unless mobile detail view */}
-      {(!showMobileDetail || isLg) && (
-        <Breadcrumb
-          className="mb-6"
-          items={[
-            {
-              label: t?.nav?.home || "Home",
-              onClick: () => navigate(`/${lang}/community`),
-            },
-            { label: t?.nav?.catSpeak || "Cat Speak" },
-            { label: t.catSpeak?.reels?.title || "Reels" },
-          ]}
-        />
-      )}
-
+    <div className="flex flex-col">
       {/* Tabs - Hide when viewing a detail reel or mobile detail view */}
       {!id && (!showMobileDetail || isLg) && (
-        <ReelTagBar activeFilter={activeTab} onSelectFilter={handleSelectTab} />
+        <Tabs
+          tabs={tabsConfig}
+          activeTab={activeTab}
+          onChange={handleSelectTab}
+          fullWidth={false}
+        />
       )}
 
       {id ? (
         <Outlet />
       ) : (
-        <div className="flex flex-col w-full relative items-start">
+        <div className="flex flex-col p-4 w-full relative items-start">
           {activeTab === "foryou" && (
             <div className="w-full flex flex-col">
               <ForYouTab
@@ -167,7 +161,7 @@ const ReelsPage = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ReelsPage;
+export default ReelsPage

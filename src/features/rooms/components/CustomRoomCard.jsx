@@ -24,7 +24,6 @@ import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon"
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
 import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg"
-import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
 import { filterHumanParticipants } from "@/features/video-call/utils/participantIdentity"
 
 const CustomRoomCard = ({
@@ -169,16 +168,15 @@ const CustomRoomCard = ({
 
   return (
     <>
-      <Animated3DCard
+      <div
         onClick={handleCardClick}
         style={{
           fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
-        className="h-full w-full"
-        containerClassName="h-full w-full"
+        className="relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D]"
       >
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-border dark:border-[#3F3F3F]">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border dark:border-[#3F3F3F]">
           {/* Blurred Background Image */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
@@ -401,7 +399,7 @@ const CustomRoomCard = ({
             </div>
           )}
         </div>
-      </Animated3DCard>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <ConfirmationModal

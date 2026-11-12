@@ -19,11 +19,7 @@ import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import { AnimatePresence, motion } from "framer-motion"
-import {
-  useGetProfileQuery,
-  useAuth,
-  useLogoutMutation,
-} from "@/features/auth"
+import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
@@ -274,7 +270,7 @@ const ProfileDropdown = () => {
   )
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative h-12 w-12" ref={menuRef}>
       {isLoading ? (
         <div className="flex h-10 w-10 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-[#7A7574]" />

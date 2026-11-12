@@ -89,7 +89,7 @@ All text inputs and form controls follow the Material Design 3 Text Field baseli
 | **Left/right padding with standalone icon** | `12dp` | `pl-3` / `pr-3` |
 | **Icon alignment** | Vertically centered | `items-center` / `flex items-center justify-center` |
 | **Padding between left, input, and right** | `4dp` | `gap-1` |
-| **Supporting text / counter top padding** | `4dp` | `pt-1` |
+| **Supporting text / counter top spacing** | `4dp` | `gap-1` (on parent container) |
 | **Padding between supporting text and counter** | `16dp` | `gap-4` |
 
 ### Spacing Flow Diagram:

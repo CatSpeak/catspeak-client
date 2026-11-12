@@ -166,7 +166,7 @@ const RoomsListSkeleton = () => (
     {Array.from({ length: 8 }).map((_, i) => (
       <div
         key={i}
-        className="rounded-2xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] overflow-hidden animate-pulse flex flex-col"
+        className="rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] overflow-hidden animate-pulse flex flex-col"
       >
         <div className="aspect-video w-full bg-gray-200 dark:bg-[#272727]" />
         <div className="p-4 flex flex-col gap-3 flex-1 justify-between">

@@ -1,149 +1,268 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useParams } from "react-router-dom"
+import { motion } from "framer-motion"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { IconButton } from "@/shared/components/ui/buttons"
+import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
+import { getWorkshopSlides } from "../data/workshopSlides"
+import ChinaWorkshopModal from "./modals/ChinaWorkshopModal"
+import EnglishWorkshopModal from "./modals/EnglishWorkshopModal"
+import HskWorkshopModal from "./modals/HskWorkshopModal"
+import ScholarshipWorkshopModal from "./modals/ScholarshipWorkshopModal"
+import WorkshopCard from "./WorkshopCard"
 
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
-import { getWorkshopSlides } from "../data/workshopSlides";
-import ChinaWorkshopModal from "./modals/ChinaWorkshopModal";
-import EnglishWorkshopModal from "./modals/EnglishWorkshopModal";
-import HskWorkshopModal from "./modals/HskWorkshopModal";
-import ScholarshipWorkshopModal from "./modals/ScholarshipWorkshopModal";
-import WorkshopCard from "./WorkshopCard";
-
+/**
+ * WorkshopCoverflowCarousel
+ *
+ * Edge-to-edge responsive carousel for workshops:
+ * - Clean 1:1 slides without fake clones or duplication.
+ * - Same-size cards naturally scaled by items shown at once (3 on desktop, 2 on tablet, 1 on mobile).
+ * - Intrinsic height: The carousel card determines the height naturally without height limits.
+ * - Accurate indicators: Dots strictly correspond to real scroll positions.
+ * - Smart visibility: Arrows and pagination hide automatically when all cards fit on screen.
+ * - Next/Prev buttons visible only on hover on desktop (hidden on touch).
+ * - Touch drag / swipe with Framer Motion.
+ */
 const WorkshopCoverflowCarousel = ({ slides: propSlides = [] }) => {
-  const { lang } = useParams();
-  const { t } = useLanguage();
+  const { lang } = useParams()
+  const { t } = useLanguage()
 
-  const slides = getWorkshopSlides(t, lang, propSlides);
+  const slides = getWorkshopSlides(t, lang, propSlides)
+  const rawTotal = slides.length
 
-  const [page, setPage] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [modalType, setModalType] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
+  const [modalType, setModalType] = useState(null)
 
-  const total = slides.length;
-  const safeIndex = total > 0 ? ((page % total) + total) % total : 0;
-
-  const goPrev = useCallback(() => {
-    setPage((prev) => prev - 1);
-  }, []);
-
-  const goNext = useCallback(() => {
-    setPage((prev) => prev + 1);
-  }, []);
-
+  // Track container width to size cards by items shown at once
+  const containerRef = useRef(null)
+  const [containerWidth, setContainerWidth] = useState(() => {
+    if (typeof window !== "undefined") return window.innerWidth
+    return 1200
+  })
 
   useEffect(() => {
-    if (isHovered || total <= 1) return;
+    if (!containerRef.current) return
+    const el = containerRef.current
+    if (el.clientWidth) {
+      setContainerWidth(el.clientWidth)
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width) {
+          setContainerWidth(Math.round(entry.contentRect.width))
+        }
+      }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // Preload all workshop slide images upfront
+  useEffect(() => {
+    slides.forEach((slide) => {
+      if (slide.image) {
+        const img = new Image()
+        img.src = slide.image
+      }
+    })
+  }, [slides])
+
+  // Responsive items per view based on container width and total slides
+  const isMobile = containerWidth < 768
+
+  const itemsPerView = useMemo(() => {
+    if (isMobile) return 1
+    if (containerWidth < 1024) return Math.min(rawTotal, 2)
+    // Desktop: 2 items if rawTotal === 2, otherwise 3
+    if (rawTotal === 2) return 2
+    return 3
+  }, [isMobile, containerWidth, rawTotal])
+
+  // Maximum scrollable index so cards do not scroll into empty whitespace
+  const maxIndex = useMemo(() => {
+    return Math.max(0, rawTotal - itemsPerView)
+  }, [rawTotal, itemsPerView])
+
+  // Reset index when language or slide count changes
+  useEffect(() => {
+    setCurrentIndex(0)
+  }, [rawTotal, lang])
+
+  // Clamp index if viewport resize decreases maxIndex
+  useEffect(() => {
+    setCurrentIndex((prev) => Math.min(prev, maxIndex))
+  }, [maxIndex])
+
+  // Padding & gap in px:
+  // Mobile: 0px padding and 0px gap for full-bleed edge-to-edge
+  // Desktop/Tablet: 16px lateral padding (px-4) & 8px gap (gap-2)
+  const edgePadding = isMobile ? 0 : 16
+  const gap = isMobile ? 0 : 8
+
+  // Exact same-size card width:
+  // Visible window width minus left/right edge padding and gaps between visible items
+  const cardWidth = useMemo(() => {
+    if (!containerWidth) return 0
+    const totalGaps = (itemsPerView - 1) * gap
+    const totalPadding = edgePadding * 2
+    return Math.max(
+      0,
+      (containerWidth - totalPadding - totalGaps) / itemsPerView,
+    )
+  }, [containerWidth, itemsPerView, gap, edgePadding])
+
+  const stepWidth = cardWidth + gap
+  const canScroll = maxIndex > 0
+
+  const goPrev = useCallback(() => {
+    if (!canScroll) return
+    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1))
+  }, [canScroll, maxIndex])
+
+  const goNext = useCallback(() => {
+    if (!canScroll) return
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1))
+  }, [canScroll, maxIndex])
+
+  const goToSlide = useCallback(
+    (index) => {
+      setCurrentIndex(Math.min(index, maxIndex))
+    },
+    [maxIndex],
+  )
+
+  // Auto-play timer (active only when there are more items to scroll through)
+  useEffect(() => {
+    if (isHovered || !canScroll) return
 
     const timer = setInterval(() => {
-      goNext();
-    }, 5000);
+      goNext()
+    }, 5000)
 
-    return () => clearInterval(timer);
-  }, [isHovered, total, goNext]);
+    return () => clearInterval(timer)
+  }, [isHovered, canScroll, goNext])
 
-  if (!slides.length) return null;
+  if (!slides.length) return null
 
-  const getShortestOffset = (idx) => {
-    let diff = idx - safeIndex;
-    if (diff > total / 2) diff -= total;
-    if (diff < -total / 2) diff += total;
-    return diff;
-  };
-
-  const getStyleForOffset = (diff) => {
-    if (diff === 0) {
-      return { x: "-50%", scale: 1.05, opacity: 1, zIndex: 20 };
-    }
-    if (diff === -1) {
-      return { x: "-146%", scale: 0.79, opacity: 0.7, zIndex: 10 };
-    }
-    if (diff === 1) {
-      return { x: "46%", scale: 0.79, opacity: 0.7, zIndex: 10 };
-    }
-    if (diff < -1) {
-      // các thẻ ở xa bên trái, để ngoài màn hình, chờ trượt vào
-      return { x: "-260%", scale: 0.7, opacity: 0, zIndex: 0 };
-    }
-    // diff > 1: các thẻ ở xa bên phải
-    return { x: "160%", scale: 0.7, opacity: 0, zIndex: 0 };
-  };
+  const xOffset = -currentIndex * stepWidth
 
   return (
     <>
-      <div
-        className="relative w-full select-none"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-
-        <div className="relative w-full h-[290px] sm:h-[290px] md:h-[300px] lg:h-[350px] xl:h-[450px] 2xl:h-[550px]  overflow-hidden">
-          {slides.map((slide, idx) => {
-            const diff = getShortestOffset(idx);
-            const style = getStyleForOffset(diff);
-            const isInteractive = diff === -1 || diff === 1;
-
-            return (
-              <motion.div
-                key={slide.id ?? idx}
-                className="absolute top-1/2 w-[82%] sm:w-[65%] md:w-[52%] lg:w-[42%] xl:w-[38%] max-w-full"
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  pointerEvents: Math.abs(diff) > 1 ? "none" : "auto",
-                  cursor: isInteractive ? "pointer" : "default",
-                }}
-                animate={{
-                  x: style.x,
-                  y: "-50%",
-                  scale: style.scale,
-                  opacity: style.opacity,
-                  zIndex: style.zIndex,
-                }}
-                transition={{
-                  duration: 0.55,
-                  ease: [0.32, 0.72, 0, 1],
-                }}
-                onClick={() => {
-                  if (diff === -1) {
-                    goPrev();
-                  } else if (diff === 1) {
-                    goNext();
-                  }
-                }}
-              >
-                <WorkshopCard
-                  slide={slide}
-                  onCtaClick={(type) => setModalType(type)}
-                />
-              </motion.div>
-            );
-          })}
-
-          <button
-            type="button"
-            onClick={goPrev}
-            aria-label="Previous workshop"
-            className="absolute left-2 sm:left-4 md:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-40 flex h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-white dark:bg-[#272727] text-[#990011] dark:text-red-400 border border-transparent dark:border-[#3F3F3F] shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
-          >
-            <ChevronLeft size={22} strokeWidth={2.5} />
-          </button>
-
-          <button
-            type="button"
-            onClick={goNext}
-            aria-label="Next workshop"
-            className="absolute right-2 sm:right-4 md:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-40 flex h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-white dark:bg-[#272727] text-[#990011] dark:text-red-400 border border-transparent dark:border-[#3F3F3F] shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
-          >
-            <ChevronRight size={22} strokeWidth={2.5} />
-          </button>
+      {/* ─── CASE 1: Single Workshop Spotlight (rawTotal === 1) ─── */}
+      {rawTotal === 1 ? (
+        <div className="relative w-full select-none px-0 md:px-4">
+          <div className="w-full max-w-5xl mx-auto">
+            <WorkshopCard
+              slide={slides[0]}
+              variant="horizontal"
+              className="rounded-none md:rounded-xl"
+              onCtaClick={(type) => setModalType(type)}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        /* ─── CASE 2: Edge-to-Edge Responsive Carousel / Grid ─── */
+        <div
+          className="relative w-full select-none group"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Carousel Track Container (no fixed height limit; height decided naturally by cards) */}
+          <div ref={containerRef} className="relative w-full overflow-hidden">
+            <motion.div
+              className={`flex items-stretch ${
+                isMobile ? "gap-0 px-0" : "gap-2 px-4"
+              }`}
+              drag={canScroll ? "x" : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.15}
+              onDragEnd={(_, info) => {
+                const threshold = 40
+                if (info.offset.x < -threshold) {
+                  goNext()
+                } else if (info.offset.x > threshold) {
+                  goPrev()
+                }
+              }}
+              animate={{ x: xOffset }}
+              transition={{
+                duration: 0.5,
+                ease: [0.32, 0.72, 0, 1],
+              }}
+            >
+              {slides.map((slide, idx) => (
+                <div
+                  key={slide.id ? `${slide.id}-${idx}` : idx}
+                  style={{ width: cardWidth ? `${cardWidth}px` : "100%" }}
+                  className="shrink-0 flex flex-col"
+                >
+                  <WorkshopCard
+                    slide={slide}
+                    className="h-full rounded-none md:rounded-xl"
+                    onCtaClick={(type) => setModalType(type)}
+                  />
+                </div>
+              ))}
+            </motion.div>
 
+            {/* Navigation Arrows: visible on hover on desktop only when scrollable */}
+            {canScroll && (
+              <>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    goPrev()
+                  }}
+                  title="Previous workshop"
+                  variant="secondary"
+                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 shadow-md backdrop-blur-md hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  <ChevronLeft />
+                </IconButton>
 
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    goNext()
+                  }}
+                  title="Next workshop"
+                  variant="secondary"
+                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 shadow-md backdrop-blur-md hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  <ChevronRight />
+                </IconButton>
+              </>
+            )}
+          </div>
+
+          {/* Pagination Indicators (only displayed when there are pages to scroll through) */}
+          {canScroll && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              {Array.from({ length: maxIndex + 1 }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    goToSlide(index)
+                  }}
+                  className={`transition-all duration-300 rounded-full cursor-pointer ${
+                    currentIndex === index
+                      ? "w-8 h-2 bg-cath-red-700 dark:bg-red-400"
+                      : "w-2 h-2 bg-gray-300 dark:bg-neutral-600 hover:bg-gray-400 dark:hover:bg-neutral-500"
+                  }`}
+                  aria-label={`Go to workshop slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── Shared Modals ─── */}
       <ChinaWorkshopModal
         open={modalType === "china"}
         onClose={() => setModalType(null)}
@@ -173,7 +292,7 @@ const WorkshopCoverflowCarousel = ({ slides: propSlides = [] }) => {
         onCancel={() => setModalType(null)}
       />
     </>
-  );
-};
+  )
+}
 
-export default WorkshopCoverflowCarousel;
+export default WorkshopCoverflowCarousel

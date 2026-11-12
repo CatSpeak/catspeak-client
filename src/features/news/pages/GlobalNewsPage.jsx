@@ -18,7 +18,11 @@ const GlobalNewsPage = () => {
 
   // Filter public posts
   const posts = useMemo(() => {
-    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
+    const rawList = Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data)
+        ? data
+        : []
     return rawList.filter(
       (post) =>
         !post.privacy || String(post.privacy).toLowerCase() === "public",
@@ -57,7 +61,7 @@ const GlobalNewsPage = () => {
         }
         emptyVariant="page"
         lastPostRef={lastPostRef}
-        className="space-y-4 w-full flex-1"
+        className="flex flex-col gap-2 w-full flex-1"
       />
     </div>
   )

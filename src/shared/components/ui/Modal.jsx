@@ -10,7 +10,7 @@ const ModalContent = ({
   onClose,
   children,
   className = "",
-  headerClassName = "flex items-center justify-between p-4",
+  headerClassName = "flex items-center justify-between min-h-[56px] pl-4 pr-1",
   title,
   description,
   ariaLabel = "Dialog",
@@ -140,10 +140,7 @@ const ModalContent = ({
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {title ? (
                   typeof title === "string" ? (
-                    <h2
-                      id={titleId}
-                      className="text-[20px] leading-[26px] font-semibold"
-                    >
+                    <h2 id={titleId} className="text-xl font-bold">
                       {title}
                     </h2>
                   ) : (

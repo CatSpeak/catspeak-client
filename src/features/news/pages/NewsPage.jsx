@@ -56,7 +56,7 @@ const NewsPage = ({ postType = "1" }) => {
       page: 1,
       pageSize: 100,
     },
-    { refetchOnFocus: false }
+    { refetchOnFocus: false },
   )
 
   const validTopicIdSet = useMemo(() => {
@@ -376,12 +376,9 @@ const NewsPage = ({ postType = "1" }) => {
   }, [columnsCount])
 
   const renderSkeletons = () => (
-    <div className="flex flex-row w-full gap-4 items-start">
+    <div className="flex flex-row w-full gap-2 items-start">
       {skeletonCols.map((col, colIndex) => (
-        <div
-          key={colIndex}
-          className="flex flex-col flex-1 gap-4 min-w-0"
-        >
+        <div key={colIndex} className="flex flex-col flex-1 gap-2 min-w-0">
           {col.map((itemIndex) => (
             <NewsCardSkeleton key={itemIndex} index={itemIndex} />
           ))}
@@ -437,11 +434,11 @@ const NewsPage = ({ postType = "1" }) => {
       ) : (
         /* ── 4. Content Masonry Grid ── */
         <>
-          <div className="flex flex-row w-full gap-4 items-start">
+          <div className="flex flex-row w-full gap-2 items-start">
             {columns.map((col, colIndex) => (
               <div
                 key={colIndex}
-                className="flex flex-col flex-1 gap-4 min-w-0"
+                className="flex flex-col flex-1 gap-2 min-w-0"
               >
                 {col.map((post) => {
                   const isSecondLast = post.postId === secondLastPostId

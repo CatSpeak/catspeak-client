@@ -19,7 +19,7 @@ const PostFeedList = ({
   emptyVariant = "card", // "card" | "page"
   isOwnProfile = false,
   lastPostRef = null,
-  className = "space-y-4",
+  className = "",
 }) => {
   // Initial Loading State
   if (isLoading && posts.length === 0) {

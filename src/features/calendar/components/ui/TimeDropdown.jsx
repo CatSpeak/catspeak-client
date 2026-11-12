@@ -1,23 +1,26 @@
 import React, { useState, useRef, useEffect } from "react"
 import { createPortal } from "react-dom"
+import { ChevronDown } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 
 const TimeDropdown = ({
   value,
   onChange,
-  color = "#B91264",
+  color = "#990011",
   className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
   const portalRef = useRef(null)
 
-  const [selectedTime, setSelectedTime] = useState(value !== undefined ? value : "")
+  const [selectedTime, setSelectedTime] = useState(
+    value !== undefined && value !== null ? value : ""
+  )
 
   useEffect(() => {
     if (value !== undefined) {
-      setSelectedTime(value)
+      setSelectedTime(value || "")
     }
   }, [value])
 
@@ -50,11 +53,10 @@ const TimeDropdown = ({
         const spaceBelow = window.innerHeight - rect.bottom
         const spaceAbove = rect.top
 
-        // TimeDropdown list is ~200px tall
-        const flipUp = spaceBelow < 220 && spaceAbove > spaceBelow
+        // TimeDropdown list is ~220px tall
+        const flipUp = spaceBelow < 240 && spaceAbove > spaceBelow
 
-        // Width is 100px
-        const forceAlignRight = rect.left + 100 > window.innerWidth
+        const forceAlignRight = rect.left + rect.width > window.innerWidth
 
         setPortalCoords({
           top: rect.top + window.scrollY,
@@ -92,12 +94,20 @@ const TimeDropdown = ({
     return `${h}:${m}`
   })
 
-  // Ensure the current selected time is in the list, if not, add it
+  // Ensure the current selected time is in the list only if it's a valid non-empty string
+  const trimmedSelectedTime =
+    typeof selectedTime === "string" ? selectedTime.trim() : ""
+
   const displayTimes = [...times]
-  if (!displayTimes.includes(selectedTime)) {
-    displayTimes.push(selectedTime)
+  if (trimmedSelectedTime && !displayTimes.includes(trimmedSelectedTime)) {
+    displayTimes.push(trimmedSelectedTime)
     displayTimes.sort()
   }
+
+  // Ensure no empty options are ever displayed
+  const validTimes = displayTimes.filter(
+    (t) => typeof t === "string" && t.trim() !== "",
+  )
 
   const listRef = useRef(null)
 
@@ -123,14 +133,34 @@ const TimeDropdown = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`hover:bg-primaryBg dark:hover:bg-[#272727] flex items-center justify-center rounded-md px-4 h-12 outline-none bg-white dark:bg-[#272727] text-gray-900 dark:text-white min-w-[90px] transition-all border ${
-          isOpen ? "border-2" : "border-border dark:border-[#3F3F3F]"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        className={`w-full h-12 px-4 rounded border text-sm font-medium transition-colors duration-150 flex items-center justify-between gap-2 outline-none select-none bg-white dark:bg-[#272727] hover:bg-primaryBg dark:hover:bg-[#3D3D3D] ${
+          isOpen
+            ? "border-cath-red-700 dark:border-red-400"
+            : "border-border dark:border-[#3F3F3F]"
         }`}
-        style={isOpen ? { borderColor: color } : {}}
+        style={
+          isOpen && color && !["#990011", "#B91264"].includes(color)
+            ? { borderColor: color }
+            : {}
+        }
       >
-        <span className={`text-base ${!selectedTime ? "text-[#7A7574] dark:text-neutral-400" : ""}`}>
+        <span
+          className={`truncate ${
+            selectedTime
+              ? "text-gray-900 dark:text-white"
+              : "text-gray-500 dark:text-[#AAAAAA]"
+          }`}
+        >
           {selectedTime || "Chọn giờ"}
         </span>
+        <ChevronDown
+          size={18}
+          className={`shrink-0 text-gray-500 dark:text-[#AAAAAA] transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
       </button>
 
       {typeof document !== "undefined" &&
@@ -153,40 +183,53 @@ const TimeDropdown = ({
                   <div
                     className={`absolute z-50 ${
                       portalCoords.flipUp
-                        ? "bottom-full mb-4 origin-bottom"
-                        : "top-full mt-4 origin-top"
+                        ? "bottom-full mb-1 origin-bottom"
+                        : "top-full mt-1 origin-top"
                     } ${
                       portalCoords.forceAlignRight
                         ? "right-0 origin-top-right"
                         : "left-0 origin-top-left"
-                    } w-[100px] h-[220px] pointer-events-none`}
+                    } pointer-events-none`}
+                    style={{
+                      width: Math.max(portalCoords.width, 110),
+                      height: 220,
+                    }}
                   >
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto w-full h-full flex flex-col bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-lg overflow-hidden"
+                      className="pointer-events-auto w-full h-full flex flex-col bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl shadow-lg overflow-hidden"
                     >
                       <div
                         ref={listRef}
-                        className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+                        className="flex-1 overflow-y-auto overflow-x-hidden p-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-2 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
                       >
-                        <div className="flex flex-col gap-1 p-1">
-                          {displayTimes.map((time) => {
-                            const isSelected = selectedTime === time;
+                        <div className="flex flex-col gap-0.5">
+                          {validTimes.map((time) => {
+                            const isSelected = Boolean(
+                              trimmedSelectedTime && trimmedSelectedTime === time,
+                            )
                             return (
-                              <div
+                              <button
                                 key={time}
+                                type="button"
                                 onClick={() => handleTimeSelect(time)}
-                                className={`w-full h-12 px-4 text-left text-base rounded-md flex items-center cursor-pointer transition-colors ${
+                                className={`w-full min-h-[40px] px-3 py-2 text-left text-sm font-medium rounded-lg flex items-center justify-between cursor-pointer transition-colors outline-none ${
                                   isSelected
-                                    ? "bg-[#F6F6F6] dark:bg-[#272727] font-semibold selected-time"
-                                    : "hover:bg-[#F6F6F6] dark:hover:bg-[#272727] text-gray-900 dark:text-neutral-200"
+                                    ? "bg-primaryBg dark:bg-[#272727] text-cath-red-700 dark:text-red-400 font-semibold selected-time"
+                                    : "hover:bg-primaryBg dark:hover:bg-[#272727] text-gray-900 dark:text-neutral-200"
                                 }`}
-                                style={isSelected ? { color: color } : {}}
+                                style={
+                                  isSelected &&
+                                  color &&
+                                  !["#990011", "#B91264"].includes(color)
+                                    ? { color }
+                                    : {}
+                                }
                               >
-                                {time}
-                              </div>
-                            );
+                                <span>{time}</span>
+                              </button>
+                            )
                           })}
                         </div>
                       </div>

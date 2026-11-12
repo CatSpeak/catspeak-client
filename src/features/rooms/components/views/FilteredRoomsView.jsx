@@ -236,7 +236,7 @@ const FilteredRoomsView = ({
           {Array.from({ length: 8 }).map((_, idx) => (
             <div
               key={`room-skeleton-${idx}`}
-              className="w-full rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1E1E1E] flex flex-col"
+              className="w-full rounded-xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1E1E1E] flex flex-col"
             >
               <div className="aspect-video w-full bg-gray-200 dark:bg-[#272727] animate-pulse" />
               <div className="p-3 sm:p-4 flex flex-col gap-3">

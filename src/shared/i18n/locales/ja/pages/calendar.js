@@ -39,6 +39,8 @@ export default {
   loadingDetails: "詳細を読み込み中...",
   loadingEvents: "イベントを読み込み中...",
   noEvents: "この日のイベントはありません",
+  noEventsDay: "この日のイベントはありません",
+  noEventsMonth: "今月のイベントはありません",
   timeLabel: "時間",
   description: "説明",
   registeredCount: "登録数",
@@ -245,6 +247,8 @@ export default {
   // Event detail
   noDescription: "このイベントには説明がありません。",
   noRegisteredEvents: "今月登録したイベントはありません。",
+  noRegisteredEventsMonth: "今月登録したイベントはありません",
+  noRegisteredEventsDay: "本日登録したイベントはありません",
   day: "日",
   // Workspace Events Page
   workspaceEventsTitle: "マイイベント",
