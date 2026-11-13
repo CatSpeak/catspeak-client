@@ -1,18 +1,25 @@
-import React, { useState } from 'react'
-import dayjs from 'dayjs'
-import DailyEventPanel from '../components/my-calendar/DailyEventPanel'
-import CalendarTab from '../components/my-calendar/CalendarTab'
-import EventTab from '../components/my-calendar/EventTab'
-import TeachingScheduleTab from '../components/my-calendar/TeachingScheduleTab'
-import { PillButton } from '@/shared/components/ui/buttons'
-import { Breadcrumb, Tabs } from '@/shared/components/ui/navigation'
-import { CalendarClock, Plus, CalendarDays, Ticket, BookOpen } from 'lucide-react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { LoadingSpinner } from '@/shared/components/ui/indicators'
+import React, { useState } from "react"
+import dayjs from "dayjs"
+import DailyEventPanel from "../components/my-calendar/DailyEventPanel"
+import CalendarTab from "../components/my-calendar/CalendarTab"
+import EventTab from "../components/my-calendar/EventTab"
+import TeachingScheduleTab from "../components/my-calendar/TeachingScheduleTab"
+import { PillButton } from "@/shared/components/ui/buttons"
+import { Tabs } from "@/shared/components/ui/navigation"
+import {
+  CalendarClock,
+  Plus,
+  CalendarDays,
+  Ticket,
+  BookOpen,
+} from "lucide-react"
+import { useNavigate, useLocation } from "react-router-dom"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { DEFAULT_FILTERS } from '@/features/calendar/data/calendarConstants'
-import useCalendarEvents from '@/features/calendar/hooks/useCalendarEvents'
+import { DEFAULT_FILTERS } from "@/features/calendar/data/calendarConstants"
+import useCalendarEvents from "@/features/calendar/hooks/useCalendarEvents"
+import PageTitle from "@/shared/components/ui/PageTitle"
 
 const MyCalendarPage = () => {
   const { t } = useLanguage()
@@ -20,11 +27,13 @@ const MyCalendarPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'calendar')
+  const [activeTab, setActiveTab] = useState(
+    location.state?.activeTab || "calendar",
+  )
   const [prevLocationKey, setPrevLocationKey] = useState(location.key)
   const [currentDate, setCurrentDate] = useState(dayjs())
   const [selectedDate, setSelectedDate] = useState(dayjs().date())
-  const [viewType, setViewType] = useState('week')
+  const [viewType, setViewType] = useState("week")
   const [activeFilters, setActiveFilters] = useState(DEFAULT_FILTERS)
 
   // Adjust state during render to avoid cascading renders from useEffect
@@ -36,33 +45,34 @@ const MyCalendarPage = () => {
   }
 
   // Use custom hook for all event data management
-  const { filteredEvents, eventsForSelectedDate, classesOptions, isLoading } = useCalendarEvents({
-    currentDate,
-    selectedDate,
-    activeFilters,
-  })
+  const { filteredEvents, eventsForSelectedDate, classesOptions, isLoading } =
+    useCalendarEvents({
+      currentDate,
+      selectedDate,
+      activeFilters,
+    })
 
   const handleNext = () => {
-    if (viewType === 'week') {
+    if (viewType === "week") {
       const nextWeek = currentDate
         .date(Math.min(selectedDate, currentDate.daysInMonth()))
-        .add(1, 'week')
+        .add(1, "week")
       setCurrentDate(nextWeek)
       setSelectedDate(nextWeek.date())
     } else {
-      setCurrentDate((d) => d.add(1, 'month'))
+      setCurrentDate((d) => d.add(1, "month"))
     }
   }
 
   const handlePrev = () => {
-    if (viewType === 'week') {
+    if (viewType === "week") {
       const prevWeek = currentDate
         .date(Math.min(selectedDate, currentDate.daysInMonth()))
-        .subtract(1, 'week')
+        .subtract(1, "week")
       setCurrentDate(prevWeek)
       setSelectedDate(prevWeek.date())
     } else {
-      setCurrentDate((d) => d.subtract(1, 'month'))
+      setCurrentDate((d) => d.subtract(1, "month"))
     }
   }
 
@@ -73,11 +83,21 @@ const MyCalendarPage = () => {
   }
 
   const tabOptions = [
-    { id: 'calendar', label: t.calendar?.generalCalendar || 'Lịch tổng hợp', icon: CalendarDays },
-    { id: 'event', label: t.nav?.events || 'Sự kiện', icon: Ticket },
-    ...(isTeacher ? [
-      { id: 'teaching-schedule', label: t.nav?.schedule || 'Lịch giảng dạy', icon: BookOpen },
-    ] : []),
+    {
+      id: "calendar",
+      label: t.calendar?.generalCalendar || "Lịch tổng hợp",
+      icon: CalendarDays,
+    },
+    { id: "event", label: t.nav?.events || "Sự kiện", icon: Ticket },
+    ...(isTeacher
+      ? [
+          {
+            id: "teaching-schedule",
+            label: t.nav?.schedule || "Lịch giảng dạy",
+            icon: BookOpen,
+          },
+        ]
+      : []),
   ]
 
   if (isLoading) {
@@ -87,80 +107,83 @@ const MyCalendarPage = () => {
   }
 
   return (
-    <div className='w-full space-y-6'>
-      <Breadcrumb
-        items={[
-          { label: t.nav?.home || 'Trang chủ', onClick: () => navigate('/') },
-          { label: t.nav?.myCalendar || 'Lịch của tôi' },
-        ]}
-      />
-
-      <div className='flex items-center justify-between flex-col md:flex-row'>
-        <p className='text-[40px] font-semibold text-[#1A1A1A] dark:text-white'>{t.nav?.myCalendar || 'Lịch của tôi'}</p>
-        <div className='flex gap-4'>
-          {isTeacher && (
-            <PillButton
-              variant='primary'
-              startIcon={<CalendarClock className='w-4 h-4' />}
-              onClick={() => navigate('/workspace/classes')}>
-              {t.calendar?.changeTeachingSchedule || 'Thay đổi lịch dạy'}
-            </PillButton>
-          )}
-          <PillButton
-            variant='outline'
-            endIcon={<Plus className='w-4 h-4' />}
-            onClick={() => navigate("/workspace/events/create")}>
-            {t.calendar?.createEvent || 'Tạo sự kiện'}
-          </PillButton>
-        </div>
+    <div className="w-full space-y-4">
+      <div className="px-4 pt-4">
+        <PageTitle>{t.nav?.myCalendar || "Lịch của tôi"}</PageTitle>
       </div>
 
-      <Tabs tabs={tabOptions} activeTab={activeTab} onChange={setActiveTab} fullWidth={false} />
+      <div className="flex gap-4 px-4">
+        {isTeacher && (
+          <PillButton
+            variant="primary"
+            startIcon={<CalendarClock className="w-4 h-4" />}
+            onClick={() => navigate("/workspace/classes")}
+          >
+            {t.calendar?.changeTeachingSchedule || "Thay đổi lịch dạy"}
+          </PillButton>
+        )}
+        <PillButton
+          variant="outline"
+          endIcon={<Plus className="w-4 h-4" />}
+          onClick={() => navigate("/workspace/events/create")}
+        >
+          {t.calendar?.createEvent || "Tạo sự kiện"}
+        </PillButton>
+      </div>
 
-      {/* Content with 3 tab: Calendar, Event, Teaching Schedule */}
-      {activeTab === 'calendar' && (
-        <div className='flex flex-col lg:flex-row items-stretch gap-4 h-auto xl:h-[calc(100vh-200px)]'>
-          <div className='flex-1 w-full min-h-0 flex flex-col'>
-            <CalendarTab
-              currentDate={currentDate}
-              selectedDate={selectedDate}
-              viewType={viewType}
-              events={filteredEvents}
-              onChangeView={setViewType}
-              onPrev={handlePrev}
-              onNext={handleNext}
-              onChangeMonth={handleMonthChange}
-              onSelectDate={setSelectedDate}
-              activeFilters={activeFilters}
-              onApplyFilter={setActiveFilters}
-              classesOptions={classesOptions}
-            />
-          </div>
-          {viewType === 'month' && (
-            <div className='w-full lg:w-[340px] flex flex-col relative shrink-0'>
-              <div className='w-full h-[500px] lg:h-auto lg:absolute lg:inset-0'>
-                <DailyEventPanel
-                  date={currentDate.date(selectedDate).format('DD/MM')}
-                  events={eventsForSelectedDate}
-                  activeFilters={activeFilters}
-                  onApplyFilter={setActiveFilters}
-                  classesOptions={classesOptions}
-                />
-              </div>
+      <Tabs
+        tabs={tabOptions}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        fullWidth={false}
+      />
+
+      <div className="px-4 pb-4">
+        {/* Content with 3 tab: Calendar, Event, Teaching Schedule */}
+        {activeTab === "calendar" && (
+          <div className="flex flex-col lg:flex-row items-stretch gap-4 h-auto xl:h-[calc(100vh-200px)]">
+            <div className="flex-1 w-full min-h-0 flex flex-col">
+              <CalendarTab
+                currentDate={currentDate}
+                selectedDate={selectedDate}
+                viewType={viewType}
+                events={filteredEvents}
+                onChangeView={setViewType}
+                onPrev={handlePrev}
+                onNext={handleNext}
+                onChangeMonth={handleMonthChange}
+                onSelectDate={setSelectedDate}
+                activeFilters={activeFilters}
+                onApplyFilter={setActiveFilters}
+                classesOptions={classesOptions}
+              />
             </div>
-          )}
-        </div>
-      )}
+            {viewType === "month" && (
+              <div className="w-full lg:w-[340px] flex flex-col relative shrink-0">
+                <div className="w-full h-[500px] lg:h-auto lg:absolute lg:inset-0">
+                  <DailyEventPanel
+                    date={currentDate.date(selectedDate).format("DD/MM")}
+                    events={eventsForSelectedDate}
+                    activeFilters={activeFilters}
+                    onApplyFilter={setActiveFilters}
+                    classesOptions={classesOptions}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
-      {activeTab === 'event' && <EventTab />}
+        {activeTab === "event" && <EventTab />}
 
-      {isTeacher && activeTab === 'teaching-schedule' && (
-        <TeachingScheduleTab
-          currentDate={currentDate}
-          onPrev={handlePrev}
-          onNext={handleNext}
-        />
-      )}
+        {isTeacher && activeTab === "teaching-schedule" && (
+          <TeachingScheduleTab
+            currentDate={currentDate}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
+        )}
+      </div>
     </div>
   )
 }

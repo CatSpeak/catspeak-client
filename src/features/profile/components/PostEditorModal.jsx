@@ -282,7 +282,7 @@ const PostEditorModal = ({
 
   const renderFooter = () => (
     <div className="flex items-center justify-between w-full flex-wrap gap-2">
-      <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap">
         <input
           type="file"
           multiple
@@ -355,7 +355,7 @@ const PostEditorModal = ({
           : t.profile?.post?.editor?.createTitle || "Tạo bài viết"
       }
       className="md:max-w-2xl w-full bg-white dark:bg-[#1A1A1A] relative"
-      bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
+      bodyClassName="px-4 flex-1 overflow-y-auto"
       fullScreenOnMobile={true}
       footer={renderFooter()}
     >
@@ -365,14 +365,16 @@ const PostEditorModal = ({
           <LoadingSpinner
             text={
               isEditMode
-                ? t.profile?.post?.editor?.savingChanges || "Đang lưu thay đổi..."
-                : t.profile?.post?.editor?.uploadingPost || "Đang đăng bài viết..."
+                ? t.profile?.post?.editor?.savingChanges ||
+                  "Đang lưu thay đổi..."
+                : t.profile?.post?.editor?.uploadingPost ||
+                  "Đang đăng bài viết..."
             }
           />
         </div>
       )}
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         {submitError && (
           <div className="flex items-start gap-2.5 p-3.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl text-red-600 dark:text-red-400 text-sm animate-shake">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -448,8 +450,16 @@ const PostEditorModal = ({
                   ? t.profile?.post?.editor?.editPlaceholder ||
                     "Chỉnh sửa bài viết..."
                   : t.profile?.post?.editor?.placeholder || "Bạn đang nghĩ gì?",
-                skin: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
-                content_css: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "dark" : "default",
+                skin:
+                  typeof document !== "undefined" &&
+                  document.documentElement.classList.contains("dark")
+                    ? "oxide-dark"
+                    : "oxide",
+                content_css:
+                  typeof document !== "undefined" &&
+                  document.documentElement.classList.contains("dark")
+                    ? "dark"
+                    : "default",
                 setup: (editor) => {
                   editor.on("focus", () => {})
                 },

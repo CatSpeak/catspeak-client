@@ -50,6 +50,10 @@ This document defines core behavior, efficiency standards, and coding convention
 - **Dialog & Modal Standards (`<Modal />`):**
   - **Centralized Padding Standard (`p-4` / 16px):** All dialog and modal internal spacing is centralized to **16px** (`p-4` / `px-4` / `pt-4` / `pb-4`). Never introduce breakpoint padding jumps to 24px (e.g., `md:p-6`, `sm:p-6`, `px-6`, `pt-6`, `pb-6`). Use consistent 16px (`p-4`) for dialog viewport padding, headers, subheaders, body content, and action footers.
   - **Corner Radius & Optical Roundness:** Desktop basic dialog uses `rounded-[28px]` (MD3); mobile full-screen uses `rounded-none`. Nested cards inside modals use $28\text{px} - 16\text{px} = 12\text{px} \rightarrow \texttt{rounded-xl}$. See [.agents/rules/shape-system.md](file:///c:/Codes/catspeak-client/.agents/rules/shape-system.md).
+- **Motion Physics System (Material Design 3 Baseline):**
+  - UI animations adopt the M3 motion physics curves (Expressive & Standard curves for Spatial & Effects transitions) mimicking spring physics for the web.
+  - See [.agents/rules/motion-system.md](file:///c:/Codes/catspeak-client/.agents/rules/motion-system.md) and cite [Motion – Material Design 3](https://m3.material.io/styles/motion/overview/specs).
+  - Tokens and transition presets are exported in `src/shared/constants/motion.js` and `src/shared/utils/animations.js`, with Tailwind utility classes (`ease-m3-*`, `duration-*`) and CSS variables (`--motion-*`) configured.
 - **Component Structure:**
   - Common UI primitives in `src/shared/components/ui/`.
   - Feature-specific logic isolated in `src/features/<feature-name>/`.

@@ -55,6 +55,36 @@
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
+
+  /* ── Material Design 3 (M3) Motion Physics System (Springs converted to curves for Web) ── */
+  /* Citation: Motion – Material Design 3 (https://m3.material.io/styles/motion/overview/specs) */
+  --motion-expressive-fast-spatial-curve: cubic-bezier(0.42, 1.67, 0.21, 0.90);
+  --motion-expressive-fast-spatial-duration: 350ms;
+  --motion-expressive-default-spatial-curve: cubic-bezier(0.38, 1.21, 0.22, 1.00);
+  --motion-expressive-default-spatial-duration: 500ms;
+  --motion-expressive-slow-spatial-curve: cubic-bezier(0.39, 1.29, 0.35, 0.98);
+  --motion-expressive-slow-spatial-duration: 650ms;
+
+  --motion-expressive-fast-effects-curve: cubic-bezier(0.31, 0.94, 0.34, 1.00);
+  --motion-expressive-fast-effects-duration: 150ms;
+  --motion-expressive-default-effects-curve: cubic-bezier(0.34, 0.80, 0.34, 1.00);
+  --motion-expressive-default-effects-duration: 200ms;
+  --motion-expressive-slow-effects-curve: cubic-bezier(0.34, 0.88, 0.34, 1.00);
+  --motion-expressive-slow-effects-duration: 300ms;
+
+  --motion-standard-fast-spatial-curve: cubic-bezier(0.27, 1.06, 0.18, 1.00);
+  --motion-standard-fast-spatial-duration: 350ms;
+  --motion-standard-default-spatial-curve: cubic-bezier(0.27, 1.06, 0.18, 1.00);
+  --motion-standard-default-spatial-duration: 500ms;
+  --motion-standard-slow-spatial-curve: cubic-bezier(0.27, 1.06, 0.18, 1.00);
+  --motion-standard-slow-spatial-duration: 750ms;
+
+  --motion-standard-fast-effects-curve: cubic-bezier(0.31, 0.94, 0.34, 1.00);
+  --motion-standard-fast-effects-duration: 150ms;
+  --motion-standard-default-effects-curve: cubic-bezier(0.34, 0.80, 0.34, 1.00);
+  --motion-standard-default-effects-duration: 200ms;
+  --motion-standard-slow-effects-curve: cubic-bezier(0.34, 0.88, 0.34, 1.00);
+  --motion-standard-slow-effects-duration: 300ms;
 }
 
 .dark {

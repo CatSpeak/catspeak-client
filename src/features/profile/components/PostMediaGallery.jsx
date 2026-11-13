@@ -362,7 +362,7 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
   if (!media || media.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-4 w-full">
       {/* Visual media gallery */}
       {visualMedia.length > 0 && (
         <VisualMediaGrid

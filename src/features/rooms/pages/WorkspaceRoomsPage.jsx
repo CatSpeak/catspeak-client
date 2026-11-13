@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { useNavigate, useParams, Outlet } from "react-router-dom";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
-import { AnimatePresence } from "framer-motion";
-import { FluentAnimation } from "@/shared/components/ui/animations";
+import React, { useState, useMemo, useCallback, useEffect } from "react"
+import { useNavigate, useParams, Outlet } from "react-router-dom"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import { FluentAnimation } from "@/shared/components/ui/animations"
 import {
   Crown,
   Bookmark,
@@ -11,98 +11,115 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   DoorOpen,
-} from "lucide-react";
-import Tabs from "@/shared/components/ui/navigation/Tabs";
-import PillButton from "@/shared/components/ui/buttons/PillButton";
-import SearchInput from "@/shared/components/ui/inputs/SearchInput";
-import { toast } from "react-hot-toast";
+} from "lucide-react"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import { toast } from "react-hot-toast"
 import {
   useGetMyRoomsQuery,
   useGetMyCustomRoomsQuery,
   useDeleteCustomRoomMutation,
   useToggleBookmarkRoomMutation,
-} from "@/store/api/roomsApi";
-import CreateRoomModal from "../components/CreateRoomModal";
-import EditRoomModal from "../components/EditRoomModal";
-import CustomRoomCard from "../components/CustomRoomCard";
-import CommunityRoomCard from "../components/CommunityRoomCard";
-import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
-import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
-import { buildCustomRoomQuota } from "../utils/customRoomQuota";
+} from "@/store/api/roomsApi"
+import CreateRoomModal from "../components/CreateRoomModal"
+import EditRoomModal from "../components/EditRoomModal"
+import CustomRoomCard from "../components/CustomRoomCard"
+import CommunityRoomCard from "../components/CommunityRoomCard"
+import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal"
+import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal"
+import { buildCustomRoomQuota } from "../utils/customRoomQuota"
+import { IconButton } from "@/shared/components/ui/buttons"
 
 const WorkspaceRoomsContent = () => {
-  const { t } = useLanguage();
-  const { limits } = usePlanFeatures();
-  const { lang, id } = useParams();
-  const navigate = useNavigate();
-  const ct = t.rooms?.customRooms || {};
+  const [tabDirection, setTabDirection] = useState(1)
+  const shouldReduceMotion = useReducedMotion()
+  const { t } = useLanguage()
+  const { limits } = usePlanFeatures()
+  const { lang, id } = useParams()
+  const navigate = useNavigate()
+  const ct = t.rooms?.customRooms || {}
 
-  const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang) ? lang : "en";
+  const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
+    ? lang
+    : "en"
 
   // Tab State: "created" | "bookmark"
-  const [activeTab, setActiveTab] = useState("created");
+  const [activeTab, setActiveTab] = useState("created")
 
   // Modals & Card Interaction States
-  const [copiedId, setCopiedId] = useState(null);
-  const [editingRoom, setEditingRoom] = useState(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState(null)
+  const [editingRoom, setEditingRoom] = useState(null)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isSortOpen, setIsSortOpen] = useState(false)
 
   // Search state
-  const [searchInputValue, setSearchInputValue] = useState("");
-  const [appliedSearch, setAppliedSearch] = useState("");
+  const [searchInputValue, setSearchInputValue] = useState("")
+  const [appliedSearch, setAppliedSearch] = useState("")
 
   // Ticket 02 filters: server-side
-  const [appliedRoomType, setAppliedRoomType] = useState("All"); // All | Temporary | Custom
-  const [appliedVisibility, setAppliedVisibility] = useState("All"); // All | Public | Private
-  const [appliedActivity, setAppliedActivity] = useState("All"); // All | InUse | Empty
-  const [appliedLanguage, setAppliedLanguage] = useState("All");
-  const [appliedSortField, setAppliedSortField] = useState("createdAt");
-  const [appliedSortOrder, setAppliedSortOrder] = useState("desc");
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 12;
+  const [appliedRoomType, setAppliedRoomType] = useState("All") // All | Temporary | Custom
+  const [appliedVisibility, setAppliedVisibility] = useState("All") // All | Public | Private
+  const [appliedActivity, setAppliedActivity] = useState("All") // All | InUse | Empty
+  const [appliedLanguage, setAppliedLanguage] = useState("All")
+  const [appliedSortField, setAppliedSortField] = useState("createdAt")
+  const [appliedSortOrder, setAppliedSortOrder] = useState("desc")
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 12
 
   // Tab mapping for API: "created" | "bookmark"
   const apiTab =
     activeTab === "bookmark" || activeTab === "bookmarked"
       ? "bookmark"
-      : "created";
+      : "created"
 
   // Map sort options to API format
   const apiSort = useMemo(() => {
     if (appliedSortField === "name") {
-      return appliedSortOrder === "asc" ? "name_asc" : "name_desc";
+      return appliedSortOrder === "asc" ? "name_asc" : "name_desc"
     }
     if (appliedSortField === "currentParticipantCount") {
-      return "participants_desc";
+      return "participants_desc"
     }
     if (appliedSortField === "createdAt") {
-      return appliedSortOrder === "asc" ? "oldest" : "newest";
+      return appliedSortOrder === "asc" ? "oldest" : "newest"
     }
-    return "newest";
-  }, [appliedSortField, appliedSortOrder]);
+    return "newest"
+  }, [appliedSortField, appliedSortOrder])
 
   // Visibility tracking for polling 15s only when tab visible
-  const [isTabVisible, setIsTabVisible] = useState(() => typeof document !== "undefined" ? document.visibilityState === "visible" : true);
+  const [isTabVisible, setIsTabVisible] = useState(() =>
+    typeof document !== "undefined"
+      ? document.visibilityState === "visible"
+      : true,
+  )
   useEffect(() => {
-    const onVis = () => setIsTabVisible(document.visibilityState === "visible");
-    document.addEventListener("visibilitychange", onVis);
-    const onFocus = () => setIsTabVisible(true);
-    const onBlur = () => setIsTabVisible(false);
-    window.addEventListener("focus", onFocus);
-    window.addEventListener("blur", onBlur);
+    const onVis = () => setIsTabVisible(document.visibilityState === "visible")
+    document.addEventListener("visibilitychange", onVis)
+    const onFocus = () => setIsTabVisible(true)
+    const onBlur = () => setIsTabVisible(false)
+    window.addEventListener("focus", onFocus)
+    window.addEventListener("blur", onBlur)
     return () => {
-      document.removeEventListener("visibilitychange", onVis);
-      window.removeEventListener("focus", onFocus);
-      window.removeEventListener("blur", onBlur);
-    };
-  }, []);
+      document.removeEventListener("visibilitychange", onVis)
+      window.removeEventListener("focus", onFocus)
+      window.removeEventListener("blur", onBlur)
+    }
+  }, [])
 
   // Reset page when filters/search/tab/sort change
   useEffect(() => {
-    setCurrentPage(1);
-  }, [apiTab, appliedSearch, apiSort, appliedRoomType, appliedVisibility, appliedActivity, appliedLanguage]);
+    setCurrentPage(1)
+  }, [
+    apiTab,
+    appliedSearch,
+    apiSort,
+    appliedRoomType,
+    appliedVisibility,
+    appliedActivity,
+    appliedLanguage,
+  ])
 
   // Build query params: created vs bookmark differences
   const queryParams = useMemo(() => {
@@ -112,14 +129,14 @@ const WorkspaceRoomsContent = () => {
       sort: apiSort,
       page: currentPage,
       pageSize,
-    };
+    }
     if (apiTab === "bookmark") {
       // bookmark: only search/activity/language/sort
       return {
         ...base,
         activity: appliedActivity !== "All" ? appliedActivity : undefined,
         language: appliedLanguage !== "All" ? appliedLanguage : undefined,
-      };
+      }
     }
     // created: full filters
     return {
@@ -128,8 +145,17 @@ const WorkspaceRoomsContent = () => {
       visibility: appliedVisibility !== "All" ? appliedVisibility : undefined,
       activity: appliedActivity !== "All" ? appliedActivity : undefined,
       language: appliedLanguage !== "All" ? appliedLanguage : undefined,
-    };
-  }, [apiTab, appliedSearch, apiSort, currentPage, appliedRoomType, appliedVisibility, appliedActivity, appliedLanguage]);
+    }
+  }, [
+    apiTab,
+    appliedSearch,
+    apiSort,
+    currentPage,
+    appliedRoomType,
+    appliedVisibility,
+    appliedActivity,
+    appliedLanguage,
+  ])
 
   // API Hooks with polling 15s only when visible
   const {
@@ -142,44 +168,47 @@ const WorkspaceRoomsContent = () => {
     pollingInterval: isTabVisible ? 15000 : 0,
     refetchOnFocus: true,
     refetchOnReconnect: true,
-  });
+  })
 
-  const { data: customRoomsData } = useGetMyCustomRoomsQuery();
+  const { data: customRoomsData } = useGetMyCustomRoomsQuery()
 
   const [deleteCustomRoom, { isLoading: isDeleting }] =
-    useDeleteCustomRoomMutation();
+    useDeleteCustomRoomMutation()
 
-  const [toggleBookmark] = useToggleBookmarkRoomMutation();
+  const [toggleBookmark] = useToggleBookmarkRoomMutation()
 
-  const isLoading = isMyRoomsLoading && !myRoomsResponse;
+  const isLoading = isMyRoomsLoading && !myRoomsResponse
 
   // Extract room list from getMyRooms response (paginated)
   const rawTargetRooms = useMemo(() => {
     if (Array.isArray(myRoomsResponse?.data?.items)) {
-      return myRoomsResponse.data.items;
+      return myRoomsResponse.data.items
     }
     if (Array.isArray(myRoomsResponse?.data)) {
-      return myRoomsResponse.data;
+      return myRoomsResponse.data
     }
     if (Array.isArray(myRoomsResponse?.items)) {
-      return myRoomsResponse.items;
+      return myRoomsResponse.items
     }
     // Fallback for customRooms endpoint shape (should not happen for paged)
     if (apiTab === "created" && Array.isArray(customRoomsData?.customRooms)) {
-      return customRoomsData.customRooms;
+      return customRoomsData.customRooms
     }
-    return [];
-  }, [myRoomsResponse, apiTab, customRoomsData]);
+    return []
+  }, [myRoomsResponse, apiTab, customRoomsData])
 
-  const totalCount = myRoomsResponse?.data?.totalCount ?? myRoomsResponse?.totalCount ?? rawTargetRooms.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const totalCount =
+    myRoomsResponse?.data?.totalCount ??
+    myRoomsResponse?.totalCount ??
+    rawTargetRooms.length
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
   // Quota for custom rooms
   const quota = buildCustomRoomQuota({
     customRoomsData,
     limits,
     fallbackUsed: myRoomsResponse?.data?.totalCount ?? rawTargetRooms.length,
-  });
+  })
 
   // Tab definition
   const tabs = useMemo(
@@ -196,109 +225,138 @@ const WorkspaceRoomsContent = () => {
       },
     ],
     [t],
-  );
+  )
+
+  const handleTabChange = (nextTab) => {
+    setTabDirection(nextTab === "bookmark" ? 1 : -1)
+    setActiveTab(nextTab)
+  }
 
   // Handle Search trigger
   const handleSearch = useCallback(() => {
-    setAppliedSearch(searchInputValue);
-  }, [searchInputValue]);
+    setAppliedSearch(searchInputValue)
+  }, [searchInputValue])
 
   // Handle Search Input Change with instant reset if cleared
   const handleSearchInputChange = useCallback((val) => {
-    setSearchInputValue(val);
+    setSearchInputValue(val)
     if (val === "") {
-      setAppliedSearch("");
+      setAppliedSearch("")
     }
-  }, []);
+  }, [])
 
   // Action handlers
   const handleCopyLink = useCallback(
     (roomId) => {
-      const link = `${window.location.origin}/${supportedLangCode}/meet/${roomId}`;
-      navigator.clipboard.writeText(link);
-      setCopiedId(roomId);
-      toast.success(ct.linkCopied || "Link copied!");
-      setTimeout(() => setCopiedId(null), 2000);
+      const link = `${window.location.origin}/${supportedLangCode}/meet/${roomId}`
+      navigator.clipboard.writeText(link)
+      setCopiedId(roomId)
+      toast.success(ct.linkCopied || "Link copied!")
+      setTimeout(() => setCopiedId(null), 2000)
     },
     [supportedLangCode, ct.linkCopied],
-  );
+  )
 
   const handleJoinRoom = useCallback(
     (roomId) => {
-      navigate(`/${supportedLangCode}/meet/${roomId}`);
+      navigate(`/${supportedLangCode}/meet/${roomId}`)
     },
     [navigate, supportedLangCode],
-  );
+  )
 
   const handleEditRoom = useCallback((room) => {
-    setEditingRoom(room);
-  }, []);
+    setEditingRoom(room)
+  }, [])
 
   const handleDelete = useCallback(
     async (roomId) => {
       try {
-        await deleteCustomRoom(roomId).unwrap();
-        toast.success(ct.deleteSuccess || "Đã xóa phòng thành công");
-        refetchMyRooms();
+        await deleteCustomRoom(roomId).unwrap()
+        toast.success(ct.deleteSuccess || "Đã xóa phòng thành công")
+        refetchMyRooms()
       } catch (err) {
-        console.error("Failed to delete custom room:", err);
-        toast.error(err?.data?.message || "Failed to delete room");
+        console.error("Failed to delete custom room:", err)
+        toast.error(err?.data?.message || "Failed to delete room")
       }
     },
     [deleteCustomRoom, ct.deleteSuccess, refetchMyRooms],
-  );
+  )
 
   const handleToggleBookmark = useCallback(
     async (roomId) => {
       try {
-        const res = await toggleBookmark(roomId).unwrap();
-        toast.success(res?.message || t.rooms?.bookmarkUpdated || "Đã cập nhật danh sách phòng đã lưu");
-        refetchMyRooms();
+        const res = await toggleBookmark(roomId).unwrap()
+        toast.success(
+          res?.message ||
+            t.rooms?.bookmarkUpdated ||
+            "Đã cập nhật danh sách phòng đã lưu",
+        )
+        refetchMyRooms()
       } catch (err) {
-        console.error("Failed to toggle bookmark:", err);
-        toast.error(err?.data?.message || t.rooms?.bookmarkUpdateError || "Không thể thay đổi lưu phòng");
+        console.error("Failed to toggle bookmark:", err)
+        toast.error(
+          err?.data?.message ||
+            t.rooms?.bookmarkUpdateError ||
+            "Không thể thay đổi lưu phòng",
+        )
       }
     },
-    [toggleBookmark, refetchMyRooms, t.rooms?.bookmarkUpdated, t.rooms?.bookmarkUpdateError],
-  );
+    [
+      toggleBookmark,
+      refetchMyRooms,
+      t.rooms?.bookmarkUpdated,
+      t.rooms?.bookmarkUpdateError,
+    ],
+  )
 
   // Filter & Sort Application — new server-side filters
   const handleApplyFilter = useCallback((filters) => {
     // filters: { roomType, visibility, activity, language }
-    if (filters.roomType !== undefined) setAppliedRoomType(filters.roomType);
-    if (filters.visibility !== undefined) setAppliedVisibility(filters.visibility);
-    if (filters.activity !== undefined) setAppliedActivity(filters.activity);
-    if (filters.language !== undefined) setAppliedLanguage(filters.language);
-  }, []);
+    if (filters.roomType !== undefined) setAppliedRoomType(filters.roomType)
+    if (filters.visibility !== undefined)
+      setAppliedVisibility(filters.visibility)
+    if (filters.activity !== undefined) setAppliedActivity(filters.activity)
+    if (filters.language !== undefined) setAppliedLanguage(filters.language)
+  }, [])
 
   const handleApplySort = useCallback((field, order) => {
-    setAppliedSortField(field);
-    setAppliedSortOrder(order);
-  }, []);
+    setAppliedSortField(field)
+    setAppliedSortOrder(order)
+  }, [])
 
   const activeFilterCount = useMemo(() => {
-    let c = 0;
+    let c = 0
     if (apiTab === "created") {
-      if (appliedRoomType !== "All") c++;
-      if (appliedVisibility !== "All") c++;
+      if (appliedRoomType !== "All") c++
+      if (appliedVisibility !== "All") c++
     }
-    if (appliedActivity !== "All") c++;
-    if (appliedLanguage !== "All") c++;
-    return c;
-  }, [apiTab, appliedRoomType, appliedVisibility, appliedActivity, appliedLanguage]);
+    if (appliedActivity !== "All") c++
+    if (appliedLanguage !== "All") c++
+    return c
+  }, [
+    apiTab,
+    appliedRoomType,
+    appliedVisibility,
+    appliedActivity,
+    appliedLanguage,
+  ])
 
   // No client-side filtering — server already filtered. Keep raw list.
-  const displayedRooms = rawTargetRooms;
+  const displayedRooms = rawTargetRooms
 
   // Toast on error with retry
   useEffect(() => {
     if (isMyRoomsError) {
-      toast.error(myRoomsError?.data?.message || t.rooms?.loadError || "Không thể tải danh sách phòng. Vui lòng thử lại.");
+      toast.error(
+        myRoomsError?.data?.message ||
+          t.rooms?.loadError ||
+          "Không thể tải danh sách phòng. Vui lòng thử lại.",
+      )
     }
-  }, [isMyRoomsError, myRoomsError, t.rooms?.loadError]);
+  }, [isMyRoomsError, myRoomsError, t.rooms?.loadError])
 
   return (
-    <div className="flex flex-col gap-5 text-gray-800 dark:text-neutral-200">
+    <div className="flex flex-col gap-4 text-gray-800 dark:text-neutral-200">
       <CreateRoomModal
         open={isCreateModalOpen}
         onCancel={() => setIsCreateModalOpen(false)}
@@ -333,233 +391,288 @@ const WorkspaceRoomsContent = () => {
       {id ? (
         <Outlet />
       ) : (
-        <AnimatePresence mode="wait">
-          <FluentAnimation
-            animationKey={`workspace-rooms-${activeTab}`}
-            direction="up"
-            className="w-full"
-          >
-            {/* Top Bar: Tabs & Create Room Button */}
-            <div className="flex justify-between items-center border-b border-border dark:border-[#3F3F3F] mb-4">
-              <Tabs
-                tabs={tabs}
-                activeTab={activeTab}
-                onChange={setActiveTab}
-                fullWidth={false}
-                className="border-none mb-0"
-              />
-              {activeTab === "created" && (
-                <PillButton
-                  onClick={() => setIsCreateModalOpen(true)}
-                  startIcon={<Plus size={18} />}
-                  className="h-10 text-sm mb-3 ml-4 shrink-0"
-                >
-                  {ct.create || "Tạo Phòng"}
-                </PillButton>
-              )}
-            </div>
+        <>
+          {/* Top Bar: Tabs & Create Room Button */}
+          <div className="flex justify-between items-center border-b border-border dark:border-[#3F3F3F]">
+            <Tabs
+              tabs={tabs}
+              activeTab={activeTab}
+              value={activeTab}
+              onChange={handleTabChange}
+              fullWidth={false}
+              className="border-none"
+            />
+          </div>
 
-            {/* Action Controls Bar: Searchbar, Filter, Sort, Search Button */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-4">
-              {/* Searchbar (Left) */}
-              <div className="flex-1 max-w-full md:max-w-xl">
-                <SearchInput
-                  value={searchInputValue}
-                  onChange={handleSearchInputChange}
-                  onSearch={handleSearch}
-                  placeholder={
-                    t.rooms?.searchPlaceholder || "Tìm kiếm theo tên phòng, chủ đề..."
-                  }
-                  className="h-12 border-border"
-                />
-              </div>
-
-              {/* Right Side Buttons: Filter, Sort, "Tìm kiếm" */}
-              <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
-                {/* Filter Button */}
-                <button
-                  type="button"
-                  onClick={() => setIsFilterOpen(true)}
-                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg dark:bg-[#272727] hover:bg-gray-200 dark:hover:bg-[#333333] text-gray-700 dark:text-neutral-200 font-medium transition-colors shrink-0 gap-2 text-sm"
-                  title={t.rooms?.filters?.filterTooltip || t.rooms?.filters?.filterModalTitle || t.rooms?.filters?.title || "Bộ lọc"}
-                >
-                  <SlidersHorizontal size={18} strokeWidth={2} />
-                  {activeFilterCount > 0 && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-[11px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-[#0F0F0F]">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </button>
-
-                {/* Sort Button */}
-                <button
-                  type="button"
-                  onClick={() => setIsSortOpen(true)}
-                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg dark:bg-[#272727] hover:bg-gray-200 dark:hover:bg-[#333333] text-gray-700 dark:text-neutral-200 font-medium transition-colors shrink-0 gap-2 text-sm"
-                  title={t.rooms?.sortTooltip || t.rooms?.sortTitle || "Sắp xếp"}
-                >
-                  <ArrowUpDown size={18} strokeWidth={2} />
-                  {appliedSortField && (
-                    <span className="flex h-2 w-2 rounded-full bg-cath-red-700" />
-                  )}
-                </button>
-
-                {/* "Tìm kiếm" Button (Far right) */}
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  className="h-12 px-6 bg-cath-red-700 hover:bg-cath-red-800 text-white font-semibold rounded-full text-sm transition-all shadow-md shadow-cath-red-700/10 flex items-center justify-center shrink-0"
-                >
-                  {t.rooms?.searchBtn || "Tìm kiếm"}
-                </button>
-              </div>
-            </div>
-
-            {/* Room Quota Counter (for Created Tab) */}
-            {activeTab === "created" && (
-              <p className="text-sm font-medium text-[#606060] dark:text-[#AAAAAA] mb-4 text-left">
-                {(ct.quota || "{{used}}/{{max}} phòng đã dùng")
-                  .replace("{{used}}", quota.used)
-                  .replace("{{max}}", quota.max)}
-              </p>
-            )}
-
-            {/* Room List Content */}
-            {isLoading ? (
-              <RoomsListSkeleton />
-            ) : isMyRoomsError ? (
-              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border dark:border-[#3F3F3F] rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A] my-4">
-                <p className="text-sm text-gray-600 dark:text-neutral-300 mb-4">{t.rooms?.loadError || "Không thể tải danh sách phòng. Vui lòng thử lại."}</p>
-                <button
-                  onClick={() => refetchMyRooms()}
-                  className="bg-cath-red-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cath-red-600 transition-colors text-sm shadow"
-                >
-                  {t.rooms?.retry || "Thử lại"}
-                </button>
-              </div>
-            ) : displayedRooms.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border dark:border-[#3F3F3F] rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A] my-4">
-                {activeTab === "created" ? (
-                  <Crown size={48} className="text-gray-300 dark:text-neutral-600 mb-3" />
-                ) : (
-                  <Bookmark size={48} className="text-gray-300 dark:text-neutral-600 mb-3" />
-                )}
-
-                <h3 className="font-bold text-gray-700 dark:text-neutral-200 mb-1 text-center">
-                  {appliedSearch || activeFilterCount > 0
-                    ? t.rooms?.noSearchResults || "Không tìm thấy kết quả phù hợp"
-                    : activeTab === "created"
-                      ? ct.noRooms || "Bạn chưa có phòng nào"
-                      : t.rooms?.noBookmarkedRooms ||
-                        "Chưa có phòng nào được lưu"}
-                </h3>
-
-                <p className="text-sm text-gray-400 dark:text-neutral-400 mb-4 text-center max-w-sm">
-                  {appliedSearch || activeFilterCount > 0
-                    ? t.rooms?.noSearchResultsDesc ||
-                      "Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc của bạn."
-                    : activeTab === "created"
-                      ? ct.noRoomsSubtext ||
-                        "Tạo phòng vĩnh viễn đầu tiên với tối đa 100 người tham gia!"
-                      : t.rooms?.noBookmarkedRoomsDesc ||
-                        "Lưu các phòng yêu thích để truy cập nhanh chóng bất cứ lúc nào!"}
-                </p>
-
-                {activeTab === "created" &&
-                  !(appliedSearch || activeFilterCount > 0) && (
-                    <button
-                      onClick={() => setIsCreateModalOpen(true)}
-                      className="bg-cath-red-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cath-red-600 transition-colors flex items-center space-x-1 text-sm shadow disabled:opacity-50"
-                    >
-                      <Plus size={16} />
-                      <span>{ct.create || "Tạo Phòng"}</span>
-                    </button>
-                  )}
-              </div>
-            ) : apiTab === "bookmark" ? (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-                  {displayedRooms.map((room) => (
-                    <CommunityRoomCard
-                      key={room.id || room.roomId}
-                      room={room}
+          <div className="w-full overflow-x-clip">
+            <AnimatePresence mode="wait" initial={false} custom={tabDirection}>
+              <motion.div
+                key={activeTab}
+                custom={tabDirection}
+                variants={{
+                  enter: (direction) => ({
+                    opacity: 0,
+                    x: shouldReduceMotion ? 0 : direction * 24,
+                  }),
+                  center: {
+                    opacity: 1,
+                    x: 0,
+                  },
+                  exit: (direction) => ({
+                    opacity: 0,
+                    x: shouldReduceMotion ? 0 : direction * -24,
+                  }),
+                }}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : {
+                        duration: 0.25,
+                        ease: [0.27, 1.06, 0.18, 1.0],
+                      }
+                }
+                className="w-full"
+              >
+                {/* Action Controls Bar: Searchbar, Filter, Sort, Search Button */}
+                <div className="px-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4">
+                  {/* Searchbar (Left) */}
+                  <div className="flex-1 max-w-[360px]">
+                    <SearchInput
+                      value={searchInputValue}
+                      onChange={handleSearchInputChange}
+                      onSearch={handleSearch}
+                      placeholder={
+                        t.rooms?.searchPlaceholder ||
+                        "Tìm kiếm theo tên phòng, chủ đề..."
+                      }
+                      className="h-12 border-border"
                     />
-                  ))}
-                </div>
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-6">
-                    <button
-                      disabled={currentPage <= 1}
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
-                    >
-                      {t.rooms?.pagination?.prev || "Trước"}
-                    </button>
-                    <span className="text-sm text-gray-600 dark:text-[#AAAAAA]">
-                      {(t.rooms?.pagination?.pageOf || "Trang {page} / {totalPages}")
-                        .replace("{page}", currentPage)
-                        .replace("{totalPages}", totalPages)} {activeTab !== "bookmark" && `(${totalCount} ${t.rooms?.filters?.room || "phòng"})`}
-                    </span>
-                    <button
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
-                    >
-                      {t.rooms?.pagination?.next || "Tiếp"}
-                    </button>
                   </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-                  {displayedRooms.map((room) => (
-                    <CustomRoomCard
-                      key={room.id || room.roomId}
-                      room={room}
-                      onEdit={handleEditRoom}
-                      onDelete={handleDelete}
-                      onCopyLink={handleCopyLink}
-                      onJoin={handleJoinRoom}
-                      onToggleBookmark={handleToggleBookmark}
-                      isBookmarkTab={false}
-                      copiedId={copiedId}
-                      isDeleting={isDeleting}
-                      ct={ct}
-                    />
-                  ))}
-                </div>
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-6">
-                    <button
-                      disabled={currentPage <= 1}
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
+
+                  {/* Right Side Buttons: Filter, Sort, "Tìm kiếm" */}
+                  <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+                    {/* Filter Button */}
+                    <IconButton
+                      onClick={() => setIsFilterOpen(true)}
+                      title={
+                        t.rooms?.filters?.filterTooltip ||
+                        t.rooms?.filters?.filterModalTitle ||
+                        t.rooms?.filters?.title ||
+                        "Bộ lọc"
+                      }
+                      variant="ghost"
+                      badge={
+                        activeFilterCount > 0 ? (
+                          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-[11px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-[#0F0F0F]">
+                            {activeFilterCount}
+                          </span>
+                        ) : null
+                      }
                     >
-                      {t.rooms?.pagination?.prev || "Trước"}
-                    </button>
-                    <span className="text-sm text-gray-600 dark:text-[#AAAAAA]">
-                      {(t.rooms?.pagination?.pageOf || "Trang {page} / {totalPages}")
-                        .replace("{page}", currentPage)
-                        .replace("{totalPages}", totalPages)} ({totalCount} {t.rooms?.filters?.room || "phòng"})
-                    </span>
-                    <button
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
+                      <SlidersHorizontal />
+                    </IconButton>
+
+                    {/* Sort Button */}
+                    <IconButton
+                      onClick={() => setIsSortOpen(true)}
+                      title={
+                        t.rooms?.sortTooltip || t.rooms?.sortTitle || "Sắp xếp"
+                      }
+                      variant="ghost"
+                      badge={
+                        appliedSortField ? (
+                          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-cath-red-700" />
+                        ) : null
+                      }
                     >
-                      {t.rooms?.pagination?.next || "Tiếp"}
-                    </button>
+                      <ArrowUpDown />
+                    </IconButton>
+
+                    {activeTab === "created" && (
+                      <PillButton onClick={() => setIsCreateModalOpen(true)}>
+                        {ct.create || "Tạo Phòng"}
+                      </PillButton>
+                    )}
                   </div>
+                </div>
+
+                {/* Room Quota Counter (for Created Tab) */}
+                {activeTab === "created" && (
+                  <p className="px-4 text-xs text-[#606060] dark:text-[#AAAAAA] mb-4 text-left">
+                    {(ct.quota || "{{used}}/{{max}} phòng đã dùng")
+                      .replace("{{used}}", quota.used)
+                      .replace("{{max}}", quota.max)}
+                  </p>
                 )}
-              </>
-            )}
-          </FluentAnimation>
-        </AnimatePresence>
+
+                {/* Room List Content */}
+                <div className="px-4">
+                  {isLoading ? (
+                    <RoomsListSkeleton />
+                  ) : isMyRoomsError ? (
+                    <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border dark:border-[#3F3F3F] rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A] my-4">
+                      <p className="text-sm text-gray-600 dark:text-neutral-300 mb-4">
+                        {t.rooms?.loadError ||
+                          "Không thể tải danh sách phòng. Vui lòng thử lại."}
+                      </p>
+                      <button
+                        onClick={() => refetchMyRooms()}
+                        className="bg-cath-red-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cath-red-600 transition-colors text-sm shadow"
+                      >
+                        {t.rooms?.retry || "Thử lại"}
+                      </button>
+                    </div>
+                  ) : displayedRooms.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border dark:border-[#3F3F3F] rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A] my-4">
+                      {activeTab === "created" ? (
+                        <Crown
+                          size={48}
+                          className="text-gray-300 dark:text-neutral-600 mb-3"
+                        />
+                      ) : (
+                        <Bookmark
+                          size={48}
+                          className="text-gray-300 dark:text-neutral-600 mb-3"
+                        />
+                      )}
+
+                      <h3 className="font-bold text-gray-700 dark:text-neutral-200 mb-1 text-center">
+                        {appliedSearch || activeFilterCount > 0
+                          ? t.rooms?.noSearchResults ||
+                            "Không tìm thấy kết quả phù hợp"
+                          : activeTab === "created"
+                            ? ct.noRooms || "Bạn chưa có phòng nào"
+                            : t.rooms?.noBookmarkedRooms ||
+                              "Chưa có phòng nào được lưu"}
+                      </h3>
+
+                      <p className="text-sm text-gray-400 dark:text-neutral-400 mb-4 text-center max-w-sm">
+                        {appliedSearch || activeFilterCount > 0
+                          ? t.rooms?.noSearchResultsDesc ||
+                            "Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc của bạn."
+                          : activeTab === "created"
+                            ? ct.noRoomsSubtext ||
+                              "Tạo phòng vĩnh viễn đầu tiên với tối đa 100 người tham gia!"
+                            : t.rooms?.noBookmarkedRoomsDesc ||
+                              "Lưu các phòng yêu thích để truy cập nhanh chóng bất cứ lúc nào!"}
+                      </p>
+
+                      {activeTab === "created" &&
+                        !(appliedSearch || activeFilterCount > 0) && (
+                          <PillButton
+                            onClick={() => setIsCreateModalOpen(true)}
+                          >
+                            {ct.create || "Tạo Phòng"}
+                          </PillButton>
+                        )}
+                    </div>
+                  ) : apiTab === "bookmark" ? (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                        {displayedRooms.map((room) => (
+                          <CommunityRoomCard
+                            key={room.id || room.roomId}
+                            room={room}
+                          />
+                        ))}
+                      </div>
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-6">
+                          <button
+                            disabled={currentPage <= 1}
+                            onClick={() =>
+                              setCurrentPage((p) => Math.max(1, p - 1))
+                            }
+                            className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
+                          >
+                            {t.rooms?.pagination?.prev || "Trước"}
+                          </button>
+                          <span className="text-sm text-gray-600 dark:text-[#AAAAAA]">
+                            {(
+                              t.rooms?.pagination?.pageOf ||
+                              "Trang {page} / {totalPages}"
+                            )
+                              .replace("{page}", currentPage)
+                              .replace("{totalPages}", totalPages)}{" "}
+                            {activeTab !== "bookmark" &&
+                              `(${totalCount} ${t.rooms?.filters?.room || "phòng"})`}
+                          </span>
+                          <button
+                            disabled={currentPage >= totalPages}
+                            onClick={() =>
+                              setCurrentPage((p) => Math.min(totalPages, p + 1))
+                            }
+                            className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
+                          >
+                            {t.rooms?.pagination?.next || "Tiếp"}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                        {displayedRooms.map((room) => (
+                          <CustomRoomCard
+                            key={room.id || room.roomId}
+                            room={room}
+                            onEdit={handleEditRoom}
+                            onDelete={handleDelete}
+                            onCopyLink={handleCopyLink}
+                            onJoin={handleJoinRoom}
+                            onToggleBookmark={handleToggleBookmark}
+                            isBookmarkTab={false}
+                            copiedId={copiedId}
+                            isDeleting={isDeleting}
+                            ct={ct}
+                          />
+                        ))}
+                      </div>
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-6">
+                          <button
+                            disabled={currentPage <= 1}
+                            onClick={() =>
+                              setCurrentPage((p) => Math.max(1, p - 1))
+                            }
+                            className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
+                          >
+                            {t.rooms?.pagination?.prev || "Trước"}
+                          </button>
+                          <span className="text-sm text-gray-600 dark:text-[#AAAAAA]">
+                            {(
+                              t.rooms?.pagination?.pageOf ||
+                              "Trang {page} / {totalPages}"
+                            )
+                              .replace("{page}", currentPage)
+                              .replace("{totalPages}", totalPages)}{" "}
+                            ({totalCount} {t.rooms?.filters?.room || "phòng"})
+                          </span>
+                          <button
+                            disabled={currentPage >= totalPages}
+                            onClick={() =>
+                              setCurrentPage((p) => Math.min(totalPages, p + 1))
+                            }
+                            className="px-4 py-2 rounded-lg border border-border dark:border-[#3F3F3F] text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-[#272727] disabled:opacity-40"
+                          >
+                            {t.rooms?.pagination?.next || "Tiếp"}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </>
       )}
     </div>
-  );
-};
+  )
+}
 
 const RoomsListSkeleton = () => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
@@ -579,10 +692,10 @@ const RoomsListSkeleton = () => (
       </div>
     ))}
   </div>
-);
+)
 
 const WorkspaceRoomsPage = () => {
-  return <WorkspaceRoomsContent />;
-};
+  return <WorkspaceRoomsContent />
+}
 
-export default WorkspaceRoomsPage;
+export default WorkspaceRoomsPage

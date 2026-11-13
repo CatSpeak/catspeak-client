@@ -71,17 +71,18 @@ const ProfileHomeTab = ({
     <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Main Content - Timeline */}
       <div
-        className={`space-y-4 ${isOwnProfile ? "lg:col-span-2" : "lg:col-span-3"}`}
+        className={`space-y-2 ${isOwnProfile ? "lg:col-span-2" : "lg:col-span-3"}`}
       >
         {isOwnProfile && (
           <>
             <FluentCard padding="p-0" className="flex flex-col overflow-hidden">
-              <div className="flex items-center gap-4 p-4 sm:p-6">
+              <div className="flex items-center gap-4 p-4">
                 <Avatar
                   size={40}
                   src={currentUser?.avatarImageUrl || currentUser?.avatarUrl}
                   name={currentUser?.nickname || currentUser?.username || "U"}
                 />
+
                 <button
                   onClick={handleOpenEditorEmpty}
                   className="flex-1 h-10 pl-5 text-left text-gray-500 dark:text-neutral-400 bg-transparent border border-border dark:border-[#3F3F3F] hover:border-cath-red-700 dark:hover:border-red-400 rounded-full outline-none cursor-pointer text-sm transition-colors"
@@ -92,7 +93,7 @@ const ProfileHomeTab = ({
 
               <div className="h-px bg-[#e5e5e5] dark:bg-[#3F3F3F]" />
 
-              <div className="flex items-center gap-2 w-full">
+              <div className="flex items-center w-full">
                 <input
                   type="file"
                   multiple
@@ -124,7 +125,11 @@ const ProfileHomeTab = ({
                   className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#e11d48] hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-rose-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <Video size={20} className="text-[#e11d48]" />
-                  <span>{t.profile?.home?.video || t.profile?.post?.editor?.video || "Video"}</span>
+                  <span>
+                    {t.profile?.home?.video ||
+                      t.profile?.post?.editor?.video ||
+                      "Video"}
+                  </span>
                 </button>
 
                 <input
@@ -141,7 +146,11 @@ const ProfileHomeTab = ({
                   className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#2563eb] hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-blue-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <FileText size={20} className="text-[#2563eb]" />
-                  <span>{t.profile?.home?.document || t.profile?.post?.editor?.document || "Tài liệu"}</span>
+                  <span>
+                    {t.profile?.home?.document ||
+                      t.profile?.post?.editor?.document ||
+                      "Tài liệu"}
+                  </span>
                 </button>
               </div>
             </FluentCard>
@@ -164,14 +173,17 @@ const ProfileHomeTab = ({
           emptyMessage={t.profile?.home?.noPosts || "Chưa có bài viết nào."}
           emptyIcon={Newspaper}
           emptyVariant="card"
+          className="flex flex-col gap-2"
         />
       </div>
 
       {/* Right Column - Sidebar */}
-      <ProfileSidebar
-        isOwnProfile={isOwnProfile}
-        onNavigateToFriends={onNavigateToFriends}
-      />
+      <div className="hidden lg:block">
+        <ProfileSidebar
+          isOwnProfile={isOwnProfile}
+          onNavigateToFriends={onNavigateToFriends}
+        />
+      </div>
     </div>
   )
 }

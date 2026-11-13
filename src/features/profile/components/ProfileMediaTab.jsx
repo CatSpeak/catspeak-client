@@ -63,7 +63,7 @@ const ProfileMediaTab = ({ targetAccountId }) => {
   }, [filteredMedias, columnsCount])
 
   return (
-    <div className="w-full flex flex-col gap-4 sm:gap-6">
+    <div className="w-full flex flex-col gap-4">
       {/* Category Filter Chips Toolbar */}
       {!isLoading && medias.length > 0 && (
         <ChipFilter
@@ -118,25 +118,28 @@ const ProfileMediaTab = ({ targetAccountId }) => {
                   <div
                     key={media.postMediaId}
                     onClick={() => setFullscreenMedia(media)}
-                    className="relative group cursor-pointer rounded-xl overflow-hidden bg-gray-100 dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F]"
+                    className="relative group cursor-pointer rounded-xl overflow-hidden isolate bg-gray-100 dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F]"
                   >
                     {media.mediaType === "Image" ? (
                       <img
                         src={media.mediaUrl}
                         alt={media.fileName}
-                        className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="block w-full h-auto object-cover"
                         loading="lazy"
                       />
                     ) : (
                       <div className="relative w-full aspect-square flex items-center justify-center bg-black">
                         <video
                           src={media.mediaUrl}
-                          className="w-full h-full object-cover opacity-80 transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full object-cover opacity-80"
+                          preload="metadata"
                         />
                         <Play className="absolute w-12 h-12 text-white/80 drop-shadow-md z-10" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-200 pointer-events-none" />
                   </div>
                 ))}
               </div>

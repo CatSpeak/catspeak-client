@@ -1,13 +1,31 @@
 import React, { useMemo, useState, useRef, useEffect } from "react"
-import { Calendar, ChevronDown, ChevronUp, ListPlus, Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react"
+import {
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  ListPlus,
+  Loader2,
+  Plus,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+} from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
-import { useGetPlaylistsQuery, useCreatePlaylistMutation, useUpdatePlaylistMutation, useDeletePlaylistMutation, useGetBookmarkedReelsQuery } from "@/store/api/reelsApi"
+import {
+  useGetPlaylistsQuery,
+  useCreatePlaylistMutation,
+  useUpdatePlaylistMutation,
+  useDeletePlaylistMutation,
+  useGetBookmarkedReelsQuery,
+} from "@/store/api/reelsApi"
 
 import PlaylistReelList from "./PlaylistReelList"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Modal from "@/shared/components/ui/Modal"
+import { PillButton } from "@/shared/components/ui/buttons"
 
 const getLocale = (lang) => {
   if (lang === "zh") return "zh-CN"
@@ -19,7 +37,10 @@ const PlaylistAvatar = ({ covers }) => {
   if (!covers || covers.length === 0) {
     return (
       <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/40 dark:to-red-900/30 flex items-center justify-center shrink-0 border border-border overflow-hidden">
-        <ListPlus size={24} className="text-red-600 dark:text-red-400 scale-75 md:scale-100" />
+        <ListPlus
+          size={24}
+          className="text-red-600 dark:text-red-400 scale-75 md:scale-100"
+        />
       </div>
     )
   }
@@ -53,10 +74,18 @@ const PlaylistAvatar = ({ covers }) => {
         </div>
         <div className="w-1/2 h-full flex flex-col">
           <div className="w-full h-1/2 border-b border-white/50">
-            <img src={covers[1]} className="w-full h-full object-cover" alt="" />
+            <img
+              src={covers[1]}
+              className="w-full h-full object-cover"
+              alt=""
+            />
           </div>
           <div className="w-full h-1/2">
-            <img src={covers[2]} className="w-full h-full object-cover" alt="" />
+            <img
+              src={covers[2]}
+              className="w-full h-full object-cover"
+              alt=""
+            />
           </div>
         </div>
       </div>
@@ -81,23 +110,39 @@ const PlaylistAvatar = ({ covers }) => {
   )
 }
 
-const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, lang, dateFormatter, formatNumber, navigate }) => {
+const PlaylistRow = ({
+  playlist,
+  expandedPlaylistId,
+  setExpandedPlaylistId,
+  ws,
+  lang,
+  dateFormatter,
+  formatNumber,
+  navigate,
+}) => {
   const isExpanded = expandedPlaylistId === playlist.playlistId
   // Fetch bookmarked reels to get accurate live count
-  const { data: bookmarkedReels } = useGetBookmarkedReelsQuery(playlist.playlistId)
-  const count = bookmarkedReels ? bookmarkedReels.length : (playlist.bookmarksCount || 0)
+  const { data: bookmarkedReels } = useGetBookmarkedReelsQuery(
+    playlist.playlistId,
+  )
+  const count = bookmarkedReels
+    ? bookmarkedReels.length
+    : playlist.bookmarksCount || 0
 
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState(playlist.name)
-  const [updatePlaylist, { isLoading: isUpdating }] = useUpdatePlaylistMutation()
-  const [deletePlaylist, { isLoading: isDeleting }] = useDeletePlaylistMutation()
+  const [updatePlaylist, { isLoading: isUpdating }] =
+    useUpdatePlaylistMutation()
+  const [deletePlaylist, { isLoading: isDeleting }] =
+    useDeletePlaylistMutation()
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
 
-  const label = count === 1
-    ? (lang?.itemCountSingular || "1 video")
-    : (lang?.itemCount || "{{count}} videos").replace("{{count}}", count)
+  const label =
+    count === 1
+      ? lang?.itemCountSingular || "1 video"
+      : (lang?.itemCount || "{{count}} videos").replace("{{count}}", count)
 
-  const covers = bookmarkedReels?.map(r => r.coverUrl).filter(Boolean) || []
+  const covers = bookmarkedReels?.map((r) => r.coverUrl).filter(Boolean) || []
 
   const handleUpdate = async (e) => {
     e.stopPropagation()
@@ -107,7 +152,10 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
       return
     }
     try {
-      await updatePlaylist({ playlistId: playlist.playlistId, name: editName.trim() }).unwrap()
+      await updatePlaylist({
+        playlistId: playlist.playlistId,
+        name: editName.trim(),
+      }).unwrap()
       setIsEditing(false)
       toast.success(lang?.updated || "Cập nhật thành công")
     } catch (err) {
@@ -140,30 +188,52 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
   return (
     <div className="border border-border rounded-xl bg-white dark:bg-[#1A1A1A] shadow-sm overflow-hidden mb-2 group/row">
       <div
-        onClick={() => !isEditing && setExpandedPlaylistId(isExpanded ? null : playlist.playlistId)}
+        onClick={() =>
+          !isEditing &&
+          setExpandedPlaylistId(isExpanded ? null : playlist.playlistId)
+        }
         className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors text-left cursor-pointer"
       >
         <PlaylistAvatar covers={covers} />
-        
+
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-gray-800 dark:text-white text-sm truncate">{playlist.name}</div>
+          <div className="font-semibold text-gray-800 dark:text-white text-sm truncate">
+            {playlist.name}
+          </div>
           <div className="flex items-center gap-1.5 flex-wrap text-xs text-gray-400 dark:text-neutral-400 mt-0.5">
             <span>{label}</span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <Calendar size={12} />
-              {ws?.createdOn || "Created on"} {dateFormatter(playlist.createdAt)}
+              {ws?.createdOn || "Created on"}{" "}
+              {dateFormatter(playlist.createdAt)}
             </span>
           </div>
         </div>
-        
+
         {/* Actions */}
         <div className="flex items-center gap-3 sm:gap-2 opacity-100 sm:opacity-0 group-hover/row:opacity-100 transition-opacity">
-          <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="p-2.5 sm:p-1.5 bg-gray-100 dark:bg-[#272727] text-gray-600 dark:text-neutral-200 rounded-lg hover:bg-gray-200 dark:hover:bg-[#333333] transition-colors" title="Edit name">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsEditing(true)
+            }}
+            className="p-2.5 sm:p-1.5 bg-gray-100 dark:bg-[#272727] text-gray-600 dark:text-neutral-200 rounded-lg hover:bg-gray-200 dark:hover:bg-[#333333] transition-colors"
+            title="Edit name"
+          >
             <Pencil className="w-5 h-5 sm:w-4 sm:h-4" />
           </button>
-          <button onClick={handleDeleteClick} disabled={isDeleting} className="p-2.5 sm:p-1.5 bg-gray-100 dark:bg-[#272727] text-gray-600 dark:text-neutral-200 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-[#ffdede] dark:hover:bg-rose-950/40 transition-colors" title="Delete playlist">
-            {isDeleting ? <Loader2 className="animate-spin w-5 h-5 sm:w-4 sm:h-4" /> : <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />}
+          <button
+            onClick={handleDeleteClick}
+            disabled={isDeleting}
+            className="p-2.5 sm:p-1.5 bg-gray-100 dark:bg-[#272727] text-gray-600 dark:text-neutral-200 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-[#ffdede] dark:hover:bg-rose-950/40 transition-colors"
+            title="Delete playlist"
+          >
+            {isDeleting ? (
+              <Loader2 className="animate-spin w-5 h-5 sm:w-4 sm:h-4" />
+            ) : (
+              <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />
+            )}
           </button>
         </div>
 
@@ -187,7 +257,9 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
         onClose={() => setIsConfirmDeleteOpen(false)}
         onConfirm={confirmDelete}
         title={lang?.deletePlaylistTitle || "Xóa Playlist"}
-        message={lang?.deleteConfirm || "Bạn có chắc chắn muốn xóa playlist này?"}
+        message={
+          lang?.deleteConfirm || "Bạn có chắc chắn muốn xóa playlist này?"
+        }
         confirmText={lang?.delete || "Xóa"}
         cancelText={lang?.cancel || "Hủy"}
       />
@@ -232,14 +304,19 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
   )
 }
 
-const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navigate }) => {
+const WorkspacePlaylistsTab = ({
+  formatNumber,
+  formatDate: propFormatDate,
+  navigate,
+}) => {
   const { t } = useLanguage()
   const ws = t?.catSpeak?.reels?.workspace || {}
   const currentLang = localStorage.getItem("communityLanguage") || "en"
   const locale = getLocale(currentLang)
 
   const { data: playlists, isLoading } = useGetPlaylistsQuery()
-  const [createPlaylist, { isLoading: isCreating }] = useCreatePlaylistMutation()
+  const [createPlaylist, { isLoading: isCreating }] =
+    useCreatePlaylistMutation()
   const [newPlaylistName, setNewPlaylistName] = useState("")
   const [showCreateInput, setShowCreateInput] = useState(false)
   const [expandedPlaylistId, setExpandedPlaylistId] = useState(null)
@@ -270,7 +347,10 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navig
     return (
       <div className="flex flex-col gap-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-white dark:bg-[#1A1A1A] p-4 shadow-sm animate-pulse">
+          <div
+            key={i}
+            className="flex items-center gap-3 rounded-lg border border-border bg-white dark:bg-[#1A1A1A] p-4 shadow-sm animate-pulse"
+          >
             <div className="w-12 h-12 bg-gray-200 dark:bg-[#272727] rounded-lg" />
             <div className="space-y-2 flex-1">
               <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-40" />
@@ -283,21 +363,24 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navig
   }
 
   return (
-    <>
+    <div className="px-4 pb-24">
       {!playlists || playlists.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A]">
-          <ListPlus size={48} className="text-gray-300 dark:text-neutral-500 mb-3" />
-          <h3 className="font-bold text-gray-700 dark:text-white mb-1">{ws?.noPlaylists || "No playlists yet"}</h3>
+          <ListPlus
+            size={48}
+            className="text-gray-300 dark:text-neutral-500 mb-3"
+          />
+          <h3 className="font-bold text-gray-700 dark:text-white mb-1">
+            {ws?.noPlaylists || "No playlists yet"}
+          </h3>
           <p className="text-sm text-gray-400 dark:text-neutral-400 mb-4 text-center max-w-sm">
-            {ws?.noPlaylistsDesc || "Save reels to playlists to organize and revisit your favorite content!"}
+            {ws?.noPlaylistsDesc ||
+              "Save reels to playlists to organize and revisit your favorite content!"}
           </p>
-          <button
-            onClick={() => setShowCreateInput(true)}
-            className="bg-cath-red-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cath-red-600 transition-colors flex items-center space-x-1 text-sm shadow"
-          >
-            <Plus size={16} />
-            <span>{ws?.createFirst || "Create First Playlist"}</span>
-          </button>
+
+          <PillButton onClick={() => setShowCreateInput(true)}>
+            {ws?.createFirst || "Create First Playlist"}
+          </PillButton>
         </div>
       ) : (
         <div className="flex flex-col">
@@ -319,18 +402,26 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navig
 
       {/* Create playlist input */}
       <div className="mt-2">
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showCreateInput ? 'max-h-24 opacity-100 mb-2' : 'max-h-0 opacity-0 mb-0'}`}>
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${showCreateInput ? "max-h-24 opacity-100 mb-2" : "max-h-0 opacity-0 mb-0"}`}
+        >
           <div className="flex gap-2 items-center">
             <input
               ref={inputRef}
               type="text"
-              placeholder={t?.catSpeak?.reels?.detail?.playlistModal?.placeholder || "Enter playlist name..."}
+              placeholder={
+                t?.catSpeak?.reels?.detail?.playlistModal?.placeholder ||
+                "Enter playlist name..."
+              }
               className="flex-1 px-4 py-2.5 bg-white dark:bg-[#242424] border border-border rounded-xl text-sm dark:text-white outline-none focus:border-cath-red-500 focus:ring-0"
               value={newPlaylistName}
               onChange={(e) => setNewPlaylistName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
               onBlur={(e) => {
-                if (!newPlaylistName.trim() && !e.relatedTarget?.closest('.create-playlist-btn')) {
+                if (
+                  !newPlaylistName.trim() &&
+                  !e.relatedTarget?.closest(".create-playlist-btn")
+                ) {
                   setShowCreateInput(false)
                 }
               }}
@@ -340,7 +431,11 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navig
               disabled={!newPlaylistName.trim() || isCreating}
               className="create-playlist-btn px-4 py-2.5 bg-cath-red-700 text-white rounded-xl text-sm font-semibold hover:bg-cath-red-600 transition-colors disabled:opacity-50 flex items-center gap-2 h-[42px]"
             >
-              {isCreating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+              {isCreating ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Plus size={16} />
+              )}
             </button>
           </div>
         </div>
@@ -351,11 +446,12 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navig
             className="w-full flex items-center justify-center gap-2 p-3 text-sm font-semibold text-gray-700 dark:text-neutral-200 hover:bg-gray-200 dark:hover:bg-[#333333] bg-gray-100 dark:bg-[#272727] rounded-xl transition-colors mt-2"
           >
             <Plus size={18} />
-            {t?.catSpeak?.reels?.detail?.playlistModal?.createNew || "Create new playlist"}
+            {t?.catSpeak?.reels?.detail?.playlistModal?.createNew ||
+              "Create new playlist"}
           </button>
         )}
       </div>
-    </>
+    </div>
   )
 }
 

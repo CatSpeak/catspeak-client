@@ -35,7 +35,7 @@ const StorageBar = ({
 
   if (isLoading) {
     return (
-      <div className="w-full animate-pulse py-2">
+      <div className="w-full animate-pulse">
         <div className="flex items-baseline mb-3">
           <div className="h-8 w-24 rounded bg-gray-200" />
           <div className="h-4 w-20 rounded bg-gray-200 ml-2" />
@@ -49,11 +49,13 @@ const StorageBar = ({
   }
 
   return (
-    <div className="w-full py-2">
+    <div className="w-full">
       {/* Header text */}
       <div className="flex items-baseline mb-2">
-        <span className="text-3xl text-gray-800 dark:text-white">{usedFormatted}</span>
-        <span className="text-sm text-gray-500 dark:text-neutral-400 ml-1.5">
+        <span className="text-3xl text-gray-800 dark:text-white">
+          {usedFormatted}
+        </span>
+        <span className="text-sm text-gray-500 dark:text-neutral-400 ml-2">
           {t?.recordings?.storage?.limit_used?.replace(
             "{{limit}}",
             limitFormatted,
@@ -62,7 +64,7 @@ const StorageBar = ({
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 w-full bg-gray-100 dark:bg-[#272727] rounded-full overflow-hidden flex">
+      <div className="h-2 w-full bg-gray-100 dark:bg-[#272727] rounded-full overflow-hidden flex">
         <div
           className={`h-full rounded-full transition-all duration-500 ease-out ${barColor}`}
           style={{ width: `${clampedPercent}%` }}
@@ -70,7 +72,7 @@ const StorageBar = ({
       </div>
 
       {/* Legend */}
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center gap-4 text-xs font-medium text-gray-600 dark:text-neutral-300">
           <div className="flex items-center gap-2">
             <div className={`w-2.5 h-2.5 rounded-full ${barColor}`} />

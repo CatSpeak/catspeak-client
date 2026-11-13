@@ -121,6 +121,8 @@ const WorkshopJugglingCarousel = ({ slides: propSlides = [] }) => {
                 <WorkshopCard
                   slide={slide}
                   onCtaClick={(type) => setModalType(type)}
+                  variant="carousel"
+                  className="rounded-3xl"
                 />
               </motion.div>
             )
@@ -179,4 +181,3 @@ const WorkshopJugglingCarousel = ({ slides: propSlides = [] }) => {
 }
 
 export default WorkshopJugglingCarousel
-

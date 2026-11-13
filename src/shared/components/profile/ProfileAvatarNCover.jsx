@@ -63,8 +63,7 @@ const ProfileAvatarNCover = ({
 
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
     useUpdateAvatarMutation()
-  const [updateCover, { isLoading: isUpdatingCover }] =
-    useUpdateCoverMutation()
+  const [updateCover, { isLoading: isUpdatingCover }] = useUpdateCoverMutation()
 
   // Optional: khi user đang trong call, đồng bộ avatar mới xuống LiveKit metadata ngay lập tức
   let localParticipant = null
@@ -201,7 +200,9 @@ const ProfileAvatarNCover = ({
   const renderCover = (hasFullBorder = false) => (
     <div
       className={`w-full h-48 md:h-[280px] bg-gray-200 dark:bg-[#242424] relative group/cover overflow-hidden ${
-        hasFullBorder ? "rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F]" : ""
+        hasFullBorder
+          ? "rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F]"
+          : ""
       } ${coverClassName}`}
     >
       {/* Cover Photo Image */}
@@ -358,33 +359,31 @@ const ProfileAvatarNCover = ({
   // Card mode (has children / actions - used in SocialProfileHeader)
   return (
     <div
-      className={`w-full bg-white dark:bg-[#1A1A1A] border border-[#e5e5e5] dark:border-[#3F3F3F] rounded-xl overflow-hidden mb-6 ${className}`}
+      className={`w-full bg-white dark:bg-[#1A1A1A] border border-[#e5e5e5] dark:border-[#3F3F3F] rounded-xl overflow-hidden mb-4 ${className}`}
     >
       {renderCover(false)}
 
       {/* Main Profile Info / Avatar Area (Facebook layout) */}
-      <div className="px-4 sm:px-6 md:px-8 pb-5 pt-0 relative border-b border-gray-100 dark:border-[#2A2A2A]">
+      <div className="px-4 pb-4 pt-0 relative border-b border-gray-100 dark:border-[#2A2A2A]">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           {/* Avatar + Primary Info */}
           <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-5 flex-1 min-w-0">
             {renderAvatar(false)}
-            {headerInfo && <div className="flex-1 min-w-0 pb-1">{headerInfo}</div>}
+            {headerInfo && (
+              <div className="flex-1 min-w-0 pb-1">{headerInfo}</div>
+            )}
           </div>
 
           {/* Right side Actions (Edit, Follow, Request buttons) */}
           {actions && (
-            <div className="flex items-center gap-2 max-[425px]:w-full max-[425px]:justify-start shrink-0 flex-wrap md:flex-nowrap md:pb-1">
+            <div className="flex items-center gap-2 max-[425px]:w-full max-[425px]:justify-start shrink-0 flex-wrap md:flex-nowrap">
               {actions}
             </div>
           )}
         </div>
 
         {/* Fallback if no headerInfo passed: render children in place */}
-        {!headerInfo && children && (
-          <div className="mt-3">
-            {children}
-          </div>
-        )}
+        {!headerInfo && children && <div className="mt-3">{children}</div>}
 
         {/* Extended Section (Bio, Motto, Badges) */}
         {headerInfo && children && (

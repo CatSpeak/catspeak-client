@@ -8,9 +8,7 @@ import {
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPublicProfileQuery } from "@/store/api/userApi"
-import {
-  useGetFriendshipCountsQuery,
-} from "../../../store/api/social/friendshipApi"
+import { useGetFriendshipCountsQuery } from "../../../store/api/social/friendshipApi"
 
 import SocialProfileHeader from "../components/SocialProfileHeader"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
@@ -37,10 +35,9 @@ const Profile = () => {
 
   useEffect(() => {
     if (!urlAccountId && user?.accountId) {
-      navigate(
-        `/workspace/profile/${user.accountId}${location.search}`,
-        { replace: true },
-      )
+      navigate(`/workspace/profile/${user.accountId}${location.search}`, {
+        replace: true,
+      })
     }
   }, [urlAccountId, user, navigate, location.search])
 
@@ -55,12 +52,15 @@ const Profile = () => {
   // Lightweight counts for header badges. Lists are lazy-loaded inside ProfileFriendsTab.
   // Fetched for the target account (own or external) so the header and tab badges show
   // real totals without visiting each sub-tab. Refetch on focus + after mutations.
-  const { data: countsResponse } = useGetFriendshipCountsQuery(targetAccountId, {
-    skip: !targetAccountId,
-    refetchOnFocus: true,
-    refetchOnReconnect: true,
-    refetchOnMountOrArgChange: true,
-  })
+  const { data: countsResponse } = useGetFriendshipCountsQuery(
+    targetAccountId,
+    {
+      skip: !targetAccountId,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+      refetchOnMountOrArgChange: true,
+    },
+  )
 
   const counts = countsResponse?.data ?? countsResponse ?? null
   const friendsCount = counts?.friends ?? counts?.Friends ?? 0
@@ -103,7 +103,7 @@ const Profile = () => {
   ]
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg dark:bg-[#0F0F0F]">
+    <div className="p-4 w-full min-h-[calc(100vh-70px)] bg-primaryBg dark:bg-[#0F0F0F]">
       <FluentAnimation
         duration={0.28}
         direction="up"
@@ -126,7 +126,7 @@ const Profile = () => {
           activeTab={activeTab}
           onChange={setActiveTab}
           fullWidth={false}
-          className="overflow-x-auto scrollbar-hidden mb-6"
+          className="overflow-x-auto scrollbar-hidden mb-4"
         />
 
         {/* Tab Content */}

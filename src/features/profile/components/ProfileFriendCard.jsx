@@ -243,7 +243,9 @@ const ProfileFriendCard = memo(
           <MenuItem
             icon={<MessageSquare />}
             label={t.profile?.friends?.actions?.message || "Nhắn tin"}
-            onClick={() => handleStartChat(user.accountId ?? user.id ?? user.userId, close)}
+            onClick={() =>
+              handleStartChat(user.accountId ?? user.id ?? user.userId, close)
+            }
           />
         )}
 
@@ -275,7 +277,9 @@ const ProfileFriendCard = memo(
           <MenuItem
             icon={<MessageSquare />}
             label={t.profile?.friends?.actions?.message || "Nhắn tin"}
-            onClick={() => handleStartChat(user.accountId ?? user.id ?? user.userId, close)}
+            onClick={() =>
+              handleStartChat(user.accountId ?? user.id ?? user.userId, close)
+            }
           />
         )}
 
@@ -306,7 +310,7 @@ const ProfileFriendCard = memo(
     return (
       <div
         onClick={() => onNavigate?.(user.accountId)}
-        className="group/card flex flex-col overflow-hidden rounded-xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] cursor-pointer select-none"
+        className="group/card flex flex-col overflow-hidden rounded-xl bg-white dark:bg-[#1A1A1A] hover:bg-[#F2F2F2] dark:hover:bg-[#272727] border border-border dark:border-[#3F3F3F] hover:border-[#D5D5D5] dark:hover:border-[#4A4A4A] transition-[background-color,border-color] duration-200 ease-out cursor-pointer select-none"
       >
         {/* Mobile View: ListItem */}
         <ListItem
@@ -361,23 +365,29 @@ const ProfileFriendCard = memo(
             </div>
           }
         >
-          <span className="font-semibold truncate text-gray-900 dark:text-white">{displayName}</span>
-          <span className="text-sm text-secondary dark:text-[#AAAAAA] truncate">{userRole}</span>
+          <span className="font-semibold truncate text-gray-900 dark:text-white">
+            {displayName}
+          </span>
+          <span className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
+            {userRole}
+          </span>
         </ListItem>
 
         {/* Desktop Card Cover: Full 1:1 square photo with AnimatedNameFallback */}
-        <div className="hidden sm:block relative aspect-square w-full overflow-hidden shrink-0">
+        <div className="hidden sm:block relative aspect-square w-full overflow-hidden shrink-0 bg-gray-100 dark:bg-[#1A1A1A]">
           {avatarUrl && !imgError ? (
             <img
               src={avatarUrl}
               alt={displayName}
               onError={() => setImgError(true)}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover/card:scale-105"
+              className="block h-full w-full object-cover"
               loading="lazy"
             />
           ) : (
             <AnimatedNameFallback name={displayName} color={solidColor} />
           )}
+          {/* Hover overlay - same behavior as media preview */}
+          {/* <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/15 transition-colors duration-200 pointer-events-none" /> */}
         </div>
 
         {/* Desktop View: Card Body (Info at top, PillButton at bottom) */}
@@ -388,7 +398,9 @@ const ProfileFriendCard = memo(
               <h3 className="font-semibold text-base text-gray-900 dark:text-white truncate">
                 {displayName}
               </h3>
-              <p className="text-sm text-secondary dark:text-[#AAAAAA] truncate">{userRole}</p>
+              <p className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
+                {userRole}
+              </p>
             </div>
 
             {/* Context Menu inline with Name */}
@@ -485,7 +497,9 @@ const ProfileFriendCard = memo(
               <PillButton
                 variant="secondary"
                 className="w-full"
-                onClick={() => handleStartChat(user.accountId ?? user.id ?? user.userId)}
+                onClick={() =>
+                  handleStartChat(user.accountId ?? user.id ?? user.userId)
+                }
               >
                 {t.profile?.friends?.actions?.message || "Nhắn tin"}
               </PillButton>

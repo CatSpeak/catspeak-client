@@ -9,10 +9,7 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react"
-import {
-  formatDuration,
-  formatFileSize,
-} from "../utils/formatUtils"
+import { formatDuration, formatFileSize } from "../utils/formatUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { FaGoogleDrive } from "react-icons/fa"
 import { useGoogleLogin } from "@react-oauth/google"
@@ -162,29 +159,27 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
   }
 
   return (
-    <div className="group flex flex-col gap-3 rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] min-h-[69px] p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="group flex flex-col gap-4 rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] min-h-[72px] px-4 py-4 sm:py-2 sm:flex-row sm:items-center sm:justify-between">
       {/* Left: metadata */}
       <div className="flex flex-col">
         {/* Top row: meeting ID & potential status badge */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[#990011] dark:text-red-400 font-medium" title={meetingId}>
-            {meetingId}
-          </span>
+          <span title={meetingId}>{meetingId}</span>
         </div>
 
         {/* Meta row: date, duration, size */}
-        <div className="flex items-center gap-4 text-sm text-[#606060] dark:text-[#AAAAAA] flex-wrap mt-1">
-          <span className="flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-4 text-sm text-[#606060] dark:text-[#AAAAAA] flex-wrap">
+          <span className="flex items-center gap-2">
+            <Calendar size={18} />
             {formatDateTime(createdAt)}
           </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
+          <span className="flex items-center gap-2">
+            <Clock size={18} />
             {formatDuration(durationSeconds)}
           </span>
           {hasFileSizeBytes && (
-            <span className="flex items-center gap-1">
-              <HardDrive className="h-3.5 w-3.5" />
+            <span className="flex items-center gap-2">
+              <HardDrive size={18} />
               {formatFileSize(fileSizeBytes)}
             </span>
           )}
@@ -218,8 +213,8 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
       {/* Right: action buttons */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {status === RECORDING_STATUS.UPLOADED_TO_DRIVE ? (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primaryBg dark:bg-[#242424] text-gray-800 dark:text-white text-sm">
-            <FaGoogleDrive className="h-5 w-5" />
+          <div className="flex items-center gap-2 px-4 h-10 rounded-full bg-primaryBg dark:bg-[#242424] text-gray-800 dark:text-white text-sm">
+            <FaGoogleDrive size={20} />
             {t?.recordings?.actions?.savedToDrive || "Saved to Drive"}
           </div>
         ) : (

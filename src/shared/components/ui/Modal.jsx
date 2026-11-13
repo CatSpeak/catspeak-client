@@ -92,7 +92,10 @@ const ModalContent = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{
+        duration: 0.2,
+        ease: [0.34, 0.8, 0.34, 1.0],
+      }}
     >
       {/* Backdrop */}
       <div
@@ -108,7 +111,16 @@ const ModalContent = ({
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
-        transition={{ duration: 0.2 }}
+        transition={{
+          opacity: {
+            duration: 0.2,
+            ease: [0.34, 0.8, 0.34, 1.0],
+          },
+          scale: {
+            duration: 0.35,
+            ease: [0.42, 1.67, 0.21, 0.9],
+          },
+        }}
         className={`relative flex flex-col w-full shadow-xl overflow-hidden ${
           /(^|\s)(md:|lg:|xl:|2xl:)?h-/.test(className)
             ? ""

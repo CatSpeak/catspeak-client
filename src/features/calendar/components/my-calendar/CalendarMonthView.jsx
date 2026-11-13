@@ -1,32 +1,32 @@
-import React from 'react'
-import dayjs from 'dayjs'
-import { useTimezone } from '@/shared/hooks/useTimezone'
-import { useLanguage } from '@/shared/context/LanguageContext'
+import React from "react"
+import dayjs from "dayjs"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const EVENT_COLORS = {
-  'teaching-schedule': '#34ce56',
-  'student-schedule': '#0e6eec',
-  'my-event': '#f83b4f',
-  'registered-event': '#e2b60a',
-  'other': '#888888'
+  "teaching-schedule": "#34ce56",
+  "student-schedule": "#0e6eec",
+  "my-event": "#f83b4f",
+  "registered-event": "#e2b60a",
+  other: "#888888",
 }
 
 const CalendarMonthView = ({
   currentDate,
   selectedDate,
   onSelectDate,
-  events
+  events,
 }) => {
   const { formatScheduleDays, getZoneDateStr } = useTimezone()
   const { t } = useLanguage()
 
   // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
-  const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day =>
-    formatScheduleDays([day])
+  const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map(
+    (day) => formatScheduleDays([day]),
   )
 
-  const startDay = (currentDate.startOf('month').day() + 6) % 7 // Make Monday = 0
-  const prevDays = currentDate.subtract(1, 'month').daysInMonth()
+  const startDay = (currentDate.startOf("month").day() + 6) % 7 // Make Monday = 0
+  const prevDays = currentDate.subtract(1, "month").daysInMonth()
   const daysInMonth = currentDate.daysInMonth()
 
   const calendarDates = Array.from({ length: 42 }, (_, i) => {
@@ -35,79 +35,108 @@ const CalendarMonthView = ({
       return {
         day: prevDays + dayValue,
         isCurrentMonth: false,
-        dateStr: currentDate.subtract(1, 'month').date(prevDays + dayValue).format('YYYY-MM-DD')
+        dateStr: currentDate
+          .subtract(1, "month")
+          .date(prevDays + dayValue)
+          .format("YYYY-MM-DD"),
       }
     }
     if (dayValue > daysInMonth) {
       return {
         day: dayValue - daysInMonth,
         isCurrentMonth: false,
-        dateStr: currentDate.add(1, 'month').date(dayValue - daysInMonth).format('YYYY-MM-DD')
+        dateStr: currentDate
+          .add(1, "month")
+          .date(dayValue - daysInMonth)
+          .format("YYYY-MM-DD"),
       }
     }
     return {
       day: dayValue,
       isCurrentMonth: true,
-      dateStr: currentDate.date(dayValue).format('YYYY-MM-DD')
+      dateStr: currentDate.date(dayValue).format("YYYY-MM-DD"),
     }
   })
 
   return (
-    <div className="w-full h-full flex flex-col min-h-0 overflow-y-auto scrollbar-app pr-2">
+    <div className="w-full h-full flex flex-col min-h-0 overflow-y-auto scrollbar-app">
       {/* Days Header */}
-      <div className="grid grid-cols-7 gap-1 text-center border-b border-border dark:border-[#3F3F3F] pb-4 mb-4">
+      <div className="grid grid-cols-7 gap-1 text-center border-b border-border dark:border-[#3F3F3F] p-4">
         {DAY_LABELS.map((label, idx) => (
-          <div key={label} className="text-base text-[#1A1A1A] dark:text-neutral-300 font-medium tracking-wider">
+          <div
+            key={label}
+            className="text-base text-[#1A1A1A] dark:text-neutral-300 font-medium tracking-wider"
+          >
             <span className="hidden sm:inline">{label}</span>
-            <span className="sm:hidden">{t.calendar?.weekDaysShort?.[idx] || label}</span>
+            <span className="sm:hidden">
+              {t.calendar?.weekDaysShort?.[idx] || label}
+            </span>
           </div>
         ))}
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-y-3">
+      <div className="grid grid-cols-7 gap-y-2">
         {calendarDates.map((dateObj, idx) => {
           const { day, isCurrentMonth } = dateObj
 
           if (!isCurrentMonth) {
             return (
-              <div key={`empty-${idx}`} className="min-h-[64px] flex flex-col items-center justify-start pt-2">
+              <div
+                key={`empty-${idx}`}
+                className="min-h-[64px] flex flex-col items-center justify-center"
+              >
                 <div className="w-10 h-10 flex shrink-0 items-center justify-center text-base text-gray-300 dark:text-neutral-600 font-medium">
-                  {String(day).padStart(2, '0')}
+                  {String(day).padStart(2, "0")}
                 </div>
               </div>
             )
           }
 
-          const isToday = day === dayjs().date() && currentDate.isSame(dayjs(), 'month')
+          const isToday =
+            day === dayjs().date() && currentDate.isSame(dayjs(), "month")
           const isSelected = day === selectedDate
           const dayEvents = events.filter((ev) => {
             if (!ev.startTime) return false
             const evDateStr = getZoneDateStr(ev.startTime)
             return evDateStr === dateObj.dateStr
           })
-          
-          const uniqueTypes = [...new Set(dayEvents.map(ev => ev.eventType || 'other'))]
+
+          const uniqueTypes = [
+            ...new Set(dayEvents.map((ev) => ev.eventType || "other")),
+          ]
 
           return (
-            <div key={`day-${idx}`} className="min-h-[64px] flex flex-col items-center justify-start pt-2 gap-1">
+            <div
+              key={`day-${idx}`}
+              className="min-h-[64px] flex flex-col items-center justify-center gap-1"
+            >
               <button
                 onClick={() => onSelectDate(day)}
                 className={`
                   w-10 h-10 flex shrink-0 items-center justify-center rounded-full text-base font-medium transition-all
-                  ${isSelected ? 'bg-[#990011] text-white border border-[#990011] dark:bg-red-600 dark:border-red-500' :
-                    isToday ? 'text-[#1A1A1A] dark:text-white border border-[#990011] dark:border-red-400' : 'text-[#1A1A1A] dark:text-white hover:bg-[#F5F5F5] dark:hover:bg-[#272727]'}
+                  ${
+                    isSelected
+                      ? "bg-[#990011] text-white border border-[#990011] dark:bg-red-600 dark:border-red-500"
+                      : isToday
+                        ? "text-[#1A1A1A] dark:text-white border border-[#990011] dark:border-red-400"
+                        : "text-[#1A1A1A] dark:text-white hover:bg-[#F5F5F5] dark:hover:bg-[#272727]"
+                  }
                 `}
               >
-                {String(day).padStart(2, '0')}
+                {String(day).padStart(2, "0")}
               </button>
+
               {uniqueTypes.length > 0 && (
                 <div className="flex justify-center items-center gap-1 flex-wrap px-1">
-                  {uniqueTypes.map(type => (
-                    <div 
+                  {uniqueTypes.map((type) => (
+                    <div
                       key={type}
-                      className="rounded-full w-1.5 h-1.5" 
-                      style={{ backgroundColor: EVENT_COLORS[type] || EVENT_COLORS['other'] }} 
+                      className="rounded-full w-1.5 h-1.5"
+                      style={{
+                        backgroundColor:
+                          EVENT_COLORS[type] || EVENT_COLORS["other"],
+                      }}
                     />
                   ))}
                 </div>

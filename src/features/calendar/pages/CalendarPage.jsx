@@ -20,7 +20,10 @@ import {
   isUrl,
   openInNewTab,
 } from "@/shared/utils/locationLink"
-import { WorkshopCarousel } from "@/features/workshops"
+import {
+  WorkshopCarousel,
+  WorkshopJugglingCarousel,
+} from "@/features/workshops"
 import {
   CreateRoomModal,
   JoinRoomModal,
@@ -150,27 +153,11 @@ const CalendarPage = () => {
   ]
 
   const handleNextMonth = () => {
-    if (viewType === "week") {
-      const nextWeek = currentDate
-        .date(Math.min(selectedDate, currentDate.daysInMonth()))
-        .add(1, "week")
-      setCurrentDate(nextWeek)
-      setSelectedDate(nextWeek.date())
-    } else {
-      setCurrentDate((d) => d.add(1, "month"))
-    }
+    setCurrentDate((d) => d.add(1, "month"))
   }
 
   const handlePrevMonth = () => {
-    if (viewType === "week") {
-      const prevWeek = currentDate
-        .date(Math.min(selectedDate, currentDate.daysInMonth()))
-        .subtract(1, "week")
-      setCurrentDate(prevWeek)
-      setSelectedDate(prevWeek.date())
-    } else {
-      setCurrentDate((d) => d.subtract(1, "month"))
-    }
+    setCurrentDate((d) => d.subtract(1, "month"))
   }
 
   const { data: eventCountsData } = useGetEventCountsQuery({
@@ -329,7 +316,7 @@ const CalendarPage = () => {
           <PageTitle>{cal.schedule || "Sự kiện"}</PageTitle>
         </div>
 
-        <WorkshopCoverflowCarousel />
+        <WorkshopJugglingCarousel />
 
         <div className="px-4 mb-16">
           <div className="flex items-center gap-2 mb-4 justify-end">

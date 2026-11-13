@@ -42,6 +42,8 @@ const SocialProfileHeader = ({
   const [isBioExpanded, setIsBioExpanded] = useState(false)
   const [isStartingChat, setIsStartingChat] = useState(false)
 
+  console.log(profile)
+
   const displayName = profile?.fullName || profile?.username || ""
   const username = profile?.username || ""
   const showHandle = Boolean(
@@ -236,7 +238,7 @@ const SocialProfileHeader = ({
   )
 
   const headerInfo = (
-    <div className="flex flex-col gap-1.5 pt-3 md:pt-4">
+    <div className="flex flex-col gap-1 pt-4">
       {/* Name and Badges */}
       <div className="flex items-center flex-wrap gap-2.5">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight truncate max-w-full">
@@ -258,19 +260,23 @@ const SocialProfileHeader = ({
       </div>
 
       {/* Handle & Headline */}
-      <div className="flex flex-col gap-0.5">
-        {showHandle && (
-          <span className="text-xs font-medium text-gray-500 dark:text-neutral-400">@{username}</span>
-        )}
-        {headline && (
-          <p className="text-sm font-medium text-gray-600 dark:text-neutral-300 line-clamp-2 max-w-2xl">
-            {headline}
-          </p>
-        )}
-      </div>
+      {(showHandle || headline) && (
+        <div className="flex flex-col">
+          {showHandle && (
+            <span className="text-xs font-medium text-gray-500 dark:text-neutral-400">
+              @{username}
+            </span>
+          )}
+          {headline && (
+            <p className="text-sm font-medium text-gray-600 dark:text-neutral-300 line-clamp-2 max-w-2xl">
+              {headline}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Stats Meta */}
-      <div className="flex items-center flex-wrap gap-2 text-sm text-gray-500 dark:text-neutral-400 mt-0.5">
+      <div className="flex items-center flex-wrap gap-2 text-sm text-gray-500 dark:text-neutral-400">
         <span className="font-semibold text-gray-800 dark:text-neutral-200">
           {friendsCount}{" "}
           <span className="font-normal text-gray-500 dark:text-neutral-400 lowercase">

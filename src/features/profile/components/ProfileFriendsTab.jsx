@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react"
-import { User, Search, ListFilter, X } from "lucide-react"
+import { User, Search, ListFilter } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
@@ -9,6 +9,9 @@ import IconButton from "@/shared/components/ui/buttons/IconButton"
 import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import { useProfileFriends } from "../hooks/useProfileFriends"
 import ProfileFriendCard from "./ProfileFriendCard"
+import ProfileFriendsFilterModal from "./ProfileFriendsFilterModal"
+import ChipFilter from "@/shared/components/ChipFilter"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 
 const getAccountId = (u) => u?.accountId ?? u?.id ?? u?.userId
 
@@ -54,12 +57,6 @@ const ProfileFriendsTab = ({
   })
 
   const [showFilter, setShowFilter] = useState(false)
-  const [draft, setDraft] = useState(activeFilter)
-
-  const openFilter = () => {
-    setDraft(activeFilter)
-    setShowFilter(true)
-  }
 
   const navigateToProfile = useCallback(
     (accountId) => {
@@ -68,14 +65,10 @@ const ProfileFriendsTab = ({
     [navigate],
   )
 
-  const applyFilter = () => {
-    setActiveFilter({ ...draft })
-    setShowFilter(false)
-  }
-
   const renderCard = (user, index, extra = {}) => {
     const accountId = getAccountId(user)
-    const isFollowing = accountId != null && followingIdSet?.has(Number(accountId))
+    const isFollowing =
+      accountId != null && followingIdSet?.has(Number(accountId))
     const isSent = accountId != null && sentRequestIds?.has(Number(accountId))
     const mappedFriendshipId =
       accountId != null ? outgoingMap?.get(Number(accountId)) : undefined
@@ -88,8 +81,12 @@ const ProfileFriendsTab = ({
         currentUserId={currentUserId}
         isFollowing={isFollowing}
         isRequestSent={isSent}
-        friendshipId={user?.friendshipId ?? mappedFriendshipId ?? extra.friendshipId}
-        isOutgoingRequest={Boolean(extra.isOutgoingRequest || user?.isOutgoingRequest)}
+        friendshipId={
+          user?.friendshipId ?? mappedFriendshipId ?? extra.friendshipId
+        }
+        isOutgoingRequest={Boolean(
+          extra.isOutgoingRequest || user?.isOutgoingRequest,
+        )}
         onRequestSent={markRequestSent}
         onRequestFailed={unmarkRequestSent}
         onFollowed={markFollowed}
@@ -100,137 +97,81 @@ const ProfileFriendsTab = ({
   }
 
   const renderGrid = (items, extra = {}) => (
-    <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+    <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
       {items.map((user, index) => renderCard(user, index, extra))}
     </div>
   )
 
   const isPendingTab = activeSubTab === "pending"
+  const modalFilterCount =
+    (activeFilter.accountType && activeFilter.accountType !== "all" ? 1 : 0) +
+    ((activeFilter.level || "").trim() ? 1 : 0)
 
   return (
     <div className="w-full flex flex-col gap-4 min-h-[500px]">
-      {/* Top Controls Bar: Sub-tab Pill Buttons + small filter button (no more full-width search) */}
-      <div className="flex items-center justify-between gap-2">
-        {/* Sub-tab Pill Buttons (horizontal scroll on mobile) */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hidden flex-1 min-w-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
-          {subTabs.map((tab) => {
-            const tabKey = tab.id ?? tab.value
-            const isActive = activeSubTab === tabKey
-            const Icon = tab.icon
+      {/* Search and filter controls */}
+      <div className="relative shrink-0">
+        {/* Row 1: Search input + Filter button */}
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="w-full max-w-[360px]">
+            <SearchInput
+              value={activeFilter.keyword || ""}
+              onChange={(val) => setActiveFilter({ keyword: val })}
+              onClear={() => setActiveFilter({ keyword: "" })}
+              placeholder={
+                t.profile?.friends?.searchPlaceholder || "Tìm kiếm bạn bè..."
+              }
+            />
+          </div>
 
-            return (
-              <PillButton
-                key={tabKey}
-                variant={isActive ? "primary" : "secondary"}
-                onClick={() => setActiveSubTab(tabKey)}
-                startIcon={Icon ? <Icon /> : null}
-                className="shrink-0"
-              >
-                {tab.label}
-                {tab.badge != null && (
-                  <span
-                    className={`ml-1 inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full text-xs font-semibold ${
-                      isActive
-                        ? "bg-white/25 text-white"
-                        : "bg-gray-100 dark:bg-[#272727] text-gray-700 dark:text-gray-200"
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
-              </PillButton>
-            )
-          })}
-        </div>
-
-        {/* Small filter button with active-count badge */}
-        <div className="relative shrink-0">
-          <IconButton
+          <PillButton
             title={t.profile?.friends?.filter || "Bộ lọc"}
-            size="md"
-            variant={filterActiveCount > 0 ? "primary" : "secondary"}
-            onClick={() => (showFilter ? setShowFilter(false) : openFilter())}
-            className="relative"
+            variant={modalFilterCount > 0 ? "primary" : "secondary"}
+            onClick={() => setShowFilter(true)}
+            startIcon={<ListFilter />}
+            className="relative shrink-0"
           >
-            <ListFilter />
-            {filterActiveCount > 0 && (
+            {t.profile?.friends?.filter || "Bộ lọc"}
+
+            {modalFilterCount > 0 && (
               <span className="absolute -top-1 -right-1 inline-flex min-w-[18px] h-[18px] px-1 items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-bold">
-                {filterActiveCount}
+                {modalFilterCount}
               </span>
             )}
-          </IconButton>
-
-          {showFilter && (
-            <>
-              {/* Mobile backdrop */}
-              <div
-                className="fixed inset-0 bg-black/30 z-40 sm:hidden"
-                onClick={() => setShowFilter(false)}
-              />
-              {/* Panel: bottom-sheet on mobile, popover on desktop */}
-              <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] p-4 shadow-xl sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:rounded-xl sm:z-30">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
-                    {t.profile?.friends?.filterTitle || "Lọc bạn bè"}
-                  </h4>
-                  <button
-                    onClick={() => setShowFilter(false)}
-                    className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] text-gray-500 dark:text-[#AAAAAA]"
-                    aria-label="Close"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-gray-600 dark:text-[#AAAAAA]">{t.profile?.friends?.searchPlaceholder || "Tìm kiếm (tên...)"}</span>
-                    <input
-                      value={draft.keyword || ""}
-                      onChange={(e) => setDraft((d) => ({ ...d, keyword: e.target.value }))}
-                      placeholder={t.profile?.friends?.searchPlaceholder || "Tìm kiếm bạn bè..."}
-                      className="h-10 px-3 rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-gray-900 dark:text-white outline-none focus:border-gray-400 dark:focus:border-neutral-500"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-gray-600 dark:text-[#AAAAAA]">{t.profile?.friends?.accountType || "Vai trò"}</span>
-                    <select
-                      value={draft.accountType || "all"}
-                      onChange={(e) => setDraft((d) => ({ ...d, accountType: e.target.value }))}
-                      className="h-10 px-2 rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-gray-900 dark:text-white outline-none"
-                    >
-                      <option value="all">{t.profile?.friends?.allRoles || "Tất cả"}</option>
-                      <option value="teacher">{t.profile?.friends?.teacher || "Giảng viên"}</option>
-                      <option value="student">{t.profile?.friends?.member || "Thành viên"}</option>
-                    </select>
-                  </label>
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-gray-600 dark:text-[#AAAAAA]">Level</span>
-                    <input
-                      value={draft.level || ""}
-                      onChange={(e) => setDraft((d) => ({ ...d, level: e.target.value }))}
-                      placeholder="vd: N5, N4..."
-                      className="h-10 px-3 rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-gray-900 dark:text-white outline-none focus:border-gray-400 dark:focus:border-neutral-500"
-                    />
-                  </label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <PillButton variant="secondary" className="flex-1" onClick={() => { clearActiveFilter(); setDraft({ keyword: "", accountType: "all", level: "" }); setShowFilter(false) }}>
-                      {t.profile?.friends?.clearFilter || "Xóa lọc"}
-                    </PillButton>
-                    <PillButton variant="primary" className="flex-1" onClick={applyFilter}>
-                      {t.profile?.friends?.applyFilter || "Áp dụng"}
-                    </PillButton>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
+          </PillButton>
         </div>
+
+        {/* Row 2: ChipFilter */}
+        <ChipFilter
+          options={subTabs.map((tab) => {
+            const Icon = tab.icon
+
+            return {
+              key: tab.id ?? tab.value,
+              label: tab.label,
+              icon: Icon ? <Icon /> : undefined,
+              count: tab.badge != null ? Number(tab.badge) : undefined,
+            }
+          })}
+          value={activeSubTab}
+          onChange={setActiveSubTab}
+          wrap={false}
+          wrapDesktop={true}
+        />
+
+        <ProfileFriendsFilterModal
+          open={showFilter}
+          onClose={() => setShowFilter(false)}
+          initialFilters={activeFilter}
+          onApply={setActiveFilter}
+          onClear={clearActiveFilter}
+        />
       </div>
 
       {/* Grid / List Content */}
       <div className="w-full">
         {isLoading ? (
-          <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
@@ -249,14 +190,21 @@ const ProfileFriendsTab = ({
             ))}
           </div>
         ) : isPendingTab ? (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             <section>
               <h4 className="font-semibold text-sm mb-2 text-gray-900 dark:text-white">
-                {t.profile?.friends?.pendingIncoming || "Chờ bạn duyệt"} ({pendingIncomingList.length})
+                {t.profile?.friends?.pendingIncoming || "Chờ bạn duyệt"} (
+                {pendingIncomingList.length})
               </h4>
               {pendingIncomingList.length === 0 ? (
                 <FluentCard>
-                  <EmptyState message={t.profile?.friends?.empty?.noPending || "Không có yêu cầu nào."} icon={User} />
+                  <EmptyState
+                    message={
+                      t.profile?.friends?.empty?.noPending ||
+                      "Không có yêu cầu nào."
+                    }
+                    icon={User}
+                  />
                 </FluentCard>
               ) : (
                 renderGrid(pendingIncomingList)
@@ -264,14 +212,24 @@ const ProfileFriendsTab = ({
             </section>
             <section>
               <h4 className="font-semibold text-sm mb-2 text-gray-900 dark:text-white">
-                {t.profile?.friends?.pendingOutgoing || "Bạn đã gửi"} ({pendingOutgoingList.length})
+                {t.profile?.friends?.pendingOutgoing || "Bạn đã gửi"} (
+                {pendingOutgoingList.length})
               </h4>
               {pendingOutgoingList.length === 0 ? (
                 <FluentCard>
-                  <EmptyState message={t.profile?.friends?.empty?.noSent || "Chưa gửi lời mời nào."} icon={User} />
+                  <EmptyState
+                    message={
+                      t.profile?.friends?.empty?.noSent ||
+                      "Chưa gửi lời mời nào."
+                    }
+                    icon={User}
+                  />
                 </FluentCard>
               ) : (
-                renderGrid(pendingOutgoingList, { isOutgoingRequest: true, activeSubTabOverride: "pending" })
+                renderGrid(pendingOutgoingList, {
+                  isOutgoingRequest: true,
+                  activeSubTabOverride: "pending",
+                })
               )}
             </section>
             {hasMore && <div ref={bottomSentinelRef} className="h-4 w-full" />}
@@ -288,7 +246,9 @@ const ProfileFriendsTab = ({
             {renderGrid(list)}
             {hasMore && <div ref={bottomSentinelRef} className="h-4 w-full" />}
             {fetchingRecs && (
-              <div className="text-center text-sm text-gray-500 dark:text-[#AAAAAA] py-2">...</div>
+              <div className="text-center text-sm text-gray-500 dark:text-[#AAAAAA] py-2">
+                ...
+              </div>
             )}
           </>
         )}

@@ -26,9 +26,6 @@ export { default as GroupTab } from "./components/tabs/GroupTab"
 export { default as ClassTab } from "./components/tabs/ClassTab"
 export { default as ForumTab } from "./components/tabs/ForumTab"
 
-// Pages
-export { default as CustomRoomsPage } from "./pages/CustomRoomsPage"
-
 // Hooks
 export { useRoomsPageLogic } from "./hooks/useRoomsPageLogic"
 export { useMediaPreview } from "./hooks/useMediaPreview"

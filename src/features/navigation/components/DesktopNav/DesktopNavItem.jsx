@@ -47,7 +47,7 @@ const DesktopNavItem = ({
             rightContent={rightContent}
             rightText={rightText}
             className={isDocked ? "justify-center rounded-xl" : ""}
-            contentClassName={`relative transition-colors duration-150 ${
+            contentClassName={`relative ${
               isDocked ? "px-0 justify-center rounded-xl" : "px-4"
             } ${
               isActive

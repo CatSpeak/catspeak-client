@@ -346,12 +346,60 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   }
 
   return (
-    <div className="w-full flex flex-col gap-6 min-h-[500px]">
-      <div
-        className={`flex flex-col md:flex-row md:items-center gap-4 ${
-          isOwnProfile ? "justify-between" : "justify-end"
-        }`}
-      >
+    <div className="w-full flex flex-col gap-4 min-h-[500px]">
+      <div className="flex flex-col gap-4">
+        {/* Row 1: Search + View toggle */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="w-full max-w-[360px]">
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder={t.materials.searchMaterialsPlaceholder}
+            />
+          </div>
+
+          <div className="inline-flex shrink-0 items-center gap-2 rounded-full border bg-muted/50">
+            <button
+              type="button"
+              onClick={() => setViewLayout("grid")}
+              title="Grid view"
+              aria-label="Grid view"
+              aria-pressed={viewLayout === "grid"}
+              className="group/icon flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus:outline-none touch-manipulation"
+            >
+              <span
+                className={`pointer-events-none inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+                  viewLayout === "grid"
+                    ? "bg-[#990011] text-white shadow-sm"
+                    : "bg-transparent text-muted-foreground hover:bg-neutral-200/80 hover:text-foreground dark:hover:bg-[#3D3D3D]"
+                }`}
+              >
+                <LayoutGrid className="h-6 w-6 pointer-events-none" />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setViewLayout("list")}
+              title="List view"
+              aria-label="List view"
+              aria-pressed={viewLayout === "list"}
+              className="group/icon flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus:outline-none touch-manipulation"
+            >
+              <span
+                className={`pointer-events-none inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+                  viewLayout === "list"
+                    ? "bg-[#990011] text-white shadow-sm"
+                    : "bg-transparent text-muted-foreground hover:bg-neutral-200/80 hover:text-foreground dark:hover:bg-[#3D3D3D]"
+                }`}
+              >
+                <TableProperties className="h-6 w-6 pointer-events-none" />
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Row 2: Filters (own profile only) */}
         {isOwnProfile && (
           <ChipFilter
             items={filterTabs}
@@ -361,31 +409,6 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
             className="flex items-center gap-2 overflow-x-auto scrollbar-hidden"
           />
         )}
-
-        <div className="flex flex-row items-center gap-2 shrink-0">
-          <div className="w-full sm:w-64">
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder={t.materials.searchMaterialsPlaceholder}
-              className="!h-10"
-            />
-          </div>
-          <IconButton
-            variant="secondary"
-            size="sm"
-            onClick={() =>
-              setViewLayout(viewLayout === "grid" ? "list" : "grid")
-            }
-            title={
-              viewLayout === "grid"
-                ? "Switch to list view"
-                : "Switch to grid view"
-            }
-          >
-            {viewLayout === "grid" ? <TableProperties /> : <LayoutGrid />}
-          </IconButton>
-        </div>
       </div>
 
       {filteredFolders.length === 0 && filteredFiles.length === 0 ? (
@@ -399,7 +422,9 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         <div className="flex flex-col gap-6">
           {filteredFolders.length > 0 && (
             <div>
-              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t.materials.folders}</h3>
+              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                {t.materials.folders}
+              </h3>
               <div
                 className={`grid gap-2 ${viewLayout === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
               >
@@ -480,7 +505,9 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
 
           {filteredFiles.length > 0 && (
             <div>
-              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t.materials.files}</h3>
+              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                {t.materials.files}
+              </h3>
               <div
                 className={`grid gap-2 ${viewLayout === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
               >

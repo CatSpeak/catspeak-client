@@ -62,8 +62,8 @@ const ListItem = ({
   // Do NOT use runtime string interpolation (e.g. `hover:${...}`) as it breaks Tailwind's JIT scanner
   // and causes dark-mode hover contrast failures (e.g. white text on bright light hover background).
   const defaultHoverClasses = selected
-    ? "hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D] group-hover:bg-itemActiveHover dark:group-hover:bg-[#3D3D3D]"
-    : "hover:bg-neutral-100 dark:hover:bg-[#272727] group-hover:bg-neutral-100 dark:group-hover:bg-[#272727]"
+    ? "hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D]"
+    : "hover:bg-neutral-100 dark:hover:bg-[#272727]"
 
   const hoverClasses = hoverBgColor || defaultHoverClasses
 
@@ -91,7 +91,7 @@ const ListItem = ({
       {...props}
     >
       <div
-        className={`w-full ${heightClass} px-4 flex items-center justify-between transition-colors duration-200 ease-in-out rounded-[inherit] ${baseBgClass} ${innerHoverClasses} ${contentClassName}`}
+        className={`w-full ${heightClass} px-4 flex items-center justify-between rounded-[inherit] ${baseBgClass} ${innerHoverClasses} ${contentClassName}`}
       >
         <div className="flex items-center gap-4 min-w-0 flex-1 my-auto">
           {leftContent && (

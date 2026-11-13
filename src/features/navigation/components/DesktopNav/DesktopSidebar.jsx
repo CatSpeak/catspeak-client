@@ -27,22 +27,17 @@ const normalizePath = (path) => {
 
 const DockButton = ({ to, onClick, icon: Icon, label, isActive }) => (
   <div className="relative group/dock px-2 py-1">
-    <Motion.div
-      whileTap={{ scale: 0.92 }}
-      transition={{ type: "spring", stiffness: 450, damping: 26 }}
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer outline-none transition-colors duration-150 relative z-10 ${
+        isActive
+          ? "bg-white text-cath-red-700 shadow-md dark:bg-cath-red-700 dark:text-white dark:shadow-md"
+          : "text-white/80 hover:text-white hover:bg-white/15 active:bg-white/25 dark:text-[#AAAAAA] dark:hover:text-white dark:hover:bg-[#272727] dark:active:bg-[#3D3D3D]"
+      }`}
     >
-      <Link
-        to={to}
-        onClick={onClick}
-        className={`w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer outline-none transition-colors duration-150 ${
-          isActive
-            ? "bg-white text-cath-red-700 shadow-md active:bg-gray-100 dark:bg-cath-red-700 dark:text-white dark:shadow-md dark:active:bg-cath-red-800"
-            : "text-white/80 hover:text-white hover:bg-white/15 active:bg-white/25 dark:text-[#AAAAAA] dark:hover:text-white dark:hover:bg-[#272727] dark:active:bg-[#333333]"
-        }`}
-      >
-        {Icon && <Icon />}
-      </Link>
-    </Motion.div>
+      {Icon && <Icon />}
+    </Link>
 
     {/* Tooltip on Hover */}
     <div className="absolute left-full ml-6 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 dark:bg-[#1A1A1A] dark:border dark:border-[#3F3F3F] text-white text-xs font-semibold rounded-md opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none drop-shadow-md flex items-center">
@@ -246,26 +241,21 @@ const DesktopSidebar = () => {
       data-tour="main-sidebar"
     >
       {/* 1. PRIMARY SLIM DOCK (ALWAYS DOCKED - 72px) */}
-      <div className="h-full bg-cath-red-700 dark:bg-[#0F0F0F] text-white flex flex-col items-center shrink-0 shadow-lg relative z-20 transition-colors duration-200 border-r border-border dark:border-[#3F3F3F]">
+      <div className="h-full w-[72px] bg-cath-red-700 dark:bg-[#0F0F0F] text-white flex flex-col items-center shrink-0 shadow-lg relative z-20 transition-colors duration-200 border-r border-border dark:border-[#3F3F3F]">
         {/* Brand Icon */}
-        <div className="py-4 flex items-center justify-center">
-          <Motion.div
-            whileTap={{ scale: 0.92 }}
-            transition={{ type: "spring", stiffness: 450, damping: 26 }}
+        <div className="py-4 flex items-center justify-center relative z-10">
+          <Link
+            to="/"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center outline-none select-none cursor-pointer transition-colors duration-150 hover:bg-white/15 active:bg-white/25 dark:hover:bg-[#272727] dark:active:bg-[#3D3D3D]"
+            title="CatSpeak Home"
           >
-            <Link
-              to="/"
-              className="flex items-center justify-center outline-none select-none cursor-pointer"
-              title="CatSpeak Home"
-            >
-              <img
-                src={LandingPageIcon}
-                alt="Cat Speak"
-                className="w-10 h-10 object-contain drop-shadow-sm rounded-full"
-                draggable={false}
-              />
-            </Link>
-          </Motion.div>
+            <img
+              src={LandingPageIcon}
+              alt="Cat Speak"
+              className="w-10 h-10 object-contain drop-shadow-sm rounded-full"
+              draggable={false}
+            />
+          </Link>
         </div>
 
         {/* Dock Section Icons */}

@@ -43,7 +43,7 @@ const IconButton = ({
     white:
       "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 group-hover/icon:bg-gray-50 shadow-xs",
     filled:
-      "bg-primaryBg dark:bg-[#1A1A1A] dark:text-gray-200 hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#E6E6E6] dark:group-active/icon:bg-[#3D3D3D]",
+      "bg-primaryBg dark:bg-[#1A1A1A] text-gray-700 dark:text-gray-200 hover:bg-[#E6E6E6] dark:hover:bg-[#272727] active:bg-[#D9D9D9] dark:active:bg-[#3D3D3D] group-hover/icon:bg-[#E6E6E6] dark:group-hover/icon:bg-[#272727] group-active/icon:bg-[#D9D9D9] dark:group-active/icon:bg-[#3D3D3D] transition-colors duration-200 ease-m3-expressive-default-effects",
     ghost:
       "bg-transparent hover:bg-neutral-200/80 dark:hover:bg-[#3D3D3D] active:bg-neutral-300 dark:active:bg-[#4D4D4D] group-hover/icon:bg-neutral-200/80 dark:group-hover/icon:bg-[#3D3D3D] group-active/icon:bg-neutral-300 dark:group-active/icon:bg-[#4D4D4D] text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white group-hover/icon:text-gray-900 dark:group-hover/icon:text-white",
     iconOnly:

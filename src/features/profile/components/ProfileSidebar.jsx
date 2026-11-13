@@ -69,21 +69,18 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
       {/* Suggested Friends Block */}
       <FluentCard padding="p-0" className="overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="h-14 px-4 sm:px-6 flex items-center justify-between">
+        <div className="h-14 px-4 flex items-center justify-between">
           <h2 className="font-bold text-gray-900 dark:text-white">
             {t.profile?.sidebar?.suggestedFriends || "Đề xuất bạn bè"}
           </h2>
         </div>
 
         {/* Body / ListItems */}
-        <div className="flex flex-col gap-1 px-1">
+        <div className="flex flex-col">
           {isLoadingRecs ? (
             <div className="flex flex-col gap-1 px-1 py-1">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-[72px] px-4 flex items-center gap-4 rounded-xl"
-                >
+                <div key={i} className="h-[72px] px-4 flex items-center gap-4">
                   <Skeleton className="w-10 h-10 rounded-full shrink-0" />
                   <div className="flex flex-col gap-2 flex-1 min-w-0">
                     <Skeleton className="h-4 w-28 rounded" />
@@ -103,57 +100,59 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
               />
             </div>
           ) : (
-            recommendations.map((user) => (
-              <ListItem
-                key={user.accountId}
-                hoverEffect={true}
-                lines={2}
-                className="rounded-xl overflow-hidden"
-                onClick={() => {
-                  navigate(`/workspace/profile/${user.accountId}`)
-                }}
-                leftContent={
-                  <Avatar
-                    size={40}
-                    src={user.avatarImageUrl}
-                    name={user.nickname || user.username}
-                    accountId={user.accountId}
-                  />
-                }
-                rightContent={
-                  sentRequests.has(user.accountId) ? (
-                    <PillButton variant="secondary" disabled>
-                      {t.profile?.social?.requestSent || "Đã gửi"}
-                    </PillButton>
-                  ) : (
-                    <PillButton
-                      variant="primary"
-                      onClick={(e) => handleAddFriend(e, user.accountId)}
-                      loading={loadingIds.has(user.accountId)}
-                    >
-                      {t.profile?.social?.addFriend || "Kết bạn"}
-                    </PillButton>
-                  )
-                }
-              >
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="truncate">
-                    {user.nickname || user.username}
-                  </span>
-                  {user?.isTeacher && <TeacherBadge />}
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1">
+              {recommendations.map((user) => (
+                <ListItem
+                  key={user.accountId}
+                  hoverEffect={true}
+                  lines={2}
+                  className="overflow-hidden"
+                  onClick={() => {
+                    navigate(`/workspace/profile/${user.accountId}`)
+                  }}
+                  leftContent={
+                    <Avatar
+                      size={40}
+                      src={user.avatarImageUrl}
+                      name={user.nickname || user.username}
+                      accountId={user.accountId}
+                    />
+                  }
+                  rightContent={
+                    sentRequests.has(user.accountId) ? (
+                      <PillButton variant="secondary" disabled>
+                        {t.profile?.social?.requestSent || "Đã gửi"}
+                      </PillButton>
+                    ) : (
+                      <PillButton
+                        variant="primary"
+                        onClick={(e) => handleAddFriend(e, user.accountId)}
+                        loading={loadingIds.has(user.accountId)}
+                      >
+                        {t.profile?.social?.addFriend || "Kết bạn"}
+                      </PillButton>
+                    )
+                  }
+                >
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="truncate">
+                      {user.nickname || user.username}
+                    </span>
+                    {user?.isTeacher && <TeacherBadge />}
+                  </div>
 
-                <span className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
-                  {getUserRoleLabel(user, t)}
-                </span>
-              </ListItem>
-            ))
+                  <span className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
+                    {getUserRoleLabel(user, t)}
+                  </span>
+                </ListItem>
+              ))}
+            </div>
           )}
         </div>
 
         {/* Footer */}
         {recommendations.length > 0 && onNavigateToFriends && (
-          <div className="p-4 sm:p-6 pt-2">
+          <div className="p-4">
             <PillButton
               onClick={() => onNavigateToFriends("find")}
               variant="secondary"

@@ -20,6 +20,7 @@ import RecordingPlayer from "../components/RecordingPlayer"
 import RecordingsEmptyState from "../components/RecordingsEmptyState"
 import RecordingsErrorState from "../components/RecordingsErrorState"
 import RecordingsListSkeleton from "../components/RecordingsListSkeleton"
+import Label from "@/shared/components/ui/Label"
 
 const RecordingsPage = () => {
   const { t } = useLanguage()
@@ -125,7 +126,9 @@ const RecordingsPage = () => {
       <ConfirmationModal
         open={!!deleteTarget}
         onClose={handleCloseDeleteModal}
-        onConfirm={() => deleteTarget && handleDeleteConfirm(deleteTarget.recordingId)}
+        onConfirm={() =>
+          deleteTarget && handleDeleteConfirm(deleteTarget.recordingId)
+        }
         title={t?.recordings?.deleteModal?.title || "Delete Recording?"}
         cancelText={t?.recordings?.deleteModal?.cancel || "Cancel"}
         confirmText={t?.recordings?.deleteModal?.confirm || "Delete"}
@@ -134,18 +137,23 @@ const RecordingsPage = () => {
       >
         {deleteTarget && (
           <p>
-            {t?.recordings?.deleteModal?.description || "This will permanently delete the recording"}
+            {t?.recordings?.deleteModal?.description ||
+              "This will permanently delete the recording"}
             {deleteTarget.meetingId && (
               <span className="font-semibold text-gray-900 dark:text-white">
-                {" "}{deleteTarget.meetingId}
+                {" "}
+                {deleteTarget.meetingId}
               </span>
             )}
             {deleteTarget.fileSizeBytes > 0 && (
               <span className="font-medium text-gray-700 dark:text-neutral-300">
-                {" "}({(deleteTarget.fileSizeBytes / (1024 * 1024)).toFixed(1)} MB)
+                {" "}
+                ({(deleteTarget.fileSizeBytes / (1024 * 1024)).toFixed(1)} MB)
               </span>
             )}
-            . {t?.recordings?.deleteModal?.cannotUndo || "This action cannot be undone."}
+            .{" "}
+            {t?.recordings?.deleteModal?.cannotUndo ||
+              "This action cannot be undone."}
           </p>
         )}
       </ConfirmationModal>
@@ -154,56 +162,62 @@ const RecordingsPage = () => {
         <FluentAnimation
           animationKey="recordings-page"
           direction="up"
-          className="w-full flex flex-col gap-6"
+          className="w-full flex flex-col gap-4"
         >
           {/* Page header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="px-4 pt-4">
             <PageTitle>{t?.recordings?.title || "Recordings"}</PageTitle>
           </div>
 
           {/* Storage bar inside FluentCard */}
-          <FluentCard>
-            <StorageBar
-              usedMb={usedMb}
-              limitMb={maxStorageMb}
-              usagePercent={usagePercent}
-              isQuotaExceeded={isQuotaExceeded}
-              isLoading={isLoadingStorage || isPlanLoading}
-              t={t}
-            />
-          </FluentCard>
+          <div className="px-4">
+            <FluentCard>
+              <StorageBar
+                usedMb={usedMb}
+                limitMb={maxStorageMb}
+                usagePercent={usagePercent}
+                isQuotaExceeded={isQuotaExceeded}
+                isLoading={isLoadingStorage || isPlanLoading}
+                t={t}
+              />
+            </FluentCard>
+          </div>
 
-          {/* Recordings list */}
-          {isLoadingRecordings ? (
-            <RecordingsListSkeleton />
-          ) : recordingsError ? (
-            <RecordingsErrorState onRetry={refetchRecordings} t={t} />
-          ) : recordings.length === 0 ? (
-            <RecordingsEmptyState t={t} />
-          ) : (
-            <div className="flex flex-col">
-              <p className="text-sm font-medium text-[#606060] dark:text-[#AAAAAA] mb-2">
-                {recordings.length === 1
-                  ? t?.recordings?.list?.count_one || "1 recording"
-                  : t?.recordings?.list?.count_other?.replace(
-                      "{{count}}",
-                      recordings.length,
-                    ) || `${recordings.length} recordings`}
-              </p>
+          <div className="px-4 pb-24">
+            {/* Recordings list */}
+            {isLoadingRecordings ? (
+              <RecordingsListSkeleton />
+            ) : recordingsError ? (
+              <RecordingsErrorState onRetry={refetchRecordings} t={t} />
+            ) : recordings.length === 0 ? (
+              <RecordingsEmptyState t={t} />
+            ) : (
+              <div>
+                <div className="mb-1">
+                  <Label>
+                    {recordings.length === 1
+                      ? t?.recordings?.list?.count_one || "1 recording"
+                      : t?.recordings?.list?.count_other?.replace(
+                          "{{count}}",
+                          recordings.length,
+                        ) || `${recordings.length} recordings`}
+                  </Label>
+                </div>
 
-              <div className="space-y-1">
-                {recordings.map((rec) => (
-                  <RecordingCard
-                    key={rec.recordingId}
-                    recording={rec}
-                    onPlay={handlePlay}
-                    onDelete={handleDeleteClick}
-                    t={t}
-                  />
-                ))}
+                <div className="flex flex-col gap-1">
+                  {recordings.map((rec) => (
+                    <RecordingCard
+                      key={rec.recordingId}
+                      recording={rec}
+                      onPlay={handlePlay}
+                      onDelete={handleDeleteClick}
+                      t={t}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </FluentAnimation>
       </AnimatePresence>
     </>

@@ -162,7 +162,7 @@ const RoomsPage = () => {
     searchArg ||
     (categories && categories.length > 0) ||
     (topicsArg && topicsArg.length > 0) ||
-    (requiredLevelsArg && requiredLevelsArg.length > 0)
+    (requiredLevelsArg && requiredLevelsArg.length > 0),
   )
 
   const pageSize = 12
@@ -272,7 +272,10 @@ const RoomsPage = () => {
               </div>
             )}
 
-            <div className="w-full flex flex-col" data-tour="rooms-category-section">
+            <div
+              className="w-full flex flex-col"
+              data-tour="rooms-category-section"
+            >
               {/* Tabs hidden temporarily to save vertical space */}
               {/* <RoomsTabs tab={tab} setTab={setTab} /> */}
 

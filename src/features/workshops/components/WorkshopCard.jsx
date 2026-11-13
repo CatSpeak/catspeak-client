@@ -16,7 +16,7 @@ const WorkshopCard = ({
 
   return (
     <div
-      className={`group flex w-full cursor-pointer overflow-hidden border-y border-x-0 md:border border-border bg-white shadow-sm dark:border-[#3F3F3F] dark:bg-[#1A1A1A] ${
+      className={`group flex w-full cursor-pointer overflow-hidden rounded-3xl border-y border-x-0 md:border border-border bg-white shadow-sm dark:border-[#3F3F3F] dark:bg-[#1A1A1A] ${
         isCarousel
           ? "relative aspect-video justify-center flex-col"
           : isHorizontal

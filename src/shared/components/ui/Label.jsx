@@ -26,7 +26,10 @@ const Label = ({
     >
       {children}
       {required && (
-        <span className="text-cath-red-600 dark:text-cath-red-400 ml-0.5" aria-hidden="true">
+        <span
+          className="text-cath-red-600 dark:text-cath-red-400 ml-0.5"
+          aria-hidden="true"
+        >
           *
         </span>
       )}
@@ -35,4 +38,3 @@ const Label = ({
 }
 
 export default Label
-
