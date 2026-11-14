@@ -3,13 +3,13 @@ import { MainLogo } from "@/shared/assets/icons/logo"
 import FooterBottom from "./FooterBottom"
 
 const quickLinks = [
-  { label: "Vấn đề người học", href: "#problem" },
-  { label: "Giải pháp CAT SPEAK", href: "#solutions" },
-  { label: "Tính năng cốt lõi (Room 1-1, AI)", href: "#features" },
-  { label: "Cách hoạt động", href: "#how-it-works" },
-  { label: "So sánh phương pháp học", href: "#solutions" },
-  { label: "Câu hỏi thường gặp (FAQ)", href: "#faq" },
-  { label: "Trạng thái hệ thống", href: "#contact" },
+  { label: "Vấn đề người học", href: "/#problem" },
+  { label: "Giải pháp CAT SPEAK", href: "/#solutions" },
+  { label: "Tính năng cốt lõi (Room 1-1, AI)", href: "/#features" },
+  { label: "Cách hoạt động", href: "/#how-it-works" },
+  { label: "So sánh phương pháp học", href: "/#solutions" },
+  { label: "Câu hỏi thường gặp (FAQ)", href: "/#faq" },
+  { label: "Trạng thái hệ thống", href: "/#contact" },
 ]
 
 const Footer = () => {
@@ -58,7 +58,7 @@ const Footer = () => {
               ))}
             </ul>
             <a
-              href="mailto:catspeak.vn@gmail.com?subject=Li%C3%AAn%20h%E1%BB%87%20h%E1%BB%A3p%20t%C3%A1c"
+              href="/contact"
               className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-400 transition-colors hover:text-amber-300"
             >
               Trang liên hệ & hợp tác

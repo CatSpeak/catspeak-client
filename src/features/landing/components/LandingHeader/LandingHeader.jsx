@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Menu } from "lucide-react"
+import { useLocation } from "react-router-dom"
 
 import { useAuth } from "@/features/auth"
 import ThemeToggle from "@/shared/components/ui/ThemeToggle"
@@ -12,6 +13,8 @@ import { MobileSidebar } from "@/features/navigation"
 const LandingHeader = ({ onGetStarted }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
   const { t } = useLanguage()
+  const { pathname } = useLocation()
+  const isContactPage = pathname === "/contact"
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleDrawerToggle = () => {
@@ -19,13 +22,26 @@ const LandingHeader = ({ onGetStarted }) => {
   }
 
   const headerT = t?.landing?.header || {}
+  const homePrefix = isContactPage ? "/" : ""
   const navItems = [
-    { label: headerT.problem || "Vấn đề", href: "#problem" },
-    { label: headerT.solution || "Giải pháp", href: "#solutions" },
-    { label: headerT.features || "Tính năng", href: "#features" },
-    { label: headerT.howItWorks || "Cách hoạt động", href: "#how-it-works" },
-    { label: headerT.faq || "FAQ", href: "#faq" },
-    { label: headerT.contact || "Liên hệ", href: "#contact" },
+    {
+      label: headerT.problem || "Vấn đề",
+      href: `${homePrefix}#learning-barriers`,
+    },
+    {
+      label: headerT.solution || "Giải pháp",
+      href: `${homePrefix}#catspeak-solutions`,
+    },
+    {
+      label: headerT.features || "Tính năng",
+      href: `${homePrefix}#core-features`,
+    },
+    {
+      label: headerT.howItWorks || "Cách hoạt động",
+      href: `${homePrefix}#how-it-works`,
+    },
+    { label: headerT.faq || "FAQ", href: `${homePrefix}#faq` },
+    { label: headerT.contact || "Liên hệ", href: "/contact", isContact: true },
   ]
 
   return (
@@ -52,7 +68,12 @@ const LandingHeader = ({ onGetStarted }) => {
             <a
               key={href}
               href={href}
-              className="transition-colors hover:text-[#990011] dark:hover:text-[#FF8599]"
+              aria-current={isContactPage && href === "/contact" ? "page" : undefined}
+              className={`transition-colors hover:text-[#990011] dark:hover:text-[#FF8599] ${
+                isContactPage && href === "/contact"
+                  ? "font-semibold text-[#A90016] underline underline-offset-8 dark:text-[#FF8599]"
+                  : ""
+              }`}
             >
               {label}
             </a>

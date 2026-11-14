@@ -35,7 +35,7 @@ const FAQSection = () => {
   return (
     <section
       id="faq"
-      className="relative w-full scroll-mt-[72px] pt-8 sm:pt-10 md:pt-14 lg:pt-16 pb-10 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden"
+      className="relative w-full scroll-mt-[72px] overflow-hidden py-8 sm:py-10 md:py-14 lg:py-16"
     >
       {/* Background sketch element */}
       <img
@@ -45,15 +45,15 @@ const FAQSection = () => {
         className="absolute bottom-0 left-0 z-0 w-[500px] select-none opacity-60 pointer-events-none dark:opacity-20 sm:w-[700px] md:w-[900px] lg:w-[1100px]"
       />
 
-      {/* Main Container - Edge-to-edge on the right, aligned with breathing room on the left */}
-      <div className="relative z-10 ml-4 mr-0 min-h-[500px] rounded-l-3xl rounded-r-none border-y border-l border-[#E29B9F] bg-[#FFF0EE] transition-colors dark:border-[#633238] dark:bg-[#21191a] sm:ml-8 md:ml-12 md:rounded-l-[40px] lg:ml-[max(2.5rem,calc((100vw-1280px)/2+2.5rem))] xl:ml-[max(3.5rem,calc((100vw-1320px)/2+3.5rem))]">
+      <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8">
+      <div className="min-h-[500px] rounded-3xl border border-[#E29B9F] bg-[#FFF0EE] transition-colors dark:border-[#633238] dark:bg-[#21191a] md:rounded-[40px]">
         {/* Inner Content Grid */}
         <ScrollReveal
           stagger
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 p-6 sm:p-10 md:p-12 lg:py-16 lg:pl-16 xl:pl-20 lg:pr-[max(2rem,calc((100vw-1280px)/2+2rem))] xl:pr-[max(3rem,calc((100vw-1320px)/2+3rem))] relative z-10 items-start"
+          className="relative z-10 grid min-w-0 grid-cols-1 items-start gap-8 p-6 sm:p-10 md:p-12 lg:grid-cols-12 lg:gap-12 lg:py-16"
         >
           {/* Left Column: Titles, Description & Cat Illustration */}
-          <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-between self-stretch h-full">
+          <div className="flex min-w-0 flex-col justify-between self-stretch lg:col-span-5 xl:col-span-4">
             <div>
               <ScrollItem>
                 <span className="text-sm font-bold text-[#990011] uppercase tracking-wider block mb-2">
@@ -86,7 +86,7 @@ const FAQSection = () => {
           </div>
 
           {/* Right Column: Accordion */}
-          <ScrollItem className="lg:col-span-7 xl:col-span-8 flex flex-col justify-center w-full">
+          <ScrollItem className="flex w-full min-w-0 flex-col justify-center lg:col-span-7 xl:col-span-8">
             <div className="w-full border-t border-[#E6C6C6] dark:border-[#4a3436]">
               {questions.map((item, originalIndex) => {
                 const isExpanded = expandedQuestions.has(originalIndex)
@@ -189,6 +189,7 @@ const FAQSection = () => {
             />
           </div>
         </ScrollReveal>
+      </div>
       </div>
     </section>
   )

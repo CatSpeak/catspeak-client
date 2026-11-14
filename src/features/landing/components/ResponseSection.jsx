@@ -41,9 +41,9 @@ const ResponseSection = () => {
 
   return (
     <section className="relative w-full py-10 sm:py-14 lg:py-16 overflow-hidden">
-      <ScrollReveal stagger className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start px-4 sm:px-6">
+      <ScrollReveal stagger className="relative z-10 mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 px-4 sm:px-6 lg:grid-cols-12 lg:gap-12">
         {/* Left: Title + Navigation */}
-        <div className="lg:col-span-4 lg:pr-2">
+        <div className="min-w-0 lg:col-span-4 lg:pr-2">
           <ScrollItem>
             <h2 className="text-4xl font-black text-[#990011] mb-2 leading-none">
               {respT.title || "Phản hồi"}
@@ -79,11 +79,11 @@ const ResponseSection = () => {
           </ScrollItem>
         </div>
 
-        {/* Right: Native scrollable cards extending off-screen to the right on desktop and mobile */}
-        <ScrollItem className="lg:col-span-8 -mx-4 sm:-mx-6 lg:mx-0 lg:-mr-6 xl:-mr-[calc((100vw-1280px)/2+24px)] 2xl:-mr-[calc((100vw-1280px)/2+24px)] overflow-hidden">
+        {/* Keep the carousel inside the page grid and scroll cards within its own viewport. */}
+        <ScrollItem className="w-full min-w-0 overflow-hidden lg:col-span-8">
           <div
             ref={scrollRef}
-            className="flex gap-6 overflow-x-auto scrollbar-none scroll-smooth py-3 px-4 sm:px-6 md:px-8 lg:px-1 snap-x snap-mandatory scroll-pl-4 sm:scroll-pl-6 md:scroll-pl-8 lg:scroll-pl-1"
+            className="flex w-full min-w-0 snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-1 py-3"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {reviews.map((review, i) => (

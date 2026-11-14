@@ -29,7 +29,7 @@ const AISection = () => {
 
   return (
     <section
-      id="how-it-works"
+      id="ai-practice"
       className="relative w-full scroll-mt-[72px] overflow-hidden bg-white py-8 transition-colors dark:bg-[#0F0F0F] sm:py-10 md:py-14 lg:py-16"
     >
       {/* Hand-drawn SVG Doodle — Single Organic Wave path from Left to Right and Top to Bottom */}
