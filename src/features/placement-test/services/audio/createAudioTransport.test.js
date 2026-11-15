@@ -99,6 +99,19 @@ describe("createAudioTransport", () => {
     expect(recognizer.destroy).toHaveBeenCalledTimes(2)
   })
 
+  it("delegates mute to the capture seam", () => {
+    // Oracle: user ruling 2026-10-31 — the red mic toggles mute, not recording.
+    const capture = createFakeCapture()
+    capture.setMuted = vi.fn((value) => value)
+    const transport = createAudioTransport({ capture })
+
+    expect(transport.setMuted(true)).toBe(true)
+    expect(capture.setMuted).toHaveBeenCalledWith(true)
+
+    expect(transport.setMuted(false)).toBe(false)
+    expect(capture.setMuted).toHaveBeenCalledWith(false)
+  })
+
   it("delegates speech synthesis to the injected speak functions", () => {
     const capture = createFakeCapture()
     const speakText = vi.fn(() => true)

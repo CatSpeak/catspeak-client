@@ -51,6 +51,11 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
   }
 
   const handleFileSelection = (file) => {
+    if (!file) return
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error(dict.fileTooLargeToast || "Tệp đính kèm không được vượt quá 50MB")
+      return
+    }
     setSelectedFile(file)
   }
 

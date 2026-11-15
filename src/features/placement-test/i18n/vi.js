@@ -34,6 +34,7 @@ export default {
       checkbox:
         "Tôi đồng ý cho phép CatSpeak sử dụng microphone và xử lý âm thanh phục vụ kiểm tra đầu vào.",
       startCta: "Bắt đầu làm bài kiểm tra",
+      permissionHint: "Vui lòng cho phép microphone trên trình duyệt",
       recommend:
         "Khuyến nghị: Đeo tai nghe có micro và ngồi trong môi trường yên tĩnh để đạt độ chính xác âm học cao nhất.",
     },
@@ -167,6 +168,9 @@ export default {
       title: "Phòng luyện nói",
       subtitle: "Hội thoại thích ứng AI • HSK 3.0",
       connection: "Kết nối ổn định",
+      connectionLost: "Mất kết nối",
+      connectionLostExitToast:
+        "Mất kết nối mạng quá lâu nên không thể tiếp tục bài thi. Tiến trình đã được lưu an toàn; hãy kiểm tra đường truyền rồi tiếp tục.",
       configure: "Cấu hình AI",
       pause: "Tạm dừng bài thi",
       casual: "Giao tiếp (Casual Chat)",
@@ -184,20 +188,27 @@ export default {
       statusWaiting: "Đang lắng nghe...",
       statusRecognized: "● Nhận diện rõ",
       statusSubmitted: "Đã nộp bài",
+      statusSkipped: "Đã bỏ qua câu này",
       statusNoAudio: "Chưa có âm thanh",
       transcriptPlaceholder: "Câu trả lời của bạn sẽ hiện ở đây...",
       analyzingSubline: "Đang tự động phân tích ngữ âm & ngữ pháp...",
+      skippedSubline: "Câu này không được tính điểm.",
       waitingSubline: "Hãy nói câu trả lời của bạn bằng tiếng Trung.",
       aiListening: "AI đang lắng nghe giọng nói của bạn...",
+      aiMuted: "Micro đang tắt tiếng. Bấm nút mic để bật lại.",
+      statusMuted: "● Đang tắt tiếng",
+      timerMuted: "Đang tắt tiếng",
+      muteCta: "Tắt tiếng",
+      unmuteCta: "Bật tiếng",
       aiAnalyzing: "AI đang phân tích câu trả lời của bạn...",
+      modelProcessing: "Model đang xử lý",
+      retryPrompt: "Vui lòng bấm mic và nói lại câu trả lời.",
       aiNotHearing: "AI đang lắng nghe cẩn thận hơn...",
       timerRecording: "{{time}} / 00:45 • Thu âm phản xạ",
       timerWaiting: "{{time}} / 00:45 • Đang chờ âm thanh",
       recordedStatus: "Đã ghi âm",
       pressMicToRecord: "Nhấn mic để trả lời",
       reRecordCta: "Thu âm lại",
-      stopRecordCta: "Dừng ghi âm",
-      startRecordCta: "Bắt đầu nói",
       aiAutoRecord: "Hệ thống sẽ tự ghi âm sau khi AI đọc xong câu hỏi.",
       aiSpeaking: "AI đang đọc câu hỏi, hãy lắng nghe...",
       autoRecordHint: "Tự ghi âm sau khi AI đọc xong",
@@ -205,10 +216,15 @@ export default {
       submitCta: "Hoàn tất câu trả lời",
       skipCta: "Bỏ qua câu này (0 điểm) →",
       scoringSummary: "Đang tổng hợp điểm đánh giá...",
+      skippingCta: "Đang chuyển câu tiếp...",
       retryBanner:
-        "AI chưa nghe rõ câu trả lời. Vui lòng nói lại giúp mình nhé. (Lần {{attempt}} / {{max}})",
+        "Chưa nghe được câu trả lời, vui lòng nói lại. (Lần {{attempt}} / {{max}})",
       noHearingBanner:
         "AI chưa nghe thấy giọng bạn nói. Vui lòng kiểm tra lại micrô hoặc tăng âm lượng phản xạ.",
+      noHearingSubline: "Chưa phát hiện tín hiệu giọng nói trong vài giây.",
+      noHearingHint: "Vui lòng mở khóa micrô trên trình duyệt.",
+      noHearingExitToast:
+        "Không phát hiện âm thanh từ micrô. Vui lòng kiểm tra thiết bị âm thanh trước khi thi lại.",
       volumeHint: "Âm lượng hơi nhỏ. Hãy nói to hơn hoặc tăng âm lượng micrô.",
       configureNotice: "Tính năng cấu hình AI sẽ sớm được cập nhật.",
       pauseTitle: "Đã Tạm Dừng Khảo Sát",
@@ -221,6 +237,11 @@ export default {
       pauseLeaveCta: "Rời Phòng Thi Tạm Thời",
       pauseResumeCta: "Tiếp Tục Làm Bài Ngay ▷",
       pauseCancelCta: "Hủy bài thi và thi lại từ đầu",
+      pauseCancelConfirmTitle: "Hủy bài thi và thi lại từ đầu?",
+      pauseCancelConfirmWarning:
+        "Bạn sẽ mất {{answered}}/{{total}} câu trả lời đã làm. Bài thi mới sẽ bắt đầu từ câu 1 và không thể khôi phục tiến trình cũ.",
+      pauseCancelConfirmKeepCta: "Quay lại làm bài",
+      pauseCancelConfirmCta: "Hủy và thi lại từ đầu",
       reconnectTitle: "Mất Kết Nối Đường Truyền",
       reconnectBody:
         "Kết nối âm thanh với phòng thi AI bị gián đoạn do tín hiệu mạng không ổn định. Hệ thống đang thử tái lập kết nối.",
@@ -271,13 +292,16 @@ export default {
       bandTitle: "HSK {{band}} · {{tier}}",
       cefrLabel: "Khung tham chiếu Châu Âu: CEFR {{cefr}}",
       heroDescription:
-        "Khả năng giao tiếp trong ngữ cảnh hàng ngày, phát âm và phản xạ phù hợp trình độ HSK {{band}}. Vốn từ vựng khẩu ngữ được tích lũy tốt.",
+        "Khả năng giao tiếp trong ngữ cảnh hàng ngày, phát âm và phản xạ phù hợp trình độ HSK {{band}}.",
+      heroVocabularyPraise: "Vốn từ vựng khẩu ngữ được tích lũy tốt.",
       feedbackTitle: "Nhận xét sư phạm từ AI Tutor",
       strengthLabel: "Điểm mạnh:",
       attentionLabel: "Cần chú ý:",
       strengthLine: "{{dimension}} đạt {{score}}/100 — nền tảng tốt để bứt phá.",
       weaknessLine:
         "{{dimension}} mới đạt {{score}}/100 — cần luyện thêm mỗi ngày.",
+      noStrengthLine:
+        "Chưa có kỹ năng nào đạt ngưỡng 60/100 để ghi nhận là điểm mạnh.",
       noWeaknessLine:
         "Chưa phát hiện điểm yếu đáng kể, hãy duy trì phong độ hiện tại.",
       roadmapTitle: "Lộ trình 5 ngày bứt phá lên HSK {{band}}",
@@ -286,6 +310,33 @@ export default {
         { tag: "D 3-4", text: "Phản xạ câu ghép phức cùng AI Tutor" },
         { tag: "D 5", text: "Thử thách mô phỏng bài thi HSKK Trung cấp" },
       ],
+      roadmapByBand: {
+        2: [
+          { tag: "D 1-2", text: "Củng cố nền HSK 1: chào hỏi, số đếm, câu đơn" },
+          { tag: "D 3-4", text: "Mở rộng vốn từ HSK 2: gia đình, thời gian, mua sắm" },
+          { tag: "D 5", text: "Thử thách hội thoại HSK 2 cùng AI Tutor" },
+        ],
+        3: [
+          { tag: "D 1-2", text: "Luyện câu ghép cơ bản: 因为…所以, 虽然…但是" },
+          { tag: "D 3-4", text: "Kể lại trải nghiệm ngắn bằng từ vựng HSK 3" },
+          { tag: "D 5", text: "Thử thách hội thoại HSK 3 cùng AI Tutor" },
+        ],
+        4: [
+          { tag: "D 1-2", text: "Luyện cấu trúc HSK 4: 不仅…而且, 即使…也" },
+          { tag: "D 3-4", text: "Nêu quan điểm và so sánh trong chủ đề quen thuộc" },
+          { tag: "D 5", text: "Thử thách hội thoại HSK 4 cùng AI Tutor" },
+        ],
+        5: [
+          { tag: "D 1-2", text: "Khẩu ngữ chuyên đề công việc & phỏng vấn" },
+          { tag: "D 3-4", text: "Phản xạ câu ghép phức cùng AI Tutor" },
+          { tag: "D 5", text: "Thử thách mô phỏng bài thi HSKK Trung cấp" },
+        ],
+        6: [
+          { tag: "D 1-2", text: "Thảo luận chuyên sâu: kinh tế, xã hội, văn hóa" },
+          { tag: "D 3-4", text: "Luyện lập luận nhiều bước và sắc thái biểu cảm" },
+          { tag: "D 5", text: "Thử thách mô phỏng bài thi HSKK Cao cấp" },
+        ],
+      },
       skillsTitle: "Phân Tích 4 Chiều Kỹ Năng Khẩu Ngữ",
       skillsSubtitle: "Đánh giá chuẩn hóa qua mô hình AI Speech Recognition",
       dimensions: {
@@ -304,6 +355,10 @@ export default {
         "* Học viên có tối đa 1 lần điều chỉnh cấp độ trước khi khóa lộ trình.",
       adjustLocked:
         "Bạn đã sử dụng quyền điều chỉnh cấp độ. Lộ trình hiện được khóa.",
+      insufficientTitle: "Không đủ dữ liệu để đánh giá",
+      insufficientBody:
+        "Bạn đã bỏ qua cả 5 câu hỏi nên chưa có câu trả lời nào để chấm điểm. Hãy làm lại bài đánh giá và trả lời ít nhất một câu để nhận báo cáo HSK 3.0.",
+      insufficientRetakeCta: "Làm lại bài đánh giá",
       emptyTitle: "Chưa có kết quả đánh giá",
       emptyBody:
         "Hãy hoàn thành bài khảo sát khẩu ngữ để xem báo cáo năng lực HSK 3.0.",
@@ -332,6 +387,8 @@ export default {
       successToast: "Đã cập nhật trình độ học tập sang HSK {{band}}.",
       alreadyAdjustedToast: "Bạn đã sử dụng quyền điều chỉnh trình độ.",
       errorToast: "Không thể cập nhật trình độ. Vui lòng thử lại.",
+      roadmapSyncErrorToast:
+        "Đã cập nhật trình độ nhưng chưa tạo lại lộ trình. Mở Lộ trình 5 ngày và chọn Đổi trình độ để đồng bộ.",
     },
     profile: {
       topbarTitle: "Hồ Sơ Năng Lực & Trạng Thái Học Viên",
@@ -344,7 +401,8 @@ export default {
         "Khả năng giao tiếp trôi chảy trong công việc & đời sống hàng ngày. Đã hoàn tất bài khảo sát thích ứng AI CAT 5 câu ngày {{date}}.",
       testDate: "Ngày thi: {{date}}",
       testCode: "Mã bài thi: #{{code}}",
-      roadmapTitle: "Lộ Trình Bứt Phá Lên HSK {{band}}",
+      selfAdjustedNote: "Cấp độ đã được tự điều chỉnh từ HSK {{from}} sang HSK {{to}}.",
+      roadmapTitle: "Lộ trình HSK {{band}}",
       roadmapProgress: "{{done}}/{{total}} Ngày ({{percent}}%)",
       roadmapDone: "Xong",
       roadmapActive: "Đang học",
@@ -410,12 +468,16 @@ export default {
     },
     lifecycle: {
       errorToast: "Không thể bắt đầu phiên thi mới. Vui lòng thử lại.",
+      pauseExpiredToast:
+        "Phiên thi đã hết hạn do tạm dừng quá 30 phút. Vui lòng bắt đầu bài thi mới.",
       resume: {
         title: "Phát Hiện Bài Thi Chưa Hoàn Thành",
         body: "Hệ thống tìm thấy một phiên làm bài dở dang của bạn (đã hoàn thành câu {{answered}} / {{total}}). Phiên thi này vẫn còn hiệu lực trong {{remaining}} tới.",
         safeTitle: "Dữ liệu làm bài được bảo lưu an toàn:",
         safeBody:
           "Bạn sẽ tiếp tục ngay tại Câu hỏi số {{order}} mà không mất điểm và file ghi âm của {{answered}} câu đã nộp.",
+        pendingAnswerNotice:
+          "Câu đang làm chưa được nộp — bản ghi âm của câu này không được lưu sau khi tải lại trang, bạn sẽ phải ghi âm lại.",
         deadlineLabel: "Thời hạn bảo lưu phiên thi:",
         autoCancel: "Tự động hủy sau: {{date}}",
         remainingChip: "⏳ Còn {{remaining}}",
@@ -434,11 +496,11 @@ export default {
       takeover: {
         title: "Phát Hiện Mở Nhiều Tab Cùng Lúc",
         body: "Để đảm bảo ổn định và tránh xung đột micro, CatSpeak chỉ cho phép mở một phòng luyện nói tại một thời điểm.",
-        mechanismTitle: "Cơ chế ngắt kết nối phiên cũ (Session Takeover):",
+        mechanismTitle: "Cơ chế ngắt kết nối phiên trùng (Session Takeover):",
         mechanismBody:
-          "Nếu bạn chọn tiếp tục tại tab này, tab cũ đang mở sẽ lập tức bị ngắt kết nối và khóa để tránh trùng lặp dữ liệu.",
+          "Nếu bạn chọn tiếp tục tại tab này, tab còn lại đang mở sẽ lập tức bị ngắt kết nối và khóa để tránh trùng lặp dữ liệu.",
         continueCta: "Tiếp Tục Làm Bài Tại Tab Này →",
-        closeCta: "Đóng Tab Này Lại",
+        closeCta: "Quay Về Trang Chủ Hồ Sơ",
         takenOverTitle: "Phiên Đã Được Tiếp Quản Ở Tab Khác",
         takenOverBody:
           "Bài thi của bạn đang được thực hiện ở một tab khác. Phiên tại tab này đã được tạm dừng và khóa để tránh trùng lặp dữ liệu.",

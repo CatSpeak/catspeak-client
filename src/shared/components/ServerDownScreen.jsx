@@ -13,6 +13,7 @@ import {
   isOfflineCapableRoute,
   subscribeOfflineCapableRoute,
 } from "@/shared/utils/offlineCapableRoute"
+import { isBrowserOffline } from "@/shared/utils/networkStatus"
 
 const offlineSnapshot = () =>
   isOfflineCapableRoute() && typeof navigator !== "undefined" && navigator.onLine === false
@@ -56,7 +57,8 @@ const ServerDownScreen = () => {
 
   // Do not block the UI if the user is actively in a video call,
   // since LiveKit runs on a separate server and the call can continue.
-  if (!isServerDown || isInCall || offlineHandled) return null
+  // Trình duyệt đang offline = mạng của người học, không phải máy chủ sập.
+  if (!isServerDown || isInCall || offlineHandled || isBrowserOffline()) return null
 
   const strings = t?.errors?.serverDown ?? {}
 

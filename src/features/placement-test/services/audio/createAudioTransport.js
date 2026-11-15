@@ -129,6 +129,8 @@ export const createAudioTransport = ({
     capture.destroy()
     statusSubscribers.clear()
   }
+  const setMuted = (value) =>
+    typeof capture.setMuted === "function" ? capture.setMuted(value) : false
   return {
     start,
     stop: () => {
@@ -151,6 +153,7 @@ export const createAudioTransport = ({
     getRecordingUrl: capture.getRecordingUrl,
     getRecordedBlob: capture.getRecordedBlob,
     isRecording: capture.isRecording,
+    setMuted,
     startListening,
     stopListening,
     speak: (text, options) => speakText(text, { lang, ...options }),

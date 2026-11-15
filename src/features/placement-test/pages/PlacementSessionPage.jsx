@@ -52,12 +52,7 @@ const PlacementSessionPage = () => {
     }
   }, [isCoolingDown, isInvalidSession, navigate, retakeLoading, retakeStatus])
 
-  const handleCloseConflict = useCallback(() => {
-    if (typeof window !== "undefined") window.close()
-    navigate(PLACEMENT_TEST_PATH, { replace: true })
-  }, [navigate])
-
-  const handleGoHome = useCallback(() => {
+  const handleLeaveSession = useCallback(() => {
     navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
   }, [navigate])
 
@@ -76,7 +71,7 @@ const PlacementSessionPage = () => {
         mode="conflict"
         copy={copy}
         onContinue={takeover.confirmTakeover}
-        onClose={handleCloseConflict}
+        onClose={handleLeaveSession}
       />
     )
   }
@@ -87,7 +82,7 @@ const PlacementSessionPage = () => {
         open
         mode="takenOver"
         copy={copy}
-        onClose={handleGoHome}
+        onClose={handleLeaveSession}
       />
     )
   }

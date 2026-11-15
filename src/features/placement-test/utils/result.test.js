@@ -6,10 +6,13 @@ import {
   getBandDescriptor,
   getCefr,
   getDimensionScores,
+  getRoadmapDays,
   getStrengthDimension,
   getTargetRoadmapBand,
   getTierKey,
   getWeaknessDimension,
+  isInsufficientEvidence,
+  normalizeServerResult,
 } from "./result"
 
 const result = {
@@ -99,6 +102,63 @@ describe("score derivations", () => {
   })
 })
 
+describe("strength threshold", () => {
+  it("does not call the best of a weak set a strength", () => {
+    expect(
+      getStrengthDimension({ pronunciation: 0, vocabulary: 0, grammar: 30, fluency: 0 }),
+    ).toBeNull()
+  })
+
+  it("returns null when no dimension was measured", () => {
+    expect(
+      getStrengthDimension({
+        pronunciation: null,
+        vocabulary: null,
+        grammar: null,
+        fluency: null,
+      }),
+    ).toBeNull()
+  })
+
+  it("keeps a dimension at or above 60 as a strength", () => {
+    expect(
+      getStrengthDimension({ pronunciation: 0, vocabulary: 60, grammar: 30, fluency: 0 }),
+    ).toEqual({ key: "vocabulary", score: 60 })
+  })
+})
+
+describe("insufficient evidence", () => {
+  it("propagates the server flag for an all-skipped session", () => {
+    const normalized = normalizeServerResult({
+      final_hsk_level: 1,
+      scores: { pronunciation: null, vocabulary: 0, grammar: 0, fluency: 0 },
+      insufficient_evidence: true,
+      turn_count: 0,
+    })
+
+    expect(normalized.insufficientEvidence).toBe(true)
+    expect(normalized.answeredCount).toBe(0)
+  })
+
+  it("keeps a normal session as having evidence", () => {
+    const normalized = normalizeServerResult({
+      final_hsk_level: 3,
+      scores: { pronunciation: 70, vocabulary: 65, grammar: 72, fluency: 60 },
+      turn_count: 5,
+    })
+
+    expect(normalized.insufficientEvidence).toBe(false)
+    expect(normalized.answeredCount).toBe(5)
+  })
+
+  it("gates both result screens on the same predicate", () => {
+    expect(isInsufficientEvidence({ insufficientEvidence: true })).toBe(true)
+    expect(isInsufficientEvidence({ insufficientEvidence: false })).toBe(false)
+    expect(isInsufficientEvidence({})).toBe(false)
+    expect(isInsufficientEvidence(null)).toBe(false)
+  })
+})
+
 describe("getTargetRoadmapBand", () => {
   it("targets one band above the current level", () => {
     expect(getTargetRoadmapBand(3)).toBe(4)
@@ -108,6 +168,25 @@ describe("getTargetRoadmapBand", () => {
   it("does not exceed HSK 6", () => {
     expect(getTargetRoadmapBand(6)).toBe(6)
     expect(getTargetRoadmapBand(9)).toBe(6)
+  })
+})
+
+describe("getRoadmapDays", () => {
+  const copy = {
+    roadmapByBand: { 2: [{ day: 1, focus: "A" }], 6: [{ day: 1, focus: "F" }] },
+    roadmapDays: [{ day: 1, focus: "fallback" }],
+  }
+
+  it("picks the content written for the target band", () => {
+    expect(getRoadmapDays(copy, 2)).toEqual([{ day: 1, focus: "A" }])
+  })
+
+  it("falls back to the legacy list when the band is missing", () => {
+    expect(getRoadmapDays(copy, 4)).toEqual([{ day: 1, focus: "fallback" }])
+  })
+
+  it("clamps out-of-range bands", () => {
+    expect(getRoadmapDays(copy, 99)).toEqual([{ day: 1, focus: "F" }])
   })
 })
 

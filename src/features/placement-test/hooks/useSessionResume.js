@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "@/components/ui/toast"
 import { useAuth } from "@/features/auth/hooks/useAuth"
@@ -9,11 +9,16 @@ import {
   useResumeSessionMutation,
 } from "../api"
 import { DEFAULT_TARGET_BAND } from "../constants/bands"
+import { PAUSE_EXPIRED_FALLBACK_NOTICE } from "../constants/lifecycle"
 import {
+  PLACEMENT_TEST_DASHBOARD_PATH,
   PLACEMENT_TEST_PROFILE_PATH,
   PLACEMENT_TEST_SESSION_PATH,
 } from "../constants/routes"
-import { getSessionLifecycle } from "../utils/sessionLifecycle"
+import {
+  SESSION_LIFECYCLE_KIND,
+  getSessionLifecycle,
+} from "../utils/sessionLifecycle"
 import { clearActiveSession } from "../utils/sessionStorage"
 
 const useSessionResume = ({ copy = {} } = {}) => {
@@ -22,6 +27,7 @@ const useSessionResume = ({ copy = {} } = {}) => {
   const [createSession, { isLoading: creating }] = useCreateSessionMutation()
   const [resumeSession] = useResumeSessionMutation()
   const [cancelSession, { isLoading: cancelling }] = useCancelSessionMutation()
+  const pauseExpiringRef = useRef(false)
   const {
     data: activeSession,
     isSuccess: activeLoaded,
@@ -39,9 +45,38 @@ const useSessionResume = ({ copy = {} } = {}) => {
     if (lifecycle?.kind === "expired") clearActiveSession()
   }, [lifecycle])
 
-  const resume = useCallback(() => {
+  // Tạm dừng quá 30 phút: hủy phiên trên máy chủ, dọn bản lưu cục bộ và về
+  // Dashboard kèm thông báo thay vì mời "tiếp tục" trong 24 giờ.
+  useEffect(() => {
+    if (lifecycle?.kind !== SESSION_LIFECYCLE_KIND.PAUSE_EXPIRED) return
+    if (pauseExpiringRef.current) return
+    pauseExpiringRef.current = true
+    const sessionId = lifecycle.session?.id
+    const finish = () => {
+      clearActiveSession()
+      toast.error(copy.pauseExpiredToast || PAUSE_EXPIRED_FALLBACK_NOTICE)
+      navigate(PLACEMENT_TEST_DASHBOARD_PATH, { replace: true })
+    }
+    ;(async () => {
+      try {
+        if (sessionId) await cancelSession({ sessionId }).unwrap()
+      } catch {
+        // Phiên đã bị hủy/hết hạn ở nơi khác: vẫn dọn bản lưu cục bộ.
+      }
+      finish()
+    })()
+  }, [cancelSession, copy.pauseExpiredToast, lifecycle, navigate])
+
+  const resume = useCallback(async () => {
     if (!lifecycle || lifecycle.expired) return
-    resumeSession({ sessionId: lifecycle.session.id })
+    try {
+      await resumeSession({
+        sessionId: lifecycle.session.id,
+        fromDashboard: true,
+      }).unwrap()
+    } catch {
+      // Keep the local session when the server check fails; the room validates it.
+    }
     navigate(PLACEMENT_TEST_SESSION_PATH)
   }, [lifecycle, navigate, resumeSession])
 

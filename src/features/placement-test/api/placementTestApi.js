@@ -91,7 +91,7 @@ export const placementTestApi = baseApi.injectEndpoints({
     scoreSession: builder.mutation({
       queryFn: (args, api, extraOptions, baseQuery) =>
         USE_REAL_ENGINE
-          ? scoreSessionReal(args, { baseQuery, api, extraOptions })
+          ? scoreSessionReal({ baseQuery, api, extraOptions })
           : scoreSessionMock(args),
       invalidatesTags: ["PlacementSession", "PlacementResult"],
     }),

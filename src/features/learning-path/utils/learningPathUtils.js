@@ -80,6 +80,15 @@ export const parseTopic = (title = "", description = "") => {
 }
 
 /**
+ * Resolves the requested roadmap day (1..5) against the calendar cards.
+ */
+export const findCardByDay = (cards = [], day) => {
+  const target = Number(day)
+  if (!Number.isInteger(target) || target < 1) return null
+  return cards.find((card) => Number(card?.dayIndex) === target) || null
+}
+
+/**
  * Formats level string into user-friendly Vietnamese label
  */
 export const getLevelName = (level = "") => {

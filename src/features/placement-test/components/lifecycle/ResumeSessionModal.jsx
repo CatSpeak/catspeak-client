@@ -1,4 +1,4 @@
-import { Play, ShieldCheck } from "lucide-react"
+import { AlertTriangle, Play, ShieldCheck } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import {
@@ -83,7 +83,20 @@ const ResumeSessionModal = ({
       </div>
     </div>
 
-    <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-[10px] bg-[#F8FAFC] dark:bg-[#242424] px-3.5 py-2.5 ring-1 ring-[#E2E8F0] dark:ring-[#3F3F3F]">
+    {copy.pendingAnswerNotice && (
+      <div className="mt-2.5 flex items-start gap-2.5 rounded-[10px] bg-[#FFFBEB] px-3.5 py-2.5 ring-1 ring-[#FDE68A]">
+        <AlertTriangle
+          size={16}
+          strokeWidth={2}
+          className="mt-0.5 shrink-0 text-[#B45309]"
+        />
+        <p className="text-[11px] leading-4 text-[#92400E]">
+          {copy.pendingAnswerNotice}
+        </p>
+      </div>
+    )}
+
+    <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-[10px] bg-[#F8FAFC] px-3.5 py-2.5 ring-1 ring-[#E2E8F0]">
       <div className="flex flex-col gap-0.5">
         <span className="text-[11.5px] font-bold leading-[16.7px] text-[#334155] dark:text-neutral-200">
           {copy.deadlineLabel}

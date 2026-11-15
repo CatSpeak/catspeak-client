@@ -8,19 +8,28 @@ import { formatTemplate } from "../../utils/format"
 
 const statusFor = (
   copy,
-  { phase, notice, transcript, isRecording, hasRecorded },
+  { phase, notice, transcript, isRecording, isMuted, hasRecorded },
 ) => {
+  if (phase === CONVERSATION_PHASE.SKIPPED) {
+    return {
+      label: copy.statusSkipped || "Đã bỏ qua câu này",
+      tone: "slate",
+    }
+  }
   if (phase === CONVERSATION_PHASE.ANALYZING) {
     return { label: copy.statusSubmitted || "Đã nộp bài", tone: "green" }
+  }
+  if (isRecording && isMuted) {
+    return { label: copy.statusMuted || "● Đang tắt tiếng", tone: "amber" }
+  }
+  if (notice === CONVERSATION_NOTICE.NO_HEARING && isRecording) {
+    return { label: copy.statusNoAudio || "Chưa có âm thanh", tone: "amber" }
   }
   if (isRecording) {
     return { label: "● Đang ghi âm...", tone: "green" }
   }
   if (hasRecorded) {
     return { label: "✓ Đã ghi âm", tone: "green" }
-  }
-  if (notice === CONVERSATION_NOTICE.NO_HEARING && isRecording) {
-    return { label: copy.statusNoAudio || "Chưa có âm thanh", tone: "amber" }
   }
   if (transcript) {
     return { label: copy.statusRecognized || "● Nhận diện rõ", tone: "green" }
@@ -57,6 +66,7 @@ const TranscriptCards = ({
   phase,
   notice,
   isRecording = false,
+  isMuted = false,
   hasRecorded = false,
   isPlayingUserAudio = false,
   onPlayUserAudio,
@@ -74,16 +84,25 @@ const TranscriptCards = ({
     notice,
     transcript,
     isRecording,
+    isMuted,
     hasRecorded,
   })
+  const noHearing =
+    notice === CONVERSATION_NOTICE.NO_HEARING && isRecording
   const subline =
-    phase === CONVERSATION_PHASE.ANALYZING
-      ? copy.analyzingSubline
-      : isRecording
-        ? "Nói to và rõ ràng vào micro..."
-        : hasRecorded
-          ? "Đã thu âm câu trả lời. Bạn có thể bấm 'Hoàn tất câu trả lời' để nộp."
-          : copy.waitingSubline
+    phase === CONVERSATION_PHASE.SKIPPED
+      ? copy.skippedSubline || "Câu này không được tính điểm."
+      : phase === CONVERSATION_PHASE.ANALYZING
+        ? copy.analyzingSubline
+        : noHearing
+        ? copy.noHearingSubline
+        : isRecording && isMuted
+          ? copy.aiMuted || "Micro đang tắt tiếng. Bấm nút mic để bật lại."
+          : isRecording
+            ? "Nói to và rõ ràng vào micro..."
+          : hasRecorded
+            ? "Đã thu âm câu trả lời. Bạn có thể bấm 'Hoàn tất câu trả lời' để nộp."
+            : copy.waitingSubline
 
   return (
     <div className="grid w-full gap-3 md:grid-cols-2">
@@ -188,9 +207,19 @@ const TranscriptCards = ({
         >
           {transcript || copy.transcriptPlaceholder}
         </p>
-        <p className="text-[10px] font-medium leading-[14px] text-slate-600">
+        <p
+          className={cn(
+            "text-[10px] font-medium leading-[14px]",
+            noHearing ? "text-amber-700" : "text-slate-600",
+          )}
+        >
           {subline}
         </p>
+        {noHearing && copy.noHearingHint && (
+          <p className="text-[10px] font-medium leading-[14px] text-amber-700">
+            {copy.noHearingHint}
+          </p>
+        )}
       </div>
     </div>
   )

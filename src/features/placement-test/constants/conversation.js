@@ -2,6 +2,7 @@ export const CONVERSATION_PHASE = {
   LOADING: "loading",
   LISTENING: "listening",
   ANALYZING: "analyzing",
+  SKIPPED: "skipped",
 }
 
 export const CONVERSATION_NOTICE = {

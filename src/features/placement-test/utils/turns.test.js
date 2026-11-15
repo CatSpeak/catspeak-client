@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { sortTurns, upsertTurn } from "./turns"
+import {
+  countSubmittedTurns,
+  isSubmittedTurn,
+  sortTurns,
+  upsertTurn,
+} from "./turns"
 
 describe("sortTurns", () => {
   it("sorts turns by order without mutating the source", () => {
@@ -26,5 +31,27 @@ describe("upsertTurn", () => {
     )
     expect(result).toHaveLength(2)
     expect(result[0].transcript).toBe("new")
+  })
+})
+
+describe("isSubmittedTurn", () => {
+  it("requires submission evidence, not a transcript", () => {
+    expect(isSubmittedTurn({ transcript: "我家有四口人" })).toBe(false)
+    expect(isSubmittedTurn({ answeredAt: 1 })).toBe(true)
+    expect(isSubmittedTurn({ submittedAt: 1 })).toBe(true)
+    expect(isSubmittedTurn(null)).toBe(false)
+  })
+})
+
+describe("countSubmittedTurns", () => {
+  it("counts only submitted turns and clamps to the total", () => {
+    const turns = [
+      { order: 1, answeredAt: 1 },
+      { order: 2, transcript: "pending" },
+      { order: 3, submittedAt: 1 },
+    ]
+    expect(countSubmittedTurns(turns, 5)).toBe(2)
+    expect(countSubmittedTurns(turns, 1)).toBe(1)
+    expect(countSubmittedTurns(null, 5)).toBe(0)
   })
 })

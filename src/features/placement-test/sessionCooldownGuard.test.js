@@ -5,15 +5,8 @@ import {
   getQuestionMock,
   resumeSessionMock,
   scoreSessionMock,
-  submitTurnMock,
 } from "./api/mockAdapter"
-import {
-  createSessionReal,
-  getQuestionReal,
-  resumeSessionReal,
-  scoreSessionReal,
-  submitTurnReal,
-} from "./api/realAdapter"
+import { resumeSessionReal, scoreSessionReal } from "./api/realAdapter"
 import { isUnfinishedSession } from "./utils/sessionLifecycle"
 
 describe("Placement Test Cooldown & Completed Session Guards", () => {
@@ -125,14 +118,11 @@ describe("Placement Test Cooldown & Completed Session Guards", () => {
         scoredAt: Date.now(),
       }
 
-      await scoreSessionReal(
-        { sessionId: "sess_done" },
-        {
-          read: mockRead,
-          clear: mockClear,
-          readResult: mockReadResult,
-        },
-      )
+      await scoreSessionReal({
+        read: mockRead,
+        clear: mockClear,
+        readResult: mockReadResult,
+      })
 
       // Active session in storage should be cleared once scoring is finalized
       expect(mockRead()).toBeNull()

@@ -17,7 +17,11 @@ const SessionNoticeBanner = ({ copy = {}, notice, retryCount = 0 }) => {
         })
 
   return (
-    <div className="flex w-full flex-col gap-1 rounded-[10px] bg-[#FFFBEB] px-3.5 py-2.5">
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex w-full flex-col gap-1 rounded-[10px] bg-[#FFFBEB] px-3.5 py-2.5"
+    >
       <div className="flex items-start gap-2">
         <TriangleAlert
           size={16}

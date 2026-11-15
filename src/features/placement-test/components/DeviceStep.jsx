@@ -196,9 +196,14 @@ const DeviceStep = ({ copy, onContinue }) => {
 
         {isNoAudio ? (
           <>
-            <div className="flex items-center gap-2.5 rounded-xl bg-[#FEF2F2] dark:bg-rose-950/40 px-4 py-3">
-              <MicOff size={18} strokeWidth={2} className="shrink-0 text-red-600 dark:text-rose-400" />
-              <span className="text-xs font-semibold leading-4 text-red-600 dark:text-rose-400">
+            <div
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
+              className="flex items-center gap-2.5 rounded-xl bg-[#FEF2F2] px-4 py-3"
+            >
+              <MicOff size={18} strokeWidth={2} className="shrink-0 text-red-600" />
+              <span className="text-xs font-semibold leading-4 text-red-600">
                 {noAudio.meterLabel}
               </span>
               <span className="ml-auto flex items-center gap-1">
@@ -314,15 +319,22 @@ const DeviceStep = ({ copy, onContinue }) => {
           </>
         ) : isError ? (
           <>
-            <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-red-50 dark:bg-rose-950/40 text-red-600 dark:text-rose-400">
-              <CircleAlert size={26} strokeWidth={2} />
-            </span>
-            <h2 className="text-xl font-semibold leading-7 text-[#09090B] dark:text-white">
-              {device.errorTitle}
-            </h2>
-            <p className="text-sm font-medium leading-[22px] text-slate-600 dark:text-neutral-300">
-              {device.errorBody}
-            </p>
+            <div
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
+              className="flex flex-col gap-4"
+            >
+              <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                <CircleAlert size={26} strokeWidth={2} />
+              </span>
+              <h2 className="text-xl font-semibold leading-7 text-[#09090B]">
+                {device.errorTitle}
+              </h2>
+              <p className="text-sm font-medium leading-[22px] text-slate-600">
+                {device.errorBody}
+              </p>
+            </div>
             <PillButton
               onClick={handleRetry}
               startIcon={<RotateCcw size={16} />}

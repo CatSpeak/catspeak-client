@@ -29,7 +29,7 @@ export default {
     description: "コミュニティのショート動画を見る。",
     loginRequired: "リールをアップロードするにはログインしてください。",
     videoFormatError: "動画形式がサポートされていません。",
-    videoSizeError: "動画サイズが50MBの上限を超えています。",
+    videoSizeError: "動画サイズが100MBの上限を超えています。",
     coverFormatError: "カバー画像の形式がサポートされていません。",
     coverSizeError: "カバーサイズが5MBの上限を超えています。",
     videoRequiredError: "動画ファイルが必要です。",
@@ -93,7 +93,7 @@ export default {
     shareKnowledge:
       "Cat Speakコミュニティで知識を共有し、ロールプレイを練習しましょう。",
     formatLimit: "形式: MP4、MOV",
-    sizeLimit: "最大5分、50MB",
+    sizeLimit: "最大5分、100MB",
     uploadReel: "リールをアップロード",
     dragDropVideo: "アップロードする動画をここにドラッグ＆ドロップ",
     clickToBrowse: "またはファイルを参照",

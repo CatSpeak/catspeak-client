@@ -6,6 +6,7 @@ import {
   getActiveSessionReal,
   getQuestionReal,
   getRetakeStatusReal,
+  resumeSessionReal,
   scoreSessionReal,
   submitTurnReal,
 } from "./realAdapter"
@@ -311,6 +312,164 @@ describe("realAdapter", () => {
     expect(res.data.turns[1].submittedAt).toBeNull()
   })
 
+  // `useConversationLoop` loads turn 1 from `initialQuestion`
+  // (hooks/useConversationLoop.js:407). Dropping it here makes the room call
+  // GET /question and re-synthesise TTS (~1 s) before "Câu 1/5" can render.
+  it("getActiveSessionReal keeps the first question of the same session", async () => {
+    const initialQuestion = {
+      turn_index: 1,
+      text: "你好！请问你叫什么名字？",
+      audio_base64: "Q1AUDIO",
+    }
+    inMemorySession = {
+      id: "psess_active_999",
+      turns: [],
+      initialQuestion,
+    }
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        has_active_session: true,
+        session: {
+          session_id: "psess_active_999",
+          status: "in_progress",
+          seed_band: 2,
+          current_turn: 1,
+          total_turns: 5,
+          turns: [],
+        },
+      },
+    })
+
+    await getActiveSessionReal({
+      baseQuery: mockBaseQuery,
+      persist: mockPersist,
+      read: mockRead,
+    })
+
+    expect(inMemorySession.initialQuestion).toEqual(initialQuestion)
+  })
+
+  it("getActiveSessionReal does not carry the first question across sessions", async () => {
+    inMemorySession = {
+      id: "psess_old",
+      turns: [],
+      initialQuestion: { turn_index: 1, text: "旧问题" },
+    }
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        has_active_session: true,
+        session: {
+          session_id: "psess_new",
+          status: "in_progress",
+          seed_band: 2,
+          current_turn: 1,
+          total_turns: 5,
+          turns: [],
+        },
+      },
+    })
+
+    await getActiveSessionReal({
+      baseQuery: mockBaseQuery,
+      persist: mockPersist,
+      read: mockRead,
+    })
+
+    expect(inMemorySession.initialQuestion).toBeUndefined()
+  })
+
+  // Oracle: the resume button must reopen the server's pending turn, not the
+  // locally cached position. GET /v1/placement/sessions/{id} returns
+  // current_turn + current_question + turns[].answered_at
+  // (catspeak-ai/src/catspeak_ai/read/placement/service.py:39-90); the client
+  // used to discard that payload and navigate with the stale local session.
+  it("resumeSessionReal adopts the server session into the local store", async () => {
+    inMemorySession = {
+      id: "psess_resume_2",
+      status: "in_progress",
+      currentOrder: 1,
+      turns: [],
+      initialQuestion: { turn_index: 1, text: "你昨天去哪儿了？" },
+    }
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        session_id: "psess_resume_2",
+        status: "in_progress",
+        seed_band: 3,
+        current_turn: 2,
+        total_turns: 5,
+        current_question: { turn_index: 2, text: "你是哪国人？" },
+        turns: [
+          {
+            turn_index: 1,
+            question_text: "你昨天去哪儿了？",
+            transcript: "我昨天去学校了",
+            speech_duration_ms: 4000,
+            answered_at: "2026-10-31T10:02:00Z",
+          },
+          {
+            turn_index: 2,
+            question_text: "你是哪国人？",
+            transcript: "",
+            speech_duration_ms: 0,
+            answered_at: null,
+          },
+        ],
+      },
+    })
+
+    await resumeSessionReal(
+      { sessionId: "psess_resume_2" },
+      { baseQuery: mockBaseQuery, read: mockRead, persist: mockPersist },
+    )
+
+    expect(inMemorySession.currentOrder).toBe(2)
+    expect(inMemorySession.currentQuestion).toMatchObject({
+      turn_index: 2,
+      text: "你是哪国人？",
+    })
+    expect(inMemorySession.turns[0].submittedAt).toBe(
+      new Date("2026-10-31T10:02:00Z").getTime(),
+    )
+    expect(inMemorySession.turns[1].submittedAt).toBeNull()
+    expect(inMemorySession.initialQuestion).toEqual({
+      turn_index: 1,
+      text: "你昨天去哪儿了？",
+    })
+  })
+
+  // Oracle: user ruling 2026-10-31 (work/placement-pause-expiry/state.md) —
+  // F5 inside a paused room must keep the 30-minute pause deadline, otherwise
+  // the reload silently resets the budget and the session stays resumable.
+  it("resumeSessionReal keeps the local pause deadline across F5", async () => {
+    const pauseStartedAt = Date.now() - 10 * 60 * 1000
+    inMemorySession = {
+      id: "psess_pause",
+      status: "in_progress",
+      pauseStartedAt,
+      pauseSpentMs: 60_000,
+      turns: [],
+    }
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        session_id: "psess_pause",
+        status: "in_progress",
+        seed_band: 3,
+        current_turn: 2,
+        total_turns: 5,
+        turns: [],
+      },
+    })
+
+    await resumeSessionReal(
+      { sessionId: "psess_pause" },
+      { baseQuery: mockBaseQuery, read: mockRead, persist: mockPersist },
+    )
+
+    expect(inMemorySession.pauseStartedAt).toBe(pauseStartedAt)
+    expect(inMemorySession.pauseSpentMs).toBe(60_000)
+  })
+
   it("getActiveSessionReal returns null when no active session", async () => {
     const mockBaseQuery = vi.fn().mockResolvedValue({
       data: { has_active_session: false, session: null },
@@ -336,6 +495,21 @@ describe("realAdapter", () => {
           eligible_at: "2026-10-01T12:00:00Z",
           last_tested_at: "2026-09-17T12:00:00Z",
         },
+        last_attempt: {
+          session_id: "psess_750a5e2bdff2472c",
+          final_hsk_level: 1,
+          turn_count: 5,
+          scored_at: "2026-09-20T10:00:00Z",
+          scores: {
+            pronunciation: 10,
+            vocabulary: 10,
+            grammar: 10,
+            fluency: 10,
+            ahi_total: 42.5,
+          },
+          self_adjusted: true,
+          adjusted_from_hsk_level: 1,
+        },
       },
     })
 
@@ -352,6 +526,40 @@ describe("realAdapter", () => {
     expect(res.data.eligible).toBe(false)
     expect(res.data.daysRemaining).toBe(10)
     expect(res.data.currentHskLevel).toBe(3)
+    expect(res.data.lastAttempt).toEqual({
+      sessionId: "psess_750a5e2bdff2472c",
+      code: "psess_750a5e2bdff2472c",
+      finalHskLevel: 1,
+      turnCount: 5,
+      scoredAt: new Date("2026-09-20T10:00:00Z").getTime(),
+      scores: {
+        pronunciation: 10,
+        vocabulary: 10,
+        grammar: 10,
+        fluency: 10,
+        ahiTotal: 42.5,
+      },
+      selfAdjusted: true,
+      adjustedFromHskLevel: 1,
+    })
+  })
+
+  it("getRetakeStatusReal maps an absent last_attempt to null", async () => {
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: {
+        account_id: 101,
+        current_hsk_level: 2,
+        last_attempt: null,
+        cooldown: { can_retake: true, days_remaining: 0 },
+      },
+    })
+
+    const res = await getRetakeStatusReal({
+      baseQuery: mockBaseQuery,
+      readResult: mockReadResult,
+    })
+
+    expect(res.data.lastAttempt).toBeNull()
   })
 
   it("adjustLevelReal calls POST /adjust-level and updates result", async () => {
@@ -398,10 +606,10 @@ describe("realAdapter", () => {
     inMemorySession = { id: "psess_12345", finalBand: 3 }
     inMemoryResult = { sessionId: "psess_12345", band: 3 }
 
-    const res = await scoreSessionReal(
-      { sessionId: "psess_12345" },
-      { read: mockRead, readResult: mockReadResult },
-    )
+    const res = await scoreSessionReal({
+      read: mockRead,
+      readResult: mockReadResult,
+    })
 
     expect(res.data.result.band).toBe(3)
   })

@@ -200,7 +200,10 @@ describe("resumeSessionMock", () => {
     const session = {
       ...buildSession({ targetBand: "hsk3_4", now: () => 1, random: () => 0.5 }),
       id: "session-1",
-      turns: [{ order: 1 }, { order: 2 }],
+      turns: [
+        { order: 1, submittedAt: 1 },
+        { order: 2, submittedAt: 2 },
+      ],
     }
 
     const result = await resumeSessionMock(
@@ -302,6 +305,7 @@ describe("scoreSessionMock", () => {
         transcript: "我喜欢学习中文",
         durationMs: 4200,
         retryCount: 0,
+        submittedAt: 1,
       },
     ],
   })

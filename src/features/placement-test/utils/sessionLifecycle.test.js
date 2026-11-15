@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { RESUME_WINDOW_MS } from "../constants/lifecycle"
+import { PAUSE_BUDGET_MS, RESUME_WINDOW_MS } from "../constants/lifecycle"
 import { SESSION_STATUS } from "../constants/session"
 import {
   SESSION_LIFECYCLE_KIND,
@@ -98,6 +98,52 @@ describe("getSessionLifecycle", () => {
     expect(lifecycle.nextOrder).toBe(2)
   })
 
+  // Oracle: the server exposes the pending turn as `current_question`
+  // (catspeak-ai/src/catspeak_ai/read/placement/service.py:44-56,64) and
+  // `current_turn = answered + 1` (:39-41). Resume must reopen that turn even
+  // when the locally stored turns array is stale — a reload mid-turn must not
+  // rewind to Câu 1 and replay `initialQuestion`.
+  it("resumes at the server pending question when the local turns are stale", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        turns: [],
+        currentQuestion: { turn_index: 2, text: "你是哪国人？" },
+      }),
+      now: ACTIVITY + 2 * HOUR_MS,
+    })
+
+    expect(lifecycle.answeredCount).toBe(0)
+    expect(lifecycle.nextOrder).toBe(2)
+  })
+
+  it("uses the server current turn as a floor when no pending question is cached", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({ turns: [], currentOrder: 2 }),
+      now: ACTIVITY + 2 * HOUR_MS,
+    })
+
+    expect(lifecycle.nextOrder).toBe(2)
+  })
+
+  // Oracle: a turn is completed only when answered_at is stamped
+  // (catspeak-ai/src/catspeak_ai/read/placement/service.py:39), which the client
+  // maps to answeredAt/submittedAt (realAdapter.js:329-330). A pending turn can
+  // carry a transcript but is still not submitted.
+  it("does not count a pending turn that only has a transcript", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        turns: [
+          { order: 1, answeredAt: null, submittedAt: null, transcript: "我家有四口人" },
+        ],
+      }),
+      now: ACTIVITY + 2 * HOUR_MS,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.RESUME)
+    expect(lifecycle.answeredCount).toBe(0)
+    expect(lifecycle.nextOrder).toBe(1)
+  })
+
   it("expires exactly at the 24h boundary", () => {
     const lifecycle = getSessionLifecycle({
       session: buildSession(),
@@ -140,5 +186,47 @@ describe("getSessionLifecycle", () => {
       windowMs: HOUR_MS,
     })
     expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.EXPIRED)
+  })
+
+  // Oracle: user ruling 2026-10-31 (work/placement-pause-expiry/state.md) —
+  // "Hết 30 phút: đóng modal, hủy phiên, chuyển về Dashboard và thông báo phiên
+  // thi đã hết hạn." The 30-minute pause budget (constants/lifecycle.js:1) must
+  // outrank the 24h resume window once the learner has been paused that long.
+  it("expires a session whose 30-minute pause budget is spent", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        status: SESSION_STATUS.IN_PROGRESS,
+        pauseStartedAt: ACTIVITY,
+      }),
+      now: ACTIVITY + PAUSE_BUDGET_MS + 60_000,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.PAUSE_EXPIRED)
+    expect(lifecycle.expired).toBe(true)
+  })
+
+  it("keeps a session resumable while it still has pause budget", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        status: SESSION_STATUS.IN_PROGRESS,
+        pauseStartedAt: ACTIVITY,
+      }),
+      now: ACTIVITY + 10 * 60 * 1000,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.RESUME)
+  })
+
+  it("subtracts pause time already spent from the budget", () => {
+    const lifecycle = getSessionLifecycle({
+      session: buildSession({
+        status: SESSION_STATUS.IN_PROGRESS,
+        pauseStartedAt: ACTIVITY,
+        pauseSpentMs: 25 * 60 * 1000,
+      }),
+      now: ACTIVITY + 5 * 60 * 1000 + 1000,
+    })
+
+    expect(lifecycle.kind).toBe(SESSION_LIFECYCLE_KIND.PAUSE_EXPIRED)
   })
 })

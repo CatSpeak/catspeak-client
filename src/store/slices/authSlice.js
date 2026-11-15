@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit"
+import { clearPlacementCache } from "@/features/placement-test/utils/sessionStorage"
 
 // Helper to safely parse user from localStorage
 const getUserFromStorage = () => {
   try {
     const userStr = localStorage.getItem("user")
     return userStr ? JSON.parse(userStr) : null
-  } catch (e) {
+  } catch {
     return null
   }
 }
@@ -66,6 +67,7 @@ const authSlice = createSlice({
       localStorage.removeItem("user")
       localStorage.removeItem("token")
       localStorage.removeItem("refreshToken")
+      clearPlacementCache()
     },
     setLoading: (state) => {
       state.status = "loading"
