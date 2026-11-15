@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import {
   Outlet,
   useLocation,
+  useNavigate,
   useSearchParams,
   ScrollRestoration,
 } from "react-router-dom"
@@ -15,6 +16,7 @@ import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
 import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader"
+import { getCommunityPath } from "@/shared/utils/navigation"
 import {
   TourGuideProvider,
   TourGuideContainer,
@@ -45,11 +47,14 @@ const MainLayout = ({
   })
 
   const location = useLocation()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isLandingPage = location.pathname === "/"
+  const isContactPage = location.pathname === "/contact"
+  const isLandingExperience = isLandingPage || isContactPage
   const isCommunityPage = location.pathname.includes("/community")
   const isPricingPage = location.pathname.startsWith("/pricing")
-  const shouldShowSidebar = showSidebar && !isLandingPage && !isPricingPage
+  const shouldShowSidebar = showSidebar && !isLandingExperience && !isPricingPage
 
   // Check for reset password intent or login redirect intent
   useEffect(() => {
@@ -170,7 +175,7 @@ const MainLayout = ({
 
       <div
         className={`relative flex min-h-screen text-left overflow-x-clip ${
-          isLandingPage ? "bg-white dark:bg-[#0F0F0F]" : "bg-primaryBg dark:bg-[#0F0F0F]"
+          isLandingExperience ? "bg-white dark:bg-[#0F0F0F]" : "bg-primaryBg dark:bg-[#0F0F0F]"
         } ${isPricingPage ? "h-screen max-h-screen overflow-hidden" : ""}`}
       >
         {shouldShowSidebar && (
@@ -182,8 +187,10 @@ const MainLayout = ({
 
         <div className="flex flex-col flex-1 min-w-0 relative">
           {showHeader &&
-            (isLandingPage ? (
-              <LandingHeader onGetStarted={() => openAuthModal("login")} />
+            (isLandingExperience ? (
+              <LandingHeader
+                onGetStarted={() => navigate(getCommunityPath())}
+              />
             ) : (
               <MainHeader
                 showSidebar={shouldShowSidebar}
@@ -203,7 +210,7 @@ const MainLayout = ({
           </main>
 
           {/* Footer full width */}
-          {showFooter && isLandingPage && <Footer />}
+          {showFooter && isLandingExperience && <Footer />}
         </div>
       </div>
 

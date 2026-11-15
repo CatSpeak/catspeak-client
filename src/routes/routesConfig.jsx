@@ -8,6 +8,7 @@ import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage"
 import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom"
 import QueuePage from "@/features/queue/pages/QueuePage"
 import RoomsPage from "@/features/rooms/pages/RoomsPage"
+import ContactPage from "@/features/landing/pages/ContactPage"
 
 // Cat Speak Feature Pages
 import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
@@ -324,6 +325,10 @@ const routesConfig = [
           {
             path: "verify-email",
             element: <VerifyEmailPage />,
+          },
+          {
+            path: "contact",
+            element: <ContactPage />,
           },
           {
             path: "shared-material/:token",

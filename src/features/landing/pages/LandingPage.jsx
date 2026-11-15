@@ -1,15 +1,24 @@
 import { useState } from "react"
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 import { LoginPopup, RegisterPopup, VerifyEmailOtpPopup } from "@/features/auth"
 import HeroSection from "@/features/landing/components/HeroSection"
-import LeadingTeamSection from "@/features/landing/components/LeadingTeamSection"
-import NewsSection from "@/features/landing/components/NewsSection"
-import ExploreEcosystemSection from "@/features/landing/components/ExploreEcosystemSection"
-import PartnerSection from "@/features/landing/components/PartnerSection"
+import PartnerNetworkSection from "@/features/landing/components/PartnerNetworkSection"
+// import NewsSection from "@/features/landing/components/NewsSection"
+import LearningBarriersSection from "@/features/landing/components/LearningBarriersSection"
+import SolutionSection from "@/features/landing/components/SolutionSection"
+import CoreFeaturesSection from "@/features/landing/components/CoreFeaturesSection"
+// import ExploreEcosystemSection from "@/features/landing/components/ExploreEcosystemSection"
 import ResponseSection from "@/features/landing/components/ResponseSection"
-import ValuesSection from "@/features/landing/components/ValuesSection"
+import HowItWorksSection from "@/features/landing/components/HowItWorksSection"
+// import ValuesSection from "@/features/landing/components/ValuesSection"
+import TargetAudienceSection from "@/features/landing/components/TargetAudienceSection"
+import MethodComparisonSection from "@/features/landing/components/MethodComparisonSection"
 import AISection from "@/features/landing/components/AISection"
+import TrustSection from "@/features/landing/components/TrustSection"
+import AchievementsSection from "@/features/landing/components/AchievementsSection"
 import FAQSection from "@/features/landing/components/FAQSection"
+import LandingContactSection from "@/features/landing/components/LandingContactSection"
+import LeadingTeamSection from "@/features/landing/components/LeadingTeamSection"
 
 const LandingPage = () => {
   const [authModal, setAuthModal] = useState({
@@ -100,38 +109,65 @@ const LandingPage = () => {
   return (
     <div className="flex flex-col w-full mx-auto overflow-hidden">
       {/* 1. Hero + Numbers */}
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full pt-4 mb-8 lg:mb-12"
+        className="relative w-full"
       >
         <HeroSection openAuthModal={openAuthModal} />
-      </motion.div>
+      </Motion.div>
 
-      {/* 2. Leading Team */}
+      {/* 2. Partner network */}
+      <PartnerNetworkSection />
+
+      {/* Instructor recruitment banner */}
       <LeadingTeamSection openAuthModal={openAuthModal} />
 
-      {/* 3. News */}
-      <NewsSection />
+      {/* 3. Trust / proof section */}
+      <TrustSection />
 
-      {/* 4. Explore Ecosystem */}
-      <ExploreEcosystemSection />
+      {/* 4. Achievements */}
+      <AchievementsSection />
 
-      {/* 5. Partner */}
-      <PartnerSection />
+      {/* 5. Learning barriers */}
+      <LearningBarriersSection />
 
-      {/* 6. Response (Testimonials) */}
+      {/* CAT SPEAK solutions */}
+      <SolutionSection />
+
+      {/* Existing CatSpeak news section is temporarily hidden. */}
+      {/* <NewsSection /> */}
+
+      {/* 6. Core features */}
+      <CoreFeaturesSection />
+
+      {/* Existing Explore Ecosystem section is temporarily hidden. */}
+      {/* <ExploreEcosystemSection /> */}
+
+      {/* 7. Responses */}
       <ResponseSection />
 
-      {/* 7. Values */}
-      <ValuesSection />
+      {/* 7. How CAT SPEAK works */}
+      <HowItWorksSection />
 
-      {/* 8. AI Section */}
+      {/* Existing Core Values section is temporarily hidden. */}
+      {/* <ValuesSection /> */}
+
+      {/* 8. Target audience */}
+      <TargetAudienceSection />
+
+      {/* 9. Method comparison */}
+      <MethodComparisonSection />
+
+      {/* 10. AI practice - "Cộng đồng ngôn ngữ tốt nhất" */}
       <AISection />
 
-      {/* 9. FAQ */}
+      {/* 10. FAQ */}
       <FAQSection />
+
+      {/* 12. Contact CTA */}
+      <LandingContactSection />
 
       {/* Auth Modal */}
       {renderAuthPopup()}
