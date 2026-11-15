@@ -3,10 +3,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { COLORS } from "@/shared/constants/constants"
 import { Share, MessageSquare } from "lucide-react"
-import {
-  useReactToPostMutation,
-  useSharePostMutation,
-} from "@/store/api/social/postsApi"
+import { useSharePostMutation } from "@/store/api/social/postsApi"
+import usePostReaction from "@/shared/hooks/usePostReaction"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import ShareModal from "./ShareModal"
 import Carousel from "@/shared/components/ui/Carousel"
@@ -44,7 +42,7 @@ const NewsCard = ({ news }) => {
   const { openAuthModal } = useAuthModal()
 
   /* ── API mutations & hooks ───────────────────────────────────────── */
-  const [reactToPost] = useReactToPostMutation()
+  const { handleReact } = usePostReaction(news)
   const [sharePost] = useSharePostMutation()
   const [shareUrl, setShareUrl] = useState("")
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
@@ -152,21 +150,6 @@ const NewsCard = ({ news }) => {
         console.error("Share failed", err)
       }
     }
-  }
-
-  const handleReact = (e, type) => {
-    e?.preventDefault?.()
-    e?.stopPropagation?.()
-
-    if (!isAuthenticated) {
-      openAuthModal("login")
-      return
-    }
-
-    const id = news?.postId || news?.id
-    if (!id) return
-
-    reactToPost({ postId: id, type })
   }
 
   const handleTouchStart = () => {

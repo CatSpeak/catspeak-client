@@ -26,10 +26,13 @@ export default {
       topics: "トピック",
     },
     newsDetail: {
+      untitled: "投稿",
       attachments: "添付ファイル",
       document: "ドキュメント",
       download: "ダウンロード",
       retryRelatedNews: "関連ニュースを読み込めませんでした。再試行してください。",
+      seeMore: "もっと見る",
+      showLess: "折りたたむ",
       expandComments: "コメントを表示",
       collapseComments: "コメントを非表示",
       previousPosts: "前の記事",

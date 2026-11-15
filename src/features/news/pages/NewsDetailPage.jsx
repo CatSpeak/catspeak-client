@@ -6,9 +6,9 @@ import {
   useGetPostBySlugQuery,
   useGetSharedPostQuery,
   useGetPostReactionsQuery,
-  useReactToPostMutation,
   useSharePostMutation,
 } from "@/store/api/social/postsApi"
+import usePostReaction from "@/shared/hooks/usePostReaction"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import PostContent from "../components/PostContent"
@@ -92,38 +92,12 @@ const NewsDetailPage = () => {
     : isNumeric
       ? normalError
       : slugError
-  const [reactToPost] = useReactToPostMutation()
   const newsItem = data?.data ?? data ?? null
   const postId = newsItem?.postId
-  const { data: postReactions, refetch: refetchReactions } =
-    useGetPostReactionsQuery(postId, { skip: !postId })
-
-  const handleReact = async (type) => {
-    if (!isAuthenticated) {
-      openAuthModal("login")
-      return
-    }
-
-    if (!newsItem?.postId) return
-
-    try {
-      await reactToPost({
-        postId: newsItem.postId,
-        type,
-      }).unwrap()
-    } catch (e) {
-      console.error("React failed", e)
-    } finally {
-      refetchReactions?.()
-      if (isSharedToken) {
-        refetchShared()
-      } else if (isNumeric) {
-        refetchNormal()
-      } else {
-        refetchSlug()
-      }
-    }
-  }
+  const { data: postReactions } = useGetPostReactionsQuery(postId, {
+    skip: !postId,
+  })
+  const { handleReact } = usePostReaction(newsItem)
 
   const [sharePost] = useSharePostMutation()
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
@@ -238,11 +212,11 @@ const NewsDetailPage = () => {
           </Link>
         </div>
 
-        {/* ── Dual-Card Layout: Perfectly aligned top baselines ── */}
+        {/* ── Main Layout: Article (Left) & Related News (Right) ── */}
         <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+          {/* ── Left Column: Main Article & Comments ── */}
           <div className="min-w-0">
-            <div className="rounded-2xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-4 shadow-xs">
-              <article aria-labelledby="news-article-title" className="min-w-0">
+            <article aria-labelledby="news-article-title" className="min-w-0">
               <NewsArticleHeader key={postId || slug} newsItem={newsItem} />
 
               <div className="pt-4">
@@ -265,7 +239,7 @@ const NewsDetailPage = () => {
                 />
 
                 {documentMedia.length > 0 && (
-                  <section className="mt-6 flex flex-col gap-3 border-t border-border pt-4">
+                  <section className="mt-6 flex flex-col gap-3 border-t border-border dark:border-[#3F3F3F] pt-4">
                     <h2 className="text-sm font-semibold text-gray-700 dark:text-neutral-200">
                       {labels?.attachments || "Attachments"} (
                       {documentMedia.length})
@@ -273,7 +247,9 @@ const NewsDetailPage = () => {
                     {documentMedia.map((doc) => (
                       <FileAttachmentItem
                         key={doc.postMediaId || doc.mediaUrl}
-                        fileName={doc.fileName || labels?.document || "Document"}
+                        fileName={
+                          doc.fileName || labels?.document || "Document"
+                        }
                         fileSize={doc.fileSize}
                         onClick={() => setPreviewDoc(doc)}
                         className="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-[#272727]"
@@ -318,7 +294,7 @@ const NewsDetailPage = () => {
               <section
                 ref={commentsRef}
                 aria-label={labels?.comment || "Comments"}
-                className="scroll-mt-24 border-t border-border -mx-4 p-4"
+                className="scroll-mt-24 pt-4"
               >
                 <CommentsSection
                   key={postId}
@@ -330,18 +306,16 @@ const NewsDetailPage = () => {
               </section>
             </div>
           </div>
-        </div>
 
-        <aside className="min-w-0 lg:sticky lg:top-20 lg:self-start">
-          <div className="rounded-2xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-xs empty:hidden overflow-hidden">
+          {/* ── Right Column: Related News (Sticky Sidebar) ── */}
+          <aside className="min-w-0 lg:sticky lg:top-20 lg:self-start">
             <RelatedNewsSection
               currentPostId={newsItem.postId || newsItem.id}
               postType={isGlobalNews ? "2" : "1"}
             />
-          </div>
-        </aside>
+          </aside>
+        </div>
       </div>
-    </div>
 
       {/* ── Share Modal ──────────────────────────────────────────── */}
       <ShareModal

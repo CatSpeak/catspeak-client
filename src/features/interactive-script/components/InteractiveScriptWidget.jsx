@@ -124,9 +124,17 @@ const InteractiveScriptWidget = ({
 
   // Render các từ trong segment (phân tách từ thường hoặc giữ nguyên cụm từ highlight)
   const renderSegment = (segment, sIdx) => {
+    const prevSeg = currentScript?.contentSegments?.[sIdx - 1]
+    const nextSeg = currentScript?.contentSegments?.[sIdx + 1]
+
     if (segment.isHighlighted) {
       const popoverKey = `seg-${sIdx}`
       const isActive = activePopoverKey === popoverKey
+
+      const isFollowedByPunctuation =
+        nextSeg && /^[\p{P}\p{S}]/u.test(nextSeg.text?.trimStart() || "")
+      const isPrecededByPunctuation =
+        prevSeg && /[“(\[‘'"`]$/u.test(prevSeg.text?.trimEnd() || "")
 
       return (
         <Popover
@@ -139,7 +147,9 @@ const InteractiveScriptWidget = ({
           trigger={
             <span
               className={cn(
-                "font-bold text-cath-red-700 dark:text-red-400 cursor-pointer transition-colors rounded-md px-1.5 py-0.5 inline-block mx-0.5",
+                "font-bold text-cath-red-700 dark:text-red-400 cursor-pointer transition-colors rounded py-0.5 inline",
+                isPrecededByPunctuation ? "pl-0" : "pl-1",
+                isFollowedByPunctuation ? "pr-0" : "pr-1",
                 "hover:bg-rose-100/70 dark:hover:bg-rose-950/40",
                 isActive &&
                   "ring-1 ring-inset ring-[#990011]/80 dark:ring-red-400/80 bg-[#FFDAD6] dark:bg-rose-950/50",
@@ -167,9 +177,7 @@ const InteractiveScriptWidget = ({
         {pieces.map((piece, pIdx) => {
           if (!piece.isWordLike) {
             return (
-              <span key={`p-${sIdx}-${pIdx}`}>
-                {piece.segment}
-              </span>
+              <span key={`p-${sIdx}-${pIdx}`}>{piece.segment}</span>
             )
           }
 
@@ -179,14 +187,29 @@ const InteractiveScriptWidget = ({
 
           if (!cleanWord) {
             return (
-              <span key={`p-${sIdx}-${pIdx}`}>
-                {chunk}
-              </span>
+              <span key={`p-${sIdx}-${pIdx}`}>{chunk}</span>
             )
           }
 
           const popoverKey = `w-${sIdx}-${pIdx}`
           const isActive = activePopoverKey === popoverKey
+
+          const nextPiece = pieces[pIdx + 1]
+          const prevPiece = pieces[pIdx - 1]
+          const isFollowedByPunctuation =
+            (nextPiece &&
+              !nextPiece.isWordLike &&
+              /^[\p{P}\p{S}]/u.test(nextPiece.segment)) ||
+            (!nextPiece &&
+              nextSeg &&
+              /^[\p{P}\p{S}]/u.test(nextSeg.text?.trimStart() || ""))
+          const isPrecededByPunctuation =
+            (prevPiece &&
+              !prevPiece.isWordLike &&
+              /^[“(\[‘'"`]/u.test(prevPiece.segment)) ||
+            (!prevPiece &&
+              prevSeg &&
+              /[“(\[‘'"`]$/u.test(prevSeg.text?.trimEnd() || ""))
 
           return (
             <Popover
@@ -199,7 +222,9 @@ const InteractiveScriptWidget = ({
               trigger={
                 <span
                   className={cn(
-                    "cursor-pointer transition-colors rounded-md px-1 py-0.5 inline-block",
+                    "cursor-pointer transition-colors rounded py-0.5 inline",
+                    isPrecededByPunctuation ? "pl-0" : "pl-0.5",
+                    isFollowedByPunctuation ? "pr-0" : "pr-0.5",
                     "hover:bg-slate-100 dark:hover:bg-[#272727] hover:text-slate-900 dark:hover:text-white",
                     isActive &&
                       "ring-1 ring-inset ring-[#990011]/80 dark:ring-red-400/80 bg-[#FFDAD6] dark:bg-rose-950/50",

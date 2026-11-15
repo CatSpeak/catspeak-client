@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { MessageSquare, ThumbsUp } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ReactionsPopover from "@/shared/components/ui/ReactionsPopover"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { ReactionBadge, NEWS_REACTIONS } from "./ReactionBadge"
 import ReactionStackedBadges from "./ReactionStackedBadges"
 import {
@@ -9,6 +10,22 @@ import {
   getTotalReactionsCount,
 } from "../utils/reactionUtils"
 import { useGetPostReactionsQuery } from "@/store/api/social/postsApi"
+
+const ShareIcon = ({ size = 20, className = "" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M14 9V5L21 12L14 19V14.9C9 14.9 5.5 16.5 3 20C4 15 7 10 14 9Z" />
+  </svg>
+)
 
 const NewsDetailActionBar = ({
   newsItem,
@@ -119,9 +136,9 @@ const NewsDetailActionBar = ({
         />
       </div>
 
-      {/* ── 3-Column Action Bar (Matching PostActionBar) ── */}
+      {/* ── 3-Column Action Bar (Using PillButton) ── */}
       <div
-        className="grid grid-cols-3 border-t border-border dark:border-[#3F3F3F] overflow-visible -mx-4"
+        className="grid grid-cols-3 gap-2 overflow-visible"
         onPointerDown={(e) => e.stopPropagation()}
       >
         {/* Like / Reactions button */}
@@ -135,26 +152,24 @@ const NewsDetailActionBar = ({
           onTouchEnd={handleTouchEnd}
           onTouchMove={handleTouchEnd}
         >
-          <button
-            type="button"
+          <PillButton
+            variant="secondary"
+            className="w-full"
             onClick={() => {
               const type = newsItem?.currentUserReaction || "Like"
               handleReact(type)
             }}
-            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] text-secondary dark:text-[#AAAAAA] hover:text-black dark:hover:text-white cursor-pointer touch-manipulation"
             aria-label={getReactionLabel()}
+            startIcon={
+              newsItem?.currentUserReaction ? (
+                <ReactionBadge type={newsItem.currentUserReaction} size={20} />
+              ) : (
+                <ThumbsUp size={20} />
+              )
+            }
           >
-            {newsItem?.currentUserReaction ? (
-              <ReactionBadge type={newsItem.currentUserReaction} size={20} />
-            ) : (
-              <ThumbsUp
-                size={20}
-                strokeWidth={1.8}
-                className="text-secondary dark:text-[#AAAAAA] group-hover/reactions:text-black dark:group-hover/reactions:text-white transition-colors"
-              />
-            )}
-            <span className="text-sm font-medium">{totalReactions}</span>
-          </button>
+            {totalReactions}
+          </PillButton>
 
           {/* Reactions Popover */}
           <ReactionsPopover
@@ -167,40 +182,26 @@ const NewsDetailActionBar = ({
         </div>
 
         {/* Comment button */}
-        <button
-          type="button"
+        <PillButton
+          variant="secondary"
+          className="w-full"
           onClick={onCommentClick}
-          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] text-secondary dark:text-[#AAAAAA] hover:text-black dark:hover:text-white cursor-pointer touch-manipulation"
           aria-label={t.news?.newsDetail?.comment || "Bình luận"}
+          startIcon={<MessageSquare size={20} />}
         >
-          <MessageSquare
-            size={20}
-            strokeWidth={1.8}
-            className="transition-colors"
-          />
-          <span className="text-sm font-medium">{totalComments}</span>
-        </button>
+          {totalComments}
+        </PillButton>
 
         {/* Share button */}
-        <button
-          type="button"
+        <PillButton
+          variant="secondary"
+          className="w-full"
           onClick={onShareClick}
-          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] text-secondary dark:text-[#AAAAAA] hover:text-black dark:hover:text-white cursor-pointer touch-manipulation"
           aria-label={t.news?.newsDetail?.share || "Chia sẻ"}
+          startIcon={<ShareIcon size={20} />}
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M14 9V5L21 12L14 19V14.9C9 14.9 5.5 16.5 3 20C4 15 7 10 14 9Z" />
-          </svg>
-          <span className="text-sm font-medium">{shareCount}</span>
-        </button>
+          {shareCount}
+        </PillButton>
       </div>
     </div>
   )

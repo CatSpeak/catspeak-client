@@ -4,8 +4,8 @@ import {
   useUpdatePostMutation,
   useDeletePostMutation,
 } from "../../../store/api/social/profilePostsApi"
-import { useReactToPostMutation } from "@/store/api/social/postsApi"
 import useSharePost from "@/shared/hooks/useSharePost"
+import usePostReaction from "@/shared/hooks/usePostReaction"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import PostEditorModal from "./PostEditorModal"
 import PostMediaGallery from "./PostMediaGallery"
@@ -61,7 +61,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
 
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation()
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation()
-  const [reactToPost] = useReactToPostMutation()
+  const { handleReact } = usePostReaction(post)
 
   const handleUpdatePost = async (formData) => {
     await updatePost({ postId: post.postId, formData }).unwrap()
@@ -75,11 +75,6 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
     } catch (error) {
       console.error("Failed to delete post:", error)
     }
-  }
-
-  const handleReact = (e, type) => {
-    e.stopPropagation()
-    reactToPost({ postId: post.postId, type })
   }
 
   const handleShare = (e) => {
@@ -123,8 +118,9 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                 className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
               >
                 <PostContent
-                  html={post?.content || (!contentUrl ? excerpt : null)}
-                  contentUrl={contentUrl}
+                  html={isExpanded ? post?.content : post?.content || excerpt}
+                  contentUrl={isExpanded ? contentUrl : null}
+                  fallback={excerpt}
                   className={
                     !isExpanded
                       ? "text-sm text-secondary dark:text-neutral-300"
