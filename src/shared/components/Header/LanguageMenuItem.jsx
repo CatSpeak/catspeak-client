@@ -1,5 +1,4 @@
 import React from "react"
-import { motion } from "framer-motion"
 
 const LanguageMenuItem = ({
   code,
@@ -9,7 +8,6 @@ const LanguageMenuItem = ({
   onSelect,
   soonLabel,
   isActive,
-  layoutId = "community-active-indicator",
   role = "option",
 }) => (
   <button
@@ -30,10 +28,7 @@ const LanguageMenuItem = ({
     }`}
   >
     {isActive && (
-      <motion.div
-        layoutId={layoutId}
-        className="absolute inset-0 rounded-xl bg-gray-500/5 pointer-events-none"
-      />
+      <div className="absolute inset-0 rounded-xl bg-gray-500/5 pointer-events-none" />
     )}
     <span className="flex h-5 w-5 shrink-0 overflow-hidden rounded-full border border-border">
       <img
@@ -45,7 +40,7 @@ const LanguageMenuItem = ({
         draggable={false}
       />
     </span>
-    <span className="min-w-0 flex-1 truncate text-[14px]">{label}</span>
+    <span className="min-w-0 flex-1 truncate text-sm leading-5">{label}</span>
     {disabled ? (
       <span className="shrink-0 ml-auto rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">
         {soonLabel}

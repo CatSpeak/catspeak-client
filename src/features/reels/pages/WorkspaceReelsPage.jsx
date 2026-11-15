@@ -5,7 +5,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useAuth } from "@/features/auth"
 
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 import CreateReelModal from "../components/modals/CreateReelModal"
 import WorkspaceMyReelsTab from "../components/tabs/WorkspaceMyReelsTab"
 import WorkspacePlaylistsTab from "../components/tabs/WorkspacePlaylistsTab"
@@ -26,6 +26,10 @@ const WorkspaceReelsContent = ({ userId }) => {
 
   const [activeTab, setActiveTab] = useState("myReels")
   const [isUploadOpen, setIsUploadOpen] = useState(false)
+
+  const handleTabChange = (nextTab) => {
+    setActiveTab(nextTab)
+  }
 
   const ws = t?.catSpeak?.reels?.workspace || {}
 
@@ -67,38 +71,44 @@ const WorkspaceReelsContent = ({ userId }) => {
           <Tabs
             tabs={tabs}
             activeTab={activeTab}
-            onChange={setActiveTab}
+            onChange={handleTabChange}
             fullWidth={false}
             className="mb-4"
           />
 
-          {activeTab === "myReels" ? (
-            <div>
-              <div className="flex justify-end mb-4 px-4">
-                {!id && activeTab === "myReels" && (
-                  <PillButton onClick={() => setIsUploadOpen(true)}>
-                    <span className="hidden sm:inline">
-                      {t.catSpeak?.reels?.uploadReel || "Upload Reel"}
-                    </span>
-                  </PillButton>
-                )}
-              </div>
+          <TabContent
+            activeTab={activeTab}
+            tabs={tabs}
+            className="w-full"
+          >
+            {activeTab === "myReels" ? (
+              <div>
+                <div className="flex justify-end mb-4 px-4">
+                  {!id && activeTab === "myReels" && (
+                    <PillButton onClick={() => setIsUploadOpen(true)}>
+                      <span className="hidden sm:inline">
+                        {t.catSpeak?.reels?.uploadReel || "Upload Reel"}
+                      </span>
+                    </PillButton>
+                  )}
+                </div>
 
-              <WorkspaceMyReelsTab
-                userId={userId}
-                formatDate={formatDate}
+                <WorkspaceMyReelsTab
+                  userId={userId}
+                  formatDate={formatDate}
+                  formatNumber={formatNumber}
+                  navigate={navigate}
+                  setIsUploadOpen={setIsUploadOpen}
+                />
+              </div>
+            ) : (
+              <WorkspacePlaylistsTab
                 formatNumber={formatNumber}
+                formatDate={formatDate}
                 navigate={navigate}
-                setIsUploadOpen={setIsUploadOpen}
               />
-            </div>
-          ) : (
-            <WorkspacePlaylistsTab
-              formatNumber={formatNumber}
-              formatDate={formatDate}
-              navigate={navigate}
-            />
-          )}
+            )}
+          </TabContent>
         </>
       )}
 

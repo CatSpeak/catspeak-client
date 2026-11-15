@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
-import { Newspaper, ArrowUpDown, ChevronDown } from "lucide-react"
+import { Newspaper, ChevronDown } from "lucide-react"
 import { useParams, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -311,7 +311,7 @@ const NewsPage = ({ postType = "1" }) => {
     <div className="flex flex-col w-full gap-4">
       <div className="flex flex-col w-full gap-4 md:flex-row md:items-center md:justify-between">
         {/* Search box */}
-        <div className="w-full md:max-w-xs">
+        <div className="w-full md:max-w-[360px]">
           <SearchInput
             value={searchInput}
             onChange={handleSearchChange}
@@ -335,9 +335,8 @@ const NewsPage = ({ postType = "1" }) => {
             trigger={(isOpen, selectedOption, toggle) => (
               <PillButton
                 onClick={toggle}
-                variant="ghost"
+                variant="secondary"
                 isActive={isOpen}
-                startIcon={<ArrowUpDown />}
                 endIcon={
                   <ChevronDown
                     className={`transition-transform duration-200 ${

@@ -29,8 +29,8 @@ const DataTable = ({
   renderMobileCard,
   className = "",
   striped = false,
-  headerRowClassName = "bg-red-50/50 text-cath-red-800 border-b border-red-100",
-  tbodyClassName = "bg-white",
+  headerRowClassName = "bg-red-50/50 dark:bg-rose-950/20 text-cath-red-800 dark:text-red-400 border-b border-red-100 dark:border-rose-900/40",
+  tbodyClassName = "bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-neutral-200",
   rowClassName = "",
   onRowClick,
   tableClassName = "",
@@ -41,11 +41,11 @@ const DataTable = ({
       <div
         className={`flex flex-col items-center justify-center py-20 flex-1 ${className}`}
       >
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-          {emptyIcon || <FileText className="w-8 h-8 text-gray-400" />}
+        <div className="w-16 h-16 bg-gray-100 dark:bg-[#272727] rounded-full flex items-center justify-center mb-4">
+          {emptyIcon || <FileText className="w-8 h-8 text-gray-400 dark:text-neutral-500" />}
         </div>
-        <p className="text-gray-800 font-medium mb-1">{emptyTitle}</p>
-        <p className="text-gray-400 text-sm">{emptyDescription}</p>
+        <p className="text-gray-800 dark:text-white font-medium mb-1">{emptyTitle}</p>
+        <p className="text-gray-400 dark:text-neutral-400 text-sm">{emptyDescription}</p>
       </div>
     )
   }
@@ -55,7 +55,7 @@ const DataTable = ({
       {/* Desktop table — hidden on mobile */}
       <FluentCard
         padding="!p-0"
-        className={`overflow-hidden flex-1 hidden md:block shadow-none !border-border !rounded-xl ${className}`}
+        className={`overflow-hidden flex-1 hidden md:block shadow-none !border-border dark:!border-[#3F3F3F] !rounded-xl ${className}`}
       >
         <table className={`w-full text-left border-collapse ${tableClassName}`}>
           <thead>
@@ -90,12 +90,12 @@ const DataTable = ({
                   onClick={
                     onRowClick ? () => onRowClick(row, index) : undefined
                   }
-                  className={`border-b border-border last:border-0 transition-colors ${
+                  className={`border-b border-border dark:border-[#3F3F3F] last:border-0 transition-colors ${
                     onRowClick ? "cursor-pointer" : ""
                   } ${
                     striped
-                      ? "odd:bg-white even:bg-gray-50/60 hover:bg-gray-100/70"
-                      : "hover:bg-gray-50/80"
+                      ? "odd:bg-white dark:odd:bg-[#1A1A1A] even:bg-gray-50/60 dark:even:bg-[#222222] hover:bg-gray-100/70 dark:hover:bg-[#2C2C2C]"
+                      : "hover:bg-gray-50/80 dark:hover:bg-[#272727]"
                   } ${customRowClass}`}
                 >
                   {columns.map((col) => (

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { getRoomShareUrl } from "@/shared/utils/shareUtils"
 import { useNavigate, useParams } from "react-router-dom"
-import { Clock, Users, Link as LinkIcon } from "lucide-react"
+import { Clock, Users, Link as LinkIcon, Lock } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
@@ -238,7 +238,7 @@ const CommunityRoomCard = ({ room }) => {
           fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
-        className={`relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out ${
+        className={`group relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out ${
           !isActionHovered
             ? "hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D]"
             : ""
@@ -258,12 +258,22 @@ const CommunityRoomCard = ({ room }) => {
             className={`relative z-10 h-full w-full ${!imageError && room.thumbnailUrl ? "object-contain" : "object-cover"}`}
           />
 
+          {/* Image Overlay on Hover */}
+          <div
+            className={`absolute inset-0 z-10 bg-black/0 transition-colors duration-200 ease-out pointer-events-none ${
+              !isActionHovered
+                ? "group-hover:bg-black/20 dark:group-hover:bg-black/35"
+                : ""
+            }`}
+          />
+
           {/* Top Left: Badges (Privacy, Level, Topic) */}
-          <div className="absolute left-2 top-2 max-w-[calc(100%-48px)] flex items-center gap-1.5 z-10 p-1">
+          <div className="absolute left-2 top-2 max-w-[calc(100%-48px)] flex items-center gap-2 z-20">
             {/* 1st (Far Left): Privacy / Password badge */}
             {(isPrivate || hasPassword) && (
               <Badge
                 color="dark"
+                className="w-5 h-5 !p-0"
                 title={
                   isPrivate && hasPassword
                     ? "Private & Password Protected"
@@ -271,10 +281,15 @@ const CommunityRoomCard = ({ room }) => {
                       ? t?.rooms?.filters?.visibilities?.Private || "Private"
                       : t?.rooms?.customRooms?.passwordRequired || "Password"
                 }
+                aria-label={
+                  isPrivate && hasPassword
+                    ? "Private & Password Protected"
+                    : isPrivate
+                      ? t?.rooms?.filters?.visibilities?.Private || "Private"
+                      : t?.rooms?.customRooms?.passwordRequired || "Password"
+                }
               >
-                {hasPassword
-                  ? t?.rooms?.customRooms?.passwordRequired || "Password"
-                  : t?.rooms?.filters?.visibilities?.Private || "Private"}
+                <Lock size={12} className="text-white shrink-0" />
               </Badge>
             )}
 
@@ -321,24 +336,25 @@ const CommunityRoomCard = ({ room }) => {
         </div>
 
         {/* Content Section — no badges row */}
-        <div className="flex flex-1 flex-col pl-4 py-4">
+        <div className="flex flex-1 flex-col pl-4 pb-4 gap-2">
           {/* Title & Link */}
-          <div className="flex items-start justify-between gap-2 pr-1 mb-2">
-            <h3 className="text-base font-bold line-clamp-2 text-black dark:text-white leading-snug">
+          <div className="flex items-start justify-between gap-2 pr-1">
+            <h3 className="pt-4 text-base font-bold line-clamp-2 text-black dark:text-white leading-snug">
               {translatedName}
             </h3>
-            <IconButton
-              variant="ghost"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseEnter={() => setIsActionHovered(true)}
-              onMouseLeave={() => setIsActionHovered(false)}
-              onClick={handleCopyLink}
-              title={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
-              aria-label={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
-              className="shrink-0"
-            >
-              <LinkIcon />
-            </IconButton>
+            <div className="shrink-0 pt-3">
+              <IconButton
+                variant="ghost"
+                onPointerDown={(e) => e.stopPropagation()}
+                onMouseEnter={() => setIsActionHovered(true)}
+                onMouseLeave={() => setIsActionHovered(false)}
+                onClick={handleCopyLink}
+                title={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
+                aria-label={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
+              >
+                <LinkIcon />
+              </IconButton>
+            </div>
           </div>
 
           {/* Footer Info */}

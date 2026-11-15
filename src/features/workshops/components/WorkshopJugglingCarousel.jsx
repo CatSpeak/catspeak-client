@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
+import { M3_MOTION } from "@/shared/constants/motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useParams } from "react-router-dom"
 
@@ -90,7 +91,7 @@ const WorkshopJugglingCarousel = ({ slides: propSlides = [] }) => {
             const isInteractive = diff === -1 || diff === 1
 
             return (
-              <motion.div
+              <Motion.div
                 key={slide.id ?? idx}
                 className="absolute top-1/2 w-[82%] sm:w-[65%] md:w-[52%] lg:w-[42%] xl:w-[38%] max-w-full"
                 style={{
@@ -106,10 +107,7 @@ const WorkshopJugglingCarousel = ({ slides: propSlides = [] }) => {
                   opacity: style.opacity,
                   zIndex: style.zIndex,
                 }}
-                transition={{
-                  duration: 0.55,
-                  ease: [0.32, 0.72, 0, 1],
-                }}
+                transition={M3_MOTION.expressive.spatial.default}
                 onClick={() => {
                   if (diff === -1) {
                     goPrev()
@@ -124,7 +122,7 @@ const WorkshopJugglingCarousel = ({ slides: propSlides = [] }) => {
                   variant="carousel"
                   className="rounded-3xl"
                 />
-              </motion.div>
+              </Motion.div>
             )
           })}
 

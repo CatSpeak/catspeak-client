@@ -11,7 +11,7 @@ import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import toast from "react-hot-toast"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 import { getReelTabsConfig } from "./config/tabs"
 import CreateReelModal from "./components/modals/CreateReelModal"
 import ForYouTab from "./components/tabs/ForYouTab"
@@ -114,7 +114,11 @@ const ReelsPage = () => {
       {id ? (
         <Outlet />
       ) : (
-        <div className="flex flex-col p-4 w-full relative items-start">
+        <TabContent
+          activeTab={activeTab}
+          tabs={tabsConfig}
+          className="flex flex-col p-4 w-full relative items-start"
+        >
           {activeTab === "foryou" && (
             <div className="w-full flex flex-col">
               <ForYouTab
@@ -149,7 +153,7 @@ const ReelsPage = () => {
               onMobileDetailChange={setShowMobileDetail}
             />
           )}
-        </div>
+        </TabContent>
       )}
 
       {/* Create Reel Modal */}

@@ -7,7 +7,7 @@ const EditNickname = ({ user, onEditName, className = "" }) => {
 
   return (
     <div
-      className={`h-12 items-center gap-2 text-sm text-secondary dark:text-[#AAAAAA] ${className}`}
+      className={`h-14 items-center gap-2 text-sm text-secondary dark:text-[#AAAAAA] ${className}`}
     >
       <p>
         {t?.rooms?.waitingScreen?.joinedAsNickname || "Joined as nickname"}:{" "}

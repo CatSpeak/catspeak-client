@@ -269,8 +269,6 @@ const DeepPronunciationAnalysisModal = ({
               >
                 Đóng cửa sổ
               </button>
-                Đóng cửa sổ
-              </button>
 
               <button
                 type="button"

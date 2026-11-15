@@ -45,7 +45,7 @@ const EmptyState = ({
       <div
         className={`flex flex-col items-center justify-center py-12 text-[#606060] dark:text-[#AAAAAA] ${className}`}
       >
-        {Icon && <Icon className="w-8 h-8 mb-2 text-[#606060] dark:text-[#AAAAAA]" />}
+        {Icon && <Icon className={iconClassName || "w-8 h-8 mb-2 text-[#606060] dark:text-[#AAAAAA]"} />}
         <div className="text-sm text-center font-medium text-gray-900 dark:text-white">{displayTitle}</div>
         {renderDescription()}
         {action}

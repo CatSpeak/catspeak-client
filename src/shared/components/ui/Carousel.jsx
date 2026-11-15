@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react"
-import { ChevronLeft, ChevronRight, X } from "lucide-react"
-import { motion as Motion, AnimatePresence } from "framer-motion"
+import { X } from "lucide-react"
+import { motion as Motion, AnimatePresence, LayoutGroup } from "framer-motion"
+import { M3_MOTION } from "@/shared/constants/motion"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 
 /**
@@ -22,6 +23,7 @@ import useScrollLock from "@/shared/hooks/useScrollLock"
  * @param {boolean} [props.showIndicators] - Whether to show pagination dots (default true)
  * @param {boolean} [props.lockToFirstImage] - Whether to lock aspect ratio to first image dimensions (default false)
  * @param {string} [props.rounded] - Default rounded class if not provided in className (default "rounded-3xl")
+ * @param {boolean} [props.autoHeight] - Whether to allow slides to dictate natural height on mobile (default false)
  */
 const Carousel = ({
   items,
@@ -37,7 +39,8 @@ const Carousel = ({
   allowFullscreen = true,
   showIndicators = true,
   lockToFirstImage = false,
-  rounded = "rounded-3xl",
+  rounded = renderItem ? "" : "rounded-3xl",
+  autoHeight = false,
 }) => {
   const slides = items && items.length > 0 ? items : images
   const totalSlides = slides?.length || 0
@@ -100,18 +103,21 @@ const Carousel = ({
 
   const resolvedRoundedClass = className.includes("rounded") ? "" : rounded
 
+  const widthClass = containerClassName.includes("w-") ? "" : "w-full"
+
   return (
-    <div
-      className={
-        isFullscreen
-          ? "fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm select-none group flex flex-col overflow-hidden"
-          : `relative w-full flex flex-col select-none group ${containerClassName}`
-      }
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onTouchStart={() => setIsHovered(true)}
-      onTouchEnd={() => setIsHovered(false)}
-    >
+    <LayoutGroup inherit={false}>
+      <div
+        className={
+          isFullscreen
+            ? "fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm select-none group flex flex-col overflow-hidden"
+            : `relative flex flex-col select-none group ${widthClass} ${containerClassName}`
+        }
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={() => setIsHovered(true)}
+        onTouchEnd={() => setIsHovered(false)}
+      >
       {/* Close Fullscreen Button */}
       {isFullscreen && (
         <button
@@ -159,8 +165,30 @@ const Carousel = ({
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-            className="absolute inset-0 w-full h-full flex-shrink-0 overflow-hidden"
+            transition={M3_MOTION.standard.spatial.default}
+            drag={totalSlides > 1 ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(_, info) => {
+              const swipeThreshold = 50
+              const swipeVelocity = 300
+              if (
+                info.offset.x < -swipeThreshold ||
+                info.velocity.x < -swipeVelocity
+              ) {
+                nextSlide()
+              } else if (
+                info.offset.x > swipeThreshold ||
+                info.velocity.x > swipeVelocity
+              ) {
+                prevSlide()
+              }
+            }}
+            className={`w-full flex-shrink-0 touch-pan-y ${
+              autoHeight
+                ? "relative sm:absolute sm:inset-0 sm:h-full"
+                : "absolute inset-0 h-full overflow-hidden"
+            }`}
           >
             {renderItem ? (
               renderItem(slides[currentIndex], currentIndex, {
@@ -206,38 +234,12 @@ const Carousel = ({
             )}
           </Motion.div>
         </AnimatePresence>
-
-        {/* Navigation Arrows */}
-        {totalSlides > 1 && (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                prevSlide()
-              }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 sm:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/70 dark:bg-black/60 backdrop-blur-md shadow-md text-cath-red-800 dark:text-cath-red-400 transition-all duration-300 hover:bg-white dark:hover:bg-neutral-800 hover:scale-105 active:scale-95"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft size={24} strokeWidth={2.5} className="ml-[-2px]" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                nextSlide()
-              }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 sm:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/70 dark:bg-black/60 backdrop-blur-md shadow-md text-cath-red-800 dark:text-cath-red-400 transition-all duration-300 hover:bg-white dark:hover:bg-neutral-800 hover:scale-105 active:scale-95"
-              aria-label="Next slide"
-            >
-              <ChevronRight size={24} strokeWidth={2.5} className="mr-[-2px]" />
-            </button>
-          </>
-        )}
       </div>
 
-      {/* Desktop Indicators (Under the slide, centered) */}
+      {/* Indicators (Under the slide, centered) */}
       {showIndicators && !isFullscreen && totalSlides > 1 && (
         <div
-          className={`hidden sm:flex items-center justify-center gap-2 mt-4 ${indicatorClassName}`}
+          className={`flex items-center justify-center gap-2 mt-2 sm:mt-4 ${indicatorClassName}`}
         >
           {slides.map((_, index) => (
             <button
@@ -256,7 +258,8 @@ const Carousel = ({
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </LayoutGroup>
   )
 }
 

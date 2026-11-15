@@ -1,6 +1,8 @@
 import React, { memo, useEffect, useRef, useId } from "react"
 import { motion, LayoutGroup } from "framer-motion"
 import Badge from "@/shared/components/ui/indicators/Badge"
+import { M3_MOTION } from "@/shared/constants/motion"
+import { useTabAnimation } from "@/shared/hooks/useTabAnimation"
 
 /**
  * Reusable Tabs component aligned with Material Design 3 (M3) baseline specifications.
@@ -59,16 +61,16 @@ const Tabs = memo(
     squashFactor = 0.88,
     stiffness = 360,
     damping = 25,
-    duration = 0.28,
+    duration = M3_MOTION.standard.spatial.fast.duration,
     indicatorTransition,
   }) => {
     const generatedId = useId()
     const layoutGroupId = id || `tabs-${generatedId.replace(/:/g, "")}`
-    const springTransition = indicatorTransition || {
-      type: "spring",
-      stiffness,
-      damping,
-    }
+    const { shouldReduceMotion } = useTabAnimation()
+    const springTransition = indicatorTransition || (shouldReduceMotion ? { duration: 0 } : {
+      ease: M3_MOTION.standard.spatial.fast.ease,
+      duration: M3_MOTION.standard.spatial.fast.duration,
+    })
 
     const isFirstMountRef = useRef(true)
     const prevActiveTabRef = useRef(activeTab)
@@ -275,7 +277,7 @@ const Tabs = memo(
                         } rounded-b-none bg-cath-red-700 dark:bg-cath-red-1000 origin-center`}
                         initial={false}
                         animate={
-                          elastic && isTabChanged
+                          elastic && isTabChanged && !shouldReduceMotion
                             ? {
                                 scaleX: [1, stretchFactor, 1],
                                 scaleY: [1, squashFactor, 1],
@@ -285,7 +287,7 @@ const Tabs = memo(
                         transition={{
                           duration,
                           times: [0, 0.45, 1],
-                          ease: "easeInOut",
+                          ease: M3_MOTION.standard.spatial.fast.ease,
                         }}
                       />
                     </motion.div>
@@ -308,4 +310,5 @@ const Tabs = memo(
   },
 )
 
+export { default as TabContent } from "./TabContent"
 export default Tabs

@@ -18,37 +18,49 @@ const SpeakingRoomPage = () => {
   // render kế tiếp nên hai cú bấm liên tiếp vẫn lọt qua và tạo hai yêu cầu.
   const startingRef = useRef(false)
 
-  const handleStartSpeaking = useCallback(async (topic, hskLevel) => {
-    if (!topic?.id || isLoading || startingRef.current) return
-    startingRef.current = true
-    try {
-      const session = await startSession({ topic_id: topic.id, hsk_level: hskLevel }).unwrap()
-      const credentials = {
-        session_id: session.session_id,
-        livekit: session.livekit,
-        topic: session.topic,
-        hsk_level: session.hsk_level,
-        started_at: session.created_at,
+  const handleStartSpeaking = useCallback(
+    async (topic, hskLevel) => {
+      if (!topic?.id || isLoading || startingRef.current) return
+      startingRef.current = true
+      try {
+        const session = await startSession({
+          topic_id: topic.id,
+          hsk_level: hskLevel,
+        }).unwrap()
+        const credentials = {
+          session_id: session.session_id,
+          livekit: session.livekit,
+          topic: session.topic,
+          hsk_level: session.hsk_level,
+          started_at: session.created_at,
+        }
+        setSessionCredentials(credentials)
+        navigate(`sessions/${session.session_id}`)
+      } catch (error) {
+        const detail = error?.data?.detail
+        const code =
+          detail?.code || detail?.errorCode || error?.data?.code || error?.code
+        if (code === "QUOTA_EXCEEDED") {
+          setQuotaModalOpen(true)
+          return
+        }
+        if (code === "SESSION_ACTIVE_ELSEWHERE") {
+          // BUG-SS-08: hộp thoại ss08, không vào phòng
+          setConflictSession({ session_id: detail?.active_session_id })
+          return
+        }
+        toast.error(
+          detail?.message ||
+            error?.data?.message ||
+            error?.message ||
+            "Không thể bắt đầu phiên luyện nói.",
+        )
+      } finally {
+        startingRef.current = false
       }
-      setSessionCredentials(credentials)
-      navigate(`sessions/${session.session_id}`)
-    } catch (error) {
-      const detail = error?.data?.detail
-      const code = detail?.code || detail?.errorCode || error?.data?.code || error?.code
-      if (code === "QUOTA_EXCEEDED") {
-        setQuotaModalOpen(true)
-        return
-      }
-      if (code === "SESSION_ACTIVE_ELSEWHERE") {
-        // BUG-SS-08: hộp thoại ss08, không vào phòng
-        setConflictSession({ session_id: detail?.active_session_id })
-        return
-      }
-      toast.error(detail?.message || error?.data?.message || error?.message || "Không thể bắt đầu phiên luyện nói.")
-    } finally {
-      startingRef.current = false
-    }
-  }, [isLoading, navigate, setSessionCredentials, startSession])
+    },
+    [isLoading, navigate, setSessionCredentials, startSession],
+  )
 
   return (
     <div className="relative">
@@ -56,7 +68,9 @@ const SpeakingRoomPage = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
           <div className="flex flex-col items-center gap-3 rounded-2xl bg-white dark:bg-[#1A1A1A] dark:border dark:border-[#3F3F3F] p-6 shadow-2xl">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-900/50 border-t-[#990011] dark:border-t-red-400" />
-            <p className="text-sm font-bold text-slate-800 dark:text-white">Đang chuẩn bị phòng luyện nói...</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-white">
+              Đang chuẩn bị phòng luyện nói...
+            </p>
           </div>
         </div>
       )}
@@ -77,7 +91,9 @@ const SpeakingRoomPage = () => {
         onClose={() => setConflictSession(null)}
         sessionInfo={
           conflictSession?.topic?.title_vi
-            ? { topic: `${conflictSession.topic.title_vi}${conflictSession.hsk_level ? ` · HSK ${conflictSession.hsk_level}` : ""}` }
+            ? {
+                topic: `${conflictSession.topic.title_vi}${conflictSession.hsk_level ? ` · HSK ${conflictSession.hsk_level}` : ""}`,
+              }
             : null
         }
         onCloseAndReturnHome={() => navigate("/", { replace: true })}

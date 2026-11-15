@@ -1,11 +1,25 @@
+import { useNavigate, useParams } from "react-router-dom";
 import Carousel from "@/shared/components/ui/Carousel";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { getImageUrl } from "@/shared/utils/imageUtils";
+import Badge from "@/shared/components/ui/indicators/Badge";
 import { getTranslatedTimeAgo } from "../utils/newsUtils";
-import TopicChips from "./TopicChips";
 
 const NewsArticleHeader = ({ newsItem }) => {
-  const { t } = useLanguage();
+  const navigate = useNavigate();
+  const { lang: paramLang } = useParams();
+  const { language, t } = useLanguage();
+  const currentLang = paramLang || language || "vi";
+
+  const handleTopicClick = (e, topic) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const topicId = topic.topicId ?? topic.TopicId ?? topic.id;
+    if (topicId !== undefined && topicId !== null) {
+      navigate(`/${currentLang}/cat-speak/news?topicIds=${topicId}`);
+    }
+  };
+
   const images = (newsItem.media || [])
     .filter((item) => item.mediaType === "Image" && item.mediaUrl)
     .map((item) => ({ url: getImageUrl(item.mediaUrl), alt: newsItem.title }));
@@ -33,7 +47,31 @@ const NewsArticleHeader = ({ newsItem }) => {
         <Carousel images={images} className="mt-4 aspect-video rounded-2xl bg-black/5" objectFit="cover" autoPlay={false} />
       )}
       {newsItem.topics?.length > 0 && (
-        <TopicChips topics={newsItem.topics} color="cath-red" className="mt-4" />
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {newsItem.topics.map((topic, index) => {
+            const id = topic.topicId ?? topic.TopicId ?? topic.id ?? index;
+            const title = topic.title || topic.Title || topic.slug || "";
+            if (!title) return null;
+
+            return (
+              <Badge
+                key={id}
+                role="button"
+                tabIndex={0}
+                onClick={(e) => handleTopicClick(e, topic)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    handleTopicClick(e, topic);
+                  }
+                }}
+                className="!cursor-pointer transition-opacity hover:opacity-80 select-none"
+                title={`#${title}`}
+              >
+                #{title}
+              </Badge>
+            );
+          })}
+        </div>
       )}
     </header>
   );

@@ -22,7 +22,7 @@ import {
 } from "../utils/reactionUtils"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useAuth } from "@/features/auth"
-import TopicChips from "./TopicChips"
+import Badge from "@/shared/components/ui/indicators/Badge"
 
 /**
  * NewsCard — Figma "Card_Bản tin Catspeak" layout.
@@ -51,6 +51,7 @@ const NewsCard = ({ news }) => {
 
   /* ── Local state ───────────────────────────────────────────────── */
   const [showReactions, setShowReactions] = useState(false)
+  const [isActionHovered, setIsActionHovered] = useState(false)
   const holdTimer = useRef(null)
 
   /* ── Derived ───────────────────────────────────────────────────── */
@@ -176,6 +177,15 @@ const NewsCard = ({ news }) => {
     if (holdTimer.current) clearTimeout(holdTimer.current)
   }
 
+  const handleTopicClick = (e, topic) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const topicId = topic.topicId ?? topic.TopicId ?? topic.id
+    if (topicId !== undefined && topicId !== null) {
+      navigate(`/${currentLang}/cat-speak/news?topicIds=${topicId}`)
+    }
+  }
+
   /* ── Derived: carousel images ────────────────────────────────────── */
   const carouselImages = useMemo(() => {
     if (!hasMedia) return []
@@ -189,25 +199,54 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className={`group flex flex-col bg-white dark:bg-[#1A1A1A] hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] border border-border dark:border-[#3F3F3F] rounded-2xl cursor-pointer hover:shadow-md transition-all duration-200 overflow-visible relative ${
-        showReactions ? "z-40" : ""
-      }`}
+      onMouseLeave={() => setIsActionHovered(false)}
+      className={`flex flex-col bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl cursor-pointer hover:shadow-md transition-all duration-200 overflow-visible relative ${
+        !isActionHovered
+          ? "group hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D]"
+          : ""
+      } ${showReactions ? "z-40" : ""}`}
     >
       {/* ── Image area ───────────────────────────────────────────── */}
-      <div className="relative w-full rounded-t-2xl overflow-hidden">
+      <div className="relative w-full rounded-t-xl overflow-hidden">
         {news.topics && news.topics.length > 0 && (
-          <div className="absolute top-2 left-2 z-20 pointer-events-auto max-w-[calc(100%-20px)]">
-            <TopicChips topics={news.topics} overlay maxVisible={2} />
+          <div
+            className="absolute top-2 left-2 z-20 pointer-events-auto max-w-[calc(100%-20px)] flex flex-wrap items-center gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {news.topics.slice(0, 2).map((topic, index) => {
+              const id = topic.topicId ?? topic.TopicId ?? topic.id ?? index
+              const title = topic.title || topic.Title || topic.slug || ""
+              if (!title) return null
+
+              return (
+                <Badge
+                  key={id}
+                  variant="overlay"
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => handleTopicClick(e, topic)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleTopicClick(e, topic)
+                    }
+                  }}
+                  className="!cursor-pointer transition-opacity hover:opacity-80 select-none"
+                  title={`#${title}`}
+                >
+                  #{title}
+                </Badge>
+              )
+            })}
           </div>
         )}
         {hasMedia ? (
-          <div className="w-full h-full rounded-t-2xl rounded-b-none overflow-hidden">
+          <div className="w-full h-full rounded-t-xl rounded-b-none overflow-hidden">
             <div className="w-full h-full transition-[filter] duration-150 ease-out group-hover:brightness-[0.96] dark:group-hover:brightness-[1.08]">
               <Carousel
                 images={carouselImages}
                 autoPlay
                 interval={5000}
-                className="w-full rounded-t-2xl rounded-b-none aspect-video"
+                className="w-full rounded-t-xl rounded-b-none aspect-video"
                 objectFit="contain"
                 showIndicators={false}
                 lockToFirstImage={true}
@@ -215,7 +254,7 @@ const NewsCard = ({ news }) => {
             </div>
           </div>
         ) : (
-          <div className="w-full h-full rounded-t-2xl overflow-hidden">
+          <div className="w-full h-full rounded-t-xl overflow-hidden">
             <div
               className="w-full h-full flex items-center justify-center p-6 min-h-[160px] transition-[filter] duration-150 ease-out group-hover:brightness-[0.96] dark:group-hover:brightness-[1.08]"
               style={{ backgroundColor: fallbackColor }}
@@ -254,8 +293,11 @@ const NewsCard = ({ news }) => {
 
       {/* ── Action bar ────────────────────────────────────────────── */}
       <div
-        className="grid grid-cols-3 border-t border-border dark:border-[#3F3F3F] rounded-b-2xl overflow-visible"
+        className="grid grid-cols-3 border-t border-border dark:border-[#3F3F3F] rounded-b-xl overflow-visible bg-white dark:bg-[#1A1A1A] transition-colors duration-200"
         onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        onMouseEnter={() => setIsActionHovered(true)}
+        onMouseLeave={() => setIsActionHovered(false)}
       >
         <div
           className={`group/reactions relative flex items-center justify-center overflow-visible ${
@@ -269,7 +311,7 @@ const NewsCard = ({ news }) => {
               const type = news.currentUserReaction || "Like"
               handleReact(e, type)
             }}
-            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] rounded-bl-2xl cursor-pointer"
+            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] rounded-bl-xl cursor-pointer"
           >
             <ReactionBadge type={news.currentUserReaction} />
             <span className="text-sm text-secondary dark:text-[#AAAAAA]">
@@ -313,7 +355,7 @@ const NewsCard = ({ news }) => {
         {/* Share */}
         <button
           onClick={handleShare}
-          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] rounded-br-2xl cursor-pointer"
+          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] rounded-br-xl cursor-pointer"
           aria-label="Share"
         >
           <Share size={20} className="text-secondary dark:text-[#AAAAAA]" />

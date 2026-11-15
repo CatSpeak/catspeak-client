@@ -113,7 +113,7 @@ const PlacementResultPage = lazy(
 const PlacementProfilePage = lazy(
   () => import("@/features/placement-test/pages/PlacementProfilePage"),
 )
-const Profile = lazy(() => import("@/features/profile/pages/Profile"))
+const ProfilePage = lazy(() => import("@/features/profile/pages/ProfilePage"))
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
 )
@@ -1413,7 +1413,7 @@ const routesConfig = [
                 path: "profile/:accountId?",
                 element: (
                   <LazyRoute fallback={<ProfilePageSkeleton />}>
-                    <Profile />
+                    <ProfilePage />
                   </LazyRoute>
                 ),
               },

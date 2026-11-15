@@ -25,13 +25,18 @@ const MenuItem = ({
   isSelected = false,
   disabled = false,
   activeColor = "inherit",
-  hoverBg = "hover:bg-primaryBg group-hover:bg-primaryBg dark:hover:bg-[#272727] dark:group-hover:bg-[#272727]",
+  hoverBg = "hover:bg-itemHover group-hover:bg-itemHover dark:hover:bg-[#272727] dark:group-hover:bg-[#272727]",
   className = "",
+  roundedClass,
+  isFirst,
+  isLast,
   onClick,
   ...props
 }) => {
   const isPrimaryRed =
     activeColor === colors.primaryRed ||
+    activeColor === colors.redPrimary ||
+    activeColor === colors.redBrand ||
     activeColor === "#990011" ||
     activeColor === "var(--cath-red-700)"
 
@@ -41,6 +46,18 @@ const MenuItem = ({
       : activeColor
     : undefined
   const Wrapper = onClick ? "button" : "div"
+
+  const resolvedRoundedClass =
+    roundedClass ||
+    (isFirst !== undefined || isLast !== undefined
+      ? isFirst && isLast
+        ? "rounded-xl"
+        : isFirst
+        ? "rounded-t-xl rounded-b"
+        : isLast
+        ? "rounded-b-xl rounded-t"
+        : "rounded"
+      : "rounded group-first:rounded-t-xl group-last:rounded-b-xl")
 
   return (
     <Wrapper
@@ -54,16 +71,16 @@ const MenuItem = ({
       {...props}
     >
       <div
-        className={`w-full px-3 py-2 flex items-center justify-between transition-colors rounded-xl text-left text-sm ${
-          disabled ? "opacity-50" : hoverBg
+        className={`w-full px-3 py-2 flex items-center justify-between ${resolvedRoundedClass} text-left text-sm ${
+          disabled ? "opacity-50" : ""
         } ${
           isSelected
-            ? `bg-primaryBg dark:bg-[#272727] ${
+            ? `bg-itemActive dark:bg-[#272727] hover:bg-itemActiveHover group-hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D] dark:group-hover:bg-[#3D3D3D] ${
                 isPrimaryRed
                   ? "text-cath-red-700 dark:text-red-400 font-medium"
                   : ""
               }`
-            : "text-gray-900 dark:text-white"
+            : `text-gray-900 dark:text-white ${hoverBg} active:bg-itemActiveHover dark:active:bg-[#3D3D3D]`
         } min-h-[44px]`}
         style={customTextColor ? { color: customTextColor } : {}}
       >

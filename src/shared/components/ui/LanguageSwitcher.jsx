@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
+import { AnimatePresence, motion as Motion } from "framer-motion"
+import { dropdownVariants } from "@/shared/constants/motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
 import useClickOutside from "@/shared/hooks/useClickOutside"
@@ -37,21 +37,15 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
     }
     if (dropdownRef.current) {
       const rect = dropdownRef.current.getBoundingClientRect()
-      const screenWidth = window.innerWidth
       const dropdownWidth = 220
 
       // Check if expanding to the left (right-0) would overflow the viewport's left edge
       const wouldOverflowLeft = rect.right - dropdownWidth < 16
-      // Check if expanding to the right (left-0) would overflow the viewport's right edge
-      const wouldOverflowRight = rect.left + dropdownWidth > screenWidth - 16
 
-      if (wouldOverflowLeft && !wouldOverflowRight) {
+      if (wouldOverflowLeft) {
         setDropdownAlign("left")
-      } else if (wouldOverflowRight && !wouldOverflowLeft) {
-        setDropdownAlign("right")
       } else {
-        // If center fits or if on a narrow mobile viewport
-        setDropdownAlign("center")
+        setDropdownAlign("right")
       }
     }
   }, [align])
@@ -64,11 +58,10 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
   }
 
   useEffect(() => {
-    if (open) {
-      updateAlignment()
-      window.addEventListener("resize", updateAlignment)
-      return () => window.removeEventListener("resize", updateAlignment)
-    }
+    if (!open) return
+    const handleResize = () => updateAlignment()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [open, updateAlignment])
 
   const handleLanguageSelect = (lang) => {
@@ -82,10 +75,8 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
 
   const alignClass =
     dropdownAlign === "left"
-      ? "left-0 right-auto"
-      : dropdownAlign === "center"
-        ? "left-1/2 -translate-x-1/2 right-auto"
-        : "right-0 left-auto"
+      ? "left-0 right-auto origin-top-left"
+      : "right-0 left-auto origin-top-right"
 
   return (
     <div
@@ -113,35 +104,32 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
 
       <AnimatePresence>
         {open && (
-          <div
-            className={`absolute top-full z-50 mt-2 min-w-[220px] w-max max-w-[calc(100vw-2rem)] ${alignClass}`}
+          <Motion.div
+            variants={dropdownVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className={`absolute top-full z-50 mt-2 min-w-[220px] w-max max-w-[calc(100vw-2rem)] ${alignClass} overflow-hidden rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-xl`}
           >
-            <FluentAnimation
-              direction="down"
-              exit
-              className="overflow-hidden rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-xl"
+            <div
+              className="flex flex-col gap-1 p-1"
+              role="listbox"
+              aria-label="Language"
             >
-              <div
-                className="flex flex-col gap-1 p-1"
-                role="listbox"
-                aria-label="Language"
-              >
-                {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => (
-                  <LanguageMenuItem
-                    key={key}
-                    code={key}
-                    label={t.header?.languages?.[key] || label}
-                    flag={flag}
-                    disabled={disabled}
-                    soonLabel={soonLabel || t.header?.soon || "Soon"}
-                    isActive={language === key}
-                    onSelect={() => handleLanguageSelect(key)}
-                    layoutId="lang-active-indicator"
-                  />
-                ))}
-              </div>
-            </FluentAnimation>
-          </div>
+              {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => (
+                <LanguageMenuItem
+                  key={key}
+                  code={key}
+                  label={t.header?.languages?.[key] || label}
+                  flag={flag}
+                  disabled={disabled}
+                  soonLabel={soonLabel || t.header?.soon || "Soon"}
+                  isActive={language === key}
+                  onSelect={() => handleLanguageSelect(key)}
+                />
+              ))}
+            </div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>

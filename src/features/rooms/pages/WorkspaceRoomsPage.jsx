@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback, useEffect } from "react"
 import { useNavigate, useParams, Outlet } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import {
   Crown,
@@ -12,7 +11,7 @@ import {
   ArrowUpDown,
   DoorOpen,
 } from "lucide-react"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import { toast } from "react-hot-toast"
@@ -32,8 +31,6 @@ import { buildCustomRoomQuota } from "../utils/customRoomQuota"
 import { IconButton } from "@/shared/components/ui/buttons"
 
 const WorkspaceRoomsContent = () => {
-  const [tabDirection, setTabDirection] = useState(1)
-  const shouldReduceMotion = useReducedMotion()
   const { t } = useLanguage()
   const { limits } = usePlanFeatures()
   const { lang, id } = useParams()
@@ -228,7 +225,6 @@ const WorkspaceRoomsContent = () => {
   )
 
   const handleTabChange = (nextTab) => {
-    setTabDirection(nextTab === "bookmark" ? 1 : -1)
     setActiveTab(nextTab)
   }
 
@@ -404,39 +400,12 @@ const WorkspaceRoomsContent = () => {
             />
           </div>
 
-          <div className="w-full overflow-x-clip">
-            <AnimatePresence mode="wait" initial={false} custom={tabDirection}>
-              <motion.div
-                key={activeTab}
-                custom={tabDirection}
-                variants={{
-                  enter: (direction) => ({
-                    opacity: 0,
-                    x: shouldReduceMotion ? 0 : direction * 24,
-                  }),
-                  center: {
-                    opacity: 1,
-                    x: 0,
-                  },
-                  exit: (direction) => ({
-                    opacity: 0,
-                    x: shouldReduceMotion ? 0 : direction * -24,
-                  }),
-                }}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={
-                  shouldReduceMotion
-                    ? { duration: 0 }
-                    : {
-                        duration: 0.25,
-                        ease: [0.27, 1.06, 0.18, 1.0],
-                      }
-                }
-                className="w-full"
-              >
-                {/* Action Controls Bar: Searchbar, Filter, Sort, Search Button */}
+          <TabContent
+            activeTab={activeTab}
+            tabs={tabs}
+            className="w-full"
+          >
+            {/* Action Controls Bar: Searchbar, Filter, Sort, Search Button */}
                 <div className="px-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-4">
                   {/* Searchbar (Left) */}
                   <div className="flex-1 max-w-[360px]">
@@ -665,9 +634,7 @@ const WorkspaceRoomsContent = () => {
                     </>
                   )}
                 </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+          </TabContent>
         </>
       )}
     </div>

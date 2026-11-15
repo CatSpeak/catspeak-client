@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react"
 import { createPortal } from "react-dom"
-import { AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 
 const Popover = ({
@@ -16,6 +16,8 @@ const Popover = ({
   className = "",
   triggerClassName = "",
   animationDirection,
+  animationType = "fluent",
+  animation,
   onOpenChange,
   openOnHover = false,
   isOpen: controlledIsOpen,
@@ -23,6 +25,7 @@ const Popover = ({
   estimatedHeight,
   offset = 8,
 }) => {
+  const prefersReducedMotion = useReducedMotion()
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const isControlled = controlledIsOpen !== undefined
   const isOpen = isControlled ? controlledIsOpen : internalIsOpen
@@ -262,6 +265,15 @@ const Popover = ({
   const animDirection =
     animationDirection || (actualPlacement.startsWith("top") ? "up" : "down")
 
+  const resolvedAnimType = animationType || animation || "fluent"
+  const transformOrigin = actualPlacement.startsWith("top")
+    ? actualPlacement.endsWith("right")
+      ? "bottom right"
+      : "bottom left"
+    : actualPlacement.endsWith("right")
+      ? "top right"
+      : "top left"
+
   const portalContent = (
     <div
       ref={portalRef}
@@ -280,17 +292,47 @@ const Popover = ({
     >
       <AnimatePresence>
         {isOpen && (
-          <FluentAnimation
-            direction={animDirection}
-            distance={8}
-            exit={true}
-          >
-            <div ref={popoverRef} onClick={(e) => e.stopPropagation()}>
+          resolvedAnimType === "unroll" ? (
+            <motion.div
+              ref={popoverRef}
+              onClick={(e) => e.stopPropagation()}
+              initial={{
+                opacity: 0,
+                scaleY: prefersReducedMotion ? 1 : 0,
+              }}
+              animate={{
+                opacity: 1,
+                scaleY: 1,
+              }}
+              exit={{
+                opacity: 0,
+                scaleY: prefersReducedMotion ? 1 : 0,
+              }}
+              transition={{
+                duration: prefersReducedMotion ? 0 : 0.2,
+                ease: [0.25, 1, 0.5, 1],
+              }}
+              style={{
+                transformOrigin,
+              }}
+            >
               {typeof content === "function"
                 ? content(() => setIsOpen(false))
                 : content}
-            </div>
-          </FluentAnimation>
+            </motion.div>
+          ) : (
+            <FluentAnimation
+              direction={animDirection}
+              distance={8}
+              exit={true}
+            >
+              <div ref={popoverRef} onClick={(e) => e.stopPropagation()}>
+                {typeof content === "function"
+                  ? content(() => setIsOpen(false))
+                  : content}
+              </div>
+            </FluentAnimation>
+          )
         )}
       </AnimatePresence>
     </div>

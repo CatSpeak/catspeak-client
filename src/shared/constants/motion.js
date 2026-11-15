@@ -1,150 +1,103 @@
 /**
- * Material Design 3 (M3) Motion Physics System Tokens
+ * ============================================================================
+ * Material Design 3 (M3) Motion System & Baseline Tokens
+ * ============================================================================
  *
- * Web: Convert springs to curves
- * Citing: [Motion – Material Design 3](https://m3.material.io/styles/motion/overview/specs)
+ * M3 Motion Architecture:
+ * - Spatial curves: Used for movement, dimensions, and translation (x, y, scale).
+ * - Effects curves: Used for visual property changes (opacity, color, blur).
  *
- * The motion physics system makes a UI expressive and easy to use.
- * These curves mimic spring physics (damping and stiffness) for animations
- * without interruptions or gestures on the web.
+ * Standard Pairing Combination:
+ * In M3, transitions combine spatial and effects tokens simultaneously:
+ * - `x` (standard.spatial.fast): 350ms [0.27, 1.06, 0.18, 1.00]
+ * - `opacity` (standard.effects.fast): 150ms [0.31, 0.94, 0.34, 1.00]
+ * 
+ * Why this combination?
+ * Fading opacity in 150ms ensures the target view is instantly visible without
+ * an "empty screen" flash, while the 350ms spatial curve smoothly settles
+ * the element into position without feeling sluggish.
+ * ============================================================================
  */
-
-/**
- * M3 Motion Bezier coordinate arrays: [x1, y1, x2, y2]
- * Direct drop-in for Framer Motion (`ease: [...]`) and Web Animations API.
- */
-export const m3Curves = {
-  // Expressive Spatial (transforms, movement, scale, layout)
-  expressiveFastSpatial: [0.42, 1.67, 0.21, 0.90],
-  expressiveDefaultSpatial: [0.38, 1.21, 0.22, 1.00],
-  expressiveSlowSpatial: [0.39, 1.29, 0.35, 0.98],
-
-  // Expressive Effects (opacity, color, blur, filters)
-  expressiveFastEffects: [0.31, 0.94, 0.34, 1.00],
-  expressiveDefaultEffects: [0.34, 0.80, 0.34, 1.00],
-  expressiveSlowEffects: [0.34, 0.88, 0.34, 1.00],
-
-  // Standard Spatial
-  standardFastSpatial: [0.27, 1.06, 0.18, 1.00],
-  standardDefaultSpatial: [0.27, 1.06, 0.18, 1.00],
-  standardSlowSpatial: [0.27, 1.06, 0.18, 1.00],
-
-  // Standard Effects
-  standardFastEffects: [0.31, 0.94, 0.34, 1.00],
-  standardDefaultEffects: [0.34, 0.80, 0.34, 1.00],
-  standardSlowEffects: [0.34, 0.88, 0.34, 1.00],
-}
-
-/**
- * CSS cubic-bezier string representations
- * Suitable for inline CSS styles or styled components: `cubic-bezier(x1, y1, x2, y2)`
- */
-export const m3CssCurves = {
-  expressiveFastSpatial: `cubic-bezier(${m3Curves.expressiveFastSpatial.join(", ")})`,
-  expressiveDefaultSpatial: `cubic-bezier(${m3Curves.expressiveDefaultSpatial.join(", ")})`,
-  expressiveSlowSpatial: `cubic-bezier(${m3Curves.expressiveSlowSpatial.join(", ")})`,
-
-  expressiveFastEffects: `cubic-bezier(${m3Curves.expressiveFastEffects.join(", ")})`,
-  expressiveDefaultEffects: `cubic-bezier(${m3Curves.expressiveDefaultEffects.join(", ")})`,
-  expressiveSlowEffects: `cubic-bezier(${m3Curves.expressiveSlowEffects.join(", ")})`,
-
-  standardFastSpatial: `cubic-bezier(${m3Curves.standardFastSpatial.join(", ")})`,
-  standardDefaultSpatial: `cubic-bezier(${m3Curves.standardDefaultSpatial.join(", ")})`,
-  standardSlowSpatial: `cubic-bezier(${m3Curves.standardSlowSpatial.join(", ")})`,
-
-  standardFastEffects: `cubic-bezier(${m3Curves.standardFastEffects.join(", ")})`,
-  standardDefaultEffects: `cubic-bezier(${m3Curves.standardDefaultEffects.join(", ")})`,
-  standardSlowEffects: `cubic-bezier(${m3Curves.standardSlowEffects.join(", ")})`,
-}
-
-/**
- * M3 Motion Durations in milliseconds (ms) and seconds (s)
- */
-export const m3Durations = {
-  expressiveFastSpatial: { ms: 350, s: 0.35 },
-  expressiveDefaultSpatial: { ms: 500, s: 0.5 },
-  expressiveSlowSpatial: { ms: 650, s: 0.65 },
-
-  expressiveFastEffects: { ms: 150, s: 0.15 },
-  expressiveDefaultEffects: { ms: 200, s: 0.2 },
-  expressiveSlowEffects: { ms: 300, s: 0.3 },
-
-  standardFastSpatial: { ms: 350, s: 0.35 },
-  standardDefaultSpatial: { ms: 500, s: 0.5 },
-  standardSlowSpatial: { ms: 750, s: 0.75 },
-
-  standardFastEffects: { ms: 150, s: 0.15 },
-  standardDefaultEffects: { ms: 200, s: 0.2 },
-  standardSlowEffects: { ms: 300, s: 0.3 },
-}
-
-/**
- * Ready-to-use Framer Motion transition configs
- * e.g. `<motion.div transition={m3Transitions.expressiveFastSpatial} />`
- */
-export const m3Transitions = {
-  expressiveFastSpatial: {
-    ease: m3Curves.expressiveFastSpatial,
-    duration: m3Durations.expressiveFastSpatial.s,
+export const M3_MOTION = {
+  expressive: {
+    spatial: {
+      fast: { ease: [0.42, 1.67, 0.21, 0.9], duration: 0.35 },
+      default: { ease: [0.38, 1.21, 0.22, 1.0], duration: 0.5 },
+      slow: { ease: [0.39, 1.29, 0.35, 0.98], duration: 0.65 },
+    },
+    effects: {
+      fast: { ease: [0.31, 0.94, 0.34, 1.0], duration: 0.15 },
+      default: { ease: [0.34, 0.8, 0.34, 1.0], duration: 0.2 },
+      slow: { ease: [0.34, 0.88, 0.34, 1.0], duration: 0.3 },
+    },
   },
-  expressiveDefaultSpatial: {
-    ease: m3Curves.expressiveDefaultSpatial,
-    duration: m3Durations.expressiveDefaultSpatial.s,
-  },
-  expressiveSlowSpatial: {
-    ease: m3Curves.expressiveSlowSpatial,
-    duration: m3Durations.expressiveSlowSpatial.s,
-  },
-
-  expressiveFastEffects: {
-    ease: m3Curves.expressiveFastEffects,
-    duration: m3Durations.expressiveFastEffects.s,
-  },
-  expressiveDefaultEffects: {
-    ease: m3Curves.expressiveDefaultEffects,
-    duration: m3Durations.expressiveDefaultEffects.s,
-  },
-  expressiveSlowEffects: {
-    ease: m3Curves.expressiveSlowEffects,
-    duration: m3Durations.expressiveSlowEffects.s,
-  },
-
-  standardFastSpatial: {
-    ease: m3Curves.standardFastSpatial,
-    duration: m3Durations.standardFastSpatial.s,
-  },
-  standardDefaultSpatial: {
-    ease: m3Curves.standardDefaultSpatial,
-    duration: m3Durations.standardDefaultSpatial.s,
-  },
-  standardSlowSpatial: {
-    ease: m3Curves.standardSlowSpatial,
-    duration: m3Durations.standardSlowSpatial.s,
-  },
-
-  standardFastEffects: {
-    ease: m3Curves.standardFastEffects,
-    duration: m3Durations.standardFastEffects.s,
-  },
-  standardDefaultEffects: {
-    ease: m3Curves.standardDefaultEffects,
-    duration: m3Durations.standardDefaultEffects.s,
-  },
-  standardSlowEffects: {
-    ease: m3Curves.standardSlowEffects,
-    duration: m3Durations.standardSlowEffects.s,
+  standard: {
+    spatial: {
+      fast: { ease: [0.27, 1.06, 0.18, 1.0], duration: 0.35 },
+      default: { ease: [0.27, 1.06, 0.18, 1.0], duration: 0.5 },
+      slow: { ease: [0.27, 1.06, 0.18, 1.0], duration: 0.75 },
+    },
+    effects: {
+      fast: { ease: [0.31, 0.94, 0.34, 1.0], duration: 0.15 },
+      default: { ease: [0.34, 0.8, 0.34, 1.0], duration: 0.2 },
+      slow: { ease: [0.34, 0.88, 0.34, 1.0], duration: 0.3 },
+    },
   },
 }
 
 /**
- * Aggregated M3 Motion Object
+ * Standard directional tab content transition variants based on M3 motion tokens
  */
-export const m3Motion = {
-  curves: m3Curves,
-  cssCurves: m3CssCurves,
-  durations: m3Durations,
-  transitions: m3Transitions,
+export const tabContentVariants = {
+  enter: (direction) => ({
+    opacity: 0,
+    x: (direction || 1) * 20,
+  }),
+  center: {
+    opacity: 1,
+    x: 0,
+  },
+  exit: (direction) => ({
+    opacity: 0,
+    x: (direction || 1) * -20,
+  }),
 }
 
-export default m3Motion
+/**
+ * Helper to build Framer Motion transition matching M3 standard tokens.
+ * Defaults to 'fast' preset (spatial: 350ms, effects: 150ms) for snappy, zero-lag tab transitions.
+ */
+export const getTabTransition = (shouldReduceMotion = false, preset = "fast") =>
+  shouldReduceMotion
+    ? { duration: 0 }
+    : {
+        x: M3_MOTION.standard.spatial[preset] || M3_MOTION.standard.spatial.fast,
+        opacity: M3_MOTION.standard.effects[preset] || M3_MOTION.standard.effects.fast,
+      }
 
+/**
+ * Standard M3 dropdown / menu transition variants (vertical unroll matching Dropdown.jsx)
+ */
+export const dropdownVariants = {
+  initial: { opacity: 0, scaleY: 0, transformOrigin: "top" },
+  animate: {
+    opacity: 1,
+    scaleY: 1,
+    transformOrigin: "top",
+    transition: {
+      duration: 0.2,
+      ease: [0.25, 1, 0.5, 1],
+    },
+  },
+  exit: {
+    opacity: 0,
+    scaleY: 0,
+    transformOrigin: "top",
+    transition: {
+      duration: 0.15,
+      ease: [0.25, 1, 0.5, 1],
+    },
+  },
+}
+
+export default M3_MOTION

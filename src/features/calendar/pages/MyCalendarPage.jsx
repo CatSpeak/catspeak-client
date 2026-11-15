@@ -5,7 +5,7 @@ import CalendarTab from "../components/my-calendar/CalendarTab"
 import EventTab from "../components/my-calendar/EventTab"
 import TeachingScheduleTab from "../components/my-calendar/TeachingScheduleTab"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { Tabs } from "@/shared/components/ui/navigation"
+import { Tabs, TabContent } from "@/shared/components/ui/navigation"
 import {
   CalendarClock,
   Plus,
@@ -30,6 +30,10 @@ const MyCalendarPage = () => {
   const [activeTab, setActiveTab] = useState(
     location.state?.activeTab || "calendar",
   )
+
+  const handleTabChange = (nextTab) => {
+    setActiveTab(nextTab)
+  }
   const [prevLocationKey, setPrevLocationKey] = useState(location.key)
   const [currentDate, setCurrentDate] = useState(dayjs())
   const [selectedDate, setSelectedDate] = useState(dayjs().date())
@@ -134,55 +138,61 @@ const MyCalendarPage = () => {
       <Tabs
         tabs={tabOptions}
         activeTab={activeTab}
-        onChange={setActiveTab}
+        onChange={handleTabChange}
         fullWidth={false}
       />
 
       <div className="px-4 pb-4">
-        {/* Content with 3 tab: Calendar, Event, Teaching Schedule */}
-        {activeTab === "calendar" && (
-          <div className="flex flex-col lg:flex-row items-stretch gap-4 h-auto xl:h-[calc(100vh-200px)]">
-            <div className="flex-1 w-full min-h-0 flex flex-col">
-              <CalendarTab
-                currentDate={currentDate}
-                selectedDate={selectedDate}
-                viewType={viewType}
-                events={filteredEvents}
-                onChangeView={setViewType}
-                onPrev={handlePrev}
-                onNext={handleNext}
-                onChangeMonth={handleMonthChange}
-                onSelectDate={setSelectedDate}
-                activeFilters={activeFilters}
-                onApplyFilter={setActiveFilters}
-                classesOptions={classesOptions}
-              />
-            </div>
-            {viewType === "month" && (
-              <div className="w-full lg:w-[340px] flex flex-col relative shrink-0">
-                <div className="w-full h-[500px] lg:h-auto lg:absolute lg:inset-0">
-                  <DailyEventPanel
-                    date={currentDate.date(selectedDate).format("DD/MM")}
-                    events={eventsForSelectedDate}
-                    activeFilters={activeFilters}
-                    onApplyFilter={setActiveFilters}
-                    classesOptions={classesOptions}
-                  />
-                </div>
+        <TabContent
+          activeTab={activeTab}
+          tabs={tabOptions}
+          className="w-full"
+        >
+          {/* Content with 3 tab: Calendar, Event, Teaching Schedule */}
+          {activeTab === "calendar" && (
+            <div className="flex flex-col lg:flex-row items-stretch gap-4 h-auto xl:h-[calc(100vh-200px)]">
+              <div className="flex-1 w-full min-h-0 flex flex-col">
+                <CalendarTab
+                  currentDate={currentDate}
+                  selectedDate={selectedDate}
+                  viewType={viewType}
+                  events={filteredEvents}
+                  onChangeView={setViewType}
+                  onPrev={handlePrev}
+                  onNext={handleNext}
+                  onChangeMonth={handleMonthChange}
+                  onSelectDate={setSelectedDate}
+                  activeFilters={activeFilters}
+                  onApplyFilter={setActiveFilters}
+                  classesOptions={classesOptions}
+                />
               </div>
-            )}
-          </div>
-        )}
+              {viewType === "month" && (
+                <div className="w-full lg:w-[340px] flex flex-col relative shrink-0">
+                  <div className="w-full h-[500px] lg:h-auto lg:absolute lg:inset-0">
+                    <DailyEventPanel
+                      date={currentDate.date(selectedDate).format("DD/MM")}
+                      events={eventsForSelectedDate}
+                      activeFilters={activeFilters}
+                      onApplyFilter={setActiveFilters}
+                      classesOptions={classesOptions}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
-        {activeTab === "event" && <EventTab />}
+          {activeTab === "event" && <EventTab />}
 
-        {isTeacher && activeTab === "teaching-schedule" && (
-          <TeachingScheduleTab
-            currentDate={currentDate}
-            onPrev={handlePrev}
-            onNext={handleNext}
-          />
-        )}
+          {isTeacher && activeTab === "teaching-schedule" && (
+            <TeachingScheduleTab
+              currentDate={currentDate}
+              onPrev={handlePrev}
+              onNext={handleNext}
+            />
+          )}
+        </TabContent>
       </div>
     </div>
   )

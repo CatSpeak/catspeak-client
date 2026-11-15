@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence, motion as Motion } from "framer-motion"
+import { M3_MOTION } from "@/shared/constants/motion"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
 import CommunityRoomCard from "../CommunityRoomCard"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -193,13 +194,13 @@ const CategoryRoomSection = ({
       : totalCount > 0 || isLoading || isFetching
 
     return (
-      <div className="relative z-10 flex w-full items-end justify-between">
+      <div className="relative z-10 flex w-full items-end justify-between mb-2">
         <button
           type="button"
           onClick={() => onSeeMore(categoryKey)}
           className="group flex w-fit items-center text-black dark:text-white cursor-pointer select-none transition-opacity duration-150 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border rounded-lg"
         >
-          <h3 className="text-xl font-bold tracking-tight">{title}</h3>
+          <h3 className="text-xl font-bold">{title}</h3>
           <ChevronRight className="transition-transform duration-150 ease-out group-hover:translate-x-1 group-active:-translate-x-0.5 group-active:duration-75" />
         </button>
 
@@ -253,7 +254,7 @@ const CategoryRoomSection = ({
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex gap-4 overflow-x-auto py-4 -my-4 -mx-4 px-4 scroll-px-4 snap-x snap-mandatory scrollbar-hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-2 overflow-x-auto py-4 -my-4 -mx-4 px-4 scroll-px-4 snap-x snap-mandatory scrollbar-hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {roomsToDisplay.map((room) => (
             <div
@@ -277,6 +278,7 @@ const CategoryRoomSection = ({
     )
   }
 
+  // ── Desktop / Tablet (>640px): Paginated Grid Carousel with Framer Motion slide transitions ──
   const gridCols =
     itemsPerPage === 1
       ? "grid-cols-1"
@@ -287,7 +289,7 @@ const CategoryRoomSection = ({
   const slideVariants = {
     enter: (dir) => ({
       x: dir > 0 ? "calc(100% + 8px)" : "calc(-100% - 8px)",
-      opacity: 0.9,
+      opacity: 1,
     }),
     center: {
       x: 0,
@@ -296,7 +298,7 @@ const CategoryRoomSection = ({
     },
     exit: (dir) => ({
       x: dir < 0 ? "calc(100% + 8px)" : "calc(-100% - 8px)",
-      opacity: 0.9,
+      opacity: 1,
       zIndex: 0,
     }),
   }
@@ -305,7 +307,7 @@ const CategoryRoomSection = ({
     <div className="flex flex-col gap-2">
       {renderHeader()}
 
-      <div className="w-full relative min-h-[280px] overflow-hidden -my-2 py-2">
+      <div className="w-full relative min-h-[280px] overflow-hidden -my-2">
         <AnimatePresence
           mode="popLayout"
           initial={false}
@@ -318,7 +320,7 @@ const CategoryRoomSection = ({
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+            transition={M3_MOTION.standard.spatial.default}
             className={`grid ${gridCols} gap-2 w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
           >
             {isLoading || (displayRooms.length === 0 && isFetching)

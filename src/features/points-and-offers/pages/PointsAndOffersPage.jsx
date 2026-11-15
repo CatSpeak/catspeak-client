@@ -1,6 +1,6 @@
-import React from "react"
-import { motion as Motion, AnimatePresence } from "framer-motion"
+import React, { useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 import {
   usePointsAndOffers,
   TAB_KEYS,
@@ -21,11 +21,15 @@ const PointsAndOffersPage = () => {
   const pt = t.pointsAndOffers || {}
 
   const tabs = [
-    { key: TAB_KEYS.OVERVIEW, label: pt.tabs?.overview || "Tổng quan" },
-    { key: TAB_KEYS.EXCHANGE, label: pt.tabs?.exchange || "Đổi Voucher" },
-    { key: TAB_KEYS.VAULT, label: pt.tabs?.vault || "Kho Voucher" },
-    { key: TAB_KEYS.HISTORY, label: pt.tabs?.history || "Lịch sử điểm" },
+    { id: TAB_KEYS.OVERVIEW, label: pt.tabs?.overview || "Tổng quan" },
+    { id: TAB_KEYS.EXCHANGE, label: pt.tabs?.exchange || "Đổi Voucher" },
+    { id: TAB_KEYS.VAULT, label: pt.tabs?.vault || "Kho Voucher" },
+    { id: TAB_KEYS.HISTORY, label: pt.tabs?.history || "Lịch sử điểm" },
   ]
+
+  const handleTabChange = (nextTab) => {
+    setActiveTab(nextTab)
+  }
   const {
     activeTab,
     setActiveTab,
@@ -93,102 +97,77 @@ const PointsAndOffersPage = () => {
       />
 
       {/* Main Tab Navigation Bar */}
-      <div className="border-b border-gray-200/90 dark:border-[#3F3F3F] mb-6 overflow-x-auto scrollbar-none">
-        <div className="flex items-center gap-6 sm:gap-8 min-w-max">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.key
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`relative pb-3 text-sm font-semibold transition cursor-pointer ${
-                  isActive
-                    ? "text-[#990011] dark:text-red-400"
-                    : "text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-white"
-                }`}
-              >
-                <span>{tab.label}</span>
-                {isActive && (
-                  <Motion.div
-                    layoutId="activeTabUnderline"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#990011] dark:bg-red-400"
-                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                  />
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      <Tabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={handleTabChange}
+        fullWidth={false}
+        className="mb-6"
+      />
 
       {/* Tab Content Panes */}
-      <AnimatePresence mode="wait">
-        <Motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.15 }}
-        >
-          {activeTab === TAB_KEYS.OVERVIEW && (
-            <PointsOverviewTab
-              userPoints={userPoints}
-              earningMethods={earningMethods}
-              pointHistory={recentActivities}
-              redeemableVouchers={redeemablePreviewVouchers}
-              onNavigateTab={setActiveTab}
-              onRedeemVoucher={handleOpenExchangeModal}
-              isLoading={
-                isLoadingOverview ||
-                isFetchingOverview ||
-                isLoadingTemplates ||
-                isFetchingTemplates
-              }
-            />
-          )}
+      <TabContent
+        activeTab={activeTab}
+        tabs={tabs}
+        className="w-full"
+      >
+        {activeTab === TAB_KEYS.OVERVIEW && (
+          <PointsOverviewTab
+            userPoints={userPoints}
+            earningMethods={earningMethods}
+            pointHistory={recentActivities}
+            redeemableVouchers={redeemablePreviewVouchers}
+            onNavigateTab={setActiveTab}
+            onRedeemVoucher={handleOpenExchangeModal}
+            isLoading={
+              isLoadingOverview ||
+              isFetchingOverview ||
+              isLoadingTemplates ||
+              isFetchingTemplates
+            }
+          />
+        )}
 
-          {activeTab === TAB_KEYS.EXCHANGE && (
-            <VoucherExchangeTab
-              vouchers={vouchers}
-              userPoints={userPoints.availablePoints}
-              searchQuery={exchangeSearchQuery}
-              onSearchChange={setExchangeSearchQuery}
-              categoryFilter={exchangeCategoryFilter}
-              onCategoryChange={setExchangeCategoryFilter}
-              typeFilter={exchangeTypeFilter}
-              onTypeChange={setExchangeTypeFilter}
-              onRedeemVoucher={handleOpenExchangeModal}
-              isLoading={isLoadingTemplates || isFetchingTemplates}
-            />
-          )}
+        {activeTab === TAB_KEYS.EXCHANGE && (
+          <VoucherExchangeTab
+            vouchers={vouchers}
+            userPoints={userPoints.availablePoints}
+            searchQuery={exchangeSearchQuery}
+            onSearchChange={setExchangeSearchQuery}
+            categoryFilter={exchangeCategoryFilter}
+            onCategoryChange={setExchangeCategoryFilter}
+            typeFilter={exchangeTypeFilter}
+            onTypeChange={setExchangeTypeFilter}
+            onRedeemVoucher={handleOpenExchangeModal}
+            isLoading={isLoadingTemplates || isFetchingTemplates}
+          />
+        )}
 
-          {activeTab === TAB_KEYS.VAULT && (
-            <VoucherVaultTab
-              vaultVouchers={vaultVouchers}
-              vaultCounts={vaultCounts}
-              activeSubTab={vaultSubTab}
-              onSubTabChange={setVaultSubTab}
-              onCopyCode={handleCopyCode}
-              onUseNow={handleUseVoucher}
-              onGoToExchange={() => setActiveTab(TAB_KEYS.EXCHANGE)}
-              isLoading={isLoadingInventory || isFetchingInventory}
-            />
-          )}
+        {activeTab === TAB_KEYS.VAULT && (
+          <VoucherVaultTab
+            vaultVouchers={vaultVouchers}
+            vaultCounts={vaultCounts}
+            activeSubTab={vaultSubTab}
+            onSubTabChange={setVaultSubTab}
+            onCopyCode={handleCopyCode}
+            onUseNow={handleUseVoucher}
+            onGoToExchange={() => setActiveTab(TAB_KEYS.EXCHANGE)}
+            isLoading={isLoadingInventory || isFetchingInventory}
+          />
+        )}
 
-          {activeTab === TAB_KEYS.HISTORY && (
-            <PointsHistoryTab
-              pointHistory={pointHistory}
-              historyFilter={historyFilter}
-              onFilterChange={setHistoryFilter}
-              historyPage={historyPage}
-              onPageChange={setHistoryPage}
-              historyPageSize={historyPageSize}
-              isLoading={isLoadingHistory || isFetchingHistory}
-            />
-          )}
-        </Motion.div>
-      </AnimatePresence>
+        {activeTab === TAB_KEYS.HISTORY && (
+          <PointsHistoryTab
+            pointHistory={pointHistory}
+            historyFilter={historyFilter}
+            onFilterChange={setHistoryFilter}
+            historyPage={historyPage}
+            onPageChange={setHistoryPage}
+            historyPageSize={historyPageSize}
+            isLoading={isLoadingHistory || isFetchingHistory}
+          />
+        )}
+      </TabContent>
 
       {/* Modals Flow */}
       <ExchangeConfirmModal

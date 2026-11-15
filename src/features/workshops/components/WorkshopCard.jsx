@@ -1,4 +1,5 @@
 import React from "react"
+import { ChevronRight } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 
@@ -16,9 +17,9 @@ const WorkshopCard = ({
 
   return (
     <div
-      className={`group flex w-full cursor-pointer overflow-hidden rounded-3xl border-y border-x-0 md:border border-border bg-white shadow-sm dark:border-[#3F3F3F] dark:bg-[#1A1A1A] ${
+      className={`group flex w-full cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl border border-border bg-white shadow-sm dark:border-[#3F3F3F] dark:bg-[#1A1A1A] [isolation:isolate] transition-colors duration-200 ease-out hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] ${
         isCarousel
-          ? "relative aspect-video justify-center flex-col"
+          ? "relative flex-col sm:aspect-video sm:h-full"
           : isHorizontal
             ? "flex-col md:flex-row items-stretch"
             : "flex-col"
@@ -28,7 +29,7 @@ const WorkshopCard = ({
       <div
         className={
           isCarousel
-            ? "absolute inset-0"
+            ? "relative w-full aspect-video overflow-hidden shrink-0 sm:absolute sm:inset-0 sm:aspect-auto"
             : isHorizontal
               ? "w-full md:w-1/2 aspect-video md:aspect-auto overflow-hidden shrink-0"
               : "aspect-video overflow-hidden shrink-0"
@@ -44,46 +45,57 @@ const WorkshopCard = ({
       </div>
 
       {isCarousel && (
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-transparent" />
+        <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent pointer-events-none">
+          <div className="absolute inset-0 bg-black/0 sm:group-hover:bg-black/15 transition-colors duration-200 ease-out" />
+        </div>
       )}
 
       <div
-        className={`flex flex-col items-start gap-2 p-4 ${
+        className={`flex flex-col ${
           isCarousel
-            ? "relative z-10 text-white"
+            ? "relative z-10 p-4 items-start text-left sm:justify-center gap-3 sm:gap-4 bg-transparent sm:bg-transparent sm:dark:bg-transparent sm:h-full"
             : isHorizontal
               ? "flex-1 md:p-8 md:gap-4 justify-center"
-              : "flex-1"
+              : "flex-1 p-4"
         }`}
       >
-        <h3
-          className={`font-bold line-clamp-2 text-gray-900 dark:text-white ${
-            isHorizontal ? "text-base md:text-2xl" : "text-base"
+        <div
+          className={`flex flex-col gap-1 w-full min-h-[58px] sm:min-h-0 items-start text-left ${
+            isCarousel ? "sm:max-w-2xl" : ""
           }`}
         >
-          {slide.title || t?.workshops?.heroCarousel?.comingSoonTitle}
-        </h3>
-
-        {slide.subtext && (
-          <p
-            className={`text-sm ${
-              isHorizontal ? "line-clamp-2 md:line-clamp-3" : "line-clamp-2"
-            } ${
+          <h3
+            className={`font-bold line-clamp-1 sm:line-clamp-2 text-left ${
               isCarousel
-                ? "text-white/80"
-                : "text-secondary dark:text-neutral-400"
+                ? "text-base sm:text-xl md:text-2xl text-gray-900 dark:text-white sm:text-white"
+                : isHorizontal
+                  ? "text-base md:text-2xl text-gray-900 dark:text-white"
+                  : "text-base text-gray-900 dark:text-white"
             }`}
           >
-            {slide.subtext}
-          </p>
-        )}
+            {slide.title || t?.workshops?.heroCarousel?.comingSoonTitle}
+          </h3>
+
+          {slide.subtext && (
+            <p
+              className={`line-clamp-2 sm:line-clamp-3 text-left ${
+                isCarousel
+                  ? "text-xs sm:text-sm md:text-base text-secondary dark:text-neutral-400 sm:text-white/90"
+                  : "text-xs text-secondary dark:text-neutral-400"
+              }`}
+            >
+              {slide.subtext}
+            </p>
+          )}
+        </div>
 
         {slide.cta && (
-          <div className="mt-auto">
+          <div className={isCarousel ? "mt-1 sm:mt-0 self-start" : "mt-2"}>
             <PillButton
               bgColor="#FFD700"
               textColor="#990011"
-              className="[&>div]:font-bold"
+              endIcon={<ChevronRight />}
+              className="[&>div]:font-bold hover:brightness-105 active:brightness-95 transition-all duration-150"
               onClick={(e) => {
                 e.stopPropagation()
                 handleClick()

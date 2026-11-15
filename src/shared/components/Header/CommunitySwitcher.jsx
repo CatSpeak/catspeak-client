@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo } from "react"
 import { ChevronDown } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
+import { AnimatePresence, motion as Motion } from "framer-motion"
+import { dropdownVariants } from "@/shared/constants/motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useParams, useLocation } from "react-router-dom"
 import { LANGUAGE_CONFIG } from "@/features/navigation"
@@ -82,32 +82,32 @@ const CommunitySwitcher = () => {
 
       <AnimatePresence>
         {isOpen && (
-          <div className="absolute top-full left-0 mt-2 min-w-[220px] z-50">
-            <FluentAnimation
-              direction="down"
-              exit
-              className="rounded-xl border border-border dark:border-[#3F3F3F] shadow-xl bg-white dark:bg-[#1A1A1A] overflow-hidden"
-            >
-              <div className="flex flex-col gap-1 p-1">
-                {LANGUAGE_CONFIG.map((config) => {
-                  // if (config.code === "vi") return null
-                  return (
-                    <LanguageMenuItem
-                      key={config.code}
-                      {...config}
-                      isActive={currentCommunity === config.code}
-                      label={
-                        t.header?.countries?.[config.labelKey] ||
-                        config.fallbackLabel
-                      }
-                      soonLabel={t.header?.soon || "Soon"}
-                      onSelect={() => handleCommunitySelect(config.code)}
-                    />
-                  )
-                })}
-              </div>
-            </FluentAnimation>
-          </div>
+          <Motion.div
+            variants={dropdownVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="absolute top-full left-0 mt-2 min-w-[220px] z-50 origin-top-left rounded-xl border border-border dark:border-[#3F3F3F] shadow-xl bg-white dark:bg-[#1A1A1A] overflow-hidden"
+          >
+            <div className="flex flex-col gap-1 p-1">
+              {LANGUAGE_CONFIG.map((config) => {
+                // if (config.code === "vi") return null
+                return (
+                  <LanguageMenuItem
+                    key={config.code}
+                    {...config}
+                    isActive={currentCommunity === config.code}
+                    label={
+                      t.header?.countries?.[config.labelKey] ||
+                      config.fallbackLabel
+                    }
+                    soonLabel={t.header?.soon || "Soon"}
+                    onSelect={() => handleCommunitySelect(config.code)}
+                  />
+                )
+              })}
+            </div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>

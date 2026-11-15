@@ -94,12 +94,16 @@ const ResultPage = ({
         {/* Detailed Metrics */}
         <div className="flex-1 w-full space-y-3.5">
           <h2 className="font-bold text-slate-800 dark:text-white text-sm sm:text-base">
-            {levelPrefix}{cefrLevel}
+            {levelPrefix}
+            {cefrLevel}
           </h2>
 
           <div className="space-y-3">
             {metrics.map((metric, idx) => (
-              <div key={idx} className="flex items-center gap-3 text-xs sm:text-sm">
+              <div
+                key={idx}
+                className="flex items-center gap-3 text-xs sm:text-sm"
+              >
                 <span className="w-36 sm:w-44 font-medium text-slate-700 dark:text-neutral-300 shrink-0">
                   {metric.label}
                 </span>
@@ -126,7 +130,9 @@ const ResultPage = ({
         <ul className="space-y-2 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed">
           {strengths.map((str, idx) => (
             <li key={idx} className="flex items-start gap-2">
-              <span className="text-emerald-700 dark:text-emerald-400 font-bold">•</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">
+                •
+              </span>
               <span>{str}</span>
             </li>
           ))}
@@ -135,35 +141,36 @@ const ResultPage = ({
 
       {/* 3. Areas for Improvement Card */}
       {improvements.length > 0 || showPronunciationLink ? (
-      <div className="w-full bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 rounded-2xl p-4 sm:p-5 space-y-2.5 shadow-2xs">
-        <h3 className="text-xs sm:text-sm font-extrabold text-amber-900 dark:text-amber-300 tracking-wide flex items-center gap-1.5">
-          <span>🔍</span> ĐIỂM CẦN LƯU Ý & KHẮC PHỤC NGỮ ÂM:
-        </h3>
-        <div className="space-y-2 text-xs sm:text-sm text-amber-950 dark:text-amber-200 leading-relaxed">
-          {improvements.map((imp, idx) => (
-            <p key={idx}>
-              <span className="font-semibold">{idx + 1}.</span> {imp}
-            </p>
-          ))}
+        <div className="w-full bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 rounded-2xl p-4 sm:p-5 space-y-2.5 shadow-2xs">
+          <h3 className="text-xs sm:text-sm font-extrabold text-amber-900 dark:text-amber-300 tracking-wide flex items-center gap-1.5">
+            <span>🔍</span> ĐIỂM CẦN LƯU Ý & KHẮC PHỤC NGỮ ÂM:
+          </h3>
+          <div className="space-y-2 text-xs sm:text-sm text-amber-950 dark:text-amber-200 leading-relaxed">
+            {improvements.map((imp, idx) => (
+              <p key={idx}>
+                <span className="font-semibold">{idx + 1}.</span> {imp}
+              </p>
+            ))}
+          </div>
+          {showPronunciationLink ? (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={onViewPronunciationDetails}
+                className="text-xs sm:text-sm font-bold text-[#990011] dark:text-red-400 hover:underline cursor-pointer inline-flex items-center gap-1"
+              >
+                👉 Xem phân tích âm tiết chi tiết & Video khẩu hình 1-1 →
+              </button>
+            </div>
+          ) : null}
         </div>
-        {showPronunciationLink ? (
-        <div className="pt-1">
-          <button
-            type="button"
-            onClick={onViewPronunciationDetails}
-            className="text-xs sm:text-sm font-bold text-[#990011] dark:text-red-400 hover:underline cursor-pointer inline-flex items-center gap-1"
-          >
-            👉 Xem phân tích âm tiết chi tiết & Video khẩu hình 1-1 →
-          </button>
-        </div>
-        ) : null}
-      </div>
       ) : null}
 
       {/* 4. Saved Flashcards Card */}
       <div className="w-full bg-slate-50 dark:bg-[#1E1E1E] border border-slate-200/80 dark:border-[#3F3F3F] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-2xs">
         <h3 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white tracking-wide flex items-center gap-1.5">
-          <span>🎴</span> ĐÃ LƯU {savedVocabs.length} TỪ VỰNG VÀO FLASHCARD — SẼ NHẮC ÔN LẠI:
+          <span>🎴</span> ĐÃ LƯU {savedVocabs.length} TỪ VỰNG VÀO FLASHCARD — SẼ
+          NHẮC ÔN LẠI:
         </h3>
         <div className="flex flex-wrap gap-2.5">
           {savedVocabs.map((vocab, idx) => (
@@ -172,8 +179,18 @@ const ResultPage = ({
               className="bg-white dark:bg-[#272727] border border-slate-200/80 dark:border-[#3F3F3F] rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-800 dark:text-neutral-100 shadow-2xs"
             >
               {vocab.hanzi}
-              {vocab.pinyin ? <span className="text-slate-400 dark:text-neutral-400 font-normal"> {vocab.pinyin}</span> : null}
-              {vocab.meaning ? <span className="text-slate-500 dark:text-neutral-400 font-normal"> ({vocab.meaning})</span> : null}
+              {vocab.pinyin ? (
+                <span className="text-slate-400 dark:text-neutral-400 font-normal">
+                  {" "}
+                  {vocab.pinyin}
+                </span>
+              ) : null}
+              {vocab.meaning ? (
+                <span className="text-slate-500 dark:text-neutral-400 font-normal">
+                  {" "}
+                  ({vocab.meaning})
+                </span>
+              ) : null}
             </div>
           ))}
         </div>
@@ -196,7 +213,6 @@ const ResultPage = ({
           Quay về Trang chủ
         </button>
       </div>
-    </div>
     </div>
   )
 }

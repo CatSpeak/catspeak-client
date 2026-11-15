@@ -2,6 +2,7 @@ import React, { useEffect, useId, useRef } from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion" // eslint-disable-line no-unused-vars
 import { X } from "lucide-react"
+import { M3_MOTION } from "@/shared/constants/motion"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
@@ -92,10 +93,7 @@ const ModalContent = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{
-        duration: 0.2,
-        ease: [0.34, 0.8, 0.34, 1.0],
-      }}
+      transition={M3_MOTION.standard.effects.default}
     >
       {/* Backdrop */}
       <div
@@ -112,14 +110,8 @@ const ModalContent = ({
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
         transition={{
-          opacity: {
-            duration: 0.2,
-            ease: [0.34, 0.8, 0.34, 1.0],
-          },
-          scale: {
-            duration: 0.35,
-            ease: [0.42, 1.67, 0.21, 0.9],
-          },
+          opacity: M3_MOTION.standard.effects.default,
+          scale: M3_MOTION.expressive.spatial.fast,
         }}
         className={`relative flex flex-col w-full shadow-xl overflow-hidden ${
           /(^|\s)(md:|lg:|xl:|2xl:)?h-/.test(className)
@@ -189,7 +181,7 @@ const ModalContent = ({
         {subHeader && <div className={subHeaderClassName}>{subHeader}</div>}
 
         <div
-          className={`px-4 flex-1 overflow-y-auto ${bodyClassName} ${!footer ? "mb-4" : ""}`}
+          className={`${/(^|\s)(!?)p[xy]?-/.test(bodyClassName) ? "" : "px-4"} flex-1 ${/(^|\s)(!?)overflow-/.test(bodyClassName) ? "" : "overflow-y-auto"} ${bodyClassName} ${!footer && !/(^|\s)(!?)m[by]?-/.test(bodyClassName) ? "mb-4" : ""}`}
         >
           {children}
         </div>

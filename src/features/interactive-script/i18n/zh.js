@@ -88,7 +88,13 @@ export default {
       moreExamples: "查看更多例句",
       langPlaceholder: "英语 -> 中文",
       listenBtn: "听发音",
-      closeBtn: "关闭弹出窗口"
+      closeBtn: "关闭弹出窗口",
+      fetchingTitle: "正在查询“{{word}}”...",
+      fetchingDesc: "正在获取词典释义和发音",
+      contributeSuccess: "反馈已提交！",
+      contributeError: "提交反馈时出错。",
+      saveSuccess: "已保存到词汇本！",
+      saveError: "无法保存单词。请重试。"
     },
     notFound: {
       title: "未找到此词的定义。",

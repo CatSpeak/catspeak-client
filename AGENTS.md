@@ -1,90 +1,10 @@
-# AI Agent Guidelines & Repository Rules
+# AI Agent Guidelines
 
-This document defines core behavior, efficiency standards, and coding conventions for AI pair programmers working in the `catspeak-client` repository.
+## 1. Clean Code
+- **Simplicity & Readability:** Write clean, readable, self-documenting code. Avoid over-engineering, premature abstractions, and dead code.
+- **Single Responsibility:** Keep components, functions, and hooks focused on a single task.
+- **Dark Mode:** Always ensure UI components support dark mode.
 
----
-
-## 1. Operating Principles & Token Efficiency
-
-- **Static Code Analysis First:** Always prioritize direct file reading (`view_file`), pattern searching (`grep_search`), and directory inspection (`list_dir`) over running shell commands or browser subagents.
-- **No Unsolicited Browser Automation:** Do NOT launch browser subagents or automated headless sessions unless the user explicitly asks for visual testing or recording.
-- **No Unsolicited Shell Probing:** Do not execute exploratory terminal commands (e.g., `netstat`, port checks, arbitrary process inspection) when the answer can be determined directly from the codebase.
-- **Direct & Action-Oriented:** Give concise, code-centric answers. Identify the exact files, lines, and root causes before proposing or applying fixes.
-
----
-
-## 2. Project Architecture & Conventions
-
-- **Styling:** Vanilla Tailwind CSS with customized theme tokens.
-  - Border token: `border-border` (e.g., `border-b border-border`).
-  - Colors: CatSpeak brand colors (`cath-red-700`, `bg-primaryBg`, `bg-primary2`, etc.).
-  - Header height: Standard application header is `64px` (`h-[64px]` / `h-16`). All header containers must account for border box sizing to avoid layout shifts or 1px vertical overflows.
-  - Shape & Corner Radius: Standard card corner radius is 12px (`rounded-xl`). Enforce optical roundness for nested elements: $\text{inner\_radius} = \text{outer\_radius} - \text{padding}$. Avoid arbitrary radius drift; use standard Tailwind tokens. See [.agents/rules/shape-system.md](file:///c:/Codes/catspeak-client/.agents/rules/shape-system.md).
-  - Dark Mode & Contrast Standards:
-    - Always provide explicit theme tokens (`light` + `dark`) using static class names (e.g., `text-gray-900 dark:text-white`, `bg-white dark:bg-[#1A1A1A]`, `hover:bg-neutral-100 dark:hover:bg-[#272727]`).
-    - **WCAG AA Contrast Requirements:**
-      - Normal body text must achieve $\ge 4.5:1$ contrast against its background.
-      - Large text ($\ge 18\text{pt}$ / $24\text{px}$ bold) and UI components/borders must achieve $\ge 3:1$ contrast.
-      - **Never hardcode raw black text** (e.g., `text-black`, `text-gray-900`, `text-[#1A1A1A]`, `text-[#101828]`) without an accompanying dark variant (`dark:text-white` or `dark:text-neutral-100`).
-    - **Brand Red Contrast in Dark Mode:**
-      - Deep brand red (`#990011` / `cath-red-700`) has an inaccessible contrast ratio of only $\approx 1.5:1$ against `#0F0F0F` dark canvas.
-      - **Never use `#990011` as plain text, icon, or outline border in dark mode.**
-      - Use accessible red tokens in dark mode: `dark:text-red-400` / `dark:text-[#f87171]` / `dark:border-red-400` (WCAG contrast $> 6:1$).
-      - Solid primary button fills using `#990011` with crisp white text (`text-white`) remain accessible.
-    - **Surface & Background Hierarchy (Dark Mode):**
-      - Main canvas: `bg-primaryBg dark:bg-[#0F0F0F]` (`--cath-bg`).
-      - Cards & elevated containers: `bg-white dark:bg-[#1A1A1A]` (`--cath-surface` / `dark:bg-card`).
-      - Nested sub-cards & text inputs: `bg-gray-50/50 dark:bg-[#242424]` or `dark:bg-[#272727]`.
-      - Interactive hover background: `dark:hover:bg-[#272727]`, active `dark:active:bg-[#3D3D3D]`.
-      - Borders & dividers: `border-border dark:border-[#3F3F3F]` (subtle: `dark:border-[#2A2A2A]`).
-      - Secondary subtext / metadata: `text-secondary dark:text-[#AAAAAA]` or `dark:text-neutral-400` (contrast $> 9:1$).
-    - **Never construct dynamic Tailwind prefix interpolations** (e.g. `` `hover:${color}` ``) or runtime string parsers. Tailwind's JIT compiler needs complete, static class names to generate the corresponding CSS rules. Dynamic prefixes break dark mode and cause light hover backgrounds to wash out white text.
-    - Common UI primitives (such as `<ListItem />`) come pre-equipped with built-in theme-aware hover defaults (`dark:hover:bg-[#272727]` matching `darkColors.itemHover` in `colors.js`). Consuming components should simply pass `hoverEffect={true}` without overriding `hoverBgColor` unless a specific semantic tint is required.
-- **Button Sizing Standards (`PillButton`, `IconButton`):**
-  - Do NOT reduce default dimensions or add sub-`sm`/`xs` sizes to `PillButton` or `IconButton`. Both enforce minimum touch target standards (WCAG 2.5.5 / 2.5.8) and brand scale.
-  - If smaller chips, tags, or compact inline controls are needed, use or create a dedicated chip/mini-primitive rather than shrinking canonical buttons.
-- **Input & Form Control Architecture (Flexbox Container Pattern & MD3 Baseline):**
-  - **Always wrap `<input>` in a styled flex container:** Form controls that feature icons, buttons, badges, or prefix/suffix adornments (such as `<TextInput />`, `<SearchInput />`) must style the outer `<div>` wrapper as the visual box (`flex items-center border border-border rounded-* bg-white dark:bg-[#272727] focus-within:border-[...]`) and keep the `<input>` element unstyled inside it (`flex-1 bg-transparent border-none outline-none p-0`).
-  - **Do NOT use `position: absolute` for input adornments:** Never overlay action buttons, leading icons, password toggles, or suffix items over an `<input>` using `absolute`. Absolute positioning creates fragile manual padding hacks (`!pr-12`, `!pl-10`), causes typed text to overlap buttons, and breaks dynamic resizing. Adornments must always be natural flex siblings in the document flow. (The only acceptable use of `absolute` is for animated floating labels that sit across the top border).
-  - **MD3 Baseline Dimensions:** Height & Target size `56dp` (`h-14 min-h-[56px]`), Top/bottom padding `4dp` (`py-1`), Left/right padding without icons `16dp` (`pl-4`/`pr-4`), Left/right padding with icon buttons `pl-0`/`pr-0` (or `pl-1`/`pr-1` for `rounded-full`), Icon alignment vertically centered (`items-center`), Padding between left, input, and right `4dp` (`gap-1`), Supporting text / counter top spacing `4dp` (`gap-1` on parent container), Padding between supporting text and counter `16dp` (`gap-4`). See [.agents/rules/form-inputs.md](file:///c:/Codes/catspeak-client/.agents/rules/form-inputs.md).
-- **Dialog & Modal Standards (`<Modal />`):**
-  - **Centralized Padding Standard (`p-4` / 16px):** All dialog and modal internal spacing is centralized to **16px** (`p-4` / `px-4` / `pt-4` / `pb-4`). Never introduce breakpoint padding jumps to 24px (e.g., `md:p-6`, `sm:p-6`, `px-6`, `pt-6`, `pb-6`). Use consistent 16px (`p-4`) for dialog viewport padding, headers, subheaders, body content, and action footers.
-  - **Corner Radius & Optical Roundness:** Desktop basic dialog uses `rounded-[28px]` (MD3); mobile full-screen uses `rounded-none`. Nested cards inside modals use $28\text{px} - 16\text{px} = 12\text{px} \rightarrow \texttt{rounded-xl}$. See [.agents/rules/shape-system.md](file:///c:/Codes/catspeak-client/.agents/rules/shape-system.md).
-- **Motion Physics System (Material Design 3 Baseline):**
-  - UI animations adopt the M3 motion physics curves (Expressive & Standard curves for Spatial & Effects transitions) mimicking spring physics for the web.
-  - See [.agents/rules/motion-system.md](file:///c:/Codes/catspeak-client/.agents/rules/motion-system.md) and cite [Motion – Material Design 3](https://m3.material.io/styles/motion/overview/specs).
-  - Tokens and transition presets are exported in `src/shared/constants/motion.js` and `src/shared/utils/animations.js`, with Tailwind utility classes (`ease-m3-*`, `duration-*`) and CSS variables (`--motion-*`) configured.
-- **Component Structure:**
-  - Common UI primitives in `src/shared/components/ui/`.
-  - Feature-specific logic isolated in `src/features/<feature-name>/`.
-  - Shared layout components in `src/layouts/` and `src/shared/components/layout/`.
-- **Links & References:** Use clickable GitHub-style links with line references (e.g., `[FileName.jsx](file:///path/to/file#L10-L20)`) when referencing code.
-- **Toast Notifications (Sonner):**
-  - All toast notifications use `sonner` via `<AppToaster />` mounted in `src/App.jsx`.
-  - The import `react-hot-toast` is aliased in `vite.config.js` to `src/shared/utils/toastBridge.jsx`.
-  - **Rule for AI Agents & Developers:** Do NOT replace Sonner with PrimeReact Toast or revert to legacy `react-hot-toast`. Sonner is used purely as the headless positioning and stacking engine, while all visual pixels, borders, colors, and components (`PillButton`, `IconButton`) are defined in `src/shared/components/ui/toast/CatSpeakToast.jsx`.
-
----
-
-## 3. UI/UX Loading & Progress Feedback Standards
-
-Choose a loading or progress indicator that corresponds to the expected wait time and kind of process:
-
-| Expected wait time | Recommendation |
-| :--- | :--- |
-| **Instant (under 200ms)** | No indicator |
-| **Short (between 200ms and 5s)** | Loading indicator (e.g. `LoadingSpinner`, spinner overlay) |
-| **Long (Over 5s)** | Progress indicator (e.g. progress bar, step progress) |
-
-- If the wait is very long, consider allowing people to navigate away from the page while the process finishes up.
-
----
-
-## 4. How to Extend Rules (For Developers)
-
-To add new rules or guidelines for your team:
-
-1. **Global/Workspace Rules:** Edit this file (`AGENTS.md`) directly. The agent automatically loads it at the root of the workspace.
-2. **Modular Rules:** Create markdown rule files under `.agents/rules/` (e.g., `.agents/rules/components.md`, `.agents/rules/api-conventions.md`).
-3. **Directory-Specific Rules:** Place a localized `AGENTS.md` or `GEMINI.md` within any sub-directory (e.g., `src/features/video-call/AGENTS.md`) to apply rules scoped only to that feature.
-
+## 2. Feature-Based Architecture
+- **Features (`src/features/<feature-name>/`):** Colocate all feature-specific components, hooks, state, and API calls within their feature folder.
+- **Shared (`src/shared/`):** Place reusable UI primitives, generic hooks, utilities, and layout wrappers used across multiple features here.

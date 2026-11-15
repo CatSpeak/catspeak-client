@@ -13,12 +13,15 @@ const Pagination = ({ page, totalPages, onChangePage, className = "" }) => {
   if (totalPages <= 1) return null
 
   // Build the page info text based on language
-  const pageInfoText = language === "zh"
-    ? `${p.page || "第"}${page}${p.of || "页，共"}${totalPages}页`
-    : <>
-        {p.page || "Trang"} <span className="font-semibold">{page}</span> {p.of || "trên"}{" "}
-        <span className="font-semibold">{totalPages}</span>
+  const pageInfoText =
+    language === "zh" ? (
+      `${p.page || "第"}${page}${p.of || "页，共"}${totalPages}页`
+    ) : (
+      <>
+        {p.page || "Trang"} <span className="font-semibold">{page}</span>{" "}
+        {p.of || "trên"} <span className="font-semibold">{totalPages}</span>
       </>
+    )
 
   // Mobile: focused 3 pages (never overflows mobile screens)
   const getMobilePages = () => {
@@ -43,7 +46,15 @@ const Pagination = ({ page, totalPages, onChangePage, className = "" }) => {
       return [1, 2, 3, 4, 5, "...", totalPages]
     }
     if (page >= totalPages - 3) {
-      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages]
+      return [
+        1,
+        "...",
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ]
     }
     return [1, "...", page - 1, page, page + 1, "...", totalPages]
   }
@@ -52,7 +63,9 @@ const Pagination = ({ page, totalPages, onChangePage, className = "" }) => {
   const desktopPages = getDesktopPages()
 
   return (
-    <div className={`mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:items-center sm:justify-between w-full ${className}`}>
+    <div
+      className={`mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:items-center sm:justify-between w-full ${className}`}
+    >
       <p className="text-sm text-gray-600 dark:text-[#AAAAAA] text-center sm:text-left font-medium">
         {pageInfoText}
       </p>
@@ -110,7 +123,10 @@ const Pagination = ({ page, totalPages, onChangePage, className = "" }) => {
         {desktopPages.map((item, idx) => {
           if (item === "...") {
             return (
-              <span key={`desktop-ellipsis-${idx}`} className="px-1.5 text-sm text-gray-400 font-semibold select-none shrink-0">
+              <span
+                key={`desktop-ellipsis-${idx}`}
+                className="px-1.5 text-sm text-gray-400 font-semibold select-none shrink-0"
+              >
                 …
               </span>
             )

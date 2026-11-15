@@ -1,7 +1,7 @@
 import React from "react"
 import { useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { Tabs } from "@/shared/components/ui/navigation"
+import { Tabs, TabContent } from "@/shared/components/ui/navigation"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import PaymentHistoryTab from "../components/PaymentHistoryTab"
 import RefundHistoryTab from "../components/RefundHistoryTab"
@@ -19,6 +19,10 @@ const BillingPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const tabParam = searchParams.get("tab")
   const activeTab = VALID_TABS.includes(tabParam) ? tabParam : "usage"
+
+  const handleTabChange = (nextTab) => {
+    setSearchParams({ tab: nextTab })
+  }
 
   const navTabs = [
     {
@@ -53,36 +57,54 @@ const BillingPage = () => {
   const getPageSubtitle = () => {
     switch (activeTab) {
       case "payments":
-        return hist.subtitle || "Xem lại lịch sử các giao dịch và hóa đơn thanh toán của bạn."
+        return (
+          hist.subtitle ||
+          "Xem lại lịch sử các giao dịch và hóa đơn thanh toán của bạn."
+        )
       case "refunds":
-        return refundT.subtitle || "Theo dõi tình trạng các yêu cầu hoàn tiền của bạn."
+        return (
+          refundT.subtitle ||
+          "Theo dõi tình trạng các yêu cầu hoàn tiền của bạn."
+        )
       case "usage":
       default:
-        return pu.pageSubtitle || "Theo dõi hạn ngạch sử dụng thực tế và quản lý gói dịch vụ của bạn."
+        return (
+          pu.pageSubtitle ||
+          "Theo dõi hạn ngạch sử dụng thực tế và quản lý gói dịch vụ của bạn."
+        )
     }
   }
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-70px)]">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-1">
+      <div className="flex flex-col gap-1 p-4">
         <PageTitle>{getPageTitle()}</PageTitle>
-        <p className="text-gray-500 dark:text-neutral-400 text-sm">{getPageSubtitle()}</p>
+        <p className="text-gray-500 dark:text-neutral-400 text-sm">
+          {getPageSubtitle()}
+        </p>
       </div>
 
       {/* Tabs */}
       <Tabs
         tabs={navTabs}
         activeTab={activeTab}
-        onChange={(id) => setSearchParams({ tab: id })}
+        onChange={handleTabChange}
         fullWidth={false}
-        className="mb-6"
       />
 
       {/* Active Tab Content */}
-      {activeTab === "usage" && <PlanUsageTab />}
-      {activeTab === "payments" && <PaymentHistoryTab />}
-      {activeTab === "refunds" && <RefundHistoryTab />}
+      <div className="p-4 pb-24">
+        <TabContent
+          activeTab={activeTab}
+          tabOrder={VALID_TABS}
+          className="w-full"
+        >
+          {activeTab === "usage" && <PlanUsageTab />}
+          {activeTab === "payments" && <PaymentHistoryTab />}
+          {activeTab === "refunds" && <RefundHistoryTab />}
+        </TabContent>
+      </div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react"
 import { ChevronLeft, CalendarX } from "lucide-react"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
@@ -48,6 +48,10 @@ const DayScheduleDayView = ({
   onEventClick,
   cal = {},
 }) => {
+  const handleTabChange = (nextTab) => {
+    setTab(nextTab)
+  }
+
   const tabs = useMemo(
     () => [
       {
@@ -96,13 +100,13 @@ const DayScheduleDayView = ({
       <Tabs
         tabs={tabs}
         activeTab={tab}
-        onChange={setTab}
+        onChange={handleTabChange}
         fullWidth={false}
         className="mb-4"
       />
 
       {/* Events List */}
-      <div className="flex-1 flex flex-col overflow-y-auto px-4 pb-4 space-y-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
+      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden px-4 pb-4 space-y-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
         {isLoading ? (
           <LoadingSpinner
             className="flex-1 flex flex-col items-center justify-center py-8"
@@ -117,46 +121,55 @@ const DayScheduleDayView = ({
             }
             className="flex-1 my-auto"
           />
-        ) : displayEvents.length === 0 ? (
-          <EmptyState
-            variant="component"
-            icon={CalendarX}
-            title={
-              tab === "registered"
-                ? cal.noRegisteredEventsDay ||
-                  "Bạn chưa đăng ký sự kiện nào trong ngày này"
-                : cal.noEventsDay ||
-                  cal.noEvents ||
-                  "Không có sự kiện nào trong ngày này"
-            }
-            className="flex-1 my-auto"
-          />
         ) : (
-          ["morning", "noon", "afternoon", "evening"].map((section) => {
-            const events = grouped[section]
-            if (!events.length) return null
-            return (
-              <div key={section} className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 px-1 mb-1">
-                  <TimeSectionIcon section={section} />
-                  <span className="text-sm font-medium text-black dark:text-white">
-                    {sectionLabels[section]}
-                  </span>
-                </div>
-                {events.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onClick={onEventClick}
-                    isSelected={selectedEvent?.id === event.id}
-                    onActionComplete={(type, status) =>
-                      setActionStatus({ type, status })
-                    }
-                  />
-                ))}
-              </div>
-            )
-          })
+          <TabContent
+            activeTab={tab}
+            tabs={tabs}
+            className="flex-1 flex flex-col space-y-4 w-full"
+            containerClassName="flex-1 flex flex-col"
+          >
+            {displayEvents.length === 0 ? (
+                <EmptyState
+                  variant="component"
+                  icon={CalendarX}
+                  title={
+                    tab === "registered"
+                      ? cal.noRegisteredEventsDay ||
+                        "Bạn chưa đăng ký sự kiện nào trong ngày này"
+                      : cal.noEventsDay ||
+                        cal.noEvents ||
+                        "Không có sự kiện nào trong ngày này"
+                  }
+                  className="flex-1 my-auto"
+                />
+              ) : (
+                ["morning", "noon", "afternoon", "evening"].map((section) => {
+                  const events = grouped[section]
+                  if (!events.length) return null
+                  return (
+                    <div key={section} className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 px-1 mb-1">
+                        <TimeSectionIcon section={section} />
+                        <span className="text-sm font-medium text-black dark:text-white">
+                          {sectionLabels[section]}
+                        </span>
+                      </div>
+                      {events.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          onClick={onEventClick}
+                          isSelected={selectedEvent?.id === event.id}
+                          onActionComplete={(type, status) =>
+                            setActionStatus({ type, status })
+                          }
+                        />
+                      ))}
+                    </div>
+                  )
+                })
+              )}
+          </TabContent>
         )}
       </div>
 

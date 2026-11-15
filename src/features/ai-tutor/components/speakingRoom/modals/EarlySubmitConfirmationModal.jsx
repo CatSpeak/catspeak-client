@@ -87,8 +87,6 @@ const EarlySubmitConfirmationModal = ({
               >
                 Nộp bài
               </button>
-                Nộp bài
-              </button>
 
               <button
                 type="button"

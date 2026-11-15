@@ -18,11 +18,11 @@ import {
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSidebar } from "@/shared/context/SidebarContext"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { M3_MOTION, dropdownVariants } from "@/shared/constants/motion"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useTourGuide } from "@/features/tour-guide"
@@ -247,22 +247,25 @@ const ProfileDropdown = () => {
     <AnimatePresence>
       {isOpen && isMobile && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center">
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={M3_MOTION.standard.effects.default}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
           />
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            transition={{
+              y: M3_MOTION.standard.spatial.fast,
+              opacity: M3_MOTION.standard.effects.fast,
+            }}
             className="relative flex h-full w-full flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]"
           >
             {dropdownContent}
-          </motion.div>
+          </Motion.div>
         </div>
       )}
     </AnimatePresence>,
@@ -295,17 +298,17 @@ const ProfileDropdown = () => {
       {/* Desktop: dropdown */}
       <AnimatePresence>
         {isOpen && !isMobile && (
-          <FluentAnimation
-            animationKey="profile-dropdown"
-            direction="down"
-            distance={12}
-            exit={true}
-            className="absolute right-0 top-full z-[1200] mt-2 w-64"
+          <Motion.div
+            variants={dropdownVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="absolute right-0 top-full z-[1200] mt-2 w-64 origin-top-right"
           >
             <div className="flex flex-col bg-white dark:bg-[#1A1A1A] overflow-hidden rounded-lg border border-border dark:border-[#3F3F3F] shadow-lg focus:outline-none">
               {dropdownContent}
             </div>
-          </FluentAnimation>
+          </Motion.div>
         )}
       </AnimatePresence>
 

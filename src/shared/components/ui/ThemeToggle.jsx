@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
 import { Sun, Moon, Monitor } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
+import { AnimatePresence, motion as Motion } from "framer-motion"
+import { dropdownVariants } from "@/shared/constants/motion"
 import { useTheme } from "@/shared/context/ThemeContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import useClickOutside from "@/shared/hooks/useClickOutside"
@@ -158,28 +158,33 @@ const ThemeToggle = ({
 
       <AnimatePresence>
         {open && !(cycle || variant === "cycle") && (
-          <div
-            className={`absolute top-full z-50 mt-2 min-w-[170px] w-max max-w-[calc(100vw-2rem)] ${alignClass}`}
+          <Motion.div
+            variants={dropdownVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className={`absolute top-full z-50 mt-2 min-w-[170px] w-max max-w-[calc(100vw-2rem)] ${alignClass} ${dropdownAlign === "left" ? "origin-top-left" : "origin-top-right"}`}
           >
-            <FluentAnimation direction="down" exit>
-              <MenuList className="py-1 min-w-[170px] shadow-xl">
-                {THEME_OPTIONS.map(({ key, icon: Icon, iconColor, label }) => {
-                  const isSelected = theme === key
-                  const itemLabel = label[language] || label.en
+            <MenuList className="py-1 min-w-[170px] shadow-xl">
+              {THEME_OPTIONS.map((item) => {
+                const isSelected = theme === item.key
+                const itemLabel = item.label[language] || item.label.en
 
-                  return (
-                    <MenuItem
-                      key={key}
-                      label={itemLabel}
-                      icon={<Icon size={20} className={iconColor} />}
-                      isSelected={isSelected}
-                      onClick={() => handleSelect(key)}
-                    />
-                  )
-                })}
-              </MenuList>
-            </FluentAnimation>
-          </div>
+                return (
+                  <MenuItem
+                    key={item.key}
+                    label={itemLabel}
+                    icon={React.createElement(item.icon, {
+                      size: 20,
+                      className: item.iconColor,
+                    })}
+                    isSelected={isSelected}
+                    onClick={() => handleSelect(item.key)}
+                  />
+                )
+              })}
+            </MenuList>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>

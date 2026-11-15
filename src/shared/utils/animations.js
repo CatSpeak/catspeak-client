@@ -1,12 +1,6 @@
-import {
-  m3Curves,
-  m3CssCurves,
-  m3Durations,
-  m3Transitions,
-  m3Motion,
-} from "../constants/motion"
+import { M3_MOTION, tabContentVariants, getTabTransition } from "../constants/motion"
 
-export { m3Curves, m3CssCurves, m3Durations, m3Transitions, m3Motion }
+export { M3_MOTION, tabContentVariants, getTabTransition }
 
 /**
  * Fluent design motion curve
@@ -16,11 +10,9 @@ export const fluentEaseOut = [0.16, 1, 0.3, 1]
 
 const animations = {
   fluentEaseOut,
-  m3Curves,
-  m3CssCurves,
-  m3Durations,
-  m3Transitions,
-  m3Motion,
+  M3_MOTION,
+  tabContentVariants,
+  getTabTransition,
 }
 
 export default animations

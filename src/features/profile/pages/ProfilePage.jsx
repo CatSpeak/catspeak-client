@@ -11,7 +11,7 @@ import { useGetPublicProfileQuery } from "@/store/api/userApi"
 import { useGetFriendshipCountsQuery } from "../../../store/api/social/friendshipApi"
 
 import SocialProfileHeader from "../components/SocialProfileHeader"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton"
 import ProfileHomeTab from "../components/ProfileHomeTab"
@@ -20,12 +20,13 @@ import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileMaterialsTab from "../components/ProfileMaterialsTab"
 import CompletedClass from "../components/CompletedClass"
 
-const Profile = () => {
+const ProfilePage = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   const { accountId: urlAccountId } = useParams()
+
   // Since URL params are strings, ensure we convert accountId to number for comparison
   const targetAccountId = urlAccountId
     ? parseInt(urlAccountId, 10)
@@ -50,8 +51,6 @@ const Profile = () => {
   const profile = publicProfileResponse?.data ?? publicProfileResponse ?? null
 
   // Lightweight counts for header badges. Lists are lazy-loaded inside ProfileFriendsTab.
-  // Fetched for the target account (own or external) so the header and tab badges show
-  // real totals without visiting each sub-tab. Refetch on focus + after mutations.
   const { data: countsResponse } = useGetFriendshipCountsQuery(
     targetAccountId,
     {
@@ -65,8 +64,6 @@ const Profile = () => {
   const counts = countsResponse?.data ?? countsResponse ?? null
   const friendsCount = counts?.friends ?? counts?.Friends ?? 0
   const followersCount = counts?.followers ?? counts?.Followers ?? 0
-  // Badge của tab ngoài "Bạn bè" là tổng số bạn bè (Accepted) cho khớp label.
-  // Số yêu cầu pending có badge riêng ở sub-tab "Yêu cầu kết nối" bên trong.
   const friendsBadge = friendsCount > 0 ? friendsCount.toString() : null
 
   const [searchParams] = useSearchParams()
@@ -83,6 +80,10 @@ const Profile = () => {
     if (currentToken) {
       setActiveTab("documents")
     }
+  }
+
+  const handleTabChange = (nextTab) => {
+    setActiveTab(nextTab)
   }
 
   if (isLoading) return <ProfilePageSkeleton />
@@ -103,13 +104,13 @@ const Profile = () => {
   ]
 
   return (
-    <div className="p-4 w-full min-h-[calc(100vh-70px)] bg-primaryBg dark:bg-[#0F0F0F]">
-      <FluentAnimation
-        duration={0.28}
-        direction="up"
-        distance={12}
-        className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10"
-      >
+    <FluentAnimation
+      duration={0.28}
+      direction="up"
+      distance={12}
+      className="p-4 w-full min-h-[calc(100vh-70px)] bg-primaryBg dark:bg-[#0F0F0F]"
+    >
+      <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
         {/* Top Header Section */}
         <SocialProfileHeader
           profile={profile}
@@ -124,20 +125,24 @@ const Profile = () => {
         <Tabs
           tabs={tabs}
           activeTab={activeTab}
-          onChange={setActiveTab}
+          onChange={handleTabChange}
           fullWidth={false}
           className="overflow-x-auto scrollbar-hidden mb-4"
         />
 
-        {/* Tab Content */}
-        <div className="w-full">
+        {/* Tab Content with M3 Motion Transition */}
+        <TabContent
+          activeTab={activeTab}
+          tabs={tabs}
+          className="w-full"
+        >
           {activeTab === "home" && (
             <ProfileHomeTab
               targetAccountId={targetAccountId}
               isOwnProfile={isOwnProfile}
               onNavigateToFriends={(sub) => {
                 setFriendsSubTab(sub)
-                setActiveTab("friends")
+                handleTabChange("friends")
               }}
             />
           )}
@@ -166,10 +171,10 @@ const Profile = () => {
               isOwnProfile={isOwnProfile}
             />
           )}
-        </div>
-      </FluentAnimation>
-    </div>
+        </TabContent>
+      </div>
+    </FluentAnimation>
   )
 }
 
-export default Profile
+export default ProfilePage

@@ -27,14 +27,14 @@ export default function RefundHistoryTable({ refunds = [], t }) {
       key: "paymentId",
       label: cols.paymentId || "Payment ID",
       headerClassName: "!py-2.5 !px-4 w-[16%]",
-      className: "!py-2.5 !px-4 w-[16%] font-medium text-gray-800",
+      className: "!py-2.5 !px-4 w-[16%] font-medium text-gray-800 dark:text-neutral-200",
       render: (row) => `#${row.paymentId || row.refundId}`,
     },
     {
       key: "amountVnd",
       label: cols.amount || "Amount",
       headerClassName: "!py-2.5 !px-4 w-[18%]",
-      className: "!py-2.5 !px-4 w-[18%] font-medium text-gray-800",
+      className: "!py-2.5 !px-4 w-[18%] font-medium text-gray-800 dark:text-neutral-200",
       render: (row) => formatAmount(row.amountVnd || row.amount),
     },
     {
@@ -48,7 +48,7 @@ export default function RefundHistoryTable({ refunds = [], t }) {
       key: "reason",
       label: cols.reason || "Reason",
       headerClassName: "!py-2.5 !px-4 w-[28%]",
-      className: "!py-2.5 !px-4 w-[28%] text-xs text-gray-600 truncate max-w-[280px]",
+      className: "!py-2.5 !px-4 w-[28%] text-gray-600 dark:text-neutral-300 truncate max-w-[280px]",
       render: (row) => row.message || row.reason || "—",
     },
   ]

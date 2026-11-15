@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import { Globe, AlertCircle, ChevronDown, Check, Flag } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetScriptTranslationQuery, useReportTranslationErrorMutation } from "@/store/api/interactiveScriptApi"
@@ -131,10 +130,9 @@ const TranslationPanel = ({
     (t.widget?.lookup?.langPlaceholder || "Tiếng Anh → Tiếng Việt")
 
   return (
-    <FluentAnimation direction="down" distance={10} duration={0.2} exit>
-      <div
-        className={`w-full bg-[#fff9f9] dark:bg-[#1A1A1A] rounded-2xl border border-[#FECACA] dark:border-[#3F3F3F] p-4 sm:p-5 shadow-sm text-slate-800 dark:text-gray-100 my-3 select-none transition-all ${className}`}
-      >
+    <div
+      className={`w-full bg-[#fff9f9] dark:bg-[#1A1A1A] rounded-2xl border border-[#FECACA] dark:border-[#3F3F3F] p-4 sm:p-5 shadow-sm text-slate-800 dark:text-gray-100 select-none transition-all ${className}`}
+    >
         {/* Header Panel */}
         <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#FECACA] dark:border-[#3F3F3F]">
           <div className="flex items-center gap-2 text-xs font-bold text-[#1E293B] dark:text-white uppercase">
@@ -242,7 +240,6 @@ const TranslationPanel = ({
           </form>
         )}
       </div>
-    </FluentAnimation>
   )
 }
 

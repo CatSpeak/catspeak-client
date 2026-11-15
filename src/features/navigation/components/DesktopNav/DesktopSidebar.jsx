@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { motion as Motion, AnimatePresence } from "framer-motion"
+import { motion as Motion, AnimatePresence, LayoutGroup } from "framer-motion"
+import { M3_MOTION } from "@/shared/constants/motion"
 import { LandingPageIcon } from "@/features/landing/assets"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -30,17 +31,26 @@ const DockButton = ({ to, onClick, icon: Icon, label, isActive }) => (
     <Link
       to={to}
       onClick={onClick}
-      className={`w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer outline-none transition-colors duration-150 relative z-10 ${
+      className={`w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer outline-none transition-colors duration-150 relative ${
         isActive
-          ? "bg-white text-cath-red-700 shadow-md dark:bg-cath-red-700 dark:text-white dark:shadow-md"
+          ? "text-cath-red-700 dark:text-white"
           : "text-white/80 hover:text-white hover:bg-white/15 active:bg-white/25 dark:text-[#AAAAAA] dark:hover:text-white dark:hover:bg-[#272727] dark:active:bg-[#3D3D3D]"
       }`}
     >
-      {Icon && <Icon />}
+      {isActive && (
+        <Motion.div
+          layoutId="activeDockIndicator"
+          className="absolute inset-0 rounded-2xl bg-white shadow-md dark:bg-cath-red-700 dark:shadow-md z-0"
+          transition={M3_MOTION.standard.spatial.fast}
+        />
+      )}
+      <span className="relative z-10 flex items-center justify-center">
+        {Icon && <Icon />}
+      </span>
     </Link>
 
     {/* Tooltip on Hover */}
-    <div className="absolute left-full ml-6 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 dark:bg-[#1A1A1A] dark:border dark:border-[#3F3F3F] text-white text-xs font-semibold rounded-md opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none drop-shadow-md flex items-center">
+    <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 dark:bg-[#1A1A1A] dark:border dark:border-[#3F3F3F] text-white text-xs font-semibold rounded opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none drop-shadow-md flex items-center">
       <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 dark:bg-[#1A1A1A] dark:border-b dark:border-l dark:border-[#3F3F3F] rotate-45 rounded-xs" />
       <span className="relative z-10">{label}</span>
     </div>
@@ -259,73 +269,84 @@ const DesktopSidebar = () => {
         </div>
 
         {/* Dock Section Icons */}
-        <div className="flex-1 flex flex-col gap-1 items-center w-full">
-          {dockNavGroups.map((group, groupIdx) => {
-            const visibleItems = group.items.filter((item) =>
-              isNavItemVisible(item, { isStudent, currentLang }),
-            )
-            if (visibleItems.length === 0) return null
+        <LayoutGroup id="dock-sidebar">
+          <div className="flex-1 flex flex-col gap-1 items-center w-full">
+            {dockNavGroups.map((group, groupIdx) => {
+              const visibleItems = group.items.filter((item) =>
+                isNavItemVisible(item, { isStudent, currentLang }),
+              )
+              if (visibleItems.length === 0) return null
 
-            return (
-              <React.Fragment key={group.key}>
-                {groupIdx > 0 && (
-                  <div className="w-8 h-[1px] bg-white/20 dark:bg-[#3F3F3F] shrink-0" />
-                )}
-                {visibleItems.map(renderDockItem)}
-              </React.Fragment>
-            )
-          })}
-        </div>
+              return (
+                <React.Fragment key={group.key}>
+                  {groupIdx > 0 && (
+                    <div className="w-8 h-[1px] bg-white/20 dark:bg-[#3F3F3F] shrink-0" />
+                  )}
+                  {visibleItems.map(renderDockItem)}
+                </React.Fragment>
+              )
+            })}
+          </div>
 
-        {/* Bottom Dock Links (Settings / Footer) */}
-        <div className="flex flex-col gap-1 items-center w-full">
-          <div className="w-8 h-[1px] bg-white/20 dark:bg-[#3F3F3F] shrink-0" />
-          {footerLinks.map((item) => {
-            const isSettingsItem = item.key === "settings"
-            const isActive = isSettingsItem
-              ? activeDockSection === "settings" || isSettingsPage
-              : activeDockSection === item.key
+          {/* Bottom Dock Links (Settings / Footer) */}
+          <div className="flex flex-col gap-1 items-center w-full">
+            <div className="w-8 h-[1px] bg-white/20 dark:bg-[#3F3F3F] shrink-0" />
+            {footerLinks.map((item) => {
+              const isSettingsItem = item.key === "settings"
+              const isActive = isSettingsItem
+                ? activeDockSection === "settings" || isSettingsPage
+                : activeDockSection === item.key
 
-            return (
-              <DockButton
-                key={item.key}
-                to={getFooterLinkPath(item)}
-                onClick={(e) => {
-                  if (isSettingsItem) {
-                    if (activeDockSection === "settings" || isSettingsPage) {
-                      e.preventDefault()
-                      setIsDesktopExpanded((prev) => !prev)
-                    } else {
-                      setIsDesktopExpanded(true)
+              return (
+                <DockButton
+                  key={item.key}
+                  to={getFooterLinkPath(item)}
+                  onClick={(e) => {
+                    if (isSettingsItem) {
+                      if (activeDockSection === "settings" || isSettingsPage) {
+                        e.preventDefault()
+                        setIsDesktopExpanded((prev) => !prev)
+                      } else {
+                        setIsDesktopExpanded(true)
+                      }
                     }
-                  }
-                }}
-                icon={item.icon || Settings}
-                label={t.nav?.[item.key] || item.key}
-                isActive={isActive}
-              />
-            )
-          })}
-        </div>
+                  }}
+                  icon={item.icon || Settings}
+                  label={t.nav?.[item.key] || item.key}
+                  isActive={isActive}
+                />
+              )
+            })}
+          </div>
+        </LayoutGroup>
       </div>
 
       {/* 2. SECONDARY EXPANDABLE SIDEBAR PANEL */}
       <AnimatePresence initial={false}>
         {isPanelOpen && (
           <Motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 280, opacity: 1 }}
+            initial={{ width: 0, opacity: 0, borderRightWidth: 0 }}
+            animate={{ width: 280, opacity: 1, borderRightWidth: 1 }}
             exit={{
               width: 0,
               opacity: 0,
-              transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
+              borderRightWidth: 0,
+              transition: {
+                width: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+                opacity: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+                borderRightWidth: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+              },
             }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            transition={{
+              width: M3_MOTION.standard.spatial.fast,
+              opacity: M3_MOTION.standard.effects.fast,
+              borderRightWidth: { duration: 0.05 },
+            }}
             className="h-full bg-white dark:bg-[#0F0F0F] border-r border-border dark:border-[#3F3F3F] overflow-hidden relative z-10 shrink-0"
           >
             <div className="w-[280px] h-full flex flex-col">
               {/* Secondary Header */}
-              <div className="p-4 flex items-center shrink-0">
+              <div className="h-[56px] px-4 flex items-center shrink-0">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">
                   {isSettingsPage
                     ? t.nav?.settings || "Settings"

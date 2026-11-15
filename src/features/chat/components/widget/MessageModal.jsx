@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence, motion as Motion } from "framer-motion"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import useScrollLock from "@/shared/hooks/useScrollLock"
+import { M3_MOTION, dropdownVariants } from "@/shared/constants/motion"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -39,7 +39,7 @@ const MessageModal = ({ isOpen, children }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={M3_MOTION.standard.effects.default}
               className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             />
 
@@ -48,7 +48,10 @@ const MessageModal = ({ isOpen, children }) => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
-              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              transition={{
+                y: M3_MOTION.standard.spatial.fast,
+                opacity: M3_MOTION.standard.effects.fast,
+              }}
               className="relative flex h-full w-full flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]"
             >
               {children}
@@ -64,15 +67,15 @@ const MessageModal = ({ isOpen, children }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <FluentAnimation
-          animationKey="message-modal"
-          direction="down"
-          distance={12}
-          exit={true}
-          className="absolute right-0 top-full mt-2 z-[1200] flex h-[480px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-lg"
+        <Motion.div
+          variants={dropdownVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="absolute right-0 top-full mt-2 z-[1200] flex h-[480px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-lg origin-top-right"
         >
           {children}
-        </FluentAnimation>
+        </Motion.div>
       )}
     </AnimatePresence>
   )

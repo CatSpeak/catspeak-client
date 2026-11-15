@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search, Check, Loader2 } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { AnimatePresence, motion } from "framer-motion"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -56,6 +55,7 @@ const Dropdown = ({
   const searchInputRef = useRef(null)
   const [portalCoords, setPortalCoords] = useState(null)
   const portalRef = useRef(null)
+  const menuRef = useRef(null)
 
   const isMultiple = mode === "multiple"
   const isSearchActive = enableSearch || Boolean(handleSearch)
@@ -141,17 +141,42 @@ const Dropdown = ({
         // Flip up if there's less than ~300px below and more space above
         const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow
 
-        // Check horizontal clipping (assume ~260px width default)
-        const forceAlignRight =
-          rect.left + 260 > window.innerWidth && rect.right >= 260
-        const forceAlignLeft = rect.right < 260 || rect.left < 50
+        // Viewport width excluding scrollbar
+        const viewportWidth =
+          document.documentElement?.clientWidth || window.innerWidth || 360
+
+        // Measure actual menu width if available, otherwise safe fallback
+        const measuredWidth = menuRef.current?.offsetWidth
+        const menuWidth = measuredWidth || Math.max(rect.width, 280)
+
+        // Margin from screen edge
+        const edgeMargin = 12
+
+        // Check if left-aligned menu would overflow the right edge of the viewport
+        const wouldOverflowRight =
+          rect.left + menuWidth > viewportWidth - edgeMargin
+
+        // Check if right-aligned menu would overflow the left edge
+        const wouldOverflowLeft = rect.right - menuWidth < edgeMargin
+
+        // Determine horizontal alignment:
+        // Respect explicit align="right" unless it overflows left.
+        // For default or align="left", automatically align right if it would overflow right.
+        let alignRight = align === "right"
+        if (wouldOverflowRight && !wouldOverflowLeft) {
+          alignRight = true
+        } else if (wouldOverflowLeft && !wouldOverflowRight) {
+          alignRight = false
+        } else if (wouldOverflowRight && wouldOverflowLeft) {
+          // Constrained viewport: pick side with more available space
+          alignRight = rect.right > viewportWidth - rect.left
+        }
 
         const newTop = rect.top + window.scrollY
-        const winWidth = typeof window !== "undefined" ? window.innerWidth : 360
-        const newWidth = Math.min(rect.width, winWidth - 16)
+        const newWidth = Math.min(rect.width, viewportWidth - 16)
         const newLeft = Math.max(
           8,
-          Math.min(rect.left + window.scrollX, winWidth - newWidth - 8),
+          Math.min(rect.left + window.scrollX, viewportWidth - newWidth - 8),
         )
 
         setPortalCoords((prev) => {
@@ -162,8 +187,7 @@ const Dropdown = ({
             prev.width === newWidth &&
             prev.height === rect.height &&
             prev.flipUp === flipUp &&
-            prev.forceAlignRight === forceAlignRight &&
-            prev.forceAlignLeft === forceAlignLeft
+            prev.alignRight === alignRight
           ) {
             return prev
           }
@@ -174,8 +198,7 @@ const Dropdown = ({
             width: newWidth,
             height: rect.height,
             flipUp,
-            forceAlignRight,
-            forceAlignLeft,
+            alignRight,
           }
         })
       }
@@ -188,14 +211,25 @@ const Dropdown = ({
 
     if (isOpen) {
       updateCoords()
+      const rafId = requestAnimationFrame(updateCoords)
       window.addEventListener("resize", updateCoords)
       window.addEventListener("scroll", handleScroll, true)
+
+      // Observe menu resizing (e.g. content loading or search filter)
+      let observer
+      if (menuRef.current) {
+        observer = new ResizeObserver(() => updateCoords())
+        observer.observe(menuRef.current)
+      }
+
       return () => {
+        cancelAnimationFrame(rafId)
         window.removeEventListener("resize", updateCoords)
         window.removeEventListener("scroll", handleScroll, true)
+        observer?.disconnect()
       }
     }
-  }, [isOpen])
+  }, [isOpen, align])
 
   // Filter options: if handleSearch is provided, parent/API controls options
   const filteredOptions = useMemo(() => {
@@ -353,7 +387,10 @@ const Dropdown = ({
 
   const hasCustomHeight = triggerClassName
     .split(" ")
-    .some((c) => c.startsWith("h-") || c.startsWith("!h-") || c.startsWith("min-h-"))
+    .some(
+      (c) =>
+        c.startsWith("h-") || c.startsWith("!h-") || c.startsWith("min-h-"),
+    )
   const wrapperHeight = hasCustomHeight ? "h-auto" : "h-12"
   const innerHeight = hasCustomHeight ? "" : "h-10"
 
@@ -374,7 +411,7 @@ const Dropdown = ({
       } touch-manipulation`}
     >
       <div
-        className={`w-full ${innerHeight} px-4 ${roundedClass} border text-sm font-medium transition-colors duration-150 flex items-center justify-between gap-2 whitespace-nowrap select-none bg-white dark:bg-[#272727] text-gray-900 dark:text-[#AAAAAA] border-[#e5e5e5] dark:border-[#3F3F3F] ${
+        className={`w-full ${innerHeight} px-4 ${roundedClass} border text-sm font-medium flex items-center justify-between gap-2 whitespace-nowrap select-none bg-white dark:bg-[#272727] text-gray-900 dark:text-[#AAAAAA] border-[#e5e5e5] dark:border-[#3F3F3F] ${
           isInteractive
             ? "hover:bg-primaryBg group-hover/dropdown-trigger:bg-primaryBg dark:hover:bg-[#3D3D3D] dark:group-hover/dropdown-trigger:bg-[#3D3D3D] hover:text-black group-hover/dropdown-trigger:text-black dark:hover:text-white dark:group-hover/dropdown-trigger:text-white active:bg-[#e0e0e0] group-active/dropdown-trigger:bg-[#e0e0e0] dark:active:bg-[#333333] dark:group-active/dropdown-trigger:bg-[#333333]"
             : ""
@@ -396,15 +433,17 @@ const Dropdown = ({
     </button>
   )
 
-  const alignClass = portalCoords?.forceAlignLeft
-    ? "left-0 origin-top-left"
-    : portalCoords?.forceAlignRight
-      ? "right-0 origin-top-right"
-      : align === "right"
-        ? "right-0 origin-top-right"
-        : align === "center"
-          ? "-translate-x-1/2 left-1/2 origin-top"
-          : "left-0 origin-top-left"
+  const isAlignRight = portalCoords?.alignRight ?? (align === "right")
+  const isAlignCenter = align === "center" && !isAlignRight
+
+  const verticalOrigin = portalCoords?.flipUp ? "bottom" : "top"
+  const transformOrigin = verticalOrigin
+
+  const alignClass = isAlignRight
+    ? "right-0"
+    : isAlignCenter
+      ? "left-1/2"
+      : "left-0"
 
   const resolvedDropdownClassName =
     dropdownClassName !== undefined
@@ -463,12 +502,34 @@ const Dropdown = ({
                 }}
               >
                 <div className="relative w-full h-full">
-                  <FluentAnimation
-                    direction={portalCoords.flipUp ? "up" : "down"}
-                    exit={true}
+                  <motion.div
+                    ref={menuRef}
+                    initial={{
+                      opacity: 0,
+                      scaleY: 0,
+                      x: isAlignCenter ? "-50%" : 0,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      scaleY: 1,
+                      x: isAlignCenter ? "-50%" : 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      scaleY: 0,
+                      x: isAlignCenter ? "-50%" : 0,
+                    }}
+                    transition={{
+                      duration: 0.2,
+                      ease: [0.25, 1, 0.5, 1],
+                    }}
+                    style={{
+                      transformOrigin,
+                      maxWidth: "calc(100vw - 24px)",
+                    }}
                     className={`absolute ${
                       portalCoords.flipUp
-                        ? "bottom-full mb-1 origin-bottom"
+                        ? "bottom-full mb-1"
                         : "top-full mt-1"
                     } pointer-events-auto ${alignClass}`}
                     data-dropdown-portal="true"
@@ -508,14 +569,16 @@ const Dropdown = ({
 
                       <div className="flex-1 overflow-y-auto overflow-x-hidden">
                         {children ? (
-                          typeof children === "function"
-                            ? children({
-                                close: () => setIsOpen(false),
-                                isOpen,
-                                selectedOption,
-                                selectedOptions: selectedOptionsList,
-                              })
-                            : children
+                          typeof children === "function" ? (
+                            children({
+                              close: () => setIsOpen(false),
+                              isOpen,
+                              selectedOption,
+                              selectedOptions: selectedOptionsList,
+                            })
+                          ) : (
+                            children
+                          )
                         ) : loading ? (
                           <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500 dark:text-[#AAAAAA]">
                             <Loader2
@@ -539,7 +602,8 @@ const Dropdown = ({
                             const optionKey =
                               option.key ||
                               option.code ||
-                              (option.value !== undefined && option.value !== null
+                              (option.value !== undefined &&
+                              option.value !== null
                                 ? `${option.value}-${idx}`
                                 : idx)
 
@@ -549,7 +613,19 @@ const Dropdown = ({
                                 type="button"
                                 disabled={option.disabled}
                                 onClick={() => handleSelect(option)}
-                                className="group w-full flex items-center focus:outline-none px-1 h-12 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:text-gray-200 hover:bg-primaryBg dark:hover:bg-[#272727]"
+                                className={`group w-full flex items-center focus:outline-none px-1 h-12 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:text-gray-200 ${
+                                  isSelected
+                                    ? "bg-itemActive dark:bg-[#272727] hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D]"
+                                    : "hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D]"
+                                } ${
+                                  !isSearchActive && idx === 0 && idx === filteredOptions.length - 1
+                                    ? "rounded-xl"
+                                    : !isSearchActive && idx === 0
+                                    ? "rounded-t-xl rounded-b"
+                                    : idx === filteredOptions.length - 1
+                                    ? "rounded-b-xl rounded-t"
+                                    : "rounded"
+                                }`}
                               >
                                 {renderOption(option, isSelected, {
                                   isMultiple,
@@ -563,6 +639,8 @@ const Dropdown = ({
                                   !option.disabled && handleSelect(option)
                                 }
                                 isSelected={isSelected}
+                                isFirst={!isSearchActive && idx === 0}
+                                isLast={idx === filteredOptions.length - 1}
                                 activeColor={option.color || activeColor}
                                 icon={option.icon}
                                 label={option.label}
@@ -601,7 +679,7 @@ const Dropdown = ({
                         )}
                       </div>
                     </MenuList>
-                  </FluentAnimation>
+                  </motion.div>
                 </div>
               </div>
             )}

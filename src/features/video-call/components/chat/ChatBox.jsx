@@ -4,7 +4,7 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useAiSend } from "@/features/video-call/hooks/useAiSend"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 
 const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   const { t } = useLanguage()
@@ -135,7 +135,12 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
       />
 
       {/* Tab Content */}
-      <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-[#1A1A1A]">
+      <TabContent
+        activeTab={activeChatTab}
+        tabs={chatTabs}
+        className="flex-1 flex flex-col min-h-0 bg-white dark:bg-[#1A1A1A]"
+        containerClassName="flex-1 flex flex-col min-h-0"
+      >
         {/* AI Tab Content */}
         {activeChatTab === "ai" && (
           <>
@@ -185,7 +190,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
             />
           </>
         )}
-      </div>
+      </TabContent>
     </div>
   )
 }

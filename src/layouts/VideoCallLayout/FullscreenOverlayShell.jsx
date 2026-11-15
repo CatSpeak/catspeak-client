@@ -43,6 +43,7 @@ const FullscreenOverlayShell = ({
         className={`relative z-10 flex flex-1 w-full flex-col items-center justify-center px-4 pb-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] ${contentClassName}`}
       >
         <FluentCard
+          padding="p-4 pb-0"
           rounded={rounded}
           className={`shadow-2xl w-full ${maxWidthClass} items-center my-auto ${cardClassName}`}
         >
