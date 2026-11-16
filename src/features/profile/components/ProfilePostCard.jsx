@@ -4,6 +4,7 @@ import {
   useUpdatePostMutation,
   useDeletePostMutation,
 } from "../../../store/api/social/profilePostsApi"
+import { useLazyGetPostBySlugQuery } from "@/store/api/social/postsApi"
 import useSharePost from "@/shared/hooks/useSharePost"
 import usePostReaction from "@/shared/hooks/usePostReaction"
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -63,6 +64,36 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation()
   const { handleReact } = usePostReaction(post)
 
+  const [
+    triggerGetPostBySlug,
+    { data: detailedPostData, isLoading: isLoadingDetail },
+  ] = useLazyGetPostBySlugQuery()
+
+  const detailedPost = detailedPostData?.data || detailedPostData || null
+  const detailedContent = detailedPost?.content || detailedPost?.Content || null
+  const detailedContentUrl =
+    detailedPost?.contentUrl || detailedPost?.ContentUrl || null
+
+  const resolvedContent = detailedContent || post?.content
+  const resolvedContentUrl = contentUrl || detailedContentUrl
+  const isExcerptTruncated = Boolean(
+    excerpt && (excerpt.endsWith("...") || excerpt.endsWith("…")),
+  )
+  const showExpandButton =
+    isOverflowing || isExpanded || isExcerptTruncated || Boolean(contentUrl)
+
+  const handleToggleExpand = () => {
+    const nextExpanded = !isExpanded
+    setIsExpanded(nextExpanded)
+
+    if (nextExpanded && !contentUrl && !post?.content && !detailedContent) {
+      const slug = post?.slug || post?.Slug || post?.postId || post?.PostId
+      if (slug) {
+        triggerGetPostBySlug(slug)
+      }
+    }
+  }
+
   const handleUpdatePost = async (formData) => {
     await updatePost({ postId: post.postId, formData }).unwrap()
     setIsEditing(false)
@@ -118,8 +149,8 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                 className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
               >
                 <PostContent
-                  html={isExpanded ? post?.content : post?.content || excerpt}
-                  contentUrl={isExpanded ? contentUrl : null}
+                  html={isExpanded ? resolvedContent : post?.content || excerpt}
+                  contentUrl={isExpanded ? resolvedContentUrl : null}
                   fallback={excerpt}
                   className={
                     !isExpanded
@@ -129,10 +160,17 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                 />
               </div>
 
-              {(isOverflowing || isExpanded) && (
+              {isLoadingDetail && isExpanded && (
+                <div className="py-2 flex items-center gap-2 text-xs text-secondary dark:text-neutral-400">
+                  <div className="w-3.5 h-3.5 border-2 border-cath-red-700 dark:border-red-400 border-t-transparent rounded-full animate-spin" />
+                  <span>{t.common?.loading || "Đang tải nội dung..."}</span>
+                </div>
+              )}
+
+              {showExpandButton && (
                 <button
                   type="button"
-                  onClick={() => setIsExpanded((prev) => !prev)}
+                  onClick={handleToggleExpand}
                   className="relative inline-block mt-1 text-sm font-semibold text-cath-red-700 dark:text-red-400 hover:text-cath-red-800 dark:hover:text-red-300 hover:underline focus:outline-none cursor-pointer touch-manipulation before:absolute before:top-1/2 before:-translate-y-1/2 before:left-1/2 before:-translate-x-1/2 before:min-w-[48px] before:w-full before:h-12 before:content-['']"
                 >
                   {isExpanded
