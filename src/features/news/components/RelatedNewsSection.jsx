@@ -8,7 +8,11 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { RotateCcw, ChevronDown } from "lucide-react"
 import { M3_MOTION } from "@/shared/constants/motion"
 import RelatedNewsCard from "./RelatedNewsCard"
-import { getCommunityName } from "../utils/newsUtils"
+import {
+  getCommunityName,
+  getCommunityLanguageId,
+  isPostInCommunity,
+} from "../utils/newsUtils"
 
 const INITIAL_LIMIT = 4
 const MAX_LIMIT = 8
@@ -23,6 +27,7 @@ const RelatedNewsSection = ({
   const labels = t.news?.newsDetail
   const currentLang = lang || language || "vi"
   const currentCommunity = getCommunityName(currentLang).toLowerCase()
+  const currentCommunityId = getCommunityLanguageId(lang || currentLang)
   const prefersReducedMotion = useReducedMotion()
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -30,6 +35,7 @@ const RelatedNewsSection = ({
     page: 1,
     pageSize: 12,
     postType,
+    languageCommunity: currentCommunityId,
   })
 
   const relatedPosts = useMemo(() => {
@@ -40,7 +46,6 @@ const RelatedNewsSection = ({
         : []
     return posts.filter((post) => {
       if (String(post.postId ?? post.id) === String(currentPostId)) return false
-      if (post.privacy && post.privacy !== "Public") return false
 
       // Filter out empty ghost posts (no text and no media)
       const hasText = Boolean(
@@ -49,10 +54,9 @@ const RelatedNewsSection = ({
       const hasMedia = Array.isArray(post.media) && post.media.length > 0
       if (!hasText && !hasMedia) return false
 
-      const community = (post.languageCommunity || "All").toLowerCase()
-      return community === "all" || community === currentCommunity
+      return isPostInCommunity(post, currentCommunityId)
     })
-  }, [data, currentPostId, currentCommunity])
+  }, [data, currentPostId, currentCommunityId])
 
   const initialPosts = useMemo(
     () => relatedPosts.slice(0, INITIAL_LIMIT),

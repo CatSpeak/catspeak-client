@@ -17,7 +17,11 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import useColumnCount from "@/shared/hooks/useColumnCount"
-import { getCommunityName, getCommunityLanguageId } from "../utils/newsUtils"
+import {
+  getCommunityName,
+  getCommunityLanguageId,
+  isPostInCommunity,
+} from "../utils/newsUtils"
 import {
   NEWS_SORT_OPTIONS,
   applyNewsFilter,
@@ -110,6 +114,7 @@ const NewsPage = ({ postType = "1" }) => {
         filters.topicIds && filters.topicIds.length > 0
           ? filters.topicIds
           : undefined,
+      languageCommunity: currentCommunityId,
     }),
     [
       page,
@@ -118,6 +123,7 @@ const NewsPage = ({ postType = "1" }) => {
       filters.searchKeyword,
       filters.sortBy,
       filters.topicIds,
+      currentCommunityId,
     ],
   )
 
@@ -207,22 +213,16 @@ const NewsPage = ({ postType = "1" }) => {
     }
   }, [filterKey, dispatch])
 
-  // Public posts filtered by current language community or "All"
+  // Public posts filtered by current language community
   const publicPosts = useMemo(() => {
     const rawList = Array.isArray(data?.data)
       ? data.data
       : Array.isArray(data)
         ? data
         : []
-    const targetCommunity = currentCommunity.toLowerCase()
 
-    return rawList.filter((post) => {
-      if (post.privacy !== "Public") return false
-
-      const postCommunity = (post.languageCommunity || "All").toLowerCase()
-      return postCommunity === "all" || postCommunity === targetCommunity
-    })
-  }, [data, currentCommunity])
+    return rawList.filter((post) => isPostInCommunity(post, currentCommunityId))
+  }, [data, currentCommunityId])
 
   const columnsCount = useColumnCount()
 
