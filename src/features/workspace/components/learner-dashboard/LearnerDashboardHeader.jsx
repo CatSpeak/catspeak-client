@@ -27,10 +27,10 @@ const LearnerDashboardHeader = ({ onRefresh, isRefreshing }) => {
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[#14171F] tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#14171F] dark:text-white tracking-tight">
               {isEn ? "Student Learning Dashboard" : "Bảng điều khiển học tập học viên"}
             </h1>
-            <p className="text-xs sm:text-sm text-[#6E788C] mt-0.5">
+            <p className="text-xs sm:text-sm text-[#6E788C] dark:text-neutral-400 mt-0.5">
               {isEn
                 ? "Track your speaking fluency, classroom participation balance, and course progress"
                 : "Theo dõi tiến độ học tập, điểm phát biểu AI và cân bằng thời gian nói trong lớp học"}
@@ -46,7 +46,7 @@ const LearnerDashboardHeader = ({ onRefresh, isRefreshing }) => {
               type="button"
               disabled={isSwitching}
               onClick={() => switchRole("Teacher")}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#72000D] bg-white border border-[#DEE0E5] hover:border-[#72000D] rounded-lg shadow-sm transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#72000D] dark:text-red-400 bg-white dark:bg-[#242424] border border-[#DEE0E5] dark:border-[#3F3F3F] hover:border-[#72000D] dark:hover:border-red-400 rounded-lg shadow-sm transition-colors cursor-pointer"
               title={isEn ? "Switch to Teacher Workspace" : "Chuyển sang Không gian Giảng viên"}
             >
               <ArrowRightLeft className={`w-3.5 h-3.5 ${isSwitching ? "animate-spin" : ""}`} />
@@ -61,10 +61,10 @@ const LearnerDashboardHeader = ({ onRefresh, isRefreshing }) => {
             type="button"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#14171F] bg-white border border-[#DEE0E5] hover:bg-gray-50 rounded-lg shadow-sm transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#14171F] dark:text-neutral-200 bg-white dark:bg-[#242424] border border-[#DEE0E5] dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2C2C2C] rounded-lg shadow-sm transition-colors cursor-pointer"
             aria-label={isEn ? "Refresh dashboard" : "Làm mới dữ liệu"}
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#6E788C] ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#6E788C] dark:text-neutral-400 ${isRefreshing ? "animate-spin" : ""}`} />
             <span>{isEn ? "Refresh" : "Làm mới"}</span>
           </button>
         </div>

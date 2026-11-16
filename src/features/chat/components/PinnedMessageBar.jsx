@@ -125,21 +125,21 @@ const PinnedMessageBar = ({
   return (
     <div
       onClick={handleClickBanner}
-      className="flex items-center justify-between px-4 h-[72px] border-b border-border/70 transition-colors cursor-pointer select-none shrink-0"
+      className="flex items-center justify-between px-4 h-[72px] border-b border-border/70 dark:border-[#3F3F3F]/70 hover:bg-neutral-50 dark:hover:bg-[#272727]/50 transition-colors cursor-pointer select-none shrink-0"
     >
       <div className="flex items-center gap-4 min-w-0 flex-1 mr-2">
-        <Pin className="rotate-45" />
+        <Pin className="rotate-45 text-cath-red-700 dark:text-red-400" />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
-            <span className="font-bold truncate">{senderName}</span>
-            <span className="text-secondary">
+            <span className="font-bold text-gray-900 dark:text-white truncate">{senderName}</span>
+            <span className="text-secondary dark:text-[#AAAAAA]">
               {t?.chat?.pinnedMessageLabel || "pinned"}
               {pinnedList.length > 1 &&
                 ` (${safeIndex + 1}/${pinnedList.length})`}
             </span>
           </div>
-          <p className="text-sm text-secondary truncate">
+          <p className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
             {previewContent || "..."}
           </p>
         </div>

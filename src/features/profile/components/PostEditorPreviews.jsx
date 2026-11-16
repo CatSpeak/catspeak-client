@@ -9,7 +9,7 @@ const PreviewItem = ({ item, onRemove }) => {
 
   if (type === "Image") {
     return (
-      <div className="relative w-full rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center min-h-[180px] shrink-0">
+      <div className="relative w-full rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#242424] flex items-center justify-center min-h-[180px] shrink-0">
         <img
           src={url}
           alt={fileName || "preview"}
@@ -29,7 +29,7 @@ const PreviewItem = ({ item, onRemove }) => {
 
   if (type === "Video") {
     return (
-      <div className="relative w-full rounded-2xl overflow-hidden border border-border bg-gray-50 min-h-[180px] shrink-0">
+      <div className="relative w-full rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#242424] min-h-[180px] shrink-0">
         <LocalVideoPreview url={url} />
         <IconButton
           onClick={onRemove}

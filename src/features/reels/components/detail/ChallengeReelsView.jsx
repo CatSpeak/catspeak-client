@@ -72,11 +72,11 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
   if (!challengeId || !selectedChallenge) return null
 
   return (
-    <div className="w-full pt-4 border-t">
+    <div className="w-full pt-4 border-t border-border dark:border-[#3F3F3F]">
       {/* Header specific to selected challenge */}
       <div className="flex items-start sm:items-center justify-between mb-6 pb-2 gap-2">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-border">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-gray-100 dark:bg-[#242424] shrink-0 border border-border dark:border-[#3F3F3F]">
             <img 
               src={selectedChallenge.bannerUrl || fallbackChallengeCard} 
               alt="" 
@@ -88,7 +88,7 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
           </div>
           <div className="flex flex-col justify-center min-w-0">
             <div className="flex items-start sm:items-center gap-1.5 sm:gap-2">
-              <span className="text-[15px] sm:text-[17px] font-bold text-gray-900 break-words line-clamp-2 leading-tight">
+              <span className="text-[15px] sm:text-[17px] font-bold text-gray-900 dark:text-white break-words line-clamp-2 leading-tight">
                 {selectedChallenge.hashtag ? selectedChallenge.hashtag : selectedChallenge.name}
               </span>
               {challengeStatus === "active" && (
@@ -98,9 +98,9 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
               )}
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-0.5">
-              <span className="text-[12px] sm:text-[14px] font-medium text-gray-500 truncate">{selectedChallenge.hashtag ? selectedChallenge.name : "Thử thách"}</span>
-              <span className="text-gray-300 text-[8px] sm:text-[10px] shrink-0">●</span>
-              <span className="text-[12px] sm:text-[14px] text-gray-500 shrink-0">{formatCompactCount(challengeReels.length)} {t.catSpeak.reels.entries || "bài dự thi"}</span>
+              <span className="text-[12px] sm:text-[14px] font-medium text-gray-500 dark:text-neutral-400 truncate">{selectedChallenge.hashtag ? selectedChallenge.name : "Thử thách"}</span>
+              <span className="text-gray-300 dark:text-neutral-600 text-[8px] sm:text-[10px] shrink-0">●</span>
+              <span className="text-[12px] sm:text-[14px] text-gray-500 dark:text-neutral-400 shrink-0">{formatCompactCount(challengeReels.length)} {t.catSpeak.reels.entries || "bài dự thi"}</span>
             </div>
           </div>
         </div>
@@ -127,14 +127,14 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
             <ReelGrid reels={challengeReels} onReelClick={onReelClick} />
             {isFetching && page > 1 && (
               <div className="flex justify-center my-6">
-                <Loader2 className="w-8 h-8 animate-spin text-cath-red-700" />
+                <Loader2 className="w-8 h-8 animate-spin text-cath-red-700 dark:text-red-400" />
               </div>
             )}
           </>
         ) : (
-          <div className="w-full text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-border">
+          <div className="w-full text-center py-12 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border border-dashed border-border dark:border-[#3F3F3F]">
             <span className="text-3xl block mb-2">🎈</span>
-            <p className="text-sm font-semibold text-gray-500">
+            <p className="text-sm font-semibold text-gray-500 dark:text-neutral-400">
               {t.catSpeak.reels.noReelsFound || "Không tìm thấy Thước phim nào."}
             </p>
           </div>

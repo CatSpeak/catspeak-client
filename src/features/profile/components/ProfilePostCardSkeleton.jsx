@@ -4,7 +4,7 @@ import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 
 const ProfilePostCardSkeleton = () => {
   return (
-    <FluentCard className="space-y-4">
+    <FluentCard className="flex flex-col gap-2">
       {/* Header Skeleton */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -28,7 +28,7 @@ const ProfilePostCardSkeleton = () => {
       </div>
 
       {/* Divider */}
-      <div className="h-px bg-[#E5E5E5]" />
+      <div className="h-px bg-border dark:bg-[#3F3F3F]" />
 
       {/* Action Bar Skeleton */}
       <div className="flex items-center justify-between pt-1">

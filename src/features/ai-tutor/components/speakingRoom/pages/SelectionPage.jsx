@@ -277,7 +277,7 @@ const SelectionPage = ({ onStartSpeaking, onQuotaExceeded, onActiveSessionConfli
       <SpeakingRoomQuotaBanner quota={quota} />
 
       {hasActiveSession && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="rounded-2xl border border-amber-200 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/20 p-4 text-sm text-amber-900 dark:text-amber-200">
           <p>Bạn còn một phiên luyện nói chưa kết thúc. Hãy tiếp tục hoặc đóng phiên trước khi bắt đầu buổi mới.</p>
           <div className="mt-3 flex flex-wrap gap-3">
             <button type="button" disabled={isEndingSession} className="font-bold underline" onClick={() => navigate(`sessions/${activeSession.session_id}`)}>Tiếp tục phiên</button>
@@ -302,9 +302,9 @@ const SelectionPage = ({ onStartSpeaking, onQuotaExceeded, onActiveSessionConfli
 
       {/* 4. Topic List / Sections */}
       {isLoadingTopics ? (
-        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 space-y-3 shadow-2xs">
-          <div className="w-8 h-8 border-4 border-rose-200 border-t-[#990011] rounded-full animate-spin mx-auto" />
-          <p className="text-sm font-semibold text-slate-700">Đang tải danh sách chủ đề đàm thoại...</p>
+        <div className="text-center py-16 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F] p-8 space-y-3 shadow-2xs">
+          <div className="w-8 h-8 border-4 border-rose-200 dark:border-rose-900/50 border-t-[#990011] dark:border-t-red-400 rounded-full animate-spin mx-auto" />
+          <p className="text-sm font-semibold text-slate-700 dark:text-neutral-200">Đang tải danh sách chủ đề đàm thoại...</p>
         </div>
       ) : (
         <TopicList

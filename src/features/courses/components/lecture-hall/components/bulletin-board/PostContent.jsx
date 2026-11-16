@@ -32,7 +32,7 @@ const PostContent = ({ post = {} }) => {
   } = post
 
   return (
-    <div className="bg-white rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm space-y-4 md:space-y-6">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm space-y-4 md:space-y-6">
       {/* Header: Author + 3 dots */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -44,37 +44,37 @@ const PostContent = ({ post = {} }) => {
             className="w-12 h-12"
           />
           <div className="space-y-0.5">
-            <p className="font-semibold text-[17px] text-[#191C1D]">{authorName}</p>
-            <p className="flex items-center gap-1 text-sm text-[#7B7979]">
+            <p className="font-semibold text-[17px] text-[#191C1D] dark:text-white">{authorName}</p>
+            <p className="flex items-center gap-1 text-sm text-[#7B7979] dark:text-gray-400">
               <Clock size={14} className="shrink-0" />
               {date}
             </p>
           </div>
         </div>
 
-        <button className="text-gray-500 hover:bg-gray-100 p-2 rounded-full transition-colors">
+        <button className="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] p-2 rounded-full transition-colors">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
         </button>
       </div>
 
       {/* Title */}
-      <h2 className="text-[24px] font-medium text-[#191C1D]">
+      <h2 className="text-[24px] font-medium text-[#191C1D] dark:text-white">
         {title}
       </h2>
 
       {/* Image / Thumbnail */}
       {thumbnailUrl ? (
-        <div className="w-full rounded-2xl overflow-hidden bg-[#F8F9FA]">
+        <div className="w-full rounded-2xl overflow-hidden bg-[#F8F9FA] dark:bg-[#222222]">
           <img src={thumbnailUrl} alt="Thumbnail" className="w-full h-auto object-cover max-h-[400px]" />
         </div>
       ) : (
-        <div className="w-full h-[240px] md:h-[300px] bg-[#D9D9D9] rounded-2xl"></div>
+        <div className="w-full h-[240px] md:h-[300px] bg-[#D9D9D9] dark:bg-[#2A2A2A] rounded-2xl"></div>
       )}
 
       {/* Content */}
       {content && (
-        <div className="text-[#333333] leading-relaxed">
-          <RenderHTML html={content} className="text-[#1A1A1A] text-[15px] leading-relaxed" />
+        <div className="text-[#333333] dark:text-gray-200 leading-relaxed">
+          <RenderHTML html={content} className="text-[#1A1A1A] dark:text-gray-200 text-[15px] leading-relaxed" />
         </div>
       )}
 
@@ -94,16 +94,16 @@ const PostContent = ({ post = {} }) => {
               role={file.url ? "button" : undefined}
               tabIndex={file.url ? 0 : undefined}
               title={dict.openAttachmentTooltip.replace("{{name}}", file.name)}
-              className="flex items-center gap-4 bg-[#F8F9FA] rounded-2xl p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-4 bg-[#F8F9FA] dark:bg-[#222222] border border-transparent dark:border-[#3F3F3F] rounded-2xl p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors"
             >
               <div className="w-12 h-12 rounded-xl bg-[#E22E2E] flex items-center justify-center shrink-0 shadow-sm text-white font-bold text-xs">
                 PDF
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-semibold text-[#191C1D] truncate">
+                <p className="text-[15px] font-semibold text-[#191C1D] dark:text-white truncate">
                   {file.name}
                 </p>
-                <p className="text-[13px] text-[#7B7979] mt-0.5">{file.size}</p>
+                <p className="text-[13px] text-[#7B7979] dark:text-gray-400 mt-0.5">{file.size}</p>
               </div>
             </div>
           ))}

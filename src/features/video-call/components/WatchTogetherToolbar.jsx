@@ -244,17 +244,17 @@ const WatchTogetherToolbar = ({
   // 44px touch targets (iOS 44pt / Android 48dp floor) + dark stage variant.
   const iconButton = isFullscreen
     ? "grid h-11 w-11 shrink-0 place-items-center rounded-full text-white transition-colors hover:bg-white/10 active:bg-white/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-    : "grid h-11 w-11 shrink-0 place-items-center rounded-full text-gray-600 transition-colors hover:bg-gray-100 active:bg-gray-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
+    : "grid h-11 w-11 shrink-0 place-items-center rounded-full text-gray-600 dark:text-neutral-200 transition-colors hover:bg-gray-100 dark:hover:bg-[#272727] active:bg-gray-200 dark:active:bg-[#3D3D3D] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
   const toolbarShell = isFullscreen
     ? "flex shrink-0 flex-col gap-2.5 border-t border-white/10 bg-black px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
-    : "flex shrink-0 flex-col gap-2.5 border-t border-gray-100 bg-white px-4 py-3"
+    : "flex shrink-0 flex-col gap-2.5 border-t border-gray-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-4 py-3"
   const titleText = isFullscreen
     ? "min-w-0 flex-1 truncate text-sm font-medium text-white"
-    : "min-w-0 flex-1 truncate text-sm font-medium text-gray-900"
+    : "min-w-0 flex-1 truncate text-sm font-medium text-gray-900 dark:text-white"
   const timeText = (alignRight) =>
     isFullscreen
       ? `w-10 shrink-0 text-xs tabular-nums text-neutral-400${alignRight ? " text-right" : ""}`
-      : `w-10 shrink-0 text-xs tabular-nums text-gray-500${alignRight ? " text-right" : ""}`
+      : `w-10 shrink-0 text-xs tabular-nums text-gray-500 dark:text-[#AAAAAA]${alignRight ? " text-right" : ""}`
   const seekSliderClass = isFullscreen
     ? "h-6 min-w-0 flex-1 cursor-pointer accent-red-500 disabled:cursor-not-allowed disabled:opacity-40"
     : "h-6 min-w-0 flex-1 cursor-pointer accent-[#990011] disabled:cursor-not-allowed disabled:opacity-40"

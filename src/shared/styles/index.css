@@ -6,7 +6,7 @@
 
 /* CSS Variables */
 :root {
-  color-scheme: light;
+  color-scheme: inherit;
   --font-primary: "Nunito", "Noto Sans SC", "Noto Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   --font-nunito: "Nunito", sans-serif;
   --header-height: 72px;
@@ -28,6 +28,15 @@
   --cath-warning: #e7001a;
   --cath-success: #4b0008;
   --cath-dusk: #1a1a2e;
+  --cath-text-primary: #111827;
+  --cath-text-secondary: #606060;
+  --cath-secondary-gray: #606060;
+  --cath-text-muted: #9CA3AF;
+  --cath-red-accessible: #990011;
+  --cath-bg: #F5F5F7;
+  --cath-surface: #FFFFFF;
+  --cath-card: #FFFFFF;
+  --cath-border: #E5E5E5;
 
   /* Shadcn UI Theme HSL Tokens */
   --background: 0 0% 100%;
@@ -42,27 +51,115 @@
   --accent-foreground: 240 5.9% 10%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
+
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
+
+  /* ── Material Design 3 (M3) Motion Physics System (Springs converted to curves for Web) ── */
+  /* Citation: Motion – Material Design 3 (https://m3.material.io/styles/motion/overview/specs) */
+  --motion-expressive-fast-spatial-curve: cubic-bezier(0.42, 1.67, 0.21, 0.90);
+  --motion-expressive-fast-spatial-duration: 350ms;
+  --motion-expressive-default-spatial-curve: cubic-bezier(0.38, 1.21, 0.22, 1.00);
+  --motion-expressive-default-spatial-duration: 500ms;
+  --motion-expressive-slow-spatial-curve: cubic-bezier(0.39, 1.29, 0.35, 0.98);
+  --motion-expressive-slow-spatial-duration: 650ms;
+
+  --motion-expressive-fast-effects-curve: cubic-bezier(0.31, 0.94, 0.34, 1.00);
+  --motion-expressive-fast-effects-duration: 150ms;
+  --motion-expressive-default-effects-curve: cubic-bezier(0.34, 0.80, 0.34, 1.00);
+  --motion-expressive-default-effects-duration: 200ms;
+  --motion-expressive-slow-effects-curve: cubic-bezier(0.34, 0.88, 0.34, 1.00);
+  --motion-expressive-slow-effects-duration: 300ms;
+
+  --motion-standard-fast-spatial-curve: cubic-bezier(0.27, 1.06, 0.18, 1.00);
+  --motion-standard-fast-spatial-duration: 350ms;
+  --motion-standard-default-spatial-curve: cubic-bezier(0.27, 1.06, 0.18, 1.00);
+  --motion-standard-default-spatial-duration: 500ms;
+  --motion-standard-slow-spatial-curve: cubic-bezier(0.27, 1.06, 0.18, 1.00);
+  --motion-standard-slow-spatial-duration: 750ms;
+
+  --motion-standard-fast-effects-curve: cubic-bezier(0.31, 0.94, 0.34, 1.00);
+  --motion-standard-fast-effects-duration: 150ms;
+  --motion-standard-default-effects-curve: cubic-bezier(0.34, 0.80, 0.34, 1.00);
+  --motion-standard-default-effects-duration: 200ms;
+  --motion-standard-slow-effects-curve: cubic-bezier(0.34, 0.88, 0.34, 1.00);
+  --motion-standard-slow-effects-duration: 300ms;
 }
 
 .dark {
-  --background: 240 10% 3.9%;
+  color-scheme: dark;
+  --background: 0 0% 5.9%;
   --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+
+  --card: 0 0% 10.2%;
   --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
+
+  --popover: 0 0% 10.2%;
   --popover-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
+
+  --muted: 0 0% 15.3%;
+  --muted-foreground: 0 0% 66.7%;
+  --accent: 0 0% 15.3%;
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+
+
+
+
+  --border: 0 0% 24.7%;
+  --input: 0 0% 24.7%;
+  --ring: 348 100% 50%;
+
+  /* Dark Mode Brand & Core Tokens */
+  --cath-primary: #990011;
+  --cath-red-700: #990011;
+  --cath-red-accessible: #f87171;
+  --cath-red-high-contrast: #e7001a;
+  --cath-text-primary: #FFFFFF;
+  --cath-text-secondary: #AAAAAA;
+  --cath-secondary-gray: #AAAAAA;
+  --cath-text-muted: #888888;
+  --cath-bg: #0F0F0F;
+  --cath-surface: #1A1A1A;
+  --cath-card: #1A1A1A;
+  --cath-border: #3F3F3F;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Interactive Navigation Item Tokens (Dark Mode) */
+.dark .bg-itemActive {
+  background-color: #272727 !important;
+}
+.dark .bg-itemHover {
+  background-color: #272727 !important;
+}
+.dark .hover\:bg-itemActiveHover:hover {
+  background-color: #3D3D3D !important;
+}
+.dark .hover\:bg-itemHover:hover {
+  background-color: #272727 !important;
+}
+.dark .active\:bg-itemActiveHover:active {
+  background-color: #3D3D3D !important;
+}
+.dark .bg-primaryBg {
+  background-color: #0F0F0F !important;
 }
 
 .font-nunito {
@@ -102,10 +199,15 @@ body {
 
 body {
   background-color: #ffffff;
-  color-scheme: light;
+  color-scheme: inherit;
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark body {
+  background-color: #0F0F0F;
+  color-scheme: dark;
 }
 
 /* Perfectly balanced bold styling (especially for CJK / Chinese text) */
@@ -132,6 +234,15 @@ html {
   scrollbar-color: var(--cath-red-700) transparent;
 }
 
+html.dark,
+html.dark body {
+  scrollbar-color: #3F3F3F #0F0F0F;
+}
+
+.dark * {
+  scrollbar-color: #3F3F3F transparent;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -152,6 +263,32 @@ html {
 
 ::-webkit-scrollbar-thumb:active {
   background: var(--cath-red-500);
+}
+
+.dark ::-webkit-scrollbar-track,
+html.dark ::-webkit-scrollbar-track {
+  background: #0F0F0F;
+}
+
+.dark ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: #3F3F3F;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+.dark ::-webkit-scrollbar-thumb:active,
+html.dark ::-webkit-scrollbar-thumb:active {
+  background: #666666;
+}
+
+.dark ::-webkit-scrollbar-corner,
+html.dark ::-webkit-scrollbar-corner {
+  background: #0F0F0F;
 }
 
 ::-webkit-scrollbar-corner {
@@ -208,6 +345,23 @@ input[type="password"]::-webkit-reveal {
     border-radius: 9999px;
   }
 
+  .dark .scrollbar-app {
+    scrollbar-color: #3F3F3F #1A1A1A;
+  }
+
+  .dark .scrollbar-app::-webkit-scrollbar-track {
+    background: #1A1A1A;
+  }
+
+  .dark .scrollbar-app::-webkit-scrollbar-thumb {
+    background: #3F3F3F;
+    border-radius: 9999px;
+  }
+
+  .dark .scrollbar-app::-webkit-scrollbar-thumb:hover {
+    background: #555555;
+  }
+
   /* Thin dark scrollbar (used for dark menus/modals) */
   .scrollbar-dark {
     scrollbar-width: thin;
@@ -254,6 +408,26 @@ input[type="password"]::-webkit-reveal {
   .scrollbar-app-transparent::-webkit-scrollbar-thumb {
     background-color: #990011;
     border-radius: 9999px;
+  }
+
+  .dark .scrollbar-app-hover:hover::-webkit-scrollbar-thumb {
+    background-color: #555555;
+  }
+
+  .dark .scrollbar-app-hover:hover::-webkit-scrollbar-track {
+    background: #1A1A1A;
+  }
+
+  .dark .scrollbar-app-transparent {
+    scrollbar-color: #3F3F3F transparent;
+  }
+
+  .dark .scrollbar-app-transparent::-webkit-scrollbar-thumb {
+    background-color: #3F3F3F;
+  }
+
+  .dark .scrollbar-app-transparent::-webkit-scrollbar-thumb:hover {
+    background-color: #555555;
   }
 
   /* Hidden scrollbar */
@@ -311,122 +485,7 @@ input[type="password"]::-webkit-reveal {
   animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-/* Prime Toast Aura Solid Dark Styling */
-.p-toast {
-  width: 350px !important;
-  max-width: calc(100vw - 32px) !important;
-  z-index: 99999 !important;
-}
-
-.p-toast .p-toast-message {
-  background: #18181b !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-left-width: 3px !important;
-  border-radius: 10px !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
-  margin-bottom: 0.625rem !important;
-  backdrop-filter: none !important;
-  overflow: hidden !important;
-}
-
-/* Status distinctions (Success, Info, Warn, Error) */
-.p-toast .p-toast-message.p-toast-message-success {
-  border-left-color: #22c55e !important;
-}
-.p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon {
-  color: #22c55e !important;
-}
-
-.p-toast .p-toast-message.p-toast-message-info {
-  border-left-color: #3b82f6 !important;
-}
-.p-toast .p-toast-message.p-toast-message-info .p-toast-message-icon {
-  color: #3b82f6 !important;
-}
-
-.p-toast .p-toast-message.p-toast-message-warn {
-  border-left-color: #f59e0b !important;
-}
-.p-toast .p-toast-message.p-toast-message-warn .p-toast-message-icon {
-  color: #f59e0b !important;
-}
-
-.p-toast .p-toast-message.p-toast-message-error {
-  border-left-color: #ef4444 !important;
-}
-.p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon {
-  color: #ef4444 !important;
-}
-
-.p-toast .p-toast-message .p-toast-message-content {
-  display: flex !important;
-  align-items: flex-start !important;
-  padding: 0.875rem 1rem !important;
-  background: transparent !important;
-  border: none !important;
-  gap: 0.75rem !important;
-}
-
-.p-toast .p-toast-message .p-toast-message-icon {
-  display: flex !important;
-  font-size: 1.125rem !important;
-  width: 1.125rem !important;
-  height: 1.125rem !important;
-  margin-top: 0.0625rem !important;
-  flex-shrink: 0 !important;
-}
-
-.p-toast .p-toast-message .p-toast-message-icon.p-icon,
-.p-toast .p-toast-message .p-toast-message-icon svg {
-  width: 1.125rem !important;
-  height: 1.125rem !important;
-}
-
-.p-toast .p-toast-message .p-toast-message-text {
-  flex: 1 1 auto !important;
-  margin: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.p-toast .p-toast-message .p-toast-summary {
-  font-size: 0.875rem !important;
-  font-weight: 600 !important;
-  line-height: 1.25rem !important;
-  color: #ffffff !important;
-  overflow-wrap: anywhere !important;
-}
-
-.p-toast .p-toast-message .p-toast-detail {
-  font-size: 0.75rem !important;
-  line-height: 1rem !important;
-  color: #a1a1aa !important;
-  margin-top: 0.25rem !important;
-  overflow-wrap: anywhere !important;
-}
-
-.p-toast .p-toast-message .p-toast-icon-close {
-  color: #a1a1aa !important;
-  background: transparent !important;
-  border: none !important;
-  width: 1.5rem !important;
-  height: 1.5rem !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 0.375rem !important;
-  cursor: pointer !important;
-  transition: color 0.15s ease, background-color 0.15s ease !important;
-  margin-left: 0.25rem !important;
-  margin-top: -0.125rem !important;
-  flex-shrink: 0 !important;
-}
-
-.p-toast .p-toast-message .p-toast-icon-close:hover {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-}
+/* Toast styling is managed via Sonner in src/shared/components/ui/AppToaster.jsx */
 
 /* TinyMCE Editor Custom Styling */
 .tox.tox-tinymce {

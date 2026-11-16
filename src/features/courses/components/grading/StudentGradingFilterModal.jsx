@@ -68,7 +68,7 @@ const StudentGradingFilterModal = ({
       }
     >
       <div className="flex flex-col gap-2 mb-4">
-        <label className="font-bold text-gray-900 text-sm">{filterT.status}</label>
+        <label className="font-bold text-gray-900 dark:text-white text-sm">{filterT.status}</label>
         <Dropdown
           options={statusOptions}
           value={localStatus}
@@ -79,7 +79,7 @@ const StudentGradingFilterModal = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="font-bold text-gray-900 text-sm">{filterT.type}</label>
+        <label className="font-bold text-gray-900 dark:text-white text-sm">{filterT.type}</label>
         <Dropdown
           options={typeOptions}
           value={localType}

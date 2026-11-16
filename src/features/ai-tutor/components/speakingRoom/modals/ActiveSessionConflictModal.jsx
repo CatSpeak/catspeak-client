@@ -29,27 +29,27 @@ const ActiveSessionConflictModal = ({
 
       {/* Dialog Container */}
       <div
-        className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 text-center max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-lg bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-3xl p-6 sm:p-7 shadow-2xl z-10 text-center max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
       >
 
             {/* Center Icon */}
-            <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3.5 shadow-2xs">
+            <div className="w-16 h-16 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3.5 shadow-2xs">
               <AlertTriangle className="w-8 h-8" />
             </div>
 
             {/* Title */}
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 uppercase">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">
               Phát hiện phiên học đang hoạt động
             </h2>
 
             {/* Subtitle */}
-            <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-neutral-300 mt-2 leading-relaxed max-w-md mx-auto">
               Bạn đang có buổi luyện nói ở thiết bị khác.
             </p>
 
             {/* Session details box */}
             {hasDetails && (
-              <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-slate-50 border border-slate-100 text-left space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+              <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#3F3F3F] text-left space-y-2 text-xs sm:text-sm text-slate-700 dark:text-neutral-300 leading-relaxed">
                 {currentSession.device && (
                   <p>
                     • <strong>Thiết bị:</strong> {currentSession.device}
@@ -69,7 +69,7 @@ const ActiveSessionConflictModal = ({
             )}
 
             {/* Security note */}
-            <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-amber-50/70 border border-amber-200/50 text-xs text-amber-900 leading-relaxed text-left">
+            <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/40 text-xs text-amber-900 dark:text-amber-200 leading-relaxed text-left">
               Để đảm bảo bảo mật và chất lượng âm thanh 2 chiều, mỗi tài khoản chỉ được tham gia 1 phòng nói duy nhất tại một thời điểm.
             </div>
 
@@ -95,7 +95,7 @@ const ActiveSessionConflictModal = ({
                   onCloseAndReturnHome?.()
                   onClose?.()
                 }}
-                className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
+                className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-slate-50 dark:bg-[#242424] hover:bg-slate-100 dark:hover:bg-[#2c2c2c] text-slate-700 dark:text-neutral-200 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
               >
                 Đóng & Quay về Trang chủ
               </button>

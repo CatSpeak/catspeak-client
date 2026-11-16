@@ -15,42 +15,42 @@ const getStatusConfig = (status, labels = {}) => {
   if (norm === "urgent") {
     return {
       label: labels.urgent || "Khẩn cấp",
-      badgeClass: "bg-[#FEE2E2] text-[#DC2626]",
+      badgeClass: "bg-[#FEE2E2] dark:bg-rose-950/40 text-[#DC2626] dark:text-[#FF6B6B]",
       accentBarClass: "bg-[#E11D48]",
-      circleBg: "bg-[#FFF1F2]",
+      circleBg: "bg-[#FFF1F2] dark:bg-rose-950/30",
       ringStroke: "#E11D48",
-      trackStroke: "stroke-red-100",
-      iconColor: "text-[#E11D48]",
+      trackStroke: "stroke-red-100 dark:stroke-red-950/40",
+      iconColor: "text-[#E11D48] dark:text-[#FF6B6B]",
       arrowBtnClass:
-        "border-[#E11D48] text-[#E11D48] group-hover:bg-[#E11D48] group-hover:text-white",
+        "border-[#E11D48] text-[#E11D48] dark:text-[#FF6B6B] group-hover:bg-[#E11D48] group-hover:text-white",
     }
   }
 
   if (norm === "required") {
     return {
       label: labels.required || "Cần làm",
-      badgeClass: "bg-[#FEF3C7] text-[#B45309]",
+      badgeClass: "bg-[#FEF3C7] dark:bg-amber-950/40 text-[#B45309] dark:text-amber-300",
       accentBarClass: "bg-[#F59E0B]",
-      circleBg: "bg-[#FFFBEB]",
+      circleBg: "bg-[#FFFBEB] dark:bg-amber-950/30",
       ringStroke: "#F59E0B",
-      trackStroke: "stroke-amber-100",
-      iconColor: "text-[#D97706]",
+      trackStroke: "stroke-amber-100 dark:stroke-amber-950/40",
+      iconColor: "text-[#D97706] dark:text-amber-400",
       arrowBtnClass:
-        "border-[#F59E0B] text-[#D97706] group-hover:bg-[#F59E0B] group-hover:text-white",
+        "border-[#F59E0B] text-[#D97706] dark:text-amber-400 group-hover:bg-[#F59E0B] group-hover:text-white",
     }
   }
 
   // Later / default
   return {
     label: labels.later || "Xử lý sau",
-    badgeClass: "bg-[#EFF6FF] text-[#2563EB]",
+    badgeClass: "bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-blue-300",
     accentBarClass: "bg-[#3B82F6]",
-    circleBg: "bg-[#EFF6FF]",
+    circleBg: "bg-[#EFF6FF] dark:bg-blue-950/30",
     ringStroke: "#3B82F6",
-    trackStroke: "stroke-blue-100",
-    iconColor: "text-[#2563EB]",
+    trackStroke: "stroke-blue-100 dark:stroke-blue-950/40",
+    iconColor: "text-[#2563EB] dark:text-blue-400",
     arrowBtnClass:
-      "border-[#3B82F6] text-[#2563EB] group-hover:bg-[#3B82F6] group-hover:text-white",
+      "border-[#3B82F6] text-[#2563EB] dark:text-blue-400 group-hover:bg-[#3B82F6] group-hover:text-white",
   }
 }
 
@@ -153,11 +153,11 @@ const TeachingTasksSection = ({
     emptyLabel || grading.noTeachingTasks || "Hiện chưa có nhiệm vụ giảng dạy."
 
   return (
-    <div className="bg-white rounded-3xl border border-border shadow-xs p-4 sm:p-5 flex flex-col gap-3.5 h-fit">
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] shadow-xs p-4 sm:p-5 flex flex-col gap-3.5 h-fit">
       {/* Section Header */}
       <div className="flex justify-between items-center">
         <h3
-          className="text-base sm:text-lg font-bold text-gray-950 tracking-tight"
+          className="text-base sm:text-lg font-bold text-gray-950 dark:text-white tracking-tight"
           title={resolvedTeachingTasksLabel}
         >
           {resolvedTeachingTasksLabel}
@@ -166,7 +166,7 @@ const TeachingTasksSection = ({
           type="button"
           onClick={() => navigate("/workspace/teaching-tasks")}
           title={resolvedViewAllLabel}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#990011] hover:text-[#7a000e] transition-colors cursor-pointer group"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#990011] dark:text-[#FF6B6B] hover:text-[#7a000e] dark:hover:text-[#FF8585] transition-colors cursor-pointer group"
         >
           <span>{resolvedViewAllLabel}</span>
           <ArrowRight
@@ -183,25 +183,25 @@ const TeachingTasksSection = ({
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="relative overflow-hidden p-3 pl-4 animate-pulse bg-gray-50 flex flex-col gap-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+                className="relative overflow-hidden p-3 pl-4 animate-pulse bg-gray-50 dark:bg-[#242424] flex flex-col gap-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
               >
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-200" />
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-200 dark:bg-[#333333]" />
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
+                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-[#333333] shrink-0" />
                   <div className="flex-1 flex flex-col gap-1.5">
-                    <div className="h-4 bg-gray-200 rounded w-2/3" />
-                    <div className="h-3 bg-gray-200 rounded w-1/3" />
+                    <div className="h-4 bg-gray-200 dark:bg-[#333333] rounded w-2/3" />
+                    <div className="h-3 bg-gray-200 dark:bg-[#333333] rounded w-1/3" />
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-1">
-                  <div className="h-3 bg-gray-200 rounded w-1/4" />
-                  <div className="h-5 bg-gray-200 rounded-full w-14" />
+                  <div className="h-3 bg-gray-200 dark:bg-[#333333] rounded w-1/4" />
+                  <div className="h-5 bg-gray-200 dark:bg-[#333333] rounded-full w-14" />
                 </div>
               </div>
             ))}
           </div>
         ) : resolvedTasks.length === 0 ? (
-          <div className="p-4 text-center text-sm font-semibold text-gray-400">
+          <div className="p-4 text-center text-sm font-semibold text-gray-400 dark:text-gray-500">
             {resolvedEmptyLabel}
           </div>
         ) : (
@@ -276,7 +276,7 @@ const TeachingTasksSection = ({
                 key={taskKey}
                 onClick={() => handleTaskClick(task)}
                 title={`${taskTitle} - ${taskSubtitle}`}
-                className="rounded-xl relative overflow-hidden w-full text-left bg-white p-2.5 sm:p-3 pl-3.5 sm:pl-4 transition-all cursor-pointer flex flex-col justify-between gap-2 group active:scale-[0.99] focus-visible:outline-none hover:bg-gray-50/60 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
+                className="rounded-xl relative overflow-hidden w-full text-left bg-white dark:bg-[#222222] p-2.5 sm:p-3 pl-3.5 sm:pl-4 transition-all cursor-pointer flex flex-col justify-between gap-2 group active:scale-[0.99] focus-visible:outline-none hover:bg-gray-50/60 dark:hover:bg-[#2A2A2A] shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
               >
                 {/* Left status indicator accent bar (Không bo góc) */}
                 <span
@@ -326,13 +326,13 @@ const TeachingTasksSection = ({
 
                   <div className="flex-1 min-w-0">
                     <h4
-                      className="text-sm sm:text-base font-bold text-gray-900 truncate leading-snug group-hover:text-[#990011] transition-colors"
+                      className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate leading-snug group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors"
                       title={taskTitle}
                     >
                       {taskTitle}
                     </h4>
                     <p
-                      className="text-xs sm:text-sm text-gray-500 font-normal truncate mt-0.5"
+                      className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-normal truncate mt-0.5"
                       title={taskSubtitle}
                     >
                       {taskSubtitle}
@@ -343,19 +343,19 @@ const TeachingTasksSection = ({
                 {/* Bottom Section: Clock, Calendar & Status Badge + Arrow Button */}
                 <div className="flex items-end justify-between gap-2.5 pt-0.5">
                   {/* Left info items */}
-                  <div className="flex flex-col gap-1 min-w-0 text-xs text-gray-700 font-medium">
+                  <div className="flex flex-col gap-1 min-w-0 text-xs text-gray-700 dark:text-gray-300 font-medium">
                     <div
-                      className="flex items-center gap-1.5 text-gray-700 font-medium truncate"
+                      className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium truncate"
                       title={dueText}
                     >
-                      <Clock className="w-3.5 h-3.5 text-gray-800 shrink-0 stroke-[2]" />
+                      <Clock className="w-3.5 h-3.5 text-gray-800 dark:text-gray-400 shrink-0 stroke-[2]" />
                       <span className="truncate">{dueText}</span>
                     </div>
                     <div
-                      className="flex items-center gap-1.5 text-gray-700 font-medium truncate"
+                      className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium truncate"
                       title={pendingText}
                     >
-                      <Calendar className="w-3.5 h-3.5 text-gray-800 shrink-0 stroke-[2]" />
+                      <Calendar className="w-3.5 h-3.5 text-gray-800 dark:text-gray-400 shrink-0 stroke-[2]" />
                       <span className="truncate">{pendingText}</span>
                     </div>
                   </div>

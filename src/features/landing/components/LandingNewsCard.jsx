@@ -33,7 +33,7 @@ const LandingNewsCard = ({ item, onClick, className = "" }) => {
       className={`w-full flex flex-col group/news cursor-pointer ${className}`}
     >
       {/* Top Image Showcase Frame */}
-      <div className="relative w-full h-[180px] sm:h-[195px] lg:h-[210px] rounded-xl overflow-hidden bg-stone-100 flex items-center justify-center">
+      <div className="relative flex h-[180px] w-full items-center justify-center overflow-hidden rounded-xl bg-stone-100 dark:bg-[#242424] sm:h-[195px] lg:h-[210px]">
         {firstMediaUrl && !imgError ? (
           <img
             src={firstMediaUrl}
@@ -43,7 +43,7 @@ const LandingNewsCard = ({ item, onClick, className = "" }) => {
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60 text-gray-400">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-stone-100 to-stone-200/60 p-6 text-gray-400 dark:from-[#242424] dark:to-[#1b1b1b] dark:text-gray-500">
             <Newspaper size={44} strokeWidth={1.5} />
           </div>
         )}
@@ -59,10 +59,10 @@ const LandingNewsCard = ({ item, onClick, className = "" }) => {
       {/* Info Section beneath the image */}
       <div className="mt-4 flex flex-col w-full">
         {/* Date */}
-        <span className="text-sm text-secondary">{formattedDate}</span>
+        <span className="text-sm text-secondary dark:text-gray-400">{formattedDate}</span>
 
         {/* Uppercase Bold Title */}
-        <h3 className="group-hover/news:text-[#910B09] transition-colors line-clamp-2">
+        <h3 className="line-clamp-2 transition-colors group-hover/news:text-[#910B09] dark:group-hover/news:text-[#ff7a8a]">
           {item.title}
         </h3>
       </div>

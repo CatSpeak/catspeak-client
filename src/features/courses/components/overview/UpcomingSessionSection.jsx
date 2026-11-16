@@ -105,9 +105,9 @@ const UpcomingSessionSection = ({
 
   return (
     <div
-      className={`bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5 ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 shadow-xs flex flex-col gap-5 ${className}`}
     >
-      <h3 className="text-lg font-bold text-gray-950 tracking-tight">
+      <h3 className="text-lg font-bold text-gray-950 dark:text-white tracking-tight">
         {upcomingSessionLabel}
       </h3>
 
@@ -125,12 +125,12 @@ const UpcomingSessionSection = ({
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center gap-1.5">
               {classData?.language && (
-                <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+                <span className="bg-[#FEF3C7] dark:bg-amber-950/40 text-[#D97706] dark:text-amber-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
                   {getLocalizedLanguageName(classData.language, t)}
                 </span>
               )}
               {classData?.levels?.[0] && (
-                <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+                <span className="bg-[#FEF3C7] dark:bg-amber-950/40 text-[#D97706] dark:text-amber-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
                   {classData.levels[0]}
                 </span>
               )}
@@ -142,13 +142,13 @@ const UpcomingSessionSection = ({
               )}
             </div>
 
-            <h4 className="font-bold text-base text-gray-950 leading-snug line-clamp-2">
+            <h4 className="font-bold text-base text-gray-950 dark:text-white leading-snug line-clamp-2">
               {classData?.title || ui.untitledClass || "Untitled class"}
             </h4>
 
-            <div className="flex flex-col gap-2 border-b border-gray-55 pb-4 text-xs font-semibold text-gray-500">
+            <div className="flex flex-col gap-2 border-b border-gray-55 dark:border-[#333333] pb-4 text-xs font-semibold text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-2">
-                <Clock size={14} className="text-gray-400" />
+                <Clock size={14} className="text-gray-400 dark:text-gray-500" />
                 <span>
                   {sessionStartTime
                     ? sessionEndTime
@@ -158,7 +158,7 @@ const UpcomingSessionSection = ({
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar size={14} className="text-gray-400" />
+                <Calendar size={14} className="text-gray-400 dark:text-gray-500" />
                 <span>{formatDateMonth(sessionDate, ui.tba)}</span>
               </div>
             </div>
@@ -169,8 +169,8 @@ const UpcomingSessionSection = ({
                   <OverlapAvatar users={students} maxShow={3} size={24} />
                 ) : (
                   <div className="flex items-center gap-1.5">
-                    <Users size={16} className="text-gray-400" />
-                    <span className="text-[11px] font-bold text-gray-400 font-sans">
+                    <Users size={16} className="text-gray-400 dark:text-gray-500" />
+                    <span className="text-[11px] font-bold text-gray-400 dark:text-gray-400 font-sans">
                       {studentCount ?? "—"}
                     </span>
                   </div>
@@ -189,8 +189,8 @@ const UpcomingSessionSection = ({
           </div>
         </>
       ) : (
-        <div className="rounded-2xl bg-gray-50 p-5 flex flex-col items-center gap-3 text-center">
-          <p className="text-xs font-semibold text-gray-500">
+        <div className="rounded-2xl bg-gray-50 dark:bg-[#242424] p-5 flex flex-col items-center gap-3 text-center">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
             {cd.noUpcomingSession || "No upcoming sessions"}
           </p>
           <button

@@ -5,7 +5,7 @@ import { memo } from "react"
  */
 const SystemMessage = memo(({ content }) => (
   <div className="flex justify-center items-center h-8">
-    <span className="text-[#606060] text-xs text-center break-words">
+    <span className="text-[#606060] dark:text-[#AAAAAA] text-xs text-center break-words">
       {content}
     </span>
   </div>

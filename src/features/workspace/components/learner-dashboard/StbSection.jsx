@@ -37,6 +37,7 @@ const StbCircularScore = ({ score = 0, color = "#059669" }) => {
       >
         <circle
           stroke="#E7E9ED"
+          className="stroke-[#E7E9ED] dark:stroke-[#333333]"
           fill="transparent"
           strokeWidth={strokeWidth}
           r={normalizedRadius}
@@ -56,10 +57,10 @@ const StbCircularScore = ({ score = 0, color = "#059669" }) => {
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center text-center">
-        <span className="text-xl font-bold leading-none tracking-tight text-[#14171F] tabular-nums sm:text-2xl">
+        <span className="text-xl font-bold leading-none tracking-tight text-[#14171F] dark:text-white tabular-nums sm:text-2xl">
           {score}%
         </span>
-        <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-[#6E788C]">
+        <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-[#6E788C] dark:text-neutral-400">
           STB
         </span>
       </div>
@@ -72,14 +73,14 @@ const StbTrendTooltip = ({ active, payload, isEn }) => {
   const point = payload[0].payload
 
   return (
-    <div className="rounded-lg border border-[#DEE0E5] bg-white px-3 py-2 text-xs shadow-md">
-      <p className="font-semibold text-[#14171F]">{point.label}</p>
-      <p className="mt-0.5 font-bold text-[#72000D]">
+    <div className="rounded-lg border border-[#DEE0E5] dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-3 py-2 text-xs shadow-md">
+      <p className="font-semibold text-[#14171F] dark:text-white">{point.label}</p>
+      <p className="mt-0.5 font-bold text-[#72000D] dark:text-red-400">
         {isEn ? "STB score: " : "Điểm STB: "}
         <span className="tabular-nums">{point.value}%</span>
       </p>
       {point.tooltip && (
-        <p className="mt-1 max-w-52 text-[11px] text-[#6E788C]">{point.tooltip}</p>
+        <p className="mt-1 max-w-52 text-[11px] text-[#6E788C] dark:text-neutral-400">{point.tooltip}</p>
       )}
     </div>
   )
@@ -102,13 +103,13 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
   return (
     <section
       aria-labelledby="stb-heading"
-      className="flex h-full min-w-0 flex-col rounded-xl border border-[#DEE0E5] bg-white p-4 shadow-2xs sm:p-5"
+      className="flex h-full min-w-0 flex-col rounded-xl border border-[#DEE0E5] dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-4 shadow-2xs sm:p-5"
     >
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Mic className="h-4 w-4 shrink-0 text-[#72000D]" />
-            <h2 id="stb-heading" className="text-sm font-bold text-[#14171F] sm:text-base">
+            <Mic className="h-4 w-4 shrink-0 text-[#72000D] dark:text-red-400" />
+            <h2 id="stb-heading" className="text-sm font-bold text-[#14171F] dark:text-white sm:text-base">
               {isEn ? "Speaking Time Balance (STB)" : "Cân bằng thời gian nói (STB)"}
             </h2>
             <span
@@ -122,7 +123,7 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
               <HelpCircle className="h-3.5 w-3.5 text-[#9AA2B1]" />
             </span>
           </div>
-          <p className="mt-1 text-[11px] leading-relaxed text-[#6E788C] sm:text-xs">
+          <p className="mt-1 text-[11px] leading-relaxed text-[#6E788C] dark:text-neutral-400 sm:text-xs">
             {isEn
               ? "Your speaking participation across online classroom sessions"
               : "Mức độ tham gia phát biểu trong các phòng học trực tuyến"}
@@ -132,7 +133,7 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
         <div
           role="tablist"
           aria-label={isEn ? "Speaking balance period" : "Khoảng thời gian cân bằng nói"}
-          className="flex w-full shrink-0 rounded-lg border border-[#DEE0E5] bg-[#F6F7F9] p-1 sm:w-auto"
+          className="flex w-full shrink-0 rounded-lg border border-[#DEE0E5] dark:border-[#3F3F3F] bg-[#F6F7F9] dark:bg-[#242424] p-1 sm:w-auto"
         >
           {presets.map((tab) => {
             const isActive = stbPreset === tab.key
@@ -143,10 +144,10 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
                 aria-selected={isActive}
                 type="button"
                 onClick={() => onStbPresetChange(tab.key)}
-                className={`min-h-7 flex-1 rounded-md px-3 py-1 text-[11px] font-semibold transition-colors sm:flex-none sm:text-xs ${
+                className={`min-h-7 flex-1 rounded-md px-3 py-1 text-[11px] font-semibold transition-colors sm:flex-none sm:text-xs cursor-pointer ${
                   isActive
-                    ? "bg-white text-[#72000D] shadow-xs ring-1 ring-black/5"
-                    : "text-[#6E788C] hover:bg-white/60 hover:text-[#14171F]"
+                    ? "bg-white dark:bg-[#1A1A1A] text-[#72000D] dark:text-red-400 shadow-xs ring-1 ring-black/5 dark:ring-white/10"
+                    : "text-[#6E788C] dark:text-neutral-400 hover:bg-white/60 dark:hover:bg-[#2C2C2C] hover:text-[#14171F] dark:hover:text-white"
                 }`}
               >
                 {isEn ? tab.labelEn : tab.labelVi}
@@ -157,7 +158,7 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[132px_minmax(0,1fr)]">
-        <div className="flex items-center justify-center gap-4 rounded-xl border border-[#E7E9ED] bg-[#FAFAFB] p-3 sm:flex-col sm:gap-1.5">
+        <div className="flex items-center justify-center gap-4 rounded-xl border border-[#E7E9ED] dark:border-[#333333] bg-[#FAFAFB] dark:bg-[#202020] p-3 sm:flex-col sm:gap-1.5">
           <StbCircularScore score={score} color={statusConfig.color} />
           <div className="flex min-w-0 flex-col items-center gap-1.5">
             <div
@@ -169,7 +170,7 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
             {delta !== undefined && delta !== null && (
               <span
                 className={`inline-flex items-center gap-0.5 whitespace-nowrap text-[10px] font-semibold ${
-                  delta >= 0 ? "text-emerald-600" : "text-rose-600"
+                  delta >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                 }`}
               >
                 {delta >= 0 ? (
@@ -186,37 +187,37 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
         </div>
 
         <div className="grid min-w-0 grid-cols-1 gap-3 min-[430px]:grid-cols-2">
-          <article className="flex min-h-24 flex-col justify-between rounded-xl border border-[#E7E9ED] bg-[#FAFAFB] p-3.5">
-            <div className="flex items-center gap-2 text-xs font-medium text-[#6E788C]">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F7EFF0] text-[#72000D]">
+          <article className="flex min-h-24 flex-col justify-between rounded-xl border border-[#E7E9ED] dark:border-[#333333] bg-[#FAFAFB] dark:bg-[#202020] p-3.5">
+            <div className="flex items-center gap-2 text-xs font-medium text-[#6E788C] dark:text-neutral-400">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F7EFF0] dark:bg-rose-950/40 text-[#72000D] dark:text-red-400">
                 <Volume2 className="h-3.5 w-3.5" />
               </span>
               <span>{isEn ? "Speaking time" : "Thời gian nói"}</span>
             </div>
-            <p className="mt-2 text-xl font-bold text-[#14171F] tabular-nums">
+            <p className="mt-2 text-xl font-bold text-[#14171F] dark:text-white tabular-nums">
               {stbData?.speakingTimeFormatted || "0m"}
             </p>
           </article>
 
-          <article className="flex min-h-24 flex-col justify-between rounded-xl border border-[#E7E9ED] bg-[#FAFAFB] p-3.5">
-            <div className="flex items-center gap-2 text-xs font-medium text-[#6E788C]">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+          <article className="flex min-h-24 flex-col justify-between rounded-xl border border-[#E7E9ED] dark:border-[#333333] bg-[#FAFAFB] dark:bg-[#202020] p-3.5">
+            <div className="flex items-center gap-2 text-xs font-medium text-[#6E788C] dark:text-neutral-400">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
                 <MessageSquare className="h-3.5 w-3.5" />
               </span>
               <span>{isEn ? "Words spoken" : "Số từ phát biểu"}</span>
             </div>
             <div className="mt-2">
-              <p className="text-xl font-bold text-[#14171F] tabular-nums">
+              <p className="text-xl font-bold text-[#14171F] dark:text-white tabular-nums">
                 {stbData?.wordsSpoken?.toLocaleString() || "0"}
-                <span className="ml-1 text-xs font-semibold text-[#6E788C]">
+                <span className="ml-1 text-xs font-semibold text-[#6E788C] dark:text-neutral-400">
                   {isEn ? "words" : "từ"}
                 </span>
               </p>
               {stbData?.averagePaceWpm !== undefined &&
                 stbData?.averagePaceWpm !== null && (
-                  <p className="mt-1 text-[10px] text-[#6E788C]">
+                  <p className="mt-1 text-[10px] text-[#6E788C] dark:text-neutral-400">
                     {isEn ? "Average pace" : "Tốc độ trung bình"}: {" "}
-                    <span className="font-semibold text-[#14171F]">
+                    <span className="font-semibold text-[#14171F] dark:text-white">
                       {stbData.averagePaceWpm} WPM
                     </span>
                   </p>
@@ -226,9 +227,9 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
         </div>
       </div>
 
-      <div className="mt-4 flex min-h-[132px] flex-1 flex-col border-t border-[#E7E9ED] pt-3">
+      <div className="mt-4 flex min-h-[132px] flex-1 flex-col border-t border-[#E7E9ED] dark:border-[#2E2E2E] pt-3">
         <div className="mb-1 flex items-center justify-between gap-3">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-[#6E788C] sm:text-[11px]">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-[#6E788C] dark:text-neutral-400 sm:text-[11px]">
             {isEn ? "Speaking balance trend" : "Xu hướng cân bằng thời gian nói"}
           </p>
           {trend.length > 0 && (
@@ -272,7 +273,7 @@ const StbSection = ({ stbData, stbPreset, onStbPresetChange }) => {
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="flex min-h-[96px] flex-1 items-center justify-center rounded-lg bg-[#FAFAFB] px-4 text-center text-xs text-[#9AA2B1]">
+          <div className="flex min-h-[96px] flex-1 items-center justify-center rounded-lg bg-[#FAFAFB] dark:bg-[#202020] px-4 text-center text-xs text-[#9AA2B1] dark:text-neutral-500">
             {isEn ? "No speaking-balance trend yet." : "Chưa có dữ liệu xu hướng cân bằng nói."}
           </div>
         )}

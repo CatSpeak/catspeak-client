@@ -14,7 +14,7 @@ const CommunityBadge = ({ languageCommunity, className = "" }) => {
 
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#990011]/10 text-[#990011] shrink-0 ${className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#990011]/10 dark:bg-red-950/40 text-[#990011] dark:text-red-400 border border-transparent dark:border-red-900/40 shrink-0 ${className}`}
     >
       {label}
     </span>

@@ -51,7 +51,7 @@ const RejectionReasonModal = ({ open = false, onClose, voucher = {} }) => {
           <span className="text-secondary shrink-0">
             {vm.adminFeedback || "Lý do"}
           </span>
-          <span className="text-right text-cath-red-700 font-medium leading-relaxed">
+          <span className="text-right text-cath-red-700 dark:text-red-400 font-medium leading-relaxed">
             {reason}
           </span>
         </div>

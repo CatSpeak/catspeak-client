@@ -13,6 +13,10 @@ export default {
   newNotificationTitle: "新しい通知",
   newNotificationBody: "閲覧できる新しい通知があります。",
   searchPlaceholder: "ルームを検索",
+  recentSearches: "最近の検索",
+  clearAll: "すべて削除",
+  resultsFound: "{{count}} 件の結果が見つかりました",
+  searching: "ルームを検索中...",
   filterRooms: "ルームを絞り込む",
   languages: {
     vi: "ベトナム語",

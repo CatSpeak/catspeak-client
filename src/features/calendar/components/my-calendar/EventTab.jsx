@@ -17,6 +17,8 @@ import TablePagination from "@/features/courses/components/shared/TablePaginatio
 import RegistrationsModal from "../workspace-events/RegistrationsModal"
 import EventFetcher from "../workspace-events/EventFetcher"
 import WorkspaceEventCard from "../workspace-events/WorkspaceEventCard"
+import { EmptyState } from "@/shared/components/ui/indicators"
+import { PillButton } from "@/shared/components/ui/buttons"
 
 const EventTab = () => {
   const { t } = useLanguage()
@@ -57,17 +59,17 @@ const EventTab = () => {
         state: { editEvent: fullEvent, from: window.location.pathname },
       })
     },
-    [navigate]
+    [navigate],
   )
 
   const handleFetchError = useCallback(
     (err) => {
       setEditFetch(null)
       toast.error(
-        err?.data?.message || cal.deleteError || "Failed to load event."
+        err?.data?.message || cal.deleteError || "Failed to load event.",
       )
     },
-    [cal]
+    [cal],
   )
 
   const handleDeleteClick = useCallback((event) => {
@@ -78,7 +80,8 @@ const EventTab = () => {
     if (!deleteTarget) return
     const toastId = toast.loading(cal.workspaceDeleting || "Deleting...")
     try {
-      const idToDelete = deleteTarget.eventId ?? deleteTarget.recurringEventId ?? deleteTarget.id
+      const idToDelete =
+        deleteTarget.eventId ?? deleteTarget.recurringEventId ?? deleteTarget.id
       await deleteEvent(idToDelete).unwrap()
       toast.success(cal.deleteSuccess || "Event deleted!", { id: toastId })
       setDeleteTarget(null)
@@ -86,7 +89,7 @@ const EventTab = () => {
       console.error("[WorkspaceEvents] Delete error:", err)
       toast.error(
         err?.data?.message || cal.deleteError || "Failed to delete.",
-        { id: toastId }
+        { id: toastId },
       )
     }
   }, [deleteEvent, deleteTarget, cal])
@@ -97,12 +100,12 @@ const EventTab = () => {
 
   const handleCreateEvent = useCallback(() => {
     navigate(`/workspace/events/create`, {
-      state: { from: window.location.pathname }
+      state: { from: window.location.pathname },
     })
   }, [navigate])
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-sm border border-border p-6 flex flex-col gap-6 text-gray-800">
+    <div className="w-full bg-white dark:bg-[#1A1A1A] rounded-xl border border-border dark:border-[#3F3F3F] p-4 flex flex-col gap-4 text-gray-800 dark:text-gray-200">
       {/* Content */}
       <div>
         {isLoading ? (
@@ -111,14 +114,14 @@ const EventTab = () => {
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="bg-white rounded-2xl p-4 border border-border shadow-sm animate-pulse"
+                className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-4 border border-border dark:border-[#3F3F3F] shadow-sm animate-pulse"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-14 h-14 rounded-full bg-gray-200 shrink-0" />
+                  <div className="w-14 h-14 rounded-full bg-gray-200 dark:bg-[#272727] shrink-0" />
                   <div className="flex-1 space-y-2 pt-1">
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-3 bg-gray-100 rounded w-1/2" />
-                    <div className="h-3 bg-gray-100 rounded w-2/3" />
+                    <div className="h-4 bg-gray-200 dark:bg-[#272727] rounded w-3/4" />
+                    <div className="h-3 bg-gray-100 dark:bg-[#242424] rounded w-1/2" />
+                    <div className="h-3 bg-gray-100 dark:bg-[#242424] rounded w-2/3" />
                   </div>
                 </div>
               </div>
@@ -132,26 +135,30 @@ const EventTab = () => {
           />
         ) : events.length === 0 ? (
           /* Empty state */
-          <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50">
-            <Calendar size={48} className="text-gray-300 mb-3" />
-            <h3 className="font-bold text-gray-700 mb-1">
-              {cal.workspaceNoEvents || "Chưa có sự kiện nào"}
-            </h3>
-            <p className="text-sm text-gray-400 mb-4 text-center max-w-sm">
-              {cal.workspaceNoEventsDesc || "Tạo sự kiện đầu tiên của bạn để quản lý tại đây."}
-            </p>
-            <button
-              onClick={handleCreateEvent}
-              className="bg-[#990011] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#80000e] transition-colors flex items-center gap-1.5 text-sm shadow"
-            >
-              <Plus size={16} />
-              <span>{cal.workspaceCreateFirst || "Tạo sự kiện đầu tiên"}</span>
-            </button>
-          </div>
+          <EmptyState
+            message={cal.workspaceNoEvents || "Chưa có sự kiện nào"}
+            description={
+              cal.workspaceNoEventsDesc ||
+              "Tạo sự kiện đầu tiên của bạn để quản lý tại đây."
+            }
+            icon={Calendar}
+            variant="detailed"
+            iconClassName="w-12 h-12 text-gray-300 dark:text-neutral-600 mb-3"
+            action={
+              <PillButton
+                onClick={handleCreateEvent}
+                startIcon={<Plus />}
+                variant="primary"
+                className="mt-4"
+              >
+                {cal.workspaceCreateFirst || "Tạo sự kiện đầu tiên"}
+              </PillButton>
+            }
+          />
         ) : (
           /* Event grid */
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-[#606060]">
+            <p className="text-xs text-[#606060] dark:text-[#AAAAAA]">
               {events.length === 1
                 ? `1 ${cal.event || "sự kiện"}`
                 : `${events.length} ${cal.event || "sự kiện"}`}
@@ -197,13 +204,13 @@ const EventTab = () => {
         onClose={() => setDeleteTarget(null)}
         title={cal.workspaceDeleteConfirmTitle || "Delete this event?"}
         className="w-[90vw] max-w-sm"
-        bodyClassName="px-6 py-2 text-sm text-gray-500"
+        bodyClassName="px-6 py-2 text-sm text-gray-500 dark:text-neutral-400"
         footer={
           <div className="flex gap-3 justify-end pt-4 pb-2">
             <button
               onClick={() => setDeleteTarget(null)}
               disabled={isDeleting}
-              className="px-4 py-2 text-sm font-semibold rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+              className="px-4 py-2 text-sm font-semibold rounded-lg hover:bg-gray-100 dark:hover:bg-[#272727] text-gray-500 dark:text-[#AAAAAA] transition-colors"
             >
               {cal.workspaceDeleteCancel || "Cancel"}
             </button>
@@ -226,7 +233,7 @@ const EventTab = () => {
       >
         {cal.workspaceDeleteConfirmMsg ||
           "This event and all its occurrences will be permanently deleted and cannot be undone."}{" "}
-        <strong className="text-gray-700">
+        <strong className="text-gray-700 dark:text-white">
           &ldquo;{deleteTarget?.title}&rdquo;
         </strong>
       </Modal>

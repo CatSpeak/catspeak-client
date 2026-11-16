@@ -103,7 +103,7 @@ const VoucherConfigCard = ({ voucher = {} }) => {
 
           <div className="flex items-center justify-between">
             <span className="text-secondary">{vd.value || "Giá trị"}</span>
-            <span className="text-cath-red-700">{discountValueDisplay}</span>
+            <span className="text-cath-red-700 dark:text-red-400 font-semibold">{discountValueDisplay}</span>
           </div>
 
           <div className="flex items-center justify-between">
@@ -156,7 +156,7 @@ const VoucherConfigCard = ({ voucher = {} }) => {
             <span className="text-secondary">
               {vd.depositUsed || "Đã dùng"}
             </span>
-            <span className="text-cath-red-700">
+            <span className="text-cath-red-700 dark:text-red-400 font-semibold">
               {formatCurrency(depositUsed)}
             </span>
           </div>

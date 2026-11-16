@@ -34,7 +34,7 @@ const CourseTab = ({
   return (
     <div className={`flex flex-col gap-6 w-full ${className}`}>
       {/* Tabs Bar */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-[#3F3F3F]">
         <CourseTabs
           tabs={courseDetailTabs}
           activeTab={activeTab}
@@ -50,27 +50,27 @@ const CourseTab = ({
             {/* 3 Info Cards: Tổng số lớp, Hình thức học, Ngôn ngữ */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
               {/* Card 1: Tổng số lớp */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-[#3F3F3F] shadow-sm flex flex-col justify-between">
                 <div className="flex items-center gap-2">
-                  <BookOpen size={18} className="text-cath-red-700" />
-                  <span className="text-xs sm:text-sm font-semibold text-gray-500">
+                  <BookOpen size={18} className="text-cath-red-700 dark:text-[#FF6B6B]" />
+                  <span className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
                     {scd.totalClasses || "Tổng số lớp"}
                   </span>
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-gray-900 mt-3">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-3">
                   {classes.length || rawCourse?.classCount || 0}
                 </div>
               </div>
 
               {/* Card 2: Hình thức học */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-[#3F3F3F] shadow-sm flex flex-col justify-between">
                 <div className="flex items-center gap-2">
-                  <Video size={18} className="text-cath-red-700" />
-                  <span className="text-xs sm:text-sm font-semibold text-gray-500">
+                  <Video size={18} className="text-cath-red-700 dark:text-[#FF6B6B]" />
+                  <span className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
                     {scd.learningMethod || "Hình thức học"}
                   </span>
                 </div>
-                <div className="text-sm sm:text-base font-bold text-gray-900 mt-3 truncate">
+                <div className="text-sm sm:text-base font-bold text-gray-900 dark:text-white mt-3 truncate">
                   {rawCourse.teachingMethod ||
                     c.student?.onlineClassroom ||
                     scd.defaultOnlineClassroom ||
@@ -79,14 +79,14 @@ const CourseTab = ({
               </div>
 
               {/* Card 3: Ngôn ngữ */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-[#3F3F3F] shadow-sm flex flex-col justify-between">
                 <div className="flex items-center gap-2">
-                  <Globe size={18} className="text-cath-red-700" />
-                  <span className="text-xs sm:text-sm font-semibold text-gray-500">
+                  <Globe size={18} className="text-cath-red-700 dark:text-[#FF6B6B]" />
+                  <span className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
                     {scd.language || "Ngôn ngữ"}
                   </span>
                 </div>
-                <div className="text-sm sm:text-base font-bold text-gray-900 mt-3 truncate">
+                <div className="text-sm sm:text-base font-bold text-gray-900 dark:text-white mt-3 truncate">
                   {getLocalizedLanguageName(
                     rawCourse.languageName || rawCourse.language,
                     t,
@@ -98,15 +98,15 @@ const CourseTab = ({
             </div>
 
             {/* Về khóa học */}
-            <div className="bg-white rounded-3xl p-5 sm:p-7 border border-gray-100 shadow-sm flex flex-col gap-3.5">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-5 sm:p-7 border border-gray-100 dark:border-[#3F3F3F] shadow-sm flex flex-col gap-3.5">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                 {scd.aboutCourse || "Về khóa học"}
               </h3>
-              <div className="text-sm sm:text-base text-gray-600 font-normal leading-relaxed text-justify">
+              <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300 font-normal leading-relaxed text-justify">
                 <RenderHTML
                   html={rawCourse.description}
                   fallback={
-                    <span className="text-gray-500 italic text-sm">
+                    <span className="text-gray-500 dark:text-gray-400 italic text-sm">
                       {scd.noCourseDescription ||
                         "Chưa có thông tin mô tả chi tiết cho khóa học này."}
                     </span>
@@ -121,26 +121,26 @@ const CourseTab = ({
         {activeTab !== "overview" && (
           <div className="flex flex-col gap-4">
             {displayedClasses.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-gray-200 p-10 text-center text-gray-400 font-medium flex flex-col items-center justify-center shadow-sm">
-                <span className="text-gray-800 text-base font-bold mb-1">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-gray-200 dark:border-[#3F3F3F] p-10 text-center text-gray-400 font-medium flex flex-col items-center justify-center shadow-sm">
+                <span className="text-gray-800 dark:text-gray-200 text-base font-bold mb-1">
                   {activeTab === "upcoming"
                     ? scd.noUpcomingClasses ||
-                      "Chưa có lớp học nào sắp mở đăng ký"
+                    "Chưa có lớp học nào sắp mở đăng ký"
                     : activeTab === "closed"
                       ? scd.noClosedClasses ||
-                        "Không có lớp học nào đã đóng đăng ký"
+                      "Không có lớp học nào đã đóng đăng ký"
                       : scd.noClasses ||
-                        c.student?.noClassesTitle ||
-                        "Chưa có lớp học nào"}
+                      c.student?.noClassesTitle ||
+                      "Chưa có lớp học nào"}
                 </span>
-                <span className="text-sm text-gray-500 max-w-sm">
+                <span className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
                   {activeTab === "upcoming"
                     ? scd.noUpcomingClassesDesc ||
-                      "Vui lòng quay lại sau hoặc xem các lớp học đang mở khác."
+                    "Vui lòng quay lại sau hoặc xem các lớp học đang mở khác."
                     : activeTab === "all"
                       ? scd.noClassesDesc ||
-                        c.student?.noClassesDesc ||
-                        "Các lớp học mới sẽ được cập nhật sớm. Vui lòng quay lại sau."
+                      c.student?.noClassesDesc ||
+                      "Các lớp học mới sẽ được cập nhật sớm. Vui lòng quay lại sau."
                       : ""}
                 </span>
               </div>

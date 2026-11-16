@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTheme } from "@/shared/context/ThemeContext";
 import { getFeatureSuffix } from "../../utils/planUtils";
 
 const hexToRgbA = (hex, alpha = 0.15) => {
@@ -101,6 +102,7 @@ const PlanCard = ({
   isProcessing,
 }) => {
   const { t, language } = useLanguage();
+  const { isDark } = useTheme();
   const {
     name,
     price,
@@ -175,16 +177,21 @@ const PlanCard = ({
             }
           : { duration: 0.7, ease: "easeOut" }
       }
-      className={`group relative flex w-full h-[calc(100dvh-11rem)] min-h-[550px] max-h-[740px] flex-col overflow-hidden rounded-xl border bg-white transition-[box-shadow,border-color,background-color] duration-500 ${
+      className={`group relative flex w-full h-[calc(100dvh-11rem)] min-h-[550px] max-h-[740px] flex-col overflow-hidden rounded-xl border bg-white dark:bg-[#1A1A1A] transition-[box-shadow,border-color,background-color] duration-500 ${
         isHighlighted ? "ring-4 ring-cath-red-700/60 shadow-2xl" : ""
       }`}
       style={{
-        background: `linear-gradient(180deg, ${hexToRgbA(
-          cardColor,
-          isHighlighted ? 0.16 : 0.1,
-        )} 0%, rgba(255, 255, 255, 0) 34%), #fff`,
+        background: isDark
+          ? `linear-gradient(180deg, ${hexToRgbA(
+              cardColor,
+              isHighlighted ? 0.22 : 0.14,
+            )} 0%, rgba(26, 26, 26, 0) 34%), #1A1A1A`
+          : `linear-gradient(180deg, ${hexToRgbA(
+              cardColor,
+              isHighlighted ? 0.16 : 0.1,
+            )} 0%, rgba(255, 255, 255, 0) 34%), #fff`,
         borderColor:
-          isHighlighted || isActive ? cardColor : hexToRgbA(cardColor, 0.22),
+          isHighlighted || isActive ? cardColor : hexToRgbA(cardColor, isDark ? 0.35 : 0.22),
         boxShadow: cardShadow,
       }}
     >
@@ -197,7 +204,7 @@ const PlanCard = ({
         <header className="flex shrink-0 items-start justify-between gap-4">
           <div className="flex min-w-0 items-start gap-3">
             <div className="min-w-0">
-              <h3 className="break-words text-xl font-extrabold leading-tight tracking-tight text-gray-950 sm:text-2xl">
+              <h3 className="break-words text-xl font-extrabold leading-tight tracking-tight text-gray-950 dark:text-white sm:text-2xl">
                 {name}
               </h3>
             </div>
@@ -220,19 +227,19 @@ const PlanCard = ({
             </span>
           )}
         </header>
-        <p className="mt-2 shrink-0 text-sm font-medium leading-relaxed text-gray-500">
+        <p className="mt-2 shrink-0 text-sm font-medium leading-relaxed text-gray-500 dark:text-neutral-400">
           {description}
         </p>
 
-        <section className="mt-7 shrink-0 border-b border-border pb-6">
+        <section className="mt-7 shrink-0 border-b border-border dark:border-[#3F3F3F] pb-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="break-words text-4xl font-black leading-none tracking-tight text-gray-950">
+                <span className="break-words text-4xl font-black leading-none tracking-tight text-gray-950 dark:text-white">
                   {priceLabel}
                 </span>
                 {isPaidPlan && (
-                  <span className="text-sm font-bold text-gray-400">
+                  <span className="text-sm font-bold text-gray-400 dark:text-neutral-400">
                     / {intervalLabel}
                   </span>
                 )}
@@ -243,13 +250,13 @@ const PlanCard = ({
 
         <section className="mt-6 flex min-h-0 flex-1 flex-col">
           <div className="mb-4 flex shrink-0 items-center gap-3">
-            <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-gray-400">
+            <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-400">
               {t.billing.pricing.included || "Included"}
             </span>
-            <span className="h-px flex-1 bg-gray-100" />
+            <span className="h-px flex-1 bg-gray-100 dark:bg-[#3F3F3F]" />
           </div>
 
-          <div className="-mr-6 min-h-0 flex-1 overflow-y-hidden overscroll-contain  transition-all duration-300 group-hover:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-transparent group-hover:[scrollbar-width:thin] group-hover:[&::-webkit-scrollbar-thumb]:rounded-full group-hover:[&::-webkit-scrollbar-thumb]:bg-black/15 sm:-mr-7">
+          <div className="-mr-6 min-h-0 flex-1 overflow-y-hidden overscroll-contain transition-all duration-300 group-hover:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-transparent group-hover:[scrollbar-width:thin] group-hover:[&::-webkit-scrollbar-thumb]:rounded-full group-hover:[&::-webkit-scrollbar-thumb]:bg-black/15 sm:-mr-7">
             <ul className="flex min-h-full flex-col gap-3.5 pr-6 sm:pr-7">
               {features.map((feature, index) => {
                 const isString = typeof feature === "string";
@@ -287,7 +294,7 @@ const PlanCard = ({
                     }}
                     key={featureKey}
                     className={`grid grid-cols-[20px_1fr] gap-3 text-sm leading-relaxed ${
-                      isFalsy ? "text-gray-400" : "text-gray-700"
+                      isFalsy ? "text-gray-400 dark:text-neutral-500" : "text-gray-700 dark:text-neutral-200"
                     }`}
                   >
                     <span
@@ -309,7 +316,7 @@ const PlanCard = ({
 
                     <span
                       className={`min-w-0 font-semibold ${
-                        isFalsy ? "line-through decoration-gray-300" : ""
+                        isFalsy ? "line-through decoration-gray-300 dark:decoration-neutral-600" : ""
                       }`}
                     >
                       {isString ? (
@@ -317,7 +324,7 @@ const PlanCard = ({
                       ) : !isBoolean && feature.limitValue ? (
                         <>
                           {feature.name}:{" "}
-                          <strong className="font-extrabold text-gray-900">
+                          <strong className="font-extrabold text-gray-900 dark:text-white">
                             {feature.limitValue}
                             {getFeatureSuffix(feature.code, t)}
                           </strong>
@@ -333,7 +340,7 @@ const PlanCard = ({
           </div>
         </section>
 
-        <footer className="mt-7 shrink-0 border-t border-border pt-5">
+        <footer className="mt-7 shrink-0 border-t border-border dark:border-[#3F3F3F] pt-5">
           {isActive ? (
             <div
               className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-center text-sm font-extrabold"
@@ -347,7 +354,7 @@ const PlanCard = ({
               <span className="leading-snug">{buttonText}</span>
             </div>
           ) : !onAction ? (
-            <div className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-border bg-gray-50 px-4 py-3 text-center text-sm font-extrabold text-gray-400">
+            <div className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#272727] px-4 py-3 text-center text-sm font-extrabold text-gray-400 dark:text-neutral-400">
               <Check size={17} strokeWidth={2.4} />
               <span className="leading-snug">{buttonText}</span>
             </div>

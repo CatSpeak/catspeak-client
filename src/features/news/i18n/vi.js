@@ -26,10 +26,13 @@ export default {
       topics: "Chủ đề",
     },
     newsDetail: {
+      untitled: "Bài viết",
       attachments: "Tài liệu đính kèm",
       document: "Tài liệu",
       download: "Tải xuống",
       retryRelatedNews: "Không thể tải bản tin liên quan. Thử lại.",
+      seeMore: "Xem thêm",
+      showLess: "Thu gọn",
       expandComments: "Hiện bình luận",
       collapseComments: "Ẩn bình luận",
       previousPosts: "Bài viết trước",

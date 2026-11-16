@@ -254,7 +254,7 @@ const CreateEventPage = () => {
     : "hh/mm";
 
   return (
-    <div className=" min-h-screen bg-primaryBg">
+    <div className=" min-h-screen bg-primaryBg dark:bg-[#0F0F0F]">
       {/* Breadcrumb */}
       <div className="px-5 py-3 pt-2">
         <Breadcrumb items={breadcrumbItems} />
@@ -262,7 +262,7 @@ const CreateEventPage = () => {
 
       {/* Page Header */}
       <div className="flex items-center justify-between px-5 pb-5">
-        <h1 className="text-3xl font-bold text-black">
+        <h1 className="text-3xl font-bold text-black dark:text-white">
           {isEditing
             ? cal.editEvent || "Chỉnh sửa sự kiện"
             : cal.createEvent || "Tạo sự kiện"}
@@ -272,7 +272,7 @@ const CreateEventPage = () => {
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#990011] text-[#990011] text-sm font-semibold hover:bg-[#990011]/5 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#990011] dark:border-red-400 text-[#990011] dark:text-red-400 text-sm font-semibold hover:bg-[#990011]/5 dark:hover:bg-red-950/20 transition-colors"
             >
               {cal.deleteEvent || "Xóa sự kiện"}
               <Trash2 size={16} />
@@ -281,7 +281,7 @@ const CreateEventPage = () => {
           <button
             type="button"
             onClick={handleClose}
-            className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 dark:border-[#3F3F3F] text-gray-600 dark:text-neutral-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors"
           >
             {cal.cancel || "Hủy"}
             <X size={16} />
@@ -292,7 +292,7 @@ const CreateEventPage = () => {
       {/* ===== MOBILE TAB SWITCHER (hidden on lg+) ===== */}
       <div className="lg:hidden px-5 mb-0">
         <div
-          className="bg-white shadow-sm overflow-hidden"
+          className="bg-white dark:bg-[#1A1A1A] shadow-sm overflow-hidden border-b border-border dark:border-[#3F3F3F]"
           style={{ borderRadius: "16px 16px 0 0" }}
         >
           <div className="flex">
@@ -301,8 +301,8 @@ const CreateEventPage = () => {
               onClick={() => setMobileTab("create")}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 mobileTab === "create"
-                  ? "text-[#990011] border-b-2 border-[#990011]"
-                  : "text-gray-400 border-b-2 border-transparent hover:text-gray-600"
+                  ? "text-[#990011] dark:text-red-400 border-b-2 border-[#990011] dark:border-red-400"
+                  : "text-gray-400 border-b-2 border-transparent hover:text-gray-600 dark:hover:text-neutral-300"
               }`}
             >
               {cal.createEventBtn || "Tạo sự kiện"}
@@ -312,8 +312,8 @@ const CreateEventPage = () => {
               onClick={() => setMobileTab("draft")}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors relative ${
                 mobileTab === "draft"
-                  ? "text-[#990011] border-b-2 border-[#990011]"
-                  : "text-gray-400 border-b-2 border-transparent hover:text-gray-600"
+                  ? "text-[#990011] dark:text-red-400 border-b-2 border-[#990011] dark:border-red-400"
+                  : "text-gray-400 border-b-2 border-transparent hover:text-gray-600 dark:hover:text-neutral-300"
               }`}
             >
               {cal.draftTab || "Bản nháp"}
@@ -331,7 +331,7 @@ const CreateEventPage = () => {
       {mobileTab === "draft" && (
         <div className="lg:hidden px-5 pb-10">
           <div
-            className="bg-white shadow-sm overflow-hidden"
+            className="bg-white dark:bg-[#1A1A1A] shadow-sm overflow-hidden"
             style={{ borderRadius: "0 0 16px 16px" }}
           >
             {drafts.length === 0 ? (
@@ -342,11 +342,11 @@ const CreateEventPage = () => {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-[#F0F0F0]">
+              <div className="divide-y divide-[#F0F0F0] dark:divide-[#272727]">
                 {drafts.map((draft) => (
                   <div
                     key={draft.id}
-                    className="flex items-start gap-3 p-4 hover:bg-[#FFF5F5] transition-colors cursor-pointer"
+                    className="flex items-start gap-3 p-4 hover:bg-[#FFF5F5] dark:hover:bg-[#242424] transition-colors cursor-pointer"
                     onClick={() => handleLoadDraft(draft)}
                   >
                     {/* Thumbnail */}
@@ -365,7 +365,7 @@ const CreateEventPage = () => {
                     </div>
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-black truncate">
+                      <p className="font-semibold text-sm text-black dark:text-white truncate">
                         {draft.title ||
                           cal.randomEventTitle ||
                           "Tên Event ngẫu nhiên"}
@@ -396,7 +396,7 @@ const CreateEventPage = () => {
                       <span className="text-xs text-gray-400">
                         {cal.filterPrice || "Giá cả"}
                       </span>
-                      <p className="text-sm font-bold text-[#990011]">
+                      <p className="text-sm font-bold text-[#990011] dark:text-red-400">
                         {draft.ticketPrice && Number(draft.ticketPrice) > 0
                           ? `${Number(draft.ticketPrice).toLocaleString()}đ`
                           : cal.free || "Miễn Phí"}
@@ -426,19 +426,19 @@ const CreateEventPage = () => {
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT - Event Info Form */}
-          <div className="bg-white rounded-2xl p-6 flex flex-col gap-6 shadow-sm">
-            <h2 className="text-lg font-bold text-black">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl p-6 flex flex-col gap-6 shadow-sm">
+            <h2 className="text-lg font-bold text-black dark:text-white">
               {cal.eventInfo || "Thông tin sự kiện"}
             </h2>
 
             {/* Image Upload */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {cal.eventImage || "Ảnh sự kiện"}
               </label>
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="relative w-full aspect-video rounded-2xl border-2 border-dashed border-[#D0D0D0] bg-[#FAFAFA] flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#990011]/40 hover:bg-[#990011]/3 transition-all overflow-hidden"
+                className="relative w-full aspect-video rounded-2xl border-2 border-dashed border-[#D0D0D0] dark:border-[#3F3F3F] bg-[#FAFAFA] dark:bg-[#242424] flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#990011]/40 dark:hover:border-red-400/40 hover:bg-[#990011]/3 transition-all overflow-hidden"
               >
                 {imagePreview ? (
                   <img
@@ -626,7 +626,7 @@ const CreateEventPage = () => {
                 <button
                   type="button"
                   onClick={handleSaveDraft}
-                  className="flex-1 h-12 rounded-full border-2 border-[#990011] text-[#990011] font-semibold text-sm hover:bg-[#990011]/5 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 h-12 rounded-full border-2 border-[#990011] dark:border-red-400 text-[#990011] dark:text-red-400 font-semibold text-sm hover:bg-[#990011]/5 dark:hover:bg-red-950/20 transition-colors flex items-center justify-center gap-2"
                 >
                   {draftSaved ? (
                     <>
@@ -656,12 +656,12 @@ const CreateEventPage = () => {
 
           {/* RIGHT - Preview + Desktop Drafts */}
           <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-bold text-black">
+            <h2 className="text-lg font-bold text-black dark:text-white">
               {cal.previewInfo || "Xem trước thông tin"}
             </h2>
 
             {/* Preview card */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-border">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-4 shadow-sm border border-border dark:border-[#3F3F3F]">
               <div className="flex items-start gap-3">
                 {/* Preview image */}
                 <div
@@ -683,7 +683,7 @@ const CreateEventPage = () => {
 
                 {/* Preview details */}
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className="text-base font-semibold text-black">
+                  <span className="text-base font-semibold text-black dark:text-white">
                     {previewTitle}
                   </span>
                   <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
@@ -718,7 +718,7 @@ const CreateEventPage = () => {
             {(!isEditing || editEvent?.isDraft) && (
               <div className="mt-6">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-bold text-black">
+                  <h2 className="text-lg font-bold text-black dark:text-white">
                     {cal.draftTab || "Bản nháp"}
                     {drafts.length > 0 && (
                       <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#990011] text-white text-[10px] font-bold">
@@ -727,7 +727,7 @@ const CreateEventPage = () => {
                     )}
                   </h2>
                 </div>
-                <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+                <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-sm border border-border dark:border-[#3F3F3F] overflow-hidden">
                   {drafts.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-gray-400">
                       <BookmarkCheck size={32} className="mb-2 opacity-30" />
@@ -736,11 +736,11 @@ const CreateEventPage = () => {
                       </p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-[#F0F0F0]">
+                    <div className="divide-y divide-[#F0F0F0] dark:divide-[#272727]">
                       {drafts.map((draft) => (
                         <div
                           key={draft.id}
-                          className="flex items-start gap-3 p-4 hover:bg-[#FFF5F5] transition-colors group"
+                          className="flex items-start gap-3 p-4 hover:bg-[#FFF5F5] dark:hover:bg-[#242424] transition-colors group"
                         >
                           {/* Thumbnail */}
                           <div
@@ -764,7 +764,7 @@ const CreateEventPage = () => {
                             className="flex-1 min-w-0 cursor-pointer"
                             onClick={() => handleLoadDraft(draft)}
                           >
-                            <p className="font-semibold text-sm text-black truncate">
+                            <p className="font-semibold text-sm text-black dark:text-white truncate">
                               {draft.title ||
                                 cal.randomEventTitle ||
                                 "Tên Event ngẫu nhiên"}
@@ -797,7 +797,7 @@ const CreateEventPage = () => {
                             <span className="text-xs text-gray-400">
                               {cal.filterPrice || "Giá cả"}
                             </span>
-                            <p className="text-sm font-bold text-[#990011]">
+                            <p className="text-sm font-bold text-[#990011] dark:text-red-400">
                               {draft.ticketPrice &&
                               Number(draft.ticketPrice) > 0
                                 ? `${Number(draft.ticketPrice).toLocaleString()}đ`
@@ -808,7 +808,7 @@ const CreateEventPage = () => {
                               onClick={() =>
                                 setShowDeleteDraftConfirm(draft.id)
                               }
-                              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-[#990011]"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-[#990011] dark:hover:text-red-400"
                               title="Xóa bản nháp"
                             >
                               <Trash2 size={13} />
@@ -824,7 +824,7 @@ const CreateEventPage = () => {
 
             {/* Map section */}
             <div className="mt-4">
-              <h2 className=" text-lg font-bold text-black mb-4">Bản đồ</h2>
+              <h2 className=" text-lg font-bold text-black dark:text-white mb-4">Bản đồ</h2>
               <div className=" relative z-0 ">
                 <MapView
                   dayEvents={
@@ -865,7 +865,7 @@ const CreateEventPage = () => {
             <AlertTriangle size={40} className="text-yellow-500" />
           </div>
 
-          <h2 className="text-2xl font-bold text-black">
+          <h2 className="text-2xl font-bold text-black dark:text-white">
             {cal.confirmDeleteTitle || "Xóa sự kiện?"}
           </h2>
 
@@ -878,7 +878,7 @@ const CreateEventPage = () => {
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(false)}
-              className="flex-1 h-12 rounded-full border-2 border-[#990011] text-[#990011] font-semibold text-sm hover:bg-[#990011]/5 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 h-12 rounded-full border-2 border-[#990011] dark:border-red-400 text-[#990011] dark:text-red-400 font-semibold text-sm hover:bg-[#990011]/5 dark:hover:bg-red-950/20 transition-colors flex items-center justify-center gap-2"
             >
               {cal.cancelDelete || "Hủy xóa"}
               <X size={16} />
@@ -910,7 +910,7 @@ const CreateEventPage = () => {
           <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-1">
             <AlertTriangle size={32} className="text-yellow-500" />
           </div>
-          <h2 className="text-xl font-bold text-black">
+          <h2 className="text-xl font-bold text-black dark:text-white">
             {cal.deleteDraftTitle || "Xóa bản nháp?"}
           </h2>
           <p className="text-sm text-gray-500 leading-relaxed">
@@ -920,7 +920,7 @@ const CreateEventPage = () => {
             <button
               type="button"
               onClick={() => setShowDeleteDraftConfirm(null)}
-              className="flex-1 h-11 rounded-full border-2 border-[#990011] text-[#990011] font-semibold text-sm hover:bg-[#990011]/5 transition-colors"
+              className="flex-1 h-11 rounded-full border-2 border-[#990011] dark:border-red-400 text-[#990011] dark:text-red-400 font-semibold text-sm hover:bg-[#990011]/5 dark:hover:bg-red-950/20 transition-colors"
             >
               {cal.cancel || "Hủy"}
             </button>
@@ -969,10 +969,10 @@ const CreateEventPage = () => {
           ) : submitStatus === "validation_error" ? (
             <AlertTriangle size={64} className="text-yellow-500" />
           ) : (
-            <XCircle size={64} className="text-[#990011]" />
+            <XCircle size={64} className="text-[#990011] dark:text-red-400" />
           )}
 
-          <h2 className="text-xl font-bold text-black mt-2">
+          <h2 className="text-xl font-bold text-black dark:text-white mt-2">
             {submitStatus === "success"
               ? isEditing
                 ? cal.updateEventSuccess || "Cập nhật sự kiện thành công!"

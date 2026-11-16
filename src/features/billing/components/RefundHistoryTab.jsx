@@ -73,47 +73,45 @@ export default function RefundHistoryTab() {
   }
 
   return (
-    <div className="!justify-start gap-6 min-h-[500px]">
+    <div className="!justify-start min-h-[500px]">
       {/* Refund Filters & Refresh Action */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-          <div className="w-full sm:max-w-sm">
-            <SearchInput
-              placeholder={
-                refundT.searchPlaceholder || "Nhập mã đơn hàng hoặc ID..."
-              }
-              value={searchQuery}
-              onChange={(val) => {
-                setSearchQuery(val)
-                setCurrentPage(1)
-              }}
-            />
-          </div>
-
-          <div className="w-full sm:w-auto">
-            <Dropdown
-              options={statusOptions}
-              value={statusFilter}
-              onChange={(val) => {
-                setStatusFilter(val || "all")
-                setCurrentPage(1)
-              }}
-              placeholder={refundT.filterStatusAll || "Tất cả trạng thái"}
-              triggerClassName="w-full sm:!min-w-[160px] text-sm"
-              dropdownClassName="min-w-[180px]"
-              icon={<Filter className="w-4 h-4 text-gray-400" />}
-            />
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 flex-1">
+        <div className="w-full sm:max-w-sm">
+          <SearchInput
+            placeholder={
+              refundT.searchPlaceholder || "Nhập mã đơn hàng hoặc ID..."
+            }
+            value={searchQuery}
+            onChange={(val) => {
+              setSearchQuery(val)
+              setCurrentPage(1)
+            }}
+          />
         </div>
 
-        <PillButton
-          variant="secondary"
-          onClick={() => refetch()}
-          startIcon={<RefreshCw />}
-          className="shrink-0 self-start sm:self-auto"
-        >
-          {refundT.btnRefresh || "Làm mới"}
-        </PillButton>
+        <div className="flex gap-2">
+          <Dropdown
+            options={statusOptions}
+            value={statusFilter}
+            onChange={(val) => {
+              setStatusFilter(val || "all")
+              setCurrentPage(1)
+            }}
+            placeholder={refundT.filterStatusAll || "Tất cả trạng thái"}
+            triggerClassName="w-full sm:!min-w-[160px] text-sm"
+            dropdownClassName="min-w-[180px]"
+            icon={<Filter />}
+          />
+
+          <PillButton
+            variant="secondary"
+            onClick={() => refetch()}
+            startIcon={<RefreshCw />}
+            className="shrink-0 self-start sm:self-auto"
+          >
+            {refundT.btnRefresh || "Làm mới"}
+          </PillButton>
+        </div>
       </div>
 
       {/* Refund Table */}

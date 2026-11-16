@@ -29,8 +29,8 @@ const BillingFilters = ({
   ]
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3 mb-6">
-      <div className="w-full sm:flex-1 sm:max-w-sm">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+      <div className="w-full sm:flex-1 sm:max-w-[360px]">
         <SearchInput
           value={searchQuery}
           onChange={onSearchChange}
@@ -38,25 +38,19 @@ const BillingFilters = ({
         />
       </div>
 
-      <div className="w-full sm:w-auto">
+      <div className="flex gap-2">
         <Dropdown
           options={dateOptions}
           value={dateFilter}
           onChange={(val) => onDateFilterChange(val)}
           placeholder={hist.dateFilterAll || "All time"}
-          triggerClassName="w-full sm:!min-w-[140px] text-sm"
-          dropdownClassName="min-w-[160px]"
         />
-      </div>
 
-      <div className="w-full sm:w-auto">
         <Dropdown
           options={statusOptions}
           value={statusFilter}
           onChange={(val) => onStatusFilterChange(val)}
           placeholder={hist.statusFilterAll || "All statuses"}
-          triggerClassName="w-full sm:!min-w-[160px] text-sm"
-          dropdownClassName="min-w-[180px]"
         />
       </div>
     </div>

@@ -75,19 +75,19 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
 
   return (
     <div
-      className={`${embedInStack ? "w-[380px] max-w-full pointer-events-auto shadow-xl" : "fixed bottom-6 right-6 z-[9999] w-[380px] pointer-events-auto"} bg-white border border-border rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col transition-all duration-300`}
+      className={`${embedInStack ? "w-[380px] max-w-full pointer-events-auto shadow-xl" : "fixed bottom-6 right-6 z-[9999] w-[380px] pointer-events-auto"} bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col transition-all duration-300`}
     >
       {/* Widget Header */}
       <div
-        className="bg-white border-b border-border px-4 h-14 flex items-center justify-between cursor-pointer select-none"
+        className="bg-white dark:bg-[#1A1A1A] border-b border-border dark:border-[#3F3F3F] px-4 h-14 flex items-center justify-between cursor-pointer select-none"
         onClick={() => setIsMinimized(!isMinimized)}
       >
         <div className="flex items-center gap-2">
-          <span className="font-semibold">{headerText}</span>
+          <span className="font-semibold text-gray-900 dark:text-white">{headerText}</span>
         </div>
         <div className="flex items-center">
           <button className="group flex h-12 w-12 shrink-0 items-center justify-center focus:outline-none">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] group-hover:text-black group-hover:bg-primaryBg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white group-hover:bg-primaryBg dark:group-hover:bg-[#272727]">
               {isMinimized ? <ChevronUp /> : <ChevronDown />}
             </div>
           </button>
@@ -100,7 +100,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
               className="group flex h-12 w-12 shrink-0 items-center justify-center focus:outline-none"
               title="Clear all"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] group-hover:text-black group-hover:bg-primaryBg">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white group-hover:bg-primaryBg dark:group-hover:bg-[#272727]">
                 <X />
               </div>
             </button>
@@ -110,7 +110,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
 
       {/* Panel List Details */}
       {!isMinimized && (
-        <div className="py-2 max-h-[280px] overflow-y-auto bg-white">
+        <div className="py-2 max-h-[280px] overflow-y-auto bg-white dark:bg-[#1A1A1A]">
           {/* Reel Upload Items */}
           {uploadItems.map((item) => (
             <ListItem
@@ -139,7 +139,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
                   <button
                     onClick={() => cancelReelUpload(item.id)}
                     title="Hủy tải lên"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200 dark:hover:bg-[#272727] text-gray-600 dark:text-neutral-300"
                   >
                     <X size={16} />
                   </button>
@@ -149,7 +149,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
                     <button
                       onClick={() => dispatch(removeUpload(item.id))}
                       title="Xóa"
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200 dark:hover:bg-[#272727] text-gray-600 dark:text-neutral-300"
                     >
                       <X />
                     </button>
@@ -158,7 +158,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
               }
             >
               <p
-                className="text-xs font-semibold text-gray-800 truncate"
+                className="text-xs font-semibold text-gray-800 dark:text-white truncate"
                 title={item.title}
               >
                 {item.title}
@@ -166,10 +166,10 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
 
               {item.status !== "success" && (
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap">
+                  <span className="text-[10px] text-gray-500 dark:text-neutral-400 font-medium whitespace-nowrap">
                     {(item.size / (1024 * 1024)).toFixed(1)} MB (Reel)
                   </span>
-                  <span className="text-[10px] font-bold text-gray-700 whitespace-nowrap">
+                  <span className="text-[10px] font-bold text-gray-700 dark:text-neutral-300 whitespace-nowrap">
                     {item.status === "uploading" && `${item.progress}%`}
                     {item.status === "failed" && "Thất bại"}
                   </span>
@@ -206,7 +206,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
                     <button
                       onClick={() => dispatch(removeRecording(item.egressId))}
                       title="Xóa"
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200 dark:hover:bg-[#272727] text-gray-600 dark:text-neutral-300"
                     >
                       <X />
                     </button>
@@ -214,7 +214,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
                 )
               }
             >
-              <p className="truncate" title={item.meetingId}>
+              <p className="truncate text-gray-800 dark:text-white text-xs font-semibold" title={item.meetingId}>
                 {item.meetingId}
               </p>
 

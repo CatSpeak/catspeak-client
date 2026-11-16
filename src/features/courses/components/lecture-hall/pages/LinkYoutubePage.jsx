@@ -71,7 +71,6 @@ const LinkYoutubePage = () => {
     return result
   }, [linkItem])
 
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40">
@@ -83,11 +82,11 @@ const LinkYoutubePage = () => {
   if (!linkItem) {
     return (
       <div className="p-6 max-w-[1200px] mx-auto w-full">
-        <button onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)} className="flex items-center gap-2 text-[#5B403C] hover:text-[#D94C38] transition-colors mb-6 font-medium">
+        <button onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)} className="flex items-center gap-2 text-[#5B403C] dark:text-gray-400 hover:text-[#D94C38] dark:hover:text-[#FF6B6B] transition-colors mb-6 font-medium">
           <ArrowLeft size={16} />
           <span>{dict.postDetail.back}</span>
         </button>
-        <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
+        <div className="text-center py-12 text-sm text-[#EF4444] dark:text-red-400 border border-dashed border-[#FCA5A5] dark:border-red-900/40 rounded-xl bg-[#FEF2F2] dark:bg-red-950/30">
           {dict.linkPage.notFound}
         </div>
       </div>
@@ -100,7 +99,7 @@ const LinkYoutubePage = () => {
         {/* ── Breadcrumb & Nút quay lại ── */}
         <div className="flex flex-col gap-4">
           <Breadcrumb
-            className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
+            className="text-[#7B7979] dark:text-gray-400 text-xs sm:text-sm flex-wrap"
             items={[
               { label: dict.postDetail.breadcrumbs.home, onClick: () => navigate("/workspace") },
               { label: isStudent ? dict.postDetail.breadcrumbs.myLearning : dict.postDetail.breadcrumbs.myCourses, onClick: () => navigate(basePath) },
@@ -110,13 +109,6 @@ const LinkYoutubePage = () => {
               { label: dict.curriculum.link, active: true },
             ]}
           />
-
-          {/* <div
-            className="inline-flex items-center gap-2 text-sm text-[#5B403C] hover:text-[#D94C38] cursor-pointer transition-colors w-fit font-medium"
-            onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
-          >
-            <ArrowLeft size={16} /> {dict.postDetail.back}
-          </div> */}
         </div>
 
         <div className="flex justify-center items-center">
@@ -131,18 +123,18 @@ const LinkYoutubePage = () => {
                   allowFullScreen
                 />
               </div>
-              <p className="mt-3 text-sm text-[#6B7280]">
+              <p className="mt-3 text-sm text-[#6B7280] dark:text-gray-400">
                 {dict.linkPage.videoNotLoading}{" "}
-                <a href={linkItem.url} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline font-medium">
+                <a href={linkItem.url} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline font-medium">
                   {dict.linkPage.openInNewTab}
                 </a>
               </p>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center p-12 text-sm text-[#5B403C] w-full border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-              <VideoOff size={40} className="mb-4 text-[#9CA3AF] opacity-80" />
+            <div className="flex flex-col items-center justify-center p-12 text-sm text-[#5B403C] dark:text-gray-300 w-full border border-dashed border-[#E2E2E2] dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#1A1A1A]">
+              <VideoOff size={40} className="mb-4 text-[#9CA3AF] dark:text-gray-500 opacity-80" />
               <p>{dict.linkPage.invalidYoutube}</p>
-              <a href={linkItem.url} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline mt-2 inline-block font-medium">
+              <a href={linkItem.url} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline mt-2 inline-block font-medium">
                 {dict.linkPage.openInNewTab}
               </a>
             </div>

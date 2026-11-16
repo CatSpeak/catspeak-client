@@ -109,8 +109,8 @@ const ExploreCoursesPage = () => {
     1,
     Number(
       teacherPagination.totalPages ||
-        Math.ceil(totalTeachers / 6) ||
-        1,
+      Math.ceil(totalTeachers / 6) ||
+      1,
     ),
   )
 
@@ -148,130 +148,138 @@ const ExploreCoursesPage = () => {
   const categoryTabs = [
     { value: "all", label: sc.tabAllCatalog || "Tất cả", icon: Compass },
     { value: "courses", label: sc.tabCourses || "Khóa học", icon: BookOpen },
-    {
-      value: "classes",
-      label: sc.tabClasses || "Lớp học",
-      icon: GraduationCap,
-    },
-    {
-      value: "teachers",
-      label: sc.tabTeachers || "Giảng viên",
-      icon: Users,
-      badge: totalTeachers > 0 ? totalTeachers : undefined,
-    },
+    { value: "classes", label: sc.tabClasses || "Lớp học", icon: GraduationCap },
+    { value: "teachers", label: sc.tabTeachers || "Giảng viên", icon: Users },
   ]
 
-  // Event 1: Search submitted via Enter or Search button click
-  const handleSearchSubmit = (val) => {
-    setAppliedSearchQuery(
-      typeof val === "string" ? val.trim() : searchInputValue.trim(),
-    )
-    setCurrentPage(1)
-  }
-
-  // Event 2: Apply filters from Modal
-  const handleApplyModalFilters = ({
-    enrollmentStatus,
-    minPrice,
-    maxPrice,
-  }) => {
-    setMinPriceInput(minPrice)
-    setMaxPriceInput(maxPrice)
-    setSelectedStatus(enrollmentStatus || "all")
-    setCurrentPage(1)
-  }
-
-  // Event 3: Single-select status handler
-  const handleSelectStatus = (val) => {
-    setCurrentPage(1)
-    setSelectedStatus((prev) => (prev === val ? "all" : val))
-  }
-
-  // Validate price range inputs
-  const parsedMin =
+  // Parse numeric prices
+  const minPriceNum =
     minPriceInput !== "" && !isNaN(Number(minPriceInput))
       ? Number(minPriceInput)
       : undefined
-  const parsedMax =
+  const maxPriceNum =
     maxPriceInput !== "" && !isNaN(Number(maxPriceInput))
       ? Number(maxPriceInput)
       : undefined
 
-  let activeMinPrice = parsedMin
-  let activeMaxPrice = parsedMax
-
-  if (parsedMax != null && parsedMin == null) {
-    activeMinPrice = 0
-  }
-  if (parsedMin != null && parsedMax != null && parsedMin > parsedMax) {
-    activeMaxPrice = undefined
-  }
-
-  const activeEnrollmentStatus = useMemo(() => {
-    if (!selectedStatus || selectedStatus === "all") return undefined
-    return selectedStatus
-  }, [selectedStatus])
-
-  // Explore Courses API Query
-  const exploreCatalogQuery = useGetExploreCoursesQuery({
-    page: currentPage,
-    pageSize: PAGE_SIZE,
-    language: resolvedLanguage,
-    search: appliedSearchQuery || undefined,
-    sort: sortOrder !== "default" ? sortOrder : undefined,
-    minPrice: activeMinPrice,
-    maxPrice: activeMaxPrice,
-    type: contentType !== "all" ? contentType : undefined,
-    enrollmentStatus: activeEnrollmentStatus,
-  })
+  // Explore Courses/Classes API Query
+  const exploreCatalogQuery = useGetExploreCoursesQuery(
+    {
+      page: currentPage,
+      limit: PAGE_SIZE,
+      search: appliedSearchQuery || undefined,
+      type: contentType !== "all" && contentType !== "teachers" ? contentType : undefined,
+      enrollmentStatus: selectedStatus !== "all" ? selectedStatus : undefined,
+      sort: sortOrder !== "default" ? sortOrder : undefined,
+      minPrice: minPriceNum,
+      maxPrice: maxPriceNum,
+      language: resolvedLanguage,
+    },
+    {
+      skip: contentType === "teachers",
+    },
+  )
 
   const isLoading = exploreCatalogQuery.isLoading
   const isFetching = exploreCatalogQuery.isFetching
   const error = exploreCatalogQuery.error
 
-  // Reset page when language changes
+  // Reset pagination when any filter changes
   useEffect(() => {
     setCurrentPage(1)
-    setTeacherPage(1)
-  }, [resolvedLanguage])
+    setCatalogItems([])
+    setHasMore(true)
+  }, [
+    appliedSearchQuery,
+    contentType,
+    selectedStatus,
+    sortOrder,
+    minPriceInput,
+    maxPriceInput,
+    resolvedLanguage,
+  ])
 
-  // Sync / Accumulate data for Infinite Scroll
+  // Accumulate items for Infinite Scroll
   useEffect(() => {
-    if (exploreCatalogQuery.data) {
-      const raw = exploreCatalogQuery.data.data
-      const items = Array.isArray(raw) ? raw : []
-      const pagination = exploreCatalogQuery.data.pagination
-      const totalPages = Number(pagination?.totalPages) || 1
+    if (contentType === "teachers") return
+    if (!exploreCatalogQuery.data) return
 
-      if (currentPage === 1) {
-        setCatalogItems(items)
-      } else {
-        setCatalogItems((prev) => {
-          const existingIds = new Set(prev.map((i) => String(i.id)))
-          const newItems = items.filter((i) => !existingIds.has(String(i.id)))
-          return [...prev, ...newItems]
-        })
-      }
-      setHasMore(currentPage < totalPages && items.length > 0)
+    const incoming =
+      exploreCatalogQuery.data.items ||
+      exploreCatalogQuery.data.data ||
+      exploreCatalogQuery.data.courses ||
+      []
+
+    const pagination = exploreCatalogQuery.data.pagination || {}
+    const totalCount =
+      pagination.total ??
+      exploreCatalogQuery.data.total ??
+      exploreCatalogQuery.data.count
+
+    if (currentPage === 1) {
+      setCatalogItems(incoming)
+    } else {
+      setCatalogItems((prev) => {
+        const existingIds = new Set(prev.map((i) => i.id || i._id))
+        const newUnique = incoming.filter(
+          (item) => !existingIds.has(item.id || item._id),
+        )
+        return [...prev, ...newUnique]
+      })
     }
-  }, [exploreCatalogQuery.data, currentPage])
 
-  // Infinite Scroll Observer
+    if (totalCount != null) {
+      const accumulatedCount =
+        currentPage === 1 ? incoming.length : catalogItems.length + incoming.length
+      setHasMore(accumulatedCount < totalCount)
+    } else {
+      setHasMore(incoming.length === PAGE_SIZE)
+    }
+  }, [exploreCatalogQuery.data, currentPage, contentType])
+
+  // Infinite Scroll Observer on the 2nd to last item
   useEffect(() => {
-    if (!secondLastItemRef.current || !hasMore || isFetching) return
+    if (contentType === "teachers") return
+    if (!hasMore || isFetching) return
+
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && hasMore && !isFetching) {
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasMore && !isFetching) {
           setCurrentPage((prev) => prev + 1)
         }
       },
-      {
-        rootMargin: "250px",
-      },
+      { root: null, rootMargin: "200px", threshold: 0.1 },
     )
-    observer.observe(secondLastItemRef.current)
-    return () => observer.disconnect()
-  }, [catalogItems, hasMore, isFetching])
+
+    const currentEl = secondLastItemRef.current
+    if (currentEl) {
+      observer.observe(currentEl)
+    }
+
+    return () => {
+      if (currentEl) {
+        observer.unobserve(currentEl)
+      }
+    }
+  }, [catalogItems, hasMore, isFetching, contentType])
+
+  const handleSearchSubmit = (val) => {
+    setAppliedSearchQuery((val || "").trim())
+    setCurrentPage(1)
+    setTeacherPage(1)
+  }
+
+  const handleSelectStatus = (val) => {
+    setSelectedStatus(val)
+    setCurrentPage(1)
+  }
+
+  const handleApplyModalFilters = ({ enrollmentStatus, minPrice, maxPrice }) => {
+    setSelectedStatus(enrollmentStatus)
+    setMinPriceInput(minPrice)
+    setMaxPriceInput(maxPrice)
+    setCurrentPage(1)
+  }
 
   const isWorkspace = window.location.pathname.startsWith("/workspace")
 
@@ -365,16 +373,16 @@ const ExploreCoursesPage = () => {
 
   return (
     <div
-      className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}
+      className={`flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-200 ${isWorkspace ? "" : "p-4 sm:p-6"}`}
     >
       {/* ─── Header & Subtitle ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-950 tracking-tight flex items-center gap-2.5">
-            <Compass size={28} className="text-[#b20a1c]" />
+          <h1 className="text-3xl font-black text-slate-950 dark:text-white tracking-tight flex items-center gap-2.5">
+            <Compass size={28} className="text-[#b20a1c] dark:text-[#FF6B6B]" />
             <span>{dict.exploreCourses || "Explore Courses"}</span>
           </h1>
-          <p className="text-sm text-slate-500 font-medium mt-1">
+          <p className="text-sm text-slate-500 dark:text-gray-400 font-medium mt-1">
             {sc.exploreCoursesSubtitle ||
               "Discover and enroll in top language courses and standalone classes to start your learning journey."}
           </p>
@@ -382,7 +390,7 @@ const ExploreCoursesPage = () => {
       </div>
 
       {/* ─── Category Tabs & Filter Button ─── */}
-      <div className="flex items-center justify-between border-b border-border/80 pb-px">
+      <div className="flex items-center justify-between border-b border-border/80 dark:border-[#3F3F3F] pb-px">
         <CourseTabs
           tabs={categoryTabs}
           activeTab={contentType}
@@ -398,12 +406,12 @@ const ExploreCoursesPage = () => {
           <button
             type="button"
             onClick={() => setIsFilterModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
+            className="hidden sm:flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] dark:text-[#FF6B6B] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
           >
-            <Filter size={16} className="text-[#b20a1c]" />
+            <Filter size={16} className="text-[#b20a1c] dark:text-[#FF6B6B]" />
             <span>{sc.filter || "Bộ lọc"}</span>
             {hasActiveModalFilters && (
-              <span className="w-2 h-2 rounded-full bg-[#b20a1c]" />
+              <span className="w-2 h-2 rounded-full bg-[#b20a1c] dark:bg-[#FF6B6B]" />
             )}
           </button>
         )}
@@ -434,12 +442,12 @@ const ExploreCoursesPage = () => {
                 placeholder={
                   contentType === "teachers"
                     ? sc.searchTeacherPlaceholder ||
-                      "Tìm theo tên giảng viên, chuyên môn,..."
+                    "Tìm theo tên giảng viên, chuyên môn,..."
                     : sc.searchPlaceholder ||
-                      "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."
+                    "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."
                 }
                 className="w-full"
-                inputClassName="w-full h-11 pl-5 pr-11 bg-white border-0 outline-none rounded-full text-sm font-normal text-slate-800 placeholder:text-slate-400 shadow-2xs focus:ring-2 focus:ring-[#b20a1c]/20 transition-all"
+                inputClassName="w-full h-11 pl-5 pr-11 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] outline-none rounded-full text-sm font-normal text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 shadow-2xs focus:ring-2 focus:ring-[#b20a1c]/20 transition-all"
               />
             </div>
           </div>
@@ -506,7 +514,7 @@ const ExploreCoursesPage = () => {
         {/* Row 2: Status single-select list (only for courses/classes, visible on >= sm) */}
         {contentType !== "teachers" && (
           <div className="hidden sm:flex flex-wrap items-center gap-2">
-            <span className="text-sm font-semibold text-slate-700 mr-1">
+            <span className="text-sm font-semibold text-slate-700 dark:text-gray-300 mr-1">
               {sc.statusLabel || "Trạng thái:"}
             </span>
 
@@ -518,11 +526,10 @@ const ExploreCoursesPage = () => {
                   key={opt.value}
                   type="button"
                   onClick={() => handleSelectStatus(opt.value)}
-                  className={`h-8 px-4 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    isSelected
+                  className={`h-8 px-4 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${isSelected
                       ? "bg-[#b20a1c] text-white shadow-xs"
-                      : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-0 shadow-2xs"
-                  }`}
+                      : "bg-white dark:bg-[#1A1A1A] text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-[#2A2A2A] hover:text-slate-900 dark:hover:text-white border border-border dark:border-[#3F3F3F] shadow-2xs"
+                    }`}
                 >
                   <span>{opt.label}</span>
                 </button>
@@ -545,26 +552,26 @@ const ExploreCoursesPage = () => {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex flex-col items-center gap-3 animate-pulse"
+                  className="rounded-2xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-6 shadow-xs flex flex-col items-center gap-3 animate-pulse"
                 >
-                  <div className="w-[72px] h-[72px] rounded-full bg-slate-200" />
-                  <div className="h-4 bg-slate-200 rounded-md w-32 mt-2" />
-                  <div className="h-3 bg-slate-100 rounded-md w-48" />
-                  <div className="h-3 bg-slate-100 rounded-md w-28" />
-                  <div className="h-8 bg-slate-100 rounded-xl w-full mt-2" />
-                  <div className="h-9 bg-slate-200 rounded-xl w-full mt-2" />
+                  <div className="w-[72px] h-[72px] rounded-full bg-slate-200 dark:bg-[#2A2A2A]" />
+                  <div className="h-4 bg-slate-200 dark:bg-[#2A2A2A] rounded-md w-32 mt-2" />
+                  <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-48" />
+                  <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-28" />
+                  <div className="h-8 bg-slate-100 dark:bg-[#222222] rounded-xl w-full mt-2" />
+                  <div className="h-9 bg-slate-200 dark:bg-[#2A2A2A] rounded-xl w-full mt-2" />
                 </div>
               ))}
             </div>
           ) : teachersError && teachersList.length === 0 ? (
             <div
               role="alert"
-              className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 bg-red-50 p-6 text-center"
+              className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 p-6 text-center"
             >
-              <h3 className="text-lg font-extrabold text-red-800">
+              <h3 className="text-lg font-extrabold text-red-800 dark:text-red-300">
                 {sc.loadErrorTitle || "Unable to load data"}
               </h3>
-              <p className="max-w-sm text-sm font-semibold text-red-700">
+              <p className="max-w-sm text-sm font-semibold text-red-700 dark:text-red-400">
                 {sc.loadErrorDescription ||
                   "Check your connection and try again."}
               </p>
@@ -572,7 +579,7 @@ const ExploreCoursesPage = () => {
                 type="button"
                 onClick={() => refetchTeachers()}
                 disabled={isTeachersFetching}
-                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 bg-white px-5 text-xs font-extrabold text-red-700 hover:bg-red-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#1A1A1A] px-5 text-xs font-extrabold text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RefreshCw size={13} aria-hidden="true" />
                 <span>{isTeachersFetching ? "Retrying..." : "Retry"}</span>
@@ -581,17 +588,17 @@ const ExploreCoursesPage = () => {
           ) : teachersList.length === 0 ? (
             <div
               role="status"
-              className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 bg-white p-8 text-center shadow-xs"
+              className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-8 text-center shadow-xs"
             >
               <Users
                 size={52}
                 aria-hidden="true"
-                className="text-slate-300 stroke-[1.2]"
+                className="text-slate-300 dark:text-gray-600 stroke-[1.2]"
               />
-              <h3 className="text-lg font-extrabold text-slate-800">
+              <h3 className="text-lg font-extrabold text-slate-800 dark:text-white">
                 {sc.noTeachersFound || "Không tìm thấy giảng viên"}
               </h3>
-              <p className="max-w-xs text-sm font-semibold text-slate-500">
+              <p className="max-w-xs text-sm font-semibold text-slate-500 dark:text-gray-400">
                 {sc.noTeachersFoundDesc ||
                   "Thử thay đổi từ khóa tìm kiếm hoặc sắp xếp."}
               </p>
@@ -627,11 +634,11 @@ const ExploreCoursesPage = () => {
               {/* Pagination & Count Summary (Matching Mockup) */}
               <div className="flex flex-col items-center justify-center gap-4 pt-2">
                 {/* Text: Hiển thị 6 trên 48 giảng viên */}
-                <p className="text-xs text-slate-400 font-normal text-center">
+                <p className="text-xs text-slate-400 dark:text-gray-500 font-normal text-center">
                   {sc.showingTeachers
                     ? sc.showingTeachers
-                        .replace("{{count}}", String(teachersList.length))
-                        .replace("{{total}}", String(totalTeachers))
+                      .replace("{{count}}", String(teachersList.length))
+                      .replace("{{total}}", String(totalTeachers))
                     : `Hiển thị ${teachersList.length} trên ${totalTeachers} giảng viên`}
                 </p>
 
@@ -644,11 +651,10 @@ const ExploreCoursesPage = () => {
                       aria-label="First page"
                       onClick={() => handleTeacherPageChange(1)}
                       disabled={teacherPage === 1}
-                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${
-                        teacherPage === 1
-                          ? "bg-[#7B7979] text-[#E2E2E2] opacity-35 cursor-not-allowed"
-                          : "border border-[#990011] text-[#990011] hover:bg-red-50 cursor-pointer"
-                      }`}
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${teacherPage === 1
+                          ? "bg-[#7B7979] dark:bg-[#333333] text-[#E2E2E2] dark:text-gray-500 opacity-35 cursor-not-allowed"
+                          : "border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                        }`}
                     >
                       <ChevronsLeft size={16} />
                     </button>
@@ -659,11 +665,10 @@ const ExploreCoursesPage = () => {
                       aria-label="Previous page"
                       onClick={() => handleTeacherPageChange(teacherPage - 1)}
                       disabled={teacherPage === 1}
-                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${
-                        teacherPage === 1
-                          ? "bg-[#7B7979] text-[#E2E2E2] opacity-35 cursor-not-allowed"
-                          : "border border-[#990011] text-[#990011] hover:bg-red-50 cursor-pointer"
-                      }`}
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${teacherPage === 1
+                          ? "bg-[#7B7979] dark:bg-[#333333] text-[#E2E2E2] dark:text-gray-500 opacity-35 cursor-not-allowed"
+                          : "border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                        }`}
                     >
                       <ChevronLeft size={16} />
                     </button>
@@ -679,11 +684,10 @@ const ExploreCoursesPage = () => {
                           key={p}
                           type="button"
                           onClick={() => handleTeacherPageChange(p)}
-                          className={`w-[38px] h-[38px] rounded-full font-semibold text-sm flex items-center justify-center transition-all cursor-pointer ${
-                            isActive
+                          className={`w-[38px] h-[38px] rounded-full font-semibold text-sm flex items-center justify-center transition-all cursor-pointer ${isActive
                               ? "bg-[#990011] text-white shadow-xs"
-                              : "border border-[#990011] text-[#990011] hover:bg-red-50"
-                          }`}
+                              : "border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50 dark:hover:bg-red-950/30"
+                            }`}
                         >
                           {String(p).padStart(2, "0")}
                         </button>
@@ -696,11 +700,10 @@ const ExploreCoursesPage = () => {
                       aria-label="Next page"
                       onClick={() => handleTeacherPageChange(teacherPage + 1)}
                       disabled={teacherPage === teacherTotalPages}
-                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${
-                        teacherPage === teacherTotalPages
-                          ? "bg-[#7B7979] text-[#E2E2E2] opacity-35 cursor-not-allowed"
-                          : "border border-[#990011] text-[#990011] hover:bg-red-50 cursor-pointer"
-                      }`}
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${teacherPage === teacherTotalPages
+                          ? "bg-[#7B7979] dark:bg-[#333333] text-[#E2E2E2] dark:text-gray-500 opacity-35 cursor-not-allowed"
+                          : "border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                        }`}
                     >
                       <ChevronRight size={16} />
                     </button>
@@ -711,11 +714,10 @@ const ExploreCoursesPage = () => {
                       aria-label="Last page"
                       onClick={() => handleTeacherPageChange(teacherTotalPages)}
                       disabled={teacherPage === teacherTotalPages}
-                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${
-                        teacherPage === teacherTotalPages
-                          ? "bg-[#7B7979] text-[#E2E2E2] opacity-35 cursor-not-allowed"
-                          : "border border-[#990011] text-[#990011] hover:bg-red-50 cursor-pointer"
-                      }`}
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${teacherPage === teacherTotalPages
+                          ? "bg-[#7B7979] dark:bg-[#333333] text-[#E2E2E2] dark:text-gray-500 opacity-35 cursor-not-allowed"
+                          : "border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                        }`}
                     >
                       <ChevronsRight size={16} />
                     </button>
@@ -731,16 +733,16 @@ const ExploreCoursesPage = () => {
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-3xl border border-border/80 bg-white p-4 shadow-xs flex flex-col gap-4 animate-pulse"
+                  className="rounded-3xl border border-border/80 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-4 shadow-xs flex flex-col gap-4 animate-pulse"
                 >
-                  <div className="aspect-[16/10] w-full bg-slate-200 rounded-2xl" />
+                  <div className="aspect-[16/10] w-full bg-slate-200 dark:bg-[#2A2A2A] rounded-2xl" />
                   <div className="space-y-2">
-                    <div className="h-4 bg-slate-200 rounded-md w-3/4" />
-                    <div className="h-3 bg-slate-100 rounded-md w-1/2" />
+                    <div className="h-4 bg-slate-200 dark:bg-[#2A2A2A] rounded-md w-3/4" />
+                    <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-1/2" />
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-auto">
-                    <div className="h-4 bg-slate-200 rounded-md w-1/3" />
-                    <div className="h-8 bg-slate-200 rounded-full w-20" />
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#333333] mt-auto">
+                    <div className="h-4 bg-slate-200 dark:bg-[#2A2A2A] rounded-md w-1/3" />
+                    <div className="h-8 bg-slate-200 dark:bg-[#2A2A2A] rounded-full w-20" />
                   </div>
                 </div>
               ))}
@@ -750,13 +752,13 @@ const ExploreCoursesPage = () => {
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-3xl border border-border/80 bg-white p-5 shadow-xs flex gap-5 animate-pulse items-center"
+                  className="rounded-3xl border border-border/80 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-5 shadow-xs flex gap-5 animate-pulse items-center"
                 >
-                  <div className="w-44 h-28 bg-slate-200 rounded-2xl shrink-0" />
+                  <div className="w-44 h-28 bg-slate-200 dark:bg-[#2A2A2A] rounded-2xl shrink-0" />
                   <div className="flex-1 space-y-3">
-                    <div className="h-5 bg-slate-200 rounded-md w-2/3" />
-                    <div className="h-3 bg-slate-100 rounded-md w-1/3" />
-                    <div className="h-4 bg-slate-200 rounded-md w-1/4" />
+                    <div className="h-5 bg-slate-200 dark:bg-[#2A2A2A] rounded-md w-2/3" />
+                    <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-1/3" />
+                    <div className="h-4 bg-slate-200 dark:bg-[#2A2A2A] rounded-md w-1/4" />
                   </div>
                 </div>
               ))}
@@ -765,12 +767,12 @@ const ExploreCoursesPage = () => {
         ) : error && catalogItems.length === 0 ? (
           <div
             role="alert"
-            className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 bg-red-50 p-6 text-center"
+            className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 p-6 text-center"
           >
-            <h3 className="text-lg font-extrabold text-red-800">
+            <h3 className="text-lg font-extrabold text-red-800 dark:text-red-300">
               {sc.loadErrorTitle || "Unable to load data"}
             </h3>
-            <p className="max-w-sm text-sm font-semibold text-red-700">
+            <p className="max-w-sm text-sm font-semibold text-red-700 dark:text-red-400">
               {sc.loadErrorDescription ||
                 "Check your connection and try again."}
             </p>
@@ -780,7 +782,7 @@ const ExploreCoursesPage = () => {
                 exploreCatalogQuery.refetch?.()
               }}
               disabled={isFetching}
-              className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 bg-white px-5 text-xs font-extrabold text-red-700 hover:bg-red-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#1A1A1A] px-5 text-xs font-extrabold text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
               <RefreshCw size={13} aria-hidden="true" />
               <span>{isFetching ? "Retrying..." : "Retry"}</span>
@@ -789,24 +791,24 @@ const ExploreCoursesPage = () => {
         ) : catalogItems.length === 0 ? (
           <div
             role="status"
-            className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 bg-white p-8 text-center shadow-xs"
+            className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-8 text-center shadow-xs"
           >
             <Compass
               size={52}
               aria-hidden="true"
-              className="text-slate-300 stroke-[1.2]"
+              className="text-slate-300 dark:text-gray-600 stroke-[1.2]"
             />
-            <h3 className="text-lg font-extrabold text-slate-800">
+            <h3 className="text-lg font-extrabold text-slate-800 dark:text-white">
               {hasActiveFilters
                 ? sc.noCoursesFound || "No items found"
                 : sc.noAvailableCourses || "No offerings available"}
             </h3>
-            <p className="max-w-xs text-sm font-semibold text-slate-500">
+            <p className="max-w-xs text-sm font-semibold text-slate-500 dark:text-gray-400">
               {hasActiveFilters
                 ? sc.noCoursesFoundDesc ||
-                  "Try clearing your search query or price filter."
+                "Try clearing your search query or price filter."
                 : sc.noAvailableCoursesDesc ||
-                  "There are no public offerings available right now."}
+                "There are no public offerings available right now."}
             </p>
             {hasActiveFilters && (
               <button

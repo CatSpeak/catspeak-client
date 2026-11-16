@@ -21,7 +21,7 @@ export default function RankRow({ rank, username, handle, score, coverUrl, onCli
 
   return (
     <div 
-      className="flex items-center justify-between p-3 sm:p-4 hover:bg-gray-50 transition-colors bg-white cursor-pointer"
+      className="flex items-center justify-between p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors bg-white dark:bg-[#1A1A1A] cursor-pointer"
       onClick={onClick}
     >
       <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -30,16 +30,16 @@ export default function RankRow({ rank, username, handle, score, coverUrl, onCli
         </div>
         <Avatar size={40} name={username || handle} src={avatarUrl} accountId={accountId} />
         <div className="flex flex-col min-w-0">
-          <span className="font-semibold text-gray-900 text-[14px] truncate">{username}</span>
-          <span className="text-gray-500 text-[12px] truncate">@{handle}</span>
+          <span className="font-semibold text-gray-900 dark:text-white text-[14px] truncate">{username}</span>
+          <span className="text-gray-500 dark:text-neutral-400 text-[12px] truncate">@{handle}</span>
         </div>
       </div>
       
       <div className="flex items-center gap-4 sm:gap-6 shrink-0 pl-2">
-        <span className="font-bold text-[14px] flex items-center gap-1.5">
-          {formatScore(score)} <Heart size={14} className="text-cath-red-700 fill-cath-red-700" />
+        <span className="font-bold text-[14px] text-gray-900 dark:text-white flex items-center gap-1.5">
+          {formatScore(score)} <Heart size={14} className="text-cath-red-700 dark:text-red-400 fill-cath-red-700 dark:fill-red-400" />
         </span>
-        <div className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-border bg-gray-100">
+        <div className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-border dark:border-[#3F3F3F] bg-gray-100 dark:bg-[#242424]">
           {coverUrl && <img src={coverUrl} alt="" className="w-full h-full object-cover" />}
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
             <Play size={16} className="text-white fill-white" />

@@ -33,14 +33,14 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
             <div
               key={`mobile-${item.id}`}
               onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(item.id))}`)}
-              className="bg-white rounded-3xl border border-border/90 p-4 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col gap-3 group"
+              className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border/90 dark:border-[#3F3F3F] p-4 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col gap-3 group"
             >
               {/* Header: Thumbnail + Title + Status + 3-dots */}
               <div className="flex items-start gap-3">
                 <CourseThumbnail
                   item={item}
                   title={item.classTitle || item.title}
-                  className="w-20 h-16 min-w-[80px] max-w-[80px] rounded-2xl bg-slate-100 shadow-2xs shrink-0 overflow-hidden"
+                  className="w-20 h-16 min-w-[80px] max-w-[80px] rounded-2xl bg-slate-100 dark:bg-[#2A2A2A] shadow-2xs shrink-0 overflow-hidden"
                   imageClassName="w-full h-full object-cover"
                 />
                 <div className="flex flex-col flex-1 min-w-0 gap-1">
@@ -53,7 +53,7 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                     )}
                   </div>
                   <h4
-                    className="font-bold text-sm text-gray-950 truncate group-hover:text-[#990011] transition-colors leading-snug"
+                    className="font-bold text-sm text-gray-950 dark:text-white truncate group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors leading-snug"
                     title={item.classTitle || item.title}
                   >
                     {item.classTitle || item.title}
@@ -73,14 +73,14 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                     }}
                     variant="ghost"
                     size="xs"
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-200"
                   >
                     <MoreVertical size={16} />
                   </IconButton>
                   {activeDropdown === `m-${item.id}` && (
                     <div
                       role="menu"
-                      className="absolute right-0 mt-1 min-w-[152px] bg-white border border-border rounded-2xl shadow-lg py-1 z-30 text-left whitespace-nowrap"
+                      className="absolute right-0 mt-1 min-w-[152px] bg-white dark:bg-[#1E1E1E] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-lg py-1 z-30 text-left whitespace-nowrap"
                     >
                       <button
                         type="button"
@@ -90,9 +90,9 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                           setActiveDropdown(null)
                           navigate(`/workspace/courses/class/${encodeURIComponent(String(item.id))}`)
                         }}
-                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 cursor-pointer"
                       >
-                        <Eye size={14} className="text-gray-500 shrink-0" />
+                        <Eye size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
                         <span>{c.viewDetails || "Xem chi tiết"}</span>
                       </button>
                       <button
@@ -104,9 +104,9 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                           if (onEdit) onEdit(item)
                           else navigate(`/workspace/courses/edit-class/${encodeURIComponent(String(item.id))}`)
                         }}
-                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-t border-border/60 cursor-pointer"
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 border-t border-border/60 dark:border-[#3F3F3F] cursor-pointer"
                       >
-                        <PenSquare size={14} className="text-gray-500 shrink-0" />
+                        <PenSquare size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
                         <span>{c.editClass || "Chỉnh sửa"}</span>
                       </button>
                       {onDelete && (
@@ -118,7 +118,7 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                             setActiveDropdown(null)
                             onDelete(item.id)
                           }}
-                          className="w-full px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-border/60 cursor-pointer"
+                          className="w-full px-3.5 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 border-t border-border/60 dark:border-[#3F3F3F] cursor-pointer"
                         >
                           <Trash2 size={14} className="shrink-0" />
                           <span>{c.deleteClass || "Xóa"}</span>
@@ -130,29 +130,29 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
               </div>
 
               {/* Middle Info Panel */}
-              <div className="bg-gray-50/80 rounded-2xl p-2.5 text-xs text-gray-600 flex flex-col gap-1.5 border border-gray-100">
+              <div className="bg-gray-50/80 dark:bg-[#242424] rounded-2xl p-2.5 text-xs text-gray-600 dark:text-gray-300 flex flex-col gap-1.5 border border-gray-100 dark:border-[#333333]">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-gray-400 font-medium text-[11px]">{c.belongsToCourse || "Thuộc khóa học"}:</span>
-                  <span className="font-semibold text-gray-800 truncate max-w-[180px]">
+                  <span className="text-gray-400 dark:text-gray-400 font-medium text-[11px]">{c.belongsToCourse || "Thuộc khóa học"}:</span>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200 truncate max-w-[180px]">
                     {item.courseTitle || c.standaloneClass || "Lớp độc lập"}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-1.5 text-gray-500">
-                    <Calendar size={13} className="text-gray-400 shrink-0" />
+                  <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+                    <Calendar size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                     <span>{item.schedule || "—"}</span>
                   </span>
-                  <span className="flex items-center gap-1.5 font-semibold text-gray-700">
-                    <Users size={13} className="text-gray-400 shrink-0" />
+                  <span className="flex items-center gap-1.5 font-semibold text-gray-700 dark:text-gray-300">
+                    <Users size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                     <span>{item.students || "0"}</span>
                   </span>
                 </div>
 
                 {(item.startDate || item.endDate) && (
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-200/60 text-[11px]">
-                    <span className="text-gray-400">{c.startDate || "Ngày mở"}: <strong className="text-gray-700 font-semibold">{item.startDate || "—"}</strong></span>
-                    <span className="text-gray-400">{c.endDate || "Ngày hết"}: <strong className="text-gray-700 font-semibold">{item.endDate || "—"}</strong></span>
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-200/60 dark:border-[#333333] text-[11px]">
+                    <span className="text-gray-400 dark:text-gray-400">{c.startDate || "Ngày mở"}: <strong className="text-gray-700 dark:text-gray-200 font-semibold">{item.startDate || "—"}</strong></span>
+                    <span className="text-gray-400 dark:text-gray-400">{c.endDate || "Ngày hết"}: <strong className="text-gray-700 dark:text-gray-200 font-semibold">{item.endDate || "—"}</strong></span>
                   </div>
                 )}
               </div>
@@ -161,20 +161,20 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
               <div className="flex flex-col gap-2 pt-1">
                 <div className="flex items-center justify-between">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-xs text-gray-400 font-medium">{c.price || "Giá cả"}:</span>
-                    <span className={`text-sm font-bold ${isFree ? "text-[#16A34A]" : "text-gray-950"}`}>
+                    <span className="text-xs text-gray-400 dark:text-gray-400 font-medium">{c.price || "Giá cả"}:</span>
+                    <span className={`text-sm font-bold ${isFree ? "text-[#16A34A] dark:text-emerald-400" : "text-gray-950 dark:text-white"}`}>
                       {isFree ? (c.free || "Miễn phí") : (item.price || "—")}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-xs font-semibold text-gray-700">
+                  <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 dark:text-gray-300">
                     <span>{c.progress || "Tiến độ"}:</span>
-                    <span className="font-bold text-[#8B0000]">{item.progress ?? 0}%</span>
+                    <span className="font-bold text-[#8B0000] dark:text-[#FF6B6B]">{item.progress ?? 0}%</span>
                   </div>
                 </div>
 
-                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-gray-100 dark:bg-[#333333] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#8B0000] rounded-full transition-all duration-500"
+                    className="h-full bg-[#8B0000] dark:bg-[#b20a1c] rounded-full transition-all duration-500"
                     style={{ width: `${item.progress ?? 0}%` }}
                   />
                 </div>
@@ -185,32 +185,32 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
       </div>
 
       {/* ─── Desktop View (>= md): Full 7-Column Table ─── */}
-      <div className="hidden md:block w-full overflow-x-auto rounded-3xl border border-border bg-white shadow-xs">
-        <table className="w-full min-w-[980px] border-collapse text-left text-xs font-semibold text-gray-500">
+      <div className="hidden md:block w-full overflow-x-auto rounded-3xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-xs">
+        <table className="w-full min-w-[980px] border-collapse text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
           <thead>
-            <tr className="border-b border-border bg-gray-50/60 text-gray-800 font-bold">
-              <th className="p-4 border-r border-border w-[170px] min-w-[150px] whitespace-nowrap">
+            <tr className="border-b border-border dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#242424] text-gray-800 dark:text-gray-200 font-bold">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[170px] min-w-[150px] whitespace-nowrap">
                 {c.coverImage || "Ảnh đại diện"}
               </th>
-              <th className="p-4 border-r border-border w-[160px] min-w-[140px] whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[160px] min-w-[140px] whitespace-nowrap">
                 {c.belongsToCourse || "Thuộc khóa học"}
               </th>
-              <th className="p-4 border-r border-border min-w-[260px]">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] min-w-[260px]">
                 {c.classInfo || "Thông tin lớp học"}
               </th>
-              <th className="p-4 border-r border-border w-[130px] min-w-[120px] text-center whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[130px] min-w-[120px] text-center whitespace-nowrap">
                 {c.startDate || "Ngày mở"}
               </th>
-              <th className="p-4 border-r border-border w-[130px] min-w-[120px] text-center whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[130px] min-w-[120px] text-center whitespace-nowrap">
                 {c.endDate || "Ngày hết"}
               </th>
-              <th className="p-4 border-r border-border w-[150px] min-w-[140px] text-center whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[150px] min-w-[140px] text-center whitespace-nowrap">
                 {c.price || "Giá cả"}
               </th>
               <th className="p-4 w-[110px] text-center whitespace-nowrap">{c.action || "Hành động"}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border text-gray-700">
+          <tbody className="divide-y divide-border dark:divide-[#3F3F3F] text-gray-700 dark:text-gray-300">
             {classes.map((item) => (
               <tr
                 key={item.id}
@@ -222,25 +222,25 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                   }
                 }}
                 tabIndex={0}
-                className="hover:bg-gray-50/70 cursor-pointer transition-colors group"
+                className="hover:bg-gray-50/70 dark:hover:bg-[#242424] cursor-pointer transition-colors group"
               >
                 {/* Cover Image cell with fixed frame */}
-                <td className="p-4 border-r border-border align-middle">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] align-middle">
                   <CourseThumbnail
                     item={item}
                     title={item.classTitle || item.title}
-                    className="w-[140px] h-[88px] min-w-[140px] max-w-[140px] min-h-[88px] max-h-[88px] rounded-2xl bg-slate-100 shadow-xs shrink-0 overflow-hidden"
+                    className="w-[140px] h-[88px] min-w-[140px] max-w-[140px] min-h-[88px] max-h-[88px] rounded-2xl bg-slate-100 dark:bg-[#2A2A2A] shadow-xs shrink-0 overflow-hidden"
                     imageClassName="w-full h-full object-cover"
                   />
                 </td>
 
                 {/* Belongs to Course cell */}
-                <td className="p-4 border-r border-border text-xs font-bold text-gray-700 min-w-[150px] align-middle">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[150px] align-middle">
                   {item.courseTitle || c.standaloneClass || "Lớp độc lập"}
                 </td>
 
                 {/* Class Info cell */}
-                <td className="p-4 border-r border-border min-w-[260px] align-middle">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] min-w-[260px] align-middle">
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <CourseStatusPill status={item.status} />
@@ -251,35 +251,35 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                       )}
                     </div>
 
-                    <h4 className="font-bold text-sm text-gray-950 leading-snug group-hover:text-[#990011] transition-colors line-clamp-1" title={item.classTitle || item.title}>
+                    <h4 className="font-bold text-sm text-gray-950 dark:text-white leading-snug group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors line-clamp-1" title={item.classTitle || item.title}>
                       {item.classTitle || item.title}
                     </h4>
 
-                    <div className="flex items-center justify-between text-[11px] text-gray-500 font-medium">
+                    <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                       <span className="flex items-center gap-1.5 truncate">
-                        <Calendar size={13} className="text-gray-400 shrink-0" />
+                        <Calendar size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                         {item.schedule}
                       </span>
                       <span className="flex items-center gap-1.5 truncate">
-                        <Users size={13} className="text-gray-400 shrink-0" />
+                        <Users size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                         {item.students}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium">
-                      <Clock size={13} className="text-gray-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                      <Clock size={13} className="text-gray-400 dark:text-gray-500 shrink-0" />
                       <span>{item.time}</span>
                     </div>
 
                     {/* Progress bar */}
                     <div className="flex flex-col gap-1 mt-0.5">
-                      <div className="flex justify-between items-center text-[11px] font-semibold text-gray-700">
+                      <div className="flex justify-between items-center text-[11px] font-semibold text-gray-700 dark:text-gray-300">
                         <span>{c.progress || "Tiến độ"}</span>
-                        <span className="font-bold text-gray-950">{item.progress ?? 0}%</span>
+                        <span className="font-bold text-gray-950 dark:text-white">{item.progress ?? 0}%</span>
                       </div>
-                      <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-gray-200 dark:bg-[#333333] rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#8B0000] rounded-full transition-all duration-500"
+                          className="h-full bg-[#8B0000] dark:bg-[#b20a1c] rounded-full transition-all duration-500"
                           style={{ width: `${item.progress ?? 0}%` }}
                         />
                       </div>
@@ -288,19 +288,19 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                 </td>
 
                 {/* Start Date */}
-                <td className="p-4 border-r border-border text-center text-sm font-semibold text-gray-800 align-middle whitespace-nowrap">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-center text-sm font-semibold text-gray-800 dark:text-gray-200 align-middle whitespace-nowrap">
                   {item.startDate || "—"}
                 </td>
 
                 {/* End Date */}
-                <td className="p-4 border-r border-border text-center text-sm font-semibold text-gray-800 align-middle whitespace-nowrap">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-center text-sm font-semibold text-gray-800 dark:text-gray-200 align-middle whitespace-nowrap">
                   {item.endDate || "—"}
                 </td>
 
                 {/* Price */}
-                <td className="p-4 border-r border-border text-center text-sm sm:text-base font-bold text-gray-950 align-middle whitespace-nowrap">
+                <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-center text-sm sm:text-base font-bold text-gray-950 dark:text-white align-middle whitespace-nowrap">
                   {item.isFree || item.price === "0đ" || item.price === "Miễn phí" || item.price === "Free" || item.price === "免费" || item.price === c.free ? (
-                    <span className="text-[#16A34A]">{c.free || "Miễn phí"}</span>
+                    <span className="text-[#16A34A] dark:text-emerald-400">{c.free || "Miễn phí"}</span>
                   ) : (
                     item.price || "—"
                   )}
@@ -318,8 +318,8 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                       title={c.viewDetails || "Xem chi tiết"}
                       variant="ghost"
                       size="xs"
-                      className="text-[#990011]"
-                      innerClassName="hover:bg-red-50 text-[#990011]"
+                      className="text-[#990011] dark:text-[#FF6B6B]"
+                      innerClassName="hover:bg-red-50 dark:hover:bg-red-950/40 text-[#990011] dark:text-[#FF6B6B]"
                     >
                       <Eye size={17} />
                     </IconButton>
@@ -337,13 +337,13 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                         }}
                         variant="ghost"
                         size="xs"
-                        className="text-[#990011]"
-                        innerClassName="hover:bg-red-50 text-[#990011]"
+                        className="text-[#990011] dark:text-[#FF6B6B]"
+                        innerClassName="hover:bg-red-50 dark:hover:bg-red-950/40 text-[#990011] dark:text-[#FF6B6B]"
                       >
                         <MoreVertical size={17} />
                       </IconButton>
                       {activeDropdown === item.id && (
-                        <div role="menu" className="absolute right-0 mt-1 min-w-[152px] bg-white border border-border rounded-2xl shadow-md py-1 z-30 text-left whitespace-nowrap">
+                        <div role="menu" className="absolute right-0 mt-1 min-w-[152px] bg-white dark:bg-[#1E1E1E] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-md py-1 z-30 text-left whitespace-nowrap">
                           <button
                             type="button"
                             role="menuitem"
@@ -353,9 +353,9 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                               if (onEdit) onEdit(item)
                               else navigate(`/workspace/courses/edit-class/${encodeURIComponent(String(item.id))}`)
                             }}
-                            className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                            className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 cursor-pointer whitespace-nowrap"
                           >
-                            <PenSquare size={14} className="text-gray-500 shrink-0" />
+                            <PenSquare size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
                             <span>{c.editClass || "Chỉnh sửa"}</span>
                           </button>
                           {onDelete && (
@@ -367,7 +367,7 @@ const ClassTable = ({ classes, t, onEdit, onDelete }) => {
                                 setActiveDropdown(null)
                                 onDelete(item.id)
                               }}
-                              className="w-full px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-border cursor-pointer whitespace-nowrap"
+                              className="w-full px-3.5 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 border-t border-border dark:border-[#3F3F3F] cursor-pointer whitespace-nowrap"
                             >
                               <Trash2 size={14} className="shrink-0" />
                               <span>{c.deleteClass || "Xóa"}</span>

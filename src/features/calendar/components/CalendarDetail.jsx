@@ -184,11 +184,11 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
 
   return (
     <div className="col-span-7 w-full h-full min-h-[400px] sm:min-h-[500px]">
-      <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-border shadow-sm p-3 w-full flex flex-col h-[500px] sm:h-[700px] transition-all">
+      <div className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-md rounded-2xl border border-border dark:border-[#3F3F3F] shadow-sm p-3 w-full flex flex-col h-[500px] sm:h-[700px] transition-all">
         {/* Calendar Day View Scroll Container */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto overflow-x-auto pr-2 bg-gray-50/30 rounded-xl relative [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+          className="flex-1 overflow-y-auto overflow-x-auto pr-2 bg-gray-50/30 dark:bg-[#242424]/40 rounded-xl relative [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
         >
           <div
             className="relative mt-5"
@@ -206,11 +206,11 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
               style={{ width: `${eventsCanvasWidth}px` }}
             >
               {isLoading ? (
-                <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+                <div className="flex items-center justify-center h-full text-gray-400 dark:text-neutral-500 text-sm">
                   {t.calendar?.loadingEvents || "Loading events…"}
                 </div>
               ) : positionedEvents.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-gray-300 text-sm select-none">
+                <div className="flex items-center justify-center h-full text-gray-400 dark:text-neutral-500 text-sm select-none">
                   {t.calendar?.noEvents || "No events for this day"}
                 </div>
               ) : (

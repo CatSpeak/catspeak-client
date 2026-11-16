@@ -35,7 +35,7 @@ const DockedAudioPlayer = ({
     activeTotal > 0 ? Math.min(100, (audioCurrentTime / activeTotal) * 100) : 0
 
   return (
-    <div className="shrink-0 border-t border-border bg-white shadow-md flex flex-col select-none z-20">
+    <div className="shrink-0 border-t border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-md flex flex-col select-none z-20">
       <div className="flex items-center justify-between gap-4 px-4 h-[72px]">
         {/* Play/Pause Button */}
         <button
@@ -52,10 +52,10 @@ const DockedAudioPlayer = ({
 
         {/* Info */}
         <div className="min-w-0 flex-1">
-          <p className="truncate">
+          <p className="truncate text-gray-900 dark:text-white">
             {activeAudio.senderName || t?.chat?.voiceAudio || "Voice Message"}
           </p>
-          <div className="flex items-center gap-1 text-sm text-secondary">
+          <div className="flex items-center gap-1 text-sm text-secondary dark:text-[#AAAAAA]">
             <span>{formatDuration(audioCurrentTime)}</span>
             {activeTotal > 0 ? (
               <>

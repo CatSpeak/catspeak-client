@@ -112,8 +112,8 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
   const pillClass = (active) =>
     `inline-flex h-10 items-center rounded-full px-4 text-sm border transition-colors ${
       active
-        ? "bg-cath-red-700 border-cath-red-700 text-white hover:bg-cath-red-800 hover:border-cath-red-800"
-        : "border-[#C6C6C6] hover:bg-primaryBg"
+        ? "bg-cath-red-700 dark:bg-[#FF0033] border-cath-red-700 dark:border-[#FF0033] text-white hover:bg-cath-red-800 dark:hover:bg-[#FF0033]/90 hover:border-cath-red-800"
+        : "border-[#C6C6C6] dark:border-[#3F3F3F] text-gray-800 dark:text-[#AAAAAA] hover:bg-primaryBg dark:hover:bg-[#272727] dark:hover:text-white"
     }`
 
   return (
@@ -126,7 +126,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
       <div className="flex flex-col gap-6 pb-2 max-h-[60vh] overflow-y-auto -mx-3 px-3 scrollbar-app-transparent max-[425px]:max-h-none max-[425px]:flex-1">
         {/* Learning Language — read-only, derived from URL */}
         <div className="text-left flex flex-col">
-          <label className="text-sm mb-2">{s.learningLanguage}</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">{s.learningLanguage}</label>
           <div className="flex flex-wrap gap-2">
             <span className={pillClass(true)}>{languageLabel(foreignLanguage)}</span>
           </div>
@@ -134,7 +134,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
 
         {/* Support Language — optional */}
         <div className="text-left flex flex-col">
-          <label className="text-sm mb-2">{s.supportLanguage}</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">{s.supportLanguage}</label>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -159,8 +159,8 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
         {/* Speed */}
         <div className="text-left flex flex-col">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm">{s.speed}</label>
-            <span className="text-sm font-medium tabular-nums">
+            <label className="text-sm font-medium text-gray-700 dark:text-neutral-200">{s.speed}</label>
+            <span className="text-sm font-medium tabular-nums text-gray-900 dark:text-white">
               {speed.toFixed(1)}×
             </span>
           </div>
@@ -171,7 +171,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
             step={SPEED_CONFIG.step}
             onChange={(e) => setSpeed(parseFloat(e.target.value))}
           />
-          <div className="flex justify-between text-xs text-[#7A7574] mt-1">
+          <div className="flex justify-between text-xs text-[#7A7574] dark:text-[#AAAAAA] mt-1">
             <span>{s.speedSlow}</span>
             <span>{s.speedNormal}</span>
             <span>{s.speedFast}</span>
@@ -181,8 +181,8 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
         {/* Proficiency Level — optional, matches Create Room levels */}
         <div className="text-left flex flex-col">
           <div className="flex items-center justify-between gap-3 mb-2">
-            <label className="text-sm">{s.proficiencyLabel}</label>
-            <span className="text-xs text-[#7A7574]">{s.proficiencyOptional}</span>
+            <label className="text-sm font-medium text-gray-700 dark:text-neutral-200">{s.proficiencyLabel}</label>
+            <span className="text-xs text-[#7A7574] dark:text-[#AAAAAA]">{s.proficiencyOptional}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {proficiencyLevels.map((level) => {
@@ -203,7 +203,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
 
         {/* Voice */}
         <div className="text-left flex flex-col">
-          <label className="text-sm mb-2">{s.voice}</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">{s.voice}</label>
           <div className="flex flex-wrap gap-2">
             {VOICES.map((v) => {
               const isAvailable = availableVoices.includes(v)

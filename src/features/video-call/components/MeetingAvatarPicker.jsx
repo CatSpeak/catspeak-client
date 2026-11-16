@@ -82,10 +82,9 @@ const MeetingAvatarPicker = ({ className = "p-4" }) => {
       )
     } catch (err) {
       console.error(err)
-      toast.error(
-        t?.rooms?.avatarPicker?.error || "Failed to update avatar",
-        { id: "meeting-avatar-upload" },
-      )
+      toast.error(t?.rooms?.avatarPicker?.error || "Failed to update avatar", {
+        id: "meeting-avatar-upload",
+      })
     }
   }
 
@@ -97,37 +96,37 @@ const MeetingAvatarPicker = ({ className = "p-4" }) => {
       await updateMeetingAvatar({ meetingAvatarUrl: "" }).unwrap()
       await syncToLiveKit(profileAvatarUrl || "")
       toast.success(
-        t?.rooms?.avatarPicker?.resetSuccess ||
-          "Using your profile avatar now",
+        t?.rooms?.avatarPicker?.resetSuccess || "Using your profile avatar now",
         { id: "meeting-avatar-reset" },
       )
     } catch (err) {
       console.error(err)
-      toast.error(
-        t?.rooms?.avatarPicker?.error || "Failed to update avatar",
-        { id: "meeting-avatar-reset" },
-      )
+      toast.error(t?.rooms?.avatarPicker?.error || "Failed to update avatar", {
+        id: "meeting-avatar-reset",
+      })
     }
   }
 
   return (
-    <div className={`flex flex-col h-full w-full ${className}`}>
-      <div className="flex justify-center">
-        <Avatar
-          size={120}
-          src={displayAvatar}
-          alt={profile?.username || "User"}
-          name={profile?.fullName || profile?.username || "User"}
-          className="shadow-md"
-        />
-      </div>
+    <div className={`flex flex-col justify-between h-full w-full ${className}`}>
+      <div className="flex flex-col items-center">
+        <div className="flex justify-center">
+          <Avatar
+            size={120}
+            src={displayAvatar}
+            alt={profile?.username || "User"}
+            name={profile?.fullName || profile?.username || "User"}
+            className="shadow-md"
+          />
+        </div>
 
-      <div className="flex flex-col gap-3 mt-6">
-        <p className="text-xs text-[#606060] text-center">
+        <p className="text-sm text-[#606060] dark:text-[#AAAAAA] text-center mt-4 max-w-[360px]">
           {t?.rooms?.avatarPicker?.description ||
             "Upload an image to change your meeting-room avatar. If empty, your profile avatar is used."}
         </p>
+      </div>
 
+      <div className="flex flex-col gap-2 mt-auto pt-4">
         <input
           type="file"
           ref={fileInputRef}
@@ -139,7 +138,7 @@ const MeetingAvatarPicker = ({ className = "p-4" }) => {
         <PillButton
           onClick={() => fileInputRef.current?.click()}
           loading={isUploading}
-          startIcon={<Upload size={16} />}
+          startIcon={<Upload />}
           className="w-full"
         >
           {t?.rooms?.avatarPicker?.uploadImage || "Upload new image"}
@@ -148,14 +147,13 @@ const MeetingAvatarPicker = ({ className = "p-4" }) => {
         {meetingAvatarUrl && (
           <PillButton
             onClick={handleReset}
-            variant="outline"
+            variant="secondary"
             loading={isClearing}
             disabled={isBusy}
-            startIcon={<RotateCcw size={16} />}
+            startIcon={<RotateCcw />}
             className="w-full"
           >
-            {t?.rooms?.avatarPicker?.resetToProfile ||
-              "Use my profile avatar"}
+            {t?.rooms?.avatarPicker?.resetToProfile || "Use my profile avatar"}
           </PillButton>
         )}
       </div>

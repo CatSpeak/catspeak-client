@@ -93,14 +93,14 @@ export const WaitingScreen = ({
       : wq.back || "Quay lại"
 
   return (
-    <div className="absolute inset-0 z-[90] flex items-center justify-center bg-white/80 px-4 backdrop-blur-md">
+    <div className="absolute inset-0 z-[90] flex items-center justify-center bg-white/80 dark:bg-black/80 px-4 backdrop-blur-md">
       <div
         role={isRejected ? "alert" : isPending ? "status" : undefined}
         aria-live={isRejected ? "assertive" : isPending ? "polite" : undefined}
         aria-busy={isPending || isKnocking ? "true" : undefined}
         aria-labelledby="waiting-room-title"
         aria-describedby="waiting-room-desc"
-        className="w-full max-w-sm animate-enter rounded-2xl border border-neutral-200/80 bg-white p-6 text-center shadow-[0_24px_60px_-24px_rgba(0,0,0,0.35)] motion-reduce:animate-none"
+        className="w-full max-w-sm animate-enter rounded-3xl border border-neutral-200/80 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-6 text-center shadow-[0_24px_60px_-24px_rgba(0,0,0,0.35)] motion-reduce:animate-none"
       >
         <span
           aria-hidden="true"
@@ -117,13 +117,13 @@ export const WaitingScreen = ({
 
         <h2
           id="waiting-room-title"
-          className="mt-4 text-lg font-bold text-neutral-900"
+          className="mt-4 text-lg font-bold text-neutral-900 dark:text-white"
         >
           {title}
         </h2>
 
         {roomName && (
-          <span className="mx-auto mt-2 flex max-w-[85%] items-center justify-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
+          <span className="mx-auto mt-2 flex max-w-[85%] items-center justify-center gap-1.5 rounded-full bg-neutral-100 dark:bg-[#272727] px-3 py-1 text-xs font-medium text-neutral-600 dark:text-[#AAAAAA]">
             <DoorOpen size={13} aria-hidden="true" className="shrink-0" />
             <span className="truncate">{roomName}</span>
           </span>
@@ -131,7 +131,7 @@ export const WaitingScreen = ({
 
         <p
           id="waiting-room-desc"
-          className="mt-3 text-sm leading-relaxed text-neutral-500"
+          className="mt-3 text-sm leading-relaxed text-neutral-500 dark:text-[#AAAAAA]"
         >
           {description}
         </p>
@@ -152,7 +152,11 @@ export const WaitingScreen = ({
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-cath-red-700 px-5 text-sm font-semibold text-white transition hover:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isKnocking ? (
-                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                <Loader2
+                  size={16}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
               ) : (
                 <DoorOpen size={16} aria-hidden="true" />
               )}
@@ -166,8 +170,8 @@ export const WaitingScreen = ({
               onClick={onCancel}
               className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400/40 ${
                 isPending || isRejected
-                  ? "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
-                  : "text-neutral-500 hover:text-neutral-700"
+                  ? "border border-neutral-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-[#3D3D3D]"
+                  : "text-neutral-500 hover:text-neutral-700 dark:text-[#AAAAAA] dark:hover:text-white"
               }`}
             >
               {isRejected ? (
@@ -267,30 +271,41 @@ export const PreJoinWaitingGate = ({
     if (effectiveEntry?.status === WAITING_STATUS.ADMITTED) admit()
   }, [effectiveEntry?.status, admit])
 
-  const handleEvent = useCallback((event) => {
-    if (event === "WaitingAdmitted") {
-      setEntry((prev) => ({ ...(prev || {}), status: WAITING_STATUS.ADMITTED }))
-    } else if (event === "WaitingRejected") {
-      setEntry((prev) => ({ ...(prev || {}), status: WAITING_STATUS.REJECTED }))
-      toast.error(
-        t?.rooms?.videoCall?.waitingQueue?.rejectedTitle ||
-          "Yêu cầu vào phòng bị từ chối",
-      )
-    } else if (event === "WaitingCancelled") {
-      // Explicit cancelled status (never null) so the server snapshot cannot
-      // resurrect a stale pending entry and re-trigger the admission path.
-      setEntry((prev) => ({
-        ...(prev || {}),
-        status: WAITING_STATUS.CANCELLED,
-      }))
-      // Pull the authoritative waiting-status snapshot in line with the event.
-      if (apiRoomId) {
-        dispatch(
-          roomsApi.util.invalidateTags([{ type: "WaitingQueue", id: apiRoomId }]),
+  const handleEvent = useCallback(
+    (event) => {
+      if (event === "WaitingAdmitted") {
+        setEntry((prev) => ({
+          ...(prev || {}),
+          status: WAITING_STATUS.ADMITTED,
+        }))
+      } else if (event === "WaitingRejected") {
+        setEntry((prev) => ({
+          ...(prev || {}),
+          status: WAITING_STATUS.REJECTED,
+        }))
+        toast.error(
+          t?.rooms?.videoCall?.waitingQueue?.rejectedTitle ||
+            "Yêu cầu vào phòng bị từ chối",
         )
+      } else if (event === "WaitingCancelled") {
+        // Explicit cancelled status (never null) so the server snapshot cannot
+        // resurrect a stale pending entry and re-trigger the admission path.
+        setEntry((prev) => ({
+          ...(prev || {}),
+          status: WAITING_STATUS.CANCELLED,
+        }))
+        // Pull the authoritative waiting-status snapshot in line with the event.
+        if (apiRoomId) {
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "WaitingQueue", id: apiRoomId },
+            ]),
+          )
+        }
       }
-    }
-  }, [apiRoomId, dispatch, t])
+    },
+    [apiRoomId, dispatch, t],
+  )
 
   // Personal outcomes arrive on user_{accountId}; room group for queue changes.
   useVideoChatSignalR(null, token, handleEvent, apiRoomId)

@@ -29,8 +29,8 @@ const AudioButton = ({ audioPath, pinyin, audio, size = "md", label = "Nghe phá
         title={isError ? "Không tải được âm thanh" : label}
         className={`${dim} rounded-full flex items-center justify-center border transition-colors ${
           isError
-            ? "bg-amber-50 border-amber-300 text-amber-600"
-            : "bg-rose-50 border-rose-200 text-[#990011] hover:bg-rose-100"
+            ? "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-amber-600 dark:text-amber-400"
+            : "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/50 text-[#990011] dark:text-red-400 hover:bg-rose-100 dark:hover:bg-rose-950/60"
         }`}
       >
         {status === "loading" ? (
@@ -43,12 +43,12 @@ const AudioButton = ({ audioPath, pinyin, audio, size = "md", label = "Nghe phá
       </button>
       {isError && pinyin && (
         showPinyin ? (
-          <span className="text-sm font-medium text-slate-700">{pinyin}</span>
+          <span className="text-sm font-medium text-slate-700 dark:text-neutral-200">{pinyin}</span>
         ) : (
           <button
             type="button"
             onClick={() => setShowPinyin(true)}
-            className="text-xs font-medium text-amber-700 underline underline-offset-2"
+            className="text-xs font-medium text-amber-700 dark:text-amber-400 underline underline-offset-2"
           >
             Xem pinyin
           </button>

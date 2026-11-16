@@ -42,8 +42,8 @@ const MessageReactionBadges = ({
             }
             className={`h-8 inline-flex items-center gap-2 px-2.5 rounded-lg text-sm border transition-colors cursor-pointer ${
               hasReacted
-                ? "border-primary bg-primary/10 text-primary hover:bg-primary/15"
-                : "border-border bg-white hover:bg-neutral-50 text-neutral-700"
+                ? "border-primary dark:border-red-400 bg-primary/10 dark:bg-red-950/30 text-primary dark:text-red-400 hover:bg-primary/15 dark:hover:bg-red-950/40"
+                : "border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] hover:bg-neutral-50 dark:hover:bg-[#272727] text-neutral-700 dark:text-neutral-200"
             }`}
           >
             <span className="text-sm select-none">{group.emoji}</span>

@@ -91,16 +91,16 @@ export default function ChallengeLeaderboardView({
 
   return (
     <>
-      <div className="w-full bg-white lg:rounded-2xl border-y lg:border border-border lg:shadow-sm py-4 sm:p-6 lg:mt-4 overflow-hidden">
+      <div className="w-full bg-white dark:bg-[#1A1A1A] lg:rounded-2xl border-y lg:border border-border dark:border-[#3F3F3F] lg:shadow-sm py-4 sm:p-6 lg:mt-4 overflow-hidden">
         {/* Header */}
-        <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-4 px-2 sm:px-6 sm:-mx-6 gap-1.5 sm:gap-2 border-b border-border">
+        <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-4 px-2 sm:px-6 sm:-mx-6 gap-1.5 sm:gap-2 border-b border-border dark:border-[#3F3F3F]">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="text-2xl sm:text-3xl shrink-0">🏆</div>
             <div className="flex flex-col min-w-0">
-              <h2 className="text-[15px] sm:text-[20px] font-bold text-gray-900 truncate">
+              <h2 className="text-[15px] sm:text-[20px] font-bold text-gray-900 dark:text-white truncate">
                 {t?.catSpeak?.reels?.leaderboard?.title || "Bảng xếp hạng"}
               </h2>
-              <span className="text-[12px] sm:text-[14px] text-gray-500 font-medium truncate mt-0.5 sm:mt-0">
+              <span className="text-[12px] sm:text-[14px] text-gray-500 dark:text-neutral-400 font-medium truncate mt-0.5 sm:mt-0">
                 {selectedChallenge.hashtag || selectedChallenge.name}
               </span>
             </div>
@@ -108,16 +108,16 @@ export default function ChallengeLeaderboardView({
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {challengeStatus === "active" && (
-              <div className="flex items-center gap-1 sm:gap-1.5 text-cath-red-700 font-medium text-[11px] sm:text-[14px]">
+              <div className="flex items-center gap-1 sm:gap-1.5 text-cath-red-700 dark:text-red-400 font-medium text-[11px] sm:text-[14px]">
                 <Clock size={14} className="sm:w-4 sm:h-4" />
                 <span>{timeRemaining}</span>
               </div>
             )}
             <button
-              className="lg:hidden p-1.5 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+              className="lg:hidden p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-[#272727] transition-colors cursor-pointer"
               onClick={() => setIsInfoModalOpen(true)}
             >
-              <Info size={18} className="text-gray-900" />
+              <Info size={18} className="text-gray-900 dark:text-white" />
             </button>
           </div>
         </div>
@@ -129,12 +129,12 @@ export default function ChallengeLeaderboardView({
             {isLoading ? (
               <div className="p-4 space-y-4 animate-pulse">
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <div key={n} className="h-16 bg-gray-100 rounded-xl w-full" />
+                  <div key={n} className="h-16 bg-gray-100 dark:bg-[#272727] rounded-xl w-full" />
                 ))}
               </div>
             ) : leaderboardEntries.length > 0 ? (
               <>
-                <div className="flex flex-col divide-y divide-gray-100">
+                <div className="flex flex-col divide-y divide-gray-100 dark:divide-[#272727]">
                   {currentEntries.map((entry, idx) => {
                     // Force sequential rank calculation to prevent backend skips
                     const actualRank =
@@ -187,43 +187,43 @@ export default function ChallengeLeaderboardView({
                       return (
                         <div
                           key={`empty-${r}`}
-                          className="flex items-center justify-between p-3 sm:p-4 bg-white/40 opacity-70"
+                          className="flex items-center justify-between p-3 sm:p-4 bg-white/40 dark:bg-[#1A1A1A]/40 opacity-70"
                         >
                           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                             <div className="w-8 flex justify-center shrink-0">
                               {r <= 3 ? (
-                                <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center font-bold text-sm">
+                                <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-[#242424] text-gray-400 dark:text-neutral-500 flex items-center justify-center font-bold text-sm">
                                   {r}
                                 </div>
                               ) : (
-                                <div className="w-7 h-7 flex items-center justify-center font-bold text-[15px] text-gray-300">
+                                <div className="w-7 h-7 flex items-center justify-center font-bold text-[15px] text-gray-300 dark:text-neutral-600">
                                   {r}
                                 </div>
                               )}
                             </div>
-                            <div className="w-10 h-10 rounded-full border-2 border-dashed border-border bg-gray-50 flex items-center justify-center shrink-0">
-                              <span className="text-gray-300 text-xl font-medium">
+                            <div className="w-10 h-10 rounded-full border-2 border-dashed border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#242424] flex items-center justify-center shrink-0">
+                              <span className="text-gray-300 dark:text-neutral-500 text-xl font-medium">
                                 ?
                               </span>
                             </div>
                             <div className="flex flex-col min-w-0">
-                              <span className="font-medium text-gray-400 text-[14px] truncate">
+                              <span className="font-medium text-gray-400 dark:text-neutral-500 text-[14px] truncate">
                                 {t?.catSpeak?.reels?.leaderboard
                                   ?.waitingParticipant ||
                                   "Đang chờ người tham gia..."}
                               </span>
-                              <span className="text-gray-300 text-[12px] truncate">
+                              <span className="text-gray-300 dark:text-neutral-600 text-[12px] truncate">
                                 ---
                               </span>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-4 sm:gap-6 shrink-0 pl-2">
-                            <span className="font-bold text-[14px] flex items-center gap-1.5 text-gray-300">
-                              0 <Heart size={14} className="text-gray-300" />
+                            <span className="font-bold text-[14px] flex items-center gap-1.5 text-gray-300 dark:text-neutral-500">
+                              0 <Heart size={14} className="text-gray-300 dark:text-neutral-500" />
                             </span>
-                            <div className="w-16 h-10 rounded-lg border-2 border-dashed border-border bg-gray-50 shrink-0 flex items-center justify-center">
-                              <Play size={16} className="text-gray-300" />
+                            <div className="w-16 h-10 rounded-lg border-2 border-dashed border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#242424] shrink-0 flex items-center justify-center">
+                              <Play size={16} className="text-gray-300 dark:text-neutral-500" />
                             </div>
                           </div>
                         </div>
@@ -233,15 +233,15 @@ export default function ChallengeLeaderboardView({
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-4 pt-4 px-4 sm:px-0 border-t border-border">
+                  <div className="flex items-center justify-center gap-2 mt-4 pt-4 px-4 sm:px-0 border-t border-border dark:border-[#3F3F3F]">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 text-[13px] font-medium border border-border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                      className="px-3 py-1.5 text-[13px] font-medium border border-border dark:border-[#3F3F3F] text-gray-700 dark:text-neutral-200 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors cursor-pointer"
                     >
                       {t?.catSpeak?.reels?.leaderboard?.prev || "Trước"}
                     </button>
-                    <span className="text-[13px] text-gray-500 font-medium">
+                    <span className="text-[13px] text-gray-500 dark:text-neutral-400 font-medium">
                       {t?.catSpeak?.reels?.leaderboard?.page || "Trang"}{" "}
                       {currentPage} / {totalPages}
                     </span>
@@ -250,7 +250,7 @@ export default function ChallengeLeaderboardView({
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 text-[13px] font-medium border border-border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                      className="px-3 py-1.5 text-[13px] font-medium border border-border dark:border-[#3F3F3F] text-gray-700 dark:text-neutral-200 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors cursor-pointer"
                     >
                       {t?.catSpeak?.reels?.leaderboard?.next || "Sau"}
                     </button>
@@ -258,50 +258,50 @@ export default function ChallengeLeaderboardView({
                 )}
               </>
             ) : (
-              <div className="flex flex-col divide-y divide-gray-100 relative">
+              <div className="flex flex-col divide-y divide-gray-100 dark:divide-[#272727] relative">
                 {/* Render 10 empty placeholders */}
                 {Array.from({ length: itemsPerPage }).map((_, idx) => {
                   const r = idx + 1;
                   return (
                     <div
                       key={`empty-${r}`}
-                      className="flex items-center justify-between p-3 sm:p-4 bg-white/40 opacity-70"
+                      className="flex items-center justify-between p-3 sm:p-4 bg-white/40 dark:bg-[#1A1A1A]/40 opacity-70"
                     >
                       <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                         <div className="w-8 flex justify-center shrink-0">
                           {r <= 3 ? (
-                            <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center font-bold text-sm">
+                            <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-[#242424] text-gray-400 dark:text-neutral-500 flex items-center justify-center font-bold text-sm">
                               {r}
                             </div>
                           ) : (
-                            <div className="w-7 h-7 flex items-center justify-center font-bold text-[15px] text-gray-300">
+                            <div className="w-7 h-7 flex items-center justify-center font-bold text-[15px] text-gray-300 dark:text-neutral-600">
                               {r}
                             </div>
                           )}
                         </div>
-                        <div className="w-10 h-10 rounded-full border-2 border-dashed border-border bg-gray-50 flex items-center justify-center shrink-0">
-                          <span className="text-gray-300 text-xl font-medium">
+                        <div className="w-10 h-10 rounded-full border-2 border-dashed border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#242424] flex items-center justify-center shrink-0">
+                          <span className="text-gray-300 dark:text-neutral-500 text-xl font-medium">
                             ?
                           </span>
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-medium text-gray-400 text-[14px] truncate">
+                          <span className="font-medium text-gray-400 dark:text-neutral-500 text-[14px] truncate">
                             {t?.catSpeak?.reels?.leaderboard
                               ?.waitingParticipant ||
                               "Đang chờ người tham gia..."}
                           </span>
-                          <span className="text-gray-300 text-[12px] truncate">
+                          <span className="text-gray-300 dark:text-neutral-600 text-[12px] truncate">
                             ---
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-4 sm:gap-6 shrink-0 pl-2">
-                        <span className="font-bold text-[14px] flex items-center gap-1.5 text-gray-300">
-                          0 <Heart size={14} className="text-gray-300" />
+                        <span className="font-bold text-[14px] flex items-center gap-1.5 text-gray-300 dark:text-neutral-500">
+                          0 <Heart size={14} className="text-gray-300 dark:text-neutral-500" />
                         </span>
-                        <div className="w-16 h-10 rounded-lg border-2 border-dashed border-border bg-gray-50 shrink-0 flex items-center justify-center">
-                          <Play size={16} className="text-gray-300" />
+                        <div className="w-16 h-10 rounded-lg border-2 border-dashed border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#242424] shrink-0 flex items-center justify-center">
+                          <Play size={16} className="text-gray-300 dark:text-neutral-500" />
                         </div>
                       </div>
                     </div>
@@ -309,13 +309,13 @@ export default function ChallengeLeaderboardView({
                 })}
 
                 {/* Overlay with CTA */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px] z-10">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 dark:bg-[#1A1A1A]/80 backdrop-blur-[1px] z-10">
                   <span className="text-4xl mb-3">👻</span>
-                  <p className="font-medium text-[15px] text-gray-700 mb-2">
+                  <p className="font-medium text-[15px] text-gray-700 dark:text-neutral-200 mb-2">
                     {t?.catSpeak?.reels?.leaderboard?.noData ||
                       "Chưa có ai tham gia thử thách này"}
                   </p>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-gray-500 dark:text-neutral-400 mb-4">
                     Hãy là người đầu tiên chinh phục đỉnh cao!
                   </p>
                 </div>
@@ -330,12 +330,12 @@ export default function ChallengeLeaderboardView({
                   <div className="py-2 px-4 text-gray-400 font-bold text-lg">
                     ...
                   </div>
-                  <div className="bg-[#FFF5F5] border border-red-200 rounded-xl p-3 sm:p-4 flex items-center justify-between mt-1">
+                  <div className="bg-[#FFF5F5] dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 rounded-xl p-3 sm:p-4 flex items-center justify-between mt-1">
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                      <div className="w-8 flex justify-center shrink-0 font-bold text-cath-red-700 text-[15px]">
+                      <div className="w-8 flex justify-center shrink-0 font-bold text-cath-red-700 dark:text-red-400 text-[15px]">
                         {currentUserEntry.calculatedRank}
                       </div>
-                      <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-300">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-[#242424] overflow-hidden shrink-0 border border-gray-300 dark:border-[#3F3F3F]">
                         <img
                           src={
                             currentUserEntry.reel?.coverUrl ||
@@ -347,12 +347,12 @@ export default function ChallengeLeaderboardView({
                         />
                       </div>
                       <div className="flex flex-col min-w-0">
-                        <span className="font-semibold text-gray-900 text-[14px] truncate">
+                        <span className="font-semibold text-gray-900 dark:text-white text-[14px] truncate">
                           {currentUserEntry.reel?.nickname ||
                             currentUserEntry.reel?.username ||
                             "User name"}
                         </span>
-                        <span className="text-gray-500 text-[12px] truncate">
+                        <span className="text-gray-500 dark:text-neutral-400 text-[12px] truncate">
                           @{currentUserEntry.reel?.username || "username"}
                         </span>
                       </div>
@@ -360,20 +360,20 @@ export default function ChallengeLeaderboardView({
 
                     <div className="flex items-center gap-4 sm:gap-6 shrink-0 pl-2">
                       <div className="flex flex-col items-end">
-                        <span className="text-[11px] text-cath-red-700 font-medium">
+                        <span className="text-[11px] text-cath-red-700 dark:text-red-400 font-medium">
                           {t?.catSpeak?.reels?.leaderboard?.yourRank ||
                             "Hạng của bạn"}
                         </span>
-                        <span className="font-bold text-[14px] flex items-center gap-1.5">
+                        <span className="font-bold text-[14px] flex items-center gap-1.5 text-gray-900 dark:text-white">
                           {formatScore(currentUserEntry.score || 0)}{" "}
                           <Heart
                             size={14}
-                            className="text-cath-red-700 fill-cath-red-700"
+                            className="text-cath-red-700 dark:text-red-400 fill-cath-red-700 dark:fill-red-400"
                           />
                         </span>
                       </div>
                       <div
-                        className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-border bg-gray-100 cursor-pointer"
+                        className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-border dark:border-[#3F3F3F] bg-gray-100 dark:bg-[#242424] cursor-pointer"
                         onClick={() =>
                           onReelClick &&
                           onReelClick(currentUserEntry.reel || currentUserEntry)

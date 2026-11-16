@@ -3,11 +3,11 @@ import { Percent, Users, Clock } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const toneStyles = {
-  red: "bg-[#FFEBED] text-[#E11D2E]",
-  green: "bg-[#E8FAED] text-[#0D9E3D]",
-  blue: "bg-[#E5F0FF] text-[#2563EB]",
-  purple: "bg-[#F0E5FF] text-[#7C3AED]",
-  orange: "bg-[#FFF2E0] text-[#F97316]",
+  red: "bg-[#FFEBED] dark:bg-[#FFEBED]/10 text-[#E11D2E] dark:text-[#FF6B6B]",
+  green: "bg-[#E8FAED] dark:bg-[#E8FAED]/10 text-[#0D9E3D] dark:text-[#4ADE80]",
+  blue: "bg-[#E5F0FF] dark:bg-[#E5F0FF]/10 text-[#2563EB] dark:text-[#60A5FA]",
+  purple: "bg-[#F0E5FF] dark:bg-[#F0E5FF]/10 text-[#7C3AED] dark:text-[#C084FC]",
+  orange: "bg-[#FFF2E0] dark:bg-[#FFF2E0]/10 text-[#F97316] dark:text-[#FB923C]",
 }
 
 const formatDuration = (seconds) => {
@@ -53,18 +53,18 @@ const SessionDetailKpis = ({ sessionData, teacherName = "Giảng viên" }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       {/* 1. Tỷ lệ phát biểu (GV / HV) */}
-      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+      <article className="min-h-[104px] min-w-0 bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles.blue}`}>
           <Percent size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="m-0 text-[#667085] text-xs font-normal truncate">{sessT.kpiSpeechRatio || "Tỷ lệ phát biểu (GV / HV)"}</p>
-          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={`${sessT.teacherTag || "GV"} ${teacherPercent}% · ${sessT.studentTag || "HV"} ${studentPercent}%`}>
+          <p className="m-0 text-[#667085] dark:text-gray-400 text-xs font-normal truncate">{sessT.kpiSpeechRatio || "Tỷ lệ phát biểu (GV / HV)"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] dark:text-white truncate tracking-tight my-0.5" title={`${sessT.teacherTag || "GV"} ${teacherPercent}% · ${sessT.studentTag || "HV"} ${studentPercent}%`}>
             {sessT.teacherTag || "GV"} {teacherPercent}% · {sessT.studentTag || "HV"} {studentPercent}%
           </strong>
           {/* Split progress mini bar + status */}
           <div className="flex items-center gap-2 mt-1">
-            <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden flex shrink-0">
+            <div className="w-16 h-1.5 bg-gray-200 dark:bg-[#2A2A2A] rounded-full overflow-hidden flex shrink-0">
               <div
                 style={{ width: `${Math.min(100, Math.max(0, teacherPercent))}%` }}
                 className="bg-sky-500 h-full"
@@ -74,7 +74,7 @@ const SessionDetailKpis = ({ sessionData, teacherName = "Giảng viên" }) => {
                 className="bg-emerald-500 h-full"
               />
             </div>
-            <small className="block text-[11px] text-[#667085] truncate font-normal">
+            <small className="block text-[11px] text-[#667085] dark:text-gray-400 truncate font-normal">
               {getTeacherStatusText(sessionData?.teacherStatus)}
             </small>
           </div>
@@ -82,30 +82,30 @@ const SessionDetailKpis = ({ sessionData, teacherName = "Giảng viên" }) => {
       </article>
 
       {/* 2. Tổng thời lượng phát biểu */}
-      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+      <article className="min-h-[104px] min-w-0 bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles.purple}`}>
           <Clock size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="m-0 text-[#667085] text-xs font-normal truncate">{sessT.kpiTotalDuration || "Tổng thời lượng phát biểu"}</p>
-          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={formatDuration(durationSeconds)}>
+          <p className="m-0 text-[#667085] dark:text-gray-400 text-xs font-normal truncate">{sessT.kpiTotalDuration || "Tổng thời lượng phát biểu"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] dark:text-white truncate tracking-tight my-0.5" title={formatDuration(durationSeconds)}>
             {formatDuration(durationSeconds)}
           </strong>
-          <small className="block text-[11px] text-[#667085] truncate font-normal">{sessT.durationHint || "Thời gian học viên thảo luận"}</small>
+          <small className="block text-[11px] text-[#667085] dark:text-gray-400 truncate font-normal">{sessT.durationHint || "Thời gian học viên thảo luận"}</small>
         </div>
       </article>
 
       {/* 3. Học viên tham gia */}
-      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+      <article className="min-h-[104px] min-w-0 bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles.green}`}>
           <Users size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="m-0 text-[#667085] text-xs font-normal truncate">{sessT.kpiParticipatingStudents || "Học viên tham gia"}</p>
-          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={`${studentCount} ${sessT.studentsUnit || "học viên"}`}>
-            {studentCount} <span className="text-xs font-semibold text-[#667085]">{sessT.studentsUnit || "học viên"}</span>
+          <p className="m-0 text-[#667085] dark:text-gray-400 text-xs font-normal truncate">{sessT.kpiParticipatingStudents || "Học viên tham gia"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] dark:text-white truncate tracking-tight my-0.5" title={`${studentCount} ${sessT.studentsUnit || "học viên"}`}>
+            {studentCount} <span className="text-xs font-semibold text-[#667085] dark:text-gray-400">{sessT.studentsUnit || "học viên"}</span>
           </strong>
-          <small className={`block text-[11px] truncate font-normal ${lowSpeakingCount > 0 ? "text-[#b45309]" : "text-[#667085]"}`}>
+          <small className={`block text-[11px] truncate font-normal ${lowSpeakingCount > 0 ? "text-[#b45309] dark:text-amber-400" : "text-[#667085] dark:text-gray-400"}`}>
             {belowThresholdText}
           </small>
         </div>

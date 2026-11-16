@@ -458,7 +458,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
 
       {/* Slide-up Comments Drawer */}
       <div
-        className={`fixed inset-x-0 bottom-0 z-[70] bg-white rounded-t-3xl shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col ${
+        className={`fixed inset-x-0 bottom-0 z-[70] bg-white dark:bg-[#1A1A1A] border-t border-border dark:border-[#3F3F3F] rounded-t-3xl shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col ${
           showComments && isActive ? "translate-y-0" : "translate-y-full"
         }`}
         style={{
@@ -470,18 +470,18 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         }}
       >
         <div className="flex items-center justify-center py-2 shrink-0">
-          <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
+          <div className="w-10 h-1.5 bg-gray-300 dark:bg-[#3F3F3F] rounded-full" />
         </div>
-        <div className="flex items-center justify-between px-4 pb-3 border-b border-border shrink-0">
-          <h3 className="text-[15px] font-bold text-gray-800">
+        <div className="flex items-center justify-between px-4 pb-3 border-b border-border dark:border-[#3F3F3F] shrink-0">
+          <h3 className="text-[15px] font-bold text-gray-800 dark:text-white">
             {formatCompactNumber(reel.comments, language)}{" "}
             {t?.catSpeak?.reels?.detail?.commentsTotal || "bình luận"}
           </h3>
           <button
             onClick={() => setShowComments(false)}
-            className="p-1.5 bg-gray-100 rounded-full border-none cursor-pointer hover:bg-gray-200"
+            className="p-1.5 bg-gray-100 dark:bg-[#272727] rounded-full border-none cursor-pointer hover:bg-gray-200 dark:hover:bg-[#333]"
           >
-            <X size={18} className="text-gray-600" />
+            <X size={18} className="text-gray-600 dark:text-neutral-300" />
           </button>
         </div>
 
@@ -489,7 +489,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
           {isCommentsLoading ? (
             <CommentsSkeleton />
           ) : comments.length === 0 ? (
-            <p className="text-gray-400 text-center text-[13px] my-10">
+            <p className="text-gray-400 dark:text-neutral-500 text-center text-[13px] my-10">
               {t?.catSpeak?.reels?.detail?.beFirstToComment ||
                 "Be the first to comment."}
             </p>
@@ -510,7 +510,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         </div>
 
         {/* Fake Comment Input (Triggers Modal) */}
-        <div className="bg-white border-t border-border p-3 pb-safe shrink-0 w-full shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-[60] mt-auto">
+        <div className="bg-white dark:bg-[#1A1A1A] border-t border-border dark:border-[#3F3F3F] p-3 pb-safe shrink-0 w-full shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-[60] mt-auto">
           <div onClick={handleOpenInput} className="flex items-center gap-3">
             <Avatar
               size={36}
@@ -518,8 +518,8 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
               name={currentUser?.name}
               className="shrink-0"
             />
-            <div className="flex-1 bg-[#f1f1f2] rounded-full px-4 py-2.5 cursor-text">
-              <span className="text-[14px] text-gray-500">
+            <div className="flex-1 bg-[#f1f1f2] dark:bg-[#242424] rounded-full px-4 py-2.5 cursor-text border border-transparent dark:border-[#3F3F3F]">
+              <span className="text-[14px] text-gray-500 dark:text-neutral-400">
                 {!isAuthenticated
                   ? t?.catSpeak?.reels?.detail?.signInToComment ||
                     "Đăng nhập để bình luận..."
@@ -539,7 +539,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         onClick={() => setIsInputModalOpen(false)}
       />
       <div
-        className={`fixed bottom-0 left-0 w-full bg-white border-t border-border p-2 pb-safe z-[100] shadow-[0_-10px_20px_rgba(0,0,0,0.08)] flex items-center gap-3 transition-transform duration-200 ${isInputModalOpen ? "translate-y-0" : "translate-y-[150%]"}`}
+        className={`fixed bottom-0 left-0 w-full bg-white dark:bg-[#1A1A1A] border-t border-border dark:border-[#3F3F3F] p-2 pb-safe z-[100] shadow-[0_-10px_20px_rgba(0,0,0,0.08)] flex items-center gap-3 transition-transform duration-200 ${isInputModalOpen ? "translate-y-0" : "translate-y-[150%]"}`}
       >
         <Avatar
           size={36}
@@ -549,7 +549,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         />
         <form
           onSubmit={handlePostComment}
-          className="flex-1 flex items-center bg-[#f1f1f2] rounded-full px-4 py-1.5"
+          className="flex-1 flex items-center bg-[#f1f1f2] dark:bg-[#242424] rounded-full px-4 py-1.5 border border-transparent dark:border-[#3F3F3F]"
         >
           <input
             ref={commentInputRef}
@@ -559,7 +559,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
             }
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            className="w-full bg-transparent border-none text-[16px] outline-none text-gray-800 placeholder-gray-500 min-w-0 h-8"
+            className="w-full bg-transparent border-none text-[16px] outline-none text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-neutral-400 min-w-0 h-8"
             disabled={isPostingComment}
             onBlur={() => {
               setTimeout(() => {
@@ -571,7 +571,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
           <button
             type="submit"
             disabled={isPostingComment || !commentText.trim()}
-            className="ml-2 w-7 h-7 rounded-full bg-cath-red-700 text-white flex items-center justify-center shrink-0 border-none disabled:opacity-50 disabled:bg-gray-300 transition-colors"
+            className="ml-2 w-7 h-7 rounded-full bg-cath-red-700 text-white flex items-center justify-center shrink-0 border-none disabled:opacity-50 disabled:bg-gray-300 dark:disabled:bg-[#333] transition-colors"
           >
             {isPostingComment ? (
               <Loader2 className="w-3 h-3 animate-spin" />

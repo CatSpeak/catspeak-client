@@ -64,7 +64,7 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
   return (
     <FluentCard id="field-credentials" className="gap-6 !justify-start h-full min-h-[320px] flex-col flex">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           {ins.uploadCredentials || "Chứng chỉ"}
         </h2>
         {!readOnly && (
@@ -78,15 +78,15 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
         )}
       </div>
 
-      <p className="text-[11px] text-cath-red-700">
+      <p className="text-[11px] text-cath-red-700 dark:text-red-400">
         {ins.credentialsNote || "Bạn phải cung cấp bằng chứng hoặc chứng chỉ phù hợp với trình độ đã chọn ở trên. Tệp tải lên phải ở định dạng PDF, rõ ràng và chi tiết, mỗi tệp dưới 5MB. NGHIÊM CẤM: Mọi hình thức chứng chỉ giả mạo."}
       </p>
 
       <div className="flex flex-col gap-3 mt-2">
         {(!formData.credentials || formData.credentials.length === 0) && (
           <div className="flex flex-col gap-1 w-full max-w-[320px]">
-            <div className={`flex flex-col items-center justify-center w-full h-[72px] bg-white border-2 border-dashed rounded-xl ${errors.credentials ? "border-red-500 bg-red-50/10" : "border-border"} text-gray-400`}>
-              <span className={`text-[13px] ${errors.credentials ? "text-red-500" : "text-gray-400"}`}>{ins.noCredentials || "Chưa có chứng chỉ"}</span>
+            <div className={`flex flex-col items-center justify-center w-full h-[72px] bg-white dark:bg-[#1A1A1A] border-2 border-dashed rounded-xl ${errors.credentials ? "border-red-500 bg-red-50/10" : "border-border dark:border-[#3F3F3F]"} text-gray-400 dark:text-neutral-500`}>
+              <span className={`text-[13px] ${errors.credentials ? "text-red-500" : "text-gray-400 dark:text-neutral-500"}`}>{ins.noCredentials || "Chưa có chứng chỉ"}</span>
             </div>
             {errors.credentials && <p className="text-xs text-red-500">{errors.credentials}</p>}
           </div>
@@ -104,16 +104,16 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
                 setPreviewIndex(idx)
               }
             }}
-            className="relative flex items-center gap-3 w-full sm:w-[320px] p-3 bg-white border border-border rounded-xl group hover:border-red-200 hover:bg-red-50/30 transition-colors shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-pointer"
+            className="relative flex items-center gap-3 w-full sm:w-[320px] p-3 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl group hover:border-red-200 dark:hover:border-rose-900/40 hover:bg-red-50/30 dark:hover:bg-rose-950/20 transition-colors shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 text-gray-500 group-hover:bg-red-50 group-hover:text-red-500 transition-colors">
+            <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-[#272727] flex items-center justify-center shrink-0 text-gray-500 dark:text-neutral-400 group-hover:bg-red-50 dark:group-hover:bg-rose-950/40 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">
               <FileText className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-gray-700 truncate" title={displayName(cred, idx)}>
+              <p className="text-[13px] font-medium text-gray-700 dark:text-neutral-200 truncate" title={displayName(cred, idx)}>
                 {displayName(cred, idx)}
               </p>
-              <p className="text-[11px] text-gray-400 mt-0.5">
+              <p className="text-[11px] text-gray-400 dark:text-neutral-400 mt-0.5">
                 {typeof cred === "string" ? (ins.attachedFile || "Tệp đính kèm") : (ins.pdfDocument || "Tài liệu PDF")}
               </p>
             </div>
@@ -129,7 +129,7 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
                   // when the delete button itself is activated via keyboard.
                   e.stopPropagation()
                 }}
-                className="shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="shrink-0 p-1.5 text-gray-400 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
                 title={ins.remove || "Xóa"}
               >
                 <X className="w-4 h-4" />
@@ -144,14 +144,14 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
         open={safePreviewIndex != null}
         onClose={() => setPreviewIndex(null)}
         title={
-          <h2 className="text-[16px] leading-[22px] font-semibold truncate flex-1 min-w-0 mr-2" title={previewName}>
+          <h2 className="text-[16px] leading-[22px] font-semibold text-slate-900 dark:text-white truncate flex-1 min-w-0 mr-2" title={previewName}>
             {previewName}
           </h2>
         }
         className="w-full h-full md:w-[90vw] md:max-w-5xl md:h-[90vh]"
-        bodyClassName="p-0 flex-1 overflow-hidden bg-[#F3F3F3] flex flex-col"
-        headerClassName="flex items-center justify-between gap-2 p-4 border-b bg-white"
-        footerClassName="p-3 sm:p-4 border-t bg-white"
+        bodyClassName="p-0 flex-1 overflow-hidden bg-[#F3F3F3] dark:bg-[#1A1A1A] flex flex-col"
+        headerClassName="flex items-center justify-between gap-2 p-4 border-b border-border dark:border-[#2E2E2E] bg-white dark:bg-[#1A1A1A]"
+        footerClassName="p-3 sm:p-4 border-t border-border dark:border-[#2E2E2E] bg-white dark:bg-[#1A1A1A]"
         footer={
           <div className="flex flex-wrap justify-end gap-2">
             {previewUrl && (
@@ -159,7 +159,7 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
                 href={previewUrl}
                 download={previewName || true}
                 onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 border border-border rounded-lg transition"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 dark:text-neutral-200 bg-white dark:bg-[#242424] hover:bg-gray-100 dark:hover:bg-[#2C2C2C] border border-border dark:border-[#3F3F3F] rounded-lg transition"
               >
                 <Download size={15} />
                 <span>{ins.download || "Tải xuống"}</span>
@@ -169,7 +169,7 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
               type="button"
               onClick={handleOpenNewTab}
               disabled={!previewUrl}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition disabled:opacity-50 cursor-pointer"
             >
               <ExternalLink size={15} />
               <span>{ins.openNewTab || "Mở tab mới"}</span>

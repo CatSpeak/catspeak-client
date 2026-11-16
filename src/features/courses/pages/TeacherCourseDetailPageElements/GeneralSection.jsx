@@ -137,9 +137,9 @@ const GeneralSection = ({
     return classes.reduce((sum, cls) => {
       const val = Number(
         cls.studentCount ??
-          cls.enrolledStudents ??
-          cls.enrolledCount ??
-          cls.totalStudents,
+        cls.enrolledStudents ??
+        cls.enrolledCount ??
+        cls.totalStudents,
       )
       return sum + (Number.isFinite(val) && val > 0 ? val : 0)
     }, 0)
@@ -147,7 +147,7 @@ const GeneralSection = ({
 
   return (
     <div
-      className={`bg-white rounded-3xl border border-border shadow-xs overflow-hidden flex flex-col ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] shadow-xs overflow-hidden flex flex-col ${className}`}
     >
       {/* ─── Visual Banner ─── */}
       <div className="relative p-6 sm:p-8 min-h-[380px] flex flex-col justify-end text-white">
@@ -185,7 +185,7 @@ const GeneralSection = ({
               aria-haspopup="menu"
               aria-expanded={showMenu}
               onClick={() => setShowMenu((prev) => !prev)}
-              className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-bold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm cursor-pointer"
+              className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white font-bold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm cursor-pointer"
             >
               <Pencil size={14} />
               <span>{c.editCourse || "Customize"}</span>
@@ -194,7 +194,7 @@ const GeneralSection = ({
             {showMenu && (
               <div
                 role="menu"
-                className="absolute right-0 mt-2 w-48 bg-white border border-border rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700"
+                className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1E1E1E] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 dark:divide-[#2E2E2E] text-gray-700 dark:text-gray-200"
               >
                 <button
                   type="button"
@@ -205,9 +205,9 @@ const GeneralSection = ({
                       `/workspace/courses/edit/${encodeURIComponent(String(id))}`,
                     )
                   }}
-                  className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold flex items-center gap-2.5 transition-colors cursor-pointer"
+                  className="w-full text-left p-3 hover:bg-gray-55 dark:hover:bg-[#2A2A2A] text-xs font-bold flex items-center gap-2.5 transition-colors cursor-pointer"
                 >
-                  <Pencil size={14} className="text-gray-500" />
+                  <Pencil size={14} className="text-gray-500 dark:text-gray-400" />
                   <span>
                     {cd.editCourse ||
                       c.createCourse?.updateCourse ||
@@ -222,9 +222,9 @@ const GeneralSection = ({
                     setShowMenu(false)
                     setShowDeleteModal(true)
                   }}
-                  className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#BA021C] flex items-center gap-2.5 transition-colors cursor-pointer"
+                  className="w-full text-left p-3 hover:bg-gray-55 dark:hover:bg-[#2A2A2A] text-xs font-bold text-[#BA021C] dark:text-[#FF6B6B] flex items-center gap-2.5 transition-colors cursor-pointer"
                 >
-                  <Trash2 size={14} className="text-[#BA021C]" />
+                  <Trash2 size={14} className="text-[#BA021C] dark:text-[#FF6B6B]" />
                   <span>{cd.deleteCourse || "Xóa khóa học"}</span>
                 </button>
               </div>
@@ -238,14 +238,14 @@ const GeneralSection = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Ngôn ngữ - Blue */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] dark:bg-blue-950/60 text-[#2563EB] dark:text-blue-400 flex items-center justify-center">
               <Globe size={18} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {c.languageLabel || cd.language || "—"}
               </span>
-              <span className="text-gray-900 font-bold text-sm mt-0.5">
+              <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                 {getLocalizedLanguageName(courseData?.language, t) || "—"}
               </span>
             </div>
@@ -253,11 +253,11 @@ const GeneralSection = ({
 
           {/* Trình độ (tổng hợp từ các class bên trong) - Yellow */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#fff9cc] text-[#e3b709] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#fff9cc] dark:bg-amber-950/60 text-[#e3b709] dark:text-amber-400 flex items-center justify-center">
               <GraduationCap size={20} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {c.levelLabel || "Level"}
               </span>
               {classLevels.length > 0 ? (
@@ -265,14 +265,14 @@ const GeneralSection = ({
                   {classLevels.map((lvl) => (
                     <span
                       key={lvl}
-                      className="inline-flex items-center justify-center px-3 py-0.5 text-xs font-bold text-white bg-[#e3b709] rounded-full w-fit"
+                      className="inline-flex items-center justify-center px-3 py-0.5 text-xs font-bold text-white bg-[#e3b709] dark:bg-amber-600 rounded-full w-fit"
                     >
                       {lvl}
                     </span>
                   ))}
                 </div>
               ) : (
-                <span className="text-gray-900 font-bold text-sm mt-0.5">
+                <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                   —
                 </span>
               )}
@@ -281,14 +281,14 @@ const GeneralSection = ({
 
           {/* Số lớp (classes.length) - Purple */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#fad9ff] text-[#c460d1] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#fad9ff] dark:bg-purple-950/60 text-[#c460d1] dark:text-purple-400 flex items-center justify-center">
               <BookOpen size={18} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.totalClasses || c.totalClasses || "Số lớp"}
               </span>
-              <span className="text-gray-900 font-bold text-sm mt-0.5">
+              <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                 {classes.length}{" "}
                 {cd.classesCountLabel || c.classesCountLabel || "lớp"}
               </span>
@@ -297,14 +297,14 @@ const GeneralSection = ({
 
           {/* Số học viên (tổng studentCount của các class) - Orange */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#ffdcc4] text-[#ff8330] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#ffdcc4] dark:bg-orange-950/60 text-[#ff8330] dark:text-orange-400 flex items-center justify-center">
               <UsersRound size={18} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.totalStudents || c.totalStudents || "Số học viên"}
               </span>
-              <span className="text-gray-900 font-bold text-sm mt-0.5">
+              <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                 {totalStudents}{" "}
                 {cd.studentsLabel || c.studentsLabel || "học viên"}
               </span>
@@ -313,19 +313,19 @@ const GeneralSection = ({
         </div>
 
         {/* Mô tả */}
-        <div className="flex items-start gap-3 border-t border-border pt-6">
-          <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
+        <div className="flex items-start gap-3 border-t border-border dark:border-[#3F3F3F] pt-6">
+          <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] dark:bg-[#2A2A2A] text-[#4B5563] dark:text-gray-300 flex items-center justify-center">
             <AlignLeft size={18} />
           </div>
           <div className="flex flex-col gap-0 w-full min-w-0">
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-400 dark:text-gray-400">
               {cd.description || "Description"}
             </span>
             <RenderHTML
               html={courseData?.description}
-              className="text-gray-600 text-sm leading-relaxed mt-0.5"
+              className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mt-0.5"
               fallback={
-                <span className="text-gray-600 text-sm leading-relaxed mt-0.5">
+                <span className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mt-0.5">
                   {cd.noDescription || "No description provided."}
                 </span>
               }

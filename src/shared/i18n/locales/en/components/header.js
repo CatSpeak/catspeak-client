@@ -14,6 +14,10 @@ export default {
   newNotificationTitle: "New Notification",
   newNotificationBody: "You have a new notification to view.",
   searchPlaceholder: "Search rooms",
+  recentSearches: "Recent searches",
+  clearAll: "Clear all",
+  resultsFound: "{{count}} results found",
+  searching: "Searching for rooms...",
   filterRooms: "Filter rooms",
   languages: {
     vi: "Vietnamese",

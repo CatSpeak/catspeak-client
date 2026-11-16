@@ -36,10 +36,10 @@ const MediaParticipantStrip = ({ participants }) => {
   return (
     <section aria-label="Đang cùng xem" className="w-full shrink-0">
       <div className="mb-2 flex items-center gap-2 px-1">
-        <span className="grid h-6 w-6 place-items-center rounded-full bg-gray-900/[0.06] text-gray-500">
+        <span className="grid h-6 w-6 place-items-center rounded-full bg-gray-900/[0.06] dark:bg-white/10 text-gray-500 dark:text-[#AAAAAA]">
           <Users size={14} />
         </span>
-        <p className="text-xs font-semibold tracking-wide text-gray-500">
+        <p className="text-xs font-semibold tracking-wide text-gray-500 dark:text-[#AAAAAA]">
           Đang cùng xem · {total}
         </p>
       </div>
@@ -50,7 +50,7 @@ const MediaParticipantStrip = ({ participants }) => {
         {visible.map((p) => (
           <div
             key={p.identity}
-            className="aspect-video min-w-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm ring-1 ring-black/10"
+            className="aspect-video min-w-0 overflow-hidden rounded-2xl bg-gray-100 dark:bg-neutral-900 shadow-sm ring-1 ring-black/10 dark:ring-white/10"
           >
             <VideoTile participant={p} compact />
           </div>
@@ -61,7 +61,7 @@ const MediaParticipantStrip = ({ participants }) => {
             onClick={() => openParticipantList?.("participants")}
             aria-label={`Xem thêm ${overflowCount} người đang cùng xem`}
             title="Xem danh sách tham gia"
-            className="flex aspect-video min-w-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl bg-neutral-900 text-white shadow-sm ring-1 ring-black/10 transition-colors hover:bg-neutral-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            className="flex aspect-video min-w-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-2xl bg-neutral-900 text-white shadow-sm ring-1 ring-black/10 dark:ring-white/10 transition-colors hover:bg-neutral-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <span className="text-xl font-bold leading-none sm:text-2xl">+{overflowCount}</span>
             <span className="text-[10px] font-medium text-neutral-300">Xem thêm</span>

@@ -1,6 +1,7 @@
 export default {
   onlineLink: "Liên kết tham gia trực tuyến",
-  onlineLinkInvalid: "Nhập liên kết họp hợp lệ bắt đầu bằng https:// hoặc http://.",
+  onlineLinkInvalid:
+    "Nhập liên kết họp hợp lệ bắt đầu bằng https:// hoặc http://.",
   searchClass: "Tìm tên lớp...",
   generalCalendar: "Lịch tổng hợp",
   personalCalendar: "Lịch cá nhân",
@@ -39,6 +40,8 @@ export default {
   loadingDetails: "Đang tải chi tiết…",
   loadingEvents: "Đang tải sự kiện…",
   noEvents: "Không có sự kiện nào trong ngày này",
+  noEventsDay: "Không có sự kiện nào trong ngày này",
+  noEventsMonth: "Không có sự kiện nào trong tháng này",
   timeLabel: "Thời gian",
   description: "Mô tả",
   registeredCount: "Số lượng đã đăng kí",
@@ -156,7 +159,8 @@ export default {
   editThisOccurrence: "Chỉ buổi này",
   editEntireSeries: "Toàn bộ chuỗi sự kiện",
   editOccurrence: "Sửa chỉ một buổi này",
-  editOccurrenceWarning: "Bạn đang chỉnh sửa một sự kiện lặp lại. Những thay đổi này sẽ chỉ được áp dụng cho phiên này.",
+  editOccurrenceWarning:
+    "Bạn đang chỉnh sửa một sự kiện lặp lại. Những thay đổi này sẽ chỉ được áp dụng cho phiên này.",
   endTimeBeforeStartTime: "Thời gian kết thúc phải sau thời gian bắt đầu",
   cancelOccurrenceToggle: "Hủy buổi này",
   reason: "Lý do thay đổi / hủy (Tùy chọn)",
@@ -177,9 +181,10 @@ export default {
     conditionsJoin: "Điều kiện tham gia",
     seeMoreEvents: "Xem thêm sự kiện trên CatSpeak",
   },
-  maxOccurrencesWarning: "Hệ thống chỉ hỗ trợ tạo tối đa 24 buổi học cho mỗi chuỗi sự kiện. Những buổi vượt quá giới hạn này sẽ không được tạo.",
+  maxOccurrencesWarning:
+    "Hệ thống chỉ hỗ trợ tạo tối đa 24 buổi học cho mỗi chuỗi sự kiện. Những buổi vượt quá giới hạn này sẽ không được tạo.",
   // New calendar UI
-  schedule: "Danh sách sự kiện",
+  schedule: "Sự kiện",
   monthSchedule: "Lịch trình sự kiện tháng",
   upcoming: "Sắp diễn ra",
   eventDayLegend: "Ngày sự kiện",
@@ -199,7 +204,8 @@ export default {
   eventInfo: "Thông tin sự kiện",
   eventImage: "Ảnh sự kiện",
   previewInfo: "Xem trước thông tin",
-  previewNote: "Thông tin hiển thị trước giúp bạn kiểm tra trước khi tạo sự kiện.",
+  previewNote:
+    "Thông tin hiển thị trước giúp bạn kiểm tra trước khi tạo sự kiện.",
   selectDayToView: "Chọn một ngày trên lịch để xem sự kiện",
   eventTypePlaceholder: "Online hay offline?",
   eventDescOptional: "Mô tả sự kiện (tùy chọn)",
@@ -218,10 +224,12 @@ export default {
   updateEventFailedMsg: "Có lỗi xảy ra khi cập nhật sự kiện, vui lòng thử lại.",
   close: "Đóng",
   deleteEvent: "Xóa sự kiện",
-  deleteEventWarning: "Nếu bạn xóa sự kiện thì sự kiện vừa rồi phải tạo lại và hành động này không thể hoàn tác lại được. Bạn có chắc không?",
+  deleteEventWarning:
+    "Nếu bạn xóa sự kiện thì sự kiện vừa rồi phải tạo lại và hành động này không thể hoàn tác lại được. Bạn có chắc không?",
   cancelDelete: "Hủy xóa",
   validationErrorTitle: "Kiểm tra lại thông tin",
-  validationErrorMsg: "Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.",
+  validationErrorMsg:
+    "Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.",
   registerSuccess: "Đăng ký thành công!",
   registerError: "Đăng ký thất bại",
   cancelRegSuccess: "Đã hủy đăng ký!",
@@ -238,6 +246,8 @@ export default {
   // Event detail
   noDescription: "Sự kiện này không có mô tả.",
   noRegisteredEvents: "Bạn chưa đăng kí sự kiện nào trong tháng này.",
+  noRegisteredEventsMonth: "Bạn chưa đăng kí sự kiện nào trong tháng này",
+  noRegisteredEventsDay: "Bạn chưa đăng ký sự kiện nào trong ngày này",
   day: "Ngày",
   // Workspace Events Page
   workspaceEventsTitle: "Sự kiện của tôi",
@@ -252,7 +262,8 @@ export default {
   workspaceEditEvent: "Chỉnh sửa sự kiện",
   workspaceDeleteEvent: "Xóa sự kiện",
   workspaceDeleteConfirmTitle: "Xóa sự kiện này?",
-  workspaceDeleteConfirmMsg: "Sự kiện và tất cả các buổi của nó sẽ bị xóa vĩnh viễn và không thể hoàn tác.",
+  workspaceDeleteConfirmMsg:
+    "Sự kiện và tất cả các buổi của nó sẽ bị xóa vĩnh viễn và không thể hoàn tác.",
   workspaceDeleteConfirm: "Xóa",
   workspaceDeleteCancel: "Hủy",
   workspaceDeleting: "Đang xóa...",
@@ -270,5 +281,7 @@ export default {
   selectClass: "Chọn lớp học",
   prevWeek: "Tuần trước",
   nextWeek: "Tuần sau",
-}
-
+  viewMode: "Chế độ xem",
+  monthView: "Tháng",
+  weekView: "Tuần",
+};

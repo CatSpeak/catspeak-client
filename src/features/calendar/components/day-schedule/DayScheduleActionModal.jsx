@@ -12,12 +12,12 @@ const DayScheduleActionModal = ({ actionStatus, onClose, cal = {} }) => {
     >
       <div className="flex flex-col items-center justify-center p-6 gap-4 text-center">
         {actionStatus?.status === "success" ? (
-          <CheckCircle2 size={64} className="text-[#00BB38]" />
+          <CheckCircle2 size={64} className="text-[#00BB38] dark:text-emerald-400" />
         ) : (
-          <XCircle size={64} className="text-[#990011]" />
+          <XCircle size={64} className="text-[#990011] dark:text-red-400" />
         )}
 
-        <h2 className="text-xl font-bold text-black mt-2">
+        <h2 className="text-xl font-bold text-black dark:text-white mt-2">
           {actionStatus?.status === "success"
             ? actionStatus.type === "register"
               ? cal.registerSuccess || "Đăng ký thành công!"

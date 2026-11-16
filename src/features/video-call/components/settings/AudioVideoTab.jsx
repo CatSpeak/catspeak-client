@@ -7,17 +7,10 @@ import {
   mapDevicesToOptions,
 } from "@/shared/utils/mediaConstraintUtils"
 
-const DeviceSection = ({ icon, title, children }) => (
-  <section className="flex flex-col gap-3 rounded-xl border border-[#e5e5e5] bg-white p-4">
-    <div className="flex items-center gap-2.5">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cath-red-700/10 text-cath-red-700">
-        {icon}
-      </span>
-      <h3 className="text-sm font-semibold text-neutral-900">{title}</h3>
-    </div>
-    {children}
-  </section>
-)
+const getCleanLabel = (str, fallback) => {
+  if (!str) return fallback
+  return str.replace(/^(Chọn|Select)\s+/i, "")
+}
 
 const AudioVideoTab = ({
   waitingT = {},
@@ -44,9 +37,7 @@ const AudioVideoTab = ({
     typeof HTMLAudioElement.prototype.setSinkId === "function"
 
   const systemDefaultLabel =
-    waitingT.systemDefault ||
-    waitingT.systemDefaultSpeaker ||
-    "System default"
+    waitingT.systemDefault || waitingT.systemDefaultSpeaker || "System default"
 
   const selectedMicLabel =
     devices.audioinput?.find((d) => d.deviceId === selectedMic)?.label ||
@@ -127,90 +118,159 @@ const AudioVideoTab = ({
   }, [isOpen])
 
   return (
-    <div className="flex flex-col gap-3 sm:gap-4">
-      <DeviceSection icon={<Mic size={16} aria-hidden="true" />} title={waitingT.selectMicrophone || "Microphone"}>
-        <Dropdown
-          options={mapDevicesToOptions(
-            devices.audioinput,
-            <Mic size={20} />,
-            true,
-            systemDefaultLabel,
-            waitingT.unknownDevice
-          )}
-          value={selectedMic}
-          onChange={(val) => setSelectedMic?.(val)}
-          placeholder={waitingT.selectMicrophone || "Select Microphone"}
-          ariaLabel={`${waitingT.selectMicrophone || "Microphone"}: ${selectedMicLabel}`}
-          className="w-full"
-          roundedClass="rounded-xl"
-          dropdownClassName="w-full"
-        />
+    <div className="px-4 pb-4 flex flex-col h-full justify-between gap-4">
+      {/* Device Selection Rows (Clean, Borderless) */}
+      <div className="flex flex-col">
+        {/* Microphone Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-h-[56px]">
+          <div className="flex items-center gap-4 min-w-0">
+            <Mic
+              className="text-neutral-600 dark:text-[#AAAAAA] shrink-0"
+              size={20}
+            />
+            <p className="text-sm sm:text-base font-medium text-neutral-900 dark:text-white truncate">
+              {getCleanLabel(waitingT.selectMicrophone, "Microphone")}
+            </p>
+          </div>
 
-        <MicTestVisualizer
-          testMic={testMic}
-          onToggleTest={() => setTestMic(!testMic)}
-          stream={testStreamRef.current || localStream}
-          selectedMic={selectedMic}
-          label={waitingT.testMic || "Test mic"}
-          stopLabel={waitingT.stopTest || "Stop testing"}
-          hint={waitingT.micTestHint}
-          listeningLabel={waitingT.micTestListening}
-          detectedLabel={waitingT.micTestDetected}
-        />
-      </DeviceSection>
+          <Dropdown
+            options={mapDevicesToOptions(
+              devices.audioinput,
+              <Mic size={18} />,
+              true,
+              systemDefaultLabel,
+              waitingT.unknownDevice,
+            )}
+            value={selectedMic}
+            onChange={(val) => setSelectedMic?.(val)}
+            placeholder={
+              (devices.audioinput?.length || 0) > 0
+                ? waitingT.selectMicrophone || "Select Microphone"
+                : (waitingT.micNotFound || "No microphone found").replace(
+                    /\.+$/,
+                    "",
+                  )
+            }
+            ariaLabel={`${waitingT.selectMicrophone || "Microphone"}: ${selectedMicLabel}`}
+            disabled={(devices.audioinput?.length || 0) === 0}
+            fitContent
+            className="w-full sm:w-auto shrink-0"
+            align="right"
+            roundedClass="rounded-xl"
+            dropdownClassName="w-max min-w-[220px] max-w-[min(480px,calc(100vw-32px))]"
+          />
+        </div>
 
-      <DeviceSection
-        icon={<Volume2 size={16} aria-hidden="true" />}
-        title={waitingT.selectSpeaker || "Speaker (Audio Output)"}
-      >
-        <Dropdown
-          options={mapDevicesToOptions(
-            devices.audiooutput,
-            <Volume2 size={20} />,
-            true,
-            systemDefaultLabel,
-            waitingT.unknownDevice
-          )}
-          value={selectedSpeaker}
-          onChange={(val) => setSelectedSpeaker?.(val)}
-          placeholder={
-            isSinkSupported
-              ? waitingT.selectSpeaker || "Select Speaker"
-              : waitingT.systemDefaultSpeaker || "System Default Speaker"
-          }
-          ariaLabel={`${waitingT.selectSpeaker || "Speaker"}: ${selectedSpeakerLabel}`}
-          disabled={!isSinkSupported}
-          className="w-full"
-          roundedClass="rounded-xl"
-          dropdownClassName="w-full"
-        />
-        {!isSinkSupported && (
-          <p className="text-[11px] text-gray-500 flex items-center gap-1">
-            <Info size={13} className="shrink-0" aria-hidden="true" />{" "}
-            {waitingT.speakerNotSupported ||
-              "Speaker selection is not supported in your browser."}
-          </p>
-        )}
-      </DeviceSection>
+        {/* Speaker Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-h-[56px]">
+          <div className="flex items-center gap-4 min-w-0">
+            <Volume2
+              className="text-neutral-600 dark:text-[#AAAAAA] shrink-0"
+              size={20}
+            />
+            <div className="min-w-0">
+              <p className="text-sm sm:text-base font-medium text-neutral-900 dark:text-white truncate">
+                {getCleanLabel(waitingT.selectSpeaker, "Speaker")}
+              </p>
+              {!isSinkSupported && (
+                <p className="text-[11px] text-gray-500 dark:text-[#AAAAAA] flex items-center gap-1 mt-0.5">
+                  <Info
+                    size={12}
+                    className="shrink-0 text-amber-500"
+                    aria-hidden="true"
+                  />{" "}
+                  {waitingT.speakerNotSupported ||
+                    "Speaker selection is not supported in your browser."}
+                </p>
+              )}
+            </div>
+          </div>
 
-      <DeviceSection icon={<Video size={16} aria-hidden="true" />} title={waitingT.selectCamera || "Camera"}>
-        <Dropdown
-          options={mapDevicesToOptions(
-            devices.videoinput,
-            <Video size={20} />,
-            false,
-            systemDefaultLabel,
-            waitingT.unknownDevice
-          )}
-          value={selectedCamera}
-          onChange={(val) => setSelectedCamera?.(val)}
-          placeholder={waitingT.selectCamera || "Select Camera"}
-          ariaLabel={`${waitingT.selectCamera || "Camera"}: ${selectedCameraLabel}`}
-          className="w-full"
-          roundedClass="rounded-xl"
-          dropdownClassName="w-full"
-        />
-      </DeviceSection>
+          <Dropdown
+            options={mapDevicesToOptions(
+              devices.audiooutput,
+              <Volume2 size={18} />,
+              true,
+              systemDefaultLabel,
+              waitingT.unknownDevice,
+            )}
+            value={selectedSpeaker}
+            onChange={(val) => setSelectedSpeaker?.(val)}
+            placeholder={
+              !isSinkSupported
+                ? waitingT.systemDefaultSpeaker || "System Default Speaker"
+                : (devices.audiooutput?.length || 0) > 0
+                  ? waitingT.selectSpeaker || "Select Speaker"
+                  : (waitingT.speakerNotFound || "No speaker found").replace(
+                      /\.+$/,
+                      "",
+                    )
+            }
+            ariaLabel={`${waitingT.selectSpeaker || "Speaker"}: ${selectedSpeakerLabel}`}
+            disabled={
+              !isSinkSupported || (devices.audiooutput?.length || 0) === 0
+            }
+            fitContent
+            className="w-full sm:w-auto shrink-0"
+            align="right"
+            roundedClass="rounded-xl"
+            dropdownClassName="w-max min-w-[220px] max-w-[min(480px,calc(100vw-32px))]"
+          />
+        </div>
+
+        {/* Camera Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-h-[56px]">
+          <div className="flex items-center gap-4 min-w-0">
+            <Video
+              className="text-neutral-600 dark:text-[#AAAAAA] shrink-0"
+              size={20}
+            />
+            <p className="text-sm sm:text-base font-medium text-neutral-900 dark:text-white truncate">
+              {getCleanLabel(waitingT.selectCamera, "Camera")}
+            </p>
+          </div>
+
+          <Dropdown
+            options={mapDevicesToOptions(
+              devices.videoinput,
+              <Video size={18} />,
+              false,
+              systemDefaultLabel,
+              waitingT.unknownDevice,
+            )}
+            value={selectedCamera}
+            onChange={(val) => setSelectedCamera?.(val)}
+            placeholder={
+              (devices.videoinput?.length || 0) > 0
+                ? waitingT.selectCamera || "Select Camera"
+                : (waitingT.cameraNotFound || "No camera found").replace(
+                    /\.+$/,
+                    "",
+                  )
+            }
+            ariaLabel={`${waitingT.selectCamera || "Camera"}: ${selectedCameraLabel}`}
+            disabled={(devices.videoinput?.length || 0) === 0}
+            fitContent
+            className="w-full sm:w-auto shrink-0"
+            align="right"
+            roundedClass="rounded-xl"
+            dropdownClassName="w-max min-w-[220px] max-w-[min(480px,calc(100vw-32px))]"
+          />
+        </div>
+      </div>
+
+      {/* Mic Test Visualizer Section (Separated by subtle border line) */}
+      <MicTestVisualizer
+        testMic={testMic}
+        onToggleTest={() => setTestMic(!testMic)}
+        stream={testStreamRef.current || localStream}
+        selectedMic={selectedMic}
+        label={waitingT.testMic || "Test mic"}
+        stopLabel={waitingT.stopTest || "Stop testing"}
+        hint={waitingT.micTestHint}
+        listeningLabel={waitingT.micTestListening}
+        detectedLabel={waitingT.micTestDetected}
+      />
 
       <audio
         ref={audioRef}

@@ -8,18 +8,18 @@ import ProfilePostCardSkeleton from "./ProfilePostCardSkeleton"
  */
 const ProfilePageSkeleton = () => {
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg">
+    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg dark:bg-[#0F0F0F]">
       <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
         {/* Profile Header Skeleton */}
-        <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
+        <div className="w-full bg-white dark:bg-[#1A1A1A] border border-[#e5e5e5] dark:border-[#3F3F3F] rounded-xl overflow-hidden mb-6">
           {/* Cover Photo */}
           <Skeleton className="w-full h-48 md:h-[280px] !rounded-none" />
 
           {/* Header Info Area */}
-          <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
+          <div className="p-4 sm:p-6 relative border-b border-gray-100 dark:border-[#272727] flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
             <div className="flex-1 min-w-0">
               {/* Avatar circle */}
-              <div className="-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white rounded-full w-fit shadow-sm">
+              <div className="-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white dark:bg-[#1A1A1A] rounded-full w-fit shadow-sm">
                 <Skeleton className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] rounded-full" />
               </div>
 
@@ -66,7 +66,7 @@ const ProfilePageSkeleton = () => {
           {/* Right Sidebar Skeleton */}
           <div className="lg:col-span-1 hidden lg:block">
             <FluentCard padding="p-0" className="overflow-hidden flex flex-col">
-              <div className="h-14 px-6 flex items-center border-b border-border">
+              <div className="h-14 px-6 flex items-center border-b border-border dark:border-[#3F3F3F]">
                 <Skeleton className="h-5 w-32 rounded" />
               </div>
               <div className="flex flex-col gap-1 p-2">

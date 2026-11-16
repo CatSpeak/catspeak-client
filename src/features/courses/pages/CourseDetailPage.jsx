@@ -39,14 +39,14 @@ const CourseDetailPage = () => {
 
   const isCourseTeacher = Boolean(
     isTeacher ||
-      user?.isTeacher ||
-      (user?.accountId &&
-        [
-          rawCourse?.teacherId,
-          rawCourse?.instructorId,
-          rawCourse?.teacher?.id,
-          rawCourse?.teacher?.accountId,
-        ].some((tid) => tid != null && String(tid) === String(user.accountId))),
+    user?.isTeacher ||
+    (user?.accountId &&
+      [
+        rawCourse?.teacherId,
+        rawCourse?.instructorId,
+        rawCourse?.teacher?.id,
+        rawCourse?.teacher?.accountId,
+      ].some((tid) => tid != null && String(tid) === String(user.accountId))),
   )
 
   const urlTab = searchParams.get("tab")
@@ -71,7 +71,7 @@ const CourseDetailPage = () => {
         className="flex justify-center items-center min-h-[400px]"
         role="status"
       >
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011] dark:border-[#FF6B6B]"></div>
       </div>
     )
   }
@@ -79,7 +79,7 @@ const CourseDetailPage = () => {
   if (error || !id || (!isLoading && !rawCourse)) {
     return (
       <div
-        className="flex flex-col items-start gap-3 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold"
+        className="flex flex-col items-start gap-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 p-4 rounded-xl text-sm font-semibold"
         role="alert"
       >
         <span>
@@ -89,7 +89,7 @@ const CourseDetailPage = () => {
           type="button"
           onClick={refetch}
           disabled={isFetching}
-          className="rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-extrabold disabled:opacity-50"
+          className="rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-[#222222] text-red-700 dark:text-red-300 px-3 py-2 text-xs font-extrabold disabled:opacity-50"
         >
           {c.courseDetail?.retry || "Try again"}
         </button>
@@ -98,7 +98,7 @@ const CourseDetailPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-100">
       {isFetching && (
         <span role="status" className="sr-only">
           {c.courseDetail?.refreshing || "Refreshing course details"}
@@ -118,7 +118,7 @@ const CourseDetailPage = () => {
       />
 
       {/* ─── Page Heading ─── */}
-      <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+      <h1 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight">
         {rawCourse?.name || "Chi tiết khóa học"}
       </h1>
 
@@ -129,7 +129,7 @@ const CourseDetailPage = () => {
           activeTab={activeTab}
           onChange={handleTabChange}
           fullWidth={false}
-          className="border-b border-border/80"
+          className="border-b border-border/80 dark:border-[#3F3F3F]"
         />
       )}
 

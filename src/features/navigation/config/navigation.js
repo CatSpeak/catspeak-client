@@ -61,12 +61,6 @@ export const navSections = [
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "events", path: "/cat-speak/calendar", icon: Calendar },
-      {
-        key: "levelAssessment",
-        path: "/ai-tutor/level-assessment",
-        icon: Target,
-        lang: "zh",
-      },
     ],
   },
   {
@@ -250,8 +244,18 @@ export const isNavItemVisible = (
   if (!item) return false
   if (item.hideInSidebar) return false
   if (item.lang && currentLang && item.lang !== currentLang) return false
-  if (item.excludeLangs && currentLang && item.excludeLangs.includes(currentLang)) return false
-  if (item.supportedLangs && currentLang && !item.supportedLangs.includes(currentLang)) return false
+  if (
+    item.excludeLangs &&
+    currentLang &&
+    item.excludeLangs.includes(currentLang)
+  )
+    return false
+  if (
+    item.supportedLangs &&
+    currentLang &&
+    !item.supportedLangs.includes(currentLang)
+  )
+    return false
   if (isHorizontal && item.showOnHorizontalBar === false) return false
   if (item.isPrivate && !isAuthenticated) return false
   if (item.roles && activeRole && !item.roles.includes(activeRole)) return false
@@ -309,11 +313,34 @@ export const navLinks = [
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "events", path: "/cat-speak/calendar", icon: Calendar },
+    ],
+  },
+  {
+    key: "aiTutor",
+    hasDropdown: true,
+    icon: Bot,
+    subItems: [
       {
         key: "levelAssessment",
         path: "/ai-tutor/level-assessment",
         icon: Target,
         lang: "zh",
+      },
+      {
+        key: "learningPath",
+        path: "/ai-tutor/learning-path",
+        icon: CalendarDays,
+      },
+      { key: "speakingRoom", path: "/ai-tutor/speaking-room", icon: Mic },
+      {
+        key: "vocabularyNotebook",
+        path: "/ai-tutor/vocabulary-notebook",
+        icon: Layers,
+      },
+      {
+        key: "historyProgress",
+        path: "/ai-tutor/history-progress",
+        icon: History,
       },
     ],
   },
@@ -341,44 +368,6 @@ export const navLinks = [
     label: "Horizontal bar",
     isHorizontalBar: true,
     showOnHorizontalBar: false,
-  },
-  {
-    key: "aiTutor",
-    hasDropdown: true,
-    icon: Bot,
-    lang: "zh",
-    subItems: [
-      {
-        key: "levelAssessment",
-        path: "/ai-tutor/level-assessment",
-        icon: Target,
-        lang: "zh",
-      },
-      {
-        key: "learningPath",
-        path: "/ai-tutor/learning-path",
-        icon: CalendarDays,
-        lang: "zh",
-      },
-      {
-        key: "speakingRoom",
-        path: "/ai-tutor/speaking-room",
-        icon: Mic,
-        lang: "zh",
-      },
-      {
-        key: "vocabularyNotebook",
-        path: "/ai-tutor/vocabulary-notebook",
-        icon: Layers,
-        lang: "zh",
-      },
-      {
-        key: "historyProgress",
-        path: "/ai-tutor/history-progress",
-        icon: History,
-        lang: "zh",
-      },
-    ],
   },
   {
     key: "workspace",
@@ -451,7 +440,6 @@ export const settingNavLinks = [
     icon: User,
     roles: ["Student", "Admin"],
   },
-  { key: "pricing", path: "/pricing", icon: CreditCard },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
   { key: "billing", path: "/billing", icon: CreditCard },
   { key: "systemConfig", path: "/setting/system", icon: Settings },

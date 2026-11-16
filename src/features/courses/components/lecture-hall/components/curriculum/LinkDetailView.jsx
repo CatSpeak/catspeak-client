@@ -9,9 +9,7 @@ const LinkDetailView = ({ itemData, onBack }) => {
   const { t, language } = useLanguage()
   const { formatDateTime } = useTimezone()
   const dict = t.courses.lectureHall
-  console.log(itemData);
 
-  // const linkItem = itemData?.link || { url: itemData?.meta, title: itemData?.title, description: itemData?.content || itemData?.description }
   const linkItem = itemData?.meta
 
   const youtubeId = useMemo(() => {
@@ -45,11 +43,11 @@ const LinkDetailView = ({ itemData, onBack }) => {
   if (!itemData) {
     return (
       <div className="p-6 w-full">
-        <button onClick={onBack} className="flex items-center gap-2 text-[#5B403C] hover:text-[#D94C38] transition-colors mb-6 font-medium">
+        <button onClick={onBack} className="flex items-center gap-2 text-[#5B403C] dark:text-gray-400 hover:text-[#D94C38] dark:hover:text-[#FF6B6B] transition-colors mb-6 font-medium">
           <ArrowLeft size={16} />
           <span>{dict.postDetail.back || "Quay lại"}</span>
         </button>
-        <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
+        <div className="text-center py-12 text-sm text-[#EF4444] dark:text-red-400 border border-dashed border-[#FCA5A5] dark:border-red-900/40 rounded-xl bg-[#FEF2F2] dark:bg-red-950/30">
           {dict.linkPage?.notFound || "Liên kết không tồn tại"}
         </div>
       </div>
@@ -67,28 +65,28 @@ const LinkDetailView = ({ itemData, onBack }) => {
         {t.courses?.lectureHall?.title || "Giảng đường"}
       </PillButton>
 
-      <div className="bg-white rounded-xl p-4 sm:p-6 w-full">
+      <div className="bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-xl p-4 sm:p-6 w-full shadow-sm">
         <div className="flex flex-col gap-6">
           <div className="flex items-start gap-4">
             <IconButton size="md" variant="secondary" >
-              <Link2 className="text-[#12B76A]" />
+              <Link2 className="text-[#12B76A] dark:text-emerald-400" />
             </IconButton>
             <div className="flex flex-col space-y-1 flex-1 min-w-0">
-              <h2 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A] truncate">
+              <h2 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A] dark:text-white truncate">
                 {displayData?.title || itemData.title}
               </h2>
               <a
                 href={linkItem}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-lg text-[#0e6eec] hover:underline break-all"
+                className="text-lg text-[#0e6eec] dark:text-blue-400 hover:underline break-all"
               >
                 {linkItem || displayData?.meta || ""}
               </a>
             </div>
           </div>
 
-          {itemData.description && <div className="text-[#7B7979] text-lg whitespace-pre-wrap">
+          {itemData.description && <div className="text-[#7B7979] dark:text-gray-300 text-lg whitespace-pre-wrap">
             {itemData.description}
           </div>}
 
@@ -118,9 +116,9 @@ const LinkDetailView = ({ itemData, onBack }) => {
                     allowFullScreen
                   />
                 </div>
-                <p className="mt-3 text-sm text-[#6B7280]">
+                <p className="mt-3 text-sm text-[#6B7280] dark:text-gray-400">
                   {dict.linkPage?.videoNotLoading || "Video không hiển thị?"}{" "}
-                  <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline font-medium">
+                  <a href={linkItem} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline font-medium">
                     {dict.linkPage?.openInNewTab || "Mở trong tab mới"}
                   </a>
                 </p>

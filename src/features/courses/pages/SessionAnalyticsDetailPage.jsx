@@ -151,23 +151,23 @@ const SessionAnalyticsDetailPage = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3">
-        <div className="w-8 h-8 border-3 border-gray-200 border-t-[#16a34a] rounded-full animate-spin" />
-        <p className="text-sm font-medium text-gray-500">{sessT.loading || "Đang tải dữ liệu phân tích buổi học..."}</p>
+        <div className="w-8 h-8 border-3 border-gray-200 dark:border-[#3F3F3F] border-t-[#16a34a] rounded-full animate-spin" />
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{sessT.loading || "Đang tải dữ liệu phân tích buổi học..."}</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e] min-h-full pb-12 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-100 min-h-full pb-12 max-w-7xl mx-auto w-full">
       {/* 1. Header with Breadcrumbs, Title and Subtitle */}
       <SessionDetailHeader sessionData={sessionData} classData={classData} />
 
       {isProcessing ? (
-        <div className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-2xl p-12 sm:p-16 shadow-xs text-center min-h-[320px]">
-          <h3 className="text-lg font-bold text-gray-900 mb-2">
+        <div className="flex flex-col items-center justify-center bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#3F3F3F] rounded-2xl p-12 sm:p-16 shadow-xs text-center min-h-[320px]">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
             {sessT.aggregatingTitle || "Buổi học đang tổng hợp dữ liệu"}
           </h3>
-          <p className="text-sm text-gray-500 max-w-md">
+          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
             {sessT.aggregatingDesc || "Buổi học cần một thời gian ngắn để đóng hẳn và tổng hợp dữ liệu. Vui lòng quay lại sau."}
           </p>
         </div>
@@ -180,12 +180,12 @@ const SessionAnalyticsDetailPage = () => {
           />
 
           {/* 3. Student Speaking Data Table */}
-          <div className="flex flex-col bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs overflow-hidden">
+          <div className="flex flex-col bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#3F3F3F] rounded-2xl p-5 sm:p-6 shadow-xs overflow-hidden">
             <div className="mb-4">
-              <h3 className="text-base font-bold text-gray-900">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
                 {sessT.tableTitle || "Dữ liệu phát biểu học viên"}
               </h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {sessT.tableDesc || "Thống kê chi tiết thời lượng, số từ và trạng thái phát biểu của từng học viên trong buổi học."}
               </p>
             </div>
@@ -202,4 +202,3 @@ const SessionAnalyticsDetailPage = () => {
 }
 
 export default SessionAnalyticsDetailPage
-

@@ -8,6 +8,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 // Hook to check and manage role based on the backend account type carried in the
 // auth user (from the login/switch response), while preserving useGetUserProfileQuery
 // to detect teacher capability (isTeacher) and maintain global caching/loading states.
+// Dark mode compatible: dark:
 export const useRoleOverride = () => {
   const { t } = useLanguage()
   const { user, refreshToken } = useAuth()

@@ -29,33 +29,33 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
           return (
             <div
               key={`mobile-${uniqueId}`}
-              className="bg-white rounded-3xl border border-border/90 p-4 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col gap-3"
+              className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border/90 dark:border-[#3F3F3F] p-4 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col gap-3"
             >
               {/* Header: thumbnail + info + 3 dots */}
               <div className="flex items-start gap-3">
                 <img
                   src={item.thumbnailUrl || defaultCourseThumbnail}
                   alt={item.className || "Thumbnail"}
-                  className="w-20 h-16 min-w-[80px] max-w-[80px] rounded-2xl bg-gray-200 shadow-2xs shrink-0 object-cover"
+                  className="w-20 h-16 min-w-[80px] max-w-[80px] rounded-2xl bg-gray-200 dark:bg-[#2A2A2A] shadow-2xs shrink-0 object-cover"
                 />
                 <div className="flex flex-col flex-1 min-w-0 gap-0.5">
-                  <h4 className="font-bold text-sm text-gray-950 truncate leading-snug">
+                  <h4 className="font-bold text-sm text-gray-950 dark:text-white truncate leading-snug">
                     {item.className || c.course || "Khóa học"}
                   </h4>
-                  <p className="text-xs text-gray-500 font-medium truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">
                     {item.taskName}
                   </p>
-                  <p className="text-xs text-[#b20a1c] font-bold">
+                  <p className="text-xs text-[#b20a1c] dark:text-[#FF6B6B] font-bold">
                     {pendingLabel}
                   </p>
 
                   <div className="mt-1 w-full">
-                    <div className="flex justify-between text-[10px] text-gray-500 mb-1 font-semibold">
+                    <div className="flex justify-between text-[10px] text-gray-500 dark:text-gray-400 mb-1 font-semibold">
                       <span>{c.progress || "Tiến độ"}</span>
                       <span>{item.progressPercent ?? 0}%</span>
                     </div>
-                    <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#990011] rounded-full transition-all duration-300" style={{ width: `${item.progressPercent ?? 0}%` }} />
+                    <div className="h-1.5 w-full bg-gray-200 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
+                      <div className="h-full bg-[#990011] dark:bg-[#FF6B6B] rounded-full transition-all duration-300" style={{ width: `${item.progressPercent ?? 0}%` }} />
                     </div>
                   </div>
                 </div>
@@ -76,8 +76,8 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
                     }
                     variant="ghost"
                     size="xs"
-                    className="text-[#990011]"
-                    innerClassName="hover:bg-red-50 text-[#990011]"
+                    className="text-[#990011] dark:text-[#FF6B6B]"
+                    innerClassName="hover:bg-red-50 dark:hover:bg-[#FF6B6B]/10 text-[#990011] dark:text-[#FF6B6B]"
                   >
                     <MoreVertical size={16} />
                   </IconButton>
@@ -85,7 +85,7 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
                   {activeDropdown === `m-${uniqueId}` && (
                     <div
                       role="menu"
-                      className="absolute right-0 mt-1 min-w-[152px] bg-white border border-border rounded-2xl shadow-lg py-1 z-30 text-left whitespace-nowrap"
+                      className="absolute right-0 mt-1 min-w-[152px] bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-lg py-1 z-30 text-left whitespace-nowrap"
                     >
                       <button
                         type="button"
@@ -94,9 +94,9 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
                           setActiveDropdown(null)
                           navigate(`/workspace/courses/class/${item.classId}`)
                         }}
-                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                        className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 cursor-pointer"
                       >
-                        <Eye size={14} className="text-gray-500 shrink-0" />
+                        <Eye size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
                         <span>{c.taskViewDetails || "Xem chi tiết"}</span>
                       </button>
                     </div>
@@ -105,12 +105,12 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
               </div>
 
               {/* Footer: time + date */}
-              <div className="flex items-center justify-between pt-2 border-t border-border/60 text-[11px] text-gray-500 font-medium">
+              <div className="flex items-center justify-between pt-2 border-t border-border/60 dark:border-[#333333] text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                 <span>
-                  {c.taskColDueTime || "Giờ hết"}: <strong className="text-gray-700">{formatScheduleTime(item.dueDate) || "—"}</strong>
+                  {c.taskColDueTime || "Giờ hết"}: <strong className="text-gray-700 dark:text-gray-200">{formatScheduleTime(item.dueDate) || "—"}</strong>
                 </span>
                 <span>
-                  {c.taskColDueDate || "Ngày hết"}: <strong className="text-gray-700">{formatDate(item.dueDate) || "—"}</strong>
+                  {c.taskColDueDate || "Ngày hết"}: <strong className="text-gray-700 dark:text-gray-200">{formatDate(item.dueDate) || "—"}</strong>
                 </span>
               </div>
             </div>
@@ -119,23 +119,23 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
       </div>
 
       {/* ─── Desktop View ─── */}
-      <div className="hidden md:block w-full overflow-x-auto rounded-3xl border border-border bg-white shadow-xs">
-        <table className="w-full min-w-[920px] border-collapse text-left text-xs font-semibold text-gray-500">
+      <div className="hidden md:block w-full overflow-x-auto rounded-3xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-xs">
+        <table className="w-full min-w-[920px] border-collapse text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
           <thead>
-            <tr className="border-b border-border bg-gray-50/60 text-gray-800 font-bold">
-              <th className="p-4 border-r border-border w-[170px] min-w-[150px] whitespace-nowrap">
+            <tr className="border-b border-border dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#222222] text-gray-800 dark:text-gray-200 font-bold">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[170px] min-w-[150px] whitespace-nowrap">
                 {c.taskColCoverImage || c.coverImage || "Ảnh đại diện"}
               </th>
-              <th className="p-4 border-r border-border min-w-[200px]">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] min-w-[200px]">
                 {c.taskColBelongsToCourse || c.belongsToCourse || "Thuộc khóa học"}
               </th>
-              <th className="p-4 border-r border-border min-w-[260px]">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] min-w-[260px]">
                 {c.taskColTaskDescription || "Mô tả việc"}
               </th>
-              <th className="p-4 border-r border-border w-[130px] min-w-[120px] text-center whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[130px] min-w-[120px] text-center whitespace-nowrap">
                 {c.taskColDueTime || "Giờ hết"}
               </th>
-              <th className="p-4 border-r border-border w-[130px] min-w-[120px] text-center whitespace-nowrap">
+              <th className="p-4 border-r border-border dark:border-[#3F3F3F] w-[130px] min-w-[120px] text-center whitespace-nowrap">
                 {c.taskColDueDate || "Ngày hết"}
               </th>
               <th className="p-4 w-[110px] text-center whitespace-nowrap">
@@ -143,7 +143,7 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border text-gray-700">
+          <tbody className="divide-y divide-border dark:divide-[#3F3F3F] text-gray-700 dark:text-gray-300">
             {tasks.map((item, idx) => {
               const uniqueId = item.id || `${item.taskType}-${item.classId}-${idx}`
               const pendingLabel = (c.taskPendingCount || "Còn {{count}} bài").replace("{{count}}", item.pendingCount ?? 0)
@@ -151,53 +151,53 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
               return (
                 <tr
                   key={uniqueId}
-                  className="hover:bg-gray-50/70 transition-colors group"
+                  className="hover:bg-gray-50/70 dark:hover:bg-[#222222]/70 transition-colors group"
                 >
                   {/* Ảnh đại diện */}
-                  <td className="p-4 border-r border-border align-middle">
+                  <td className="p-4 border-r border-border dark:border-[#3F3F3F] align-middle">
                     <img
                       src={item.thumbnailUrl || defaultCourseThumbnail}
                       alt={item.className || "Thumbnail"}
-                      className="w-[140px] h-[120px] min-w-[140px] max-w-[140px] rounded-2xl bg-gray-200 shadow-xs shrink-0 object-cover"
+                      className="w-[140px] h-[120px] min-w-[140px] max-w-[140px] rounded-2xl bg-gray-200 dark:bg-[#2A2A2A] shadow-xs shrink-0 object-cover"
                     />
                   </td>
 
                   {/* Thuộc khóa học */}
-                  <td className="p-4 border-r border-border align-middle">
-                    <h4 className="font-bold text-sm text-gray-950 leading-snug">
+                  <td className="p-4 border-r border-border dark:border-[#3F3F3F] align-middle">
+                    <h4 className="font-bold text-sm text-gray-950 dark:text-white leading-snug">
                       {c.taskColBelongsToCourse || "Khóa học"} (ID: {item.courseId})
                     </h4>
                   </td>
 
                   {/* Mô tả việc */}
-                  <td className="p-4 border-r border-border align-middle">
+                  <td className="p-4 border-r border-border dark:border-[#3F3F3F] align-middle">
                     <div className="flex flex-col gap-2">
-                      <h4 className="font-bold text-sm text-gray-950 leading-snug">
+                      <h4 className="font-bold text-sm text-gray-950 dark:text-white leading-snug">
                         {item.className}
                       </h4>
-                      <p className="text-[11px] text-gray-500 font-medium">
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                         {item.taskName} — {pendingLabel}
                       </p>
 
                       <div className="mt-1">
-                        <div className="flex justify-between text-[10px] text-gray-500 mb-1 font-semibold">
+                        <div className="flex justify-between text-[10px] text-gray-500 dark:text-gray-400 mb-1 font-semibold">
                           <span>{c.progress || "Tiến độ"}</span>
                           <span>{item.progressPercent ?? 0}%</span>
                         </div>
-                        <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#990011] rounded-full transition-all duration-300" style={{ width: `${item.progressPercent ?? 0}%` }} />
+                        <div className="h-1.5 w-full bg-gray-200 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#990011] dark:bg-[#FF6B6B] rounded-full transition-all duration-300" style={{ width: `${item.progressPercent ?? 0}%` }} />
                         </div>
                       </div>
                     </div>
                   </td>
 
                   {/* Giờ hết */}
-                  <td className="p-4 border-r border-border text-center text-sm font-semibold text-gray-800 align-middle whitespace-nowrap">
+                  <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-center text-sm font-semibold text-gray-800 dark:text-gray-200 align-middle whitespace-nowrap">
                     {formatScheduleTime(item.dueDate) || "—"}
                   </td>
 
                   {/* Ngày hết */}
-                  <td className="p-4 border-r border-border text-center text-sm font-semibold text-gray-800 align-middle whitespace-nowrap">
+                  <td className="p-4 border-r border-border dark:border-[#3F3F3F] text-center text-sm font-semibold text-gray-800 dark:text-gray-200 align-middle whitespace-nowrap">
                     {formatDate(item.dueDate) || "—"}
                   </td>
 
@@ -218,15 +218,15 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
                           }}
                           variant="ghost"
                           size="xs"
-                          className="text-[#990011]"
-                          innerClassName="hover:bg-red-50 text-[#990011]"
+                          className="text-[#990011] dark:text-[#FF6B6B]"
+                          innerClassName="hover:bg-red-50 dark:hover:bg-[#FF6B6B]/10 text-[#990011] dark:text-[#FF6B6B]"
                         >
                           <MoreVertical size={17} />
                         </IconButton>
                         {activeDropdown === uniqueId && (
                           <div
                             role="menu"
-                            className="absolute right-0 mt-1 min-w-[152px] bg-white border border-border rounded-2xl shadow-md py-1 z-30 text-left whitespace-nowrap"
+                            className="absolute right-0 mt-1 min-w-[152px] bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-md py-1 z-30 text-left whitespace-nowrap"
                           >
                             <button
                               type="button"
@@ -236,9 +236,9 @@ const TeachingTasksTable = ({ tasks, defaultCourseThumbnail }) => {
                                 setActiveDropdown(null)
                                 navigate(`/workspace/courses/class/${item.classId}`)
                               }}
-                              className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                              className="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2 cursor-pointer whitespace-nowrap"
                             >
-                              <Eye size={14} className="text-gray-500 shrink-0" />
+                              <Eye size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
                               <span>{c.taskViewDetails || "Xem chi tiết"}</span>
                             </button>
                           </div>

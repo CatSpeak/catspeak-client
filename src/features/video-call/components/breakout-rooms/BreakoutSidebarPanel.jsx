@@ -110,11 +110,11 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
   const isStarted = status?.isBreakoutActive
 
   return (
-    <div className="flex h-full w-full flex-col bg-white">
+    <div className="flex h-full w-full flex-col bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white">
       {/* Sidebar Panel Header */}
-      <div className="hidden md:flex items-center justify-between px-4 py-3 border-b border-border bg-white">
+      <div className="hidden md:flex items-center justify-between px-4 py-3 border-b border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A]">
         <div className="flex items-center gap-2">
-          <h3 className="text-black text-base font-semibold m-0">
+          <h3 className="text-black dark:text-white text-base font-semibold m-0">
             {isStarted ? "Phòng thảo luận" : "Phòng họp nhóm"}
           </h3>
 

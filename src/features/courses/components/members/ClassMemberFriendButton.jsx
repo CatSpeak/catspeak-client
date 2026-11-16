@@ -300,14 +300,14 @@ const ClassMemberFriendButton = ({
         onClick={handleUnfriend}
         disabled={isLoading}
         title={t.profile?.social?.unfriend || "Bạn bè (Nhấn để hủy kết bạn)"}
-        className={`h-8 px-2.5 sm:px-3 rounded-full border border-emerald-200 bg-emerald-50 hover:bg-red-50 hover:border-red-200 text-emerald-700 hover:text-red-700 text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-2xs group active:scale-95 cursor-pointer disabled:opacity-50 shrink-0 ${className}`}
+        className={`h-8 px-2.5 sm:px-3 rounded-full border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-red-50 dark:hover:bg-red-950/40 hover:border-red-200 dark:hover:border-red-900/50 text-emerald-700 dark:text-emerald-300 hover:text-red-700 dark:hover:text-red-300 text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-2xs group active:scale-95 cursor-pointer disabled:opacity-50 shrink-0 ${className}`}
       >
         {isLoading ? (
-          <Loader2 size={13} className="animate-spin text-emerald-600" />
+          <Loader2 size={13} className="animate-spin text-emerald-600 dark:text-emerald-400" />
         ) : (
           <>
             <UserCheck size={13} className="shrink-0 group-hover:hidden" />
-            <UserX size={13} className="shrink-0 hidden group-hover:inline text-red-600" />
+            <UserX size={13} className="shrink-0 hidden group-hover:inline text-red-600 dark:text-red-400" />
             <span className="hidden md:inline group-hover:hidden">Bạn bè</span>
             <span className="hidden md:group-hover:inline">Hủy kết bạn</span>
           </>
@@ -324,14 +324,14 @@ const ClassMemberFriendButton = ({
         onClick={handleCancelFriendRequest}
         disabled={isLoading}
         title={t.profile?.social?.cancelRequest || "Đã gửi lời mời (Nhấn để hủy)"}
-        className={`h-8 px-2.5 sm:px-3 rounded-full border border-amber-200 bg-amber-50 hover:bg-red-50 hover:border-red-200 text-amber-700 hover:text-red-700 text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-2xs group active:scale-95 cursor-pointer disabled:opacity-50 shrink-0 ${className}`}
+        className={`h-8 px-2.5 sm:px-3 rounded-full border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 hover:bg-red-50 dark:hover:bg-red-950/40 hover:border-red-200 dark:hover:border-red-900/50 text-amber-700 dark:text-amber-300 hover:text-red-700 dark:hover:text-red-300 text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-2xs group active:scale-95 cursor-pointer disabled:opacity-50 shrink-0 ${className}`}
       >
         {isLoading ? (
-          <Loader2 size={13} className="animate-spin text-amber-600" />
+          <Loader2 size={13} className="animate-spin text-amber-600 dark:text-amber-400" />
         ) : (
           <>
-            <Clock size={13} className="shrink-0 text-amber-600 group-hover:hidden" />
-            <X size={13} className="shrink-0 hidden group-hover:inline text-red-600" />
+            <Clock size={13} className="shrink-0 text-amber-600 dark:text-amber-400 group-hover:hidden" />
+            <X size={13} className="shrink-0 hidden group-hover:inline text-red-600 dark:text-red-400" />
             <span className="hidden md:inline group-hover:hidden">Đã gửi</span>
             <span className="hidden md:group-hover:inline">Hủy lời mời</span>
           </>
@@ -365,7 +365,7 @@ const ClassMemberFriendButton = ({
           onClick={handleDeclineFriendRequest}
           disabled={isLoading}
           title={t.profile?.friends?.actions?.decline || "Từ chối kết bạn"}
-          className="h-8 w-8 rounded-full border border-gray-200 hover:bg-red-50 hover:border-red-200 text-gray-400 hover:text-red-600 flex items-center justify-center transition-all cursor-pointer disabled:opacity-50"
+          className="h-8 w-8 rounded-full border border-gray-200 dark:border-[#3F3F3F] hover:bg-red-50 dark:hover:bg-red-950/40 hover:border-red-200 dark:hover:border-red-900/50 text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex items-center justify-center transition-all cursor-pointer disabled:opacity-50"
         >
           <X size={13} />
         </button>
@@ -380,7 +380,7 @@ const ClassMemberFriendButton = ({
       onClick={handleSendFriendRequest}
       disabled={isLoading}
       title={t.profile?.social?.addFriend || "Kết bạn"}
-      className={`h-8 px-2.5 sm:px-3 rounded-full border border-gray-200 hover:border-[#990011] hover:text-[#990011] hover:bg-red-50/50 bg-white text-gray-700 text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-50 shrink-0 ${className}`}
+      className={`h-8 px-2.5 sm:px-3 rounded-full border border-gray-200 dark:border-[#3F3F3F] hover:border-[#990011] dark:hover:border-[#FF6B6B] hover:text-[#990011] dark:hover:text-[#FF6B6B] hover:bg-red-50/50 dark:hover:bg-red-950/30 bg-white dark:bg-[#222222] text-gray-700 dark:text-gray-200 text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-50 shrink-0 ${className}`}
     >
       {isLoading ? (
         <Loader2 size={13} className="animate-spin text-gray-400" />

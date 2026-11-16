@@ -99,20 +99,20 @@ const TeacherOpenClassCard = ({ classItem }) => {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition-all p-4 sm:p-5 flex flex-col gap-4">
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs hover:shadow-sm transition-all p-4 sm:p-5 flex flex-col gap-4">
       {/* ─── Main Row: Date Box + Summary + Price & Actions ─── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Left Side: Date Box + Title & Info */}
         <div className="flex items-start sm:items-center gap-4 min-w-0">
           {/* Date Box */}
-          <div className="w-14 h-16 sm:w-16 sm:h-18 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col items-center justify-center shrink-0 text-center select-none shadow-2xs">
-            <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="w-14 h-16 sm:w-16 sm:h-18 rounded-xl bg-slate-50 dark:bg-[#242424] border border-slate-200/80 dark:border-[#333333] flex flex-col items-center justify-center shrink-0 text-center select-none shadow-2xs">
+            <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-wider">
               {t.courses?.startDate || "BẮT ĐẦU"}
             </span>
-            <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-tight">
               {dayNumber}
             </span>
-            <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500">
+            <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-gray-400">
               {monthName}
             </span>
           </div>
@@ -121,33 +121,33 @@ const TeacherOpenClassCard = ({ classItem }) => {
           <div className="min-w-0 flex-1">
             <h3
               onClick={handleRegisterClick}
-              className="text-base sm:text-lg font-extrabold text-slate-900 hover:text-[#990011] transition-colors cursor-pointer truncate"
+              className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white hover:text-[#990011] dark:hover:text-[#FF6B6B] transition-colors cursor-pointer truncate"
               title={className}
             >
               {className}
             </h3>
 
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1 text-xs text-slate-500">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1 text-xs text-slate-500 dark:text-gray-400">
               {/* Schedule */}
               <div className="flex items-center gap-1">
-                <Clock size={13} className="text-amber-500 shrink-0" />
-                <span className="font-medium text-slate-600">
+                <Clock size={13} className="text-amber-500 dark:text-amber-400 shrink-0" />
+                <span className="font-medium text-slate-600 dark:text-gray-300">
                   {formatScheduleString(schedule)}
                 </span>
               </div>
 
-              <span className="text-slate-300">•</span>
+              <span className="text-slate-300 dark:text-gray-600">•</span>
 
               {/* Enrolled */}
               <div className="flex items-center gap-1">
-                <Users size={13} className="text-slate-400 shrink-0" />
+                <Users size={13} className="text-slate-400 dark:text-gray-500 shrink-0" />
                 <span>{enrolledCount} học viên</span>
               </div>
 
-              <span className="text-slate-300">•</span>
+              <span className="text-slate-300 dark:text-gray-600">•</span>
 
               {/* Level / Language */}
-              <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold text-[11px]">
+              <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-[#2A2A2A] text-slate-700 dark:text-gray-300 font-semibold text-[11px]">
                 {language || "Cơ bản"}
               </span>
             </div>
@@ -155,10 +155,10 @@ const TeacherOpenClassCard = ({ classItem }) => {
         </div>
 
         {/* Right Side: Price + Slots Status + Action Buttons */}
-        <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+        <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-[#333333]">
           {/* Price & Slot Count */}
           <div className="text-left sm:text-right">
-            <div className="text-lg sm:text-xl font-black text-[#990011] leading-tight">
+            <div className="text-lg sm:text-xl font-black text-[#990011] dark:text-[#FF6B6B] leading-tight">
               {formatTeacherPrice(price)}
             </div>
             <div
@@ -176,7 +176,7 @@ const TeacherOpenClassCard = ({ classItem }) => {
             <button
               type="button"
               onClick={() => setIsExpanded((prev) => !prev)}
-              className="px-3 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors flex items-center gap-1 cursor-pointer select-none"
+              className="px-3 py-2 rounded-xl border border-slate-200 dark:border-[#3F3F3F] text-slate-700 dark:text-gray-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-[#2A2A2A] transition-colors flex items-center gap-1 cursor-pointer select-none"
             >
               <span>
                 {isExpanded
@@ -190,7 +190,7 @@ const TeacherOpenClassCard = ({ classItem }) => {
             <button
               type="button"
               onClick={handleRegisterClick}
-              className="px-4 py-2 rounded-xl bg-[#990011] text-white text-xs font-bold hover:bg-[#80000e] transition-all shadow-2xs active:scale-[0.98] flex items-center gap-1.5 cursor-pointer select-none"
+              className="px-4 py-2 rounded-xl bg-[#990011] dark:bg-[#b20a1c] text-white text-xs font-bold hover:bg-[#80000e] dark:hover:bg-[#960817] transition-all shadow-2xs active:scale-[0.98] flex items-center gap-1.5 cursor-pointer select-none"
             >
               <span>{t.courses?.registerNow || "Đăng ký ngay"}</span>
               <ArrowRight size={13} />
@@ -201,43 +201,43 @@ const TeacherOpenClassCard = ({ classItem }) => {
 
       {/* ─── Expandable Details Accordion ─── */}
       {isExpanded && (
-        <div className="pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2.5 animate-fadeIn">
+        <div className="pt-3 border-t border-slate-100 dark:border-[#333333] grid grid-cols-2 sm:grid-cols-4 gap-2.5 animate-fadeIn">
           {/* Sĩ số phòng */}
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-            <div className="text-[11px] font-medium text-slate-400">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#333333]">
+            <div className="text-[11px] font-medium text-slate-400 dark:text-gray-400">
               {t.courses?.classCapacity || "Sĩ số phòng"}
             </div>
-            <div className="text-xs font-bold text-slate-800 mt-0.5">
+            <div className="text-xs font-bold text-slate-800 dark:text-gray-200 mt-0.5">
               {enrolledCount}/{capacity} học viên
             </div>
           </div>
 
           {/* Trình độ */}
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-            <div className="text-[11px] font-medium text-slate-400">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#333333]">
+            <div className="text-[11px] font-medium text-slate-400 dark:text-gray-400">
               {t.courses?.level || "Trình độ"}
             </div>
-            <div className="text-xs font-bold text-slate-800 mt-0.5">
+            <div className="text-xs font-bold text-slate-800 dark:text-gray-200 mt-0.5">
               {language || "Cơ bản"}
             </div>
           </div>
 
           {/* Thời gian đăng ký */}
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-            <div className="text-[11px] font-medium text-slate-400">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#333333]">
+            <div className="text-[11px] font-medium text-slate-400 dark:text-gray-400">
               {t.courses?.enrollmentTime || "Thời gian đăng ký"}
             </div>
-            <div className="text-xs font-bold text-slate-800 mt-0.5">
+            <div className="text-xs font-bold text-slate-800 dark:text-gray-200 mt-0.5">
               Hạn chót {deadlineFormatted}
             </div>
           </div>
 
           {/* Hình thức */}
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-            <div className="text-[11px] font-medium text-slate-400">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#333333]">
+            <div className="text-[11px] font-medium text-slate-400 dark:text-gray-400">
               {t.courses?.format || "Hình thức"}
             </div>
-            <div className="text-xs font-bold text-slate-800 mt-0.5">
+            <div className="text-xs font-bold text-slate-800 dark:text-gray-200 mt-0.5">
               {t.courses?.formatOnline || "Trực tuyến Cat Speak"}
             </div>
           </div>

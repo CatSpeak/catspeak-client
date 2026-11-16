@@ -66,31 +66,31 @@ const CountdownTicker = ({ targetDate }) => {
 
   if (countdownTargetMs === null || !countdownTime) {
     return (
-      <div role="status" className="py-6 text-center text-xs font-semibold text-gray-500">
+      <div role="status" className="py-6 text-center text-xs font-semibold text-gray-500 dark:text-gray-400">
         {ui.tba || "TBA"}
       </div>
     )
   }
 
   return (
-    <div className="flex justify-around items-center text-center py-3 border-b border-border select-none">
+    <div className="flex justify-around items-center text-center py-3 border-b border-border dark:border-[#3F3F3F] select-none">
       <div className="flex flex-col">
-        <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.days}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+        <span className="text-3xl font-black text-gray-950 dark:text-white leading-none">{countdownTime.days}</span>
+        <span className="text-[10px] text-gray-400 dark:text-gray-400 font-bold mt-2 uppercase tracking-wider">
           {ui.days || "Days"}
         </span>
       </div>
-      <span className="text-2xl font-bold text-gray-300 -mt-5">:</span>
+      <span className="text-2xl font-bold text-gray-300 dark:text-gray-600 -mt-5">:</span>
       <div className="flex flex-col">
-        <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.hours}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+        <span className="text-3xl font-black text-gray-950 dark:text-white leading-none">{countdownTime.hours}</span>
+        <span className="text-[10px] text-gray-400 dark:text-gray-400 font-bold mt-2 uppercase tracking-wider">
           {ui.hours || "Hours"}
         </span>
       </div>
-      <span className="text-2xl font-bold text-gray-300 -mt-5">:</span>
+      <span className="text-2xl font-bold text-gray-300 dark:text-gray-600 -mt-5">:</span>
       <div className="flex flex-col">
-        <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.mins}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+        <span className="text-3xl font-black text-gray-950 dark:text-white leading-none">{countdownTime.mins}</span>
+        <span className="text-[10px] text-gray-400 dark:text-gray-400 font-bold mt-2 uppercase tracking-wider">
           {ui.minutesShort || "Mins"}
         </span>
       </div>

@@ -68,21 +68,21 @@ const VoucherStatsCard = ({ voucher = {}, usages = [] }) => {
       {/* ─── 2 Metric Cards ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
         {/* Box 1: Tổng tiền đã giảm */}
-        <div className="p-4 rounded-xl bg-slate-50 border border-border flex flex-col gap-1">
-          <span className="text-sm text-secondary">
+        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#242424] border border-border dark:border-[#3F3F3F] flex flex-col gap-1">
+          <span className="text-sm text-secondary dark:text-neutral-400">
             {vd.totalDiscountGiven || "Tổng tiền đã giảm"}
           </span>
-          <span className="text-2xl font-bold text-cath-red-700">
+          <span className="text-2xl font-bold text-cath-red-700 dark:text-red-400">
             {formatCurrency(totalDiscountGiven)}
           </span>
         </div>
 
         {/* Box 2: Đơn thành công */}
-        <div className="p-4 rounded-xl bg-slate-50 border border-border flex flex-col gap-1">
-          <span className="text-sm text-secondary">
+        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#242424] border border-border dark:border-[#3F3F3F] flex flex-col gap-1">
+          <span className="text-sm text-secondary dark:text-neutral-400">
             {vd.successOrders || "Đơn thành công"}
           </span>
-          <span className="text-2xl font-bold">{successfulOrdersCount}</span>
+          <span className="text-2xl font-bold text-gray-900 dark:text-white">{successfulOrdersCount}</span>
         </div>
       </div>
     </FluentCard>

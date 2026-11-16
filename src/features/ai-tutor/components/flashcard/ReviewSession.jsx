@@ -178,10 +178,10 @@ const ReviewSession = ({
           {error?.data?.detail?.message || (offline ? "Kiểm tra kết nối rồi thử lại nhé." : code || "Bạn thử lại sau ít phút.")}
         </p>
         <div className="flex gap-3">
-          <button type="button" onClick={onExit} className="h-10 px-5 rounded-full border border-slate-300 bg-white text-sm font-medium">
+          <button type="button" onClick={onExit} className="h-10 px-5 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-slate-700 dark:text-neutral-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-[#333] cursor-pointer">
             Quay lại
           </button>
-          <button type="button" onClick={retry} className="h-10 px-5 rounded-full bg-[#990011] text-white text-sm font-medium">
+          <button type="button" onClick={retry} className="h-10 px-5 rounded-full bg-[#990011] text-white text-sm font-medium cursor-pointer">
             Thử lại
           </button>
         </div>
@@ -272,7 +272,7 @@ const ReviewSession = ({
             <button
               type="button"
               onClick={exitNow}
-              className="h-11 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="h-11 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-6 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#333] cursor-pointer"
             >
               Thoát
             </button>
@@ -280,14 +280,14 @@ const ReviewSession = ({
               type="button"
               onClick={stay}
               autoFocus
-              className="h-11 rounded-full bg-[#990011] px-6 text-sm font-semibold text-white hover:brightness-95"
+              className="h-11 rounded-full bg-[#990011] px-6 text-sm font-semibold text-white hover:brightness-95 cursor-pointer"
             >
               Tiếp tục ôn
             </button>
           </>
         }
       >
-        <p className="font-medium text-slate-800">Kết quả của bạn đã được lưu.</p>
+        <p className="font-medium text-slate-800 dark:text-neutral-200">Kết quả của bạn đã được lưu.</p>
         <p className="mt-1">
           Bạn đã ôn {Math.max(0, position - 1)}/{total} thẻ. Các thẻ chưa ôn giữ nguyên lịch, vào lại trong hôm nay
           sẽ tiếp tục đúng chỗ đang dừng.

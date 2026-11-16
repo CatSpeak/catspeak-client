@@ -75,8 +75,8 @@ const WatchTogetherPanel = ({
       )}
       {/* Drawer */}
       {open && (
-        <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[380px] bg-white shadow-2xl flex flex-col border-l border-border overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+        <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[380px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-2xl flex flex-col border-l border-border dark:border-[#3F3F3F] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border dark:border-[#3F3F3F] shrink-0">
             <div className="flex items-center gap-2">
               <Youtube size={20} className="text-red-600" />
               <span className="font-semibold text-base">
@@ -86,7 +86,7 @@ const WatchTogetherPanel = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
+              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#272727] transition-colors text-gray-500 dark:text-[#AAAAAA]"
             >
               <X size={20} />
             </button>
@@ -96,16 +96,16 @@ const WatchTogetherPanel = ({
             {isHost ? (
               <div className="space-y-4">
                 {isPlaying && (
-                  <div className="rounded-xl bg-gray-50 p-3 border border-border">
-                    <p className="text-xs font-medium text-gray-500">
+                  <div className="rounded-xl bg-gray-50 dark:bg-[#272727] p-3 border border-border dark:border-[#3F3F3F]">
+                    <p className="text-xs font-medium text-gray-500 dark:text-[#AAAAAA]">
                       {t?.rooms?.videoCall?.watchTogether?.nowPlaying ||
                         "Đang phát"}
                     </p>
-                    <p className="text-sm font-medium text-gray-800 truncate mt-0.5">
+                    <p className="text-sm font-medium text-gray-800 dark:text-white truncate mt-0.5">
                       {status?.title || status?.videoId || "Đang phát video"}
                     </p>
                     {status?.watchUrl && (
-                      <p className="text-xs text-gray-500 mt-1 truncate">
+                      <p className="text-xs text-gray-500 dark:text-[#AAAAAA] mt-1 truncate">
                         {status?.watchUrl}
                       </p>
                     )}
@@ -113,7 +113,7 @@ const WatchTogetherPanel = ({
                       type="button"
                       disabled={isStopping}
                       onClick={handleStop}
-                      className="mt-2.5 w-full h-10 rounded-xl bg-gray-900 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
+                      className="mt-2.5 w-full h-10 rounded-xl bg-gray-900 dark:bg-neutral-800 text-white text-sm font-semibold hover:bg-black dark:hover:bg-neutral-700 disabled:opacity-50 transition-colors"
                     >
                       {isStopping
                         ? (t?.rooms?.videoCall?.watchTogether?.stopping ||
@@ -124,7 +124,7 @@ const WatchTogetherPanel = ({
                   </div>
                 )}
                 <form onSubmit={handleStart} className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-200">
                     {isPlaying
                       ? (t?.rooms?.videoCall?.watchTogether?.switchLabel ||
                           "Dán link YouTube mới để đổi video")
@@ -138,7 +138,7 @@ const WatchTogetherPanel = ({
                       if (urlError) setUrlError("")
                     }}
                     placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full h-11 px-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-red-500/40 text-sm"
+                    className="w-full h-11 px-3 rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] text-foreground dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-red-500/40 text-sm"
                     autoFocus={!isPlaying}
                   />
                   {urlError && (
@@ -161,7 +161,7 @@ const WatchTogetherPanel = ({
                 </form>
               </div>
             ) : (
-              <div className="text-center text-gray-500 text-sm py-10">
+              <div className="text-center text-gray-500 dark:text-[#AAAAAA] text-sm py-10">
                 {isPlaying
                   ? (t?.rooms?.videoCall?.watchTogether?.hostWatching ||
                       "Chủ phòng đang phát video chung.")

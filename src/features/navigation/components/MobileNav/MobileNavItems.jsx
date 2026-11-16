@@ -166,9 +166,9 @@ const MobileNavItems = ({
       {/* Slides left (-translate-x-full) when a subpage is opened.     */}
       {/* ============================================================ */}
       <div
-        className={`absolute inset-0 w-full h-full flex flex-col transition-transform duration-300 ${activeDrilldownItem ? "-translate-x-full" : "translate-x-0"}`}
+        className={`absolute inset-0 w-full h-full bg-white dark:bg-[#0F0F0F] flex flex-col transition-transform duration-300 ${activeDrilldownItem ? "-translate-x-full" : "translate-x-0"}`}
       >
-        <div className="shrink-0 border-b border-border">
+        <div className="shrink-0 border-b border-border dark:border-[#3F3F3F]">
           <MobileCommunitySwitcher
             onOpen={() => setActiveDrilldownItem(communityNavItem)}
           />
@@ -188,7 +188,12 @@ const MobileNavItems = ({
             )
             .map((item) => {
               if (item.isHorizontalBar) {
-                return <div key={item.key} className="border-t border-border" />
+                return (
+                  <div
+                    key={item.key}
+                    className="border-t border-border dark:border-[#3F3F3F]"
+                  />
+                )
               }
               const label = t.nav?.[item.key] || item.label || item.key
               const IconComponent = item.icon || Globe
@@ -210,17 +215,19 @@ const MobileNavItems = ({
                         color={item.color}
                       />
                     }
-                    rightContent={<ChevronRight className="shrink-0" />}
+                    rightContent={
+                      <ChevronRight className="shrink-0 text-gray-400 dark:text-neutral-500" />
+                    }
                     className="transition-all duration-200 w-full"
                     contentClassName={`transition-all duration-200 px-4 ${
                       checkIsActive(item)
-                        ? "bg-itemActive hover:bg-itemActiveHover"
-                        : "hover:bg-itemHover"
+                        ? "bg-itemActive dark:bg-[#272727] hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D] text-gray-900 dark:text-white"
+                        : "text-gray-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-[#272727] hover:text-gray-900 dark:hover:text-white"
                     }`}
                     title={label}
                   >
                     <span
-                      className="text-base text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate"
+                      className="text-base text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate text-gray-800 dark:text-neutral-200"
                       style={item.color ? { color: item.color } : undefined}
                     >
                       {label}
@@ -243,7 +250,7 @@ const MobileNavItems = ({
             })}
         </div>
 
-        <div className="pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex flex-col mt-auto border-t border-border shrink-0">
+        <div className="pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex flex-col mt-auto border-t border-border dark:border-[#3F3F3F] shrink-0">
           <MobileLanguageSwitcher
             onOpen={() => setActiveDrilldownItem(languageNavItem)}
           />
@@ -265,17 +272,17 @@ const MobileNavItems = ({
                     />
                   }
                   rightContent={
-                    <ChevronRight className="shrink-0 text-gray-500" />
+                    <ChevronRight className="shrink-0 text-gray-400 dark:text-neutral-500" />
                   }
                   className="transition-all duration-200 w-full"
                   contentClassName={`transition-all duration-200 px-4 ${
                     isSettings
-                      ? "bg-itemActive hover:bg-itemActiveHover"
-                      : "hover:bg-itemHover"
+                      ? "bg-itemActive dark:bg-[#272727] hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D] text-gray-900 dark:text-white"
+                      : "text-gray-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-[#272727] hover:text-gray-900 dark:hover:text-white"
                   }`}
                   title={label}
                 >
-                  <span className="text-base text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate">
+                  <span className="text-base text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate text-gray-800 dark:text-neutral-200">
                     {label}
                   </span>
                 </ListItem>
@@ -303,13 +310,13 @@ const MobileNavItems = ({
       {/* Slides in from right (translate-x-0) when item is opened.     */}
       {/* ============================================================ */}
       <div
-        className={`absolute inset-0 w-full h-full bg-white flex flex-col transition-transform duration-300 ${activeDrilldownItem ? "translate-x-0" : "translate-x-full"}`}
+        className={`absolute inset-0 w-full h-full bg-white dark:bg-[#0F0F0F] flex flex-col transition-transform duration-300 ${activeDrilldownItem ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Drilldown Header */}
         <div className="flex items-center shrink-0">
           <button
             onClick={() => setActiveDrilldownItem(null)}
-            className="flex items-center w-full px-4 h-14 gap-4 hover:bg-itemHover active:bg-itemActiveHover transition-colors"
+            className="flex items-center w-full px-4 h-14 gap-4 text-gray-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-neutral-200 dark:active:bg-[#333333] transition-colors cursor-pointer"
             title={
               activeDrilldownItem
                 ? t.nav?.[activeDrilldownItem.key] ||
@@ -318,10 +325,10 @@ const MobileNavItems = ({
                 : undefined
             }
           >
-            <ChevronLeft />
+            <ChevronLeft className="shrink-0 text-gray-700 dark:text-neutral-300" />
             {activeDrilldownItem && (
               <span
-                className="font-bold truncate max-w-[80%]"
+                className="font-bold text-xl text-gray-900 dark:text-white truncate max-w-[80%]"
                 style={
                   activeDrilldownItem.color
                     ? { color: activeDrilldownItem.color }
@@ -337,7 +344,7 @@ const MobileNavItems = ({
         </div>
 
         {/* Drilldown Links */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {activeDrilldownItem?.key === "communitySwitcher" ? (
             <MobileCommunityContent
               onSelect={() => {
@@ -357,7 +364,7 @@ const MobileNavItems = ({
               (group, groupIdx) => (
                 <React.Fragment key={group.key}>
                   {groupIdx > 0 && (
-                    <div className="my-1 mx-3 h-px bg-border shrink-0" />
+                    <div className="my-1 mx-3 h-px bg-border dark:bg-[#3F3F3F] shrink-0" />
                   )}
                   {group.items.map((sub) => {
                     const subLabel = t.nav?.[sub.key] || sub.key || sub.label

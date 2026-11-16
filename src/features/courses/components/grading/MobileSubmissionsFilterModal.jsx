@@ -33,17 +33,17 @@ const MobileSubmissionsFilterModal = ({
 
       {/* Modal / Bottom Sheet Container */}
       <div
-        className="relative w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl z-10 flex flex-col max-h-[85vh] animate-in slide-in-from-bottom duration-200"
+        className="relative w-full max-w-lg bg-white dark:bg-[#1A1A1A] rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl z-10 flex flex-col max-h-[85vh] animate-in slide-in-from-bottom duration-200 border border-transparent dark:border-[#3F3F3F]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+        <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-[#3F3F3F]">
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-black text-gray-900">
+            <h3 className="text-base font-black text-gray-900 dark:text-white">
               {qg.filterModalTitle || qg.filter || "Bộ lọc"}
             </h3>
             {activeFiltersCount > 0 && (
-              <span className="w-5 h-5 rounded-full bg-[#990011] text-white text-xs font-bold flex items-center justify-center">
+              <span className="w-5 h-5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-white text-xs font-bold flex items-center justify-center">
                 {activeFiltersCount}
               </span>
             )}
@@ -54,7 +54,7 @@ const MobileSubmissionsFilterModal = ({
               <button
                 type="button"
                 onClick={onReset}
-                className="text-xs font-bold text-gray-500 hover:text-[#990011] transition-colors cursor-pointer"
+                className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-[#990011] dark:hover:text-[#FF6B6B] transition-colors cursor-pointer"
               >
                 {qg.reset || "Đặt lại"}
               </button>
@@ -62,7 +62,7 @@ const MobileSubmissionsFilterModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#2A2A2A] hover:bg-gray-200 dark:hover:bg-[#333333] flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors cursor-pointer"
               aria-label={qg.close || "Đóng"}
             >
               <X className="w-4 h-4" />
@@ -74,7 +74,7 @@ const MobileSubmissionsFilterModal = ({
         <div className="flex-1 overflow-y-auto py-4 space-y-5">
           {/* Section 1: Trạng thái nộp */}
           <div>
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2.5">
+            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2.5">
               {qg.submissionStatus}
             </h4>
             <div className="grid grid-cols-2 gap-2">
@@ -87,8 +87,8 @@ const MobileSubmissionsFilterModal = ({
                     onClick={() => onSelectSubmissionStatus(opt.value)}
                     className={`flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                       isSelected
-                        ? "border-[#990011] bg-red-50/50 text-[#990011]"
-                        : "border-border bg-gray-50/50 text-gray-700 hover:bg-gray-100"
+                        ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B]"
+                        : "border-border dark:border-[#3F3F3F] bg-gray-50/50 dark:bg-[#222222] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A]"
                     }`}
                   >
                     {opt.style ? (
@@ -98,7 +98,7 @@ const MobileSubmissionsFilterModal = ({
                     ) : (
                       <span>{opt.label}</span>
                     )}
-                    {isSelected && <Check className="w-4 h-4 text-[#990011] stroke-[2.5]" />}
+                    {isSelected && <Check className="w-4 h-4 text-[#990011] dark:text-[#FF6B6B] stroke-[2.5]" />}
                   </button>
                 )
               })}
@@ -107,7 +107,7 @@ const MobileSubmissionsFilterModal = ({
 
           {/* Section 2: Trạng thái chấm */}
           <div>
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2.5">
+            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2.5">
               {qg.gradingStatus}
             </h4>
             <div className="grid grid-cols-2 gap-2">
@@ -120,8 +120,8 @@ const MobileSubmissionsFilterModal = ({
                     onClick={() => onSelectGradingStatus(opt.value)}
                     className={`flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                       isSelected
-                        ? "border-[#990011] bg-red-50/50 text-[#990011]"
-                        : "border-border bg-gray-50/50 text-gray-700 hover:bg-gray-100"
+                        ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B]"
+                        : "border-border dark:border-[#3F3F3F] bg-gray-50/50 dark:bg-[#222222] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A]"
                     }`}
                   >
                     {opt.style ? (
@@ -131,7 +131,7 @@ const MobileSubmissionsFilterModal = ({
                     ) : (
                       <span>{opt.label}</span>
                     )}
-                    {isSelected && <Check className="w-4 h-4 text-[#990011] stroke-[2.5]" />}
+                    {isSelected && <Check className="w-4 h-4 text-[#990011] dark:text-[#FF6B6B] stroke-[2.5]" />}
                   </button>
                 )
               })}
@@ -140,7 +140,7 @@ const MobileSubmissionsFilterModal = ({
 
           {/* Section 3: Điểm số & Sắp xếp */}
           <div>
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2.5">
+            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2.5">
               {qg.score}
             </h4>
             <div className="space-y-1.5">
@@ -153,12 +153,12 @@ const MobileSubmissionsFilterModal = ({
                     onClick={() => onSelectScore(opt.value)}
                     className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                       isSelected
-                        ? "border-[#990011] bg-red-50/50 text-[#990011]"
-                        : "border-border bg-gray-50/50 text-gray-700 hover:bg-gray-100"
+                        ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B]"
+                        : "border-border dark:border-[#3F3F3F] bg-gray-50/50 dark:bg-[#222222] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A]"
                     }`}
                   >
                     <span>{opt.label}</span>
-                    {isSelected && <Check className="w-4 h-4 text-[#990011] stroke-[2.5]" />}
+                    {isSelected && <Check className="w-4 h-4 text-[#990011] dark:text-[#FF6B6B] stroke-[2.5]" />}
                   </button>
                 )
               })}
@@ -167,7 +167,7 @@ const MobileSubmissionsFilterModal = ({
         </div>
 
         {/* Footer Action */}
-        <div className="pt-3 border-t border-gray-100">
+        <div className="pt-3 border-t border-gray-100 dark:border-[#3F3F3F]">
           <button
             type="button"
             onClick={onClose}

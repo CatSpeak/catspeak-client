@@ -220,19 +220,19 @@ const CreateVoucherPage = () => {
 
   if (isEditing && (isDetailError || !voucherDetail)) {
     return (
-      <div className="p-8 text-center bg-white rounded-3xl border border-slate-200 max-w-lg mx-auto my-12 shadow-xs">
+      <div className="p-8 text-center bg-white dark:bg-[#1A1A1A] rounded-3xl border border-slate-200 dark:border-[#3F3F3F] max-w-lg mx-auto my-12 shadow-xs">
         <AlertCircle className="w-10 h-10 text-rose-500 mx-auto mb-3" />
-        <h3 className="text-base font-bold text-slate-900">
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">
           {t?.vouchers?.notFound || "Không tìm thấy thông tin voucher"}
         </h3>
-        <p className="text-xs text-slate-500 mt-1 mb-5">
+        <p className="text-xs text-slate-500 dark:text-neutral-400 mt-1 mb-5">
           {t?.vouchers?.notFoundDesc ||
             "Voucher không tồn tại hoặc bạn không có quyền truy cập."}
         </p>
         <button
           type="button"
           onClick={handleGoBack}
-          className="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl cursor-pointer"
+          className="px-4 py-2 bg-slate-900 dark:bg-neutral-800 text-white text-xs font-semibold rounded-xl cursor-pointer"
         >
           {t?.vouchers?.back || "Quay lại"}
         </button>

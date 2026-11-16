@@ -75,18 +75,18 @@ const BankLogo = ({ logo, name, size = 24 }) => {
 const SummaryRow = ({ icon, label, value }) => (
   <div className="flex h-[46px] items-center gap-2.5">
     {icon ? (
-      <span className="flex shrink-0 items-center text-[#101828]">{icon}</span>
+      <span className="flex shrink-0 items-center text-[#101828] dark:text-white">{icon}</span>
     ) : null}
-    <span className="w-[165px] shrink-0 text-[11px] font-medium text-[#667085]">
+    <span className="w-[165px] shrink-0 text-[11px] font-medium text-[#667085] dark:text-neutral-400">
       {label}
     </span>
-    <span className="min-w-0 flex-1 break-words text-xs font-medium text-[#101828]">
+    <span className="min-w-0 flex-1 break-words text-xs font-medium text-[#101828] dark:text-white">
       {value || "—"}
     </span>
   </div>
 )
 
-const Divider = () => <div className="h-px w-full bg-[#E4E7EC]" />
+const Divider = () => <div className="h-px w-full bg-[#E4E7EC] dark:bg-[#2E2E2E]" />
 
 const BankAccountDrawer = ({
   open,
@@ -449,12 +449,12 @@ const BankAccountDrawer = ({
               </p>
             </div>
           ) : verifyWarning ? (
-            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFFAEB] px-3.5 py-2.5">
+            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFFAEB] dark:bg-amber-950/30 px-3.5 py-2.5">
               <ShieldCheck
                 size={18}
-                className="mt-0.5 shrink-0 text-[#B54708]"
+                className="mt-0.5 shrink-0 text-[#B54708] dark:text-amber-400"
               />
-              <p className="text-[10px] font-semibold leading-4 text-[#B54708]">
+              <p className="text-[10px] font-semibold leading-4 text-[#B54708] dark:text-amber-300">
                 {verifyWarning}
               </p>
             </div>
@@ -462,15 +462,15 @@ const BankAccountDrawer = ({
 
           {currentBank && currentAccountLabel ? (
             <>
-              <span className="text-sm font-semibold text-[#101828]">
+              <span className="text-sm font-semibold text-[#101828] dark:text-white">
                 {ins.bankCurrentAccount || "Tài khoản hiện tại"}
               </span>
-              <div className="flex items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] bg-[#F8FAFC] px-3.5 py-3.5">
-                <Landmark size={20} className="shrink-0 text-[#101828]" />
-                <span className="min-w-0 flex-1 truncate text-xs font-medium text-[#101828]">
+              <div className="flex items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] dark:border-[#3F3F3F] bg-[#F8FAFC] dark:bg-[#202020] px-3.5 py-3.5">
+                <Landmark size={20} className="shrink-0 text-[#101828] dark:text-neutral-200" />
+                <span className="min-w-0 flex-1 truncate text-xs font-medium text-[#101828] dark:text-white">
                   {currentAccountLabel}
                 </span>
-                <span className="shrink-0 rounded-[7px] bg-[#EFF4FF] px-3 py-1 text-[11px] font-semibold text-[#2E6FE8]">
+                <span className="shrink-0 rounded-[7px] bg-[#EFF4FF] dark:bg-blue-950/40 px-3 py-1 text-[11px] font-semibold text-[#2E6FE8] dark:text-blue-300">
                   {ins.bankCurrentBadge || "Hiện tại"}
                 </span>
               </div>
@@ -478,12 +478,12 @@ const BankAccountDrawer = ({
             </>
           ) : null}
 
-          <span className="text-sm font-semibold text-[#101828]">
+          <span className="text-sm font-semibold text-[#101828] dark:text-white">
             {verified?.isVerified === false
               ? ins.bankManualInfo || "Thông tin tài khoản mới (tự nhập)"
               : ins.bankVerifiedInfo || "Thông tin tài khoản mới (đã được xác thực)"}
           </span>
-          <div className="flex flex-col rounded-lg border border-[#D0D5DD] px-4 py-3.5">
+          <div className="flex flex-col rounded-lg border border-[#D0D5DD] dark:border-[#3F3F3F] px-4 py-3.5">
             <SummaryRow
               label={ins.bankLabel || "Ngân hàng"}
               value={verified?.bankShortName || selectedBank?.label}
@@ -515,14 +515,14 @@ const BankAccountDrawer = ({
               className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
                 consent
                   ? "border-[#F52235] bg-[#F52235]"
-                  : "border-[#D0D5DD] bg-white"
+                  : "border-[#D0D5DD] dark:border-[#3F3F3F] bg-white dark:bg-[#242424]"
               }`}
             >
               {consent && (
                 <Check size={13} strokeWidth={3} className="text-white" />
               )}
             </span>
-            <span className="text-[10px] leading-4 text-[#101828]">
+            <span className="text-[10px] leading-4 text-[#101828] dark:text-neutral-200">
               {verified?.isVerified === false
                 ? ins.bankConsentManual ||
                   "Tôi xác nhận đã kiểm tra kỹ và chịu trách nhiệm nếu sai tên chủ tài khoản. Tôi đồng ý dùng tài khoản này để nhận thanh toán từ Cat Speak."
@@ -531,17 +531,17 @@ const BankAccountDrawer = ({
             </span>
           </label>
 
-          <div className="flex items-start gap-2.5 rounded-[7px] bg-[#EFF4FF] px-3 py-2.5">
+          <div className="flex items-start gap-2.5 rounded-[7px] bg-[#EFF4FF] dark:bg-blue-950/30 px-3 py-2.5">
             <Mail
               size={18}
-              className="mt-0.5 shrink-0 text-[#101828]"
+              className="mt-0.5 shrink-0 text-[#101828] dark:text-blue-400"
             />
             <div className="flex flex-col gap-0.5">
-              <span className="text-[9px] text-[#667085]">
+              <span className="text-[9px] text-[#667085] dark:text-neutral-400">
                 {ins.bankOtpWillSendTo ||
                   "Mã xác thực (OTP) sẽ được gửi về email của bạn:"}
               </span>
-              <span className="text-[11px] font-semibold text-[#101828]">
+              <span className="text-[11px] font-semibold text-[#101828] dark:text-white">
                 {challenge?.maskedEmail || maskEmail(currentEmail) || "—"}
               </span>
             </div>
@@ -557,17 +557,17 @@ const BankAccountDrawer = ({
         <div className="flex flex-col gap-[18px]">
           {currentBank && currentAccountLabel ? (
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold text-[#101828]">
+              <span className="text-xs font-semibold text-[#101828] dark:text-white">
                 {ins.bankCurrentAccount || "Tài khoản hiện tại"}
               </span>
-              <div className="flex h-11 w-full items-center rounded-[7px] border border-[#D0D5DD] bg-[#F2F4F7] px-3.5 text-[13px] text-[#667085]">
+              <div className="flex h-11 w-full items-center rounded-[7px] border border-[#D0D5DD] dark:border-[#3F3F3F] bg-[#F2F4F7] dark:bg-[#202020] px-3.5 text-[13px] text-[#667085] dark:text-neutral-300">
                 {currentAccountLabel}
               </div>
             </div>
           ) : null}
 
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold text-[#101828]">
+            <span className="text-xs font-semibold text-[#101828] dark:text-white">
               {ins.bankLabel || "Ngân hàng"}
             </span>
             <Dropdown
@@ -586,10 +586,10 @@ const BankAccountDrawer = ({
               renderOption={(option) => (
                 <div className="flex w-full items-center gap-2.5 px-3 py-2">
                   <BankLogo logo={option.logo} name={option.label} />
-                  <span className="truncate text-[13px] text-[#101828]">
+                  <span className="truncate text-[13px] text-[#101828] dark:text-white">
                     {option.label}
                   </span>
-                  <span className="ml-auto shrink-0 text-[11px] text-[#667085]">
+                  <span className="ml-auto shrink-0 text-[11px] text-[#667085] dark:text-neutral-400">
                     {option.code}
                   </span>
                 </div>
@@ -599,7 +599,7 @@ const BankAccountDrawer = ({
                   type="button"
                   onClick={toggle}
                   disabled={isVerifying}
-                  className="flex h-11 w-full items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] bg-white px-3 text-[13px] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-11 w-full items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-3 text-[13px] transition-colors hover:bg-[#F9FAFB] dark:hover:bg-[#2C2C2C] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {selectedOption ? (
                     <BankLogo
@@ -609,7 +609,7 @@ const BankAccountDrawer = ({
                   ) : null}
                   <span
                     className={`truncate ${
-                      selectedOption ? "text-[#101828]" : "text-[#98A2B3]"
+                      selectedOption ? "text-[#101828] dark:text-white" : "text-[#98A2B3] dark:text-neutral-500"
                     }`}
                   >
                     {selectedOption?.label ||
@@ -619,7 +619,7 @@ const BankAccountDrawer = ({
                   <span className="flex-1" />
                   <ChevronDown
                     size={14}
-                    className={`shrink-0 text-[#101828] transition-transform duration-200 ${
+                    className={`shrink-0 text-[#101828] dark:text-neutral-300 transition-transform duration-200 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -629,7 +629,7 @@ const BankAccountDrawer = ({
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold text-[#101828]">
+            <span className="text-xs font-semibold text-[#101828] dark:text-white">
               {ins.bankNewAccountNumber || "Số tài khoản mới"}
             </span>
             <input
@@ -645,8 +645,8 @@ const BankAccountDrawer = ({
                 setAccountNumber(sanitizeAccountNumber(event.target.value))
                 setAccountError("")
               }}
-              className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 ${
-                shownAccountError ? "border-red-500" : "border-[#D0D5DD]"
+              className={`h-11 w-full rounded-[7px] border bg-white dark:bg-[#242424] px-3.5 text-[13px] text-[#101828] dark:text-white outline-none transition-colors placeholder:text-[#98A2B3] dark:placeholder:text-neutral-500 focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 ${
+                shownAccountError ? "border-red-500" : "border-[#D0D5DD] dark:border-[#3F3F3F]"
               }`}
             />
             {shownAccountError && (
@@ -657,7 +657,7 @@ const BankAccountDrawer = ({
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold text-[#101828]">
+            <span className="text-xs font-semibold text-[#101828] dark:text-white">
               {ins.bankAccountHolder || "Tên chủ tài khoản"}
             </span>
             <input
@@ -681,8 +681,8 @@ const BankAccountDrawer = ({
                 )
                 setHolderError("")
               }}
-              className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 ${
-                shownHolderError ? "border-red-500" : "border-[#D0D5DD]"
+              className={`h-11 w-full rounded-[7px] border bg-white dark:bg-[#242424] px-3.5 text-[13px] text-[#101828] dark:text-white outline-none transition-colors placeholder:text-[#98A2B3] dark:placeholder:text-neutral-500 focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 ${
+                shownHolderError ? "border-red-500" : "border-[#D0D5DD] dark:border-[#3F3F3F]"
               }`}
             />
             {shownHolderError && (
@@ -692,9 +692,9 @@ const BankAccountDrawer = ({
             )}
           </div>
 
-          <div className="flex items-start gap-2.5 rounded-[7px] bg-[#EFF4FF] px-3.5 py-2.5">
-            <Info size={18} className="mt-0.5 shrink-0 text-[#2E6FE8]" />
-            <p className="text-[10px] leading-4 text-[#667085]">
+          <div className="flex items-start gap-2.5 rounded-[7px] bg-[#EFF4FF] dark:bg-blue-950/30 px-3.5 py-2.5">
+            <Info size={18} className="mt-0.5 shrink-0 text-[#2E6FE8] dark:text-blue-400" />
+            <p className="text-[10px] leading-4 text-[#667085] dark:text-neutral-300">
               {ins.bankStep1Banner ||
                 "Hệ thống sẽ kiểm tra thông tin tài khoản trước khi gửi mã xác thực đến bạn."}
             </p>

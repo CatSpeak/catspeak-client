@@ -54,7 +54,7 @@ const FolderPickerModal = ({ isOpen, word, initialIds = [], onClose, onSave, onL
           <button
             type="button"
             onClick={onClose}
-            className="h-11 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="h-11 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-6 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#333333] transition-colors"
           >
             Huỷ
           </button>
@@ -62,7 +62,7 @@ const FolderPickerModal = ({ isOpen, word, initialIds = [], onClose, onSave, onL
             type="button"
             disabled={saving}
             onClick={() => onSave?.([...selected])}
-            className="h-11 rounded-full bg-[#990011] px-6 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-60"
+            className="h-11 rounded-full bg-[#990011] px-6 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-60 transition-all"
           >
             Lưu
           </button>
@@ -70,7 +70,7 @@ const FolderPickerModal = ({ isOpen, word, initialIds = [], onClose, onSave, onL
       }
     >
       {folders.length === 0 ? (
-        <p className="text-slate-500">Bạn chưa có thư mục nào. Tạo thư mục đầu tiên bên dưới.</p>
+        <p className="text-slate-500 dark:text-neutral-400">Bạn chưa có thư mục nào. Tạo thư mục đầu tiên bên dưới.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {folders.map((f) => {
@@ -78,8 +78,8 @@ const FolderPickerModal = ({ isOpen, word, initialIds = [], onClose, onSave, onL
             return (
               <li key={f.id}>
                 <label
-                  className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${
-                    f.read_only ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400" : "cursor-pointer border-slate-200 hover:border-rose-200"
+                  className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors ${
+                    f.read_only ? "cursor-not-allowed border-slate-100 dark:border-[#272727] bg-slate-50 dark:bg-[#202020] text-slate-400" : "cursor-pointer border-slate-200 dark:border-[#3F3F3F] hover:border-rose-200 dark:hover:border-red-400"
                   }`}
                 >
                   <input
@@ -89,13 +89,13 @@ const FolderPickerModal = ({ isOpen, word, initialIds = [], onClose, onSave, onL
                     disabled={f.read_only}
                     onChange={() => toggle(f.id)}
                   />
-                  <span className="flex-1 font-medium text-slate-800">{f.name}</span>
+                  <span className="flex-1 font-medium text-slate-800 dark:text-white">{f.name}</span>
                   {f.read_only ? (
                     <span className="inline-flex items-center gap-1 text-xs">
                       <Lock className="h-3.5 w-3.5" /> Chỉ đọc
                     </span>
                   ) : (
-                    checked && <Check className="h-4 w-4 text-[#990011]" />
+                    checked && <Check className="h-4 w-4 text-[#990011] dark:text-red-400" />
                   )}
                 </label>
               </li>
@@ -111,18 +111,18 @@ const FolderPickerModal = ({ isOpen, word, initialIds = [], onClose, onSave, onL
           maxLength={60}
           placeholder="Tên thư mục mới"
           aria-label="Tên thư mục mới"
-          className="h-10 flex-1 rounded-xl border border-slate-300 px-3 text-sm outline-none focus:border-[#990011]"
+          className="h-10 flex-1 rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-gray-900 dark:text-white px-3 text-sm outline-none focus:border-[#990011] dark:focus:border-red-400"
         />
         <button
           type="submit"
           disabled={creating || !name.trim()}
-          className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 text-sm font-bold text-[#680411] disabled:opacity-50"
+          className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 px-3 text-sm font-bold text-[#680411] dark:text-rose-300 disabled:opacity-50"
         >
           <FolderPlus className="h-4 w-4" />
           Tạo
         </button>
       </form>
-      {error && <p className="mt-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="mt-2 text-sm text-rose-700 dark:text-rose-400">{error}</p>}
     </FlashcardModal>
   )
 }

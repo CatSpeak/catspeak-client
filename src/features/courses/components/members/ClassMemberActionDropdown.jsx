@@ -352,7 +352,7 @@ const ClassMemberActionDropdown = ({
             type="button"
             aria-label={t.common?.actions || "Tùy chọn"}
             title={t.common?.actions || "Tùy chọn"}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200/80 transition-all border border-transparent hover:border-gray-200 shadow-2xs cursor-pointer"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2A2A2A] active:bg-gray-200/80 dark:active:bg-[#333333] transition-all border border-transparent hover:border-gray-200 dark:hover:border-[#3F3F3F] shadow-2xs cursor-pointer"
           >
             {isMessaging || isActionLoading ? (
               <Loader2 size={15} className="animate-spin text-gray-500" />
@@ -362,7 +362,7 @@ const ClassMemberActionDropdown = ({
           </button>
         }
         content={(close) => (
-          <MenuList className="min-w-[170px] py-1 shadow-xl border border-gray-100 rounded-2xl">
+          <MenuList className="min-w-[170px] py-1 shadow-xl border border-gray-100 dark:border-[#3F3F3F] bg-white dark:bg-[#222222] rounded-2xl">
             {/* Friend Action */}
             {isFriend ? (
               <MenuItem
@@ -371,9 +371,9 @@ const ClassMemberActionDropdown = ({
                   close?.()
                   handleUnfriend()
                 }}
-                icon={<UserX size={16} className="text-red-500" />}
+                icon={<UserX size={16} className="text-red-500 dark:text-red-400" />}
                 label={t.profile?.social?.unfriend || "Hủy kết bạn"}
-                className="text-red-600 hover:text-red-700"
+                className="text-red-600 dark:text-red-400 hover:text-red-700"
               />
             ) : isPendingOutgoing ? (
               <MenuItem
@@ -382,7 +382,7 @@ const ClassMemberActionDropdown = ({
                   close?.()
                   handleCancelFriendRequest()
                 }}
-                icon={<Clock size={16} className="text-amber-500" />}
+                icon={<Clock size={16} className="text-amber-500 dark:text-amber-400" />}
                 label={t.profile?.social?.cancelRequest || "Hủy yêu cầu kết bạn"}
               />
             ) : isIncomingRequest ? (
@@ -393,11 +393,11 @@ const ClassMemberActionDropdown = ({
                     close?.()
                     handleAcceptFriendRequest()
                   }}
-                  icon={<UserCheck size={16} className="text-emerald-600" />}
+                  icon={<UserCheck size={16} className="text-emerald-600 dark:text-emerald-400" />}
                   label={
                     t.profile?.friends?.actions?.accept || "Chấp nhận kết bạn"
                   }
-                  className="text-emerald-600 hover:text-emerald-700"
+                  className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"
                 />
                 <MenuItem
                   onClick={(e) => {
@@ -405,11 +405,11 @@ const ClassMemberActionDropdown = ({
                     close?.()
                     handleDeclineFriendRequest()
                   }}
-                  icon={<UserX size={16} className="text-red-500" />}
+                  icon={<UserX size={16} className="text-red-500 dark:text-red-400" />}
                   label={
                     t.profile?.friends?.actions?.decline || "Từ chối kết bạn"
                   }
-                  className="text-red-600 hover:text-red-700"
+                  className="text-red-600 dark:text-red-400 hover:text-red-700"
                 />
               </>
             ) : (
@@ -419,7 +419,7 @@ const ClassMemberActionDropdown = ({
                   close?.()
                   handleSendFriendRequest()
                 }}
-                icon={<UserPlus size={16} className="text-[#990011]" />}
+                icon={<UserPlus size={16} className="text-[#990011] dark:text-[#FF6B6B]" />}
                 label={t.profile?.social?.addFriend || "Kết bạn"}
               />
             )}
@@ -431,7 +431,7 @@ const ClassMemberActionDropdown = ({
                 close?.()
                 handleStartChatInternal(e)
               }}
-              icon={<Send size={16} className="text-gray-700" />}
+              icon={<Send size={16} className="text-gray-700 dark:text-gray-300" />}
               label={t.courses?.classDetail?.message || "Nhắn tin"}
             />
           </MenuList>

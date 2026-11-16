@@ -26,27 +26,27 @@ const TodayTabView = ({
       {/* 1. Hôm nay section */}
       {todayCard && (
         <div>
-          <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
+          <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3">
             Hôm nay · {todayDateString}
           </h2>
 
-          <div className="relative rounded-2xl border-2 border-[#980019] p-6 bg-white flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-xs">
+          <div className="relative rounded-2xl border-2 border-[#980019] dark:border-red-400 p-6 bg-white dark:bg-[#1A1A1A] flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-xs">
             <span className="absolute top-4 right-4 bg-[#980019] text-white text-xs px-2.5 py-0.5 rounded-md font-semibold">
               Hôm nay
             </span>
 
             <div className="flex flex-col gap-1 max-w-xl">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                 Ngày {todayCard.dayIndex} · {todayParsed.vietnamese || todayCard.topicTitle}
               </h3>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-neutral-300">
                 {todayParsed.hanzi && <span>{todayParsed.hanzi} · </span>}
                 <span>{todayCard.topicDescription || todayParsed.pinyin || "Chủ đề đàm thoại"}</span>
                 <span> · ~10 phút · {hskLevel}</span>
               </p>
 
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-xs text-gray-400 dark:text-neutral-400 mt-2">
                 Mục tiêu: phản xạ tự nhiên, phát âm chuẩn và hoàn thành hội thoại với AI Tutor
               </p>
             </div>
@@ -67,7 +67,7 @@ const TodayTabView = ({
       {/* 2. Làm bù trong chu kỳ section */}
       {missedCards.length > 0 && (
         <div className="mt-2">
-          <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
+          <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3">
             Làm bù trong chu kỳ
           </h2>
 
@@ -77,16 +77,16 @@ const TodayTabView = ({
               return (
                 <div
                   key={card.cardId || card.dayIndex}
-                  className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs hover:border-gray-300 transition-colors"
+                  className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#3F3F3F] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs hover:border-gray-300 dark:hover:border-neutral-500 transition-colors"
                 >
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <span className="bg-[#FEF6EE] text-[#D97706] text-xs font-semibold px-2.5 py-0.5 rounded-md">
+                    <span className="bg-[#FEF6EE] dark:bg-amber-950/40 text-[#D97706] dark:text-amber-400 text-xs font-semibold px-2.5 py-0.5 rounded-md">
                       Làm bù
                     </span>
-                    <span className="font-bold text-sm text-gray-900">
+                    <span className="font-bold text-sm text-gray-900 dark:text-white">
                       Ngày {card.dayIndex} · {parsed.vietnamese || card.topicTitle}
                     </span>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-400 dark:text-neutral-400">
                       {parsed.hanzi} · đã lỡ buổi học
                     </span>
                   </div>
@@ -95,7 +95,7 @@ const TodayTabView = ({
                     <button
                       type="button"
                       onClick={() => onSelectCard?.(card)}
-                      className="text-[#D97706] font-semibold text-xs sm:text-sm hover:underline cursor-pointer"
+                      className="text-[#D97706] dark:text-amber-400 font-semibold text-xs sm:text-sm hover:underline cursor-pointer"
                     >
                       Học bù
                     </button>
@@ -103,7 +103,7 @@ const TodayTabView = ({
                       <button
                         type="button"
                         onClick={() => onSkipCard?.(card)}
-                        className="text-gray-400 font-medium text-xs sm:text-sm hover:text-gray-600 cursor-pointer"
+                        className="text-gray-400 dark:text-neutral-400 font-medium text-xs sm:text-sm hover:text-gray-600 dark:hover:text-white cursor-pointer"
                       >
                         Bỏ qua
                       </button>
@@ -118,7 +118,7 @@ const TodayTabView = ({
 
       {/* 3. Sắp tới preview line */}
       {nextUpcomingCard && (
-        <div className="text-xs text-gray-500 mt-1">
+        <div className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
           Sắp tới: Ngày {nextUpcomingCard.dayIndex} · {nextUpcomingCard.topicTitle} — mở vào{" "}
           {nextUpcomingCard.scheduledDate
             ? dayjs(nextUpcomingCard.scheduledDate).format("dddd, DD/MM")

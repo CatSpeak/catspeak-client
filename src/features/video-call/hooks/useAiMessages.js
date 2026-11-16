@@ -137,7 +137,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
               type: "interaction",
               timestamp: Date.now(),
               prompt: json.message,
-              promptRaw: json.message,
+              promptRaw: (json.message || "").replace(/^((@(AIPublic|AIPrivate|public-ai|private-ai|AISystem))\s*)+/gi, "").trim(),
               topic: "public-ai",
               questioner: json.questioner,
               response: null,

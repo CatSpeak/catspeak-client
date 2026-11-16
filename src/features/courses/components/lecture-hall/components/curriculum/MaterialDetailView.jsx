@@ -48,11 +48,11 @@ const MaterialDetailView = ({ itemData, onBack }) => {
   if (!itemData) {
     return (
       <div className="p-6 w-full">
-        <button onClick={onBack} className="flex items-center gap-2 text-[#5B403C] hover:text-[#D94C38] transition-colors mb-6 font-medium">
+        <button onClick={onBack} className="flex items-center gap-2 text-[#5B403C] dark:text-gray-400 hover:text-[#D94C38] dark:hover:text-[#FF6B6B] transition-colors mb-6 font-medium">
           <ArrowLeft size={16} />
           <span>{dict.postDetail.back || "Quay lại"}</span>
         </button>
-        <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
+        <div className="text-center py-12 text-sm text-[#EF4444] dark:text-red-400 border border-dashed border-[#FCA5A5] dark:border-red-900/40 rounded-xl bg-[#FEF2F2] dark:bg-red-950/30">
           {dict.curriculum?.unnamedMaterial || "Tài liệu không tồn tại"}
         </div>
       </div>
@@ -70,26 +70,25 @@ const MaterialDetailView = ({ itemData, onBack }) => {
         {t.courses?.lectureHall?.title || "Giảng đường"}
       </PillButton>
 
-      <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#E2E2E2] w-full">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 sm:p-8 shadow-sm border border-[#E2E2E2] dark:border-[#3F3F3F] w-full">
         <div className="flex flex-col gap-6">
           <div className="flex items-start gap-4">
             <IconButton size="md" variant="secondary" >
-              <FileText size={28} className="text-[#DC2626]" />
+              <FileText size={28} className="text-[#DC2626] dark:text-red-400" />
             </IconButton>
             <div className="flex flex-col space-y-1 flex-1 min-w-0">
-              <h2 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A] truncate">
+              <h2 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A] dark:text-white truncate">
                 {displayData?.title || itemData.title}
               </h2>
-              <div className="text-base text-[#7B7979]">
+              <div className="text-base text-[#7B7979] dark:text-gray-400">
                 {displayData?.meta || ""}
               </div>
             </div>
           </div>
 
-          {itemData.description && <div className="text-[#7B7979] text-base whitespace-pre-wrap">
+          {itemData.description && <div className="text-[#7B7979] dark:text-gray-300 text-base whitespace-pre-wrap">
             {itemData.description || ""}
           </div>}
-
 
           <PillButton
             onClick={handleDownload}

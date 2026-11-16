@@ -1,17 +1,46 @@
-import React, { memo, useEffect, useRef } from "react"
+import React, { memo, useEffect, useRef, useId } from "react"
+import { motion, LayoutGroup } from "framer-motion"
+import Badge from "@/shared/components/ui/indicators/Badge"
+import { M3_MOTION } from "@/shared/constants/motion"
+import { useTabAnimation } from "@/shared/hooks/useTabAnimation"
 
 /**
- * Reusable Tabs component that prevents layout shift on active bold states and supports optional icons.
- * Hỗ trợ cuộn ngang không hiện scrollbar, kéo chuột (mouse drag-to-scroll) trên laptop,
- * cảm ứng vuốt mượt trên mobile, và tự động cuộn theo con lăn chuột.
+ * Reusable Tabs component aligned with Material Design 3 (M3) baseline specifications.
+ * Supports optional icons, horizontal drag/wheel scroll, inline/stacked layouts, and theme tokens.
  *
- * @param {Array} tabs - Array of tab objects: { id: string, label: string, icon: ReactComponent }
+ * Baseline Measurements:
+ * - Container height (label text only): 48dp (h-12)
+ * - Container height (icon and label text): 64dp (h-16)
+ * - Icon size: 24dp
+ * - Divider height: 1dp (border-b)
+ * - Primary active indicator height: 3dp (h-[3px])
+ * - Secondary active indicator height: 2dp (h-[2px])
+ * - Active indicator shape: 3, 3, 0, 0 (rounded-t-[3px] rounded-b-none)
+ * - Active indicator inset: 2dp on each side (left-[2px] right-[2px])
+ * - Active indicator minimum length: 24dp (min-w-[24px])
+ * - Padding between inline icon and text: 8dp (gap-2)
+ * - Padding between inline text and badge: 4dp (gap-1)
+ * - Overlap of badge on stacked icon: 6dp (-top-[6px] -right-[6px])
+ *
+ * @param {Array} tabs - Array of tab objects: { id: string, label: string, icon: ReactComponent, badge?: any, stacked?: boolean }
  * @param {string} activeTab - Currently active tab id
  * @param {function} onChange - Callback when a tab is clicked
  * @param {string} className - Optional extra class name for the tab container
  * @param {string} activeClassName - Optional custom active tab classes
  * @param {string} inactiveClassName - Optional custom inactive tab classes
- * @param {boolean|'responsive'} fullWidth - If true, tabs will divide space equally (flex-1). If false, tabs retain content width and scroll horizontally.
+ * @param {boolean|'responsive'} fullWidth - If true, tabs divide space equally (flex-1). If false, tabs retain content width.
+ * @param {string} height - Optional custom container height class (defaults: 48dp / h-12 for text-only, 64dp / h-16 for icon+text)
+ * @param {'primary'|'secondary'} variant - Tab indicator variant (default: "primary")
+ * @param {boolean} stacked - Whether to stack icon above label text (default: false)
+ * @param {number} iconSize - Icon size in dp/px (default: 24)
+ * @param {string} [id] - Optional unique identifier to scope Framer Motion layout animations (defaults to useId)
+ * @param {boolean} [elastic=true] - Whether to enable tactile squash-and-stretch elasticity (aligned with useElasticStretch)
+ * @param {number} [stretchFactor=1.35] - Peak horizontal stretch ratio (scaleX) during transit
+ * @param {number} [squashFactor=0.88] - Peak vertical compression ratio (scaleY) during transit
+ * @param {number} [stiffness=360] - Spring stiffness for indicator movement
+ * @param {number} [damping=25] - Spring damping for indicator movement
+ * @param {number} [duration=0.28] - Keyframe duration for squash/stretch
+ * @param {object} [indicatorTransition] - Optional custom Framer Motion spring transition config
  */
 const Tabs = memo(
   ({
@@ -19,13 +48,51 @@ const Tabs = memo(
     activeTab,
     onChange,
     className = "",
-    activeClassName = "text-[#990011]",
-    inactiveClassName = "text-[#606060]",
+    activeClassName = "text-neutral-900 dark:text-white",
+    inactiveClassName = "text-neutral-500 group-hover:text-neutral-800 dark:text-neutral-400 dark:group-hover:text-neutral-100",
     fullWidth = true,
-    height = "h-12",
+    height,
+    variant = "primary",
+    stacked = false,
+    iconSize = 24,
+    id,
+    elastic = true,
+    stretchFactor = 1.35,
+    squashFactor = 0.88,
+    stiffness = 360,
+    damping = 25,
+    duration = M3_MOTION.standard.spatial.fast.duration,
+    indicatorTransition,
   }) => {
-    const isResponsive = fullWidth === "responsive"
-    const isFull = fullWidth === true
+    const generatedId = useId()
+    const layoutGroupId = id || `tabs-${generatedId.replace(/:/g, "")}`
+    const { shouldReduceMotion } = useTabAnimation()
+    const springTransition = indicatorTransition || (shouldReduceMotion ? { duration: 0 } : {
+      ease: M3_MOTION.standard.spatial.fast.ease,
+      duration: M3_MOTION.standard.spatial.fast.duration,
+    })
+
+    const isFirstMountRef = useRef(true)
+    const prevActiveTabRef = useRef(activeTab)
+    const isTabChanged =
+      !isFirstMountRef.current && prevActiveTabRef.current !== activeTab
+
+    useEffect(() => {
+      isFirstMountRef.current = false
+      prevActiveTabRef.current = activeTab
+    }, [activeTab])
+    // Baseline heights: 48dp (h-12) for text-only, 64dp (h-16) for icon + text
+    const hasIcons = tabs.some((tab) => Boolean(tab.icon))
+    const containerHeight = height || (hasIcons ? "h-16" : "h-12")
+
+    const isPrimary = variant === "primary"
+    const widthClass =
+      fullWidth === true
+        ? "flex-1"
+        : fullWidth === "responsive"
+          ? "flex-1 sm:flex-none"
+          : "flex-none"
+
     const scrollContainerRef = useRef(null)
     const activeTabRef = useRef(null)
 
@@ -99,90 +166,149 @@ const Tabs = memo(
     }
 
     return (
-      <div
-        ref={scrollContainerRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUpOrLeave}
-        onMouseLeave={handleMouseUpOrLeave}
-        onWheel={handleWheel}
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        className={`w-full max-w-full min-w-0 flex items-center overflow-x-auto select-none touch-pan-x overscroll-x-contain cursor-grab active:cursor-grabbing border-b border-border scrollbar-none scrollbar-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-          !isFull && !isResponsive
-            ? "gap-1 sm:gap-2 px-1 sm:px-2 py-0.5"
-            : "py-0.5"
-        } ${className}`}
-      >
-        {tabs.map((tab) => {
-          const tabKey = tab.id ?? tab.value
-          const Icon = tab.icon
-          const isActive = activeTab === tabKey
+      <LayoutGroup id={layoutGroupId}>
+        <div
+          ref={scrollContainerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+          onWheel={handleWheel}
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className={`w-full min-w-0 flex items-end overflow-x-auto select-none touch-pan-x overscroll-x-contain border-b border-border dark:border-[#3F3F3F] scrollbar-none ${className}`}
+        >
+          {tabs.map((tab) => {
+            const tabKey = tab.id ?? tab.value
+            const Icon = tab.icon
+            const isActive = activeTab === tabKey
+            const isTabStacked = tab.stacked ?? stacked
 
-          return (
-            <button
-              key={tabKey}
-              ref={isActive ? activeTabRef : null}
-              type="button"
-              onClick={() => handleTabClick(tabKey)}
-              className={`h-11 sm:h-12 min-w-fit shrink-0 group relative flex items-center justify-center transition-all select-none ${
-                isFull
-                  ? "flex-1 px-3 sm:px-4"
-                  : isResponsive
-                    ? "flex-1 sm:flex-none px-3.5 sm:px-5"
-                    : "flex-none px-3.5 sm:px-5"
-              }`}
-            >
-              <div
-                className={`relative h-full flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[15px] font-medium transition-colors whitespace-nowrap ${
-                  isActive ? activeClassName : inactiveClassName
+            return (
+              <button
+                key={tabKey}
+                ref={isActive ? activeTabRef : null}
+                type="button"
+                onClick={() => handleTabClick(tabKey)}
+                className={`${containerHeight} ${widthClass} -mb-px min-w-fit shrink-0 group relative flex items-center justify-center px-4 select-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/50 dark:focus-visible:ring-cath-red-1000/50 transition-colors duration-100 ease-out hover:bg-neutral-500/10 dark:hover:bg-white/5 active:bg-neutral-500/20 dark:active:bg-white/10 ${
+                  isActive ? "z-10" : "z-0"
                 }`}
               >
-                {Icon && <Icon size={18} className="hidden sm:block shrink-0" />}
-
-                <span className="relative flex flex-col items-center justify-center whitespace-nowrap">
-                  {/* Invisible bold text to reserve space and prevent layout shift */}
-                  <span
-                    className="invisible h-0 overflow-hidden font-bold whitespace-nowrap select-none"
-                    aria-hidden="true"
-                  >
-                    {tab.label}
-                  </span>
-                  <span
-                    className={`whitespace-nowrap transition-all ${
-                      isActive ? "font-bold text-[#990011]" : "font-medium"
-                    }`}
-                  >
-                    {tab.label}
-                  </span>
-                </span>
-
-                {tab.badge && (
-                  <span
-                    className={`min-w-4 h-4 px-1.5 rounded-full text-xs font-semibold flex items-center justify-center transition-colors shrink-0 ${
-                      isActive
-                        ? "bg-[#990011] text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
-
-                {/* Underline Indicator */}
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${
-                    isActive
-                      ? "bg-[#990011] scale-x-100"
-                      : "bg-[#990011]/30 scale-x-0 group-hover:scale-x-100 origin-center"
+                  className={`relative z-10 h-full flex ${
+                    isTabStacked
+                      ? "flex-col justify-center items-center gap-1 py-1"
+                      : "flex-row items-center gap-2"
+                  } text-sm transition-colors whitespace-nowrap min-w-[24px] ${
+                    isActive ? activeClassName : inactiveClassName
                   }`}
-                />
-              </div>
-            </button>
-          )
-        })}
-      </div>
+                >
+                  {/* Icon (24dp default) with optional stacked badge (6dp overlap) */}
+                  {Icon && (
+                    <div className="relative shrink-0 flex items-center justify-center">
+                      <Icon
+                        size={tab.iconSize || iconSize}
+                        className="shrink-0"
+                      />
+                      {isTabStacked &&
+                        tab.badge &&
+                        (React.isValidElement(tab.badge) ? (
+                          <div className="absolute -top-[6px] -right-[6px] shrink-0">
+                            {tab.badge}
+                          </div>
+                        ) : (
+                          <Badge
+                            color={
+                              tab.badgeColor || (isActive ? "cath-red" : "gray")
+                            }
+                            size="sm"
+                            className="absolute -top-[6px] -right-[6px] min-w-[16px] h-4 px-1"
+                          >
+                            {tab.badge}
+                          </Badge>
+                        ))}
+                    </div>
+                  )}
+
+                  {/* Inline text & badge container with 4dp gap (8dp for non-badge elements) */}
+                  <div
+                    className={`flex items-center ${
+                      tab.badgeGap ||
+                      (React.isValidElement(tab.badge) ? "gap-2" : "gap-1")
+                    }`}
+                  >
+                    <span className="whitespace-nowrap">{tab.label}</span>
+
+                    {/* Inline badge (padding between inline text and badge: 4dp) */}
+                    {!isTabStacked &&
+                      tab.badge &&
+                      (React.isValidElement(tab.badge) ? (
+                        tab.badge
+                      ) : (
+                        <Badge
+                          color={
+                            tab.badgeColor || (isActive ? "cath-red" : "gray")
+                          }
+                          className="min-w-[16px] h-4 px-1"
+                        >
+                          {tab.badge}
+                        </Badge>
+                      ))}
+                  </div>
+
+                  {/* Active Indicator:
+                      Primary: height 3dp, shape 3, 3, 0, 0, inset 2dp on each side, min-w 24dp
+                      Secondary: height 2dp, shape 2, 2, 0, 0
+                      Animated smoothly with Framer Motion layoutId and elastic squash-and-stretch
+                  */}
+                  {isActive ? (
+                    <motion.div
+                      layoutId="activeTabIndicator"
+                      className={`absolute bottom-0 ${
+                        isPrimary
+                          ? "left-[2px] right-[2px] min-w-[24px] h-[3px] rounded-t-[3px]"
+                          : "left-0 right-0 h-[2px] rounded-t-[2px]"
+                      } rounded-b-none pointer-events-none z-10`}
+                      transition={springTransition}
+                    >
+                      <motion.div
+                        key={activeTab}
+                        className={`w-full h-full ${
+                          isPrimary ? "rounded-t-[3px]" : "rounded-t-[2px]"
+                        } rounded-b-none bg-cath-red-700 dark:bg-cath-red-1000 origin-center`}
+                        initial={false}
+                        animate={
+                          elastic && isTabChanged && !shouldReduceMotion
+                            ? {
+                                scaleX: [1, stretchFactor, 1],
+                                scaleY: [1, squashFactor, 1],
+                              }
+                            : { scaleX: 1, scaleY: 1 }
+                        }
+                        transition={{
+                          duration,
+                          times: [0, 0.45, 1],
+                          ease: M3_MOTION.standard.spatial.fast.ease,
+                        }}
+                      />
+                    </motion.div>
+                  ) : (
+                    <div
+                      className={`absolute bottom-0 ${
+                        isPrimary
+                          ? "left-[2px] right-[2px] min-w-[24px] h-[3px] rounded-t-[3px]"
+                          : "left-0 right-0 h-[2px] rounded-t-[2px]"
+                      } rounded-b-none bg-cath-red-700/30 dark:bg-cath-red-1000/30 scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-200 pointer-events-none`}
+                    />
+                  )}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </LayoutGroup>
     )
   },
 )
 
+export { default as TabContent } from "./TabContent"
 export default Tabs

@@ -30,8 +30,8 @@ const ShareModal = ({ open, onClose, shareUrl }) => {
       onClose={onClose}
       title={t.news?.newsDetail?.share || "Share"}
       showCloseButton={true}
-      className="rounded-xl max-w-md"
-      bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
+      className="rounded-3xl max-w-md border border-border dark:border-[#3F3F3F]"
+      bodyClassName="px-4 flex-1 overflow-y-auto"
       footer={
         <div className="flex justify-end gap-2">
           <PillButton

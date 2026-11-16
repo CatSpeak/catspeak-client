@@ -13,11 +13,7 @@ import {
   Check,
   Award,
   GraduationCap,
-  Briefcase,
-  Lightbulb,
   MapPin,
-  Calendar,
-  Sparkles,
   Quote,
 } from "lucide-react"
 import toast from "react-hot-toast"
@@ -42,7 +38,6 @@ import {
 
 /**
  * Trang Hồ sơ Năng lực Chuyên sâu của Giảng viên (EX-GV-03, Ticket 09)
- * Theo mockup: designs/explore-teacher/Hồ sơ năng lực - Giảng viên Nguyễn Bình.html
  */
 const TeacherCompetencyPage = () => {
   const { slugOrId } = useParams()
@@ -136,16 +131,16 @@ const TeacherCompetencyPage = () => {
   // ─── Loading Skeleton ───
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#121212] py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto flex flex-col gap-6 animate-pulse">
-          <div className="h-4 w-48 bg-slate-200 rounded" />
-          <div className="h-44 bg-white rounded-2xl border border-slate-200" />
+          <div className="h-4 w-48 bg-slate-200 dark:bg-[#2A2A2A] rounded" />
+          <div className="h-44 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 flex flex-col gap-6">
-              <div className="h-48 bg-white rounded-2xl border border-slate-200" />
-              <div className="h-56 bg-white rounded-2xl border border-slate-200" />
+              <div className="h-48 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]" />
+              <div className="h-56 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]" />
             </div>
-            <div className="lg:col-span-4 h-96 bg-white rounded-2xl border border-slate-200" />
+            <div className="lg:col-span-4 h-96 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F]" />
           </div>
         </div>
       </div>
@@ -155,15 +150,15 @@ const TeacherCompetencyPage = () => {
   // ─── Error / Not Found ───
   if (isError || !teacher) {
     return (
-      <div className="min-h-[70vh] bg-[#F8F9FA] flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-slate-200 p-8 text-center shadow-xs">
-          <div className="w-16 h-16 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+      <div className="min-h-[70vh] bg-[#F8F9FA] dark:bg-[#121212] flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#3F3F3F] p-8 text-center shadow-xs">
+          <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-[#FF6B6B] flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
             !
           </div>
-          <h2 className="text-xl font-black text-slate-900 mb-2">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">
             {t.courses?.teacherNotFound || "Không tìm thấy giảng viên"}
           </h2>
-          <p className="text-sm text-slate-500 mb-6">
+          <p className="text-sm text-slate-500 dark:text-gray-400 mb-6">
             {t.courses?.teacherNotFoundDesc ||
               "Hồ sơ năng lực bạn đang tìm kiếm không tồn tại hoặc đã ngừng hoạt động."}
           </p>
@@ -171,13 +166,13 @@ const TeacherCompetencyPage = () => {
             <button
               type="button"
               onClick={() => refetch()}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50"
+              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#3F3F3F] text-slate-700 dark:text-gray-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-[#222222] cursor-pointer"
             >
               Thử lại
             </button>
             <Link
               to="/explore-courses"
-              className="px-5 py-2 rounded-xl bg-[#990011] text-white text-xs font-bold hover:bg-[#80000e] transition-colors"
+              className="px-5 py-2 rounded-xl bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white text-xs font-bold transition-colors cursor-pointer"
             >
               {t.courses?.backToExplore || "Khám phá khóa học"}
             </Link>
@@ -196,7 +191,6 @@ const TeacherCompetencyPage = () => {
   )
   const ratingValue = formatRating(teacher.rating)
   const reviewCount = teacher.reviewCount || 0
-  const studentCount = teacher.studentCount || 0
   const activeClassCount = teacher.activeClassCount || 0
   const teachingMotto = teacher.teachingMotto
   const introduction = teacher.introduction
@@ -209,34 +203,34 @@ const TeacherCompetencyPage = () => {
   const totalReviewsCount = reviewCount || 1
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-16">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#121212] pb-16">
       {/* ─── Breadcrumbs & Back Bar ─── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none">
           {/* Breadcrumb Path */}
-          <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 overflow-hidden">
+          <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-gray-400 overflow-hidden">
             <Link
               to="/"
-              className="hover:text-slate-900 transition-colors shrink-0"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
             >
               {t.courses?.home || "Trang chủ"}
             </Link>
             <ChevronRight size={13} className="text-slate-400 shrink-0" />
             <Link
               to="/explore-courses?type=teachers"
-              className="hover:text-slate-900 transition-colors shrink-0"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
             >
               {t.courses?.student?.tabTeachers || "Giảng viên"}
             </Link>
             <ChevronRight size={13} className="text-slate-400 shrink-0" />
             <Link
               to={`/explore/teachers/${encodeURIComponent(slugOrId)}`}
-              className="hover:text-slate-900 transition-colors truncate"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors truncate"
             >
               {fullName}
             </Link>
             <ChevronRight size={13} className="text-slate-400 shrink-0" />
-            <span className="font-bold text-[#990011] shrink-0">
+            <span className="font-bold text-[#990011] dark:text-[#FF6B6B] shrink-0">
               {t.courses?.competencyProfile || "Hồ sơ năng lực"}
             </span>
           </nav>
@@ -244,7 +238,7 @@ const TeacherCompetencyPage = () => {
           {/* Back button */}
           <Link
             to={`/explore/teachers/${encodeURIComponent(slugOrId)}`}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#990011] transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-gray-300 hover:text-[#990011] dark:hover:text-[#FF6B6B] transition-colors shrink-0"
           >
             <ArrowLeft size={14} />
             <span>
@@ -256,11 +250,11 @@ const TeacherCompetencyPage = () => {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col gap-6">
         {/* ─── Compact Teacher Identity Header Card ─── */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Avatar + Identity + Stats */}
           <div className="flex items-center gap-4 min-w-0">
             {/* Avatar 72x72 */}
-            <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shadow-2xs shrink-0 flex items-center justify-center select-none">
+            <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden bg-slate-100 dark:bg-[#222222] border border-slate-200 dark:border-[#3F3F3F] shadow-2xs shrink-0 flex items-center justify-center select-none">
               {teacher.avatarUrl && !avatarError ? (
                 <img
                   src={teacher.avatarUrl}
@@ -278,11 +272,11 @@ const TeacherCompetencyPage = () => {
             {/* Name + Verified Badge + Stats line */}
             <div className="flex flex-col gap-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black text-slate-900 truncate">
+                <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">
                   {fullName}
                 </h1>
-                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[11px] font-bold select-none">
-                  <ShieldCheck size={13} className="text-emerald-600" />
+                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50 text-[11px] font-bold select-none">
+                  <ShieldCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
                   <span>
                     {t.courses?.verifiedBadge ||
                       "Giảng viên được xác minh bởi Cat Speak"}
@@ -291,31 +285,31 @@ const TeacherCompetencyPage = () => {
               </div>
 
               {/* Headline */}
-              <div className="text-xs text-slate-600 truncate font-medium">
+              <div className="text-xs text-slate-600 dark:text-gray-400 truncate font-medium">
                 {headline}
               </div>
 
               {/* Stats Bar */}
-              <div className="flex items-center gap-3 text-xs font-semibold text-slate-700 pt-1">
+              <div className="flex items-center gap-3 text-xs font-semibold text-slate-700 dark:text-gray-300 pt-1">
                 <div className="flex items-center gap-1">
                   <Star size={13} className="text-amber-400 fill-amber-400" />
                   <span>{ratingValue}</span>
-                  <span className="text-slate-400 font-normal">
+                  <span className="text-slate-400 dark:text-gray-500 font-normal">
                     ({formatTeacherNumber(reviewCount)})
                   </span>
                 </div>
 
-                <span className="text-slate-200">│</span>
+                <span className="text-slate-200 dark:text-gray-700">│</span>
 
-                <div className="flex items-center gap-1 text-slate-700">
+                <div className="flex items-center gap-1 text-slate-700 dark:text-gray-300">
                   <Trophy size={13} className="text-amber-500" />
                   <span>5 Năm KN</span>
                 </div>
 
-                <span className="text-slate-200">│</span>
+                <span className="text-slate-200 dark:text-gray-700">│</span>
 
-                <div className="flex items-center gap-1 text-slate-700">
-                  <BookOpen size={13} className="text-blue-600" />
+                <div className="flex items-center gap-1 text-slate-700 dark:text-gray-300">
+                  <BookOpen size={13} className="text-blue-600 dark:text-blue-400" />
                   <span>{activeClassCount || 10} Khóa</span>
                 </div>
               </div>
@@ -328,7 +322,7 @@ const TeacherCompetencyPage = () => {
               <button
                 type="button"
                 onClick={handleMessageClick}
-                className="px-4 py-2 rounded-xl border border-[#990011] text-[#990011] hover:bg-[#990011]/5 transition-colors font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-4 py-2 rounded-xl border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-[#990011]/5 dark:hover:bg-red-950/30 transition-colors font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-[0.98]"
               >
                 <MessageSquare size={14} />
                 <span>{t.courses?.sendMessage || "Nhắn tin"}</span>
@@ -338,15 +332,14 @@ const TeacherCompetencyPage = () => {
                 type="button"
                 onClick={handleFollowClick}
                 disabled={isFollowActionPending}
-                className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all ${
-                  isFollowing
-                    ? "bg-slate-50 border border-slate-300 text-slate-700 hover:bg-slate-100"
-                    : "bg-[#990011] text-white hover:bg-[#80000e]"
-                }`}
+                className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all active:scale-[0.98] ${isFollowing
+                    ? "bg-slate-50 dark:bg-[#222222] border border-slate-300 dark:border-[#3F3F3F] text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-[#2A2A2A]"
+                    : "bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white"
+                  }`}
               >
                 {isFollowing ? (
                   <>
-                    <Check size={14} className="text-emerald-600 stroke-[2.5]" />
+                    <Check size={14} className="text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
                     <span>{t.courses?.following || "Đang theo dõi"}</span>
                   </>
                 ) : (
@@ -364,18 +357,18 @@ const TeacherCompetencyPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* ─── Left Column (8 cols): Competency Sections ─── */}
           <div className="lg:col-span-8 flex flex-col gap-6">
-            {/* 1. Teaching Motto (Châm ngôn giảng dạy nổi bật) */}
+            {/* 1. Teaching Motto */}
             {teachingMotto && (
-              <div className="p-6 rounded-2xl bg-gradient-to-r from-red-50/70 via-amber-50/40 to-slate-50 border border-red-100/80 shadow-2xs relative overflow-hidden">
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-red-50/70 via-amber-50/40 to-slate-50 dark:from-red-950/30 dark:via-amber-950/20 dark:to-[#1A1A1A] border border-red-100/80 dark:border-red-900/40 shadow-2xs relative overflow-hidden">
                 <Quote
                   size={48}
-                  className="absolute -bottom-2 -right-2 text-[#990011]/10 pointer-events-none"
+                  className="absolute -bottom-2 -right-2 text-[#990011]/10 dark:text-[#FF6B6B]/10 pointer-events-none"
                 />
                 <div className="relative z-10 flex flex-col gap-2">
-                  <span className="text-[11px] font-bold text-[#990011] uppercase tracking-wider">
+                  <span className="text-[11px] font-bold text-[#990011] dark:text-[#FF6B6B] uppercase tracking-wider">
                     {t.courses?.teachingMottoTitle || "Triết lý giảng dạy"}
                   </span>
-                  <blockquote className="text-base sm:text-lg font-bold text-slate-900 italic leading-snug">
+                  <blockquote className="text-base sm:text-lg font-bold text-slate-900 dark:text-white italic leading-snug">
                     "{teachingMotto}"
                   </blockquote>
                 </div>
@@ -384,31 +377,31 @@ const TeacherCompetencyPage = () => {
 
             {/* 2. Introduction ("Giới thiệu bản thân") */}
             {introduction && (
-              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 sm:p-7 flex flex-col gap-4">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-6 sm:p-7 flex flex-col gap-4">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-                  <h2 className="text-lg font-extrabold text-slate-900">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] shrink-0" />
+                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
                     {t.courses?.aboutMe || "Giới thiệu bản thân"}
                   </h2>
                 </div>
 
-                <div className="text-sm text-slate-600 leading-relaxed space-y-3 whitespace-pre-line">
+                <div className="text-sm text-slate-600 dark:text-gray-300 leading-relaxed space-y-3 whitespace-pre-line">
                   {introduction}
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 text-xs text-slate-400 font-medium">
+                <div className="pt-3 border-t border-slate-100 dark:border-[#2E2E2E] text-xs text-slate-400 dark:text-gray-500 font-medium">
                   {t.courses?.lastUpdated?.replace("{{time}}", "2 ngày trước") ||
                     "Cập nhật lần cuối: 2 ngày trước"}
                 </div>
               </div>
             )}
 
-            {/* 3. Certificates & Credentials ("Chứng chỉ & Bằng cấp") - BR-EX-GV-13 */}
+            {/* 3. Certificates & Credentials ("Chứng chỉ & Bằng cấp") */}
             {certificates.length > 0 && (
-              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 sm:p-7 flex flex-col gap-5">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-6 sm:p-7 flex flex-col gap-5">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-                  <h2 className="text-lg font-extrabold text-slate-900">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] shrink-0" />
+                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
                     {t.courses?.certificatesCredentials ||
                       "Chứng chỉ & Bằng cấp"}
                   </h2>
@@ -418,30 +411,30 @@ const TeacherCompetencyPage = () => {
                   {certificates.map((cert, index) => (
                     <div
                       key={index}
-                      className="p-4 rounded-xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-all flex flex-col gap-2"
+                      className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#222222] border border-slate-100 dark:border-[#333333] hover:border-slate-200 dark:hover:border-slate-700 transition-all flex flex-col gap-2"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <Award size={18} className="text-amber-500 shrink-0" />
-                          <h3 className="font-extrabold text-slate-900 text-sm">
+                          <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">
                             {cert.name}
                           </h3>
                         </div>
                         {cert.issuedYear && (
-                          <span className="text-[11px] font-bold text-slate-400 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-400 dark:text-gray-400 shrink-0">
                             {cert.issuedYear}
                           </span>
                         )}
                       </div>
 
                       {cert.scoreDetails && (
-                        <div className="text-xs font-semibold text-slate-700 bg-white/80 px-2.5 py-1 rounded-md border border-slate-100">
+                        <div className="text-xs font-semibold text-slate-700 dark:text-gray-200 bg-white/80 dark:bg-[#2A2A2A] px-2.5 py-1 rounded-md border border-slate-100 dark:border-[#3F3F3F]">
                           {cert.scoreDetails}
                         </div>
                       )}
 
                       {cert.issuedBy && (
-                        <div className="text-[11px] text-slate-500 font-medium">
+                        <div className="text-[11px] text-slate-500 dark:text-gray-400 font-medium">
                           Cấp bởi: {cert.issuedBy}
                         </div>
                       )}
@@ -451,12 +444,12 @@ const TeacherCompetencyPage = () => {
               </div>
             )}
 
-            {/* 4. Education ("Học vấn") - BR-EX-GV-13 */}
+            {/* 4. Education ("Học vấn") */}
             {education.length > 0 && (
-              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 sm:p-7 flex flex-col gap-5">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-6 sm:p-7 flex flex-col gap-5">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-                  <h2 className="text-lg font-extrabold text-slate-900">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] shrink-0" />
+                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
                     {t.courses?.educationTitle || "Học vấn"}
                   </h2>
                 </div>
@@ -465,32 +458,32 @@ const TeacherCompetencyPage = () => {
                   {education.map((edu, index) => (
                     <div
                       key={index}
-                      className="p-4 rounded-xl bg-slate-50/70 border border-slate-100 flex items-start gap-3.5"
+                      className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#222222] border border-slate-100 dark:border-[#333333] flex items-start gap-3.5"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                         <GraduationCap size={20} />
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center justify-between gap-1">
-                          <h3 className="font-extrabold text-slate-900 text-sm">
+                          <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">
                             {edu.school}
                           </h3>
                           {edu.period && (
-                            <span className="text-xs text-slate-400 font-medium">
+                            <span className="text-xs text-slate-400 dark:text-gray-400 font-medium">
                               Niên khóa: {edu.period}
                             </span>
                           )}
                         </div>
 
                         {edu.major && (
-                          <div className="text-xs font-medium text-slate-700 mt-0.5">
+                          <div className="text-xs font-medium text-slate-700 dark:text-gray-300 mt-0.5">
                             {edu.major}
                           </div>
                         )}
 
                         {edu.degreeGrade && (
-                          <div className="text-[11px] font-bold text-emerald-700 bg-emerald-50 inline-block px-2 py-0.5 rounded mt-2">
+                          <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 inline-block px-2 py-0.5 rounded mt-2">
                             {edu.degreeGrade}
                           </div>
                         )}
@@ -501,17 +494,17 @@ const TeacherCompetencyPage = () => {
               </div>
             )}
 
-            {/* 5. Experience Timeline ("Kinh nghiệm giảng dạy") - BR-EX-GV-13 */}
+            {/* 5. Experience Timeline ("Kinh nghiệm giảng dạy") */}
             {experience.length > 0 && (
-              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 sm:p-7 flex flex-col gap-5">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-6 sm:p-7 flex flex-col gap-5">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-                  <h2 className="text-lg font-extrabold text-slate-900">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] shrink-0" />
+                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
                     {t.courses?.teachingExpTitle || "Kinh nghiệm giảng dạy"}
                   </h2>
                 </div>
 
-                <div className="relative pl-6 sm:pl-8 border-l-2 border-slate-100 space-y-6">
+                <div className="relative pl-6 sm:pl-8 border-l-2 border-slate-100 dark:border-[#3F3F3F] space-y-6">
                   {experience.map((exp, index) => {
                     const isCurrent =
                       exp.isCurrent ||
@@ -521,19 +514,18 @@ const TeacherCompetencyPage = () => {
                       <div key={index} className="relative">
                         {/* Dot indicator on timeline */}
                         <span
-                          className={`absolute -left-[31px] sm:-left-[39px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white shadow-xs ${
-                            isCurrent
-                              ? "bg-emerald-500 ring-4 ring-emerald-100"
-                              : "bg-slate-300"
-                          }`}
+                          className={`absolute -left-[31px] sm:-left-[39px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-[#1A1A1A] shadow-xs ${isCurrent
+                              ? "bg-emerald-500 ring-4 ring-emerald-100 dark:ring-emerald-950/50"
+                              : "bg-slate-300 dark:bg-gray-600"
+                            }`}
                         />
 
                         {/* Experience item details */}
                         <div className="flex flex-col gap-1.5">
                           <div className="flex flex-wrap items-center justify-between gap-1">
-                            <h3 className="font-extrabold text-slate-900 text-sm">
+                            <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">
                               {exp.role} ·{" "}
-                              <span className="text-slate-600 font-semibold">
+                              <span className="text-slate-600 dark:text-gray-300 font-semibold">
                                 {exp.organization}
                               </span>
                             </h3>
@@ -541,11 +533,10 @@ const TeacherCompetencyPage = () => {
                             {/* Period Badge */}
                             {exp.period && (
                               <span
-                                className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                                  isCurrent
-                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                    : "bg-slate-100 text-slate-600"
-                                }`}
+                                className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${isCurrent
+                                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50"
+                                    : "bg-slate-100 dark:bg-[#2A2A2A] text-slate-600 dark:text-gray-300"
+                                  }`}
                               >
                                 {exp.period}
                                 {exp.yearsCount ? ` · ${exp.yearsCount} năm` : ""}
@@ -555,7 +546,7 @@ const TeacherCompetencyPage = () => {
 
                           {/* Location */}
                           {exp.location && (
-                            <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                            <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-gray-400">
                               <MapPin size={11} />
                               <span>{exp.location}</span>
                             </div>
@@ -563,7 +554,7 @@ const TeacherCompetencyPage = () => {
 
                           {/* Description */}
                           {exp.description && (
-                            <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                            <p className="text-xs text-slate-600 dark:text-gray-300 leading-relaxed mt-1">
                               {exp.description}
                             </p>
                           )}
@@ -575,14 +566,14 @@ const TeacherCompetencyPage = () => {
               </div>
             )}
 
-            {/* 6. Teaching Methods ("Phương pháp giảng dạy") - BR-EX-GV-13 */}
+            {/* 6. Teaching Methods ("Phương pháp giảng dạy") */}
             {teachingMethods &&
               (teachingMethods.tags?.length > 0 ||
                 teachingMethods.description) && (
-                <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 sm:p-7 flex flex-col gap-4">
+                <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-6 sm:p-7 flex flex-col gap-4">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#990011] shrink-0" />
-                    <h2 className="text-lg font-extrabold text-slate-900">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] shrink-0" />
+                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
                       {t.courses?.teachingMethodsTitle ||
                         "Phương pháp giảng dạy"}
                     </h2>
@@ -595,7 +586,7 @@ const TeacherCompetencyPage = () => {
                         {teachingMethods.tags.map((tag, i) => (
                           <span
                             key={i}
-                            className="px-3 py-1 rounded-lg bg-red-50 text-[#990011] text-xs font-bold border border-red-100/80"
+                            className="px-3 py-1 rounded-lg bg-red-50 dark:bg-red-950/40 text-[#990011] dark:text-[#FF6B6B] text-xs font-bold border border-red-100/80 dark:border-red-900/40"
                           >
                             {tag}
                           </span>
@@ -605,7 +596,7 @@ const TeacherCompetencyPage = () => {
 
                   {/* Method Description text */}
                   {teachingMethods.description && (
-                    <div className="text-sm text-slate-600 leading-relaxed space-y-3 whitespace-pre-line pt-2">
+                    <div className="text-sm text-slate-600 dark:text-gray-300 leading-relaxed space-y-3 whitespace-pre-line pt-2">
                       {teachingMethods.description}
                     </div>
                   )}
@@ -615,12 +606,12 @@ const TeacherCompetencyPage = () => {
 
           {/* ─── Right Column (4 cols): Sticky Reviews Sidebar ─── */}
           <div className="lg:col-span-4 sticky top-6 flex flex-col gap-6">
-            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 flex flex-col gap-5">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/90 dark:border-[#3F3F3F] shadow-2xs p-6 flex flex-col gap-5">
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#990011]" />
-                  <h3 className="font-extrabold text-slate-900 text-base">
+                  <span className="w-2 h-2 rounded-full bg-[#990011] dark:bg-[#FF6B6B]" />
+                  <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
                     {t.courses?.studentReviews || "Đánh giá từ học viên"}
                   </h3>
                 </div>
@@ -628,7 +619,7 @@ const TeacherCompetencyPage = () => {
 
               {/* Big Score + Stars */}
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-black text-slate-900">
+                <span className="text-4xl font-black text-slate-900 dark:text-white">
                   {ratingValue}
                 </span>
                 <div className="flex flex-col">
@@ -641,7 +632,7 @@ const TeacherCompetencyPage = () => {
                       />
                     ))}
                   </div>
-                  <span className="text-[11px] text-slate-400 mt-0.5">
+                  <span className="text-[11px] text-slate-400 dark:text-gray-400 mt-0.5">
                     {t.courses?.basedOnReviews?.replace(
                       "{{count}}",
                       formatTeacherNumber(reviewCount)
@@ -661,16 +652,16 @@ const TeacherCompetencyPage = () => {
                   return (
                     <div
                       key={star}
-                      className="flex items-center gap-2 text-xs text-slate-600 font-semibold"
+                      className="flex items-center gap-2 text-xs text-slate-600 dark:text-gray-300 font-semibold"
                     >
                       <span className="w-9 shrink-0">{star} sao</span>
-                      <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-[#2A2A2A] overflow-hidden">
                         <div
                           className="h-full bg-[#FBBF24] rounded-full transition-all duration-300"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="w-7 text-right text-slate-400 font-medium shrink-0 text-[11px]">
+                      <span className="w-7 text-right text-slate-400 dark:text-gray-400 font-medium shrink-0 text-[11px]">
                         {pct}%
                       </span>
                     </div>
@@ -680,17 +671,17 @@ const TeacherCompetencyPage = () => {
 
               {/* Featured Reviews in Sidebar (1 or 2) */}
               {featuredReviews.length > 0 && (
-                <div className="pt-3 border-t border-slate-100 flex flex-col gap-3">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="pt-3 border-t border-slate-100 dark:border-[#2E2E2E] flex flex-col gap-3">
+                  <span className="text-[11px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-wider">
                     {t.courses?.featuredReviews || "NHẬN XÉT TIÊU BIỂU"}
                   </span>
 
                   {featuredReviews.slice(0, 2).map((rev) => (
                     <div
                       key={rev.reviewId}
-                      className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5 text-xs"
+                      className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#222222] border border-slate-100 dark:border-[#333333] flex flex-col gap-1.5 text-xs"
                     >
-                      <div className="flex items-center justify-between font-bold text-slate-900">
+                      <div className="flex items-center justify-between font-bold text-slate-900 dark:text-white">
                         <span>{rev.studentName}</span>
                         <div className="flex items-center gap-0.5 text-amber-400">
                           {[1, 2, 3, 4, 5].map((s) => (
@@ -700,21 +691,21 @@ const TeacherCompetencyPage = () => {
                               className={
                                 s <= Math.round(rev.rating)
                                   ? "fill-amber-400 text-amber-400"
-                                  : "text-slate-200"
+                                  : "text-slate-200 dark:text-gray-600"
                               }
                             />
                           ))}
                         </div>
                       </div>
 
-                      <p className="text-slate-600 italic leading-relaxed text-[11px]">
+                      <p className="text-slate-600 dark:text-gray-300 italic leading-relaxed text-[11px]">
                         "{rev.comment}"
                       </p>
 
                       {rev.className && (
                         <Link
                           to={`/explore-courses/class/${rev.classId}`}
-                          className="text-[10px] font-bold text-[#990011] hover:underline"
+                          className="text-[10px] font-bold text-[#990011] dark:text-[#FF6B6B] hover:underline"
                         >
                           Lớp: {rev.className}
                         </Link>
@@ -728,7 +719,7 @@ const TeacherCompetencyPage = () => {
               <button
                 type="button"
                 onClick={() => setIsReviewsModalOpen(true)}
-                className="w-full py-2.5 px-4 rounded-xl border border-[#990011] text-[#990011] hover:bg-[#990011]/5 transition-colors text-xs font-bold text-center cursor-pointer active:scale-[0.99] mt-2"
+                className="w-full py-2.5 px-4 rounded-xl border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-[#990011]/5 dark:hover:bg-red-950/30 transition-colors text-xs font-bold text-center cursor-pointer active:scale-[0.99] mt-2"
               >
                 {t.courses?.viewAllReviews || "Xem tất cả nhận xét"}
               </button>
@@ -737,7 +728,7 @@ const TeacherCompetencyPage = () => {
         </div>
       </div>
 
-      {/* ─── All Reviews Modal (Ticket 08) ─── */}
+      {/* ─── All Reviews Modal ─── */}
       <TeacherReviewsModal
         isOpen={isReviewsModalOpen}
         onClose={() => setIsReviewsModalOpen(false)}

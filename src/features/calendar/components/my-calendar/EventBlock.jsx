@@ -23,7 +23,7 @@ const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick })
   return (
     <div
       onClick={onClick}
-      className="absolute rounded-xl p-3 flex flex-col gap-2 min-h-fit z-10 border cursor-pointer hover:opacity-90 transition-opacity"
+      className="absolute rounded-xl p-3 flex flex-col gap-2 min-h-fit z-10 border cursor-pointer hover:opacity-90 transition-opacity dark:!bg-[#242424] dark:!border-[#3F3F3F]"
       style={{
         top: `${top}px`,
         height: `${height}px`,
@@ -34,11 +34,11 @@ const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick })
       }}
     >
       <div className="flex flex-col gap-0.5">
-        <p className="text-sm font-semibold text-[#1A1A1A] truncate">{event.title}</p>
-        {event.subtitle && <p className="text-xs font-medium text-[#7B7979] truncate">{event.subtitle}</p>}
+        <p className="text-sm font-semibold text-[#1A1A1A] dark:text-white truncate">{event.title}</p>
+        {event.subtitle && <p className="text-xs font-medium text-[#7B7979] dark:text-[#AAAAAA] truncate">{event.subtitle}</p>}
       </div>
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-1.5 text-xs text-[#1A1A1A]">
+        <div className="flex items-center gap-1.5 text-xs text-[#1A1A1A] dark:text-neutral-300">
           <Clock className="w-3.5 h-3.5 shrink-0" />
           <span className="truncate">
             {event.startTime ? formatTime(event.startTime) : ''}
@@ -46,7 +46,7 @@ const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick })
           </span>
         </div>
         {event.location && (
-          <div className="flex items-center gap-1.5 text-xs text-[#1A1A1A]">
+          <div className="flex items-center gap-1.5 text-xs text-[#1A1A1A] dark:text-neutral-300">
             <Calendar className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">{event.location}</span>
           </div>
@@ -60,7 +60,7 @@ const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick })
             e.stopPropagation();
             navigate(`/${encodeURIComponent(getClassLanguageCode(event?.classLanguage) || 'en')}/meet/class-${event?.classId}`);
           }}
-          className="absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-[90%] py-1 bg-white border border-[#990011] text-[#990011] rounded-md text-xs font-bold hover:bg-red-50 z-20 shadow-sm"
+          className="absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-[90%] py-1 bg-white dark:bg-[#1A1A1A] border border-[#990011] dark:border-red-400 text-[#990011] dark:text-red-400 rounded-md text-xs font-bold hover:bg-red-50 dark:hover:bg-red-950/30 z-20 shadow-sm"
         >
           {t?.calendar?.enterRoom || 'Vào phòng'}
         </button>

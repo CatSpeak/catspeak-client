@@ -128,10 +128,10 @@ const AddMembersModal = ({
       onClose={handleClose}
       title={t?.chat?.modals?.addMembersTitle || "Add members to group"}
       fullScreenOnMobile={false}
-      className="rounded-xl border border-border"
+      className="rounded-xl border border-border dark:border-[#3F3F3F]"
       headerClassName="flex items-center justify-between p-4"
       bodyClassName="px-0 flex-1 flex flex-col overflow-hidden min-h-0"
-      footerClassName="p-4 border-t border-border"
+      footerClassName="p-4 border-t border-border dark:border-[#3F3F3F]"
       footer={
         <div className="flex flex-col gap-4">
           {/* Invite link quick share option */}
@@ -141,12 +141,12 @@ const AddMembersModal = ({
                 t?.chat?.copyInviteLinkTitle ||
                 "Hoặc mời bằng liên kết tham gia"
               }
-              labelClassName="text-secondary"
+              labelClassName="text-secondary dark:text-[#AAAAAA]"
               readOnly
               value={fullInviteUrl}
               containerClassName="w-full"
               variant="square"
-              className="hover:!border-border focus:!border-border select-all"
+              className="hover:!border-border dark:hover:!border-[#3F3F3F] focus:!border-border dark:focus:!border-[#3F3F3F] select-all"
               rightContentClassName="right-1"
               rightContentWidthClass="!pr-14"
               rightContent={
@@ -220,7 +220,7 @@ const AddMembersModal = ({
                 onClick={() => toggleSelectFriend(friend.accountId)}
                 hoverEffect={true}
                 className="overflow-hidden cursor-pointer shrink-0"
-                contentClassName={`${isChecked ? "bg-primaryBg" : ""}`}
+                contentClassName={`${isChecked ? "bg-primaryBg dark:bg-[#272727]" : ""}`}
                 lines={2}
                 leftContent={
                   <Avatar
@@ -234,8 +234,8 @@ const AddMembersModal = ({
                   <Checkbox checked={isChecked} variant="large" as="div" />
                 }
               >
-                <p>{friend.nickname || friend.username}</p>
-                <p className="text-sm text-[#606060]">
+                <p className="font-semibold text-gray-900 dark:text-white truncate">{friend.nickname || friend.username}</p>
+                <p className="text-sm text-[#606060] dark:text-[#AAAAAA]">
                   {friend.isTeacher
                     ? t?.chat?.userPanel?.teacher || "Giảng viên"
                     : friend.level || t?.chat?.userPanel?.student || "Student"}

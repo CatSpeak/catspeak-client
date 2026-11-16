@@ -9,6 +9,7 @@ import React from "react"
  * @param {boolean} disabled - Disabled state.
  * @param {"default" | "white"} variant - Styling variant ("default" or "white").
  * @param {boolean} withWrapper - Optional 48px click target with 40px hover circle.
+ * @param {number} [size] - Ignored: Radio indicator size is always 20x20.
  * @param {string} className - Optional styling overrides.
  */
 const Radio = ({
@@ -18,6 +19,7 @@ const Radio = ({
   disabled = false,
   variant = "default",
   withWrapper = false,
+  size = 20,
   className = "",
   ...props
 }) => {
@@ -28,20 +30,20 @@ const Radio = ({
       ? "border-white"
       : "border-white/60 group-hover:border-white"
     : checked
-      ? "border-[#990011]"
-      : "border-black/50 group-hover:border-black"
+      ? "border-[#990011] dark:border-cath-red-1000"
+      : "border-black/50 group-hover:border-black dark:border-neutral-400 dark:group-hover:border-white"
 
   const innerDotClass = isWhite
     ? "bg-white"
-    : "bg-[#990011]"
+    : "bg-[#990011] dark:bg-cath-red-1000"
 
   const radioIndicator = (
     <div
-      className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all duration-200 ${outerBorderClass}`}
+      className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all duration-200 ${outerBorderClass}`}
     >
       {checked && (
         <div
-          className={`h-3 w-3 rounded-full transition-transform duration-150 scale-100 ${innerDotClass}`}
+          className={`h-2.5 w-2.5 rounded-full transition-transform duration-150 scale-100 ${innerDotClass}`}
         />
       )}
     </div>
@@ -59,7 +61,9 @@ const Radio = ({
       >
         <span
           className={`w-10 h-10 inline-flex items-center justify-center rounded-full transition-colors ${
-            disabled ? "" : "group-hover:bg-primaryBg hover:bg-primaryBg"
+            disabled
+              ? ""
+              : "group-hover:bg-primaryBg hover:bg-primaryBg dark:group-hover:bg-[#272727] dark:hover:bg-[#272727]"
           }`}
         >
           {radioIndicator}

@@ -39,23 +39,23 @@ const ExchangeErrorModal = ({
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 sm:p-7 flex flex-col items-center text-center z-10"
+          className="relative w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-2xl border border-transparent dark:border-[#3F3F3F] p-6 sm:p-7 flex flex-col items-center text-center z-10"
         >
           {isNetwork ? (
             <>
               {/* Network Disconnect Icon in Light Blue */}
-              <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 mb-4 shadow-xs">
+              <div className="w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-blue-500 dark:text-blue-400 mb-4 shadow-xs">
                 <WifiOff size={28} />
               </div>
 
-              <h3 className="text-lg font-bold text-gray-900 mb-1.5">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1.5">
                 {er.networkTitle || "Không thể kết nối"}
               </h3>
-              <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+              <p className="text-xs text-gray-500 dark:text-neutral-400 mb-4 leading-relaxed">
                 {er.networkDesc || "Có lỗi kỹ thuật hoặc mất kết nối mạng. Điểm của bạn không bị trừ. Vui lòng thử lại sau."}
               </p>
 
-              <div className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-1.5 text-[11px] font-mono text-gray-500 mb-6">
+              <div className="bg-gray-50 dark:bg-[#242424] border border-gray-100 dark:border-[#3F3F3F] rounded-lg px-3 py-1.5 text-[11px] font-mono text-gray-500 dark:text-neutral-400 mb-6">
                 {errorCodeText}
               </div>
 
@@ -63,7 +63,7 @@ const ExchangeErrorModal = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="py-2.5 px-3 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition cursor-pointer"
+                  className="py-2.5 px-3 text-xs sm:text-sm font-medium text-gray-700 dark:text-neutral-200 bg-white dark:bg-[#242424] border border-gray-200 dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2c2c2c] rounded-xl transition cursor-pointer"
                 >
                   {er.closeBtn || "Đóng"}
                 </button>
@@ -79,14 +79,14 @@ const ExchangeErrorModal = ({
           ) : (
             <>
               {/* Out of Stock Empty Chest/Box in Light Amber */}
-              <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 mb-4 shadow-xs">
+              <div className="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-500 dark:text-amber-400 mb-4 shadow-xs">
                 <PackageX size={28} />
               </div>
 
-              <h3 className="text-lg font-bold text-gray-900 mb-1.5">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1.5">
                 {er.outOfStockTitle || "Ưu đãi vừa hết lượt"}
               </h3>
-              <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+              <p className="text-xs text-gray-500 dark:text-neutral-400 mb-6 leading-relaxed">
                 {er.outOfStockDesc || "Rất tiếc, Voucher này đã hết lượt quy đổi trong khi bạn xác nhận! Điểm của bạn không bị trừ."}
               </p>
 
@@ -94,7 +94,7 @@ const ExchangeErrorModal = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="py-2.5 px-3 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition cursor-pointer"
+                  className="py-2.5 px-3 text-xs sm:text-sm font-medium text-gray-700 dark:text-neutral-200 bg-white dark:bg-[#242424] border border-gray-200 dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2c2c2c] rounded-xl transition cursor-pointer"
                 >
                   {er.closeBtn || "Đóng"}
                 </button>

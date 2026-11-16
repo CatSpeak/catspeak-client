@@ -72,23 +72,29 @@ export default {
       }
     },
     langPairs: {
-      "en-vi": "Tiếng Anh → Tiếng Việt",
-      "en-zh": "Tiếng Anh → 中文",
-      "en-ja": "Tiếng Anh → 日本語",
-      "vi-en": "Tiếng Việt → Tiếng Anh"
+      "en-vi": "Anh → Việt",
+      "en-zh": "Anh → Trung",
+      "en-ja": "Anh → Nhật",
+      "vi-en": "Việt → Anh",
     },
     lookup: {
-      meaning: "NGHĨA",
-      instructorNote: "GIẢI THÍCH CHI TIẾT (GIẢNG VIÊN CAT SPEAK)",
-      example: "VÍ DỤ",
-      relatedWords: "Từ liên quan:",
+      meaning: "Nghĩa",
+      instructorNote: "Giải thích chi tiết (Giảng viên Cat Speak)",
+      example: "Ví dụ",
+      relatedWords: "Từ liên quan",
       saved: "Đã lưu vào sổ",
       save: "Thêm vào sổ từ",
       collapseExamples: "Thu gọn ví dụ",
       moreExamples: "Xem thêm ví dụ",
-      langPlaceholder: "Tiếng Anh -> Tiếng Việt",
+      langPlaceholder: "Anh → Việt",
       listenBtn: "Nghe phát âm",
-      closeBtn: "Đóng popup"
+      closeBtn: "Đóng popup",
+      fetchingTitle: "Đang tra cứu \"{{word}}\"...",
+      fetchingDesc: "Đang lấy giải nghĩa và phiên âm từ điển",
+      contributeSuccess: "Góp ý đã được gửi!",
+      contributeError: "Có lỗi xảy ra khi gửi góp ý.",
+      saveSuccess: "Đã lưu từ vào Sổ từ vựng!",
+      saveError: "Không thể lưu từ. Vui lòng thử lại."
     },
     notFound: {
       title: "Không tìm thấy định nghĩa cho từ này.",

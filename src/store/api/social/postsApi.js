@@ -156,26 +156,23 @@ export const postsApi = socialApi.injectEndpoints({
         { type: "PostReactions", id: String(postId) },
       ],
       async onQueryStarted(
-        { postId, type },
+        { postId, type, skipOptimistic },
         { dispatch, getState, queryFulfilled },
       ) {
-        // 1. Instant optimistic local update
-        const patches = updatePostInCaches(
-          getState(),
-          dispatch,
-          postId,
-          (post) => {
-            if (post.currentUserReaction === type) {
-              post.currentUserReaction = null
-              post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
-            } else {
-              if (!post.currentUserReaction) {
-                post.totalReactions = (post.totalReactions || 0) + 1
+        // 1. Instant optimistic local update (skip if caller already managed it optimistically with debounce)
+        const patches = !skipOptimistic
+          ? updatePostInCaches(getState(), dispatch, postId, (post) => {
+              if (post.currentUserReaction === type) {
+                post.currentUserReaction = null
+                post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
+              } else {
+                if (!post.currentUserReaction) {
+                  post.totalReactions = (post.totalReactions || 0) + 1
+                }
+                post.currentUserReaction = type
               }
-              post.currentUserReaction = type
-            }
-          },
-        )
+            })
+          : []
 
         try {
           // 2. Sync with authoritative server response when request completes

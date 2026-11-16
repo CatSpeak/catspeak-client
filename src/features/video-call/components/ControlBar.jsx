@@ -1,16 +1,13 @@
 import React, { useState } from "react"
-import { useSelector, useDispatch } from "react-redux"
+import { useSelector } from "react-redux"
 import {
   Video,
   VideoOff,
   MonitorUp,
   MonitorOff,
-  MessageSquare,
-  Users,
   Mic,
   MicOff,
   Phone,
-  Circle,
   MoreVertical,
   Hand,
   Split,
@@ -34,18 +31,15 @@ import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import ControlButton from "./ControlButton"
-import ControlBarSubtitles from "./ControlBarSubtitles"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 import LeaveCallModal from "./LeaveCallModal"
 import RightSideControls from "./RightSideControls"
-import { useGame } from "@/features/games/context/GameContext"
 import RecordingButton from "./RecordingButton"
 import toast from "react-hot-toast"
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
-  const { startGame } = useGame()
   const {
     micOn,
     cameraOn,
@@ -54,10 +48,6 @@ const VideoCallControlBar = () => {
     isTogglingCam,
     isTogglingScreenShare,
     canShareScreen = true,
-    showChat,
-    setShowChat,
-    showParticipants,
-    setShowParticipants,
     showBreakout,
     setShowBreakout,
     handleToggleMic,
@@ -75,14 +65,11 @@ const VideoCallControlBar = () => {
     showStopModal,
     confirmStopRecording,
     cancelStopRecording,
-    unreadRoomChat,
-    unreadAiChat,
     isHandRaised,
     sessionId,
     room,
     lkRoom,
     user,
-    participants,
     isAISession,
     isHost: isHostFromContext,
     id: roomId,
@@ -164,7 +151,6 @@ const VideoCallControlBar = () => {
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
   const [showMoreMenu, setShowMoreMenu] = useState(false)
-  const [showGameModal, setShowGameModal] = useState(false)
 
   const handleToggleHand = async () => {
     const newRaised = !isHandRaised
@@ -186,22 +172,13 @@ const VideoCallControlBar = () => {
     }
   }
 
-  const handleGameStart = ({ gameId, difficulty, language }) => {
-    startGame(gameId, difficulty, language)
-    setShowGameModal(false)
-  }
-
-  const unreadMessages = unreadRoomChat + unreadAiChat
-
-  const iconClass = "w-6 h-6"
-
   return (
-    <div className="relative flex w-full shrink-0 items-center justify-center bg-white px-3 sm:px-4 py-2 pb-[calc(0.5rem_+_env(safe-area-inset-bottom,0px))] border-t border-border">
+    <div className="relative flex w-full shrink-0 items-center justify-center bg-white dark:bg-[#1A1A1A] px-4 min-h-[56px] h-[calc(56px+env(safe-area-inset-bottom,0px))] pb-[env(safe-area-inset-bottom,0px)] md:pb-0 border-t border-border dark:border-[#3F3F3F]">
       {/* Centered call controls across the entire bar width */}
-      <div className="flex items-center justify-center gap-1">
-        <ControlButton
-          isActive={micOn}
-          isLoading={isTogglingMic}
+      <div className="flex items-center justify-center gap-2">
+        <IconButton
+          variant={micOn ? "controlActive" : "control"}
+          disabled={isTogglingMic}
           onClick={handleMicWithGate}
           title={
             isVoiceRestricted
@@ -211,15 +188,14 @@ const VideoCallControlBar = () => {
                 ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
                 : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
           }
-          iconActive={<Mic className={iconClass} />}
-          iconInactive={<MicOff className={iconClass} />}
           className="z-10"
-          inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
-        />
+        >
+          {micOn ? <Mic /> : <MicOff />}
+        </IconButton>
 
-        <ControlButton
-          isActive={cameraOn}
-          isLoading={isTogglingCam}
+        <IconButton
+          variant={cameraOn ? "controlActive" : "control"}
+          disabled={isTogglingCam}
           onClick={handleCameraWithGate}
           title={
             !allowSelfCamera && !canSelfCamera
@@ -229,16 +205,15 @@ const VideoCallControlBar = () => {
                 ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
                 : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
           }
-          iconActive={<Video className={iconClass} />}
-          iconInactive={<VideoOff className={iconClass} />}
-          inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
-        />
+        >
+          {cameraOn ? <Video /> : <VideoOff />}
+        </IconButton>
 
-        <ControlButton
-          isActive={isLocalScreenShare}
-          isLoading={isTogglingScreenShare}
+        <IconButton
+          variant={isLocalScreenShare ? "controlActive" : "control"}
+          disabled={!canShareScreen || isTogglingScreenShare}
           onClick={handleToggleScreenShare}
-          disabled={!canShareScreen}
+          className="hidden md:flex"
           title={
             !canShareScreen
               ? t.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
@@ -247,11 +222,9 @@ const VideoCallControlBar = () => {
                 ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
                 : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
           }
-          iconActive={<MonitorOff className={iconClass} />}
-          iconInactive={<MonitorUp className={iconClass} />}
-          className="hidden md:flex"
-          inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
-        />
+        >
+          {isLocalScreenShare ? <MonitorOff /> : <MonitorUp />}
+        </IconButton>
 
         <div className="relative hidden lg:block z-50">
           <RecordingButton
@@ -265,47 +238,41 @@ const VideoCallControlBar = () => {
         {!isAISession &&
           isBreakoutSupported(room?.roomType) &&
           (isHost || isBreakoutActive || breakoutStatus?.isBreakoutActive) && (
-            <ControlButton
-              isActive={showBreakout}
+            <IconButton
+              variant={showBreakout ? "controlActive" : "control"}
               onClick={() => setShowBreakout(!showBreakout)}
               title="Breakout Rooms"
-              iconActive={<Split className={iconClass} />}
-              iconInactive={<Split className={iconClass} />}
               className="hidden lg:flex"
-              inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
-            />
+            >
+              <Split />
+            </IconButton>
           )}
 
-        <ControlButton
-          isActive={isHandRaised}
-          isLoading={isTogglingHand}
+        <IconButton
+          variant={isHandRaised ? "controlActive" : "control"}
+          disabled={isTogglingHand}
           onClick={handleToggleHand}
           title={isHandRaised ? "Lower hand" : "Raise hand"}
-          iconActive={<Hand className={iconClass} />}
-          iconInactive={<Hand className={iconClass} />}
-          inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
-        />
-
-        {/* <ControlBarSubtitles className="hidden min-[426px]:flex" /> */}
+        >
+          <Hand />
+        </IconButton>
 
         <div className="relative">
-          <ControlButton
-            isActive={showMoreMenu}
+          <IconButton
+            variant={showMoreMenu ? "controlActive" : "control"}
             onClick={() => setShowMoreMenu(!showMoreMenu)}
             title={t?.rooms?.videoCall?.moreOptions || "More options"}
-            iconActive={<MoreVertical className={iconClass} />}
-            iconInactive={<MoreVertical className={iconClass} />}
-            inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
-          />
+          >
+            <MoreVertical />
+          </IconButton>
           <ControlBarMoreMenu
             showMoreMenu={showMoreMenu}
             setShowMoreMenu={setShowMoreMenu}
-            setShowGameModal={setShowGameModal}
           />
         </div>
 
-        <ControlButton
-          isActive={true}
+        <IconButton
+          variant="danger"
           onClick={() => {
             if (isHost && isBreakoutActive) {
               toast.error(
@@ -316,15 +283,14 @@ const VideoCallControlBar = () => {
             promptLeaveCall()
           }}
           title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
-          iconActive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
-          iconInactive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
-          activeClassOverride="bg-red-600 hover:bg-red-700 text-white"
-        />
+        >
+          <Phone className="rotate-[135deg]" />
+        </IconButton>
       </div>
 
       {/* Docked right-side controls on tablets, laptops, and desktops */}
-      <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 hidden md:flex items-center">
-        <RightSideControls className="gap-1" />
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden md:flex items-center">
+        <RightSideControls className="gap-2" />
       </div>
 
       {showStopModal && (

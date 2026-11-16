@@ -26,32 +26,32 @@ const getItemConfig = (type) => {
   switch (type) {
     case "link":
       return {
-        iconBg: "bg-[#D1F7E3] text-[#12B76A]",
+        iconBg: "bg-[#D1F7E3] dark:bg-emerald-950/40 text-[#12B76A] dark:text-emerald-400",
         Icon: Link2,
       }
     case "material":
       return {
-        iconBg: "bg-[#F3F4F6] text-[#DC2626]",
+        iconBg: "bg-[#F3F4F6] dark:bg-red-950/40 text-[#DC2626] dark:text-red-400",
         Icon: FileText,
       }
     case "assignment":
       return {
-        iconBg: "bg-[#FEF0C7] text-[#D97706]",
+        iconBg: "bg-[#FEF0C7] dark:bg-amber-950/40 text-[#D97706] dark:text-amber-400",
         Icon: FileEdit,
       }
     case "quiz":
       return {
-        iconBg: "bg-[#EBE5FC] text-[#7C3AED]",
+        iconBg: "bg-[#EBE5FC] dark:bg-purple-950/40 text-[#7C3AED] dark:text-purple-400",
         Icon: FileQuestion,
       }
     case "bulletinBoard":
       return {
-        iconBg: "bg-red-100/70 text-[#750000]",
+        iconBg: "bg-red-100/70 dark:bg-red-950/40 text-[#750000] dark:text-[#FF6B6B]",
         Icon: MessageSquare,
       }
     default:
       return {
-        iconBg: "bg-gray-100 text-gray-500",
+        iconBg: "bg-gray-100 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400",
         Icon: FileText,
       }
   }
@@ -82,9 +82,6 @@ const StudentLessonRow = ({
   const isYoutubeLink = displayData.type === "link" && displayData.meta && (displayData.meta.includes("youtube.com") || displayData.meta.includes("youtu.be"))
   const config = getItemConfig(displayData.type || "assignment")
   const IconComponent = config.Icon
-
-  console.log(displayData);
-
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
@@ -224,7 +221,7 @@ const StudentLessonRow = ({
             assignment={{ dueDate: item.deadline || item.dueDate, ...item.assignment }}
             isCompleted={item.isCompleted}
           />
-          <ChevronRight size={18} className="text-[#191C1D] shrink-0" />
+          <ChevronRight size={18} className="text-[#191C1D] dark:text-gray-300 shrink-0" />
         </div>
       )
     }
@@ -239,7 +236,7 @@ const StudentLessonRow = ({
             isCompleted={item.isCompleted}
             closeTime={item.closeTime || item.quiz?.closeTime}
           />
-          <ChevronRight size={18} className="text-[#191C1D] shrink-0" />
+          <ChevronRight size={18} className="text-[#191C1D] dark:text-gray-300 shrink-0" />
         </div>
       )
     }
@@ -252,7 +249,7 @@ const StudentLessonRow = ({
       onClick={() => {
         handleRowClick();
       }}
-      className={`rounded-xl p-4 flex flex-col relative transition-all bg-white border border-[#E2E2E2] cursor-pointer hover:border-[#B52A2A] hover:shadow-sm ${className}`}
+      className={`rounded-xl p-4 flex flex-col relative transition-all bg-white dark:bg-[#1A1A1A] border border-[#E2E2E2] dark:border-[#3F3F3F] cursor-pointer hover:border-[#B52A2A] dark:hover:border-[#FF6B6B] hover:shadow-sm ${className}`}
     >
       <div className="flex items-center justify-between gap-4 w-full">
         {/* Left section: Type Icon + Title & Meta */}
@@ -267,18 +264,13 @@ const StudentLessonRow = ({
           {/* Title and Meta Information */}
           <div className="min-w-0 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-[15px] font-medium text-[#191C1D] truncate max-w-full">
+              <h4 className="text-[15px] font-medium text-[#191C1D] dark:text-white truncate max-w-full">
                 {displayData.title}
               </h4>
             </div>
 
             {displayData.meta && (
-              <div className="flex items-center gap-1.5 text-[13px] text-[#6B7280] font-normal">
-                {/* {displayData.type === "material" || displayData.type === "assignment" ? (
-                  <Clock size={14} className="shrink-0" />
-                ) : displayData.type === "link" && !isYoutubeLink ? (
-                  <Clock size={14} className="shrink-0" />
-                ) : null} */}
+              <div className="flex items-center gap-1.5 text-[13px] text-[#6B7280] dark:text-gray-400 font-normal">
                 <div
                   className="line-clamp-1 truncate"
                   dangerouslySetInnerHTML={{ __html: displayData.meta }}
@@ -296,7 +288,7 @@ const StudentLessonRow = ({
 
       {/* Expanded Youtube Video */}
       {isExpanded && isYoutubeLink && (
-        <div className="w-full mt-4 pt-4 border-t border-[#E2E2E2] flex justify-center items-center">
+        <div className="w-full mt-4 pt-4 border-t border-[#E2E2E2] dark:border-[#3F3F3F] flex justify-center items-center">
           {youtubeId ? (
             <div className="flex flex-col items-center w-full">
               <div className="w-full max-w-3xl aspect-video rounded-xl overflow-hidden shadow-md">
@@ -310,8 +302,8 @@ const StudentLessonRow = ({
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-sm text-[#5B403C] w-full border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-              <VideoOff size={32} className="mb-3 text-[#9CA3AF] opacity-80" />
+            <div className="flex flex-col items-center justify-center py-8 text-sm text-[#5B403C] dark:text-gray-300 w-full border border-dashed border-[#E2E2E2] dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#222222]">
+              <VideoOff size={32} className="mb-3 text-[#9CA3AF] dark:text-gray-500 opacity-80" />
               <p>{t.courses.lectureHall.linkPage?.invalidYoutube || "Invalid YouTube URL"}</p>
             </div>
           )}

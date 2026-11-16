@@ -78,7 +78,7 @@ const Calendar = ({ currentDate }) => {
         {days.map((d) => (
           <div
             key={d}
-            className="text-xs font-bold text-[#606060] uppercase tracking-wider"
+            className="text-xs font-bold text-[#606060] dark:text-neutral-400 uppercase tracking-wider"
           >
             {d}
           </div>
@@ -126,8 +126,8 @@ const Calendar = ({ currentDate }) => {
           if (!isCurrentMonth) {
             return (
               <React.Fragment key={`empty-${idx}`}>
-                <div className="relative flex flex-col rounded-2xl bg-gray-50/50 border border-border overflow-hidden min-h-[80px] sm:min-h-0 sm:aspect-[5/4] items-start justify-start p-1.5 sm:p-3">
-                  <span className="text-sm sm:text-base text-gray-400/60 font-medium">
+                <div className="relative flex flex-col rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A]/50 border border-border dark:border-[#3F3F3F] overflow-hidden min-h-[80px] sm:min-h-0 sm:aspect-[5/4] items-start justify-start p-1.5 sm:p-3">
+                  <span className="text-sm sm:text-base text-gray-400/60 dark:text-neutral-600 font-medium">
                     {day}
                   </span>
                 </div>
@@ -146,20 +146,20 @@ const Calendar = ({ currentDate }) => {
                 onClick={() =>
                   setSelectedDate(selectedDate === date ? null : date)
                 }
-                className={`relative flex flex-col rounded-2xl bg-white border overflow-hidden cursor-pointer min-h-[80px] sm:min-h-0 sm:aspect-[5/4]
-                  ${isToday && selectedDate !== date ? "border-[#990011]" : "border-border"}
-                  ${selectedDate === date ? "ring-2 ring-[#990011]/80 transform scale-[1.02] z-10" : ""}
+                className={`relative flex flex-col rounded-2xl bg-white dark:bg-[#1A1A1A] border overflow-hidden cursor-pointer min-h-[80px] sm:min-h-0 sm:aspect-[5/4]
+                  ${isToday && selectedDate !== date ? "border-[#990011] dark:border-red-400" : "border-border dark:border-[#3F3F3F]"}
+                  ${selectedDate === date ? "ring-2 ring-[#990011]/80 dark:ring-red-400/80 transform scale-[1.02] z-10" : ""}
                 `}
               >
                 {/* Top Row: Date and Event Count */}
                 <div className="flex items-start justify-between p-1.5 sm:p-3 z-10 text-sm sm:text-base">
                   <span
-                    className={`font-medium ${isToday ? "text-cath-red-700" : "text-gray-900"}`}
+                    className={`font-medium ${isToday ? "text-cath-red-700 dark:text-red-400" : "text-gray-900 dark:text-white"}`}
                   >
                     {date}
                   </span>
                   {eventCount > 0 && (
-                    <span className="text-cath-red-700 font-bold text-xs sm:text-base">
+                    <span className="text-cath-red-700 dark:text-red-400 font-bold text-xs sm:text-base">
                       {eventCount}
                     </span>
                   )}

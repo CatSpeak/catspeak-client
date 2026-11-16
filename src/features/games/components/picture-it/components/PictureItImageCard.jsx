@@ -53,15 +53,15 @@ const PictureItImageCard = ({
           </div>
         )}
         {imgLoading && !imgError && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-100 z-10">
-            <Loader2 className="h-7 w-7 animate-spin text-cath-red-700" />
-            <span className="text-sm text-secondary font-semibold">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-100 dark:bg-[#1A1A1A] z-10">
+            <Loader2 className="h-7 w-7 animate-spin text-cath-red-700 dark:text-red-400" />
+            <span className="text-sm text-secondary dark:text-neutral-400 font-semibold">
               {ic.loadingImage || 'Loading image...'}
             </span>
           </div>
         )}
         {imgError && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-100 text-secondary z-10">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-100 dark:bg-[#1A1A1A] text-secondary dark:text-neutral-400 z-10">
             <ImageOff size={36} strokeWidth={1.5} className="text-slate-400" />
             <span className="text-base font-medium">{ic.imageUnavailable || 'Image unavailable'}</span>
           </div>

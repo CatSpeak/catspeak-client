@@ -5,10 +5,11 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useAuth } from "@/features/auth"
 
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 import CreateReelModal from "../components/modals/CreateReelModal"
 import WorkspaceMyReelsTab from "../components/tabs/WorkspaceMyReelsTab"
 import WorkspacePlaylistsTab from "../components/tabs/WorkspacePlaylistsTab"
+import { PillButton } from "@/shared/components/ui/buttons"
 
 const getLocale = (lang) => {
   if (lang === "zh") return "zh-CN"
@@ -26,12 +27,23 @@ const WorkspaceReelsContent = ({ userId }) => {
   const [activeTab, setActiveTab] = useState("myReels")
   const [isUploadOpen, setIsUploadOpen] = useState(false)
 
+  const handleTabChange = (nextTab) => {
+    setActiveTab(nextTab)
+  }
+
   const ws = t?.catSpeak?.reels?.workspace || {}
 
-  const tabs = useMemo(() => [
-    { id: "myReels", label: ws?.tabs?.myReels || "My Reels", icon: Film },
-    { id: "playlists", label: ws?.tabs?.playlists || "Playlists", icon: ListPlus },
-  ], [ws])
+  const tabs = useMemo(
+    () => [
+      { id: "myReels", label: ws?.tabs?.myReels || "My Reels", icon: Film },
+      {
+        id: "playlists",
+        label: ws?.tabs?.playlists || "Playlists",
+        icon: ListPlus,
+      },
+    ],
+    [ws],
+  )
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale])
 
@@ -39,7 +51,7 @@ const WorkspaceReelsContent = ({ userId }) => {
 
   const formatNumber = useCallback(
     (value) => numberFormatter.format(value || 0),
-    [numberFormatter]
+    [numberFormatter],
   )
 
   const { id } = useParams()
@@ -49,50 +61,54 @@ const WorkspaceReelsContent = ({ userId }) => {
   }, [])
 
   return (
-    <div className="flex flex-col gap-5 text-gray-800">
-      {!id && (
-        <div className="hidden">
-        </div>
-      )}
+    <div className="text-gray-800 dark:text-neutral-200">
+      {!id && <div className="hidden"></div>}
 
       {id ? (
         <Outlet />
       ) : (
         <>
-          <div className="flex justify-between items-center border-b border-border mb-4">
-            <Tabs
-              tabs={tabs}
-              activeTab={activeTab}
-              onChange={setActiveTab}
-              fullWidth={false}
-              className="border-none mb-0"
-            />
-            {!id && activeTab === "myReels" && (
-              <button
-                onClick={() => setIsUploadOpen(true)}
-                className="bg-cath-red-700 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-cath-red-600 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center space-x-1 text-sm shrink-0 mb-3 ml-4"
-              >
-                <Plus size={16} />
-                <span className="hidden sm:inline">{t.catSpeak?.reels?.uploadReel || "Upload Reel"}</span>
-              </button>
-            )}
-          </div>
+          <Tabs
+            tabs={tabs}
+            activeTab={activeTab}
+            onChange={handleTabChange}
+            fullWidth={false}
+            className="mb-4"
+          />
 
-          {activeTab === "myReels" ? (
-            <WorkspaceMyReelsTab
-              userId={userId}
-              formatDate={formatDate}
-              formatNumber={formatNumber}
-              navigate={navigate}
-              setIsUploadOpen={setIsUploadOpen}
-            />
-          ) : (
-            <WorkspacePlaylistsTab
-              formatNumber={formatNumber}
-              formatDate={formatDate}
-              navigate={navigate}
-            />
-          )}
+          <TabContent
+            activeTab={activeTab}
+            tabs={tabs}
+            className="w-full"
+          >
+            {activeTab === "myReels" ? (
+              <div>
+                <div className="flex justify-end mb-4 px-4">
+                  {!id && activeTab === "myReels" && (
+                    <PillButton onClick={() => setIsUploadOpen(true)}>
+                      <span className="hidden sm:inline">
+                        {t.catSpeak?.reels?.uploadReel || "Upload Reel"}
+                      </span>
+                    </PillButton>
+                  )}
+                </div>
+
+                <WorkspaceMyReelsTab
+                  userId={userId}
+                  formatDate={formatDate}
+                  formatNumber={formatNumber}
+                  navigate={navigate}
+                  setIsUploadOpen={setIsUploadOpen}
+                />
+              </div>
+            ) : (
+              <WorkspacePlaylistsTab
+                formatNumber={formatNumber}
+                formatDate={formatDate}
+                navigate={navigate}
+              />
+            )}
+          </TabContent>
         </>
       )}
 

@@ -240,9 +240,9 @@ const Step2TeacherDeposit = ({
             </div>
 
             {/* Highlighted Transaction Content */}
-            <div className="p-4 sm:px-4 sm:py-0 sm:h-[56px] rounded-xl bg-rose-50 border border-rose-200 text-cath-red-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
+            <div className="p-4 sm:px-4 sm:py-0 sm:h-[56px] rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-cath-red-700 dark:text-red-400 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
               <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                <span className="text-sm sm:text-base text-cath-red-700/80 shrink-0">
+                <span className="text-sm sm:text-base text-cath-red-700/80 dark:text-red-400/80 shrink-0">
                   {t?.vouchers?.deposit?.transactionContent ||
                     "Nội dung chuyển khoản"}
                 </span>
@@ -270,7 +270,7 @@ const Step2TeacherDeposit = ({
                   "Nội dung chuyển khoản") ? (
                   <Check className="text-emerald-600" />
                 ) : (
-                  <Copy className="text-cath-red-700" />
+                  <Copy className="text-cath-red-700 dark:text-red-400" />
                 )}
               </IconButton>
 
@@ -335,7 +335,7 @@ const Step2TeacherDeposit = ({
               </span>
             </div>
 
-            <div className="flex justify-between text-cath-red-700">
+            <div className="flex justify-between text-cath-red-700 dark:text-red-400 font-semibold">
               <span>{t?.vouchers?.deposit?.discountValue || "Mức giảm:"}</span>
               <span>
                 {isPercent
@@ -422,7 +422,7 @@ const Step2TeacherDeposit = ({
               <span className="font-bold">
                 {t?.vouchers?.deposit?.depositRequired || "Cọc bắt buộc:"}
               </span>
-              <span className="font-bold text-xl text-cath-red-700">
+              <span className="font-bold text-xl text-cath-red-700 dark:text-red-400">
                 {formatCurrency(depositAmount)}
               </span>
             </div>
@@ -439,7 +439,7 @@ const Step2TeacherDeposit = ({
             />
             <span className="text-sm">
               {t?.vouchers?.deposit?.termsPrefix || "Tôi đồng ý với"}{" "}
-              <strong className="text-cath-red-700 hover:underline">
+              <strong className="text-cath-red-700 dark:text-red-400 hover:underline">
                 {t?.vouchers?.deposit?.termsLink ||
                   "Điều khoản cọc và hoàn tiền"}
               </strong>{" "}

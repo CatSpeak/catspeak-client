@@ -37,11 +37,11 @@ const SubtitleOverlay = () => {
 
   return (
     <div className="w-full shrink-0 flex justify-center p-2 md:pt-0 z-20 relative">
-      <div className="w-full max-w-4xl bg-white text-gray-800 rounded-xl shadow-lg border border-border px-6 py-4 min-h-[130px] flex items-center justify-center text-center text-sm leading-relaxed sm:text-base md:text-lg">
+      <div className="w-full max-w-4xl bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white rounded-2xl shadow-lg border border-border dark:border-[#3F3F3F] px-6 py-4 min-h-[130px] flex items-center justify-center text-center text-sm leading-relaxed sm:text-base md:text-lg">
         {latestText ? (
           latestText
         ) : (
-          <span className="text-gray-400 italic">
+          <span className="text-gray-400 dark:text-[#AAAAAA] italic">
             {t.rooms?.videoCall?.speechWaiting || "Waiting for speech..."}
           </span>
         )}

@@ -29,12 +29,12 @@ const LeaderboardCard = ({ leaderboard = [] }) => {
     >
       <FluentCard className="h-full gap-3 py-4">
         {/* Header */}
-        <div className="flex items-center gap-2 px-3 pb-2 border-b border-border">
-          <div className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0 bg-cath-red-700/10">
-            <Trophy size={14} className="text-cath-red-700" />
+        <div className="flex items-center gap-2 px-3 pb-2 border-b border-border dark:border-[#3F3F3F]">
+          <div className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0 bg-cath-red-700/10 dark:bg-red-950/40">
+            <Trophy size={14} className="text-cath-red-700 dark:text-red-400" />
           </div>
-          <p className="text-sm font-semibold text-headingColor">{lb.title || 'Leaderboard'}</p>
-          <span className="ml-auto text-xs text-secondary tabular-nums">
+          <p className="text-sm font-semibold text-headingColor dark:text-white">{lb.title || 'Leaderboard'}</p>
+          <span className="ml-auto text-xs text-secondary dark:text-neutral-400 tabular-nums">
             {(lb.playersCount || '{0} players').replace('{0}', leaderboard.length)}
           </span>
         </div>

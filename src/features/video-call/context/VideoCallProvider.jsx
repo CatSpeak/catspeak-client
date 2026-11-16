@@ -106,7 +106,11 @@ export const VideoCallProvider = ({ children }) => {
   }, [isReturningToCall, dispatch])
 
   if (isReturningToCall) {
-    return <>{children}</>
+    return (
+      <VideoCallErrorBoundary>
+        {children}
+      </VideoCallErrorBoundary>
+    )
   }
 
   // Otherwise, render the normal waiting → joining → in-call flow
@@ -121,9 +125,6 @@ export const VideoCallProvider = ({ children }) => {
 
 // ─── Inner provider (only rendered for new calls, not returns) ──────────
 const VideoCallProviderInner = ({ children, roomId, lang }) => {
-  // 🧪 TEST LINE: Throw an error to trigger the error boundary
-  // throw new Error("Simulated Video Call crash for testing ErrorBoundary!")
-
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -143,7 +144,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   )
 
   // Sync phase if location.state updates after initial mount (e.g., when ending a call)
-  // Sync phase if location.state updates after initial mount (e.g., when ending a call)
   useEffect(() => {
     if (location.state?.callEnded) {
       setPhase("ended")
@@ -152,6 +152,13 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       setPhase(fromQueue ? "joining" : "verifying")
     }
   }, [location.state?.callEnded, phase, fromQueue])
+
+  // If the active call ends (or user leaves), phase shouldn't stay stuck on "in-call"
+  useEffect(() => {
+    if (!isInCall && phase === "in-call") {
+      setPhase("ended")
+    }
+  }, [isInCall, phase])
 
   const [showSwitchModal, setShowSwitchModal] = useState(false)
   const [pendingJoinArgs, setPendingJoinArgs] = useState(null)
@@ -608,9 +615,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       await cleanupMediaPreview()
       await new Promise((resolve) => setTimeout(resolve, 300))
 
-      // Set phase to in-call
-      setPhase("in-call")
-
       // Build the call path for PiP return navigation
       const callPath = `/${lang || language}/meet/${roomId}`
 
@@ -636,6 +640,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           country: user?.country,
         }),
       )
+
+      // Set phase to in-call after Redux call state is active
+      setPhase("in-call")
 
       // Auto-restore breakout state if user was in a sub-room before refresh/reconnect
       if (activeSubSessionId) {
@@ -889,6 +896,17 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   }
 
   // ---- PHASE: IN-CALL ----
+  // If Redux indicates the call has ended or was torn down, immediately render CallEndedScreen
+  // so children (VideoCallRoomContent) are not rendered without an active LiveKitRoom.
+  if (!isInCall) {
+    return (
+      <>
+        {switchModal}
+        <CallEndedScreen />
+      </>
+    )
+  }
+
   // The global provider is now rendering LiveKitRoom.
   // Just render children — they get context from GlobalCallContent.
   return <>{children}</>

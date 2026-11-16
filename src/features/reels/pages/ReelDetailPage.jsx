@@ -318,8 +318,8 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
 
   if (isLoading) {
     return (
-      <div className="absolute inset-0 z-10 w-full h-full bg-[#f8f9fa] flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-cath-red-700" />
+      <div className="absolute inset-0 z-10 w-full h-full bg-[#f8f9fa] dark:bg-[#0F0F0F] flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-cath-red-700 dark:text-red-400" />
       </div>
     )
   }
@@ -328,9 +328,9 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
 
   if (isReelNotFound || combinedReels.length === 0) {
     return (
-      <div className="absolute inset-0 z-10 w-full h-full bg-[#f8f9fa] flex flex-col items-center justify-center py-15 px-5 text-lighttextGray text-center gap-3">
+      <div className="absolute inset-0 z-10 w-full h-full bg-[#f8f9fa] dark:bg-[#0F0F0F] flex flex-col items-center justify-center py-15 px-5 text-lighttextGray dark:text-neutral-400 text-center gap-3">
         <svg
-          className="text-[#d4d4d4]"
+          className="text-[#d4d4d4] dark:text-[#525252]"
           width="48"
           height="48"
           viewBox="0 0 24 24"
@@ -343,8 +343,8 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
           <polygon points="23 7 16 12 23 17 23 7" />
           <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
         </svg>
-        <span className="text-[15px] font-medium text-[#525252]">{t?.catSpeak?.reels?.detail?.reelNotFound || "Reel not found"}</span>
-        <span className="text-[13px] text-lighttextGray">
+        <span className="text-[15px] font-medium text-[#525252] dark:text-white">{t?.catSpeak?.reels?.detail?.reelNotFound || "Reel not found"}</span>
+        <span className="text-[13px] text-lighttextGray dark:text-neutral-400">
           {t?.catSpeak?.reels?.detail?.reelNotFoundDesc || "The reel you're looking for doesn't exist or has been removed."}
         </span>
         <button className="mt-3 px-6 py-2.5 rounded-lg text-sm font-semibold bg-cath-red-700 text-white border-none cursor-pointer transition-colors duration-200 hover:bg-[#7a000e]" onClick={handleClose}>
@@ -355,15 +355,15 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   }
 
   return (
-    <div className={`inset-0 w-full h-[100dvh] overflow-hidden flex flex-col ${isMobile ? "fixed z-[9999] bg-black" : "absolute z-10 bg-[#f8f9fa]"}`}>
+    <div className={`inset-0 w-full h-[100dvh] overflow-hidden flex flex-col ${isMobile ? "fixed z-[9999] bg-black" : "absolute z-10 bg-[#f8f9fa] dark:bg-[#0F0F0F]"}`}>
       {/* Floating Close Button */}
       {!isMobile && (
         <button
           onClick={handleClose}
-          className="absolute top-6 left-6 z-50 w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-border"
+          className="absolute top-6 left-6 z-50 w-10 h-10 rounded-full bg-white dark:bg-[#1A1A1A] shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 dark:hover:bg-[#272727] border border-border dark:border-[#3F3F3F]"
           aria-label="Close"
         >
-          <X size={20} className="text-gray-600" />
+          <X size={20} className="text-gray-600 dark:text-white" />
         </button>
       )}
 
@@ -408,17 +408,17 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
           <button
             onClick={() => scrollRef.current?.scrollToPrev()}
             disabled={isAtTop}
-            className={`w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center transition-all border border-border ${isAtTop ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-105 hover:bg-gray-50"}`}
+            className={`w-10 h-10 rounded-full bg-white dark:bg-[#1A1A1A] shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center transition-all border border-border dark:border-[#3F3F3F] ${isAtTop ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-105 hover:bg-gray-50 dark:hover:bg-[#272727]"}`}
             aria-label="Previous reel"
           >
-            <ArrowUp size={20} className="text-gray-600" />
+            <ArrowUp size={20} className="text-gray-600 dark:text-white" />
           </button>
           <button
             onClick={() => scrollRef.current?.scrollToNext()}
-            className="w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-border"
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#1A1A1A] shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 dark:hover:bg-[#272727] border border-border dark:border-[#3F3F3F]"
             aria-label="Next reel"
           >
-            <ArrowDown size={20} className="text-gray-600" />
+            <ArrowDown size={20} className="text-gray-600 dark:text-white" />
           </button>
         </div>
       )}
@@ -440,10 +440,10 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
                 refetchPublic()
               }
             }}
-            className="w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-border"
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#1A1A1A] shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 dark:hover:bg-[#272727] border border-border dark:border-[#3F3F3F]"
             aria-label="Refresh feed"
           >
-            <RefreshCw size={20} className={`text-gray-600 ${isFeedFetching || isDetailLoading ? "animate-spin text-cath-red-600" : ""}`} />
+            <RefreshCw size={20} className={`text-gray-600 dark:text-white ${isFeedFetching || isDetailLoading ? "animate-spin text-cath-red-600 dark:text-red-400" : ""}`} />
           </button>
         </div>
       )}

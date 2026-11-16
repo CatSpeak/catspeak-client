@@ -1,7 +1,18 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
-import { Bot, HardDrive, DoorOpen, Film, Layers, Users, CheckCircle2, AlertTriangle, ArrowUpRight } from "lucide-react"
+import {
+  Bot,
+  HardDrive,
+  DoorOpen,
+  Film,
+  Layers,
+  Users,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowUpRight,
+} from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import ProgressBar from "@/shared/components/ui/ProgressBar"
 
 const FEATURE_CONFIG_MAP = {
   MAX_AI_MESSAGES: {
@@ -75,7 +86,15 @@ const UsageQuotaCard = ({ feature }) => {
 
   if (!feature) return null
 
-  const { featureCode, featureName, limitValue, usedValue, remainingValue, isExceeded, unit } = feature
+  const {
+    featureCode,
+    featureName,
+    limitValue,
+    usedValue,
+    remainingValue,
+    isExceeded,
+    unit,
+  } = feature
   const codeKey = featureCode?.toUpperCase()
 
   const config = FEATURE_CONFIG_MAP[codeKey] || {
@@ -89,16 +108,25 @@ const UsageQuotaCard = ({ feature }) => {
   }
 
   const IconComponent = config.icon
-  const displayTitle = (config.titleKey && quotasT[config.titleKey]) || featureName || config.defaultTitle
-  const actionPath = config.actionPathGetter ? config.actionPathGetter(language) : config.actionPath
-  const actionText = (config.actionTextKey && quotasT[config.actionTextKey]) || config.defaultActionText
+  const displayTitle =
+    (config.titleKey && quotasT[config.titleKey]) ||
+    featureName ||
+    config.defaultTitle
+  const actionPath = config.actionPathGetter
+    ? config.actionPathGetter(language)
+    : config.actionPath
+  const actionText =
+    (config.actionTextKey && quotasT[config.actionTextKey]) ||
+    config.defaultActionText
 
   const isCapacityOnly = config.isCapacityOnly || usedValue === "N/A"
 
   // MAX_ACTIVE_ROOMS: 0 means the entitlement is forbidden, not "unlimited".
   const zeroMeansForbidden = codeKey === "MAX_ACTIVE_ROOMS"
-  const displayLimit = limitValue == null || limitValue === "" ? "0" : limitValue
-  const showUnlimited = (limitValue === "0" || !limitValue) && !zeroMeansForbidden
+  const displayLimit =
+    limitValue == null || limitValue === "" ? "0" : limitValue
+  const showUnlimited =
+    (limitValue === "0" || !limitValue) && !zeroMeansForbidden
 
   // Calculate percentage
   let percentage = 0
@@ -111,77 +139,95 @@ const UsageQuotaCard = ({ feature }) => {
 
   // Color Coding Status
   let statusColor = "bg-emerald-500"
-  let textColor = "text-emerald-600"
-  let borderColor = "border-emerald-100"
-  let badgeBg = "bg-emerald-50 text-emerald-700 border-emerald-200"
+  let textColor = "text-emerald-600 dark:text-emerald-400"
+  let borderColor = "border-border dark:border-[#3F3F3F]"
+  let badgeBg =
+    "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
 
   if (!isCapacityOnly) {
     if (isExceeded || percentage >= 90) {
       statusColor = "bg-rose-500"
-      textColor = "text-rose-600"
+      textColor = "text-rose-600 dark:text-rose-400"
       borderColor = "border-rose-200"
-      badgeBg = "bg-rose-50 text-rose-700 border-rose-200"
+      badgeBg =
+        "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800"
     } else if (percentage >= 75) {
       statusColor = "bg-amber-500"
-      textColor = "text-amber-600"
+      textColor = "text-amber-600 dark:text-amber-400"
       borderColor = "border-amber-200"
-      badgeBg = "bg-amber-50 text-amber-700 border-amber-200"
+      badgeBg =
+        "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
     }
   }
 
   return (
-    <div className={`bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between ${borderColor}`}>
-      <div>
-        {/* Header: Icon & Badge Status */}
-        <div className="flex items-center justify-between mb-4">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${config.gradient} flex items-center justify-center text-white shadow-md`}>
+    <div
+      className={`bg-white dark:bg-[#1A1A1A] rounded-xl border hover:shadow-md transition-all duration-300 flex flex-col justify-between ${borderColor} dark:border-[#3F3F3F]`}
+    >
+      <div className="p-4">
+        {/* Header: Icon + Title + Status */}
+        <div className="flex items-center gap-4 mb-4">
+          <div
+            className={`w-14 h-14 shrink-0 rounded-xl bg-gradient-to-br ${config.gradient} flex items-center justify-center text-white shadow-md`}
+          >
             <IconComponent className="w-6 h-6" />
           </div>
 
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${badgeBg}`}>
-            {!isCapacityOnly && (isExceeded || percentage >= 90) ? (
-              <>
-                <AlertTriangle className="w-3.5 h-3.5" />
-                {quotasT.statusWarning || "Gần Đạt Giới Hạn"}
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                {quotasT.statusNormal || "Bình Thường"}
-              </>
-            )}
-          </span>
+          <div className="min-w-0">
+            <h3 className="text-base text-gray-900 dark:text-white">
+              {displayTitle}
+            </h3>
+
+            <p className={`text-sm ${textColor}`}>
+              {!isCapacityOnly && (isExceeded || percentage >= 90)
+                ? quotasT.statusWarning || "Gần Đạt Giới Hạn"
+                : quotasT.statusNormal || "Bình Thường"}
+            </p>
+          </div>
         </div>
 
-        {/* Title */}
-        <h3 className="text-base font-bold text-gray-900 mb-1">{displayTitle}</h3>
-        
         {/* Usage Stat Number / Capacity Display */}
         {isCapacityOnly ? (
-          <div className="flex items-baseline gap-1.5 my-3">
-            <span className="text-2xl font-extrabold text-gray-900">{limitValue || "100"}</span>
-            <span className="text-gray-500 text-sm font-medium">{unit || "participants"}</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-base font-bold text-gray-900 dark:text-white">
+              {limitValue || "100"}
+            </span>
+            <span className="text-gray-500 dark:text-neutral-400">
+              {unit || "participants"}
+            </span>
           </div>
         ) : (
-          <div className="flex items-baseline gap-1.5 my-3">
-            <span className="text-2xl font-extrabold text-gray-900">{usedValue}</span>
-            <span className="text-gray-400 text-sm font-medium">/ {showUnlimited ? (quotasT.unlimited || "Không giới hạn") : `${displayLimit} ${unit}`}</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-base font-bold text-gray-900 dark:text-white">
+              {usedValue}
+            </span>
+            <span className="text-gray-400 dark:text-neutral-400">
+              /{" "}
+              {showUnlimited
+                ? quotasT.unlimited || "Không giới hạn"
+                : `${displayLimit} ${unit}`}
+            </span>
           </div>
         )}
 
         {/* Progress Bar (Only for non-capacity quantifiable features) */}
         {!isCapacityOnly && limitNum > 0 && (
-          <div className="space-y-1.5 mb-4">
-            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${statusColor}`}
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-            <div className="flex justify-between items-center text-xs text-gray-500 font-medium">
-              <span>{quotasT.used || "Đã dùng"}: {percentage}%</span>
+          <div className="mb-4">
+            <ProgressBar
+              progress={percentage}
+              heightClass="h-2"
+              colorClass={statusColor}
+            />
+
+            <div className="flex justify-between items-center text-xs text-gray-500 dark:text-neutral-400">
+              <span>
+                {quotasT.used || "Đã dùng"}: {percentage}%
+              </span>
+
               {remainingValue != null && (
-                <span className={textColor}>{quotasT.remaining || "Còn lại"}: {remainingValue} {unit}</span>
+                <span className={textColor}>
+                  {quotasT.remaining || "Còn lại"}: {remainingValue} {unit}
+                </span>
               )}
             </div>
           </div>
@@ -192,10 +238,10 @@ const UsageQuotaCard = ({ feature }) => {
       {actionPath && (
         <button
           onClick={() => navigate(actionPath)}
-          className="w-full mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-600 hover:text-cath-red-700 transition-colors group"
+          className="w-full px-4 h-[56px] border-t border-border dark:border-[#3F3F3F] flex items-center justify-between text-sm text-gray-600 dark:text-neutral-300 hover:text-cath-red-700 dark:hover:text-red-400 transition-colors group"
         >
           <span>{actionText}</span>
-          <ArrowUpRight className="w-4 h-4 text-gray-400 group-hover:text-cath-red-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          <ArrowUpRight className="text-gray-400 group-hover:text-cath-red-700 dark:group-hover:text-red-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
         </button>
       )}
     </div>

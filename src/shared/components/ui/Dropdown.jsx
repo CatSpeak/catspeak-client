@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search, Check, Loader2 } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { AnimatePresence, motion } from "framer-motion"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import MenuItem from "@/shared/components/ui/MenuItem"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
+import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 
 const removeDiacritics = (str) => {
@@ -25,6 +23,7 @@ const removeDiacritics = (str) => {
  */
 const Dropdown = ({
   options = [],
+  children,
   value,
   onChange,
   trigger,
@@ -33,6 +32,7 @@ const Dropdown = ({
   className = "",
   dropdownClassName,
   fullWidth = false,
+  fitContent = false,
   triggerClassName = "",
   roundedClass = "rounded-full",
   align = "left", // 'left' | 'right' | 'center'
@@ -55,9 +55,13 @@ const Dropdown = ({
   const searchInputRef = useRef(null)
   const [portalCoords, setPortalCoords] = useState(null)
   const portalRef = useRef(null)
+  const menuRef = useRef(null)
 
   const isMultiple = mode === "multiple"
   const isSearchActive = enableSearch || Boolean(handleSearch)
+  const hasOptions =
+    options.length > 0 || Boolean(children) || Boolean(handleSearch) || loading
+  const isInteractive = !disabled && hasOptions
 
   // Normalize selected values for multiple and single mode
   const selectedValues = useMemo(() => {
@@ -137,14 +141,43 @@ const Dropdown = ({
         // Flip up if there's less than ~300px below and more space above
         const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow
 
-        // Check horizontal clipping (assume ~260px width default)
-        const forceAlignRight = rect.left + 260 > window.innerWidth && rect.right >= 260
-        const forceAlignLeft = rect.right < 260 || rect.left < 50
+        // Viewport width excluding scrollbar
+        const viewportWidth =
+          document.documentElement?.clientWidth || window.innerWidth || 360
+
+        // Measure actual menu width if available, otherwise safe fallback
+        const measuredWidth = menuRef.current?.offsetWidth
+        const menuWidth = measuredWidth || Math.max(rect.width, 280)
+
+        // Margin from screen edge
+        const edgeMargin = 12
+
+        // Check if left-aligned menu would overflow the right edge of the viewport
+        const wouldOverflowRight =
+          rect.left + menuWidth > viewportWidth - edgeMargin
+
+        // Check if right-aligned menu would overflow the left edge
+        const wouldOverflowLeft = rect.right - menuWidth < edgeMargin
+
+        // Determine horizontal alignment:
+        // Respect explicit align="right" unless it overflows left.
+        // For default or align="left", automatically align right if it would overflow right.
+        let alignRight = align === "right"
+        if (wouldOverflowRight && !wouldOverflowLeft) {
+          alignRight = true
+        } else if (wouldOverflowLeft && !wouldOverflowRight) {
+          alignRight = false
+        } else if (wouldOverflowRight && wouldOverflowLeft) {
+          // Constrained viewport: pick side with more available space
+          alignRight = rect.right > viewportWidth - rect.left
+        }
 
         const newTop = rect.top + window.scrollY
-        const winWidth = typeof window !== "undefined" ? window.innerWidth : 360
-        const newWidth = Math.min(rect.width, winWidth - 16)
-        const newLeft = Math.max(8, Math.min(rect.left + window.scrollX, winWidth - newWidth - 8))
+        const newWidth = Math.min(rect.width, viewportWidth - 16)
+        const newLeft = Math.max(
+          8,
+          Math.min(rect.left + window.scrollX, viewportWidth - newWidth - 8),
+        )
 
         setPortalCoords((prev) => {
           if (
@@ -154,8 +187,7 @@ const Dropdown = ({
             prev.width === newWidth &&
             prev.height === rect.height &&
             prev.flipUp === flipUp &&
-            prev.forceAlignRight === forceAlignRight &&
-            prev.forceAlignLeft === forceAlignLeft
+            prev.alignRight === alignRight
           ) {
             return prev
           }
@@ -166,8 +198,7 @@ const Dropdown = ({
             width: newWidth,
             height: rect.height,
             flipUp,
-            forceAlignRight,
-            forceAlignLeft,
+            alignRight,
           }
         })
       }
@@ -180,14 +211,25 @@ const Dropdown = ({
 
     if (isOpen) {
       updateCoords()
+      const rafId = requestAnimationFrame(updateCoords)
       window.addEventListener("resize", updateCoords)
       window.addEventListener("scroll", handleScroll, true)
+
+      // Observe menu resizing (e.g. content loading or search filter)
+      let observer
+      if (menuRef.current) {
+        observer = new ResizeObserver(() => updateCoords())
+        observer.observe(menuRef.current)
+      }
+
       return () => {
+        cancelAnimationFrame(rafId)
         window.removeEventListener("resize", updateCoords)
         window.removeEventListener("scroll", handleScroll, true)
+        observer?.disconnect()
       }
     }
-  }, [isOpen])
+  }, [isOpen, align])
 
   // Filter options: if handleSearch is provided, parent/API controls options
   const filteredOptions = useMemo(() => {
@@ -262,34 +304,45 @@ const Dropdown = ({
 
   // Resolved translations
   const resolvedSearchPlaceholder =
-    searchPlaceholder ||
-    t?.search ||
-    t?.common?.search ||
-    "Search..."
+    searchPlaceholder || t?.search || t?.common?.search || "Search..."
 
   const resolvedNoOptionsFound =
-    t?.noOptionsFound ||
-    t?.common?.noOptionsFound ||
-    "No options found"
+    t?.noOptionsFound || t?.common?.noOptionsFound || "No options found"
 
-  const resolvedLoading =
-    t?.loading ||
-    t?.common?.loading ||
-    "Loading..."
+  const resolvedLoading = t?.loading || t?.common?.loading || "Loading..."
 
   // Default trigger content based on single/multiple mode
   const renderDefaultTriggerContent = () => {
     if (!isMultiple) {
+      const rawLabel = selectedOption ? selectedOption.label : placeholder
+      const displayLabel =
+        typeof rawLabel === "string" && !selectedOption
+          ? rawLabel.replace(/\.+$/, "")
+          : rawLabel
       return (
-        <span className="flex-1 text-left truncate min-w-0">
-          {selectedOption ? selectedOption.label : placeholder}
+        <span
+          title={typeof displayLabel === "string" ? displayLabel : undefined}
+          className={`text-left truncate min-w-0 ${
+            fitContent ? "max-w-[280px]" : "flex-1"
+          } ${
+            selectedOption
+              ? "text-gray-900 dark:text-white"
+              : "text-gray-500 dark:text-[#AAAAAA]"
+          }`}
+        >
+          {displayLabel}
         </span>
       )
     }
 
     if (selectedValues.length === 0) {
       return (
-        <span className="flex-1 text-left truncate min-w-0">
+        <span
+          title={typeof placeholder === "string" ? placeholder : undefined}
+          className={`text-left truncate min-w-0 ${
+            fitContent ? "max-w-[280px]" : "flex-1"
+          } text-gray-500 dark:text-[#AAAAAA]`}
+        >
           {placeholder}
         </span>
       )
@@ -300,86 +353,132 @@ const Dropdown = ({
 
     if (selectedValues.length === 1) {
       return (
-        <span className="flex-1 text-left truncate min-w-0">
+        <span
+          title={typeof firstLabel === "string" ? firstLabel : undefined}
+          className={`text-left truncate min-w-0 ${
+            fitContent ? "max-w-[280px]" : "flex-1"
+          } text-gray-900 dark:text-white`}
+        >
           {firstLabel}
         </span>
       )
     }
 
     return (
-      <span className="flex-1 text-left truncate min-w-0 flex items-center gap-1.5">
+      <span
+        title={typeof firstLabel === "string" ? firstLabel : undefined}
+        className={`text-left truncate min-w-0 ${
+          fitContent ? "max-w-[280px]" : "flex-1"
+        } flex items-center gap-1.5 text-gray-900 dark:text-white`}
+      >
         <span className="truncate">{firstLabel}</span>
-        <span className="shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-[#990011]">
+        <span className="shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-[#990011] dark:bg-red-950/60 dark:text-red-400">
           +{selectedValues.length - 1}
         </span>
       </span>
     )
   }
 
+  const startIconNode = !isMultiple
+    ? selectedOption?.icon
+    : selectedValues.length === 1
+      ? options.find((opt) => opt.value === selectedValues[0])?.icon
+      : undefined
+
+  const hasCustomHeight = triggerClassName
+    .split(" ")
+    .some(
+      (c) =>
+        c.startsWith("h-") || c.startsWith("!h-") || c.startsWith("min-h-"),
+    )
+  const wrapperHeight = hasCustomHeight ? "h-auto" : "h-12"
+  const innerHeight = hasCustomHeight ? "" : "h-10"
+
   const defaultTrigger = (
-    <PillButton
+    <button
       type="button"
-      onClick={() => !disabled && setIsOpen(!isOpen)}
-      disabled={disabled}
-      variant="secondary"
-      roundedClass={roundedClass}
-      startIcon={
-        !isMultiple
-          ? selectedOption?.icon
-          : selectedValues.length === 1
-            ? options.find((opt) => opt.value === selectedValues[0])?.icon
-            : undefined
-      }
-      endIcon={
-        <ChevronDown
-          className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-            }`}
-        />
-      }
+      onClick={() => isInteractive && setIsOpen(!isOpen)}
+      disabled={!isInteractive}
       aria-label={ariaLabel}
       aria-haspopup="listbox"
       aria-expanded={isOpen}
-      className={`w-full focus-visible:ring-2 focus-visible:ring-cath-red-700/40 focus-visible:ring-offset-1 ${triggerClassName}`}
+      className={`group/dropdown-trigger relative outline-none flex items-center ${wrapperHeight} ${
+        fitContent ? "w-auto min-w-fit max-w-full inline-flex" : "w-full"
+      } ${
+        isInteractive
+          ? "cursor-pointer"
+          : "opacity-50 cursor-not-allowed pointer-events-none"
+      } touch-manipulation`}
     >
-      {renderDefaultTriggerContent()}
-    </PillButton>
+      <div
+        className={`w-full ${innerHeight} px-4 ${roundedClass} border text-sm font-medium flex items-center justify-between gap-2 whitespace-nowrap select-none bg-white dark:bg-[#272727] text-gray-900 dark:text-[#AAAAAA] border-[#e5e5e5] dark:border-[#3F3F3F] ${
+          isInteractive
+            ? "hover:bg-primaryBg group-hover/dropdown-trigger:bg-primaryBg dark:hover:bg-[#3D3D3D] dark:group-hover/dropdown-trigger:bg-[#3D3D3D] hover:text-black group-hover/dropdown-trigger:text-black dark:hover:text-white dark:group-hover/dropdown-trigger:text-white active:bg-[#e0e0e0] group-active/dropdown-trigger:bg-[#e0e0e0] dark:active:bg-[#333333] dark:group-active/dropdown-trigger:bg-[#333333]"
+            : ""
+        } group-focus-visible/dropdown-trigger:ring-2 group-focus-visible/dropdown-trigger:ring-cath-red-700/40 group-focus-visible/dropdown-trigger:ring-offset-1 ${triggerClassName}`}
+      >
+        {startIconNode && (
+          <span className="flex items-center justify-center shrink-0">
+            {startIconNode}
+          </span>
+        )}
+        {renderDefaultTriggerContent()}
+        <ChevronDown
+          size={20}
+          className={`shrink-0 transition-transform duration-200 ${
+            !hasOptions ? "opacity-30" : "text-gray-500 dark:text-[#AAAAAA]"
+          } ${isOpen ? "rotate-180" : ""}`}
+        />
+      </div>
+    </button>
   )
 
-  const alignClass = portalCoords?.forceAlignLeft
-    ? "left-0 origin-top-left"
-    : portalCoords?.forceAlignRight
-      ? "right-0 origin-top-right"
-      : align === "right"
-        ? "right-0 origin-top-right"
-        : align === "center"
-          ? "-translate-x-1/2 left-1/2 origin-top"
-          : "left-0 origin-top-left"
+  const isAlignRight = portalCoords?.alignRight ?? (align === "right")
+  const isAlignCenter = align === "center" && !isAlignRight
+
+  const verticalOrigin = portalCoords?.flipUp ? "bottom" : "top"
+  const transformOrigin = verticalOrigin
+
+  const alignClass = isAlignRight
+    ? "right-0"
+    : isAlignCenter
+      ? "left-1/2"
+      : "left-0"
 
   const resolvedDropdownClassName =
     dropdownClassName !== undefined
       ? dropdownClassName
       : fullWidth
         ? "w-full"
-        : "min-w-[260px] max-w-[260px]"
+        : fitContent
+          ? "w-max min-w-[200px] max-w-[min(480px,calc(100vw-32px))]"
+          : "min-w-[260px] max-w-[260px]"
 
   return (
-    <div className={`relative ${fullWidth ? "w-full" : ""} ${className}`} ref={dropdownRef}>
+    <div
+      className={`relative ${
+        fullWidth ? "w-full" : fitContent ? "w-fit" : ""
+      } ${className}`}
+      ref={dropdownRef}
+    >
       {trigger
         ? typeof trigger === "function"
           ? trigger(
-            isOpen,
-            isMultiple ? selectedOptionsList : selectedOption,
-            () => !disabled && setIsOpen(!isOpen),
-            {
-              isMultiple,
-              selectedValues,
-              selectedOptions: selectedOptionsList,
-            },
-          )
+              isOpen,
+              isMultiple ? selectedOptionsList : selectedOption,
+              () => isInteractive && setIsOpen(!isOpen),
+              {
+                isMultiple,
+                selectedValues,
+                selectedOptions: selectedOptionsList,
+                hasOptions,
+                disabled: !isInteractive,
+              },
+            )
           : React.cloneElement(trigger, {
-            onClick: () => !disabled && setIsOpen(!isOpen),
-            disabled,
-          })
+              onClick: () => isInteractive && setIsOpen(!isOpen),
+              disabled: !isInteractive,
+            })
         : defaultTrigger}
 
       {typeof document !== "undefined" &&
@@ -403,126 +502,184 @@ const Dropdown = ({
                 }}
               >
                 <div className="relative w-full h-full">
-                  <FluentAnimation
-                    direction={portalCoords.flipUp ? "up" : "down"}
-                    exit={true}
-                    className={`absolute ${portalCoords.flipUp
-                      ? "bottom-full mb-2 origin-bottom"
-                      : "top-full mt-2"
-                      } flex flex-col pointer-events-auto shadow-lg border border-border rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${resolvedDropdownClassName}`}
+                  <motion.div
+                    ref={menuRef}
+                    initial={{
+                      opacity: 0,
+                      scaleY: 0,
+                      x: isAlignCenter ? "-50%" : 0,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      scaleY: 1,
+                      x: isAlignCenter ? "-50%" : 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      scaleY: 0,
+                      x: isAlignCenter ? "-50%" : 0,
+                    }}
+                    transition={{
+                      duration: 0.2,
+                      ease: [0.25, 1, 0.5, 1],
+                    }}
+                    style={{
+                      transformOrigin,
+                      maxWidth: "calc(100vw - 24px)",
+                    }}
+                    className={`absolute ${
+                      portalCoords.flipUp
+                        ? "bottom-full mb-1"
+                        : "top-full mt-1"
+                    } pointer-events-auto ${alignClass}`}
                     data-dropdown-portal="true"
                   >
-                    {isSearchActive && (
-                      <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-border">
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            {loading && handleSearch ? (
-                              <Loader2
-                                size={14}
-                                className="text-gray-400 animate-spin"
-                              />
-                            ) : (
-                              <Search size={14} className="text-gray-400" />
-                            )}
-                          </div>
-                          <input
-                            ref={searchInputRef}
-                            type="text"
-                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-border rounded-md focus:outline-none focus:border-cath-red-700"
-                            placeholder={resolvedSearchPlaceholder}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex-1 py-[2px] overflow-y-auto overflow-x-hidden">
-                      {loading ? (
-                        <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500">
-                          <Loader2
-                            size={16}
-                            className="animate-spin text-[#990011]"
-                          />
-                          <span>{resolvedLoading}</span>
-                        </div>
-                      ) : filteredOptions.length > 0 ? (
-                        filteredOptions.map((option, idx) => {
-                          if (option.type === "divider") {
-                            return (
-                              <hr
-                                key={`divider-${idx}`}
-                                className="border-t border-gray-200 my-1 w-full"
-                              />
-                            )
-                          }
-
-                          const isSelected = isOptionSelected(option.value)
-                          const optionKey =
-                            option.key ||
-                            option.code ||
-                            (option.value !== undefined && option.value !== null
-                              ? `${option.value}-${idx}`
-                              : idx)
-
-                          return renderOption ? (
-                            <button
-                              key={optionKey}
-                              type="button"
-                              disabled={option.disabled}
-                              onClick={() => handleSelect(option)}
-                              className="group w-full flex items-center focus:outline-none px-1 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {renderOption(option, isSelected, {
-                                isMultiple,
-                                isSelected,
-                              })}
-                            </button>
-                          ) : (
-                            <MenuItem
-                              key={optionKey}
-                              onClick={() =>
-                                !option.disabled && handleSelect(option)
-                              }
-                              isSelected={isSelected}
-                              activeColor={option.color || activeColor}
-                              icon={option.icon}
-                              label={option.label}
-                              rightText={option.rightText}
-                              rightContent={
-                                isMultiple ? (
-                                  <div className="flex items-center ml-2">
-                                    <div
-                                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${isSelected
-                                        ? "bg-[#990011] border-[#990011] text-white"
-                                        : "border-gray-300 bg-white group-hover:border-gray-400"
-                                        }`}
-                                    >
-                                      {isSelected && (
-                                        <Check size={12} strokeWidth={3} />
-                                      )}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  option.rightContent
-                                )
-                              }
-                              className={
-                                option.disabled
-                                  ? "opacity-50 pointer-events-none"
-                                  : ""
-                              }
+                    <MenuList
+                      className={`${maxHeightClass} overflow-hidden ${resolvedDropdownClassName}`}
+                      data-dropdown-portal="true"
+                    >
+                      {isSearchActive && (
+                        <div className="px-3 py-2 shrink-0 bg-white dark:bg-[#1A1A1A] z-10 border-b border-border dark:border-[#3F3F3F]">
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              {loading && handleSearch ? (
+                                <Loader2
+                                  size={14}
+                                  className="text-gray-400 dark:text-[#AAAAAA] animate-spin"
+                                />
+                              ) : (
+                                <Search
+                                  size={14}
+                                  className="text-gray-400 dark:text-[#AAAAAA]"
+                                />
+                              )}
+                            </div>
+                            <input
+                              ref={searchInputRef}
+                              type="text"
+                              className="w-full pl-9 pr-3 py-1.5 text-sm bg-white dark:bg-[#272727] text-gray-900 dark:text-white border border-border dark:border-[#3F3F3F] rounded-md focus:outline-none focus:border-cath-red-700 dark:focus:border-cath-red-700 placeholder:text-gray-400 dark:placeholder:text-[#AAAAAA]"
+                              placeholder={resolvedSearchPlaceholder}
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
                             />
-                          )
-                        })
-                      ) : (
-                        <div className="px-3 py-6 text-sm text-center text-gray-500">
-                          {resolvedNoOptionsFound}
+                          </div>
                         </div>
                       )}
-                    </div>
-                  </FluentAnimation>
+
+                      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                        {children ? (
+                          typeof children === "function" ? (
+                            children({
+                              close: () => setIsOpen(false),
+                              isOpen,
+                              selectedOption,
+                              selectedOptions: selectedOptionsList,
+                            })
+                          ) : (
+                            children
+                          )
+                        ) : loading ? (
+                          <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500 dark:text-[#AAAAAA]">
+                            <Loader2
+                              size={16}
+                              className="animate-spin text-[#990011] dark:text-red-400"
+                            />
+                            <span>{resolvedLoading}</span>
+                          </div>
+                        ) : filteredOptions.length > 0 ? (
+                          filteredOptions.map((option, idx) => {
+                            if (option.type === "divider") {
+                              return (
+                                <hr
+                                  key={`divider-${idx}`}
+                                  className="border-t border-gray-200 dark:border-[#3F3F3F] my-1 w-full"
+                                />
+                              )
+                            }
+
+                            const isSelected = isOptionSelected(option.value)
+                            const optionKey =
+                              option.key ||
+                              option.code ||
+                              (option.value !== undefined &&
+                              option.value !== null
+                                ? `${option.value}-${idx}`
+                                : idx)
+
+                            return renderOption ? (
+                              <button
+                                key={optionKey}
+                                type="button"
+                                disabled={option.disabled}
+                                onClick={() => handleSelect(option)}
+                                className={`group w-full flex items-center focus:outline-none px-1 h-12 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:text-gray-200 ${
+                                  isSelected
+                                    ? "bg-itemActive dark:bg-[#272727] hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D]"
+                                    : "hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D]"
+                                } ${
+                                  !isSearchActive && idx === 0 && idx === filteredOptions.length - 1
+                                    ? "rounded-xl"
+                                    : !isSearchActive && idx === 0
+                                    ? "rounded-t-xl rounded-b"
+                                    : idx === filteredOptions.length - 1
+                                    ? "rounded-b-xl rounded-t"
+                                    : "rounded"
+                                }`}
+                              >
+                                {renderOption(option, isSelected, {
+                                  isMultiple,
+                                  isSelected,
+                                })}
+                              </button>
+                            ) : (
+                              <MenuItem
+                                key={optionKey}
+                                onClick={() =>
+                                  !option.disabled && handleSelect(option)
+                                }
+                                isSelected={isSelected}
+                                isFirst={!isSearchActive && idx === 0}
+                                isLast={idx === filteredOptions.length - 1}
+                                activeColor={option.color || activeColor}
+                                icon={option.icon}
+                                label={option.label}
+                                rightText={option.rightText}
+                                rightContent={
+                                  isMultiple ? (
+                                    <div className="flex items-center ml-2">
+                                      <div
+                                        className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
+                                          isSelected
+                                            ? "bg-[#990011] border-[#990011] text-white"
+                                            : "border-gray-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] group-hover:border-gray-400 dark:group-hover:border-[#555555]"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check size={12} strokeWidth={3} />
+                                        )}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    option.rightContent
+                                  )
+                                }
+                                className={
+                                  option.disabled
+                                    ? "opacity-50 pointer-events-none"
+                                    : ""
+                                }
+                              />
+                            )
+                          })
+                        ) : (
+                          <div className="px-3 py-6 text-sm text-center text-gray-500 dark:text-[#AAAAAA]">
+                            {resolvedNoOptionsFound}
+                          </div>
+                        )}
+                      </div>
+                    </MenuList>
+                  </motion.div>
                 </div>
               </div>
             )}

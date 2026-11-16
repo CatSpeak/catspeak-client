@@ -25,12 +25,12 @@ const MediaUploadBubble = ({ pendingUpload, onRetry, onCancel }) => {
       <div className="flex flex-col w-full max-w-[360px]">
         <ListItem
           lines={2}
-          className="bg-primaryBg rounded-2xl overflow-hidden text-left"
+          className="bg-primaryBg dark:bg-[#272727] rounded-2xl overflow-hidden text-left"
           leftContent={getFileIcon(fileName)}
           rightContent={
             <div className="flex items-center gap-1">
               {isUploading && (
-                <div className="p-2 text-[#990011]">
+                <div className="p-2 text-[#990011] dark:text-red-400">
                   <Loader2 className="w-5 h-5 animate-spin" />
                 </div>
               )}
@@ -59,12 +59,12 @@ const MediaUploadBubble = ({ pendingUpload, onRetry, onCancel }) => {
             </div>
           }
         >
-          <p className="font-semibold truncate m-0">{fileName}</p>
+          <p className="font-semibold text-gray-900 dark:text-white truncate m-0">{fileName}</p>
 
           {isUploading ? (
-            <p className="text-xs text-[#606060] m-0">Đang gửi...</p>
+            <p className="text-xs text-[#606060] dark:text-[#AAAAAA] m-0">Đang gửi...</p>
           ) : isError ? (
-            <p className="text-sm text-red-500 font-semibold truncate m-0">
+            <p className="text-sm text-red-500 dark:text-red-400 font-semibold truncate m-0">
               {errorMsg || "Upload failed"}
             </p>
           ) : null}

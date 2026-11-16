@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import { Globe, AlertCircle, ChevronDown, Check, Flag } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetScriptTranslationQuery, useReportTranslationErrorMutation } from "@/store/api/interactiveScriptApi"
@@ -117,7 +116,7 @@ const TranslationPanel = ({
       )
       if (isMatch) {
         return (
-          <strong key={idx} className="font-semibold text-cath-red-700">
+          <strong key={idx} className="font-semibold text-cath-red-700 dark:text-red-400">
             {part}
           </strong>
         )
@@ -131,14 +130,13 @@ const TranslationPanel = ({
     (t.widget?.lookup?.langPlaceholder || "Tiếng Anh → Tiếng Việt")
 
   return (
-    <FluentAnimation direction="down" distance={10} duration={0.2} exit>
-      <div
-        className={`w-full bg-[#fff9f9] rounded-2xl border border-[#FECACA] p-4 sm:p-5 shadow-sm text-slate-800 my-3 select-none transition-all ${className}`}
-      >
+    <div
+      className={`w-full bg-[#fff9f9] dark:bg-[#1A1A1A] rounded-2xl border border-[#FECACA] dark:border-[#3F3F3F] p-4 sm:p-5 shadow-sm text-slate-800 dark:text-gray-100 select-none transition-all ${className}`}
+    >
         {/* Header Panel */}
-        <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#FECACA]">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#1E293B] uppercase">
-            <Globe className="w-5 h-5 text-cath-red-700 shrink-0" />
+        <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#FECACA] dark:border-[#3F3F3F]">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#1E293B] dark:text-white uppercase">
+            <Globe className="w-5 h-5 text-cath-red-700 dark:text-[#FF0033] shrink-0" />
             <span>{t.widget?.translateFull || "BẢN DỊCH CẢ ĐOẠN VĂN"}</span>
           </div>
 
@@ -150,7 +148,7 @@ const TranslationPanel = ({
               dropdownClassName="min-w-[210px]"
               roundedClass="rounded-xl"
               trigger={
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-medium text-[#6B7280] bg-white border border-[#FECACA] rounded-lg transition-colors cursor-pointer">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-medium text-[#6B7280] dark:text-[#AAAAAA] bg-white dark:bg-[#272727] border border-[#FECACA] dark:border-[#3F3F3F] rounded-lg transition-colors cursor-pointer">
                   <span>{currentLangLabel}</span>
                   <ChevronDown className="w-5 h-5 text-[#6B7280]" />
                 </div>
@@ -160,21 +158,21 @@ const TranslationPanel = ({
         </div>
 
         {/* Body Bản dịch */}
-        <div className="py-2 text-sm sm:text-base text-[#1E293B]">
+        <div className="py-2 text-sm sm:text-base text-[#1E293B] dark:text-gray-200">
           {renderFormattedBody()}
         </div>
 
         {/* Câu nổi bật dịch */}
         {featuredQuoteTranslation && (
-          <p className="text-sm sm:text-base font-medium italic text-[#334155]">
+          <p className="text-sm sm:text-base font-medium italic text-[#334155] dark:text-[#AAAAAA]">
             &ldquo;{featuredQuoteTranslation}&rdquo;
           </p>
         )}
 
         {/* Footer Panel */}
-        <div className="flex items-center justify-between gap-2 text-xs sm:text-sm text-[#64748B] mt-2 border-t border-[#FECACA]">
+        <div className="flex items-center justify-between gap-2 text-xs sm:text-sm text-[#64748B] dark:text-[#AAAAAA] mt-2 border-t border-[#FECACA] dark:border-[#3F3F3F]">
           <div className="flex items-center gap-1 h-12">
-            <AlertCircle className="w-5 h-5 text-red-700 shrink-0" />
+            <AlertCircle className="w-5 h-5 text-red-700 dark:text-[#FF0033] shrink-0" />
             <span>{t.widget?.translationPanel?.aiDisclaimer || "Bản dịch AI mang tính chất tham khảo"}</span>
           </div>
 
@@ -182,7 +180,7 @@ const TranslationPanel = ({
             <PillButton
               onClick={() => setShowReportForm(true)}
               variant="secondary-no-outline"
-              startIcon={<Flag className="w-5 h-5 text-red-700 shrink-0" />}
+              startIcon={<Flag className="w-5 h-5 text-red-700 dark:text-[#FF0033] shrink-0" />}
             >
               {t.widget?.translationPanel?.reportInaccurate || "Báo dịch chưa chuẩn"}
             </PillButton>
@@ -193,9 +191,9 @@ const TranslationPanel = ({
         {showReportForm && (
           <form
             onSubmit={handleSendReport}
-            className="mt-3 pt-3 border-t border-border flex flex-col gap-2.5 rounded-xl animate-fadeIn"
+            className="mt-3 pt-3 border-t border-border dark:border-[#3F3F3F] flex flex-col gap-2.5 rounded-xl animate-fadeIn"
           >
-            <div className="flex items-center justify-between text-base font-semibold text-slate-800">
+            <div className="flex items-center justify-between text-base font-semibold text-slate-800 dark:text-white">
               <span>{t.widget?.translationPanel?.reportTitle || "Góp ý bản dịch chưa chuẩn:"}</span>
             </div>
 
@@ -242,7 +240,6 @@ const TranslationPanel = ({
           </form>
         )}
       </div>
-    </FluentAnimation>
   )
 }
 

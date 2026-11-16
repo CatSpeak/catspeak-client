@@ -6,12 +6,12 @@ const IntellectualPropertyPolicy = () => {
   const policy = t.policies.intellectualPropertyPolicy
 
   return (
-    <div className="space-y-4 text-gray-700">
+    <div className="space-y-4 text-gray-700 dark:text-neutral-300">
       <p className="text-base leading-relaxed italic">{policy.intro}</p>
 
       {/* Section 1 */}
-      <div className="pt-6 border-t border-border">
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+      <div className="pt-6 border-t border-border dark:border-[#3F3F3F]">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {policy.section1.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">
@@ -35,7 +35,7 @@ const IntellectualPropertyPolicy = () => {
 
       {/* Section 2 */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {policy.section2.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">
@@ -61,7 +61,7 @@ const IntellectualPropertyPolicy = () => {
 
       {/* Section 3 */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {policy.section3.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">
@@ -87,7 +87,7 @@ const IntellectualPropertyPolicy = () => {
 
       {/* Section 4 */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {policy.section4.title}
         </h3>
         <p className="text-base leading-relaxed">{policy.section4.text}</p>
@@ -95,7 +95,7 @@ const IntellectualPropertyPolicy = () => {
 
       {/* Section 5 */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {policy.section5.title}
         </h3>
         <ul className="list-disc list-inside text-base space-y-1 ml-2">
@@ -107,7 +107,7 @@ const IntellectualPropertyPolicy = () => {
 
       {/* Section 6 */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {policy.section6.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">
@@ -130,7 +130,7 @@ const IntellectualPropertyPolicy = () => {
 
       {/* Section 7 */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {policy.section7.title}
         </h3>
         {policy.section7.paragraphs.map((paragraph, index) => (
@@ -145,7 +145,7 @@ const IntellectualPropertyPolicy = () => {
 
       {/* Section 8 - Contact */}
       <div>
-        <h3 className="font-bold text-[#8f0d15] mb-2 text-lg">
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2 text-lg">
           {policy.section8.title}
         </h3>
         <p className="text-base leading-relaxed mb-2">
@@ -185,7 +185,7 @@ const IntellectualPropertyPolicy = () => {
           </li>
         </ul>
 
-        <p className="text-small mt-8 text-center uppercase text-[#7A7574]">
+        <p className="text-small mt-8 text-center uppercase text-[#7A7574] dark:text-neutral-400">
           {policy.section8.copyright}
         </p>
       </div>

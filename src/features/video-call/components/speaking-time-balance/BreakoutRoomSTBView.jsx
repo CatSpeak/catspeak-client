@@ -40,7 +40,7 @@ const BreakoutRoomSTBView = ({
       </div>
 
       {/* Column Headers */}
-      <div className="flex items-center justify-between px-6 py-2 text-xs font-medium text-gray-400 border-t border-gray-100 mb-2">
+      <div className="flex items-center justify-between px-6 py-2 text-xs font-medium text-gray-400 dark:text-neutral-400 border-t border-gray-100 dark:border-[#3F3F3F] mb-2">
         <span>{labels.colName || "Tên"}</span>
         <div className="flex items-center gap-8">
           <span className="w-8 text-right">{labels.colPercent || "%"}</span>
@@ -58,21 +58,21 @@ const BreakoutRoomSTBView = ({
             return (
               <div
                 key={item.participant?.identity || idx}
-                className="bg-[#FEF2F2] border border-red-100 rounded-xl p-3.5 flex items-center justify-between text-sm transition-all"
+                className="bg-[#FEF2F2] dark:bg-rose-950/40 border border-red-100 dark:border-rose-900/50 rounded-xl p-3.5 flex items-center justify-between text-sm transition-all"
               >
                 <div className="flex items-center gap-2 min-w-0 pr-2">
                   <span className="inline-flex items-center justify-center bg-[#DC2626] text-white font-bold text-xs px-1.5 py-0.5 rounded shrink-0 shadow-sm">
                     !!
                   </span>
-                  <span className="font-bold text-[#991B1B] truncate">
+                  <span className="font-bold text-[#991B1B] dark:text-red-400 truncate">
                     {item.name}
                   </span>
                 </div>
                 <div className="flex items-center gap-8 shrink-0">
-                  <span className="font-bold text-gray-900 w-8 text-right font-mono">
+                  <span className="font-bold text-gray-900 dark:text-white w-8 text-right font-mono">
                     {item.sharePercent}%
                   </span>
-                  <span className="text-gray-500 font-mono w-12 text-right text-xs">
+                  <span className="text-gray-500 dark:text-neutral-400 font-mono w-12 text-right text-xs">
                     {formatDuration(item.durationSec)}
                   </span>
                 </div>
@@ -83,18 +83,18 @@ const BreakoutRoomSTBView = ({
           return (
             <div
               key={item.participant?.identity || idx}
-              className="bg-[#F8F9FA] rounded-xl p-3.5 flex items-center justify-between text-sm transition-all"
+              className="bg-[#F8F9FA] dark:bg-[#242424] rounded-xl p-3.5 flex items-center justify-between text-sm transition-all"
             >
               <div className="flex items-center gap-2 min-w-0 pr-2">
-                <span className="font-normal text-gray-800 truncate">
+                <span className="font-normal text-gray-800 dark:text-white truncate">
                   {item.name}
                 </span>
               </div>
               <div className="flex items-center gap-8 shrink-0">
-                <span className="font-medium text-gray-900 w-8 text-right font-mono">
+                <span className="font-medium text-gray-900 dark:text-white w-8 text-right font-mono">
                   {item.sharePercent}%
                 </span>
-                <span className="text-gray-500 font-mono w-12 text-right text-xs">
+                <span className="text-gray-500 dark:text-neutral-400 font-mono w-12 text-right text-xs">
                   {formatDuration(item.durationSec)}
                 </span>
               </div>

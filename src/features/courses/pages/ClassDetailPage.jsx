@@ -120,9 +120,9 @@ const ClassDetailPage = () => {
   // Process data for rendering
   const classData =
     detailResponse &&
-    typeof detailResponse === "object" &&
-    !Array.isArray(detailResponse) &&
-    detailResponse.id
+      typeof detailResponse === "object" &&
+      !Array.isArray(detailResponse) &&
+      detailResponse.id
       ? detailResponse
       : null
 
@@ -229,8 +229,6 @@ const ClassDetailPage = () => {
     )
     return (Array.isArray(raw) ? raw : [])
       .filter((s) => {
-        // Chỉ học viên Confirmed (Status === 1); entry không có trường
-        // status (members view-model) thì giữ lại, server validate tiếp.
         const st = s?.status ?? s?.enrollmentStatus
         return st == null || Number(st) === 1
       })
@@ -252,7 +250,7 @@ const ClassDetailPage = () => {
     return (
       <div
         role="alert"
-        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+        className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
       >
         <span>
           {cd.loadFailed || "This class could not be loaded. Please try again."}
@@ -261,7 +259,7 @@ const ClassDetailPage = () => {
           <button
             type="button"
             onClick={refetchDetail}
-            className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+            className="rounded-xl bg-[#990011] hover:bg-[#b20a1c] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] px-4 py-2 text-xs font-bold text-white transition-colors"
           >
             {cd.retry || "Try again"}
           </button>
@@ -271,7 +269,7 @@ const ClassDetailPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e] w-full max-w-full min-w-0">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-100 w-full max-w-full min-w-0">
       {isDetailFetching && (
         <span role="status" className="sr-only">
           {cd.refreshing || "Refreshing class details"}
@@ -289,14 +287,14 @@ const ClassDetailPage = () => {
               },
               ...(classData.courseId
                 ? [
-                    {
-                      label: classData.courseName || "Khóa học",
-                      onClick: () =>
-                        navigate(
-                          `/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`,
-                        ),
-                    },
-                  ]
+                  {
+                    label: classData.courseName || "Khóa học",
+                    onClick: () =>
+                      navigate(
+                        `/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`,
+                      ),
+                  },
+                ]
                 : []),
               {
                 label: classData.name || "Chi tiết lớp học",
@@ -306,7 +304,7 @@ const ClassDetailPage = () => {
 
           {/* ─── Page Heading & Header Actions ─── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+            <h1 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight">
               {classData.name || "Chi tiết lớp học"}
             </h1>
 
@@ -321,17 +319,17 @@ const ClassDetailPage = () => {
                     navigate("/chat")
                   }
                 }}
-                className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
+                className="h-10 px-5 bg-white dark:bg-[#1A1A1A] border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50/50 dark:hover:bg-red-950/30 font-bold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
               >
                 <span>{c.student?.chat || "Chat"}</span>
-                <MessageSquareText size={14} className="text-[#990011]" />
+                <MessageSquareText size={14} className="text-[#990011] dark:text-[#FF6B6B]" />
               </button>
 
               {/* Tạo bài button */}
               <button
                 type="button"
                 onClick={() => setShowCreatePostModal(true)}
-                className="h-10 px-5 bg-[#990011] hover:bg-[#700000] text-white font-bold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
+                className="h-10 px-5 bg-[#990011] hover:bg-[#700000] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white font-bold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
               >
                 <span>{cd.createPost || "Create Post"}</span>
                 <Plus size={14} className="fill-white" />
@@ -346,7 +344,7 @@ const ClassDetailPage = () => {
               activeTab={activeTab}
               onChange={handleTabChange}
               fullWidth={false}
-              className="border-b border-border/80 w-full"
+              className="border-b border-border/80 dark:border-[#3F3F3F] w-full"
             />
           </div>
         </>

@@ -148,17 +148,17 @@ const SpeakingSessionPage = () => {
   }, [endSession, isEnding, navigate, sessionId, setSessionCredentials])
 
   if (isLoading || isReconnecting) {
-    return <div className="mx-auto max-w-xl py-20 text-center text-sm font-semibold text-slate-600">Đang xác nhận trạng thái phòng luyện nói...</div>
+    return <div className="mx-auto max-w-xl py-20 text-center text-sm font-semibold text-slate-600 dark:text-neutral-400">Đang xác nhận trạng thái phòng luyện nói...</div>
   }
 
   if (!credentials) {
     return (
-      <div className="mx-auto max-w-xl rounded-3xl border border-amber-200 bg-white p-8 text-center shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900">Không thể tiếp tục phiên luyện nói</h1>
-        <p className="mt-2 text-sm text-slate-600">{sessionError?.message || connectError || (session?.status === "created" ? "Phiên chưa khởi động được. Hãy đóng phiên và bắt đầu buổi mới." : "Phiên có thể đang hoạt động trên thiết bị khác.")}</p>
-        {isError ? <button className="mt-4 px-4 py-2 text-sm font-bold text-[#990011] underline" onClick={refetch}>Tải lại trạng thái phiên</button> : session?.status === "reconnecting" ? <button className="mt-4 px-4 py-2 text-sm font-bold text-[#990011] underline" onClick={() => attemptReconnect(true)}>Thử kết nối lại</button> : null}
-        {session && <button disabled={isEnding} className="mt-4 px-4 py-2 text-sm font-bold text-[#990011] underline disabled:opacity-50" onClick={handleLeave}>{isEnding ? "Đang đóng phiên..." : "Đóng phiên cũ"}</button>}
-        <button className="mt-6 rounded-xl bg-[#990011] px-5 py-3 text-sm font-bold text-white" onClick={() => navigate("../", { replace: true })}>Về danh sách chủ đề</button>
+      <div className="mx-auto max-w-xl rounded-3xl border border-amber-200 dark:border-amber-900/40 bg-white dark:bg-[#1A1A1A] p-8 text-center shadow-sm">
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Không thể tiếp tục phiên luyện nói</h1>
+        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{sessionError?.message || connectError || (session?.status === "created" ? "Phiên chưa khởi động được. Hãy đóng phiên và bắt đầu buổi mới." : "Phiên có thể đang hoạt động trên thiết bị khác.")}</p>
+        {isError ? <button className="mt-4 px-4 py-2 text-sm font-bold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80" onClick={refetch}>Tải lại trạng thái phiên</button> : session?.status === "reconnecting" ? <button className="mt-4 px-4 py-2 text-sm font-bold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80" onClick={() => attemptReconnect(true)}>Thử kết nối lại</button> : null}
+        {session && <button disabled={isEnding} className="mt-4 px-4 py-2 text-sm font-bold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80 disabled:opacity-50" onClick={handleLeave}>{isEnding ? "Đang đóng phiên..." : "Đóng phiên cũ"}</button>}
+        <button className="mt-6 rounded-xl bg-[#990011] hover:bg-red-800 dark:bg-cath-red-700 dark:hover:bg-red-800 px-5 py-3 text-sm font-bold text-white transition-colors cursor-pointer" onClick={() => navigate("../", { replace: true })}>Về danh sách chủ đề</button>
       </div>
     )
   }

@@ -166,7 +166,7 @@ const SettingToggleRow = ({
   disabled = false,
 }) => (
   <div className="flex justify-between items-center gap-3">
-    <span className="text-xs font-semibold text-gray-700">{label}</span>
+    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{label}</span>
     <Switch
       checked={Boolean(checked)}
       onChange={onChange}
@@ -286,7 +286,6 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   // Drag states
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [draggableIndex, setDraggableIndex] = useState(null);
-  // Mirrors draggedIndex so the drag handlers can stay referentially stable.
   const draggedIndexRef = useRef(null);
   const setDraggedIndexStable = useCallback((value) => {
     draggedIndexRef.current = value;
@@ -351,7 +350,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       type: "HYDRATE",
       payload: mappedForm,
     });
-  }, [effectiveQuizId, quizDetail, userTimeZone]);
+  }, [effectiveQuizId, quizDetail, userTimeZone, isImportingMode]);
 
   const handleDownloadTemplate = async () => {
     try {
@@ -388,7 +387,6 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     if (!targetQuizId) {
       setIsImportingMode(true);
       if (!title?.trim()) {
-        // ← THÊM LẠI dòng này!
         setIsImportingMode(false);
         toast.error(
           ce.toastEnterTitleBeforeImport ||
@@ -410,7 +408,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     }
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", targetFile);
 
     try {
       toast.loading(
@@ -437,7 +435,6 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         return;
       }
 
-      // Map backend preview DTOs to local form state format
       const localQuestions = parsedQuestions.map((q, idx) => {
         let mappedCorrectAnswers = [];
         const qType = q.type;
@@ -447,14 +444,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           qType === "MultipleChoiceMultiple" ||
           qType === "TrueFalse"
         ) {
-          // Choice answers are stored as option index strings, e.g. "0", "1"
           const optionsList = q.options || [];
           mappedCorrectAnswers = (q.correctAnswers || [])
             .map((ans) => optionsList.indexOf(ans))
             .filter((index) => index !== -1)
             .map((index) => String(index));
         } else {
-          // FillInBlank correct answer contains the exact text
           mappedCorrectAnswers = q.correctAnswers || [];
         }
 
@@ -472,7 +467,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       });
 
       setFormField("questions", (prev) => [...prev, ...localQuestions]);
-      setImportedFileName(file.name);
+      setImportedFileName(targetFile.name);
       setViewMode("edit");
       if (
         !routeQuizId &&
@@ -511,7 +506,6 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
   const handleReUploadExcel = () => {
     setImportedFileName(null);
-    // Mở hộp thoại chọn file ngay
     if (importFileInputRef.current) {
       importFileInputRef.current.click();
     }
@@ -906,8 +900,6 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         }
       }
 
-      // Read the source index from the ref so this callback never has to
-      // depend on draggedIndex state and can stay referentially stable.
       const fromIndex = draggedIndexRef.current;
       if (fromIndex === null || fromIndex === index) return;
 
@@ -924,8 +916,6 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     setDraggableIndex(null);
   }, [setDraggedIndexStable]);
 
-  // One stable object so <QuestionCard> can be memoized. Every member is a
-  // useCallback, so this identity only changes when the language does.
   const questionHandlers = useMemo(
     () => ({
       handleAddOption,
@@ -1264,15 +1254,15 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     const isAnswered = isQuestionAnswered(targetQ, previewAnswers);
 
     if (isCurrent) {
-      return "w-10 h-10 rounded-full flex items-center justify-center bg-[#990011] text-white font-extrabold decoration-2 shadow-xs cursor-pointer select-none";
+      return "w-10 h-10 rounded-full flex items-center justify-center bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-[#1A1A1A] font-extrabold decoration-2 shadow-xs cursor-pointer select-none";
     }
     if (isFlagged) {
-      return "w-10 h-10 rounded-full flex items-center justify-center border-2 border-red-500 text-red-500 font-extrabold bg-white hover:bg-red-50/10 cursor-pointer shadow-xs select-none";
+      return "w-10 h-10 rounded-full flex items-center justify-center border-2 border-red-500 dark:border-red-400 text-red-500 dark:text-red-400 font-extrabold bg-white dark:bg-[#1A1A1A] hover:bg-red-50/10 cursor-pointer shadow-xs select-none";
     }
     if (isAnswered) {
-      return "w-10 h-10 rounded-full flex items-center justify-center bg-red-50/70 border border-red-200 text-[#990011] font-extrabold hover:bg-red-50 cursor-pointer shadow-xs select-none";
+      return "w-10 h-10 rounded-full flex items-center justify-center bg-red-50/70 dark:bg-[#FF6B6B]/20 border border-red-200 dark:border-[#FF6B6B]/30 text-[#990011] dark:text-[#FF6B6B] font-extrabold hover:bg-red-50 dark:hover:bg-[#FF6B6B]/30 cursor-pointer shadow-xs select-none";
     }
-    return "w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 border border-border text-gray-700 font-extrabold hover:bg-gray-100 cursor-pointer shadow-xs select-none";
+    return "w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] text-gray-700 dark:text-gray-300 font-extrabold hover:bg-gray-100 dark:hover:bg-[#2A2A2A] cursor-pointer shadow-xs select-none";
   };
 
   const isLocallyCreatedQuiz = Boolean(
@@ -1313,7 +1303,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         role="alert"
         className="mx-auto flex min-h-[400px] max-w-xl flex-col items-center justify-center gap-4 text-center"
       >
-        <p className="text-sm font-semibold text-gray-700">
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
           {hasMalformedQuizResponse
             ? ce.invalidResponse || "The quiz response was invalid."
             : getQuizErrorMessage(
@@ -1325,7 +1315,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         <button
           type="button"
           onClick={refetchQuiz}
-          className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+          className="rounded-xl bg-[#990011] dark:bg-[#FF6B6B] px-4 py-2 text-xs font-bold text-white dark:text-[#1A1A1A]"
         >
           {ce.retry || "Try again"}
         </button>
@@ -1357,21 +1347,21 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     ).length;
 
     return (
-      <div className="min-h-screen flex flex-col font-sans text-gray-805 -mx-4 -mt-6">
+      <div className="min-h-screen flex flex-col font-sans text-gray-800 dark:text-gray-200 -mx-4 -mt-6">
         {/* ─── Top Yellow/Orange Banner ─── */}
-        <div className="text-cath-red-700 px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none shrink-0">
-          <span className="text-sm font-bold tracking-wide flex items-center">
-            <span className="w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 shrink-0">
+        <div className="text-cath-red-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none shrink-0 border-b border-yellow-200 dark:border-yellow-900/40">
+          <span className="text-sm font-bold tracking-wide flex items-center gap-2">
+            <span className="w-9 h-9 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center text-yellow-700 dark:text-yellow-400 shrink-0">
               <Eye size={18} />
             </span>
-            <span className="w-2.5 h-2.5 bg-red-650 rounded-full animate-pulse" />
+            <span className="w-2.5 h-2.5 bg-red-650 dark:bg-[#FF6B6B] rounded-full animate-pulse" />
             {p.bannerText}
           </span>
           <div className="flex items-center gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setIsPreviewMode(false)}
-              className="px-4 py-2 border border-gray-900 text-gray-900 rounded-full hover:bg-black/5 transition-all font-bold text-xs select-none cursor-pointer"
+              className="px-4 py-2 border border-gray-900 dark:border-gray-200 text-gray-900 dark:text-white rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-all font-bold text-xs select-none cursor-pointer"
             >
               {p.backToEdit}
             </button>
@@ -1379,7 +1369,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               type="button"
               disabled={isSubmitting}
               onClick={() => handleSubmit()}
-              className="px-5 py-2 bg-[#990011] hover:bg-[#80000e] text-white rounded-full transition-all active:scale-95 font-bold text-xs shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+              className="px-5 py-2 bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] text-white dark:text-[#1A1A1A] rounded-full transition-all active:scale-95 font-bold text-xs shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting
                 ? ce.saving || "Saving..."
@@ -1393,24 +1383,24 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         </div>
 
         {/* ─── Sub-header Row ─── */}
-        <div className="bg-white mx-6 px-6 py-4 rounded-3xl border border-border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs shrink-0 select-none">
+        <div className="bg-white dark:bg-[#1A1A1A] mx-6 px-6 py-4 rounded-3xl border border-border dark:border-[#3F3F3F] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs shrink-0 select-none">
           <div className="flex flex-col gap-1.5">
-            <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight">
+            <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
               {title || p.unnamedExam}
             </h1>
           </div>
 
           <div className="flex items-center gap-6 self-end md:self-auto">
             <div className="flex flex-col gap-1 w-32 sm:w-44 text-right">
-              <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+              <div className="flex justify-between items-center text-xs font-bold text-gray-500 dark:text-gray-400">
                 <span>{p.progress}</span>
-                <span className="text-gray-900">
+                <span className="text-gray-900 dark:text-white">
                   {answeredCount}/{questions.length}
                 </span>
               </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-gray-100 dark:bg-[#2A2A2A] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#990011] transition-all duration-300"
+                  className="h-full bg-[#990011] dark:bg-[#FF6B6B] transition-all duration-300"
                   style={{
                     width: `${questions.length ? (answeredCount / questions.length) * 100 : 0}%`,
                   }}
@@ -1418,7 +1408,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               </div>
             </div>
 
-            <div className="px-4 py-2 bg-red-50/20 border border-red-100 rounded-2xl flex items-center gap-2 text-[#990011] font-black tracking-wider text-lg shadow-2xs">
+            <div className="px-4 py-2 bg-red-50/20 dark:bg-[#FF6B6B]/10 border border-red-100 dark:border-[#FF6B6B]/30 rounded-2xl flex items-center gap-2 text-[#990011] dark:text-[#FF6B6B] font-black tracking-wider text-lg shadow-2xs">
               <Timer size={20} className="animate-pulse" />
               <span>{formatTime(previewTimeRemaining)}</span>
             </div>
@@ -1430,27 +1420,27 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {/* Left Area: Active Question card */}
           <div className="flex-1 flex flex-col gap-6">
             {questions.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-border p-12 text-center text-gray-400 font-bold shadow-xs">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-12 text-center text-gray-400 dark:text-gray-500 font-bold shadow-xs">
                 {p.emptyQuestions}
               </div>
             ) : (
-              <div className="bg-white rounded-3xl border border-border p-6 md:p-8 flex flex-col gap-6 shadow-xs">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 md:p-8 flex flex-col gap-6 shadow-xs">
                 {/* Card Title & Score info */}
-                <div className="flex justify-between items-center border-b border-cath-red-700 pb-4 select-none">
-                  <h2 className="text-lg font-black text-[#990011] tracking-tight">
+                <div className="flex justify-between items-center border-b border-border dark:border-[#3F3F3F] pb-4 select-none">
+                  <h2 className="text-lg font-black text-[#990011] dark:text-[#FF6B6B] tracking-tight">
                     {(ce.questionNumber || "Question {{number}}").replace(
                       "{{number}}",
                       previewCurrentIndex + 1,
                     )}
                   </h2>
-                  <span className="px-3.5 py-1.5 bg-gray-50 border border-border rounded-xl text-xs font-bold text-gray-500">
+                  <span className="px-3.5 py-1.5 bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-bold text-gray-500 dark:text-gray-400">
                     {currentQuestion.score} {p.points}
                   </span>
                 </div>
 
                 {/* Question Image Media (Image on top) */}
                 {currentQuestion.mediaUrl && !currentQuestion.clearMedia && (
-                  <div className="rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center p-2">
+                  <div className="rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#222222] flex items-center justify-center p-2">
                     <img
                       src={currentQuestion.mediaUrl}
                       alt={(
@@ -1464,8 +1454,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
                 {/* Question Audio Media (Audio play below image) */}
                 {currentQuestion.audioUrl && !currentQuestion.clearAudio && (
-                  <div className="p-3 bg-red-50/20 border border-red-100 rounded-2xl flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#990011] text-white flex items-center justify-center shrink-0">
+                  <div className="p-3 bg-red-50/20 dark:bg-[#FF6B6B]/10 border border-red-100 dark:border-[#FF6B6B]/30 rounded-2xl flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-[#1A1A1A] flex items-center justify-center shrink-0">
                       <MusicIcon size={16} />
                     </div>
                     <audio
@@ -1479,7 +1469,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 {/* Question text content */}
                 <RenderHTML
                   html={currentQuestion.content}
-                  className="text-sm font-semibold text-gray-800 leading-relaxed"
+                  className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed"
                   fallback={ce.noQuestionContent || "No question content yet."}
                 />
 
@@ -1499,23 +1489,23 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             handleSelectOption(currentQuestion.id, optIdx)
                           }
                           className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
-                            ? "border-[#990011] bg-red-50/10"
-                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
+                            ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-[#FF6B6B]/10"
+                            : "border-border dark:border-[#3F3F3F] bg-gray-50/50 dark:bg-[#222222] hover:bg-gray-100/50 dark:hover:bg-[#2A2A2A]"
                             }`}
                         >
                           <span
                             aria-hidden="true"
                             className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected
-                              ? "border-[#990011] bg-red-50/10"
-                              : "border-gray-300"
+                              ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-[#FF6B6B]/10"
+                              : "border-gray-300 dark:border-[#3F3F3F]"
                               }`}
                           >
                             {isSelected && (
-                              <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
+                              <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
                             )}
                           </span>
                           <span
-                            className={`text-xs font-bold ${isSelected ? "text-[#990011]" : "text-gray-700"}`}
+                            className={`text-xs font-bold ${isSelected ? "text-[#990011] dark:text-[#FF6B6B]" : "text-gray-700 dark:text-gray-300"}`}
                           >
                             {String.fromCharCode(65 + optIdx)}. {opt}
                           </span>
@@ -1544,20 +1534,20 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             });
                           }}
                           className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
-                            ? "border-[#990011] bg-red-50/10"
-                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
+                            ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-[#FF6B6B]/10"
+                            : "border-border dark:border-[#3F3F3F] bg-gray-50/50 dark:bg-[#222222] hover:bg-gray-100/50 dark:hover:bg-[#2A2A2A]"
                             }`}
                         >
                           <span
                             aria-hidden="true"
-                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${isSelected ? "border-[#990011] bg-[#990011]" : "border-gray-300"}`}
+                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${isSelected ? "border-[#990011] dark:border-[#FF6B6B] bg-[#990011] dark:bg-[#FF6B6B]" : "border-gray-300 dark:border-[#3F3F3F]"}`}
                           >
                             {isSelected && (
-                              <span className="h-2 w-2 bg-white" />
+                              <span className="h-2 w-2 bg-white dark:bg-[#1A1A1A]" />
                             )}
                           </span>
                           <span
-                            className={`text-xs font-bold ${isSelected ? "text-[#990011]" : "text-gray-700"}`}
+                            className={`text-xs font-bold ${isSelected ? "text-[#990011] dark:text-[#FF6B6B]" : "text-gray-700 dark:text-gray-300"}`}
                           >
                             {String.fromCharCode(65 + optIdx)}. {opt}
                           </span>
@@ -1579,23 +1569,23 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             handleSelectOption(currentQuestion.id, optIdx)
                           }
                           className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
-                            ? "border-[#990011] bg-red-50/10"
-                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
+                            ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-[#FF6B6B]/10"
+                            : "border-border dark:border-[#3F3F3F] bg-gray-50/50 dark:bg-[#222222] hover:bg-gray-100/50 dark:hover:bg-[#2A2A2A]"
                             }`}
                         >
                           <span
                             aria-hidden="true"
                             className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected
-                              ? "border-[#990011] bg-red-50/10"
-                              : "border-gray-300"
+                              ? "border-[#990011] dark:border-[#FF6B6B] bg-red-50/10 dark:bg-[#FF6B6B]/10"
+                              : "border-gray-300 dark:border-[#3F3F3F]"
                               }`}
                           >
                             {isSelected && (
-                              <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
+                              <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
                             )}
                           </span>
                           <span
-                            className={`text-xs font-bold ${isSelected ? "text-[#990011]" : "text-gray-700"}`}
+                            className={`text-xs font-bold ${isSelected ? "text-[#990011] dark:text-[#FF6B6B]" : "text-gray-700 dark:text-gray-300"}`}
                           >
                             {optIdx === 0
                               ? ce.trueLabel || "True"
@@ -1618,7 +1608,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       }));
                     }}
                     placeholder={ce.answerPlaceholder || "Enter answer here..."}
-                    className="w-full p-4 border border-border rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011]"
+                    className="w-full p-4 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] text-gray-800 dark:text-gray-100 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B]"
                   />
                 ) : (
                   /* Essay Answer Area */
@@ -1633,7 +1623,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       }));
                     }}
                     placeholder={p.essayPlaceholder}
-                    className="w-full p-4 border border-border rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] min-h-[140px] resize-y transition-all"
+                    className="w-full p-4 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] text-gray-800 dark:text-gray-100 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] min-h-[140px] resize-y transition-all"
                   />
                 )}
               </div>
@@ -1642,9 +1632,9 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
           {/* Right Area: Questions Grid sidebar */}
           <div className="w-full lg:w-80 shrink-0 select-none">
-            <div className="bg-white rounded-3xl border border-border p-6 flex flex-col gap-5 shadow-xs">
-              <div className="flex items-center gap-2 text-gray-800 border-b border-border pb-3">
-                <LayoutGrid size={18} className="text-[#990011]" />
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-6 flex flex-col gap-5 shadow-xs">
+              <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 border-b border-border dark:border-[#3F3F3F] pb-3">
+                <LayoutGrid size={18} className="text-[#990011] dark:text-[#FF6B6B]" />
                 <h3 className="text-sm font-black tracking-tight">
                   {p.questionsList}
                 </h3>
@@ -1670,29 +1660,29 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 ))}
               </div>
 
-              <div className="h-px bg-gray-100 my-1" />
+              <div className="h-px bg-gray-100 dark:bg-[#3F3F3F] my-1" />
 
               {/* Legend details */}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[10px] font-bold text-gray-500 pl-1">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[10px] font-bold text-gray-500 dark:text-gray-400 pl-1">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-gray-50 border border-border flex items-center justify-center text-gray-700 text-[10px]" />
+                  <span className="w-5 h-5 rounded-full bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] flex items-center justify-center text-gray-700 dark:text-gray-300 text-[10px]" />
                   <span>{p.unanswered}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-red-50/70 border border-red-200 flex items-center justify-center text-[#990011] text-[10px]" />
+                  <span className="w-5 h-5 rounded-full bg-red-50/70 dark:bg-[#FF6B6B]/20 border border-red-200 dark:border-[#FF6B6B]/30 flex items-center justify-center text-[#990011] dark:text-[#FF6B6B] text-[10px]" />
                   <span>{p.answered}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-[#990011] text-white flex items-center justify-center text-[10px] underline decoration-1" />
+                  <span className="w-5 h-5 rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-[#1A1A1A] flex items-center justify-center text-[10px] underline decoration-1" />
                   <span>{p.current}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full border-2 border-red-500 text-red-500 bg-white flex items-center justify-center text-[10px]" />
+                  <span className="w-5 h-5 rounded-full border-2 border-red-500 dark:border-red-400 text-red-500 dark:text-red-400 bg-white dark:bg-[#1A1A1A] flex items-center justify-center text-[10px]" />
                   <span>{p.flagged}</span>
                 </div>
               </div>
 
-              <div className="h-px bg-gray-100 my-1" />
+              <div className="h-px bg-gray-100 dark:bg-[#3F3F3F] my-1" />
 
               {/* Navigation controls */}
               <div className="flex gap-2">
@@ -1702,7 +1692,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   onClick={() =>
                     setPreviewCurrentIndex((prev) => Math.max(0, prev - 1))
                   }
-                  className="flex-1 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center justify-center gap-1 hover:shadow-md transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+                  className="flex-1 py-2.5 bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] text-white dark:text-[#1A1A1A] font-extrabold text-xs rounded-full flex items-center justify-center gap-1 hover:shadow-md transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-sm"
                 >
                   <ArrowLeft size={12} />
                   <span>{p.prevQuestion}</span>
@@ -1718,7 +1708,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       Math.min(questions.length - 1, prev + 1),
                     )
                   }
-                  className="flex-1 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center justify-center gap-1 hover:shadow-md transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+                  className="flex-1 py-2.5 bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] text-white dark:text-[#1A1A1A] font-extrabold text-xs rounded-full flex items-center justify-center gap-1 hover:shadow-md transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-sm"
                 >
                   <span>{p.nextQuestion}</span>
                   <ArrowRight size={12} />
@@ -1737,7 +1727,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       [qId]: !prev[qId],
                     }));
                   }}
-                  className="w-full py-2.5 border border-[#990011] text-[#990011] hover:bg-red-50/20 font-extrabold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer mt-1"
+                  className="w-full py-2.5 border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50/20 dark:hover:bg-[#FF6B6B]/10 font-extrabold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer mt-1"
                 >
                   <Flag size={12} />
                   <span>
@@ -1755,11 +1745,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   }
 
   return (
-    <div className="flex flex-col flex-1 gap-6 text-[#2e2e2e] pb-24 sm:pb-28">
+    <div className="flex flex-col flex-1 gap-6 text-[#2e2e2e] dark:text-gray-200 pb-24 sm:pb-28">
       {isLocallyCreatedQuiz && (isQuizError || hasMalformedQuizResponse) && (
         <div
           role="status"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-xs font-semibold text-amber-900 dark:text-amber-400"
         >
           <span>
             {ce.draftReloadFailed ||
@@ -1817,7 +1807,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       />
 
       {/* ─── Page Title ─── */}
-      <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+      <h1 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight">
         {effectiveQuizId
           ? ce.editTitle || "Edit Exam"
           : ce.pageTitle || "Create New Exam"}
@@ -1826,7 +1816,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       {isClosedQuiz && (
         <div
           role="note"
-          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900"
+          className="rounded-2xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-xs font-semibold text-amber-900 dark:text-amber-400"
         >
           {ce.closedNotice ||
             "This quiz is closed. Its schedule, late-submission setting, time limit, questions, grading scale, and result-release mode can no longer be changed."}
@@ -1840,9 +1830,9 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         {/* ─── Main Form Panel (Left) ─── */}
         <div className="flex-1 flex flex-col gap-6 w-full">
           {/* Card: Base Info */}
-          <div className="bg-white border border-border rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-gray-800">
+              <label className="text-sm font-bold text-gray-800 dark:text-gray-200">
                 {ce.examNameLabel || "Tên bài kiểm tra"}{" "}
                 <span className="text-red-500">*</span>
               </label>
@@ -1854,13 +1844,13 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   ce.examNamePlaceholder ||
                   "Nhập tên bài kiểm tra (VD: Bài kiểm tra giữa kỳ)"
                 }
-                className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm"
+                className="w-full px-4 py-3 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] transition-all text-sm"
                 required
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-gray-800">
+              <label className="text-sm font-bold text-gray-800 dark:text-gray-200">
                 {ce.descriptionLabel || "Mô tả / Hướng dẫn"}
               </label>
 
@@ -1882,7 +1872,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   toolbar:
                     "bold italic underline strikethrough | emoticons link | bullist numlist",
                   placeholder: ce.descriptionPlaceholder,
-                  skin: "oxide",
+                  skin: document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
+                  content_css: document.documentElement.classList.contains("dark") ? "dark" : "default",
+                  content_style: document.documentElement.classList.contains("dark")
+                    ? "body { font-family: Inter, sans-serif; font-size: 14px; color: #f3f4f6; background-color: #1A1A1A; }"
+                    : "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
                   setup: (editor) => {
                     editor.on("focus", () => { });
                   },
@@ -1894,7 +1888,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {/* Heading: Questions list */}
           <div className="flex flex-wrap justify-between items-center gap-2 px-2">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-gray-800">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">
                 {ce.questionsList || "Danh sách câu hỏi"}
               </h2>
               <IconButton
@@ -1903,16 +1897,16 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 onClick={() => setIsExcelInstructionOpen(true)}
                 title={ce.importExcelHowToTitle || "Cách điền file Excel"}
               >
-                <Info className="w-5 h-5" />
+                <Info className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </IconButton>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-semibold text-gray-500 flex items-center gap-1.5">
+              <span className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                 {ce.totalScore || "Tổng điểm"}:
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black transition-all ${questions.length > 0 && isScoreMatched
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs"
-                    : "bg-red-50 text-[#990011] border border-red-200 shadow-2xs"
+                    ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 shadow-2xs"
+                    : "bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] border border-red-200 dark:border-red-900/40 shadow-2xs"
                     }`}
                   title={`${totalScoreVal} / ${targetScale}`}
                 >
@@ -1930,11 +1924,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {/* Questions Container */}
           <div className="flex flex-col gap-4">
             {importedFileName ? (
-              <div className="border-2 border-green-300 bg-green-50/50 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
+              <div className="border-2 border-green-300 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center shrink-0">
                     <svg
-                      className="w-7 h-7 text-green-600"
+                      className="w-7 h-7 text-green-600 dark:text-green-400"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -1949,12 +1943,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   </div>
                   <div className="min-w-0">
                     <h3
-                      className="text-sm font-extrabold text-gray-800 truncate"
+                      className="text-sm font-extrabold text-gray-800 dark:text-white truncate"
                       title={importedFileName}
                     >
                       {importedFileName}
                     </h3>
-                    <p className="text-xs text-green-700 mt-0.5">
+                    <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
                       {ce.extractedSuccessDesc ||
                         "Đã trích xuất câu hỏi thành công — có thể chỉnh sửa trực tiếp bên dưới."}
                     </p>
@@ -1964,7 +1958,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   <button
                     type="button"
                     onClick={handleReUploadExcel}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] text-white dark:text-[#1A1A1A] text-xs font-bold rounded-xl transition-all shadow-xs"
                   >
                     <svg
                       className="w-3.5 h-3.5"
@@ -1985,7 +1979,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               </div>
             ) : (
               <div
-                className="border-2 border-dashed border-red-200 bg-white hover:bg-red-50/20 rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-[#990011] cursor-pointer"
+                className="border-2 border-dashed border-red-200 dark:border-[#FF6B6B]/30 bg-white dark:bg-[#1A1A1A] hover:bg-red-50/20 dark:hover:bg-[#FF6B6B]/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-[#990011] dark:hover:border-[#FF6B6B] cursor-pointer"
                 onDragOver={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -2006,9 +2000,9 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 }}
               >
                 {/* File Icon */}
-                <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-2">
+                <div className="w-12 h-12 bg-red-50 dark:bg-[#FF6B6B]/20 rounded-xl flex items-center justify-center mb-2">
                   <svg
-                    className="w-7 h-7 text-[#990011]"
+                    className="w-7 h-7 text-[#990011] dark:text-[#FF6B6B]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -2018,7 +2012,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   >
                     <path
                       d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
-                      fill="#990011"
+                      fill="currentColor"
                       fillOpacity="0.1"
                     />
                     <polyline points="14 2 14 8 20 8" />
@@ -2026,16 +2020,15 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     <polyline points="9 15 12 12 15 15" />
                   </svg>
                 </div>
-                <h3 className="text-base font-extrabold text-gray-800">
+                <h3 className="text-base font-extrabold text-gray-800 dark:text-gray-100">
                   {ce.importFromExcel || "Nhập câu hỏi từ file Excel"}
                 </h3>
-                <p className="text-xs text-gray-500 max-w-sm mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mt-1">
                   {ce.uploadExcelDesc ||
                     "Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi."}
                 </p>
-                {/* Modal trigger via Info icon instead */}
                 <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-                  <label className="flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs">
+                  <label className="flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] text-white dark:text-[#1A1A1A] text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs">
                     <svg
                       className="w-4 h-4"
                       viewBox="0 0 24 24"
@@ -2073,10 +2066,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     type="button"
                     onClick={handleDownloadTemplate}
                     disabled={isDownloadingTemplate}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold border border-gray-300 rounded-xl transition-all shadow-xs disabled:opacity-55"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-[#222222] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-200 text-xs font-bold border border-gray-300 dark:border-[#3F3F3F] rounded-xl transition-all shadow-xs disabled:opacity-55"
                   >
                     <svg
-                      className="w-4 h-4 text-gray-500"
+                      className="w-4 h-4 text-gray-500 dark:text-gray-400"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -2091,7 +2084,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     {ce.downloadTemplate || "Tải file mẫu"}
                   </button>
                 </div>
-                <div className="text-[11px] text-gray-400 mt-3 leading-relaxed">
+                <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-3 leading-relaxed">
                   {ce.supportedFormat ||
                     "Định dạng hỗ trợ: .xlsx | Dung lượng tối đa: 20 MB"}
                   <br />
@@ -2119,26 +2112,26 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           <button
             type="button"
             onClick={handleAddQuestion}
-            className="border-2 border-dashed border-red-100 hover:border-[#990011] bg-white hover:bg-red-50/20 transition-all rounded-3xl p-6 text-center cursor-pointer flex flex-col items-center justify-center gap-2 group"
+            className="border-2 border-dashed border-red-100 dark:border-[#FF6B6B]/30 hover:border-[#990011] dark:hover:border-[#FF6B6B] bg-white dark:bg-[#1A1A1A] hover:bg-red-50/20 dark:hover:bg-[#FF6B6B]/10 transition-all rounded-3xl p-6 text-center cursor-pointer flex flex-col items-center justify-center gap-2 group"
           >
-            <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-[#990011] group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 bg-red-50 dark:bg-[#FF6B6B]/20 rounded-full flex items-center justify-center text-[#990011] dark:text-[#FF6B6B] group-hover:scale-110 transition-transform">
               <Plus size={20} />
             </div>
-            <span className="text-sm font-bold text-[#990011] tracking-wide">
+            <span className="text-sm font-bold text-[#990011] dark:text-[#FF6B6B] tracking-wide">
               {ce.addQuestion || "Thêm câu hỏi mới"}
             </span>
           </button>
         </div>
 
         {/* ─── Settings Panel (Right) ─── */}
-        <div className="w-full lg:w-[320px] bg-white border border-border rounded-3xl p-6 flex flex-col gap-5 shadow-sm shrink-0 lg:sticky lg:top-4">
-          <h2 className="text-lg font-black text-gray-900 border-b border-border pb-3">
+        <div className="w-full lg:w-[320px] bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 flex flex-col gap-5 shadow-sm shrink-0 lg:sticky lg:top-4">
+          <h2 className="text-lg font-black text-gray-900 dark:text-white border-b border-border dark:border-[#3F3F3F] pb-3">
             {ce.sidebarTitle || "Cấu hình bài kiểm tra"}
           </h2>
 
           {/* Time Limit */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-800">
+            <label className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {ce.durationLabel || "Thời gian làm bài (Phút)"}
             </label>
             <input
@@ -2146,14 +2139,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               min="1"
               value={duration}
               onChange={(e) => setFormField("duration", e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] font-bold"
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] font-bold"
               placeholder={ce.minutesPlaceholder || "Minutes"}
             />
           </div>
 
           {/* Max Attempts Dropdown */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-800">
+            <label className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {ce.maxAttempts || "Maximum attempts"}
             </label>
             <div className="relative">
@@ -2162,7 +2155,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 onChange={(e) =>
                   setFormField("maxAttempts", Number(e.target.value))
                 }
-                className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
+                className="w-full pl-3 pr-8 py-2 bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] appearance-none cursor-pointer"
               >
                 {Number.isInteger(Number(maxAttempts)) &&
                   Number(maxAttempts) > 0 &&
@@ -2186,7 +2179,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               </select>
               <ChevronDown
                 size={14}
-                className="absolute right-3.5 top-2.5 text-gray-400 pointer-events-none"
+                className="absolute right-3.5 top-2.5 text-gray-400 dark:text-gray-500 pointer-events-none"
               />
             </div>
           </div>
@@ -2194,10 +2187,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {/* Pass Percent Input */}
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-gray-800">
+              <label className="text-xs font-bold text-gray-800 dark:text-gray-200">
                 {ce.passScore || "Pass score (%)"}
               </label>
-              <span className="text-xs font-extrabold text-[#990011]">
+              <span className="text-xs font-extrabold text-[#990011] dark:text-[#FF6B6B]">
                 {passPercent}%
               </span>
             </div>
@@ -2212,14 +2205,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0)),
                 )
               }
-              className="w-full px-3 py-2 bg-gray-50 border border-border rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011]"
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B]"
               placeholder="50"
             />
           </div>
 
           {/* Open Time */}
           <div className="flex flex-col gap-1.5 relative">
-            <label className="text-xs font-bold text-gray-800">
+            <label className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {ce.openTimeLabel || "Thời gian mở"}
             </label>
             <DatePicker
@@ -2234,7 +2227,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
           {/* Close Time */}
           <div className="flex flex-col gap-1.5 relative">
-            <label className="text-xs font-bold text-gray-800">
+            <label className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {ce.closeTimeLabel || "Thời gian đóng"}
             </label>
             <DatePicker
@@ -2247,11 +2240,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             />
           </div>
 
-          <div className="h-px bg-gray-100 w-full" />
+          <div className="h-px bg-gray-100 dark:bg-[#3F3F3F] w-full" />
 
           {/* Advanced Settings */}
           <div className="flex flex-col gap-3">
-            <span className="text-xs font-bold uppercase tracking-wide">
+            <span className="text-xs font-bold uppercase tracking-wide text-gray-800 dark:text-gray-200">
               {ce.advancedSettings || "Cài đặt nâng cao"}
             </span>
 
@@ -2302,14 +2295,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
             {/* Score Scale Dropdown */}
             <div className="flex flex-col gap-1.5 mt-1">
-              <label className="text-xs font-bold text-gray-800">
+              <label className="text-xs font-bold text-gray-800 dark:text-gray-200">
                 {ce.scoreScale || "Thang điểm"}
               </label>
               <div className="relative">
                 <select
                   value={scoreScale}
                   onChange={(e) => setFormField("scoreScale", e.target.value)}
-                  className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
+                  className="w-full pl-3 pr-8 py-2 bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] appearance-none cursor-pointer"
                 >
                   <option value="scale10">
                     {ce.scale10 || "Thang điểm 10"}
@@ -2320,14 +2313,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 </select>
                 <ChevronDown
                   size={14}
-                  className="absolute right-3.5 top-2.5 text-gray-400 pointer-events-none"
+                  className="absolute right-3.5 top-2.5 text-gray-400 dark:text-gray-500 pointer-events-none"
                 />
               </div>
             </div>
 
             {/* Result Release Dropdown */}
             <div className="flex flex-col gap-1.5 mt-1">
-              <label className="text-xs font-bold text-gray-800">
+              <label className="text-xs font-bold text-gray-800 dark:text-gray-200">
                 {ce.resultRelease || "Công bố kết quả"}
               </label>
               <div className="relative">
@@ -2336,7 +2329,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   onChange={(e) =>
                     setFormField("resultRelease", e.target.value)
                   }
-                  className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
+                  className="w-full pl-3 pr-8 py-2 bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] dark:focus:border-[#FF6B6B] appearance-none cursor-pointer"
                 >
                   <option value="manual">
                     {ce.releaseManual || "Công bố thủ công"}
@@ -2347,17 +2340,17 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 </select>
                 <ChevronDown
                   size={14}
-                  className="absolute right-3.5 top-2.5 text-gray-400 pointer-events-none"
+                  className="absolute right-3.5 top-2.5 text-gray-400 dark:text-gray-500 pointer-events-none"
                 />
               </div>
             </div>
           </div>
 
-          <div className="h-px bg-gray-100 w-full" />
+          <div className="h-px bg-gray-100 dark:bg-[#3F3F3F] w-full" />
 
           {/* Publish Status */}
           <div className="flex flex-col gap-3">
-            <span className="text-xs font-bold text-gray-800">
+            <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {ce.publishStatus || "Trạng thái đăng"}
             </span>
 
@@ -2376,15 +2369,15 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 >
                   <span
                     className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "now"
-                      ? "border-[#990011]"
-                      : "border-gray-300"
+                      ? "border-[#990011] dark:border-[#FF6B6B]"
+                      : "border-gray-300 dark:border-[#3F3F3F]"
                       }`}
                   >
                     {publishStatus === "now" && (
-                      <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
+                      <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
                     )}
                   </span>
-                  <span className="text-xs font-semibold text-gray-750">
+                  <span className="text-xs font-semibold text-gray-750 dark:text-gray-200">
                     {ce.publishNow || "Đăng ngay"}
                   </span>
                 </button>
@@ -2398,21 +2391,21 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 >
                   <span
                     className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "draft"
-                      ? "border-[#990011]"
-                      : "border-gray-300"
+                      ? "border-[#990011] dark:border-[#FF6B6B]"
+                      : "border-gray-300 dark:border-[#3F3F3F]"
                       }`}
                   >
                     {publishStatus === "draft" && (
-                      <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
+                      <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
                     )}
                   </span>
-                  <span className="text-xs font-semibold text-gray-750">
+                  <span className="text-xs font-semibold text-gray-750 dark:text-gray-200">
                     {ce.saveDraft || "Lưu nháp"}
                   </span>
                 </button>
               </div>
             ) : (
-              <span className="rounded-xl bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-700">
+              <span className="rounded-xl bg-gray-50 dark:bg-[#222222] px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200">
                 {(ce.currentStatus || "Current status: {{status}}").replace(
                   "{{status}}",
                   localizedQuizStatus,
@@ -2422,8 +2415,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           </div>
 
           {/* Post to Bulletin board */}
-          <div className="bg-red-50/20 border border-red-100 rounded-2xl p-4 flex justify-between items-center shadow-xs">
-            <span className="text-xs font-bold text-gray-800">
+          <div className="bg-red-50/20 dark:bg-[#FF6B6B]/10 border border-red-100 dark:border-[#FF6B6B]/30 rounded-2xl p-4 flex justify-between items-center shadow-xs">
+            <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {ce.postToFeed || "Đăng lên giảng đường"}
             </span>
             <Switch
@@ -2439,13 +2432,13 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
       {/* ─── Footer Buttons (Fixed at Bottom) ─── */}
       <div
-        className={`fixed bottom-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-border px-4 sm:px-6 py-3.5 flex justify-between items-center transition-[left] duration-200 ${isDesktopExpanded ? "left-0 lg:left-[352px]" : "left-0 lg:left-[72px]"
+        className={`fixed bottom-0 right-0 z-40 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-md border-t border-border dark:border-[#3F3F3F] px-4 sm:px-6 py-3.5 flex justify-between items-center transition-[left] duration-200 ${isDesktopExpanded ? "left-0 lg:left-[352px]" : "left-0 lg:left-[72px]"
           }`}
       >
         <button
           type="button"
           onClick={handleCancel}
-          className="text-xs font-extrabold text-gray-500 hover:text-gray-700 transition-colors uppercase tracking-wider cursor-pointer py-2"
+          className="text-xs font-extrabold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors uppercase tracking-wider cursor-pointer py-2"
         >
           {ce.btnCancel || "Hủy"}
         </button>
@@ -2456,7 +2449,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             type="button"
             disabled={isSubmitting}
             onClick={handlePreview}
-            className="p-2 sm:p-2.5 border border-border hover:bg-gray-50 text-gray-600 rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            className="p-2 sm:p-2.5 border border-border dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#222222] text-gray-600 dark:text-gray-300 rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             title={ce.previewLabel || "Preview"}
           >
             <Eye size={18} />
@@ -2468,7 +2461,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               type="button"
               disabled={isSubmitting}
               onClick={handleSaveDraft}
-              className="h-9 sm:h-10 px-3 sm:px-5 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shrink-0"
+              className="h-9 sm:h-10 px-3 sm:px-5 border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50/50 dark:hover:bg-[#FF6B6B]/10 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shrink-0"
             >
               {ce.btnSaveDraft || "Lưu nháp"}
             </button>
@@ -2479,7 +2472,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleSubmit()}
-            className="h-9 sm:h-10 px-4 sm:px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shrink-0"
+            className="h-9 sm:h-10 px-4 sm:px-6 bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] text-white dark:text-[#1A1A1A] font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shrink-0"
           >
             {isSubmitting
               ? ce.saving || "Saving..."
@@ -2543,7 +2536,7 @@ const CreateExamPage = () => {
         role="alert"
         className="mx-auto flex min-h-[400px] max-w-xl flex-col items-center justify-center gap-4 text-center"
       >
-        <p className="text-sm font-semibold text-gray-700">
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
           {getQuizErrorMessage(
             classDetailError,
             language,
@@ -2553,7 +2546,7 @@ const CreateExamPage = () => {
         <button
           type="button"
           onClick={refetchClass}
-          className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+          className="rounded-xl bg-[#990011] dark:bg-[#FF6B6B] px-4 py-2 text-xs font-bold text-white dark:text-[#1A1A1A]"
         >
           {ce.retry || "Try again"}
         </button>

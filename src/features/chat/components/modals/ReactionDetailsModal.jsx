@@ -107,7 +107,7 @@ const ReactionDetailsModal = ({
           filteredReactions.map((item, idx) => (
             <div
               key={item.messageReactionId || `${item.accountId}-${idx}`}
-              className="h-[72px] flex items-center justify-between px-4 hover:bg-itemHover active:bg-itemActiveHover transition-colors shrink-0"
+              className="h-[72px] flex items-center justify-between px-4 hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D] transition-colors shrink-0"
             >
               <div className="flex items-center gap-4 min-w-0">
                 <Avatar
@@ -116,11 +116,11 @@ const ReactionDetailsModal = ({
                   name={item.username || "User"}
                 />
                 <div className="min-w-0">
-                  <p className="truncate">
+                  <p className="truncate text-gray-900 dark:text-white">
                     {item.username || t?.chat?.someone || "User"}
                   </p>
                   {item.createdAt && (
-                    <p className="text-sm text-secondary">
+                    <p className="text-sm text-secondary dark:text-[#AAAAAA]">
                       {formatRelative(item.createdAt)}
                     </p>
                   )}

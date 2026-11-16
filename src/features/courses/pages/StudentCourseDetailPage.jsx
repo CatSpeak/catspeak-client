@@ -276,7 +276,7 @@ const StudentCourseDetailPage = () => {
     return (
       <div
         role="alert"
-        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+        className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
       >
         <span>
           {scd.courseLoadFailed ||
@@ -285,7 +285,7 @@ const StudentCourseDetailPage = () => {
         <button
           type="button"
           onClick={refetch}
-          className="rounded-full bg-[#990011] px-4 py-2 text-xs font-black text-white"
+          className="rounded-full bg-[#990011] hover:bg-[#b20a1c] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] px-4 py-2 text-xs font-black text-white transition-colors cursor-pointer"
         >
           {scd.retry || "Try again"}
         </button>
@@ -297,7 +297,7 @@ const StudentCourseDetailPage = () => {
     return (
       <div
         role="status"
-        className="p-8 text-center text-sm font-semibold text-gray-500"
+        className="p-8 text-center text-sm font-semibold text-gray-500 dark:text-gray-400"
       >
         {scd.courseUnavailable || "Course details are unavailable."}
       </div>
@@ -305,8 +305,6 @@ const StudentCourseDetailPage = () => {
   }
 
   // Data helpers
-  const languageLabel =
-    getLocalizedLanguageName(rawCourse.language, t) || rawCourse.language || "—"
   const thumbnailUrl = getSafeMediaUrl(rawCourse.thumbnailUrl)
   const teacherAvatarUrl = getSafeMediaUrl(
     teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl,
@@ -314,7 +312,7 @@ const StudentCourseDetailPage = () => {
 
   return (
     <div
-      className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}
+      className={`flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-100 ${isWorkspace ? "" : "p-4 sm:p-6"}`}
     >
       {isFetching && (
         <span className="sr-only" role="status">
@@ -401,15 +399,15 @@ const StudentCourseDetailPage = () => {
           <div
             role="alertdialog"
             aria-modal="true"
-            className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-4"
+            className="w-full max-w-md bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 shadow-2xl flex flex-col gap-4 border border-border dark:border-[#3F3F3F]"
           >
             <div className="flex items-center gap-2.5">
               <AlertTriangle size={22} className="text-amber-500 shrink-0" />
-              <h2 className="text-lg font-black text-gray-950">
+              <h2 className="text-lg font-black text-gray-950 dark:text-white">
                 {scd.scheduleConflictTitle || "Lịch học bị trùng"}
               </h2>
             </div>
-            <p className="text-sm text-gray-600 font-medium leading-relaxed">
+            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
               {scd.scheduleConflictDesc ||
                 "Lịch học của lớp này trùng với lớp bạn đang học:"}
             </p>
@@ -418,7 +416,7 @@ const StudentCourseDetailPage = () => {
                 {conflictClasses.names.map((name) => (
                   <li
                     key={name}
-                    className="text-sm font-bold text-[#990011] bg-red-50 border border-red-100 rounded-xl px-3 py-2"
+                    className="text-sm font-bold text-[#990011] dark:text-[#FF6B6B] bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 rounded-xl px-3 py-2"
                   >
                     {name}
                   </li>
@@ -429,7 +427,7 @@ const StudentCourseDetailPage = () => {
               <button
                 type="button"
                 onClick={() => setConflictClasses(null)}
-                className="h-10 px-4 rounded-full border border-border text-gray-700 text-sm font-black hover:bg-gray-50"
+                className="h-10 px-4 rounded-full border border-border dark:border-[#3F3F3F] text-gray-700 dark:text-gray-200 text-sm font-black hover:bg-gray-50 dark:hover:bg-[#2A2A2A] cursor-pointer"
               >
                 {scd.cancel || "Hủy"}
               </button>
@@ -440,7 +438,7 @@ const StudentCourseDetailPage = () => {
                   setConflictClasses(null)
                   doEnroll(target.classId, target.courseId, true)
                 }}
-                className="h-10 px-4 rounded-full bg-[#990011] hover:bg-[#80000e] text-white text-sm font-black"
+                className="h-10 px-4 rounded-full bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white text-sm font-black cursor-pointer"
               >
                 {scd.confirmEnroll || "Vẫn đăng ký"}
               </button>

@@ -18,15 +18,11 @@ import {
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
-import { AnimatePresence, motion } from "framer-motion"
-import {
-  useGetProfileQuery,
-  useAuth,
-  useLogoutMutation,
-} from "@/features/auth"
+import { AnimatePresence, motion as Motion } from "framer-motion"
+import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSidebar } from "@/shared/context/SidebarContext"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { M3_MOTION, dropdownVariants } from "@/shared/constants/motion"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useTourGuide } from "@/features/tour-guide"
@@ -129,7 +125,7 @@ const ProfileDropdown = () => {
   }
 
   const menuItemClass =
-    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm hover:bg-[#F6F6F6]"
+    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white hover:bg-[#F2F2F2] active:bg-[#E6E6E6] dark:hover:bg-[#272727] dark:active:bg-[#3D3D3D] transition-colors cursor-pointer"
 
   const menuItemDisabledClass =
     "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-[#7A7574] cursor-not-allowed"
@@ -137,12 +133,12 @@ const ProfileDropdown = () => {
   const dropdownContent = (
     <>
       {/* Mobile Header */}
-      <div className="flex md:hidden items-center gap-3 border-b border-[#F0F0F0] p-4 text-gray-800">
+      <div className="flex md:hidden items-center gap-3 border-b border-[#F0F0F0] dark:border-[#3F3F3F] p-4 text-gray-800 dark:text-white">
         <button
           onClick={handleCloseMenu}
-          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100"
+          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-[#272727]"
         >
-          <ArrowLeft className="h-5 w-5 text-gray-700" />
+          <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-[#AAAAAA]" />
         </button>
         <span className="text-lg font-semibold">
           {t.header.profile || "Profile"}
@@ -154,7 +150,7 @@ const ProfileDropdown = () => {
         <button
           type="button"
           onClick={handleProfileClick}
-          className="flex w-full items-center gap-3 p-2 rounded-lg text-left transition-colors hover:bg-[#F6F6F6] cursor-pointer"
+          className="flex w-full items-center gap-3 p-2 rounded-lg text-left transition-colors hover:bg-[#F2F2F2] active:bg-[#E6E6E6] dark:hover:bg-[#272727] dark:active:bg-[#3D3D3D] cursor-pointer"
         >
           <Avatar
             size={40}
@@ -164,11 +160,11 @@ const ProfileDropdown = () => {
           />
 
           <div className="min-w-0 flex flex-col justify-center">
-            <p className="m-0 truncate text-base font-semibold text-gray-900">
+            <p className="m-0 truncate text-base font-semibold text-gray-900 dark:text-white">
               {user?.fullName || user?.username || "User"}
             </p>
             {user?.nickname && (
-              <p className="m-0 truncate text-xs text-gray-500 mt-0.5">
+              <p className="m-0 truncate text-xs text-gray-500 dark:text-[#AAAAAA] mt-0.5">
                 {user.nickname} (
                 {t.profile?.personalInfo?.nickname || "Biệt danh"})
               </p>
@@ -178,8 +174,8 @@ const ProfileDropdown = () => {
       </div>
 
       {isTeacherProfile && (
-        <div className="my-1 flex flex-col gap-1 p-2 bg-[#F6F6F6] rounded-lg mx-1">
-          <p className="text-xs font-semibold text-gray-500 px-2 pb-1 uppercase">
+        <div className="my-1 flex flex-col gap-1 p-2 bg-[#F6F6F6] dark:bg-[#272727] rounded-lg mx-1">
+          <p className="text-xs font-semibold text-gray-500 dark:text-[#AAAAAA] px-2 pb-1 uppercase">
             {t.header?.switchRole || "Chuyển vai trò"}
           </p>
           <button
@@ -194,7 +190,7 @@ const ProfileDropdown = () => {
                 window.location.reload()
               }
             }}
-            className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isStudent ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
+            className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isStudent ? "bg-white dark:bg-[#1A1A1A] shadow-sm font-semibold text-cath-red-700 dark:text-white" : "hover:bg-[#F2F2F2] active:bg-[#E6E6E6] dark:hover:bg-[#272727] dark:active:bg-[#3D3D3D] text-gray-700 dark:text-[#AAAAAA]"}`}
           >
             <BookOpen size={18} />
             <span>{t.header?.studentRole || "Học viên"}</span>
@@ -211,7 +207,7 @@ const ProfileDropdown = () => {
                 window.location.reload()
               }
             }}
-            className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isTeacher ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
+            className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isTeacher ? "bg-white dark:bg-[#1A1A1A] shadow-sm font-semibold text-cath-red-700 dark:text-white" : "hover:bg-[#F2F2F2] active:bg-[#E6E6E6] dark:hover:bg-[#272727] dark:active:bg-[#3D3D3D] text-gray-700 dark:text-[#AAAAAA]"}`}
           >
             <GraduationCap size={18} />
             <span>{t.header?.teacherRole || "Giảng viên"}</span>
@@ -219,7 +215,7 @@ const ProfileDropdown = () => {
         </div>
       )}
 
-      <div className="border-t border-border" />
+      <div className="border-t border-border dark:border-[#3F3F3F]" />
 
       <div className="flex flex-col gap-1 p-1">
         <button onClick={handleSettingsClick} className={menuItemClass}>
@@ -251,22 +247,25 @@ const ProfileDropdown = () => {
     <AnimatePresence>
       {isOpen && isMobile && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center">
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={M3_MOTION.standard.effects.default}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
           />
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="relative flex h-full w-full flex-col overflow-hidden bg-white"
+            transition={{
+              y: M3_MOTION.standard.spatial.fast,
+              opacity: M3_MOTION.standard.effects.fast,
+            }}
+            className="relative flex h-full w-full flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]"
           >
             {dropdownContent}
-          </motion.div>
+          </Motion.div>
         </div>
       )}
     </AnimatePresence>,
@@ -274,7 +273,7 @@ const ProfileDropdown = () => {
   )
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative h-12 w-12" ref={menuRef}>
       {isLoading ? (
         <div className="flex h-10 w-10 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-[#7A7574]" />
@@ -282,8 +281,8 @@ const ProfileDropdown = () => {
       ) : (
         <IconButton
           onClick={handleToggleMenu}
-          variant="filled"
-          innerClassName="overflow-hidden"
+          variant="ghost"
+          innerClassName="overflow-hidden rounded-full"
           aria-expanded={isOpen}
           aria-haspopup="true"
         >
@@ -299,17 +298,17 @@ const ProfileDropdown = () => {
       {/* Desktop: dropdown */}
       <AnimatePresence>
         {isOpen && !isMobile && (
-          <FluentAnimation
-            animationKey="profile-dropdown"
-            direction="down"
-            distance={12}
-            exit={true}
-            className="absolute right-0 top-full z-[1200] mt-2 w-64"
+          <Motion.div
+            variants={dropdownVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="absolute right-0 top-full z-[1200] mt-2 w-64 origin-top-right"
           >
-            <div className="flex flex-col bg-white overflow-hidden rounded-lg border border-border shadow-lg focus:outline-none">
+            <div className="flex flex-col bg-white dark:bg-[#1A1A1A] overflow-hidden rounded-lg border border-border dark:border-[#3F3F3F] shadow-lg focus:outline-none">
               {dropdownContent}
             </div>
-          </FluentAnimation>
+          </Motion.div>
         )}
       </AnimatePresence>
 

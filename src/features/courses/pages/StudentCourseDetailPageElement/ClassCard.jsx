@@ -118,34 +118,33 @@ const ClassCard = ({
     <div
       onClick={handleExpandToggle}
       aria-expanded={isExpanded}
-      className={`cursor-pointer bg-white border rounded-2xl sm:rounded-3xl p-2 sm:p-3 transition-all duration-200 ${
-        isClassEnrolled
-          ? "border-green-300 ring-2 ring-green-50/60 shadow-sm"
+      className={`cursor-pointer bg-white dark:bg-[#1A1A1A] border rounded-2xl sm:rounded-3xl p-2 sm:p-3 transition-all duration-200 ${isClassEnrolled
+          ? "border-green-300 dark:border-green-700/60 ring-2 ring-green-50/60 dark:ring-green-950/30 shadow-sm"
           : isExpanded
-            ? "border-cath-red-700/30 shadow-md ring-2 ring-red-50/40"
-            : "border-gray-200 hover:border-gray-300 shadow-sm"
-      }`}
+            ? "border-cath-red-700/30 dark:border-rose-500/40 shadow-md ring-2 ring-red-50/40 dark:ring-rose-950/20"
+            : "border-gray-200 dark:border-[#3F3F3F] hover:border-gray-300 dark:hover:border-gray-600 shadow-sm"
+        }`}
     >
       {/* ─── Accordion Item Header ─── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         {/* Left Side: Start Date Badge + Title + Sub-info */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
           {/* Start Date Badge */}
-          <div className="bg-cath-red-700/5 border border-cath-red-700/15 rounded-2xl w-16 h-16 sm:w-20 sm:h-18 flex flex-col items-center justify-center shrink-0 p-1 select-none shadow-sm">
-            <span className="text-[10px] sm:text-[11px] font-bold text-cath-red-700 tracking-tight leading-none">
+          <div className="bg-cath-red-700/5 dark:bg-rose-950/30 border border-cath-red-700/15 dark:border-rose-900/40 rounded-2xl w-16 h-16 sm:w-20 sm:h-18 flex flex-col items-center justify-center shrink-0 p-1 select-none shadow-sm">
+            <span className="text-[10px] sm:text-[11px] font-bold text-cath-red-700 dark:text-[#FF6B6B] tracking-tight leading-none">
               {scd.startDateBadge || "Bắt đầu"}
             </span>
-            <span className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">
+            <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-tight">
               {startBadge.day}
             </span>
-            <span className="text-[10px] sm:text-xs font-semibold text-amber-500 capitalize leading-none text-center truncate max-w-full px-0.5">
+            <span className="text-[10px] sm:text-xs font-semibold text-amber-500 dark:text-amber-400 capitalize leading-none text-center truncate max-w-full px-0.5">
               {startBadge.month}
             </span>
           </div>
 
           {/* Main Info */}
           <div className="flex-1 flex flex-col gap-1 min-w-0">
-            <h3 className="font-bold text-lg sm:text-xl text-gray-950 leading-snug flex flex-wrap items-center gap-2">
+            <h3 className="font-bold text-lg sm:text-xl text-gray-950 dark:text-white leading-snug flex flex-wrap items-center gap-2">
               <span
                 onClick={(e) => {
                   e.stopPropagation()
@@ -154,20 +153,20 @@ const ClassCard = ({
                     : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                   navigate(classPath)
                 }}
-                className="hover:text-cath-red-700"
+                className="hover:text-cath-red-700 dark:hover:text-[#FF6B6B]"
               >
                 {cls.title || cls.name}
               </span>
               <button
                 type="button"
                 onClick={handleShareClick}
-                className="p-1 text-gray-400 hover:text-cath-red-700 transition-colors inline-flex items-center justify-center cursor-pointer"
+                className="p-1 text-gray-400 dark:text-gray-400 hover:text-cath-red-700 dark:hover:text-[#FF6B6B] transition-colors inline-flex items-center justify-center cursor-pointer"
                 title={c.classDetail?.shareClass || "Share"}
               >
                 {linkCopied ? <Check size={16} /> : <Share2 size={16} />}
               </button>
               {isClassEnrolled && (
-                <span className="bg-green-100 text-green-700 font-bold text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <span className="bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 font-bold text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1">
                   <CheckCircle2 size={11} />
                   <span>
                     {scd.enrolledBadge || c.student?.enrolled || "Đã tham gia"}
@@ -177,7 +176,7 @@ const ClassCard = ({
             </h3>
 
             {/* Sub-row: Clock + Users + Level */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm font-medium text-gray-600">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-1.5">
                 <Users size={15} className="text-amber-500 shrink-0" />
                 <span>
@@ -209,18 +208,18 @@ const ClassCard = ({
         </div>
 
         {/* Right Side: Price, Slots, and Register Button */}
-        <div className="flex items-center gap-4 sm:gap-6 shrink-0 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
-          {/* Tuition & Slots: Căn trái và nằm bên trái button */}
+        <div className="flex items-center gap-4 sm:gap-6 shrink-0 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100 dark:border-[#3F3F3F]">
+          {/* Tuition & Slots */}
           <div className="flex flex-col items-start text-left min-w-[120px] sm:min-w-[140px] shrink-0">
-            <span className="text-xl sm:text-2xl font-bold text-cath-red-700 tracking-tight leading-tight">
+            <span className="text-xl sm:text-2xl font-bold text-cath-red-700 dark:text-[#FF6B6B] tracking-tight leading-tight">
               {tuitionLabel}
             </span>
-            <span className="text-xs sm:text-sm font-medium text-amber-500">
+            <span className="text-xs sm:text-sm font-medium text-amber-500 dark:text-amber-400">
               {remainingSlotsString}
             </span>
           </div>
 
-          {/* Button: Fixed width container */}
+          {/* Button */}
           <div className="w-36 sm:w-44 shrink-0 flex justify-end">
             {isClassEnrolled ? (
               <button
@@ -247,11 +246,10 @@ const ClassCard = ({
                     handleClassRegister(cls)
                   }
                 }}
-                className={`w-full h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold rounded-full transition-all shadow-sm truncate text-center flex items-center justify-center ${
-                  classButton.key === "open"
-                    ? "bg-cath-red-700 hover:bg-[#80000e] text-white active:scale-95 cursor-pointer"
-                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                }`}
+                className={`w-full h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold rounded-full transition-all shadow-sm truncate text-center flex items-center justify-center ${classButton.key === "open"
+                    ? "bg-cath-red-700 hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white active:scale-95 cursor-pointer"
+                    : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
               >
                 {enrollingClassId === cls.id
                   ? scd.processing || sc.processing || "Đang xử lý..."
@@ -266,71 +264,71 @@ const ClassCard = ({
       {isExpanded && (
         <div
           id={`class-details-${cls.id}`}
-          className="border-t border-gray-100 pt-5 mt-5 flex flex-col gap-5 animate-fadeIn"
+          className="border-t border-gray-100 dark:border-[#3F3F3F] pt-5 mt-5 flex flex-col gap-5 animate-fadeIn"
         >
           {/* Top Specification Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* Card 1: Registered Students */}
-            <div className="bg-white rounded-2xl p-3.5 border border-gray-200 flex items-start gap-3 shadow-sm">
-              <Users size={20} className="text-cath-red-700 shrink-0 mt-0.5" />
+            <div className="bg-white dark:bg-[#222222] rounded-2xl p-3.5 border border-gray-200 dark:border-[#333333] flex items-start gap-3 shadow-sm">
+              <Users size={20} className="text-cath-red-700 dark:text-[#FF6B6B] shrink-0 mt-0.5" />
               <div className="flex flex-col gap-0.5">
-                <span className="text-gray-400 font-medium text-xs">
+                <span className="text-gray-400 dark:text-gray-400 font-medium text-xs">
                   {scd.registeredStudentsLabel ||
                     scd.remainingSlotsLabel ||
                     c.student?.registeredStudents ||
                     c.student?.remainingSlots ||
                     "Số người đã đăng ký"}
                 </span>
-                <span className="text-gray-900 font-bold text-base">
+                <span className="text-gray-900 dark:text-white font-bold text-base">
                   {enrolledSeats ?? (totalSlots != null && remainingSlots != null ? Math.max(0, Number(totalSlots) - Number(remainingSlots)) : 0)}/{totalSlots ?? "N/A"}
                 </span>
               </div>
             </div>
 
             {/* Card 2: Level */}
-            <div className="bg-white rounded-2xl p-3.5 border border-gray-200 flex items-start gap-3 shadow-sm">
+            <div className="bg-white dark:bg-[#222222] rounded-2xl p-3.5 border border-gray-200 dark:border-[#333333] flex items-start gap-3 shadow-sm">
               <GraduationCap
                 size={20}
                 className="text-amber-500 shrink-0 mt-0.5"
               />
               <div className="flex flex-col gap-0.5">
-                <span className="text-gray-400 font-medium text-xs">
+                <span className="text-gray-400 dark:text-gray-400 font-medium text-xs">
                   {scd.levelLabel || c.student?.levelLabel || "Trình độ"}
                 </span>
-                <span className="text-gray-900 font-bold text-base">
+                <span className="text-gray-900 dark:text-white font-bold text-base">
                   {levelsText}
                 </span>
               </div>
             </div>
 
             {/* Card 3: Enrollment Period */}
-            <div className="bg-white rounded-2xl p-3.5 border border-gray-200 flex items-start gap-3 shadow-sm">
+            <div className="bg-white dark:bg-[#222222] rounded-2xl p-3.5 border border-gray-200 dark:border-[#333333] flex items-start gap-3 shadow-sm">
               <Calendar
                 size={20}
                 className="text-emerald-500 shrink-0 mt-0.5"
               />
               <div className="flex flex-col gap-0.5 min-w-0">
-                <span className="text-gray-400 font-medium text-xs">
+                <span className="text-gray-400 dark:text-gray-400 font-medium text-xs">
                   {scd.enrollmentPeriod ||
                     c.student?.enrollmentPeriod ||
                     "Thời gian đăng ký"}
                 </span>
-                <span className="text-gray-900 font-bold text-sm sm:text-base truncate">
+                <span className="text-gray-900 dark:text-white font-bold text-sm sm:text-base truncate">
                   {enrollmentPeriodText}
                 </span>
               </div>
             </div>
 
             {/* Card 4: Learning Method */}
-            <div className="bg-white rounded-2xl p-3.5 border border-gray-200 flex items-start gap-3 shadow-sm">
+            <div className="bg-white dark:bg-[#222222] rounded-2xl p-3.5 border border-gray-200 dark:border-[#333333] flex items-start gap-3 shadow-sm">
               <Video size={20} className="text-blue-500 shrink-0 mt-0.5" />
               <div className="flex flex-col gap-0.5 min-w-0">
-                <span className="text-gray-400 font-medium text-xs">
+                <span className="text-gray-400 dark:text-gray-400 font-medium text-xs">
                   {scd.learningMethod ||
                     c.student?.virtualClassroom ||
                     "Hình thức học"}
                 </span>
-                <span className="text-gray-900 font-bold text-sm sm:text-base truncate">
+                <span className="text-gray-900 dark:text-white font-bold text-sm sm:text-base truncate">
                   {cls.roomName ||
                     c.student?.onlineClassroom ||
                     scd.defaultOnlineClassroom ||
@@ -343,7 +341,7 @@ const ClassCard = ({
           {/* Weekly Schedule */}
           {cls.rawSchedule && cls.rawSchedule.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="font-bold text-gray-700 text-sm">
+              <span className="font-bold text-gray-700 dark:text-gray-200 text-sm">
                 {scd.weeklySchedule ||
                   c.student?.weeklySchedule ||
                   "Lịch học hàng tuần"}
@@ -352,9 +350,9 @@ const ClassCard = ({
                 {cls.rawSchedule.map((s, idx) => (
                   <div
                     key={idx}
-                    className="w-full sm:w-auto bg-white border border-gray-200 rounded-xl px-3.5 py-2 sm:py-1.5 text-sm font-medium text-gray-700 shadow-sm"
+                    className="w-full sm:w-auto bg-white dark:bg-[#222222] border border-gray-200 dark:border-[#333333] rounded-xl px-3.5 py-2 sm:py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm"
                   >
-                    <strong className="text-gray-900 font-bold">
+                    <strong className="text-gray-900 dark:text-white font-bold">
                       {formatScheduleDays(
                         [s.dayOfWeek],
                         ui.tba,
@@ -373,14 +371,14 @@ const ClassCard = ({
 
           {/* About Class / Description */}
           <div className="flex flex-col gap-1.5">
-            <span className="font-bold text-gray-700 text-sm">
+            <span className="font-bold text-gray-700 dark:text-gray-200 text-sm">
               {scd.aboutClass || c.student?.aboutClass || "Về lớp học"}
             </span>
             <RenderHTML
               html={cls.description}
-              className="text-gray-600 font-normal text-sm sm:text-base leading-relaxed"
+              className="text-gray-600 dark:text-gray-300 font-normal text-sm sm:text-base leading-relaxed"
               fallback={
-                <span className="text-gray-500 italic text-sm">
+                <span className="text-gray-500 dark:text-gray-400 italic text-sm">
                   {scd.noClassDescription ||
                     "Chưa có thông tin mô tả chi tiết cho lớp học này."}
                 </span>

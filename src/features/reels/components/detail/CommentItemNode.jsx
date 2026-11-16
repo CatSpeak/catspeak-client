@@ -38,7 +38,7 @@ const CommentItemNode = React.memo(function CommentItemNode({
 
   return (
     <div className="w-full">
-      <div className="flex gap-2 items-start transition-colors duration-200 rounded-lg hover:bg-black/5">
+      <div className="flex gap-2 items-start transition-colors duration-200 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
         <Avatar
           size={36}
           src={comment.avatarUrl}
@@ -56,26 +56,26 @@ const CommentItemNode = React.memo(function CommentItemNode({
                   navigate(`/workspace/profile/${comment.accountId}`)
                 }
               }}
-              className={`font-bold text-[13px] text-headingColor ${comment.accountId ? "cursor-pointer hover:underline" : ""}`}
+              className={`font-bold text-[13px] text-headingColor dark:text-white ${comment.accountId ? "cursor-pointer hover:underline" : ""}`}
             >
               {comment.nickname || comment.username || "Anonymous"}
             </span>
-            <span className="text-xs text-lighttextGray">
+            <span className="text-xs text-lighttextGray dark:text-neutral-400">
               {formatRelative(comment.createdAt)}
             </span>
           </div>
-          <p className="text-[14px] text-headingColor leading-[1.4] break-words whitespace-pre-wrap mt-0.5">{comment.content}</p>
+          <p className="text-[14px] text-headingColor dark:text-neutral-200 leading-[1.4] break-words whitespace-pre-wrap mt-0.5">{comment.content}</p>
           <div className="flex items-center gap-3 mt-1">
             <button
               onClick={handleReplyClick}
-              className="text-xs font-semibold text-lighttextGray hover:text-text555 cursor-pointer bg-transparent border-none outline-none p-0 transition-colors duration-200"
+              className="text-xs font-semibold text-lighttextGray dark:text-neutral-400 hover:text-text555 dark:hover:text-white cursor-pointer bg-transparent border-none outline-none p-0 transition-colors duration-200"
             >
               {t?.catSpeak?.reels?.detail?.reply || "Reply"}
             </button>
             {isOwner && (
               <button
                 onClick={handleDeleteClick}
-                className="text-xs font-semibold text-[#ef4444] hover:text-[#dc2626] cursor-pointer bg-transparent border-none outline-none p-0 transition-colors duration-200 opacity-0 group-hover/comment:opacity-100"
+                className="text-xs font-semibold text-[#ef4444] dark:text-red-400 hover:text-[#dc2626] dark:hover:text-red-300 cursor-pointer bg-transparent border-none outline-none p-0 transition-colors duration-200 opacity-0 group-hover/comment:opacity-100"
               >
                 {t?.catSpeak?.reels?.detail?.delete || "Delete"}
               </button>
@@ -89,7 +89,7 @@ const CommentItemNode = React.memo(function CommentItemNode({
           {!expanded ? (
             <button
               onClick={() => setExpanded(true)}
-              className="flex items-center gap-[6px] text-xs font-bold text-[#666] hover:text-headingColor mt-1 cursor-pointer bg-transparent border-none outline-none p-0 ml-9 transition-colors duration-200"
+              className="flex items-center gap-[6px] text-xs font-bold text-[#666] dark:text-neutral-400 hover:text-headingColor dark:hover:text-white mt-1 cursor-pointer bg-transparent border-none outline-none p-0 ml-9 transition-colors duration-200"
             >
               ── {t?.catSpeak?.reels?.detail?.viewReplies || "View replies"} ({comment.replies.length})
             </button>
@@ -97,11 +97,11 @@ const CommentItemNode = React.memo(function CommentItemNode({
             <>
               <button
                 onClick={() => setExpanded(false)}
-                className="flex items-center gap-[6px] text-xs font-bold text-[#666] hover:text-headingColor mt-1 cursor-pointer bg-transparent border-none outline-none p-0 ml-9 transition-colors duration-200"
+                className="flex items-center gap-[6px] text-xs font-bold text-[#666] dark:text-neutral-400 hover:text-headingColor dark:hover:text-white mt-1 cursor-pointer bg-transparent border-none outline-none p-0 ml-9 transition-colors duration-200"
               >
                 ── {t?.catSpeak?.reels?.detail?.hideReplies || "Hide replies"}
               </button>
-              <div className="ml-9 mt-3 flex flex-col gap-4 relative before:content-[''] before:absolute before:left-[-20px] before:top-2 before:bottom-6 before:w-[2px] before:bg-gray-200">
+              <div className="ml-9 mt-3 flex flex-col gap-4 relative before:content-[''] before:absolute before:left-[-20px] before:top-2 before:bottom-6 before:w-[2px] before:bg-gray-200 dark:before:bg-[#3F3F3F]">
                 {comment.replies.map((reply) => (
                   <CommentItemNode
                     key={reply.reelCommentId}

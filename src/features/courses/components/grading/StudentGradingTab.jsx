@@ -77,17 +77,18 @@ const StudentGradingTab = ({ id: classId }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-[#1A1A1A]">{gradingT.gradingTitle || "Quản lý bài"}</h2>
+        <h2 className="text-xl font-bold text-[#1A1A1A] dark:text-white">{gradingT.gradingTitle || "Quản lý bài"}</h2>
         <div className="relative">
           <IconButton
             onClick={() => setShowFilterModal(true)}
             title={filterT.title}
             variant="outline"
+            className="dark:border-[#3F3F3F]"
           >
             <SlidersHorizontal />
           </IconButton>
           {activeFilterCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[24px] h-[24px] bg-[#990011] text-white text-base font-bold rounded-full flex items-center justify-center border-[1.5px] border-white pointer-events-none z-10 px-1 leading-none shadow-sm">
+            <span className="absolute -top-1 -right-1 min-w-[24px] h-[24px] bg-[#990011] dark:bg-[#FF6B6B] text-white text-base font-bold rounded-full flex items-center justify-center border-[1.5px] border-white dark:border-[#1A1A1A] pointer-events-none z-10 px-1 leading-none shadow-sm">
               {activeFilterCount}
             </span>
           )}
@@ -104,15 +105,15 @@ const StudentGradingTab = ({ id: classId }) => {
       />
 
       {isError && (
-        <div role="alert" className="rounded-xl border border-border p-4 text-center">
-          <p>{gradingT.studentListLoadError}</p>
-          <button type="button" onClick={retry} className="mt-2 text-cath-red-700 underline">
+        <div role="alert" className="rounded-xl border border-border dark:border-[#3F3F3F] p-4 text-center">
+          <p className="text-gray-700 dark:text-gray-300">{gradingT.studentListLoadError}</p>
+          <button type="button" onClick={retry} className="mt-2 text-cath-red-700 dark:text-[#FF6B6B] underline cursor-pointer">
             {gradingT.retry}
           </button>
         </div>
       )}
       {visibleItems.length === 0 && !isError ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center text-gray-500">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#3F3F3F] rounded-2xl p-12 text-center text-gray-500 dark:text-gray-400">
           {gradingT.noMatchingItems}
         </div>
       ) : (

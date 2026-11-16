@@ -8,6 +8,7 @@ import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage"
 import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom"
 import QueuePage from "@/features/queue/pages/QueuePage"
 import RoomsPage from "@/features/rooms/pages/RoomsPage"
+import ContactPage from "@/features/landing/pages/ContactPage"
 
 // Cat Speak Feature Pages
 import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
@@ -15,7 +16,7 @@ import NewsPage from "@/features/news/pages/NewsPage"
 import GlobalNewsPage from "@/features/news/pages/GlobalNewsPage"
 import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
 import DiscoverPage from "@/features/discover/DiscoverPage"
-import MailPage from "@/features/mail/pages/MailPage"
+import LettersPage from "@/features/stories/pages/LettersPage.jsx"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
 import CalendarPage from "@/features/calendar/pages/CalendarPage"
 import CreateEventPage from "@/features/calendar/pages/CreateEventPage"
@@ -113,7 +114,7 @@ const PlacementResultPage = lazy(
 const PlacementProfilePage = lazy(
   () => import("@/features/placement-test/pages/PlacementProfilePage"),
 )
-const Profile = lazy(() => import("@/features/profile/pages/Profile"))
+const ProfilePage = lazy(() => import("@/features/profile/pages/ProfilePage"))
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
 )
@@ -326,6 +327,10 @@ const routesConfig = [
             element: <VerifyEmailPage />,
           },
           {
+            path: "contact",
+            element: <ContactPage />,
+          },
+          {
             path: "shared-material/:token",
             element: (
               <LazyRoute>
@@ -510,7 +515,7 @@ const routesConfig = [
                   },
                   {
                     path: "letters",
-                    element: <MailPage />,
+                    element: <LettersPage />,
                   },
                   {
                     path: "calendar",
@@ -1413,7 +1418,7 @@ const routesConfig = [
                 path: "profile/:accountId?",
                 element: (
                   <LazyRoute fallback={<ProfilePageSkeleton />}>
-                    <Profile />
+                    <ProfilePage />
                   </LazyRoute>
                 ),
               },

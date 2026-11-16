@@ -39,9 +39,9 @@ const CalendarCardItem = ({
   const isInProgress = status === "InProgress"
 
   // Base card container styling based on Figma screens
-  let borderClass = "border border-gray-200"
+  let borderClass = "border border-gray-200 dark:border-[#3F3F3F]"
   if (isScheduled && !isQuotaLocked) {
-    borderClass = "border-2 border-[#980019] shadow-sm"
+    borderClass = "border-2 border-[#980019] dark:border-red-400 shadow-sm"
   }
 
   const handleCardClick = () => {
@@ -76,7 +76,7 @@ const CalendarCardItem = ({
           handleCardClick()
         }
       }}
-      className={`group relative flex flex-col justify-between rounded-2xl bg-white p-5 transition-all duration-200 cursor-pointer min-h-[220px] ${borderClass}`}
+      className={`group relative flex flex-col justify-between rounded-2xl bg-white dark:bg-[#1A1A1A] p-5 transition-all duration-200 cursor-pointer min-h-[220px] ${borderClass}`}
     >
       {/* Popover for completed card (Figma screen 13 lp01c) */}
       {isCompleted && showPopover && (
@@ -92,11 +92,11 @@ const CalendarCardItem = ({
       <div>
         <div className="flex items-start justify-between gap-1 mb-2">
           <div className="flex flex-col text-left">
-            <span className="text-xs font-bold text-gray-900 leading-tight">
+            <span className="text-xs font-bold text-gray-900 dark:text-white leading-tight">
               Ngày {card.dayIndex}{dayOfWeek ? ` · ${dayOfWeek}` : ""}
             </span>
             {formattedDate && (
-              <span className="text-[11px] text-gray-400 font-normal mt-0.5">
+              <span className="text-[11px] text-gray-400 dark:text-neutral-400 font-normal mt-0.5">
                 {formattedDate}
               </span>
             )}
@@ -123,19 +123,19 @@ const CalendarCardItem = ({
             )}
 
             {isQuotaLocked && (
-              <span className="inline-block bg-gray-100 text-gray-500 text-[11px] font-medium px-2 py-0.5 rounded-md">
+              <span className="inline-block bg-gray-100 dark:bg-[#272727] text-gray-500 dark:text-neutral-300 text-[11px] font-medium px-2 py-0.5 rounded-md">
                 Khóa
               </span>
             )}
 
             {isSkipped && (
-              <span className="inline-block bg-gray-100 text-gray-500 text-[11px] font-medium px-2 py-0.5 rounded-md">
+              <span className="inline-block bg-gray-100 dark:bg-[#272727] text-gray-500 dark:text-neutral-300 text-[11px] font-medium px-2 py-0.5 rounded-md">
                 Đã bỏ qua
               </span>
             )}
 
             {isUpcoming && !isQuotaLocked && !isSkipped && (
-              <span className="inline-block bg-gray-100 text-gray-400 text-[11px] font-medium px-2 py-0.5 rounded-md">
+              <span className="inline-block bg-gray-100 dark:bg-[#272727] text-gray-400 dark:text-neutral-400 text-[11px] font-medium px-2 py-0.5 rounded-md">
                 Sắp tới
               </span>
             )}
@@ -144,11 +144,11 @@ const CalendarCardItem = ({
 
         {/* Card Body: Title (Vietnamese) & Subtitle (Hanzi / Pinyin / Desc) */}
         <div className="my-3 text-left">
-          <h3 className="text-base font-bold text-gray-900 leading-snug line-clamp-1 group-hover:text-[#980019] transition-colors">
+          <h3 className="text-base font-bold text-gray-900 dark:text-white leading-snug line-clamp-1 group-hover:text-[#980019] dark:group-hover:text-red-400 transition-colors">
             {vietnamese || card.topicTitle}
           </h3>
 
-          <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+          <p className="text-xs text-gray-400 dark:text-neutral-400 mt-1 line-clamp-1">
             {hanzi && <span>{hanzi}</span>}
             {hanzi && (pinyin || card.topicDescription) && <span> · </span>}
             <span>{card.topicDescription || pinyin}</span>
@@ -166,7 +166,7 @@ const CalendarCardItem = ({
                 e.stopPropagation()
                 setShowPopover((prev) => !prev)
               }}
-              className="inline-block bg-[#E6F8EB] text-[#12B76A] font-bold text-xs py-1.5 px-3 rounded-lg hover:bg-[#D5F4DE] transition-colors"
+              className="inline-block bg-[#E6F8EB] dark:bg-emerald-950/40 text-[#12B76A] dark:text-emerald-400 font-bold text-xs py-1.5 px-3 rounded-lg hover:bg-[#D5F4DE] dark:hover:bg-emerald-900/50 transition-colors"
             >
               {card.score !== null ? Math.round(card.score) : 82} điểm
             </span>
@@ -178,7 +178,7 @@ const CalendarCardItem = ({
           <button
             type="button"
             onClick={handlePrimaryBtnClick}
-            className="w-full bg-[#FEF6EE] text-[#D97706] hover:bg-[#FDE8D0] font-semibold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1 transition-colors"
+            className="w-full bg-[#FEF6EE] dark:bg-amber-950/40 text-[#D97706] dark:text-amber-400 hover:bg-[#FDE8D0] dark:hover:bg-amber-900/50 font-semibold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1 transition-colors"
           >
             <span>Học bù</span>
             <span>→</span>
@@ -196,7 +196,7 @@ const CalendarCardItem = ({
                   e.stopPropagation()
                   onSkipCard?.(card)
                 }}
-                className="self-end text-[11px] text-gray-400 hover:text-gray-600 transition-colors pr-1"
+                className="self-end text-[11px] text-gray-400 dark:text-neutral-400 hover:text-gray-600 dark:hover:text-white transition-colors pr-1"
               >
                 Bỏ qua
               </button>
@@ -219,7 +219,7 @@ const CalendarCardItem = ({
           <button
             type="button"
             onClick={handlePrimaryBtnClick}
-            className="w-full bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium text-xs py-2 px-3 rounded-xl text-center transition-colors"
+            className="w-full bg-gray-100 dark:bg-[#272727] text-gray-600 dark:text-neutral-300 hover:bg-gray-200 dark:hover:bg-[#333333] font-medium text-xs py-2 px-3 rounded-xl text-center transition-colors"
           >
             Cần Premium
           </button>
@@ -231,7 +231,7 @@ const CalendarCardItem = ({
             <button
               type="button"
               onClick={handlePrimaryBtnClick}
-              className="w-full bg-[#FEF6EE] text-[#D97706] hover:bg-[#FDE8D0] font-semibold text-xs py-2 px-3 rounded-xl text-center transition-colors"
+              className="w-full bg-[#FEF6EE] dark:bg-amber-950/40 text-[#D97706] dark:text-amber-400 hover:bg-[#FDE8D0] dark:hover:bg-amber-900/50 font-semibold text-xs py-2 px-3 rounded-xl text-center transition-colors"
             >
               Học sớm
             </button>
@@ -239,7 +239,7 @@ const CalendarCardItem = ({
             <button
               type="button"
               disabled
-              className="w-full bg-gray-50 text-gray-400 text-xs py-2 px-3 rounded-xl text-center cursor-not-allowed"
+              className="w-full bg-gray-50 dark:bg-[#242424] text-gray-400 dark:text-neutral-500 text-xs py-2 px-3 rounded-xl text-center cursor-not-allowed"
             >
               Chưa tới
             </button>
@@ -251,7 +251,7 @@ const CalendarCardItem = ({
           <button
             type="button"
             disabled
-            className="w-full bg-gray-50 text-gray-400 text-xs py-2 px-3 rounded-xl text-center cursor-not-allowed"
+            className="w-full bg-gray-50 dark:bg-[#242424] text-gray-400 dark:text-neutral-500 text-xs py-2 px-3 rounded-xl text-center cursor-not-allowed"
           >
             Đã bỏ qua
           </button>

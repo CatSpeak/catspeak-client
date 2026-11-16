@@ -97,12 +97,12 @@ export const TourGuideCard = ({
       </div>
 
       {/* Tooltip Card Body */}
-      <div className="bg-white rounded-[26px] sm:rounded-[28px] pl-8 sm:pl-10 pr-6 sm:pr-7 pt-4 sm:pt-5 pb-5 sm:pb-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)] border border-[#ffe6ea] max-w-[390px] w-full text-left relative">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-[26px] sm:rounded-[28px] pl-8 sm:pl-10 pr-6 sm:pr-7 pt-4 sm:pt-5 pb-5 sm:pb-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)] border border-[#ffe6ea] dark:border-[#3F3F3F] max-w-[390px] w-full text-left relative">
         {/* Top-right "Bỏ qua" button in RED */}
         <div className="flex justify-end -mt-1 -mr-1 mb-1">
           <button
             onClick={onSkip}
-            className="text-[#980019] hover:text-[#800015] font-semibold text-xs sm:text-[13px] cursor-pointer transition-colors px-1"
+            className="text-[#980019] dark:text-red-400 hover:text-[#800015] dark:hover:text-red-300 font-semibold text-xs sm:text-[13px] cursor-pointer transition-colors px-1"
           >
             Bỏ qua
           </button>
@@ -111,18 +111,18 @@ export const TourGuideCard = ({
         {/* Headings */}
         <div className="min-w-0 pr-1">
           <h3 className="text-lg sm:text-xl md:text-[22px] font-extrabold tracking-tight leading-snug">
-            <div className="text-gray-900">{step.titleLine1}</div>
-            <div className="text-[#980019]">{step.titleLine2}</div>
+            <div className="text-gray-900 dark:text-white">{step.titleLine1}</div>
+            <div className="text-[#980019] dark:text-red-400">{step.titleLine2}</div>
           </h3>
 
-          <p className="text-gray-600 text-xs sm:text-[13px] md:text-[13.5px] leading-relaxed mt-2.5">
+          <p className="text-gray-600 dark:text-neutral-300 text-xs sm:text-[13px] md:text-[13.5px] leading-relaxed mt-2.5">
             {step.description}
           </p>
         </div>
 
         {/* Footer: Step Counter on left, Action buttons on right (NO divider line) */}
         <div className="flex items-center justify-between mt-5">
-          <span className="text-xs sm:text-[13px] font-medium text-gray-400">
+          <span className="text-xs sm:text-[13px] font-medium text-gray-400 dark:text-neutral-400">
             {step.stepIndex}/{totalSteps}
           </span>
 
@@ -130,7 +130,7 @@ export const TourGuideCard = ({
             {step.stepIndex > 1 && (
               <button
                 onClick={onPrev}
-                className="px-4 sm:px-5 py-1.5 rounded-full border-[1.5px] border-[#980019] text-[#980019] bg-white hover:bg-rose-50 font-semibold text-xs sm:text-[13px] transition-colors cursor-pointer"
+                className="px-4 sm:px-5 py-1.5 rounded-full border-[1.5px] border-[#980019] dark:border-red-400 text-[#980019] dark:text-red-400 bg-white dark:bg-[#272727] hover:bg-rose-50 dark:hover:bg-rose-950/30 font-semibold text-xs sm:text-[13px] transition-colors cursor-pointer"
               >
                 Quay lại
               </button>

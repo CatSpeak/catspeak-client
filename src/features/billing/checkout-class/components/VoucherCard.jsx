@@ -8,17 +8,17 @@ const VoucherCard = ({ voucher, category, isSelected, canUse, onToggleVoucher, o
   const tc = t.billing.checkoutClass
   const { formatDate } = useTimezone()
   let Icon = CheckCircle2
-  let iconColor = 'text-[#16A34A]'
-  let bgClass = 'bg-[#F0FDF4] border-[#BBF7D0]'
+  let iconColor = 'text-[#16A34A] dark:text-emerald-400'
+  let bgClass = 'bg-[#F0FDF4] dark:bg-emerald-950/20 border-[#BBF7D0] dark:border-emerald-800/40'
 
   if (category === 'invalid_class' || category === 'ineligible') {
     Icon = AlertTriangle
-    iconColor = 'text-[#F59F00]'
-    bgClass = 'bg-[#FFF8E6] border-[#FDE3A7]'
+    iconColor = 'text-[#F59F00] dark:text-amber-400'
+    bgClass = 'bg-[#FFF8E6] dark:bg-amber-950/20 border-[#FDE3A7] dark:border-amber-800/40'
   } else if (category === 'expired' || category === 'out_of_uses') {
     Icon = XCircle
-    iconColor = 'text-[#B20000]'
-    bgClass = 'bg-[#FDF0F0] border-[#F5C2C2] opacity-80'
+    iconColor = 'text-[#B20000] dark:text-red-400'
+    bgClass = 'bg-[#FDF0F0] dark:bg-rose-950/20 border-[#F5C2C2] dark:border-rose-900/40 opacity-80'
   }
 
   return (
@@ -28,20 +28,20 @@ const VoucherCard = ({ voucher, category, isSelected, canUse, onToggleVoucher, o
           <Icon size={20} className={`${iconColor} shrink-0 mt-0.5`} />
           <div className='space-y-1'>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-[#0B1C30]">{voucher.code}</span>
+              <span className="font-semibold text-[#0B1C30] dark:text-white">{voucher.code}</span>
               <span className={`text-xs px-2 py-0.5 rounded-md font-bold ${voucher.sponsorType === 'CatSpeak' ? 'bg-[#F59F00] text-[#684000]' : 'bg-[#AECDF3] text-[#00479C]'}`}>
                 {voucher.sponsorType === 'CatSpeak' ? 'CATSPEAK' : tc.sponsorInstructorBadge}
               </span>
             </div>
-            <p className="text-sm text-[#5B403E]">{voucher.description}</p>
+            <p className="text-sm text-[#5B403E] dark:text-neutral-300">{voucher.description}</p>
             {voucher.maxDiscountAmount && voucher.discountType?.toLowerCase() === 'percentage' && (
-              <p className="text-xs text-[#5B403E]">
+              <p className="text-xs text-[#5B403E] dark:text-neutral-300">
                 {tc.maxDiscountLabel} {formatCurrency(voucher.maxDiscountAmount)}
               </p>
             )}
             <div className='flex items-center gap-1'>
-              <Clock size={12} color='#5B403E' />
-              <p className="text-xs font-bold text-[#5B403E]"> {tc.expiry} {voucher.isNeverExpired ? tc.neverExpires : formatDate(voucher.validTo)}</p>
+              <Clock size={12} className="text-[#5B403E] dark:text-neutral-300" />
+              <p className="text-xs font-bold text-[#5B403E] dark:text-neutral-300"> {tc.expiry} {voucher.isNeverExpired ? tc.neverExpires : formatDate(voucher.validTo)}</p>
             </div>
 
             {(category === 'invalid_class' || category === 'ineligible' || category === 'expired' || category === 'out_of_uses') && (

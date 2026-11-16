@@ -3,7 +3,7 @@ import { SquareUserRound, Mail, Star, Medal, BookOpen } from "lucide-react"
 import { parseLanguages, getLanguageExperienceList } from "@/features/landing/utils/instructorUtils"
 
 const statBoxClass =
-  "flex-1 min-w-0 px-2 py-2 bg-white shadow-[0px_1px_4px_rgba(12,12,13,0.05),0px_1px_4px_rgba(12,12,13,0.10)] rounded-xl flex flex-col justify-center items-center gap-1.5"
+  "flex-1 min-w-0 px-2 py-2 bg-white dark:bg-[#222222] shadow-[0px_1px_4px_rgba(12,12,13,0.05),0px_1px_4px_rgba(12,12,13,0.10)] border border-transparent dark:border-[#333333] rounded-xl flex flex-col justify-center items-center gap-1.5"
 
 const TeacherInforCard = ({
   teacher = {},
@@ -43,7 +43,7 @@ const TeacherInforCard = ({
 
   return (
     <div
-      className={`rounded-3xl p-5 shadow-sm flex flex-col items-center gap-4 bg-[linear-gradient(44deg,white_1%,white_35%,#F5DBDB_100%)] relative overflow-hidden ${className}`}
+      className={`rounded-3xl p-5 shadow-sm flex flex-col items-center gap-4 bg-[linear-gradient(44deg,white_1%,white_35%,#F5DBDB_100%)] dark:bg-[linear-gradient(44deg,#1A1A1A_1%,#1A1A1A_35%,#3D1E22_100%)] border border-border dark:border-[#3F3F3F] relative overflow-hidden ${className}`}
     >
       {/* Avatar + Name + handle */}
       <div className="w-36 flex flex-col items-center gap-1">
@@ -60,15 +60,15 @@ const TeacherInforCard = ({
               decoding="async"
             />
           ) : (
-            <div className="w-[106px] h-[106px] rounded-full bg-red-100 text-cath-red-700 flex items-center justify-center font-bold text-3xl border-4 border-white shadow-md transition-transform duration-200 group-hover:scale-105">
+            <div className="w-[106px] h-[106px] rounded-full bg-red-100 dark:bg-red-950/60 text-cath-red-700 dark:text-[#FF6B6B] flex items-center justify-center font-bold text-3xl border-4 border-white dark:border-[#1A1A1A] shadow-md transition-transform duration-200 group-hover:scale-105">
               {(teacher.name || "T")[0]?.toUpperCase()}
             </div>
           )}
           <div className="self-stretch flex flex-col items-center gap-1">
-            <h3 className="self-stretch text-center text-black text-sm font-semibold leading-[19.6px] break-words">
+            <h3 className="self-stretch text-center text-black dark:text-white text-sm font-semibold leading-[19.6px] break-words">
               {teacher.name || scd.instructorUnavailable || "Giảng viên"}
             </h3>
-            <p className="self-stretch text-center text-[#7B7979] text-xs font-normal leading-[16.8px] break-words">
+            <p className="self-stretch text-center text-[#7B7979] dark:text-gray-400 text-xs font-normal leading-[16.8px] break-words">
               {teacher.email ||
                 teacher.contactEmail ||
                 teacher.accountEmail ||
@@ -83,11 +83,11 @@ const TeacherInforCard = ({
       <div className="self-stretch flex justify-between items-stretch gap-2">
         {showRating && (
           <div className={statBoxClass}>
-            <div className="w-9 h-9 p-1 bg-[#FFF3C6] rounded-full flex justify-center items-center overflow-hidden">
+            <div className="w-9 h-9 p-1 bg-[#FFF3C6] dark:bg-amber-950/60 rounded-full flex justify-center items-center overflow-hidden">
               <Star size={18} className="fill-[#F4AB1B] text-[#F4AB1B]" />
             </div>
-            <div className="text-black text-lg font-medium leading-[25.2px] break-words">{ratingValue}</div>
-            <div className="text-[#7B7979] text-xs font-normal leading-[16.8px] break-words">
+            <div className="text-black dark:text-white text-lg font-medium leading-[25.2px] break-words">{ratingValue}</div>
+            <div className="text-[#7B7979] dark:text-gray-400 text-xs font-normal leading-[16.8px] break-words">
               {scd.rating || "Đánh giá"}
             </div>
           </div>
@@ -95,30 +95,30 @@ const TeacherInforCard = ({
 
         {yearsExperience !== null && (
           <div className={statBoxClass}>
-            <div className="w-9 h-9 p-1 bg-[#E3D7FF] rounded-full flex justify-center items-center overflow-hidden">
+            <div className="w-9 h-9 p-1 bg-[#E3D7FF] dark:bg-purple-950/60 rounded-full flex justify-center items-center overflow-hidden">
               <Medal size={18} className="text-[#8C65E1]" />
             </div>
-            <div className="text-black text-lg font-medium leading-[25.2px] break-words">{yearsExperience}</div>
-            <div className="text-[#7B7979] text-xs font-normal leading-[16.8px] break-words">
+            <div className="text-black dark:text-white text-lg font-medium leading-[25.2px] break-words">{yearsExperience}</div>
+            <div className="text-[#7B7979] dark:text-gray-400 text-xs font-normal leading-[16.8px] break-words">
               {scd.yearsExperience || "Năm KN"}
             </div>
           </div>
         )}
 
         <div className={statBoxClass}>
-          <div className="w-9 h-9 p-1 bg-[#BFDBFF] rounded-full flex justify-center items-center overflow-hidden">
+          <div className="w-9 h-9 p-1 bg-[#BFDBFF] dark:bg-blue-950/60 rounded-full flex justify-center items-center overflow-hidden">
             <BookOpen size={18} className="text-[#1D7DFD]" />
           </div>
-          <div className="text-black text-lg font-medium leading-[25.2px] break-words">{taughtCount}</div>
-          <div className="text-[#7B7979] text-xs font-normal leading-[16.8px] break-words">
+          <div className="text-black dark:text-white text-lg font-medium leading-[25.2px] break-words">{taughtCount}</div>
+          <div className="text-[#7B7979] dark:text-gray-400 text-xs font-normal leading-[16.8px] break-words">
             {scd.classesCount || "Khóa đã dạy"}
           </div>
         </div>
       </div>
 
       {/* Introduction */}
-      <div className="self-stretch p-2.5 bg-[#FFFBEA] rounded-xl outline outline-[0.2px] outline-[#FFE47C] outline-offset-[-0.2px] flex justify-center items-center gap-2.5">
-        <p className="text-black text-xs font-normal leading-[16.8px] break-words line-clamp-4">
+      <div className="self-stretch p-2.5 bg-[#FFFBEA] dark:bg-amber-950/20 rounded-xl outline outline-[0.2px] outline-[#FFE47C] dark:outline-amber-800/40 outline-offset-[-0.2px] flex justify-center items-center gap-2.5">
+        <p className="text-black dark:text-gray-200 text-xs font-normal leading-[16.8px] break-words line-clamp-4">
           {teacher.introduction ||
             teacher.bio ||
             teacher.description ||
@@ -133,7 +133,7 @@ const TeacherInforCard = ({
           type="button"
           onClick={goToProfile}
           disabled={!teacherId}
-          className="flex-1 px-3 py-2 bg-[linear-gradient(129deg,#DD2E41_0%,#F7A0AA_100%)] rounded-[20px] flex justify-center items-center gap-2.5 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+          className="flex-1 px-3 py-2 bg-[linear-gradient(129deg,#DD2E41_0%,#F7A0AA_100%)] dark:bg-[linear-gradient(129deg,#990011_0%,#DD2E41_100%)] rounded-[20px] flex justify-center items-center gap-2.5 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
         >
           <SquareUserRound size={20} className="text-[#F5F5F5]" />
           <span className="text-[#F5F5F5] text-xs font-normal leading-[16.8px] break-words">
@@ -146,9 +146,9 @@ const TeacherInforCard = ({
           onClick={handleContactTeacher}
           disabled={!teacherId}
           title={scd.messageTeacher || "Nhắn tin với giảng viên"}
-          className="w-7 h-7 p-2 rounded-full outline outline-1 outline-[#990011] outline-offset-[-1px] flex justify-center items-center gap-2.5 transition-all hover:bg-red-50 active:scale-95 cursor-pointer disabled:opacity-50"
+          className="w-7 h-7 p-2 rounded-full outline outline-1 outline-[#990011] dark:outline-[#FF6B6B] outline-offset-[-1px] flex justify-center items-center gap-2.5 transition-all hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-95 cursor-pointer disabled:opacity-50"
         >
-          <Mail size={12} className="text-[#990011]" />
+          <Mail size={12} className="text-[#990011] dark:text-[#FF6B6B]" />
         </button>
       </div>
     </div>

@@ -45,43 +45,43 @@ const ExchangeSuccessModal = ({
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 sm:p-7 flex flex-col items-center text-center z-10"
+          className="relative w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-2xl border border-transparent dark:border-[#3F3F3F] p-6 sm:p-7 flex flex-col items-center text-center z-10"
         >
           {/* Green Check Circle */}
-          <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4 shadow-xs">
+          <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4 shadow-xs">
             <Check size={28} strokeWidth={2.5} />
           </div>
 
-          <h3 className="text-lg font-bold text-gray-900 mb-1.5">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1.5">
             {sc.title || "Đổi Voucher thành công!"}
           </h3>
-          <p className="text-xs text-gray-500 mb-5 leading-relaxed">
+          <p className="text-xs text-gray-500 dark:text-neutral-400 mb-5 leading-relaxed">
             {messageText}
           </p>
 
           {/* Voucher Code Card Box */}
-          <div className="w-full bg-amber-50/60 border border-dashed border-amber-300 rounded-xl p-3.5 mb-5 flex items-center gap-3 text-left">
+          <div className="w-full bg-amber-50/60 dark:bg-[#242424] border border-dashed border-amber-300 dark:border-amber-700/60 rounded-xl p-3.5 mb-5 flex items-center gap-3 text-left">
             <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-white shrink-0 shadow-xs">
               <Ticket size={20} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-1">
-                <span className="text-xs font-semibold text-gray-600">
+                <span className="text-xs font-semibold text-gray-600 dark:text-neutral-300">
                   {sc.codeLabel || "MÃ VOUCHER"}
                 </span>
                 <button
                   type="button"
                   onClick={() => onCopyCode(voucher.code)}
-                  className="p-1 hover:bg-amber-100 text-amber-700 rounded transition cursor-pointer"
+                  className="p-1 hover:bg-amber-100 dark:hover:bg-[#333] text-amber-700 dark:text-amber-400 rounded transition cursor-pointer"
                   title={sc.copyTooltip || "Sao chép mã"}
                 >
                   <Copy size={13} />
                 </button>
               </div>
-              <div className="font-mono font-bold text-sm sm:text-base text-gray-900 tracking-wide">
+              <div className="font-mono font-bold text-sm sm:text-base text-gray-900 dark:text-white tracking-wide">
                 {voucher.code}
               </div>
-              <div className="text-[11px] text-gray-500 mt-0.5">
+              <div className="text-[11px] text-gray-500 dark:text-neutral-400 mt-0.5">
                 {expiryText}
               </div>
             </div>
@@ -99,7 +99,7 @@ const ExchangeSuccessModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition cursor-pointer"
+              className="w-full py-1.5 text-xs font-medium text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-white transition cursor-pointer"
             >
               {sc.closeBtn || "Đóng"}
             </button>

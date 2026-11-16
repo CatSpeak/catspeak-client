@@ -25,12 +25,12 @@ export default function ChallengeCard({
       onClick={() => onJoin(challenge)}
       className={`group relative flex flex-col w-full h-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer ${
         isSelected
-          ? "border-cath-red-700 bg-[#fff5f5] shadow-md"
-          : "border-border bg-white hover:border-cath-red-700 hover:bg-[#fff5f5] hover:shadow-md"
+          ? "border-cath-red-700 dark:border-red-400 bg-[#fff5f5] dark:bg-red-950/20 shadow-md"
+          : "border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] hover:border-cath-red-700 dark:hover:border-red-400 hover:bg-[#fff5f5] dark:hover:bg-red-950/20 hover:shadow-md"
       }`}
     >
       {/* Thumbnail Container */}
-      <div className="relative h-24 sm:h-28 md:h-32 w-full overflow-hidden bg-gray-100">
+      <div className="relative h-24 sm:h-28 md:h-32 w-full overflow-hidden bg-gray-100 dark:bg-[#242424]">
         <img
           src={bannerUrl || fallbackChallengeCard}
           alt={name || hashtag}
@@ -54,21 +54,21 @@ export default function ChallengeCard({
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-2.5 sm:p-3 md:p-4">
-        <h3 className="text-[13px] sm:text-[15px] md:text-[17px] font-bold text-gray-800 mb-0.5 line-clamp-1">
+        <h3 className="text-[13px] sm:text-[15px] md:text-[17px] font-bold text-gray-800 dark:text-white mb-0.5 line-clamp-1">
           {hashtag ? hashtag : name || "Thử thách mới"}
         </h3>
-        <p className="text-[11px] md:text-[13px] text-gray-500 mb-2 sm:mb-3 md:mb-4 line-clamp-1">
+        <p className="text-[11px] md:text-[13px] text-gray-500 dark:text-neutral-400 mb-2 sm:mb-3 md:mb-4 line-clamp-1">
           {hashtag ? name : "Thử thách"}
         </p>
 
         {/* Stats */}
         <div className="flex flex-col gap-1.5 md:gap-2.5 mb-3 md:mb-5">
-          <div className="flex items-center gap-1.5 md:gap-2 text-gray-700 text-[11px] md:text-[13px]">
+          <div className="flex items-center gap-1.5 md:gap-2 text-gray-700 dark:text-neutral-300 text-[11px] md:text-[13px]">
             <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-500" />
             <span className="truncate">{isPast ? (t.catSpeak.reels.votingClosed || "Đã đóng cổng bình chọn") : formatDaysLeft(validEndDate, t)}</span>
           </div>
-          <div className="flex items-center gap-1.5 md:gap-2 text-gray-700 text-[11px] md:text-[13px]">
-            <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-700" />
+          <div className="flex items-center gap-1.5 md:gap-2 text-gray-700 dark:text-neutral-300 text-[11px] md:text-[13px]">
+            <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-700 dark:text-neutral-300" />
             <span className="truncate">{participantsStr.replace("{{count}}", formatCompactCount(participantCount))}</span>
           </div>
         </div>

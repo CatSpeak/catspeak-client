@@ -6,12 +6,11 @@ import Switch from "@/shared/components/ui/inputs/Switch"
 import Slider from "@/shared/components/ui/Slider"
 import TopicSelect from "./TopicSelect"
 import LevelSelector from "./LevelSelector"
-import LanguageSelect from "./LanguageSelect"
 import { TOPICS, LEVELS } from "../../config/constants"
 import { Crown } from "lucide-react"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 
-const labelClass = "text-xs"
+const labelClass = "text-xs text-gray-700 dark:text-neutral-200"
 
 /**
  * A centralized, DRY form component for room creation.
@@ -39,7 +38,7 @@ const CreateRoomFormFields = ({
   const maxParticipantsLimit = limits.maxParticipantsInCustomRooms
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {isCustomMode && isQuotaFull && (
         <Banner
           variant="danger"
@@ -83,17 +82,6 @@ const CreateRoomFormFields = ({
           maxLength={isCustomMode ? 50 : 100}
           showCount
         />
-
-        {/* Language Selection (Custom Mode Only, optional) */}
-        {isCustomMode && (
-          <LanguageSelect
-            value={formData.languageType}
-            onChange={(language) => handleChange("languageType", language)}
-            disabled={isDisabled}
-            labelClassName={labelClass}
-            t={t}
-          />
-        )}
 
         {/* Topics Selection (Shared) */}
         <TopicSelect
@@ -142,7 +130,7 @@ const CreateRoomFormFields = ({
                 <span className={labelClass}>
                   {cr.privateRoom || "Private Room"}
                 </span>
-                <div className="flex items-center justify-between gap-4 w-full rounded-md border border-border px-4 min-h-[56px] bg-white transition-all duration-200">
+                <div className="flex items-center justify-between gap-4 w-full rounded-md border border-border dark:border-[#3F3F3F] px-4 min-h-[56px] bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white transition-all duration-200">
                   <span className="flex-1">
                     {formData.isPrivate
                       ? ct.privateHint ||
@@ -247,7 +235,7 @@ const CreateRoomFormFields = ({
                     variant="square"
                     aria-label={ct.maxParticipantsLabel || "Max Participants"}
                   />
-                  <span>/ {maxParticipantsLimit}</span>
+                  <span className="text-gray-600 dark:text-neutral-400">/ {maxParticipantsLimit}</span>
                 </div>
               </div>
             </div>

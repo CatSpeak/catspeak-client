@@ -226,7 +226,7 @@ const ChatPage = () => {
   )
 
   return (
-    <FluentAnimation className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
+    <FluentAnimation className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2 dark:bg-[#0F0F0F]">
       {/* ── Sidebar ──────────────────────────────────── */}
       <div
         className={`${selectedId ? "hidden lg:flex" : "flex"} w-full lg:w-[360px] shrink-0`}
@@ -295,11 +295,11 @@ const ChatPage = () => {
           className="flex-1 hidden lg:flex"
           message={
             <div className="flex flex-col items-center justify-center">
-              <MessageCircle size={48} className="text-[#990011] mb-4" />
-              <h2 className="text-lg font-semibold text-black mb-1">
+              <MessageCircle size={48} className="text-[#990011] dark:text-red-400 mb-4" />
+              <h2 className="text-lg font-semibold text-black dark:text-white mb-1">
                 {t?.chat?.yourMessages || "Your Messages"}
               </h2>
-              <p className="text-sm text-[#606060] text-center max-w-[260px]">
+              <p className="text-sm text-[#606060] dark:text-[#AAAAAA] text-center max-w-[260px]">
                 {t?.chat?.selectConversationPrompt ||
                   "Select a conversation from the sidebar to start chatting"}
               </p>
@@ -346,7 +346,7 @@ const ChatPage = () => {
                   animate={{ x: 0 }}
                   exit={{ x: "100%" }}
                   transition={{ type: "spring", damping: 28, stiffness: 300 }}
-                  className="relative z-10 h-full w-full max-w-full sm:w-[360px] sm:max-w-[360px] shadow-2xl bg-white overflow-hidden flex flex-col"
+                  className="relative z-10 h-full w-full max-w-full sm:w-[360px] sm:max-w-[360px] shadow-2xl bg-white dark:bg-[#1A1A1A] border-l border-border dark:border-[#3F3F3F] overflow-hidden flex flex-col"
                 >
                   <ChatUserPanel
                     conversation={activeConversation}

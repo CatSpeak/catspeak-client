@@ -39,8 +39,8 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
   const formattedTotal = `${new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US").format(plan.price)}₫`; // VAT 0% makes total equal to price
 
   return (
-    <div className="bg-white border border-border rounded-3xl p-6 shadow-sm sticky top-24 space-y-6">
-      <h2 className="text-xl font-bold text-gray-900">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-sm sticky top-24 space-y-6">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
         {t.billing?.checkout?.paymentDetails || "Thông tin thanh toán"}
       </h2>
 
@@ -68,23 +68,23 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
 
       {/* Price Calculation Table */}
       <div className="space-y-3 pt-2">
-        <div className="flex justify-between items-center text-sm font-medium text-gray-500">
+        <div className="flex justify-between items-center text-sm font-medium text-gray-500 dark:text-neutral-400">
           <span>{t.billing?.checkout?.price || "Giá"}</span>
-          <span className="text-gray-900">{formattedPrice}</span>
+          <span className="text-gray-900 dark:text-white">{formattedPrice}</span>
         </div>
 
-        <div className="flex justify-between items-center text-sm font-medium text-gray-500">
+        <div className="flex justify-between items-center text-sm font-medium text-gray-500 dark:text-neutral-400">
           <span>{t.billing?.checkout?.vat || "VAT (0%)"}</span>
-          <span className="text-gray-900">0₫</span>
+          <span className="text-gray-900 dark:text-white">0₫</span>
         </div>
 
-        <hr className="border-border my-2" />
+        <hr className="border-border dark:border-[#3F3F3F] my-2" />
 
         <div className="flex justify-between items-baseline">
-          <span className="text-sm font-bold text-gray-900">
+          <span className="text-sm font-bold text-gray-900 dark:text-white">
             {t.billing?.checkout?.total || "Tổng thanh toán"}
           </span>
-          <span className="text-xl font-extrabold text-[#BE0015]">
+          <span className="text-xl font-extrabold text-[#BE0015] dark:text-red-400">
             {formattedTotal}
           </span>
         </div>
@@ -97,11 +97,11 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
           id="agree-checkbox"
           checked={agreed}
           onChange={(e) => setAgreed(e.target.checked)}
-          className="w-4 h-4 rounded border-gray-300 text-[#BE0015] focus:ring-[#BE0015] shrink-0 mt-[1px] cursor-pointer"
+          className="w-4 h-4 rounded border-gray-300 dark:border-neutral-500 text-[#BE0015] focus:ring-[#BE0015] shrink-0 mt-[1px] cursor-pointer"
         />
         <label
           htmlFor="agree-checkbox"
-          className="text-xs text-gray-500 leading-normal select-none cursor-pointer"
+          className="text-xs text-gray-500 dark:text-neutral-400 leading-normal select-none cursor-pointer"
         >
           {language === "vi" ? (
             <>
@@ -110,7 +110,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
                 href="/policy"
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#BE0015] font-semibold hover:underline"
+                className="text-[#BE0015] dark:text-red-400 font-semibold hover:underline"
               >
                 {t.billing?.checkout?.termsOfService || "Điều khoản dịch vụ"}
               </a>{" "}
@@ -119,7 +119,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
                 href="/policy"
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#BE0015] font-semibold hover:underline"
+                className="text-[#BE0015] dark:text-red-400 font-semibold hover:underline"
               >
                 {t.billing?.checkout?.privacyPolicy || "Chính sách bảo mật"}
               </a>
@@ -131,7 +131,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
                 href="/policy"
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#BE0015] font-semibold hover:underline"
+                className="text-[#BE0015] dark:text-red-400 font-semibold hover:underline"
               >
                 {t.billing?.checkout?.termsOfService || "服务条款"}
               </a>{" "}
@@ -140,7 +140,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
                 href="/policy"
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#BE0015] font-semibold hover:underline"
+                className="text-[#BE0015] dark:text-red-400 font-semibold hover:underline"
               >
                 {t.billing?.checkout?.privacyPolicy || "隐私政策"}
               </a>
@@ -152,7 +152,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
                 href="/policy"
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#BE0015] font-semibold hover:underline"
+                className="text-[#BE0015] dark:text-red-400 font-semibold hover:underline"
               >
                 {t.billing?.checkout?.termsOfService || "Terms of Service"}
               </a>{" "}
@@ -161,7 +161,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
                 href="/policy"
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#BE0015] font-semibold hover:underline"
+                className="text-[#BE0015] dark:text-red-400 font-semibold hover:underline"
               >
                 {t.billing?.checkout?.privacyPolicy || "Privacy Policy"}
               </a>
@@ -179,7 +179,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
           className={`w-full py-3.5 px-6 rounded-2xl font-bold text-sm transition-all duration-150 flex items-center justify-center gap-2 active:scale-[0.99] ${
             !agreed || isProcessing
               ? "bg-[#7A7574] text-white cursor-not-allowed"
-              : "bg-[#BE0015] hover:bg-[#980013] text-white shadow-md shadow-gray-200 cursor-pointer"
+              : "bg-[#BE0015] hover:bg-[#980013] text-white shadow-md shadow-gray-200 dark:shadow-none cursor-pointer"
           }`}
         >
           {isProcessing ? (

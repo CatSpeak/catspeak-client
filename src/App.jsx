@@ -14,6 +14,7 @@ import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
 import { LanguageProvider } from "@/shared/context/LanguageContext"
+import { ThemeProvider } from "@/shared/context/ThemeContext"
 // import { ScrollToTopButton } from "@/shared/components/ui/buttons";
 import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
 import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
@@ -33,6 +34,7 @@ function App() {
     <Provider store={store}>
       <AuthVisibilitySync />
       <LanguageProvider>
+        <ThemeProvider>
         <GlobalErrorBoundary>
           <WebViewGuard>
             <GlobalVideoCallProvider>
@@ -63,6 +65,7 @@ function App() {
             </GlobalVideoCallProvider>
           </WebViewGuard>
         </GlobalErrorBoundary>
+        </ThemeProvider>
       </LanguageProvider>
     </Provider>
   )

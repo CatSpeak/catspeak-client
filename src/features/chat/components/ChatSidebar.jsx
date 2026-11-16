@@ -61,10 +61,10 @@ const ChatSidebar = ({
   }, [conversations, filter, searchQuery, selectedId])
 
   return (
-    <div className="flex flex-col w-full lg:w-[360px] h-full overflow-hidden bg-white lg:border lg:border-border lg:rounded-xl">
+    <div className="flex flex-col w-full lg:w-[360px] h-full overflow-hidden bg-white dark:bg-[#1A1A1A] lg:border lg:border-border dark:lg:border-[#3F3F3F] lg:rounded-xl">
       {/* ── Header ───────────────────────────────────── */}
       <div className="h-[72px] px-4 flex items-center justify-between">
-        <h1 className="font-bold">{t?.chat?.title || "Chats"}</h1>
+        <h1 className="font-bold text-gray-900 dark:text-white">{t?.chat?.title || "Chats"}</h1>
         <IconButton
           onClick={onNewChatClick}
           size="sm"

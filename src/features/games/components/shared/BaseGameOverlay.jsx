@@ -53,9 +53,9 @@ const BaseGameOverlay = ({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 text-slate-900"
+                className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 dark:bg-[#1A1A1A]/95 text-slate-900 dark:text-white"
               >
-                <h1 className="text-4xl font-bold mb-8 text-cath-red-700">
+                <h1 className="text-4xl font-bold mb-8 text-cath-red-700 dark:text-red-400">
                   {title}
                 </h1>
                 {countdown !== null && countdown !== undefined ? (
@@ -65,12 +65,12 @@ const BaseGameOverlay = ({
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 1.5, opacity: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="text-8xl font-black text-cath-red-500"
+                    className="text-8xl font-black text-cath-red-500 dark:text-red-400"
                   >
                     {countdown}
                   </motion.div>
                 ) : (
-                  <div className="text-xl text-slate-600 font-medium">
+                  <div className="text-xl text-slate-600 dark:text-neutral-300 font-medium">
                     {waitingText || "Đang chuẩn bị ván đấu..."}
                   </div>
                 )}

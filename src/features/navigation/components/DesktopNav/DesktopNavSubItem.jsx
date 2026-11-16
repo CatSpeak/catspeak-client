@@ -28,8 +28,8 @@ const DesktopNavSubItem = ({
           isFlyout ? "px-3 gap-3" : "pl-7 pr-3 gap-3"
         } ${
           isActive
-            ? "bg-itemActive hover:bg-itemActiveHover"
-            : "hover:bg-itemHover"
+            ? "bg-itemActive dark:bg-[#272727] hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D] text-gray-900 dark:text-white"
+            : "text-gray-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-[#272727] hover:text-gray-900 dark:hover:text-white"
         }`
       }
       onClick={onClick}
@@ -40,7 +40,7 @@ const DesktopNavSubItem = ({
           {isActive && (
             <motion.div
               layoutId="desktopNavActiveIndicator"
-              className="absolute left-0 top-3 w-1 h-5 bg-cath-red-700 rounded-r-full z-10"
+              className="absolute left-0 top-3 w-1 h-5 bg-cath-red-700 dark:bg-red-400 rounded-r-full z-10"
               transition={{ type: "spring", stiffness: 380, damping: 30 }}
             />
           )}

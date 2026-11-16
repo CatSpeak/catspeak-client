@@ -3,6 +3,7 @@ import { Pencil } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
+import Label from "@/shared/components/ui/Label"
 
 const AccountCredentialsForm = ({
   formData,
@@ -18,75 +19,92 @@ const AccountCredentialsForm = ({
   const isEditing = editingField === "personalInfo"
 
   return (
-    <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-border rounded-xl shadow-sm !justify-start">
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
-            {t.profile?.personalInfo?.title || "Thông tin cá nhân"}
-          </h2>
-          {!isEditing ? (
-            <PillButton
-              onClick={() => onEdit("personalInfo")}
-              variant="outline"
-              startIcon={<Pencil size={18} />}
-            >
-              {t.profile?.personalInfo?.edit || "Sửa"}
-            </PillButton>
-          ) : (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onCancel}
-                className="px-4 py-1.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50"
-                disabled={isUpdating}
+    <div>
+      <h2 className="text-base font-bold text-gray-900 dark:text-white mb-1">
+        {t.profile?.personalInfo?.title || "Thông tin cá nhân"}
+      </h2>
+
+      <FluentCard className="flex flex-col w-full p-4 gap-4 border-border rounded-xl !justify-start">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-end">
+            {!isEditing ? (
+              <PillButton
+                onClick={() => onEdit("personalInfo")}
+                variant="outline"
+                startIcon={<Pencil size={18} />}
               >
-                {t.profile?.personalInfo?.cancel || "Hủy"}
-              </button>
-              <button
-                onClick={() => onSave("personalInfo")}
-                className="px-4 py-1.5 rounded-full bg-cath-red-700 text-white hover:bg-cath-red-800 transition-colors text-sm font-medium disabled:opacity-50"
-                disabled={isUpdating}
-              >
-                {t.profile?.personalInfo?.save || "Lưu"}
-              </button>
+                {t.profile?.personalInfo?.edit || "Sửa"}
+              </PillButton>
+            ) : (
+              <div className="flex items-center gap-2">
+                <PillButton
+                  onClick={onCancel}
+                  variant="secondary"
+                  disabled={isUpdating}
+                >
+                  {t.profile?.personalInfo?.cancel || "Hủy"}
+                </PillButton>
+
+                <PillButton
+                  onClick={() => onSave("personalInfo")}
+                  variant="primary"
+                  disabled={isUpdating}
+                  loading={isUpdating}
+                  loadingText={t.profile?.personalInfo?.saving || "Đang lưu..."}
+                >
+                  {t.profile?.personalInfo?.save || "Lưu"}
+                </PillButton>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <Label>
+                {t.profile?.personalInfo?.username || "Tên đăng nhập"}
+              </Label>
+              <TextInput
+                name="username"
+                value={formData.username}
+                onChange={onChange}
+                disabled={!isEditing || isUpdating}
+                placeholder={
+                  t.profile?.personalInfo?.enterUsername ||
+                  "Nhập tên đăng nhập..."
+                }
+                error={errors?.username}
+                className={`!rounded bg-gray-50/50 dark:bg-[#242424] border px-3 ${
+                  errors?.username
+                    ? "border-red-500"
+                    : "border-border dark:border-[#3F3F3F]"
+                }`}
+                containerClassName="!gap-0"
+              />
             </div>
-          )}
-        </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.username || "Tên đăng nhập"}
-            </label>
-            <TextInput
-              name="username"
-              value={formData.username}
-              onChange={onChange}
-              disabled={!isEditing || isUpdating}
-              placeholder={t.profile?.personalInfo?.enterUsername || "Nhập tên đăng nhập..."}
-              error={errors?.username}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.username ? "border-red-500" : "border-border"}`}
-              containerClassName="!gap-0"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.nickname || "Biệt danh"}
-            </label>
-            <TextInput
-              name="nickname"
-              value={formData.nickname}
-              onChange={onChange}
-              disabled={!isEditing || isUpdating}
-              placeholder={t.profile?.personalInfo?.enterNickname || "Nhập biệt danh..."}
-              error={errors?.nickname}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.nickname ? "border-red-500" : "border-border"}`}
-              containerClassName="!gap-0"
-            />
+            <div className="flex flex-col gap-1">
+              <Label>{t.profile?.personalInfo?.nickname || "Biệt danh"}</Label>
+              <TextInput
+                name="nickname"
+                value={formData.nickname}
+                onChange={onChange}
+                disabled={!isEditing || isUpdating}
+                placeholder={
+                  t.profile?.personalInfo?.enterNickname || "Nhập biệt danh..."
+                }
+                error={errors?.nickname}
+                className={`!rounded bg-gray-50/50 dark:bg-[#242424] border px-3 ${
+                  errors?.nickname
+                    ? "border-red-500"
+                    : "border-border dark:border-[#3F3F3F]"
+                }`}
+                containerClassName="!gap-0"
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </FluentCard>
+      </FluentCard>
+    </div>
   )
 }
 

@@ -28,7 +28,6 @@ import StudentClassOverviewTab from "../components/overview/StudentClassOverview
 import StudentClassOverview from "./StudentClassOverview"
 
 const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
-// const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
 const StudentGradingTab = lazy(() => import("../components/grading/StudentGradingTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
 const StudentClassRecordingsTab = lazy(
@@ -76,7 +75,7 @@ const StudentClassDetailPage = () => {
     setSearchParams(nextParams)
   }
 
-  // Fetch Class Details conditionally via RTK Query (Student view is always studentDetail)
+  // Fetch Class Details conditionally via RTK Query
   const {
     currentData: detailResponse,
     isLoading: isDetailLoading,
@@ -119,8 +118,6 @@ const StudentClassDetailPage = () => {
   )
 
   useEffect(() => {
-    // Only redirect if they are the owner AND they are currently in Teacher mode.
-    // If isStudent is true, they intentionally switched to student mode to preview, so we don't redirect.
     if (isOwner && id && !isStudent) {
       navigate(`/workspace/courses/class/${id}${window.location.search}`, { replace: true })
     }
@@ -246,10 +243,10 @@ const StudentClassDetailPage = () => {
 
   if (detailError || !id || !classData) {
     return (
-      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+      <div role="alert" className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
         <span>{scd.classLoadFailed || "This class could not be loaded. Please try again."}</span>
         {id && (
-          <button type="button" onClick={refetchDetail} className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white">
+          <button type="button" onClick={refetchDetail} className="rounded-xl bg-[#990011] hover:bg-[#b20a1c] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] px-4 py-2 text-xs font-bold text-white transition-colors cursor-pointer">
             {scd.retry || "Try again"}
           </button>
         )}
@@ -258,7 +255,7 @@ const StudentClassDetailPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-100">
       {isDetailFetching && (
         <span role="status" className="sr-only">
           {scd.refreshingClass || "Refreshing class details"}
@@ -288,8 +285,8 @@ const StudentClassDetailPage = () => {
       />
 
       {/* ─── Page Heading & Header Actions ─── */}
-      {isStudent ?
-        (<StudentClassOverview
+      {isStudent ? (
+        <StudentClassOverview
           classData={classData}
           onJoinRoom={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
           onChat={() => {
@@ -300,79 +297,78 @@ const StudentClassDetailPage = () => {
             }
           }}
         />
-        ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-              {c.student?.classDetails || "Class Details"}
-            </h1>
+      ) : (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight">
+            {c.student?.classDetails || "Class Details"}
+          </h1>
 
-            <div className="flex items-center gap-3">
-              {!isEnrolled ? (
+          <div className="flex items-center gap-3">
+            {!isEnrolled ? (
+              <button
+                type="button"
+                onClick={handleEnroll}
+                disabled={
+                  isEnrolling
+                  || isOwner
+                  || Boolean(enrollmentIssue)
+                }
+                title={
+                  isOwner
+                    ? (
+                      c.student?.cannotEnrollOwn
+                      || "You cannot enroll in your own course or class."
+                    )
+                    : (
+                      enrollmentIssue
+                        ? getClassEnrollmentIssueMessage(
+                          enrollmentIssue,
+                          c.student,
+                        )
+                        : undefined
+                    )
+                }
+                className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50 cursor-pointer"
+              >
+                <span>
+                  {enrollmentIssue
+                    ? getClassEnrollmentIssueLabel(
+                      enrollmentIssue,
+                      c.student,
+                    )
+                    : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
+                </span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={handleEnroll}
-                  disabled={
-                    isEnrolling
-                    || isOwner
-                    || Boolean(enrollmentIssue)
-                  }
-                  title={
-                    isOwner
-                      ? (
-                        c.student?.cannotEnrollOwn
-                        || "You cannot enroll in your own course or class."
-                      )
-                      : (
-                        enrollmentIssue
-                          ? getClassEnrollmentIssueMessage(
-                            enrollmentIssue,
-                            c.student,
-                          )
-                          : undefined
-                      )
-                  }
-                  className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
+                  onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+                  className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
                 >
-                  <span>
-                    {enrollmentIssue
-                      ? getClassEnrollmentIssueLabel(
-                        enrollmentIssue,
-                        c.student,
-                      )
-                      : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
-                  </span>
+                  <Video size={14} className="fill-white" />
+                  <span>{c.student?.joinRoom || c.joinRoom || "Vào phòng học"}</span>
                 </button>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
-                    className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
-                  >
-                    <Video size={14} className="fill-white" />
-                    <span>{c.student?.joinRoom || c.joinRoom || "Vào phòng học"}</span>
-                  </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (classData?.chatGroupId) {
-                        navigate(`/chat/${classData.chatGroupId}`)
-                      } else {
-                        navigate("/chat")
-                      }
-                    }}
-                    className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
-                  >
-                    <MessageSquare size={14} className="fill-[#990011]" />
-                    <span>{c.student?.chat || "Chat"}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>)}
-
-
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (classData?.chatGroupId) {
+                      navigate(`/chat/${classData.chatGroupId}`)
+                    } else {
+                      navigate("/chat")
+                    }
+                  }}
+                  className="h-10 px-5 bg-white dark:bg-[#1A1A1A] border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50/50 dark:hover:bg-red-950/30 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
+                >
+                  <MessageSquare size={14} className="fill-[#990011] dark:fill-[#FF6B6B]" />
+                  <span>{c.student?.chat || "Chat"}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ─── Navigation Tabs ─── */}
       <ClassDetailTabs
@@ -384,21 +380,21 @@ const StudentClassDetailPage = () => {
 
       {/* ─── Tab Contents ─── */}
       {!isEnrolled && ENROLLED_ONLY_TABS.has(activeTab) && (
-        <div role="status" className="flex flex-col items-start gap-3 rounded-xl border border-border bg-white p-6 text-sm">
+        <div role="status" className="flex flex-col items-start gap-3 rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-6 text-sm text-slate-800 dark:text-gray-200">
           <p>{scd.enrollmentAccessNotice}</p>
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={refetchDetail}
               disabled={isDetailFetching}
-              className="rounded-full bg-cath-red-700 px-4 py-2 font-semibold text-white disabled:opacity-50"
+              className="rounded-full bg-cath-red-700 hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] px-4 py-2 font-semibold text-white disabled:opacity-50 cursor-pointer"
             >
               {isDetailFetching ? scd.refreshingClass : scd.recheckEnrollment}
             </button>
             <button
               type="button"
               onClick={() => navigate(`/workspace/explore-courses/class/${encodeURIComponent(id)}`)}
-              className="rounded-full border border-border px-4 py-2 font-semibold"
+              className="rounded-full border border-border dark:border-[#3F3F3F] px-4 py-2 font-semibold text-slate-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] cursor-pointer"
             >
               {scd.viewEnrollmentDetails}
             </button>
@@ -435,15 +431,6 @@ const StudentClassDetailPage = () => {
             isStudent={true}
           />
         )}
-
-        {/* {activeTab === "grading" && isEnrolled && (
-          <ClassGradingTab
-            id={id}
-            isStudent={true}
-            language={language}
-            cd={cd}
-          />
-        )} */}
 
         {activeTab === "grading" && isEnrolled && (
           <StudentGradingTab

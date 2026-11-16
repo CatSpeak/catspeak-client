@@ -85,7 +85,7 @@ const PlayerItemContent = ({
       >
         {player.score === 0 ? (
           <div
-            className={`rounded-full border border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold ${
+            className={`rounded-full border border-dashed border-slate-300 dark:border-[#3F3F3F] flex items-center justify-center text-slate-400 dark:text-neutral-400 font-bold ${
               embedded ? "w-4 h-4 text-[10px]" : "w-5 h-5 text-[10px]"
             }`}
           >
@@ -93,7 +93,7 @@ const PlayerItemContent = ({
           </div>
         ) : (
           <div
-            className={`font-semibold text-slate-400 text-center ${embedded ? "text-xs" : "text-sm"}`}
+            className={`font-semibold text-slate-400 dark:text-neutral-400 text-center ${embedded ? "text-xs" : "text-sm"}`}
           >
             {index + 1}
           </div>
@@ -119,21 +119,21 @@ const PlayerItemContent = ({
       {/* Info */}
       <div className={`flex-1 min-w-0 ${player.hasLeft ? "opacity-40" : ""}`}>
         <div
-          className={`font-semibold text-slate-800 flex items-center gap-1 min-w-0 ${embedded ? "text-sm" : "text-sm"}`}
+          className={`font-semibold text-slate-800 dark:text-white flex items-center gap-1 min-w-0 ${embedded ? "text-sm" : "text-sm"}`}
         >
           <span className="truncate min-w-0 max-w-full" title={player.name}>
             {player.name}
           </span>
           {player.isYou && (
             <span
-              className={`font-normal text-slate-500 shrink-0 ${embedded ? "text-[10px]" : "text-xs"}`}
+              className={`font-normal text-slate-500 dark:text-neutral-400 shrink-0 ${embedded ? "text-[10px]" : "text-xs"}`}
             >
               ({t.rooms?.game?.crackIt?.you || "Bạn"})
             </span>
           )}
         </div>
         <div
-          className={`text-slate-500 font-medium mt-0.5 flex items-center gap-1 ${embedded ? "text-xs" : "text-xs"}`}
+          className={`text-slate-500 dark:text-neutral-400 font-medium mt-0.5 flex items-center gap-1 ${embedded ? "text-xs" : "text-xs"}`}
         >
           <AnimatedScore
             value={player.score}
@@ -166,7 +166,7 @@ const PlayerItemContent = ({
       {player.hasLeft && (
         <div className="shrink-0 ml-1 md:ml-2">
           <span
-            className={`uppercase font-bold text-slate-400 bg-slate-100 rounded-md ${
+            className={`uppercase font-bold text-slate-400 dark:text-neutral-400 bg-slate-100 dark:bg-[#272727] rounded-md ${
               embedded ? "text-[10px] px-1.5 py-0.5" : "text-[10px] px-2 py-1"
             }`}
           >
@@ -302,19 +302,19 @@ const GameSidebar = ({
     >
       {/* LEADERBOARD CARD */}
       <div
-        className={`flex-1 bg-white rounded-2xl overflow-hidden shadow-sm border border-border flex flex-col min-h-0 ${
+        className={`flex-1 bg-white dark:bg-[#1A1A1A] rounded-2xl overflow-hidden shadow-sm border border-border dark:border-[#3F3F3F] flex flex-col min-h-0 ${
           embedded ? "py-2 px-1.5" : "py-4 px-2 md:py-6 md:px-3"
         }`}
       >
         <div className={`shrink-0 ${embedded ? "px-1.5" : "px-2 md:px-3"}`}>
           {!hideTitle && (
             <div
-              className={`flex items-center justify-between gap-2 border-b border-border ${
+              className={`flex items-center justify-between gap-2 border-b border-border dark:border-[#3F3F3F] ${
                 embedded ? "mb-2.5 pb-2" : "mb-6 pb-4"
               }`}
             >
               <h3
-                className={`font-black text-cath-red-700 uppercase tracking-[0.2em] truncate ${
+                className={`font-black text-cath-red-700 dark:text-red-400 uppercase tracking-[0.2em] truncate ${
                   embedded ? "text-xs tracking-[0.18em]" : "text-lg"
                 }`}
               >
@@ -323,7 +323,7 @@ const GameSidebar = ({
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-red-50 text-slate-600 hover:text-cath-red-600 transition-colors flex items-center justify-center shrink-0"
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#272727] hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-600 dark:text-neutral-300 hover:text-cath-red-600 dark:hover:text-red-400 transition-colors flex items-center justify-center shrink-0"
                   aria-label="Đóng bảng xếp hạng"
                 >
                   <X size={16} />
@@ -365,14 +365,14 @@ const GameSidebar = ({
                   {participant && !player.isYou && !player.hasLeft ? (
                     <ParticipantActionPopover participant={participant}>
                       <div
-                        className={`group flex items-center gap-2 md:gap-3 border-b border-transparent last:border-0 w-full h-full cursor-pointer transition-colors border-b-gray-100 hover:border-transparent relative rounded-xl ${
+                        className={`group flex items-center gap-2 md:gap-3 border-b border-transparent last:border-0 w-full h-full cursor-pointer transition-colors border-b-gray-100 dark:border-b-[#272727] hover:border-transparent relative rounded-xl ${
                           embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
                         }`}
                       >
                         {innerContent}
                         <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center pointer-events-none">
-                          <div className="w-4 h-8 bg-gradient-to-r from-transparent to-[#F2F2F2]"></div>
-                          <div className="bg-primaryBg h-8 flex items-center text-gray-500 pr-1">
+                          <div className="w-4 h-8 bg-gradient-to-r from-transparent to-[#F2F2F2] dark:to-[#1A1A1A]"></div>
+                          <div className="bg-primaryBg dark:bg-[#1A1A1A] h-8 flex items-center text-gray-500 dark:text-neutral-400 pr-1">
                             <SlidersHorizontal size={18} />
                           </div>
                         </div>
@@ -380,7 +380,7 @@ const GameSidebar = ({
                     </ParticipantActionPopover>
                   ) : (
                     <div
-                      className={`flex items-center gap-2 md:gap-3 border-b border-border last:border-0 w-full h-full relative rounded-xl ${
+                      className={`flex items-center gap-2 md:gap-3 border-b border-border dark:border-[#272727] last:border-0 w-full h-full relative rounded-xl ${
                         embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
                       }`}
                     >

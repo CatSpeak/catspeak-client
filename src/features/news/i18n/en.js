@@ -26,10 +26,13 @@ export default {
       topics: "Topics",
     },
     newsDetail: {
+      untitled: "Post",
       attachments: "Attachments",
       document: "Document",
       download: "Download",
       retryRelatedNews: "Could not load related news. Try again.",
+      seeMore: "See more",
+      showLess: "Show less",
       expandComments: "Show comments",
       collapseComments: "Hide comments",
       previousPosts: "Previous posts",

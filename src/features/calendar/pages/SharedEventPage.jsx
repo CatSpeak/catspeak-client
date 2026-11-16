@@ -93,23 +93,23 @@ const SharedEventPage = () => {
       "Liên kết chia sẻ này đã hết hạn, đã đạt giới hạn lượt xem, hoặc không tồn tại."
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-slate-100 px-4">
-        <div className="bg-white rounded-3xl shadow-xl p-10 max-w-md w-full text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-slate-100 dark:from-[#0F0F0F] dark:to-[#1A1A1A] px-4">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-3xl shadow-xl p-10 max-w-md w-full text-center">
           <AlertTriangle
             className="mx-auto mb-4 text-red-400"
             size={48}
             strokeWidth={1.5}
           />
-          <h1 className="text-xl font-bold text-gray-800 mb-2">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
             {t.calendar?.shared?.invalidLink || "Liên kết không hợp lệ"}
           </h1>
           <CommunityBadge languageCommunity={data?.languageCommunity} />
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-500 dark:text-neutral-400 mb-6">
             {backendMessage || defaultMessage}
           </p>
           <Link
             to="/"
-            className="inline-block bg-slate-800 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-slate-700 transition-colors"
+            className="inline-block bg-slate-800 dark:bg-neutral-800 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-slate-700 dark:hover:bg-neutral-700 transition-colors"
           >
             {t.calendar?.shared?.backToHome || "Về trang chủ"}
           </Link>

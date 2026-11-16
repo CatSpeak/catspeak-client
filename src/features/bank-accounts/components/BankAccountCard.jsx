@@ -51,7 +51,11 @@ export default function BankAccountCard({ account }) {
       await setDefaultAccount(id).unwrap()
     } catch (err) {
       setIsOptimisticDefault(false)
-      toast.error(err?.data?.message || t?.bankAccounts?.errorSetDefault || "Không thể cài làm mặc định")
+      toast.error(
+        err?.data?.message ||
+          t?.bankAccounts?.errorSetDefault ||
+          "Không thể cài làm mặc định",
+      )
     }
   }
 
@@ -66,13 +70,21 @@ export default function BankAccountCard({ account }) {
       await deleteAccount(id).unwrap()
       setIsDeleteModalOpen(false)
     } catch (err) {
-      toast.error(err?.data?.message || t?.bankAccounts?.errorDelete || "Không thể xóa tài khoản ngân hàng")
+      toast.error(
+        err?.data?.message ||
+          t?.bankAccounts?.errorDelete ||
+          "Không thể xóa tài khoản ngân hàng",
+      )
     } finally {
       setIsDeleting(false)
     }
   }
 
-  const bankDisplayName = bankShortName || bankFullName || t?.bankAccounts?.defaultBankFallback || "Ngân hàng"
+  const bankDisplayName =
+    bankShortName ||
+    bankFullName ||
+    t?.bankAccounts?.defaultBankFallback ||
+    "Ngân hàng"
 
   return (
     <>
@@ -120,9 +132,13 @@ export default function BankAccountCard({ account }) {
             {/* Badges container */}
             <div className="flex flex-col items-end gap-1.5 shrink-0">
               {isVerified ? (
-                <Badge color="white">{t?.bankAccounts?.verified || "Đã xác thực"}</Badge>
+                <Badge color="white">
+                  {t?.bankAccounts?.verified || "Đã xác thực"}
+                </Badge>
               ) : (
-                <Badge color="white">{t?.bankAccounts?.unverified || "Chưa xác thực"}</Badge>
+                <Badge color="white">
+                  {t?.bankAccounts?.unverified || "Chưa xác thực"}
+                </Badge>
               )}
             </div>
           </div>
@@ -192,4 +208,3 @@ export default function BankAccountCard({ account }) {
     </>
   )
 }
-

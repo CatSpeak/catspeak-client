@@ -153,13 +153,13 @@ const ForwardMessageModal = ({ open, onClose, message }) => {
       </div>
 
       {/* ── Conversation Multi-Select List ──────────────────── */}
-      <div className="flex-1 overflow-y-auto max-h-[280px] p-2 divide-y divide-border/20">
+      <div className="flex-1 overflow-y-auto max-h-[280px] p-2 divide-y divide-border/20 dark:divide-[#3F3F3F]/30">
         {isLoading ? (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-neutral-500 dark:text-[#AAAAAA]">
             {t?.chat?.loadingConversations || "Loading..."}
           </div>
         ) : filteredConversations.length === 0 ? (
-          <div className="p-8 text-center text-sm text-neutral-500">
+          <div className="p-8 text-center text-sm text-neutral-500 dark:text-[#AAAAAA]">
             {t?.chat?.sidebar?.noConversations || "No conversations found"}
           </div>
         ) : (
@@ -178,15 +178,15 @@ const ForwardMessageModal = ({ open, onClose, message }) => {
                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
                   isSelected
                     ? "bg-primary/10 dark:bg-primary/20"
-                    : "hover:bg-neutral-50 dark:hover:bg-zinc-800/40"
+                    : "hover:bg-neutral-50 dark:hover:bg-[#272727]"
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
                   <Avatar size={36} name={name} src={avatar} />
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{name}</p>
+                    <p className="font-medium text-sm truncate text-gray-900 dark:text-white">{name}</p>
                     {c.isGroup && (
-                      <p className="text-[11px] text-neutral-400">
+                      <p className="text-[11px] text-neutral-400 dark:text-[#AAAAAA]">
                         {c.participants?.length || 0} members
                       </p>
                     )}
@@ -198,7 +198,7 @@ const ForwardMessageModal = ({ open, onClose, message }) => {
                   className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
                     isSelected
                       ? "bg-primary border-primary text-white"
-                      : "border-neutral-300 dark:border-neutral-600 bg-white dark:bg-zinc-800"
+                      : "border-neutral-300 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A]"
                   }`}
                 >
                   {isSelected && <Check size={14} className="stroke-[3]" />}
@@ -210,7 +210,7 @@ const ForwardMessageModal = ({ open, onClose, message }) => {
       </div>
 
       {/* ── Footer Comment & Action Bar ─────────────────────── */}
-      <div className="p-3 border-t border-border bg-neutral-50/50 dark:bg-zinc-900/50 flex flex-col gap-2">
+      <div className="p-3 border-t border-border dark:border-[#3F3F3F] bg-neutral-50/50 dark:bg-[#1A1A1A]/80 flex flex-col gap-2">
         <input
           type="text"
           value={comment}
@@ -219,11 +219,11 @@ const ForwardMessageModal = ({ open, onClose, message }) => {
             t?.chat?.forwardCommentPlaceholder ||
             "Add an optional comment or note..."
           }
-          className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-800 rounded-lg border border-border focus:ring-2 focus:ring-primary outline-hidden"
+          className="w-full px-3 py-2 text-xs bg-white dark:bg-[#242424] text-gray-900 dark:text-white rounded-lg border border-border dark:border-[#3F3F3F] focus:ring-2 focus:ring-primary outline-hidden"
         />
 
         <div className="flex items-center justify-between mt-1">
-          <span className="text-xs text-neutral-500 font-medium">
+          <span className="text-xs text-neutral-500 dark:text-[#AAAAAA] font-medium">
             {selectedIds.size > 0
               ? `${selectedIds.size} ${t?.chat?.conversationsSelected || "selected"}`
               : t?.chat?.selectToForward || "Select conversations to forward"}
@@ -233,7 +233,7 @@ const ForwardMessageModal = ({ open, onClose, message }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 cursor-pointer"
+              className="px-3 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
             >
               {t?.chat?.cancel || "Cancel"}
             </button>

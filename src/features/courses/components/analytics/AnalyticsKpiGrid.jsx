@@ -4,8 +4,8 @@ import AnalyticsKpiCard from "./AnalyticsKpiCard"
 const AnalyticsKpiGrid = ({ items = [], cols = 5 }) => {
   const gridColsClass =
     cols === 6
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 mb-4"
-      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3 mb-4"
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 mb-4 text-slate-900 dark:text-gray-100"
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3 mb-4 text-slate-900 dark:text-gray-100"
 
   return (
     <div className={gridColsClass}>

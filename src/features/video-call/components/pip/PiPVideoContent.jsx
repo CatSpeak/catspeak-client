@@ -1,11 +1,16 @@
 import { useRef, useEffect, useMemo } from "react"
 import { Track } from "livekit-client"
 import { useIsSpeaking } from "@livekit/components-react"
-import { MonitorUp, MicOff, VideoOff } from "lucide-react"
+import { MonitorUp, MicOff, VideoOff, Hand } from "lucide-react"
+import { motion } from "framer-motion"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import {
+  getVideoTileOverlayBarClass,
+  getVideoTileOverlayPillClass,
+} from "@/features/video-call/utils/videoTileClass"
 
 // ─── Dominant Speaker Video ─────────────────────────────────────────────────
 
@@ -34,6 +39,7 @@ const DominantVideo = ({ participant }) => {
   }
 
   const meta = parseMetadata(participant?.metadata)
+  const isHandRaised = meta?.handRaised === true
   const avatarUrl = sanitizeAvatarUrl(meta?.avatarImageUrl)
 
   const theme = useMemo(
@@ -94,20 +100,42 @@ const DominantVideo = ({ participant }) => {
       )}
 
       {/* Bottom Controls Overlay */}
-      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none">
+      <div className={getVideoTileOverlayBarClass()}>
         {/* Status icons and Name */}
-        <div className="flex min-w-0 items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 text-white backdrop-blur-sm pointer-events-auto">
-          <div className="flex flex-shrink-0 items-center gap-1">
-            {screenShareOn && <MonitorUp size={14} />}
-            {!micOn && <MicOff size={14} />}
-            {!webcamOn && <VideoOff size={14} />}
-          </div>
-          <div className="min-w-0 truncate font-medium text-xs">
+        <div className={getVideoTileOverlayPillClass()}>
+          {(screenShareOn || !micOn || !webcamOn) && (
+            <div className="flex flex-shrink-0 items-center gap-1">
+              {screenShareOn && <MonitorUp size={18} />}
+              {!micOn && <MicOff size={18} />}
+              {!webcamOn && <VideoOff size={18} />}
+            </div>
+          )}
+
+          <div className="min-w-0 truncate text-sm">
             {displayName}{" "}
             {isLocal &&
               (t?.rooms?.videoCall?.participantList?.youSuffix || "(You)")}
           </div>
         </div>
+
+        {/* Raised Hand Icon */}
+        {isHandRaised && (
+          <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-full bg-yellow-500/90 text-white shadow-md backdrop-blur-sm pointer-events-auto">
+            <motion.div
+              animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.5,
+                ease: "easeInOut",
+                repeatDelay: 1,
+              }}
+              style={{ originX: 0.7, originY: 0.7 }}
+              className="flex flex-shrink-0 items-center justify-center"
+            >
+              <Hand />
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   )

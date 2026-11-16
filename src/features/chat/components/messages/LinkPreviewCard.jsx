@@ -32,7 +32,7 @@ const LinkPreviewCard = ({ urlDetails, hasCaption = false }) => {
         className="w-6 h-6 object-contain"
       />
     ) : (
-      <Globe className="text-[#606060]" />
+      <Globe className="text-[#606060] dark:text-[#AAAAAA]" />
     )
 
   return (
@@ -46,11 +46,11 @@ const LinkPreviewCard = ({ urlDetails, hasCaption = false }) => {
     >
       <ListItem
         lines={2}
-        className={`bg-primaryBg ${roundedClass} overflow-hidden text-left`}
+        className={`bg-primaryBg dark:bg-[#272727] ${roundedClass} overflow-hidden text-left`}
         leftContent={leftContent}
       >
-        <p className="font-semibold truncate m-0 capitalize">{domain}</p>
-        <p className="text-sm text-[#606060] truncate m-0">
+        <p className="font-semibold text-gray-900 dark:text-white truncate m-0 capitalize">{domain}</p>
+        <p className="text-sm text-[#606060] dark:text-[#AAAAAA] truncate m-0">
           {pathSnippet || href}
         </p>
       </ListItem>

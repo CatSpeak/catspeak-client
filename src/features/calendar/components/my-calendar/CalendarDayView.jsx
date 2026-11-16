@@ -23,7 +23,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
 
   if (selectedEvent) {
     return (
-      <div className="flex flex-col min-h-0 w-full border bg-white rounded-xl h-full flex-1">
+      <div className="flex flex-col min-h-0 w-full border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] rounded-xl h-full flex-1">
         <EventCardDetail event={selectedEvent} onBack={() => setSelectedEvent(null)} onShareEvent={onShareEvent} />
       </div>
     )
@@ -44,15 +44,15 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
   layoutEventClusters(parsedEvents)
 
   return (
-    <div className={`flex flex-col min-h-0 w-full ${hideHeader ? '' : 'border bg-white rounded-xl'} h-full flex-1`}>
+    <div className={`flex flex-col min-h-0 w-full ${hideHeader ? '' : 'border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] rounded-xl'} h-full flex-1`}>
       {/* Panel Header */}
       {!hideHeader && (
-        <div className="flex items-center justify-between px-6 pt-6 pb-2 border-b">
+        <div className="flex items-center justify-between px-6 pt-6 pb-2 border-b border-border dark:border-[#3F3F3F]">
           <div className="flex items-center gap-4">
-            <div className="text-xs font-medium text-gray-400 w-12 shrink-0">GMT +7</div>
+            <div className="text-xs font-medium text-gray-400 dark:text-neutral-500 w-12 shrink-0">GMT +7</div>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-gray-500">{dayLabel}</span>
-              <span className={`text-2xl font-bold ${isToday ? 'text-[#990011]' : 'text-[#1A1A1A]'}`}>
+              <span className="text-sm font-semibold text-gray-500 dark:text-neutral-400">{dayLabel}</span>
+              <span className={`text-2xl font-bold ${isToday ? 'text-[#990011] dark:text-red-400' : 'text-[#1A1A1A] dark:text-white'}`}>
                 {formattedDate}
               </span>
             </div>
@@ -75,7 +75,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
           {/* Y-Axis */}
           <div className="w-16 flex flex-col shrink-0 items-center">
             {HOURS.map((hour) => (
-              <div key={hour} className="h-[60px] text-xs text-gray-400 font-medium relative -top-2">
+              <div key={hour} className="h-[60px] text-xs text-gray-400 dark:text-neutral-500 font-medium relative -top-2">
                 {hour}:00
               </div>
             ))}
@@ -84,7 +84,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
           {/* Horizontal Lines and Events */}
           <div className="flex-1 relative pr-4">
             {HOURS.map((_, i) => (
-              <div key={i} className="h-[60px] border-t border-[#F5F5F5] w-full" />
+              <div key={i} className="h-[60px] border-t border-[#F5F5F5] dark:border-[#2E2E2E] w-full" />
             ))}
 
             <div className="absolute inset-0 flex pointer-events-none z-10">
@@ -109,7 +109,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
                 className="absolute left-0 right-4 border-t border-red-500 flex items-center z-[5] pointer-events-none"
                 style={{ top: `${(currentHour * 60) + currentMin}px` }}
               >
-                <span className="absolute text-xs font-bold text-red-500 bg-white pr-1 -left-12">
+                <span className="absolute text-xs font-bold text-red-500 dark:text-red-400 bg-white dark:bg-[#1A1A1A] pr-1 -left-12">
                   {now.format('H:mm')}
                 </span>
               </div>

@@ -83,7 +83,7 @@ const TablePagination = ({ currentPage, totalPages, totalCount, limit, onPageCha
   )
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4 px-1 text-xs font-semibold text-gray-400">
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4 px-1 text-xs font-semibold text-gray-400 dark:text-gray-400">
 
       {/* Results counter */}
       <span aria-live="polite">{resultsText}</span>
@@ -97,8 +97,8 @@ const TablePagination = ({ currentPage, totalPages, totalCount, limit, onPageCha
           onClick={() => onPageChange(normalizedCurrentPage - 1)}
           disabled={isPreviousDisabled}
           className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${isPreviousDisabled
-            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-            : "bg-gray-400 text-white hover:bg-gray-500"
+            ? "bg-gray-200 dark:bg-[#2A2A2A] text-gray-400 dark:text-gray-600 cursor-not-allowed"
+            : "bg-gray-400 dark:bg-[#3F3F3F] text-white hover:bg-gray-500 dark:hover:bg-gray-600"
             }`}
         >
           <ChevronLeft size={14} aria-hidden="true" />
@@ -111,7 +111,7 @@ const TablePagination = ({ currentPage, totalPages, totalCount, limit, onPageCha
               <span
                 key={`ellipsis-${idx}`}
                 aria-hidden="true"
-                className="px-1 text-gray-450 font-bold select-none"
+                className="px-1 text-gray-450 dark:text-gray-500 font-bold select-none"
               >
                 ...
               </span>
@@ -128,7 +128,7 @@ const TablePagination = ({ currentPage, totalPages, totalCount, limit, onPageCha
               onClick={() => onPageChange(p)}
               className={`w-7 h-7 rounded-full border text-xs font-bold transition-all flex items-center justify-center ${isActive
                 ? "bg-[#990011] border-[#990011] text-white"
-                : "border-border text-gray-600 hover:border-gray-400 hover:text-gray-900 bg-white"
+                : "border-border dark:border-[#3F3F3F] text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white bg-white dark:bg-[#1A1A1A]"
                 }`}
             >
               {displayNum}
@@ -143,8 +143,8 @@ const TablePagination = ({ currentPage, totalPages, totalCount, limit, onPageCha
           onClick={() => onPageChange(normalizedCurrentPage + 1)}
           disabled={isNextDisabled}
           className={`w-7 h-7 rounded-full border flex items-center justify-center transition-all ${isNextDisabled
-            ? "bg-gray-50 border-border text-gray-300 cursor-not-allowed"
-            : "border-[#990011] hover:bg-red-50 text-[#990011] bg-white"
+            ? "bg-gray-50 dark:bg-[#2A2A2A] border-border dark:border-[#3F3F3F] text-gray-300 dark:text-gray-600 cursor-not-allowed"
+            : "border-[#990011] dark:border-[#FF6B6B] hover:bg-red-50 dark:hover:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] bg-white dark:bg-[#1A1A1A]"
             }`}
         >
           <ChevronRight size={14} aria-hidden="true" />

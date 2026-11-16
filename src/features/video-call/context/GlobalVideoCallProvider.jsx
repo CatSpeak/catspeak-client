@@ -16,6 +16,7 @@ import {
 } from "@/features/video-call/utils/userPreferences"
 import GlobalCallContent from "./GlobalCallContent"
 import { useVideoCallAuthHeartbeat } from "@/features/video-call/hooks/useVideoCallAuthHeartbeat"
+import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantList"
 
 const PREF_KEYS = {
   RECEIVE_SYSTEM_MSGS: "receiveSystemMsgs",
@@ -33,25 +34,6 @@ const readPrefs = (accountId) => ({
     defaultValue: false,
   }),
 })
-
-const GlobalVideoCallContext = createContext(null)
-
-export const useGlobalVideoCall = () => {
-  const ctx = useContext(GlobalVideoCallContext)
-  if (!ctx)
-    throw new Error(
-      "useGlobalVideoCall must be used within GlobalVideoCallProvider",
-    )
-  return ctx
-}
-
-// Backward-compat alias (existing components import VideoCallContext)
-export { GlobalVideoCallContext as VideoCallContext }
-
-// Re-export navigate bridge (used by routesConfig RootLayout)
-export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
-
-import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantList"
 
 // --- Idle context (no active call) ------------------------------------------
 
@@ -156,7 +138,69 @@ const IDLE_VALUE = {
   deviceSelection: null,
   joinLeaveSound: false,
   setJoinLeaveSound: () => {},
+  isRecording: false,
+  isTogglingRecording: false,
+  handleToggleRecording: () => {},
+  showStopModal: false,
+  confirmStopRecording: () => {},
+  cancelStopRecording: () => {},
+  egressId: null,
+  startedByAccountId: null,
+  recordingStatus: {
+    elapsedSeconds: 0,
+    formattedTime: "00:00",
+    totalUsedMb: 0,
+    limitMb: null,
+    usagePercent: 0,
+    isDanger: false,
+    isWarning: false,
+  },
+
+  // Safe fallback properties consumed by VideoCallRoomContent / sub-panels
+  user: null,
+  location: null,
+  sessionId: null,
+  room: null,
+  handleSendMessage: () => {},
+  isHost: false,
+  showSpeakingTimeBalance: false,
+  setShowSpeakingTimeBalance: () => {},
+  showStudentSpeakingWidget: false,
+  setShowStudentSpeakingWidget: () => {},
+  showBreakout: false,
+  setShowBreakout: () => {},
+  showTroubleshoot: false,
+  mediaActive: false,
+  mediaVideoId: null,
+  mediaTitle: "",
+  isMediaHost: false,
+  isStartingMedia: false,
+  isStoppingMedia: false,
+  startMedia: async () => false,
+  stopMedia: async () => false,
+  mediaPlayerRef: { current: null },
+  needsTapToSync: false,
+  syncError: null,
+  tapToSync: () => {},
+  reportSyncError: () => {},
+  showWatchTogether: false,
+  setShowWatchTogether: () => {},
 }
+
+const GlobalVideoCallContext = createContext(IDLE_VALUE)
+
+export const useGlobalVideoCall = () => {
+  const ctx = useContext(GlobalVideoCallContext)
+  return ctx || IDLE_VALUE
+}
+
+// Backward-compat alias (existing components import VideoCallContext)
+export { GlobalVideoCallContext as VideoCallContext }
+
+// Re-export navigate bridge (used by routesConfig RootLayout)
+export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
+
+// --- Idle Call Content -----------------------------------------------------
 
 const IdleCallContent = ({
   children,

@@ -18,6 +18,7 @@ import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
 import { useWatchTogether } from "@/features/video-call/hooks/useWatchTogether"
 import { useRecording } from "@/features/video-call/hooks/useRecording"
+import { useRecordingStatus } from "@/features/video-call/hooks/useRecordingStatus"
 import { useVideoChatSignalR } from "@/features/video-call/hooks/useVideoChatSignalR"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
@@ -820,6 +821,12 @@ const GlobalCallContent = ({
     allowMemberRecording,
   })
 
+  const recordingStatus = useRecordingStatus(
+    isRecording,
+    recordingState.confirmStopRecording,
+    sessionId,
+  )
+
   const subtitleControls = useSubtitleControls({
     sessionId,
     room: roomData,
@@ -1429,6 +1436,7 @@ const GlobalCallContent = ({
     cancelStopRecording: recordingState.cancelStopRecording,
     egressId: egressId,
     startedByAccountId: startedByAccountId,
+    recordingStatus,
     layoutMode,
     setLayoutMode,
     pinnedParticipantId,

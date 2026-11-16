@@ -72,8 +72,6 @@ const validateMaterialFile = (file) => {
   return isSupportedDocument || isSupportedImage ? null : "type"
 }
 
-
-
 const formatMaterialSize = (value) => {
   const size = Number(value)
   return Number.isFinite(size) && size >= 0 && size < (1024 ** 4)
@@ -223,10 +221,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
       {/* LEFT/MAIN COLUMN: Materials List (Full width for student) */}
       <div className={`${isStudent ? "lg:col-span-3" : "lg:col-span-2"} flex flex-col gap-4`}>
         {/* Header and Search */}
-        <div className="bg-white rounded-2xl border border-border p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
-            <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
+            <span className="w-1.5 h-4 bg-[#990011] dark:bg-[#b20a1c] rounded-full" />
+            <h3 className="text-sm font-extrabold text-gray-800 dark:text-white uppercase tracking-wider">
               {cm.materialsList || cd.materialsList || "Materials List"}
             </h3>
           </div>
@@ -238,7 +236,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
               placeholder={cm.searchMaterials || cd.searchMaterials || "Search materials..."}
               value={materialSearch}
               onChange={(e) => setMaterialSearch(e.target.value)}
-              className="w-full h-9 pl-9 pr-4 bg-gray-50 hover:bg-gray-100/70 focus:bg-white border border-transparent focus:border-border outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400"
+              className="w-full h-9 pl-9 pr-4 bg-gray-50 dark:bg-[#222222] hover:bg-gray-100/70 dark:hover:bg-[#2A2A2A] focus:bg-white dark:focus:bg-[#1A1A1A] border border-transparent focus:border-border dark:focus:border-[#3F3F3F] outline-none rounded-xl text-xs font-semibold text-gray-800 dark:text-gray-100 transition-all placeholder:text-gray-400"
             />
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>}
@@ -246,7 +244,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
 
         {/* List of files */}
         <div
-          className="bg-white rounded-2xl border border-border p-5 shadow-sm flex flex-col gap-3 min-h-[300px]"
+          className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] p-5 shadow-sm flex flex-col gap-3 min-h-[300px]"
           aria-busy={isMaterialsLoading || isMaterialsFetching}
         >
           {isStudent ? (
@@ -254,10 +252,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
               role="status"
               className="flex flex-col items-center justify-center py-16 text-center"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 mb-4 border border-border">
+              <div className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-[#222222] flex items-center justify-center text-gray-400 mb-4 border border-border dark:border-[#3F3F3F]">
                 <FileText size={24} />
               </div>
-              <h4 className="text-sm font-bold text-gray-800 mb-1">
+              <h4 className="text-sm font-bold text-gray-800 dark:text-white mb-1">
                 {cm.materialsUnavailable || "Student materials are not available yet"}
               </h4>
               <p className="text-xs font-semibold text-gray-400 max-w-[320px]">
@@ -269,7 +267,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
               {hasMalformedItems && (
                 <div
                   role="alert"
-                  className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800"
+                  className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300"
                 >
                   {cm.someMaterialsUnavailable || "Some materials could not be displayed."}
                 </div>
@@ -279,7 +277,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                   role="status"
                   className="flex flex-col items-center justify-center py-20 gap-3"
                 >
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011]" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011] dark:border-[#FF6B6B]" />
                   <span className="text-xs font-bold text-gray-400">
                     {cm.loadingMaterials || cd.loadingMaterials || "Loading materials..."}
                   </span>
@@ -289,10 +287,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                   role="alert"
                   className="flex flex-col items-center justify-center py-16 text-center"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-[#990011] mb-4 border border-red-100">
+                  <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-950/40 flex items-center justify-center text-[#990011] dark:text-[#FF6B6B] mb-4 border border-red-100 dark:border-red-900/40">
                     <FileText size={24} />
                   </div>
-                  <h4 className="text-sm font-bold text-gray-800 mb-1">
+                  <h4 className="text-sm font-bold text-gray-800 dark:text-white mb-1">
                     {cm.materialsLoadFailed || "Unable to load materials"}
                   </h4>
                   <p className="text-xs font-semibold text-gray-400 max-w-[280px]">
@@ -302,7 +300,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                     <button
                       type="button"
                       onClick={() => refetchMaterials()}
-                      className="mt-4 rounded-xl border border-[#990011] px-4 py-2 text-xs font-extrabold text-[#990011] hover:bg-red-50"
+                      className="mt-4 rounded-xl border border-[#990011] dark:border-[#FF6B6B] px-4 py-2 text-xs font-extrabold text-[#990011] dark:text-[#FF6B6B] hover:bg-red-50 dark:hover:bg-red-950/30"
                     >
                       {cm.retry || "Try again"}
                     </button>
@@ -310,10 +308,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                 </div>
               ) : filteredMaterials.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 mb-4 border border-border">
+                  <div className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-[#222222] flex items-center justify-center text-gray-400 mb-4 border border-border dark:border-[#3F3F3F]">
                     <FileText size={24} />
                   </div>
-                  <h4 className="text-sm font-bold text-gray-800 mb-1">
+                  <h4 className="text-sm font-bold text-gray-800 dark:text-white mb-1">
                     {normalizedSearch && materialsList.length > 0
                       ? (cm.noMatchingMaterials || "No matching materials")
                       : (cm.noMaterials || cd.noMaterials || "No materials yet")}
@@ -325,7 +323,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                   </p>
                 </div>
               ) : (
-                <div className="flex flex-col divide-y divide-gray-100">
+                <div className="flex flex-col divide-y divide-gray-100 dark:divide-[#2A2A2A]">
                   {filteredMaterials.map((file, index) => {
                     const {
                       name: rawFileName,
@@ -347,11 +345,11 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                     const itemKey = materialId ?? `${fileName}-${index}`
 
                     return (
-                      <div key={itemKey} className="flex items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0 hover:bg-gray-50/30 px-2 rounded-xl transition-colors">
+                      <div key={itemKey} className="flex items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0 hover:bg-gray-50/30 dark:hover:bg-[#222222] px-2 rounded-xl transition-colors">
                         <div className="flex items-center gap-3 min-w-0">
                           {getFileIcon(fileName)}
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold text-gray-800 break-all max-w-[200px] md:max-w-md">
+                            <span className="text-xs font-bold text-gray-800 dark:text-gray-100 break-all max-w-[200px] md:max-w-md">
                               {fileName}
                             </span>
                             <div className="flex items-center gap-2 text-[10px] text-gray-400 font-semibold mt-1">
@@ -374,7 +372,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                               rel="noopener noreferrer"
                               referrerPolicy="no-referrer"
                               aria-label={`${cm.viewFile || "View file"}: ${fileName}`}
-                              className="p-2 text-gray-400 hover:text-[#990011] hover:bg-[#990011]/5 rounded-xl transition-all"
+                              className="p-2 text-gray-400 hover:text-[#990011] dark:hover:text-[#FF6B6B] hover:bg-[#990011]/5 dark:hover:bg-[#FF6B6B]/10 rounded-xl transition-all"
                               title={cm.viewFile || "View file"}
                             >
                               <Eye size={15} />
@@ -383,7 +381,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                           {fileUrl && !safeFileUrl && (
                             <span
                               aria-label={`${fileName}: ${cm.fileUnavailable || "File unavailable"}`}
-                              className="p-2 text-gray-300 cursor-not-allowed"
+                              className="p-2 text-gray-300 dark:text-gray-600 cursor-not-allowed"
                               title={cm.fileUnavailable || "File unavailable"}
                             >
                               <Eye size={15} />
@@ -396,7 +394,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                                 setDeleteMaterialData(material)
                               }}
                               aria-label={`${cm.deleteFile || "Delete file"}: ${fileName}`}
-                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-55 rounded-xl transition-all"
+                              className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all"
                               title={cm.deleteFile || "Delete file"}
                             >
                               <Trash2 size={15} />
@@ -416,10 +414,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
       {/* RIGHT COLUMN: Upload Panel (Hidden for students) */}
       {!isStudent && (
         <div className="flex flex-col gap-6">
-          <div className="bg-white rounded-2xl border border-border p-5 shadow-sm flex flex-col gap-4">
-            <div className="flex items-center gap-2 border-b border-gray-50 pb-2.5">
-              <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
-              <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] p-5 shadow-sm flex flex-col gap-4">
+            <div className="flex items-center gap-2 border-b border-gray-100 dark:border-[#333333] pb-2.5">
+              <span className="w-1.5 h-4 bg-[#990011] dark:bg-[#b20a1c] rounded-full" />
+              <h3 className="text-sm font-extrabold text-gray-800 dark:text-white uppercase tracking-wider">
                 {cm.uploadMaterial || cd.uploadMaterial || "Upload Material"}
               </h3>
             </div>
@@ -427,8 +425,8 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
             <div className="flex flex-col gap-3">
               <div
                 className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${dragActive
-                  ? "border-[#990011] bg-[#990011]/5"
-                  : "border-border hover:border-gray-300 hover:bg-gray-50/55"
+                  ? "border-[#990011] dark:border-[#FF6B6B] bg-[#990011]/5 dark:bg-[#FF6B6B]/10"
+                  : "border-border dark:border-[#3F3F3F] hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50/55 dark:hover:bg-[#222222]"
                   }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -446,10 +444,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                 aria-label={cm.selectFileLabel || "Select a material file"}
                 aria-describedby="material-upload-limits"
               >
-                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#990011] mb-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center text-[#990011] dark:text-[#FF6B6B] mb-3">
                   <Upload size={18} />
                 </div>
-                <span className="text-xs font-bold text-gray-800">
+                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
                   {cm.selectFile || cd.selectFile || "Select a file or drag and drop"}
                 </span>
                 <span
@@ -469,11 +467,11 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
               />
 
               {selectedUploadFile && (
-                <div className="p-3 bg-gray-50/80 rounded-xl border border-border flex items-center justify-between gap-3 animate-fadeIn">
+                <div className="p-3 bg-gray-50/80 dark:bg-[#222222] rounded-xl border border-border dark:border-[#3F3F3F] flex items-center justify-between gap-3 animate-fadeIn">
                   <div className="flex items-center gap-2.5 overflow-hidden">
                     {getFileIcon(selectedUploadFile.name)}
                     <div className="flex flex-col overflow-hidden">
-                      <span className="text-xs font-bold text-gray-850 truncate max-w-[150px]">
+                      <span className="text-xs font-bold text-gray-850 dark:text-gray-100 truncate max-w-[150px]">
                         {selectedUploadFile.name}
                       </span>
                       <span className="text-[9px] text-gray-400 font-bold">
@@ -485,7 +483,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                     type="button"
                     onClick={() => setSelectedUploadFile(null)}
                     aria-label={cm.removeSelectedFile || "Remove selected file"}
-                    className="p-1 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-all"
+                    className="p-1 hover:bg-gray-200 dark:hover:bg-[#333333] rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all cursor-pointer"
                   >
                     <X size={14} />
                   </button>
@@ -496,7 +494,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                 type="button"
                 disabled={!id || !selectedUploadFile || isUploading}
                 onClick={handleUploadSubmit}
-                className="w-full h-10 bg-[#990011] hover:bg-[#80000e] disabled:bg-gray-200 text-white disabled:text-gray-400 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:cursor-not-allowed"
+                className="w-full h-10 bg-[#990011] hover:bg-[#80000e] dark:bg-[#b20a1c] dark:hover:bg-[#c9182b] disabled:bg-gray-200 dark:disabled:bg-[#2A2A2A] text-white disabled:text-gray-400 dark:disabled:text-gray-600 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isUploading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />

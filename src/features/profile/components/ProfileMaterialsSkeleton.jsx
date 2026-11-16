@@ -31,7 +31,7 @@ const ProfileMaterialsSkeleton = ({ isOwnProfile = true }) => {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="border border-border rounded-xl p-4 bg-white flex items-center justify-between"
+              className="border border-border dark:border-[#3F3F3F] rounded-xl p-4 bg-white dark:bg-[#1A1A1A] flex items-center justify-between"
             >
               <div className="flex items-center gap-4 flex-1 min-w-0 mr-2">
                 <Skeleton className="w-8 h-8 rounded-md shrink-0" />
@@ -53,7 +53,7 @@ const ProfileMaterialsSkeleton = ({ isOwnProfile = true }) => {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="border border-border rounded-xl p-4 bg-white flex flex-col justify-between gap-4 w-full"
+              className="border border-border dark:border-[#3F3F3F] rounded-xl p-4 bg-white dark:bg-[#1A1A1A] flex flex-col justify-between gap-4 w-full"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-4 min-w-0 flex-1">

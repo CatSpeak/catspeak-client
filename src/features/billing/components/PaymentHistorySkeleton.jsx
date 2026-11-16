@@ -12,9 +12,9 @@ export default function PaymentHistorySkeleton() {
       </div>
 
       {/* Table Skeleton */}
-      <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-xs">
+      <div className="border border-gray-200 dark:border-[#3F3F3F] rounded-xl overflow-hidden bg-white dark:bg-[#1A1A1A] shadow-xs">
         {/* Table Header */}
-        <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 grid grid-cols-6 gap-4">
+        <div className="bg-gray-50 dark:bg-[#242424] border-b border-gray-200 dark:border-[#3F3F3F] px-4 py-3 grid grid-cols-6 gap-4">
           <Skeleton className="h-4 w-20 rounded" />
           <Skeleton className="h-4 w-24 rounded" />
           <Skeleton className="h-4 w-16 rounded" />
@@ -24,7 +24,7 @@ export default function PaymentHistorySkeleton() {
         </div>
 
         {/* Table Rows (5 rows) */}
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-gray-100 dark:divide-[#272727]">
           {Array.from({ length: 5 }).map((_, idx) => (
             <div key={idx} className="px-4 py-4 grid grid-cols-6 gap-4 items-center">
               <Skeleton className="h-4 w-28 rounded" />
