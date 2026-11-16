@@ -82,8 +82,8 @@ const CreatePostPage = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error(dict.createPost.fileTooLargeToast)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(dict.createPost.fileTooLargeToast || "Kích thước ảnh bìa không được vượt quá 5MB")
       return
     }
     const reader = new FileReader()
@@ -291,7 +291,7 @@ const CreatePostPage = () => {
                   </div>
                   <div className="text-center text-xs text-[#9CA3AF] dark:text-gray-400 space-y-1 font-medium">
                     <p>{dict.createPost.avatarDesc1 || "Hỗ trợ định dạng png, jpeg và svg."}</p>
-                    <p>{dict.createPost.avatarDesc2 || "Kích cỡ dưới 50mb"}</p>
+                    <p>{dict.createPost.avatarDesc2 || "Kích cỡ dưới 5MB"}</p>
                   </div>
                 </div>
               )}
