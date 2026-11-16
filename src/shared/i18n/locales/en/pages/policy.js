@@ -3,7 +3,7 @@ export default {
   heading: 'Privacy Policy',
   subtitle:
     'We are committed to protecting your privacy and personal data. This policy explains how Cat Speak collects, uses, and stores your information.',
-  footer: 'COPYRIGHT 09-2025 | CAT SPEAK – LANGUAGE IN HAND',
+  footer: '© 2026 | CAT SPEAK - I SPEAK YOU SPEAK WE PEAK',
   sections: [
     {
       title: '1. Information We Collect',
@@ -75,8 +75,13 @@ export default {
     },
     {
       title: '9. Contact',
-      intro: 'If you have any questions about this policy, please reach out:',
-      bullets: ['Email: support@catspeak.com.vn', 'Hotline: +84 123 456 789', 'Fanpage: facebook.com/cathspeak'],
+      intro: 'If you have any questions or requests regarding this Privacy Policy, please contact:',
+      bullets: [
+        'Email: catspeak.vn@gmail.com',
+        'Website: https://www.catspeak.com.vn/',
+        'Fanpage: https://www.facebook.com/share/1DzTNUSEAN/',
+        'Hotline: 0868192604',
+      ],
     },
   ],
 }

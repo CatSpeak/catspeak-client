@@ -3,7 +3,7 @@ export default {
   heading: 'Chính sách bảo mật',
   subtitle:
     'Cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của người dùng. Chính sách này mô tả cách Cat Speak thu thập, sử dụng và lưu trữ thông tin của bạn.',
-  footer: 'COPYRIGHT 09-2025 | CAT SPEAK – LANGUAGE IN HAND',
+  footer: '© 2026 | CAT SPEAK - I SPEAK YOU SPEAK WE PEAK',
   sections: [
     {
       title: '1. Thông tin chúng tôi thu thập',
@@ -75,8 +75,13 @@ export default {
     },
     {
       title: '9. Liên hệ',
-      intro: 'Nếu bạn có bất kỳ câu hỏi nào về chính sách này, vui lòng liên hệ:',
-      bullets: ['Email: support@catspeak.com.vn', 'Hotline: +84 123 456 789', 'Fanpage: facebook.com/cathspeak'],
+      intro: 'Nếu có câu hỏi hoặc yêu cầu liên quan đến chính sách bảo mật, vui lòng liên hệ:',
+      bullets: [
+        'Email: catspeak.vn@gmail.com',
+        'Website: https://www.catspeak.com.vn/',
+        'Fanpage: https://www.facebook.com/share/1DzTNUSEAN/',
+        'Hotline: 0868192604',
+      ],
     },
   ],
 }
