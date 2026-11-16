@@ -74,11 +74,11 @@ const VoucherDetailSkeleton = () => {
 
             {/* 2 Metric Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-              <div className="p-4 rounded-xl bg-slate-50 border border-border flex flex-col gap-2">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#242424] border border-border dark:border-[#3F3F3F] flex flex-col gap-2">
                 <Skeleton className="h-3.5 w-28 rounded" />
                 <Skeleton className="h-7 w-32 rounded" />
               </div>
-              <div className="p-4 rounded-xl bg-slate-50 border border-border flex flex-col gap-2">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#242424] border border-border dark:border-[#3F3F3F] flex flex-col gap-2">
                 <Skeleton className="h-3.5 w-28 rounded" />
                 <Skeleton className="h-7 w-16 rounded" />
               </div>
@@ -112,7 +112,7 @@ const VoucherDetailSkeleton = () => {
 
         {/* Table Rows Skeleton */}
         <div className="overflow-x-auto -mx-6 px-6 pt-2">
-          <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pb-3">
             <Skeleton className="h-3.5 w-20 rounded" />
             <Skeleton className="h-3.5 w-28 rounded" />
             <Skeleton className="h-3.5 w-24 rounded" />
@@ -120,7 +120,7 @@ const VoucherDetailSkeleton = () => {
             <Skeleton className="h-3.5 w-20 rounded" />
           </div>
 
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border dark:divide-[#3F3F3F]">
             {[...Array(4)].map((_, idx) => (
               <div key={idx} className="flex items-center justify-between py-4">
                 <Skeleton className="h-4 w-24 rounded" />

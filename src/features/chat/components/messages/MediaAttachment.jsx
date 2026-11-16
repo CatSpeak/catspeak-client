@@ -100,7 +100,7 @@ const MediaAttachment = ({
       {isAudio ? (
         <div
           className={`w-fit max-w-[340px] ${roundedClass} overflow-hidden ${
-            hasHeader ? "bg-transparent" : isOwn ? "bg-[#990011]" : "bg-primaryBg"
+            hasHeader ? "bg-transparent" : isOwn ? "bg-[#990011] dark:bg-cath-red-700" : "bg-primaryBg dark:bg-[#272727]"
           }`}
         >
           <VoiceWaveformPlayer
@@ -195,19 +195,19 @@ const MediaAttachment = ({
         >
           <ListItem
             lines={2}
-            className={`bg-primaryBg ${roundedClass} overflow-hidden text-left`}
+            className={`bg-primaryBg dark:bg-[#272727] ${roundedClass} overflow-hidden text-left`}
             leftContent={<FileIcon />}
           >
-            <p className="font-semibold truncate m-0">{displayName}</p>
+            <p className="font-semibold text-gray-900 dark:text-white truncate m-0">{displayName}</p>
             {parsedSize ? (
-              <p className="text-sm text-[#606060] m-0">
+              <p className="text-sm text-[#606060] dark:text-[#AAAAAA] m-0">
                 {parsedSize >= 1024 * 1024
                   ? `${(parsedSize / (1024 * 1024)).toFixed(1)} MB`
                   : `${(parsedSize / 1024).toFixed(1)} KB`}
               </p>
             ) : (
               displayName.includes(".") && (
-                <p className="text-xs text-[#606060] m-0 uppercase">
+                <p className="text-xs text-[#606060] dark:text-[#AAAAAA] m-0 uppercase">
                   {displayName.split(".").pop()} File
                 </p>
               )

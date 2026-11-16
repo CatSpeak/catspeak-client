@@ -57,11 +57,11 @@ const VoucherModal = ({
     >
       {isAllEmpty ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#1864AB]">
+          <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center mx-auto mb-4 text-[#1864AB] dark:text-blue-400">
             <Tag size={24} />
           </div>
-          <h3 className="font-bold text-[#111827] mb-2">{tc.noOffersTitle}</h3>
-          <p className="text-sm text-[#6B7280] max-w-xs mx-auto">
+          <h3 className="font-bold text-[#111827] dark:text-white mb-2">{tc.noOffersTitle}</h3>
+          <p className="text-sm text-[#6B7280] dark:text-neutral-400 max-w-xs mx-auto">
             {tc.noOffersDesc}
           </p>
         </div>

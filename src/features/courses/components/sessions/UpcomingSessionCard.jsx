@@ -66,26 +66,25 @@ const UpcomingSessionCard = ({
 
   return (
     <div
-      className={`bg-white rounded-3xl border border-border shadow-xs flex flex-col justify-between overflow-hidden transition-all ${
-        nextClass ? "hover:shadow-md hover:cursor-pointer hover:bg-gray-50/50" : ""
-      }`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] shadow-xs flex flex-col justify-between overflow-hidden transition-all ${nextClass ? "hover:shadow-md hover:cursor-pointer hover:bg-gray-50/50 dark:hover:bg-[#222222]" : ""
+        }`}
       onClick={nextClass ? onJoin : undefined}
     >
       <div className="p-6 flex flex-col gap-5">
-        <h3 className="text-lg font-black text-gray-950 tracking-tight">
+        <h3 className="text-lg font-black text-gray-950 dark:text-white tracking-tight">
           {upcomingSessionLabel}
         </h3>
 
         {nextClass ? (
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+              <span className="bg-[#FEF3C7] dark:bg-amber-950/60 text-[#D97706] dark:text-amber-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
                 {getLocalizedLanguageName(
                   nextClass.language || courseData?.language,
                   t,
                 ) || "—"}
               </span>
-              <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+              <span className="bg-[#FEF3C7] dark:bg-amber-950/60 text-[#D97706] dark:text-amber-300 font-bold text-[10px] px-2.5 py-0.5 rounded-full">
                 {nextClass.levels?.[0] || courseData?.levels?.[0] || "—"}
               </span>
               {nextClass.status && (
@@ -93,13 +92,13 @@ const UpcomingSessionCard = ({
               )}
             </div>
 
-            <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-2">
+            <h4 className="font-extrabold text-base text-gray-950 dark:text-white leading-snug line-clamp-2">
               {nextClass.title}
             </h4>
 
-            <div className="flex flex-col gap-2 border-b border-gray-50 pb-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-                <Clock size={14} className="text-gray-400" />
+            <div className="flex flex-col gap-2 border-b border-gray-50 dark:border-[#333333] pb-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                <Clock size={14} className="text-gray-400 dark:text-gray-500" />
                 <span>
                   {(() => {
                     const ns = nextClass?.nextSession
@@ -109,7 +108,7 @@ const UpcomingSessionCard = ({
                     const sessionStartTime =
                       schedObj?.startTime ||
                       (typeof ns?.startTime === "string" &&
-                      !ns.startTime.includes("T")
+                        !ns.startTime.includes("T")
                         ? ns.startTime
                         : null) ||
                       ns?.startTime ||
@@ -117,7 +116,7 @@ const UpcomingSessionCard = ({
                     const sessionEndTime =
                       schedObj?.endTime ||
                       (typeof ns?.endTime === "string" &&
-                      !ns.endTime.includes("T")
+                        !ns.endTime.includes("T")
                         ? ns.endTime
                         : null) ||
                       ns?.endTime ||
@@ -134,8 +133,8 @@ const UpcomingSessionCard = ({
                   })()}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-                <Calendar size={14} className="text-gray-400" />
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                <Calendar size={14} className="text-gray-400 dark:text-gray-500" />
                 <span>
                   {(() => {
                     const ns = nextClass?.nextSession
@@ -143,7 +142,7 @@ const UpcomingSessionCard = ({
                       ns?.rawStartTime ||
                       ns?.date ||
                       (typeof ns?.startTime === "string" &&
-                      (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                        (ns.startTime.includes("T") || ns.startTime.includes("-"))
                         ? ns.startTime
                         : null) ||
                       nextClass?.date ||
@@ -183,7 +182,7 @@ const UpcomingSessionCard = ({
                   e.stopPropagation()
                   onJoin?.(e)
                 }}
-                className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap cursor-pointer"
+                className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap cursor-pointer"
               >
                 <span>{joinRoomLabel}</span>
                 <span>&rarr;</span>
@@ -191,12 +190,12 @@ const UpcomingSessionCard = ({
             </div>
           </div>
         ) : (
-          <div className="bg-[#FCFCFC] border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
-            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+          <div className="bg-[#FCFCFC] dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
+            <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-[#1A1A1A] flex items-center justify-center text-gray-400">
               <Calendar size={18} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="font-extrabold text-base text-gray-700">
+              <span className="font-extrabold text-base text-gray-700 dark:text-gray-200">
                 {noUpcomingLabel}
               </span>
               <p className="text-sm text-gray-400 font-semibold max-w-[200px] leading-relaxed">
@@ -213,7 +212,7 @@ const UpcomingSessionCard = ({
           e.stopPropagation()
           onViewAll?.(e)
         }}
-        className="w-full py-3.5 px-6 border-t border-border text-xs font-bold text-gray-500 hover:text-[#990011] hover:bg-gray-50 transition-colors text-center cursor-pointer flex items-center justify-center"
+        className="w-full py-3.5 px-6 border-t border-border dark:border-[#3F3F3F] text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-[#990011] dark:hover:text-[#FF6B6B] hover:bg-gray-50 dark:hover:bg-[#222222] transition-colors text-center cursor-pointer flex items-center justify-center"
       >
         {viewAllLabel}
       </button>

@@ -7,7 +7,7 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators"
  */
 const VideoCallLoading = ({ message = "Loading room..." }) => {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primaryBg">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primaryBg dark:bg-[#0F0F0F] text-foreground dark:text-white">
       <LoadingSpinner text={message} />
     </div>
   )

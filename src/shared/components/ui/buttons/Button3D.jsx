@@ -1,3 +1,4 @@
+import React from "react"
 import { Loader2 } from "lucide-react"
 import colors from "@/shared/utils/colors"
 
@@ -9,7 +10,9 @@ const Button3D = ({
   loading = false,
   disabled = false,
   loadingText,
+  type = "button",
   className = "",
+  innerClassName = "",
   roundedClass = "rounded-xl",
   ...props
 }) => {
@@ -20,11 +23,25 @@ const Button3D = ({
   // This creates the proper 3D depth below the primary red (700) face.
   const edgeBackground = `linear-gradient(to left, ${colors.red[200]} 0%, ${colors.red[400]} 8%, ${colors.red[400]} 92%, ${colors.red[200]} 100%)`
 
+  const renderIcon = (icon) => {
+    if (!icon) return null
+    return (
+      <span className="flex items-center justify-center shrink-0 pointer-events-none">
+        {React.isValidElement(icon)
+          ? React.cloneElement(icon, {
+              size: icon.props.size || 20,
+            })
+          : icon}
+      </span>
+    )
+  }
+
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={isActuallyDisabled}
-      className={`relative border-none bg-transparent p-0 cursor-pointer outline-offset-4 transition-[filter] duration-250 select-none touch-manipulation focus:not(:focus-visible):outline-none ${
+      className={`relative h-10 border-none bg-transparent p-0 cursor-pointer outline-offset-4 transition-[filter] duration-250 select-none touch-manipulation focus:not(:focus-visible):outline-none ${
         !isActuallyDisabled ? "group hover:brightness-110" : "opacity-70 cursor-not-allowed grayscale-[30%]"
       } ${className}`}
       {...props}
@@ -46,23 +63,23 @@ const Button3D = ({
       
       {/* Front */}
       <span
-        className={`block relative py-2.5 px-6 ${roundedClass} text-sm sm:text-base font-medium text-white will-change-transform -translate-y-[4px] transition-transform duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] flex items-center justify-center gap-2 ${
+        className={`relative w-full h-10 px-4 ${roundedClass} text-sm font-medium text-white will-change-transform -translate-y-[4px] transition-transform duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] flex items-center justify-center gap-2 whitespace-nowrap select-none ${
           !isActuallyDisabled
             ? "group-hover:-translate-y-[6px] group-hover:duration-[250ms] group-hover:ease-[cubic-bezier(.3,.7,.4,1.5)] group-active:-translate-y-[2px] group-active:duration-[34ms]"
             : ""
-        }`}
+        } ${innerClassName}`}
         style={{ backgroundColor: colors.primaryRed }}
       >
         {loading ? (
           <>
-            <Loader2 className="animate-spin w-5 h-5" />
+            <Loader2 className="animate-spin w-5 h-5 shrink-0" />
             <span>{loadingText || children}</span>
           </>
         ) : (
           <>
-            {startIcon}
+            {renderIcon(startIcon)}
             {children}
-            {endIcon}
+            {renderIcon(endIcon)}
           </>
         )}
       </span>

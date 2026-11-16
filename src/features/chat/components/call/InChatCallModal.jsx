@@ -140,7 +140,7 @@ const CallControlsInner = ({
   }, [isDirect1on1, remoteParticipants, localParticipant, lastSpeakerId])
 
   return (
-    <div className="flex flex-col h-full w-full justify-between bg-white text-black select-none">
+    <div className="flex flex-col h-full w-full justify-between bg-white dark:bg-[#1A1A1A] text-black dark:text-white select-none">
       {/* ── Top Bar ── */}
       <CallTopBar
         chatTitle={chatTitle}
@@ -152,7 +152,7 @@ const CallControlsInner = ({
       />
 
       {/* ── Main View (Single Spotlight Tile when Minimized, Grid when Expanded) ── */}
-      <div className="flex-1 p-4 overflow-y-auto min-h-0 bg-primaryBg">
+      <div className="flex-1 p-4 overflow-y-auto min-h-0 bg-primaryBg dark:bg-[#0F0F0F]">
         {isMinimized ? (
           <div className="w-full h-full">
             {isWaitingForFriend ? (
@@ -244,10 +244,10 @@ const InChatCallModal = ({
   const callType = callSession.callType || "video"
 
   const containerClasses = isMinimized
-    ? "fixed bottom-5 right-5 z-[1301] w-72 sm:w-80 h-96 rounded-2xl shadow-2xl overflow-hidden border border-border bg-white flex flex-col animate-in zoom-in-95 duration-200"
+    ? "fixed bottom-5 right-5 z-[1301] w-72 sm:w-80 h-96 rounded-2xl shadow-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] flex flex-col animate-in zoom-in-95 duration-200"
     : isFullscreen
-      ? "fixed inset-0 z-[1301] bg-white flex flex-col overflow-hidden animate-in fade-in duration-200"
-      : "fixed inset-3 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[94vw] sm:max-w-4xl sm:h-[82vh] sm:max-h-[720px] z-[1301] rounded-2xl shadow-2xl overflow-hidden border border-border bg-white flex flex-col animate-in fade-in zoom-in-95 duration-200"
+      ? "fixed inset-0 z-[1301] bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden animate-in fade-in duration-200"
+      : "fixed inset-3 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[94vw] sm:max-w-4xl sm:h-[82vh] sm:max-h-[720px] z-[1301] rounded-2xl shadow-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] flex flex-col animate-in fade-in zoom-in-95 duration-200"
 
   return createPortal(
     <>

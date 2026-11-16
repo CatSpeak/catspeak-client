@@ -1,5 +1,8 @@
-import React from "react";
-import { ChevronDown } from "lucide-react";
+import React, { useMemo } from "react"
+import { ChevronDown, CalendarX } from "lucide-react"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
+import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 
 /**
  * View tổng quan tháng: hiển thị danh sách ngày có sự kiện và ngày có đăng ký.
@@ -13,6 +16,7 @@ import { ChevronDown } from "lucide-react";
  *   monthTab             – "upcoming" | "registered"
  *   setMonthTab          – setter
  *   onSelectDate         – (day: number) => void
+ *   isLoading            – đang tải
  *   cal                  – bản dịch
  */
 const DayScheduleMonthView = ({
@@ -25,117 +29,157 @@ const DayScheduleMonthView = ({
   monthTab,
   setMonthTab,
   onSelectDate,
+  isLoading = false,
   cal = {},
 }) => {
-  const eventCounts = eventCountsByDay || {};
+  const eventCounts = eventCountsByDay || {}
   const daysWithEvents = Object.keys(eventCounts)
     .map(Number)
     .sort((a, b) => a - b)
-    .filter((day) => eventCounts[day] > 0);
+    .filter((day) => eventCounts[day] > 0)
 
-  const totalUpcoming = totalUniqueEvents || 0;
+  const totalUpcoming = totalUniqueEvents || 0
 
-  return (
-    <div className="flex flex-col h-full bg-white p-5 md:p-6 lg:p-6 rounded-3xl shadow-sm">
-      <h3 className="text-[22px] font-medium text-black mb-6">
-        {cal.monthSchedule || "Lịch trình sự kiện tháng"}{" "}
-        {currentDate.format("M")}
-      </h3>
+  const handleTabChange = (nextTab) => {
+    setMonthTab(nextTab)
+  }
 
-      {/* Tabs */}
-      <div className="flex w-full border-b border-border mb-6">
-        <button
-          onClick={() => setMonthTab("upcoming")}
-          className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[16px] font-medium border-b-2 transition-all ${
-            monthTab === "upcoming"
-              ? "border-[#990011] text-[#990011]"
-              : "border-transparent text-gray-400 hover:text-black"
-          }`}
-        >
-          {cal.upcoming || "Sắp diễn ra"}
-          {totalUpcoming > 0 && (
+  const tabs = useMemo(
+    () => [
+      {
+        id: "upcoming",
+        label: cal.upcoming || "Sắp diễn ra",
+        badge:
+          totalUpcoming > 0 ? (
             <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-white">
               {totalUpcoming}
             </span>
-          )}
-        </button>
-        <button
-          onClick={() => setMonthTab("registered")}
-          className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[16px] font-medium border-b-2 transition-all ${
-            monthTab === "registered"
-              ? "border-[#990011] text-[#990011]"
-              : "border-transparent text-gray-400 hover:text-black"
-          }`}
-        >
-          {cal.registered || "Đã đăng kí"}
-          {daysWithRegistered.length > 0 && (
+          ) : null,
+      },
+      {
+        id: "registered",
+        label: cal.registered || "Đã đăng kí",
+        badge:
+          daysWithRegistered?.length > 0 ? (
             <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-white">
-              {registeredMonthEvents.length}
+              {registeredMonthEvents?.length || 0}
             </span>
-          )}
-        </button>
+          ) : null,
+      },
+    ],
+    [
+      cal.upcoming,
+      cal.registered,
+      totalUpcoming,
+      daysWithRegistered,
+      registeredMonthEvents,
+    ],
+  )
+
+  return (
+    <div className="flex flex-col h-full flex-1 bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-xl">
+      {/* Title */}
+      <div className="h-[56px] px-4 flex items-center">
+        <h3 className="text-xl font-bold text-black dark:text-white">
+          {cal.monthSchedule || "Lịch trình sự kiện tháng"}{" "}
+          {currentDate.format("M")}
+        </h3>
       </div>
 
+      {/* Tabs */}
+      <Tabs
+        tabs={tabs}
+        activeTab={monthTab}
+        onChange={handleTabChange}
+        fullWidth={false}
+        className="mb-4"
+      />
+
       {/* Content */}
-      <div className="flex-1 overflow-y-auto space-y-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
-        {monthTab === "upcoming" ? (
-          daysWithEvents.length === 0 ? (
-            <div className="text-sm text-gray-400 py-8 text-center mt-10">
-              {cal.noEvents || "Không có sự kiện nào trong tháng này"}
-            </div>
-          ) : (
-            daysWithEvents.map((day) => (
-              <div
-                key={day}
-                onClick={() => onSelectDate && onSelectDate(day)}
-                className="flex items-center justify-between px-5 py-[14px] border border-border rounded-[16px] cursor-pointer hover:border-[#990011] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-[15px] font-medium text-black">
-                    {cal.day || "Ngày"} {day < 10 ? `0${day}` : day}
-                  </span>
-                  <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-white">
-                    {eventCounts[day] < 10
-                      ? `0${eventCounts[day]}`
-                      : eventCounts[day]}
-                  </span>
-                </div>
-                <ChevronDown size={20} className="text-black" />
-              </div>
-            ))
-          )
+      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden px-4 pb-4 space-y-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
+        {isLoading ? (
+          <LoadingSpinner
+            className="flex-1 flex flex-col items-center justify-center py-8"
+            text={cal.loadingEvents || "Đang tải sự kiện..."}
+          />
         ) : (
-          // Registered tab
-          daysWithRegistered.length === 0 ? (
-            <div className="text-sm text-gray-400 py-8 text-center mt-10">
-              {cal.noRegisteredEvents ||
-                "Bạn chưa đăng kí sự kiện nào trong tháng này"}
-            </div>
-          ) : (
-            daysWithRegistered.map((day) => (
-              <div
-                key={day}
-                onClick={() => onSelectDate && onSelectDate(day)}
-                className="flex items-center justify-between px-5 py-[14px] border border-[#990011]/30 rounded-[16px] cursor-pointer hover:border-[#990011] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-[15px] font-medium text-black">
-                    {cal.day || "Ngày"} {day < 10 ? `0${day}` : day}
-                  </span>
-                  <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#990011] text-white">
-                    {registeredByDay[day] < 10
-                      ? `0${registeredByDay[day]}`
-                      : registeredByDay[day]}
-                  </span>
-                </div>
-                <ChevronDown size={20} className="text-black" />
-              </div>
-            ))
-          )
+          <TabContent
+            activeTab={monthTab}
+            tabs={tabs}
+            className="flex-1 flex flex-col space-y-3 w-full"
+            containerClassName="flex-1 flex flex-col"
+          >
+            {monthTab === "upcoming" ? (
+                daysWithEvents.length === 0 ? (
+                  <EmptyState
+                    variant="component"
+                    icon={CalendarX}
+                    title={
+                      cal.noEventsMonth ||
+                      cal.noEvents ||
+                      "Không có sự kiện nào trong tháng này"
+                    }
+                    className="flex-1 my-auto"
+                  />
+                ) : (
+                  daysWithEvents.map((day) => (
+                    <div
+                      key={day}
+                      onClick={() => onSelectDate && onSelectDate(day)}
+                      className="flex items-center justify-between px-5 py-[14px] border border-border dark:border-[#3F3F3F] dark:bg-[#202020] rounded-[16px] cursor-pointer hover:border-[#990011] dark:hover:border-red-400 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-[15px] font-medium text-black dark:text-white">
+                          {cal.day || "Ngày"} {day < 10 ? `0${day}` : day}
+                        </span>
+                        <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-white">
+                          {eventCounts[day] < 10
+                            ? `0${eventCounts[day]}`
+                            : eventCounts[day]}
+                        </span>
+                      </div>
+                      <ChevronDown size={20} className="text-black dark:text-white" />
+                    </div>
+                  ))
+                )
+              ) : // Registered tab
+              daysWithRegistered.length === 0 ? (
+                <EmptyState
+                  variant="component"
+                  icon={CalendarX}
+                  title={
+                    cal.noRegisteredEventsMonth ||
+                    cal.noRegisteredEvents ||
+                    "Bạn chưa đăng kí sự kiện nào trong tháng này"
+                  }
+                  className="flex-1 my-auto"
+                />
+              ) : (
+                daysWithRegistered.map((day) => (
+                  <div
+                    key={day}
+                    onClick={() => onSelectDate && onSelectDate(day)}
+                    className="flex items-center justify-between px-5 py-[14px] border border-[#990011]/30 dark:border-red-500/40 dark:bg-[#202020] rounded-[16px] cursor-pointer hover:border-[#990011] dark:hover:border-red-400 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-[15px] font-medium text-black dark:text-white">
+                        {cal.day || "Ngày"} {day < 10 ? `0${day}` : day}
+                      </span>
+                      <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#990011] text-white">
+                        {registeredByDay[day] < 10
+                          ? `0${registeredByDay[day]}`
+                          : registeredByDay[day]}
+                      </span>
+                    </div>
+                    <ChevronDown size={20} className="text-black dark:text-white" />
+                  </div>
+                ))
+              )}
+          </TabContent>
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DayScheduleMonthView;
+export default DayScheduleMonthView

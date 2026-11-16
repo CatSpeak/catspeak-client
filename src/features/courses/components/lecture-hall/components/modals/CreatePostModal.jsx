@@ -116,9 +116,9 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
       onClose={handleCloseModal}
       title={dict.title}
       fullScreenOnMobile={false}
-      className="md:max-w-2xl rounded-xl"
-      headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
-      bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
+      className="md:max-w-2xl rounded-xl bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F]"
+      headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2] dark:border-[#3F3F3F]"
+      bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2] dark:border-[#3F3F3F]"
       footer={
         <div className="flex justify-end gap-3 px-1">
           <PillButton
@@ -128,6 +128,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
             bgColor={"white"}
             textColor={"#72000d"}
             borderColor={"#E2E2E2"}
+            className="dark:bg-[#222222] dark:text-[#FF6B6B] dark:border-[#3F3F3F]"
           >
             {dict.cancel}
           </PillButton>
@@ -140,7 +141,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Tiêu đề */}
         <div>
-          <label className="block text-sm font-semibold text-[#374151] mb-1.5">
+          <label className="block text-sm font-semibold text-[#374151] dark:text-gray-300 mb-1.5">
             {dict.postName} <span className="text-[#EF4444]">*</span>
           </label>
           <TextInput
@@ -149,13 +150,13 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
             onChange={(e) => handleChange("title", e.target.value)}
             error={errors.title}
             placeholder={dict.postNamePlaceholder}
-            className={`rounded-xl !h-[50px] px-4 text-sm ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
+            className={`rounded-xl !h-[50px] px-4 text-sm bg-white dark:bg-[#222222] text-gray-900 dark:text-white ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
           />
         </div>
 
         {/* Nội dung */}
         <div>
-          <label className="block text-sm font-semibold text-[#374151] mb-2">
+          <label className="block text-sm font-semibold text-[#374151] dark:text-gray-300 mb-2">
             {dict.content} <span className="text-[#EF4444]">*</span>
           </label>
           <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
@@ -182,7 +183,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
 
         {/* Tệp đính kèm */}
         <div>
-          <label className="block text-sm font-semibold text-[#374151] mb-2">
+          <label className="block text-sm font-semibold text-[#374151] dark:text-gray-300 mb-2">
             {dict.attachments} ({selectedFile ? "1/1" : "0/1"})
           </label>
 
@@ -211,18 +212,18 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
               tabIndex={0}
               aria-label={dict.attachmentsDesc}
               className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all space-y-3 ${dragActive
-                ? "border-[#72000d] bg-red-50/40"
-                : "border-[#E2E2E2] hover:border-gray-400 bg-[#F9FAFB]"
+                ? "border-[#72000d] dark:border-[#FF6B6B] bg-red-50/40 dark:bg-red-950/30"
+                : "border-[#E2E2E2] dark:border-[#3F3F3F] hover:border-gray-400 dark:hover:border-gray-500 bg-[#F9FAFB] dark:bg-[#222222]"
                 }`}
             >
-              <div className="w-12 h-12 bg-white text-[#72000d] rounded-full flex items-center justify-center mx-auto shadow-sm">
+              <div className="w-12 h-12 bg-white dark:bg-[#1A1A1A] text-[#72000d] dark:text-[#FF6B6B] rounded-full flex items-center justify-center mx-auto shadow-sm">
                 <CloudUpload size={24} />
               </div>
               <div>
-                <p className="text-xs sm:text-sm text-[#72000d] font-bold mb-1">
+                <p className="text-xs sm:text-sm text-[#72000d] dark:text-[#FF6B6B] font-bold mb-1">
                   {dict.attachmentsDesc}
                 </p>
-                <p className="text-[11px] text-gray-500 mt-1">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
                   {dict.supportedFiles}
                 </p>
               </div>
@@ -240,7 +241,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
         <div className="space-y-3">
           <ToggleOption
             icon={<Pin size={20} className="text-[#E2B60A]" />}
-            iconBg="bg-[#FFF9CC]"
+            iconBg="bg-[#FFF9CC] dark:bg-amber-950/40"
             title={dict.pinTitle}
             description={dict.pinDesc}
             checked={formData.isPinned}
@@ -249,7 +250,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
 
           <ToggleOption
             icon={<MessageSquare size={20} className="text-[#0E6EEC]" />}
-            iconBg="bg-[#8ECAFF]"
+            iconBg="bg-[#8ECAFF] dark:bg-blue-950/40"
             title={dict.allowReplyTitle}
             description={dict.allowReplyDesc}
             checked={formData.allowReply}
@@ -258,7 +259,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
 
           <ToggleOption
             icon={<Eye size={20} className="text-[#F83B4F]" />}
-            iconBg="bg-[#FFEAED]"
+            iconBg="bg-[#FFEAED] dark:bg-red-950/40"
             title={dict.visibleTitle}
             description={dict.visibleDesc}
             checked={formData.visibleToStudents}

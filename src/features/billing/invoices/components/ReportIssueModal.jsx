@@ -91,7 +91,7 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
           onSubmit={handleSubmit}
           className="space-y-4"
         >
-          <p className="text-sm text-[#7A7574] mb-4">
+          <p className="text-sm text-[#7A7574] dark:text-neutral-400 mb-4">
             {t.billing.reportIssueModal.subtitle.replace(
               "{{paymentId}}",
               paymentId,
@@ -100,15 +100,15 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
 
           <div>
             <label
-              className="block text-sm font-semibold mb-2"
+              className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
               htmlFor="explanation"
             >
               {t.billing.reportIssueModal.explanationLabel}{" "}
-              <span className="text-cath-red-700">*</span>
+              <span className="text-cath-red-700 dark:text-red-400">*</span>
             </label>
             <textarea
               id="explanation"
-              className="w-full border border-[#E5E5E5] rounded-xl p-3 outline-none focus:border-[#333] transition-colors resize-none h-32 text-sm"
+              className="w-full border border-[#E5E5E5] dark:border-[#3F3F3F] bg-white dark:bg-[#242424] text-gray-900 dark:text-white rounded-xl p-3 outline-none focus:border-[#333] dark:focus:border-neutral-400 transition-colors resize-none h-32 text-sm"
               placeholder={t.billing.reportIssueModal.explanationPlaceholder}
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
@@ -117,13 +117,13 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
               {t.billing.reportIssueModal.proofImageLabel}
             </label>
-            <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-[#E5E5E5] border-dashed rounded-xl cursor-pointer hover:bg-[#fafafa] transition-colors relative">
+            <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-[#E5E5E5] dark:border-[#3F3F3F] border-dashed rounded-xl cursor-pointer hover:bg-[#fafafa] dark:hover:bg-[#272727] transition-colors relative">
               <div className="flex flex-col items-center justify-center pt-3 pb-4">
-                <UploadCloud className="w-7 h-7 text-[#7A7574] mb-1.5" />
-                <p className="text-xs text-[#7A7574] px-2 text-center truncate max-w-[300px]">
+                <UploadCloud className="w-7 h-7 text-[#7A7574] dark:text-neutral-400 mb-1.5" />
+                <p className="text-xs text-[#7A7574] dark:text-neutral-400 px-2 text-center truncate max-w-[300px]">
                   {file ? file.name : t.billing.reportIssueModal.uploadFileText}
                 </p>
               </div>
@@ -137,19 +137,19 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
             </label>
           </div>
 
-          {error && <p className="text-sm text-cath-red-700">{error}</p>}
+          {error && <p className="text-sm text-cath-red-700 dark:text-red-400">{error}</p>}
         </form>
       )}
 
       {step === "success" && (
         <div className="flex flex-col items-center justify-center py-6 text-center">
-          <div className="w-16 h-16 bg-[#E5F7ED] text-green-600 rounded-full flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-[#E5F7ED] dark:bg-emerald-950/40 text-green-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-4">
             <CheckCircle2 size={32} />
           </div>
-          <h3 className="text-2xl font-bold mb-2">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             {t.billing.reportIssueModal.successTitle}
           </h3>
-          <p className="text-[#7A7574]">
+          <p className="text-[#7A7574] dark:text-neutral-400">
             {t.billing.reportIssueModal.successSubtitle}
           </p>
         </div>

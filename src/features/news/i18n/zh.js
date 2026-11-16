@@ -26,10 +26,13 @@ export default {
       topics: "话题",
     },
     newsDetail: {
+      untitled: "帖子",
       attachments: "附件",
       document: "文档",
       download: "下载",
       retryRelatedNews: "无法加载相关新闻。请重试。",
+      seeMore: "查看更多",
+      showLess: "收起",
       expandComments: "显示评论",
       collapseComments: "隐藏评论",
       previousPosts: "上一篇文章",

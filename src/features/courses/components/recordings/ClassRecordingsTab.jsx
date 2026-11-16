@@ -244,8 +244,6 @@ const ClassRecordingsTab = ({ classId, classData }) => {
           id: videoToDelete.id,
         }).unwrap()
       }
-      // Lưu ý: Chúng ta không xóa video gốc khỏi hệ thống ở đây, 
-      // chỉ xóa khỏi danh sách của lớp (nếu đã liên kết).
       toast.success("Đã xóa video bài giảng khỏi danh sách lớp học!")
       setVideoToDelete(null)
     } catch (err) {
@@ -264,7 +262,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-3 py-12">
         <LoadingSpinner />
-        <span className="text-sm text-neutral-500 font-medium">
+        <span className="text-sm text-neutral-500 dark:text-neutral-400 font-medium">
           Đang tải danh sách video bài giảng...
         </span>
       </div>
@@ -273,13 +271,13 @@ const ClassRecordingsTab = ({ classId, classData }) => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[260px] p-6 bg-red-50/50 border border-red-200 rounded-2xl text-center gap-3">
+      <div className="flex flex-col items-center justify-center min-h-[260px] p-6 bg-red-50/50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 rounded-2xl text-center gap-3">
         <AlertCircle className="w-10 h-10 text-red-500" />
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-semibold text-red-900">
+          <p className="text-sm font-semibold text-red-900 dark:text-red-300">
             Không thể tải danh sách video bài giảng
           </p>
-          <p className="text-xs text-red-600">
+          <p className="text-xs text-red-600 dark:text-red-400">
             {error?.data?.message ||
               "Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau."}
           </p>
@@ -294,17 +292,17 @@ const ClassRecordingsTab = ({ classId, classData }) => {
   return (
     <div className="flex flex-col gap-6">
       {/* ── Header & Banner Thống Kê ───────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-white border border-neutral-200/80 rounded-2xl shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-white dark:bg-[#1A1A1A] border border-neutral-200/80 dark:border-[#3F3F3F] rounded-2xl shadow-xs">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-[#990011]/10 rounded-xl text-[#990011]">
+            <div className="p-2 bg-[#990011]/10 dark:bg-[#FF6B6B]/10 rounded-xl text-[#990011] dark:text-[#FF6B6B]">
               <Video className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-neutral-900">
+            <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
               Quản lý Video Bài Giảng
             </h2>
           </div>
-          <p className="text-xs text-neutral-500 ml-1">
+          <p className="text-xs text-neutral-500 dark:text-gray-400 ml-1">
             Lưu trữ, phát trực tiếp và xuất bản các video ghi hình buổi dạy cho học viên
           </p>
         </div>
@@ -322,40 +320,40 @@ const ClassRecordingsTab = ({ classId, classData }) => {
 
       {/* ── Thống kê nhanh ─────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-        <div className="flex flex-col p-4 bg-white border border-neutral-200/70 rounded-xl shadow-xs">
-          <span className="text-xs text-neutral-500 font-medium">Tổng video</span>
-          <span className="text-xl font-bold text-neutral-900 mt-1">
+        <div className="flex flex-col p-4 bg-white dark:bg-[#1A1A1A] border border-neutral-200/70 dark:border-[#3F3F3F] rounded-xl shadow-xs">
+          <span className="text-xs text-neutral-500 dark:text-gray-400 font-medium">Tổng video</span>
+          <span className="text-xl font-bold text-neutral-900 dark:text-white mt-1">
             {stats.total}
           </span>
         </div>
-        <div className="flex flex-col p-4 bg-white border border-neutral-200/70 rounded-xl shadow-xs">
-          <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+        <div className="flex flex-col p-4 bg-white dark:bg-[#1A1A1A] border border-neutral-200/70 dark:border-[#3F3F3F] rounded-xl shadow-xs">
+          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" /> Đã đăng
           </span>
-          <span className="text-xl font-bold text-emerald-700 mt-1">
+          <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">
             {stats.published}
           </span>
         </div>
-        <div className="flex flex-col p-4 bg-white border border-neutral-200/70 rounded-xl shadow-xs">
-          <span className="text-xs text-amber-600 font-medium flex items-center gap-1">
+        <div className="flex flex-col p-4 bg-white dark:bg-[#1A1A1A] border border-neutral-200/70 dark:border-[#3F3F3F] rounded-xl shadow-xs">
+          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
             <FileText className="w-3.5 h-3.5" /> Bản nháp
           </span>
-          <span className="text-xl font-bold text-amber-700 mt-1">
+          <span className="text-xl font-bold text-amber-700 dark:text-amber-400 mt-1">
             {stats.draft}
           </span>
         </div>
-        <div className="flex flex-col p-4 bg-white border border-neutral-200/70 rounded-xl shadow-xs">
-          <span className="text-xs text-neutral-500 font-medium flex items-center gap-1">
+        <div className="flex flex-col p-4 bg-white dark:bg-[#1A1A1A] border border-neutral-200/70 dark:border-[#3F3F3F] rounded-xl shadow-xs">
+          <span className="text-xs text-neutral-500 dark:text-gray-400 font-medium flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" /> Tổng thời lượng
           </span>
-          <span className="text-xl font-bold text-neutral-800 mt-1">
+          <span className="text-xl font-bold text-neutral-800 dark:text-white mt-1">
             {formatDuration(stats.totalSeconds)}
           </span>
         </div>
       </div>
 
       {/* ── Thanh Công Cụ & Bộ Lọc ─────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-neutral-50/70 border border-neutral-200/70 rounded-xl">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-neutral-50/70 dark:bg-[#222222] border border-neutral-200/70 dark:border-[#3F3F3F] rounded-xl">
         {/* Tìm kiếm */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -364,21 +362,21 @@ const ClassRecordingsTab = ({ classId, classData }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm theo tiêu đề, buổi số hoặc ngày học..."
-            className="w-full pl-9 pr-3 py-2 bg-white border border-neutral-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all"
+            className="w-full pl-9 pr-3 py-2 bg-white dark:bg-[#1A1A1A] border border-neutral-200 dark:border-[#3F3F3F] rounded-lg text-xs sm:text-sm text-neutral-800 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all placeholder:text-neutral-400"
           />
         </div>
 
         {/* Lọc trạng thái & Chuyển View */}
         <div className="flex items-center gap-2 self-end sm:self-auto">
           {/* Filter Pills */}
-          <div className="flex items-center bg-white border border-neutral-200 p-0.5 rounded-lg text-xs">
+          <div className="flex items-center bg-white dark:bg-[#1A1A1A] border border-neutral-200 dark:border-[#3F3F3F] p-0.5 rounded-lg text-xs">
             <button
               type="button"
               onClick={() => setStatusFilter("all")}
-              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer ${
                 statusFilter === "all"
-                  ? "bg-[#990011] text-white shadow-xs"
-                  : "text-neutral-600 hover:text-neutral-900"
+                  ? "bg-[#990011] dark:bg-[#b20a1c] text-white shadow-xs"
+                  : "text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
               }`}
             >
               Tất cả ({allRecordings.length})
@@ -386,10 +384,10 @@ const ClassRecordingsTab = ({ classId, classData }) => {
             <button
               type="button"
               onClick={() => setStatusFilter("published")}
-              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer ${
                 statusFilter === "published"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-neutral-600 hover:text-neutral-900"
+                  : "text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
               }`}
             >
               Đã đăng ({stats.published})
@@ -397,10 +395,10 @@ const ClassRecordingsTab = ({ classId, classData }) => {
             <button
               type="button"
               onClick={() => setStatusFilter("draft")}
-              className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer ${
                 statusFilter === "draft"
                   ? "bg-amber-600 text-white shadow-xs"
-                  : "text-neutral-600 hover:text-neutral-900"
+                  : "text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
               }`}
             >
               Bản nháp ({stats.draft})
@@ -408,15 +406,15 @@ const ClassRecordingsTab = ({ classId, classData }) => {
           </div>
 
           {/* View toggle */}
-          <div className="flex items-center bg-white border border-neutral-200 p-0.5 rounded-lg">
+          <div className="flex items-center bg-white dark:bg-[#1A1A1A] border border-neutral-200 dark:border-[#3F3F3F] p-0.5 rounded-lg">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
               title="Xem dạng Lưới"
-              className={`p-1.5 rounded-md transition-all ${
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
                 viewMode === "grid"
-                  ? "bg-neutral-100 text-neutral-900"
-                  : "text-neutral-400 hover:text-neutral-700"
+                  ? "bg-neutral-100 dark:bg-[#2A2A2A] text-neutral-900 dark:text-white"
+                  : "text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
               }`}
             >
               <LayoutGrid className="w-4 h-4" />
@@ -425,10 +423,10 @@ const ClassRecordingsTab = ({ classId, classData }) => {
               type="button"
               onClick={() => setViewMode("table")}
               title="Xem dạng Bảng"
-              className={`p-1.5 rounded-md transition-all ${
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
                 viewMode === "table"
-                  ? "bg-neutral-100 text-neutral-900"
-                  : "text-neutral-400 hover:text-neutral-700"
+                  ? "bg-neutral-100 dark:bg-[#2A2A2A] text-neutral-900 dark:text-white"
+                  : "text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
               }`}
             >
               <List className="w-4 h-4" />
@@ -439,17 +437,17 @@ const ClassRecordingsTab = ({ classId, classData }) => {
 
       {/* ── Danh Sách Video ────────────────────────────────────────── */}
       {filteredRecordings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-white border border-dashed border-neutral-300 rounded-2xl text-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-400">
+        <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-[#1A1A1A] border border-dashed border-neutral-300 dark:border-[#3F3F3F] rounded-2xl text-center gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-[#2A2A2A] flex items-center justify-center text-neutral-400">
             <Video className="w-7 h-7" />
           </div>
           <div className="flex flex-col gap-1 max-w-md">
-            <h3 className="text-base font-semibold text-neutral-900">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-white">
               {searchQuery || statusFilter !== "all"
                 ? "Không tìm thấy video nào phù hợp"
                 : "Chưa có video bài giảng nào"}
             </h3>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-neutral-500 dark:text-gray-400">
               {searchQuery || statusFilter !== "all"
                 ? "Thử thay đổi từ khóa tìm kiếm hoặc bỏ bộ lọc trạng thái để xem lại."
                 : "Các buổi dạy khi kết thúc ghi hình sẽ tự động hiển thị tại đây để bạn đăng tải cho học viên."}
@@ -480,7 +478,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
             return (
               <div
                 key={recording.id}
-                className="group flex flex-col bg-white border border-neutral-200/80 hover:border-neutral-300 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200"
+                className="group flex flex-col bg-white dark:bg-[#1A1A1A] border border-neutral-200/80 dark:border-[#3F3F3F] hover:border-neutral-300 dark:hover:border-neutral-500 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200"
               >
                 {/* Thumbnail Preview Area */}
                 <div className="relative aspect-video bg-neutral-900 flex items-center justify-center overflow-hidden">
@@ -490,7 +488,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                   <button
                     type="button"
                     onClick={() => setSelectedVideoToPlay(recording)}
-                    className="relative z-10 w-12 h-12 rounded-full bg-[#990011] hover:bg-[#b00014] text-white flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110 active:scale-95"
+                    className="relative z-10 w-12 h-12 rounded-full bg-[#990011] hover:bg-[#b00014] text-white flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110 active:scale-95 cursor-pointer"
                     title="Xem video"
                   >
                     <Play className="w-5 h-5 fill-current ml-0.5" />
@@ -535,16 +533,16 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                 <div className="p-4 flex flex-col flex-1 gap-3">
                   <div className="flex flex-col gap-1">
                     <h3
-                      className="font-bold text-neutral-900 text-sm line-clamp-1 group-hover:text-[#990011] transition-colors"
+                      className="font-bold text-neutral-900 dark:text-white text-sm line-clamp-1 group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B] transition-colors"
                       title={titleDisplay}
                     >
                       {titleDisplay}
                     </h3>
 
                     {/* Metadata tags */}
-                    <div className="flex flex-col gap-1 mt-1 text-xs text-neutral-500">
+                    <div className="flex flex-col gap-1 mt-1 text-xs text-neutral-500 dark:text-gray-400">
                       {classData?.name && (
-                         <span className="flex items-center gap-1 font-medium text-[#990011]">
+                         <span className="flex items-center gap-1 font-medium text-[#990011] dark:text-[#FF6B6B]">
                            Lớp: {classData.name} ({classId})
                          </span>
                       )}
@@ -564,7 +562,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                   </div>
 
                   {/* Action Bar */}
-                  <div className="mt-auto pt-3 border-t border-neutral-100 flex items-center justify-between gap-2">
+                  <div className="mt-auto pt-3 border-t border-neutral-100 dark:border-[#333333] flex items-center justify-between gap-2">
                     {/* Switch Publish */}
                     <div className="flex items-center gap-2">
                       <Switch
@@ -573,7 +571,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                         onChange={() => handleTogglePublish(recording)}
                         disabled={isToggling || (!recording.classSessionId && recording.isNewRaw)}
                       />
-                      <span className="text-xs font-medium text-neutral-600">
+                      <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
                         {recording.isPublished ? "Đăng giảng đường" : "Lưu nháp"}
                       </span>
                     </div>
@@ -583,7 +581,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                        <button
                          type="button"
                          onClick={() => setVideoToDelete(recording)}
-                         className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                         className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                          title="Xóa video khỏi danh sách"
                        >
                          <Trash2 className="w-4 h-4" />
@@ -597,10 +595,10 @@ const ClassRecordingsTab = ({ classId, classData }) => {
         </div>
       ) : (
         /* ── Table View ── */
-        <div className="bg-white border border-neutral-200/80 rounded-2xl overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-neutral-200/80 dark:border-[#3F3F3F] rounded-2xl overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-neutral-700">
-              <thead className="bg-neutral-50/80 border-b border-neutral-200 text-xs font-semibold text-neutral-600 uppercase">
+            <table className="w-full text-left text-sm text-neutral-700 dark:text-neutral-200">
+              <thead className="bg-neutral-50/80 dark:bg-[#222222] border-b border-neutral-200 dark:border-[#3F3F3F] text-xs font-semibold text-neutral-600 dark:text-neutral-300 uppercase">
                 <tr>
                   <th className="px-4 py-3.5">Lớp học</th>
                   <th className="px-4 py-3.5">Buổi</th>
@@ -612,7 +610,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                   <th className="px-4 py-3.5 text-right">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-100 dark:divide-[#2A2A2A]">
                 {filteredRecordings.map((recording) => {
                   const isToggling = updatingId === recording.recordingId
                   const titleDisplay =
@@ -631,25 +629,25 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                   return (
                     <tr
                       key={recording.id}
-                      className="hover:bg-neutral-50/50 transition-colors"
+                      className="hover:bg-neutral-50/50 dark:hover:bg-[#222222] transition-colors"
                     >
-                      <td className="px-4 py-3 text-neutral-900 max-w-xs truncate text-xs">
-                        <span className="font-semibold text-[#990011] block truncate" title={classData?.name}>{classData?.name}</span>
-                        <span className="text-neutral-500 text-[10px]">ID: {classId}</span>
+                      <td className="px-4 py-3 text-neutral-900 dark:text-white max-w-xs truncate text-xs">
+                        <span className="font-semibold text-[#990011] dark:text-[#FF6B6B] block truncate" title={classData?.name}>{classData?.name}</span>
+                        <span className="text-neutral-500 dark:text-gray-400 text-[10px]">ID: {classId}</span>
                       </td>
-                      <td className="px-4 py-3 font-semibold text-neutral-900 whitespace-nowrap">
+                      <td className="px-4 py-3 font-semibold text-neutral-900 dark:text-white whitespace-nowrap">
                         Buổi {recording.sessionNumber ?? "--"}
                       </td>
-                      <td className="px-4 py-3 font-medium text-neutral-900 max-w-xs truncate">
+                      <td className="px-4 py-3 font-medium text-neutral-900 dark:text-white max-w-xs truncate">
                         {titleDisplay}
                       </td>
-                      <td className="px-4 py-3 text-neutral-600 text-xs whitespace-nowrap">
+                      <td className="px-4 py-3 text-neutral-600 dark:text-neutral-300 text-xs whitespace-nowrap">
                         {formattedDate}
                       </td>
-                      <td className="px-4 py-3 text-neutral-600 text-xs whitespace-nowrap font-mono">
+                      <td className="px-4 py-3 text-neutral-600 dark:text-neutral-300 text-xs whitespace-nowrap font-mono">
                         {formatDuration(recording.durationSeconds)}
                       </td>
-                      <td className="px-4 py-3 text-neutral-600 text-xs whitespace-nowrap">
+                      <td className="px-4 py-3 text-neutral-600 dark:text-neutral-300 text-xs whitespace-nowrap">
                         {formatFileSize(recording.fileSizeBytes)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -663,8 +661,8 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                           <span
                             className={`text-xs font-medium ${
                               recording.isPublished
-                                ? "text-emerald-700 font-semibold"
-                                : "text-amber-700"
+                                ? "text-emerald-700 dark:text-emerald-400 font-semibold"
+                                : "text-amber-700 dark:text-amber-400"
                             }`}
                           >
                             {recording.isPublished ? "Đã đăng" : "Nháp"}
@@ -676,7 +674,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                           <button
                             type="button"
                             onClick={() => setSelectedVideoToPlay(recording)}
-                            className="p-1.5 rounded-lg text-neutral-600 hover:text-[#990011] hover:bg-neutral-100 transition-colors"
+                            className="p-1.5 rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-[#990011] dark:hover:text-[#FF6B6B] hover:bg-neutral-100 dark:hover:bg-[#2A2A2A] transition-colors cursor-pointer"
                             title="Phát video"
                           >
                             <Play className="w-4 h-4 fill-current" />
@@ -685,7 +683,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                             <button
                               type="button"
                               onClick={() => setVideoToDelete(recording)}
-                              className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                               title="Xóa video"
                             >
                               <Trash2 className="w-4 h-4" />

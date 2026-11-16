@@ -36,14 +36,14 @@ const WorkspaceCourseRedirect = () => {
         role="alert"
         className="mx-auto flex min-h-[240px] max-w-md flex-col items-center justify-center gap-4 text-center"
       >
-        <p className="text-sm font-semibold text-red-700">
+        <p className="text-sm font-semibold text-red-700 dark:text-red-400">
           {redirect.loadFailed || "We could not determine your workspace. Please try again."}
         </p>
         <button
           type="button"
           onClick={() => retry()}
           disabled={isFetching}
-          className="h-10 rounded-full bg-[#990011] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#80000e] disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-10 rounded-full bg-[#990011] hover:bg-[#80000e] dark:bg-[#b20a1c] dark:hover:bg-[#c9182b] px-5 text-xs font-extrabold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         >
           {isFetching
             ? redirect.retrying || "Retrying..."

@@ -75,7 +75,7 @@ const GroupAvatar = ({ conversation, size = 48 }) => {
           size={smallSize}
           name={first?.username || first?.name}
           src={first?.avatarImageUrl || first?.avatar || first?.avatarUrl}
-          className={`border-2 border-white ${themeFirst.avatarClass}`}
+          className={`border-2 border-white dark:border-[#1A1A1A] ${themeFirst.avatarClass}`}
         />
       </div>
       <div className="absolute bottom-0 right-0 z-[2] rounded-full">
@@ -83,7 +83,7 @@ const GroupAvatar = ({ conversation, size = 48 }) => {
           size={smallSize}
           name={second?.username || second?.name}
           src={second?.avatarImageUrl || second?.avatar || second?.avatarUrl}
-          className={`border-2 border-white ${themeSecond.avatarClass}`}
+          className={`border-2 border-white dark:border-[#1A1A1A] ${themeSecond.avatarClass}`}
         />
       </div>
     </div>

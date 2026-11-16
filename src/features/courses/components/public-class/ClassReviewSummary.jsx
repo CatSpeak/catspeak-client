@@ -17,7 +17,7 @@ const ClassReviewSummary = ({ classId }) => {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-black text-slate-900">
+      <span className="text-sm font-black text-slate-900 dark:text-white">
         {Number(average).toFixed(1)}
       </span>
       <div className="flex items-center gap-0.5">
@@ -28,12 +28,12 @@ const ClassReviewSummary = ({ classId }) => {
             className={
               star <= Math.round(Number(average))
                 ? "fill-amber-400 text-amber-400"
-                : "fill-gray-200 text-gray-200"
+                : "fill-gray-200 dark:fill-[#333333] text-gray-200 dark:text-[#333333]"
             }
           />
         ))}
       </div>
-      <span className="text-xs font-medium text-slate-500">
+      <span className="text-xs font-medium text-slate-500 dark:text-gray-400">
         {(rv.reviewCount || "({count} đánh giá)").replace("{count}", String(count))}
       </span>
     </div>

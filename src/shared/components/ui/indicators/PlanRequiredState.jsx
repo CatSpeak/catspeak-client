@@ -31,7 +31,7 @@ const PlanRequiredState = ({
         className="w-full"
       >
         {pageTitle && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="p-4">
             <PageTitle>{pageTitle}</PageTitle>
           </div>
         )}
@@ -42,12 +42,11 @@ const PlanRequiredState = ({
           title={title}
           subtext={subtext}
           action={
-            <PillButton
-              onClick={handleUpgradeNavigation}
-              startIcon={<Crown size={18} />}
-            >
-              Upgrade to Pro
-            </PillButton>
+            <div className="mt-4">
+              <PillButton onClick={handleUpgradeNavigation}>
+                Upgrade to Pro
+              </PillButton>
+            </div>
           }
           fullPage
         />

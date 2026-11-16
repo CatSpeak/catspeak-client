@@ -88,7 +88,7 @@ export const ReactionBadge = ({ type, size = 20, className = "" }) => {
     <ThumbsUp
       size={size}
       strokeWidth={1.8}
-      className={`text-[#4b5563] ${className}`}
+      className={`text-[#4b5563] dark:text-[#AAAAAA] ${className}`}
     />
   );
 };
@@ -122,7 +122,7 @@ export const NEWS_REACTIONS = [
     icon: ({ size = 24, className = "" }) => (
       <LikeBadge size={size} className={className} />
     ),
-    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+    hoverBgClass: "group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#3D3D3D] transition-colors",
   },
   {
     type: "Love",
@@ -131,7 +131,7 @@ export const NEWS_REACTIONS = [
     icon: ({ size = 24, className = "" }) => (
       <LoveBadge size={size} className={className} />
     ),
-    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+    hoverBgClass: "group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#3D3D3D] transition-colors",
   },
   {
     type: "Haha",
@@ -140,7 +140,7 @@ export const NEWS_REACTIONS = [
     icon: ({ size = 24, className = "" }) => (
       <HahaBadge size={size} className={className} />
     ),
-    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+    hoverBgClass: "group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#3D3D3D] transition-colors",
   },
 ];
 
@@ -152,7 +152,7 @@ export const COMMENT_FACEBOOK_REACTIONS = [
     icon: ({ size = 20, className = "" }) => (
       <LikeBadge size={size} className={className} />
     ),
-    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+    hoverBgClass: "group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#3D3D3D] transition-colors",
   },
   {
     type: 2,
@@ -161,7 +161,7 @@ export const COMMENT_FACEBOOK_REACTIONS = [
     icon: ({ size = 20, className = "" }) => (
       <LoveBadge size={size} className={className} />
     ),
-    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+    hoverBgClass: "group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#3D3D3D] transition-colors",
   },
   {
     type: 3,
@@ -170,7 +170,7 @@ export const COMMENT_FACEBOOK_REACTIONS = [
     icon: ({ size = 20, className = "" }) => (
       <HahaBadge size={size} className={className} />
     ),
-    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+    hoverBgClass: "group-hover/icon:bg-[#F2F2F2] dark:group-hover/icon:bg-[#3D3D3D] transition-colors",
   },
 ];
 

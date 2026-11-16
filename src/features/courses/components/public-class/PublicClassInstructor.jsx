@@ -34,17 +34,11 @@ const PublicClassInstructor = ({ classData }) => {
 
   return (
     <div id="instructor" className="scroll-mt-24">
-      <h2 className="text-lg sm:text-xl font-bold text-slate-950 tracking-tight mb-3">
+      <h2 className="text-lg sm:text-xl font-bold text-slate-950 dark:text-white tracking-tight mb-3">
         {pc.instructorTitle || "Thông tin giảng viên"}
       </h2>
 
-      <div
-        style={{
-          background:
-            "linear-gradient(15deg,rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.67) 29%, rgba(194, 14, 35, 0.07) 87%, rgba(194, 14, 35, 0.15) 100%)",
-        }}
-        className="border border-border rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col gap-4"
-      >
+      <div className="border border-border dark:border-[#3F3F3F] rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col gap-4 bg-gradient-to-br from-white via-white/80 to-rose-100/30 dark:from-[#1A1A1A] dark:via-[#1A1A1A] dark:to-rose-950/20">
         {/* Avatar + Teacher Info (Clickable Block) */}
         <div
           className="group cursor-pointer flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 w-fit transition-all duration-200"
@@ -72,29 +66,29 @@ const PublicClassInstructor = ({ classData }) => {
 
           {/* Teacher Name & Title */}
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 font-semibold text-[#b20a1c] group-hover:text-cath-red-700 transition-colors tracking-wider mb-1">
+            <div className="flex items-center gap-1.5 font-semibold text-[#b20a1c] dark:text-[#FF6B6B] group-hover:text-cath-red-700 dark:group-hover:text-[#FF6B6B] transition-colors tracking-wider mb-1">
               <BadgeCheck size={20} />
               {pc.verifiedTeacher || "Giảng viên được xác minh bởi Catspeak"}
             </div>
-            <h3 className="font-bold text-slate-900 group-hover:text-cath-red-700 transition-colors leading-tight">
+            <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-cath-red-700 dark:group-hover:text-[#FF6B6B] transition-colors leading-tight">
               {teacherName}
             </h3>
             {(teacherTitle || experienceBadge) && (
               <div className="flex flex-wrap items-center gap-2">
                 {teacherTitle && (
-                  <p className="text-xs font-semibold text-slate-500 group-hover:text-cath-red-700 transition-colors">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-gray-400 group-hover:text-cath-red-700 dark:group-hover:text-[#FF6B6B] transition-colors">
                     {teacherTitle}
                   </p>
                 )}
                 {experienceBadge && (
-                  <span className="inline-flex w-fit items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold px-2.5 py-1 rounded-full">
+                  <span className="inline-flex w-fit items-center gap-1 bg-slate-100 dark:bg-[#2A2A2A] text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-[#3F3F3F] text-xs font-semibold px-2.5 py-1 rounded-full">
                     <Briefcase size={12} />
                     {experienceBadge}
                   </span>
                 )}
               </div>
             )}
-            <p className="text-slate-600 leading-relaxed text-justify">
+            <p className="text-slate-600 dark:text-gray-300 leading-relaxed text-justify">
               {teacherBio}
             </p>
           </div>

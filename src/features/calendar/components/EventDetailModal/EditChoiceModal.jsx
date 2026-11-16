@@ -14,20 +14,20 @@ const EditChoiceModal = ({ open, onClose, onSelect, headerColor }) => {
       open={open}
       onClose={onClose}
       showCloseButton={false}
-      className="!max-w-[400px] w-full p-6 bg-white rounded-xl shadow-xl border overflow-visible"
+      className="!max-w-[400px] w-full p-6 bg-white dark:bg-[#1A1A1A] rounded-xl shadow-xl border border-border dark:border-[#3F3F3F] overflow-visible"
       bodyClassName="flex-1"
     >
       <div className="relative flex flex-col text-center">
-        <h3 className="text-xl font-bold mb-2 text-gray-800">
+        <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-white">
           {cal.editRecurringEvent}
         </h3>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-gray-600 dark:text-neutral-400 mb-6">
           {cal.editChoicePrompt}
         </p>
         <div className="flex flex-col gap-3">
           <button
             onClick={() => onSelect("occurrence")}
-            className="bg-primaryBg hover:bg-[#E5E5E5] text-gray-800 font-semibold h-10 px-4 rounded-lg transition-colors border"
+            className="bg-primaryBg dark:bg-[#272727] hover:bg-[#E5E5E5] dark:hover:bg-[#333333] text-gray-800 dark:text-neutral-100 font-semibold h-10 px-4 rounded-lg transition-colors border border-border dark:border-[#3F3F3F]"
           >
             {cal.editThisOccurrence}
           </button>
@@ -40,7 +40,7 @@ const EditChoiceModal = ({ open, onClose, onSelect, headerColor }) => {
           </button>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 font-medium h-10 mt-2"
+            className="text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-white font-medium h-10 mt-2"
           >
             {cal.cancel}
           </button>

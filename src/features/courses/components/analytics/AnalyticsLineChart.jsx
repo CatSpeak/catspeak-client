@@ -61,7 +61,7 @@ const AnalyticsLineChart = ({
 
   if (chartData.length === 0) {
     return (
-      <div className="w-full h-[250px] flex items-center justify-center rounded-xl border border-dashed border-border text-sm text-gray-400">
+      <div className="w-full h-[250px] flex items-center justify-center rounded-xl border border-dashed border-border dark:border-[#3F3F3F] text-sm text-gray-400 dark:text-gray-500">
         {secT.noData || "No analytics data for this period."}
       </div>
     )
@@ -76,7 +76,7 @@ const AnalyticsLineChart = ({
   return (
     <div className="w-full flex flex-col gap-2">
       {/* Legend & Unit Label */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-600 font-medium px-1 mb-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-600 dark:text-gray-300 font-medium px-1 mb-1">
         <div className="flex flex-wrap items-center gap-3">
           {series.map((s, idx) => {
             const color = s.color || defaultColors[idx % defaultColors.length]
@@ -93,7 +93,7 @@ const AnalyticsLineChart = ({
         </div>
 
         {clickable && (
-          <span className="text-[11px] text-[#990011] font-semibold bg-[#ffecef] px-2.5 py-0.5 rounded-full">
+          <span className="text-[11px] text-[#990011] dark:text-[#FF6B6B] font-semibold bg-[#ffecef] dark:bg-[#ffecef]/10 px-2.5 py-0.5 rounded-full">
             {clickToDrillText}
           </span>
         )}
@@ -108,15 +108,17 @@ const AnalyticsLineChart = ({
             onClick={handleChartClick}
             className={clickable ? "cursor-pointer" : ""}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e9edf2" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e9edf2" className="stroke-[#e9edf2] dark:stroke-[#333333]" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fontSize: 11, fill: "#718096" }}
+              tick={{ fontSize: 11, fill: "currentColor" }}
+              className="text-[#718096] dark:text-gray-400"
               axisLine={{ stroke: "#e2e8f0" }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#667085" }}
+              tick={{ fontSize: 11, fill: "currentColor" }}
+              className="text-[#667085] dark:text-gray-400"
               axisLine={false}
               tickLine={false}
               tickFormatter={axisFormatter}

@@ -41,16 +41,16 @@ const ResponseSection = () => {
 
   return (
     <section className="relative w-full py-10 sm:py-14 lg:py-16 overflow-hidden">
-      <ScrollReveal stagger className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start px-4 sm:px-6">
+      <ScrollReveal stagger className="relative z-10 mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 px-4 sm:px-6 lg:grid-cols-12 lg:gap-12">
         {/* Left: Title + Navigation */}
-        <div className="lg:col-span-4 lg:pr-2">
+        <div className="min-w-0 lg:col-span-4 lg:pr-2">
           <ScrollItem>
             <h2 className="text-4xl font-black text-[#990011] mb-2 leading-none">
               {respT.title || "Phản hồi"}
             </h2>
           </ScrollItem>
           <ScrollItem>
-            <p className="text-secondary leading-relaxed mb-8">
+            <p className="mb-8 leading-relaxed text-secondary dark:text-gray-300">
               {respT.subtitle}
             </p>
           </ScrollItem>
@@ -79,26 +79,26 @@ const ResponseSection = () => {
           </ScrollItem>
         </div>
 
-        {/* Right: Native scrollable cards extending off-screen to the right on desktop and mobile */}
-        <ScrollItem className="lg:col-span-8 -mx-4 sm:-mx-6 lg:mx-0 lg:-mr-6 xl:-mr-[calc((100vw-1280px)/2+24px)] 2xl:-mr-[calc((100vw-1280px)/2+24px)] overflow-hidden">
+        {/* Keep the carousel inside the page grid and scroll cards within its own viewport. */}
+        <ScrollItem className="w-full min-w-0 overflow-hidden lg:col-span-8">
           <div
             ref={scrollRef}
-            className="flex gap-6 overflow-x-auto scrollbar-none scroll-smooth py-3 px-4 sm:px-6 md:px-8 lg:px-1 snap-x snap-mandatory scroll-pl-4 sm:scroll-pl-6 md:scroll-pl-8 lg:scroll-pl-1"
+            className="flex w-full min-w-0 snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-1 py-3"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {reviews.map((review, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-[min(390px,85vw)] bg-white/80 backdrop-blur-md border border-[#990011] rounded-xl p-4 sm:p-6 flex flex-col gap-6 shadow-sm snap-start transition-all"
+                className="flex w-[min(390px,85vw)] flex-shrink-0 snap-start flex-col gap-6 rounded-xl border border-[#990011] bg-white/80 p-4 shadow-sm backdrop-blur-md transition-all dark:border-[#702630] dark:bg-[#1c1c1c]/90 sm:p-6"
               >
-                <p className="leading-relaxed flex-1">"{review.text}"</p>
+                <p className="flex-1 leading-relaxed text-gray-800 dark:text-gray-200">"{review.text}"</p>
                 <div className="flex items-center gap-4">
                   <AvatarPlaceholder
                     name={review.name}
                     color={avatarColors[i % avatarColors.length]}
                   />
                   <div className="flex flex-col">
-                    <span className="font-bold">{review.name}</span>
+                    <span className="font-bold text-gray-900 dark:text-gray-100">{review.name}</span>
                     <span className="text-sm text-secondary">
                       {review.role}
                     </span>

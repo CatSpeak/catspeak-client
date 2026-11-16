@@ -6,8 +6,8 @@ const StatusBadge = ({ status, label, className = "" }) => {
   const { t } = useLanguage()
   const courses = t.courses || {}
   const config = CLASS_STATUS_CONFIG[status] || {
-    bgClass: "bg-gray-100",
-    textClass: "text-gray-700",
+    bgClass: "bg-gray-100 dark:bg-[#2A2A2A]",
+    textClass: "text-gray-700 dark:text-gray-300",
     dotClass: null,
     hasPing: false
   }

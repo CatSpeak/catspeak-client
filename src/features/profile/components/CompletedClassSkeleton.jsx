@@ -8,7 +8,7 @@ const CompletedClassSkeleton = ({ count = 6 }) => {
       {Array.from({ length: count }).map((_, index) => (
         <FluentCard
           key={index}
-          className="relative flex flex-col h-full overflow-hidden border border-border bg-white rounded-2xl !p-0"
+          className="relative flex flex-col h-full overflow-hidden border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] rounded-2xl !p-0"
         >
           {/* Top Hero Thumbnail Skeleton */}
           <div className="w-full h-44 relative shrink-0">
@@ -29,14 +29,14 @@ const CompletedClassSkeleton = ({ count = 6 }) => {
               </div>
 
               {/* Schedule Info Skeleton */}
-              <div className="space-y-2 pt-2 border-t border-gray-100">
+              <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-[#272727]">
                 <Skeleton className="h-3.5 w-40 rounded" />
                 <Skeleton className="h-3.5 w-48 rounded" />
                 <Skeleton className="h-3.5 w-24 rounded" />
               </div>
 
               {/* Progress Skeleton */}
-              <div className="space-y-1.5 pt-2 border-t border-gray-100">
+              <div className="space-y-1.5 pt-2 border-t border-gray-100 dark:border-[#272727]">
                 <div className="flex justify-between">
                   <Skeleton className="h-3 w-20 rounded" />
                   <Skeleton className="h-3 w-24 rounded" />
@@ -46,7 +46,7 @@ const CompletedClassSkeleton = ({ count = 6 }) => {
             </div>
 
             {/* Bottom Actions Skeleton */}
-            <div className="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+            <div className="pt-3 border-t border-gray-100 dark:border-[#272727] flex items-center justify-between gap-2">
               <Skeleton className="h-9 flex-1 rounded-full" />
               <Skeleton className="h-9 flex-1 rounded-full" />
             </div>

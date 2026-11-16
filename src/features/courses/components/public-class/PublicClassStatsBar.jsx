@@ -1,5 +1,5 @@
 import React from "react"
-import { Calendar, Star, Award, Clock, BarChart3, User } from "lucide-react"
+import { Calendar, Clock, BarChart3, User } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
@@ -102,7 +102,7 @@ const PublicClassStatsBar = ({ classData }) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
-      <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.35fr_1fr] gap-4 sm:gap-6">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl shadow-lg border border-slate-100 dark:border-[#3F3F3F] p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.35fr_1fr] gap-4 sm:gap-6">
         {stats.map((item) => {
           const Icon = item.icon
           return (
@@ -110,14 +110,14 @@ const PublicClassStatsBar = ({ classData }) => {
               <div className="shrink-0 mt-0.5">
                 <Icon
                   size={25}
-                  className={item.iconColor || "text-[#b20a1c]"}
+                  className={item.iconColor || "text-[#b20a1c] dark:text-[#FF6B6B]"}
                 />
               </div>
               <div className="flex flex-col gap-0.5 min-w-0">
-                <span className="text-sm sm:text-base font-bold text-slate-900 leading-snug whitespace-pre-line">
+                <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug whitespace-pre-line">
                   {item.title}
                 </span>
-                <p className="text-xs text-slate-500 font-medium leading-normal">
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium leading-normal">
                   {item.subtitle}
                 </p>
               </div>

@@ -16,7 +16,7 @@ const CourseThumbnail = ({
   }, [item?.thumbnailUrl])
 
   return (
-    <div className={`relative flex items-center justify-center shrink-0 overflow-hidden ${className}`}>
+    <div className={`relative flex items-center justify-center shrink-0 overflow-hidden bg-gray-100 dark:bg-[#2A2A2A] ${className}`}>
       <img
         src={imgSrc}
         alt={title || item?.title || ""}

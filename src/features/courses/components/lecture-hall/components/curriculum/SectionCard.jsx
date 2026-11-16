@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react"
-import { MoreVertical, EyeOff, ChevronUp, ChevronDown, Inbox } from "lucide-react"
+import { EyeOff, ChevronUp, ChevronDown, Inbox } from "lucide-react"
 import LessonItemRow from "./LessonItemRow"
 import StudentLessonRow from "./StudentLessonRow"
 import { IconButton } from "@/shared/components/ui/buttons"
@@ -30,25 +30,25 @@ const SectionCard = ({
 
   return (
     <div
-      className={`bg-white border border-[#E2E2E2] rounded-2xl md:rounded-3xl shadow-sm ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] border border-[#E2E2E2] dark:border-[#3F3F3F] rounded-2xl md:rounded-3xl shadow-sm ${className}`}
     >
       {/* Section Header */}
-      <div className={`flex items-center justify-between gap-3 md:gap-4 px-4 md:px-6 py-4 md:py-5 bg-white w-full ${isExpanded ? "rounded-t-2xl md:rounded-t-3xl border-b border-[#E2E2E2]" : "rounded-2xl md:rounded-3xl"}`}>
+      <div className={`flex items-center justify-between gap-3 md:gap-4 px-4 md:px-6 py-4 md:py-5 bg-white dark:bg-[#1A1A1A] w-full ${isExpanded ? "rounded-t-2xl md:rounded-t-3xl border-b border-[#E2E2E2] dark:border-[#3F3F3F]" : "rounded-2xl md:rounded-3xl"}`}>
         <div className="space-y-1 w-full min-w-0">
           <div className="flex items-center gap-2 md:gap-3 flex-wrap">
             <span
-              className="text-base md:text-lg font-bold text-[#191C1D]"
+              className="text-base md:text-lg font-bold text-[#191C1D] dark:text-white"
             >
               {section.name}
             </span>
             {section.isVisibleToStudents === false && (
-              <span className="inline-flex items-center gap-1 bg-[#E1E3E4] text-[#5B403C] text-xs px-2 py-0.5 rounded-full font-medium">
+              <span className="inline-flex items-center gap-1 bg-[#E1E3E4] dark:bg-[#2A2A2A] text-[#5B403C] dark:text-gray-300 text-xs px-2 py-0.5 rounded-full font-medium border border-transparent dark:border-[#3F3F3F]">
                 <EyeOff size={12} /> <span className="font-medium">{dict.hiddenStatus}</span>
               </span>
             )}
           </div>
           {section.description && (
-            <p className="text-xs sm:text-sm text-[#5B403C] font-normal">
+            <p className="text-xs sm:text-sm text-[#5B403C] dark:text-gray-400 font-normal">
               {section.description}
             </p>
           )}
@@ -81,7 +81,7 @@ const SectionCard = ({
 
       {/* List of Lessons inside Section */}
       {isExpanded && (
-        <div className="bg-white w-full rounded-b-2xl md:rounded-b-3xl p-4 md:p-6 pt-2 md:pt-4">
+        <div className="bg-white dark:bg-[#1A1A1A] w-full rounded-b-2xl md:rounded-b-3xl p-4 md:p-6 pt-2 md:pt-4">
           {section.items && section.items.length > 0 ? (
             section.items.map((item) => (
               isStudent ? (
@@ -104,7 +104,7 @@ const SectionCard = ({
               )
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-sm text-[#5B403C] border border-dashed border-[#E2E2E2] rounded-xl">
+            <div className="flex flex-col items-center justify-center py-6 text-sm text-[#5B403C] dark:text-gray-400 border border-dashed border-[#E2E2E2] dark:border-[#3F3F3F] rounded-xl bg-gray-50/50 dark:bg-[#222222]">
               <Inbox size={24} className="mb-2 opacity-60" />
               <p>{dict.noLessons}</p>
             </div>

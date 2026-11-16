@@ -119,7 +119,7 @@ const CheckoutPage = () => {
   if (isProfileLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in duration-500">
-        <Loader2 className="w-12 h-12 text-cath-red-700 animate-spin mb-4" />
+        <Loader2 className="w-12 h-12 text-cath-red-700 dark:text-red-400 animate-spin mb-4" />
         <p className="text-gray-400 text-sm font-medium">
           {t.billing?.pricing?.processing || "Đang tải..."}
         </p>
@@ -133,7 +133,7 @@ const CheckoutPage = () => {
       <CheckoutBreadcrumbs t={t} language={language} />
 
       {/* Main Title */}
-      <h1 className="text-3xl md:text-4xl font-extrabold mb-8 tracking-tight text-gray-900">
+      <h1 className="text-3xl md:text-4xl font-extrabold mb-8 tracking-tight text-gray-900 dark:text-white">
         {t.billing?.checkout?.title || "Thanh toán dịch vụ"}
       </h1>
 
@@ -141,8 +141,8 @@ const CheckoutPage = () => {
         {/* Left Columns (Form details) */}
         <div className="lg:col-span-2 space-y-8">
           {/* Transfer Info Section */}
-          <div className="bg-white border border-border rounded-3xl p-6 shadow-sm space-y-6">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-sm space-y-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {t.billing?.checkout?.transferInfo || "Thông tin chuyển khoản"}
             </h2>
 
@@ -153,7 +153,7 @@ const CheckoutPage = () => {
               onMemoChange={setMemo}
             />
 
-            <hr className="border-border" />
+            <hr className="border-border dark:border-[#3F3F3F]" />
 
             {/* Buyer details */}
             <BuyerInfoBox

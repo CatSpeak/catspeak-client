@@ -645,7 +645,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
     return (
       <div
         role="alert"
-        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+        className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
       >
         <span>
           {hasRequestError
@@ -666,7 +666,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
                 refetchAssignment()
                 refetchSubmissions()
               }}
-              className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
+              className="rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-[#1A1A1A] px-3 py-1.5 text-xs font-extrabold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50"
             >
               {gradingTranslations.retry}
             </button>
@@ -674,7 +674,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
               <button
                 type="button"
                 onClick={onBack}
-                className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
+                className="rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-[#1A1A1A] px-3 py-1.5 text-xs font-extrabold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50"
               >
                 {gradingTranslations.btnBack}
               </button>

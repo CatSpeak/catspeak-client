@@ -58,12 +58,12 @@ const ProfileOtpModal = ({ open, onClose, email, onVerify, isVerifying, onResend
   return (
     <Modal open={open} onClose={onClose}>
       <div className="pb-6">
-        <h2 className="mb-2 text-center text-3xl font-bold text-[#8f0d15]">
+        <h2 className="mb-2 text-center text-3xl font-bold text-[#8f0d15] dark:text-red-400">
           {title || authText.verifyEmailTitle || "Xác minh Email"}
         </h2>
-        <p className="mb-6 text-center text-sm text-[#7A7574]">
+        <p className="mb-6 text-center text-sm text-[#7A7574] dark:text-neutral-400">
           {profileText.otpSentToEmail || "Chúng tôi đã gửi mã xác nhận 6 chữ số đến email của bạn"}{" "}
-          {email && <strong className="text-black">{email}</strong>}
+          {email && <strong className="text-black dark:text-white">{email}</strong>}
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -86,16 +86,16 @@ const ProfileOtpModal = ({ open, onClose, email, onVerify, isVerifying, onResend
                 }`}
               />
             </div>
-            {validationError && <p className="mt-1 text-xs text-red-600">{validationError}</p>}
+            {validationError && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{validationError}</p>}
           </div>
 
           {errorMsg && (
-            <p className="mb-4 rounded-lg bg-red-100 py-2 px-3 text-sm text-red-700">
+            <p className="mb-4 rounded-lg bg-red-100 dark:bg-rose-950/40 py-2 px-3 text-sm text-red-700 dark:text-red-400">
               {errorMsg}
             </p>
           )}
           {successMsg && (
-            <p className="mb-4 rounded-lg bg-green-100 py-2 px-3 text-sm text-green-700">
+            <p className="mb-4 rounded-lg bg-green-100 dark:bg-emerald-950/40 py-2 px-3 text-sm text-green-700 dark:text-emerald-400">
               {successMsg}
             </p>
           )}
@@ -103,7 +103,7 @@ const ProfileOtpModal = ({ open, onClose, email, onVerify, isVerifying, onResend
           <button
             type="submit"
             disabled={isVerifying}
-            className="w-full bg-[#990011] hover:bg-[#80000e] text-white py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 mb-4 h-10 flex items-center justify-center"
+            className="w-full bg-[#990011] hover:bg-[#80000e] text-white py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 mb-4 h-10 flex items-center justify-center cursor-pointer"
           >
             {isVerifying ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -113,14 +113,14 @@ const ProfileOtpModal = ({ open, onClose, email, onVerify, isVerifying, onResend
           </button>
 
           <div className="text-center text-sm">
-            <span className="text-[#7A7574]">
+            <span className="text-[#7A7574] dark:text-neutral-400">
               {authText.didntReceiveCode || "Không nhận được mã?"}
             </span>{" "}
             <button
               type="button"
               onClick={handleResend}
               disabled={isResending}
-              className="font-semibold text-[#990011] hover:underline disabled:opacity-50 inline-flex items-center"
+              className="font-semibold text-[#990011] dark:text-red-400 hover:underline disabled:opacity-50 inline-flex items-center cursor-pointer"
             >
               {isResending ? <RefreshCw className="h-3 w-3 mr-1 animate-spin" /> : null}
               {authText.resendOtp || "Gửi lại OTP"}

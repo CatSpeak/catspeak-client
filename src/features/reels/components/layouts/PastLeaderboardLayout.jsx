@@ -72,10 +72,10 @@ export default function PastLeaderboardLayout({
       <div className="mb-6 w-full">
         {(!showMobileDetail || isLg) && (
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
               {t?.catSpeak?.reels?.leaderboard?.pastLeaderboardTitle || "Bảng xếp hạng đã kết thúc"}
             </h2>
-            <p className="text-[13px] text-gray-500">
+            <p className="text-[13px] text-gray-500 dark:text-neutral-400">
               {t?.catSpeak?.reels?.leaderboard?.pastLeaderboardDesc || "Khám phá kết quả chung cuộc các thử thách đã khép lại"}
             </p>
           </div>
@@ -89,7 +89,7 @@ export default function PastLeaderboardLayout({
             <div className="lg:col-span-6 flex flex-col gap-4">
               {isLoading ? (
                 <div className="animate-pulse flex flex-col gap-4">
-                  {[1, 2, 3].map(n => <div key={n} className="h-36 bg-gray-100 rounded-2xl w-full" />)}
+                  {[1, 2, 3].map(n => <div key={n} className="h-36 bg-gray-100 dark:bg-[#272727] rounded-2xl w-full" />)}
                 </div>
               ) : visiblePastChallenges.length > 0 ? (
                 <>
@@ -113,8 +113,8 @@ export default function PastLeaderboardLayout({
                   />
                 </>
               ) : (
-                <div className="py-12 px-4 bg-gray-50 rounded-2xl border border-border text-center">
-                  <p className="text-[14px] font-semibold text-gray-600">{t?.catSpeak?.reels?.noPastChallenges || "Chưa có thử thách nào đã kết thúc."}</p>
+                <div className="py-12 px-4 bg-gray-50 dark:bg-[#1A1A1A] rounded-2xl border border-border dark:border-[#3F3F3F] text-center">
+                  <p className="text-[14px] font-semibold text-gray-600 dark:text-neutral-300">{t?.catSpeak?.reels?.noPastChallenges || "Chưa có thử thách nào đã kết thúc."}</p>
                 </div>
               )}
             </div>
@@ -128,7 +128,7 @@ export default function PastLeaderboardLayout({
                 <div className="mb-4">
                   <button 
                     onClick={() => onMobileDetailChange && onMobileDetailChange(false)}
-                    className="flex items-center gap-2 text-gray-600 font-semibold py-2 active:opacity-70"
+                    className="flex items-center gap-2 text-gray-600 dark:text-neutral-300 font-semibold py-2 active:opacity-70 cursor-pointer"
                   >
                     <ArrowRight size={18} className="rotate-180" /> 
                     {t?.catSpeak?.reels?.back || "Trở lại danh sách"}

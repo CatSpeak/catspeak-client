@@ -171,7 +171,7 @@ export default function BulletinBoardPage() {
     <div className="min-h-screen space-y-6">
       <Breadcrumb
         separator=">"
-        className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
+        className="text-[#7B7979] dark:text-gray-400 text-xs sm:text-sm flex-wrap"
         items={[
           { label: dict.postDetail.breadcrumbs.home, onClick: () => navigate("/workspace") },
           { label: isStudent ? dict.postDetail.breadcrumbs.myLearning : dict.postDetail.breadcrumbs.myCourses, onClick: () => navigate(basePath) },
@@ -183,7 +183,7 @@ export default function BulletinBoardPage() {
       />
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 py-2">
-        <h1 className="text-[32px] md:text-[40px] font-semibold text-[#191C1D]">
+        <h1 className="text-[32px] md:text-[40px] font-semibold text-[#191C1D] dark:text-white">
           Chi tiết bảng tin
         </h1>
         {(!isStudent) && (
@@ -218,12 +218,12 @@ export default function BulletinBoardPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 flex-1 w-full overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <FileText className="w-8 h-8 text-gray-400" />
+        <div className="flex flex-col items-center justify-center py-20 flex-1 w-full overflow-x-auto rounded-2xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-sm">
+          <div className="w-16 h-16 bg-gray-100 dark:bg-[#2A2A2A] rounded-full flex items-center justify-center mb-4">
+            <FileText className="w-8 h-8 text-gray-400 dark:text-gray-500" />
           </div>
-          <p className="text-gray-800 font-medium mb-1">{dict.bulletinBoard.noPosts}</p>
-          <p className="text-gray-400 text-sm">{dict.bulletinBoard.noPostsDescription}</p>
+          <p className="text-gray-800 dark:text-gray-200 font-medium mb-1">{dict.bulletinBoard.noPosts}</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm">{dict.bulletinBoard.noPostsDescription}</p>
         </div>
       )}
 

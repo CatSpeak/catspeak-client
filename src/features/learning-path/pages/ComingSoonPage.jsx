@@ -36,7 +36,7 @@ const ComingSoonPage = ({
       {/* Decorative Mascot / Badge */}
       <div className="relative mb-6">
         <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-cath-red-600 via-amber-500 to-orange-400 p-0.5 shadow-2xl shadow-cath-red-500/20">
-          <div className="w-full h-full bg-white dark:bg-gray-800 rounded-3xl flex items-center justify-center text-cath-red-600 dark:text-cath-red-400">
+          <div className="w-full h-full bg-white dark:bg-gray-800 rounded-3xl flex items-center justify-center text-cath-red-600 dark:text-red-400">
             <Compass className="w-12 h-12 stroke-[1.5] animate-pulse" />
           </div>
         </div>
@@ -85,7 +85,7 @@ const ComingSoonPage = ({
                 </p>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs font-semibold text-cath-red-700 dark:text-cath-red-400">
+              <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs font-semibold text-cath-red-700 dark:text-red-400">
                 <span>Chọn lộ trình</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>

@@ -2,23 +2,25 @@ import React, { useEffect, useId, useRef } from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion" // eslint-disable-line no-unused-vars
 import { X } from "lucide-react"
+import { M3_MOTION } from "@/shared/constants/motion"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
 const ModalContent = ({
   onClose,
   children,
   className = "",
-  headerClassName = "flex items-center justify-between p-4 sm:p-6",
+  headerClassName = "flex items-center justify-between min-h-[56px] pl-4 pr-1",
   title,
   description,
   ariaLabel = "Dialog",
   showCloseButton = true,
   subHeader,
-  subHeaderClassName = "px-4 sm:px-6 pb-6 shrink-0",
+  subHeaderClassName = "px-4 pb-4 shrink-0",
   footer,
-  footerClassName = "p-4 sm:p-6",
-  bodyClassName = "p-4 sm:p-6 flex-1 overflow-y-auto",
+  footerClassName = "p-4",
+  bodyClassName = "",
   fullScreenOnMobile = true,
 }) => {
   useScrollLock(true)
@@ -91,7 +93,7 @@ const ModalContent = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={M3_MOTION.standard.effects.default}
     >
       {/* Backdrop */}
       <div
@@ -107,7 +109,10 @@ const ModalContent = ({
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
-        transition={{ duration: 0.2 }}
+        transition={{
+          opacity: M3_MOTION.standard.effects.default,
+          scale: M3_MOTION.expressive.spatial.fast,
+        }}
         className={`relative flex flex-col w-full shadow-xl overflow-hidden ${
           /(^|\s)(md:|lg:|xl:|2xl:)?h-/.test(className)
             ? ""
@@ -118,12 +123,12 @@ const ModalContent = ({
           /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(className)
             ? ""
             : "md:max-w-md"
-        } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
+        } ${/(^|\s)bg-/.test(className) ? "" : "bg-white dark:bg-[#1A1A1A] text-gray-900 dark:text-white"} ${
           /(^|\s)rounded/.test(className)
             ? ""
             : fullScreenOnMobile
-              ? "rounded-none md:rounded-3xl md:border md:border-border"
-              : "rounded-3xl border border-border"
+              ? "rounded-none md:rounded-3xl md:border md:border-border dark:md:border-[#3F3F3F]"
+              : "rounded-3xl border border-border dark:border-[#3F3F3F]"
         } ${className}`}
         role="dialog"
         aria-modal="true"
@@ -136,13 +141,10 @@ const ModalContent = ({
         {(title || description || showCloseButton) && (
           <div className={headerClassName}>
             {title || description ? (
-              <div className="flex min-w-0 flex-col gap-1">
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {title ? (
                   typeof title === "string" ? (
-                    <h2
-                      id={titleId}
-                      className="text-[20px] leading-[26px] font-semibold"
-                    >
+                    <h2 id={titleId} className="text-xl font-bold">
                       {title}
                     </h2>
                   ) : (
@@ -150,7 +152,10 @@ const ModalContent = ({
                   )
                 ) : null}
                 {description && (
-                  <p id={descriptionId} className="text-sm text-secondary">
+                  <p
+                    id={descriptionId}
+                    className="text-sm text-secondary dark:text-[#AAAAAA]"
+                  >
                     {description}
                   </p>
                 )}
@@ -160,21 +165,24 @@ const ModalContent = ({
             )}
 
             {showCloseButton && (
-              <button
+              <IconButton
                 type="button"
                 aria-label="Close dialog"
                 onClick={onClose}
-                className="flex shrink-0 items-center justify-center h-10 w-10 hover:bg-[#E5E5E5] rounded-full transition-colors"
+                variant="ghost"
+                className="shrink-0"
               >
-                <X size={20} />
-              </button>
+                <X />
+              </IconButton>
             )}
           </div>
         )}
 
         {subHeader && <div className={subHeaderClassName}>{subHeader}</div>}
 
-        <div className={`${bodyClassName} ${!footer ? "mb-4 sm:mb-6" : ""}`}>
+        <div
+          className={`${/(^|\s)(!?)p[xy]?-/.test(bodyClassName) ? "" : "px-4"} flex-1 ${/(^|\s)(!?)overflow-/.test(bodyClassName) ? "" : "overflow-y-auto"} ${bodyClassName} ${!footer && !/(^|\s)(!?)m[by]?-/.test(bodyClassName) ? "mb-4" : ""}`}
+        >
           {children}
         </div>
 

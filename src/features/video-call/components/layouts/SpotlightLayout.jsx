@@ -129,7 +129,7 @@ const SpotlightLayout = ({
   return (
     <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-0">
       {/* Main spotlight tile */}
-      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0 relative overflow-hidden rounded-xl">
+      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0 relative overflow-hidden rounded-2xl">
         {isSpotlightGame ? (
           <GameTile isMain={true} />
         ) : spotlightItem?.type === "screen" ? (
@@ -165,7 +165,7 @@ const SpotlightLayout = ({
           <div className="flex flex-1 gap-1 min-h-0 min-w-0 flex-row md:flex-col overflow-hidden">
             {visibleItems.map((item) => renderSidebarItem(item))}
             {overflowCount > 0 && (
-              <div className="relative h-full w-full min-h-0 min-w-0 overflow-hidden rounded-xl">
+              <div className="relative h-full w-full min-h-0 min-w-0 overflow-hidden rounded-2xl">
                 <OverflowTile
                   overflowItems={overflowItems}
                   overflowCount={overflowCount}

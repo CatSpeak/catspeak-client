@@ -7,12 +7,10 @@ const RecurrenceIntervalRow = ({ intervalUnit, value, onChange, disabled }) => {
 
   return (
     <div
-      className="flex items-center gap-3 border rounded-md px-4 h-[48px] shadow-sm bg-white"
-      style={{ borderColor: colors.border }}
+      className="flex items-center gap-3 border border-border dark:border-[#3F3F3F] rounded-md px-4 h-[48px] shadow-sm bg-white dark:bg-[#272727]"
     >
       <span
-        className="text-base font-medium shrink-0"
-        style={{ color: colors.textGray }}
+        className="text-base font-medium shrink-0 text-gray-600 dark:text-neutral-400"
       >
         {cal.repeatEvery}
       </span>
@@ -22,11 +20,10 @@ const RecurrenceIntervalRow = ({ intervalUnit, value, onChange, disabled }) => {
         value={value}
         onChange={(e) => onChange(Math.max(1, Number(e.target.value)))}
         disabled={disabled}
-        className={`w-14 text-center border border-border rounded-[5px] text-black text-base outline-none py-0.5 shadow-sm ${disabled ? "opacity-60 cursor-not-allowed bg-gray-50" : ""}`}
+        className={`w-14 text-center border border-border dark:border-[#3F3F3F] rounded-[5px] text-black dark:text-white bg-transparent text-base outline-none py-0.5 shadow-sm ${disabled ? "opacity-60 cursor-not-allowed bg-gray-50 dark:bg-[#1A1A1A]" : ""}`}
       />
       <span
-        className="text-base font-medium"
-        style={{ color: colors.textGray }}
+        className="text-base font-medium text-gray-600 dark:text-neutral-400"
       >
         {intervalUnit}
       </span>

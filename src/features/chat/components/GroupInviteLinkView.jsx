@@ -192,10 +192,10 @@ const GroupInviteLinkView = ({ conversation, canManage = false }) => {
                     fullInviteUrl,
                   )}`}
                   alt="QR Code"
-                  className="w-28 h-28 block"
+                  className="w-28 h-28 block rounded-lg bg-white p-1"
                   loading="lazy"
                 />
-                <span className="text-xs text-secondary">
+                <span className="text-xs text-secondary dark:text-[#AAAAAA]">
                   {t?.chat?.clickToEnlargeQr || "Nhấn để phóng to mã QR"}
                 </span>
               </button>
@@ -213,7 +213,7 @@ const GroupInviteLinkView = ({ conversation, canManage = false }) => {
               }
               containerClassName="w-full"
               variant="square"
-              className="hover:!border-border focus:!border-border select-all"
+              className="hover:!border-border dark:hover:!border-[#3F3F3F] focus:!border-border dark:focus:!border-[#3F3F3F] select-all"
               rightContentClassName="right-1"
               rightContentWidthClass="!pr-14"
               rightContent={
@@ -233,7 +233,7 @@ const GroupInviteLinkView = ({ conversation, canManage = false }) => {
 
             {/* Helper notice for non-managers when invite link is disabled */}
             {!isEnabled && !canManage && (
-              <p className="text-xs text-secondary px-4">
+              <p className="text-xs text-secondary dark:text-[#AAAAAA] px-4">
                 {t?.chat?.askAdminToEnableInvite ||
                   "Liên kết mời đang bị tắt. Bạn có thể nhờ quản trị viên hoặc trưởng nhóm bật lại."}
               </p>
@@ -245,7 +245,7 @@ const GroupInviteLinkView = ({ conversation, canManage = false }) => {
         {canManage && (
           <div>
             <div className="px-4 mb-1 select-none">
-              <h4 className="text-xs text-secondary">
+              <h4 className="text-xs text-secondary dark:text-[#AAAAAA]">
                 {t?.chat?.adminSettings || "Cài đặt quản trị viên"}
               </h4>
             </div>

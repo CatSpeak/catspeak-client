@@ -128,17 +128,17 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
       showCloseButton
       fullScreenOnMobile={false}
       className="md:max-w-lg rounded-3xl"
-      headerClassName="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 border-b border-gray-100"
+      headerClassName="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 border-b border-gray-100 dark:border-[#3F3F3F]"
       title={
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cath-red-700 to-cath-red-500 text-white shadow-sm ring-4 ring-red-50">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cath-red-700 to-cath-red-500 text-white shadow-sm ring-4 ring-red-50 dark:ring-red-950/30">
             <UserPlus size={20} className="stroke-[2.2]" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 leading-tight">
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
               {title}
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5 truncate">
+            <p className="text-xs text-gray-500 dark:text-[#AAAAAA] mt-0.5 truncate">
               {t.rooms?.videoCall?.inviteSubtitle ||
                 "Gửi lời mời tham gia đến bạn bè của bạn"}
             </p>
@@ -146,7 +146,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
         </div>
       }
       bodyClassName="px-5 sm:px-6 py-5 flex flex-col gap-4 flex-1 overflow-y-auto"
-      footerClassName="px-5 sm:px-6 py-4 bg-gray-50/70 border-t border-gray-100"
+      footerClassName="px-5 sm:px-6 py-4 bg-gray-50/70 dark:bg-[#1f1f1f] border-t border-gray-100 dark:border-[#3F3F3F]"
       footer={
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full">
           <div className="hidden sm:flex items-center gap-2 min-w-0 text-xs">
@@ -158,7 +158,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
                 {readyHint.replace("{{count}}", String(selectedCount))}
               </span>
             ) : (
-              <span className="text-gray-400 truncate">
+              <span className="text-gray-400 dark:text-[#AAAAAA] truncate">
                 {t.rooms?.videoCall?.inviteEmptyHint ||
                   "Chọn ít nhất một người bạn để gửi lời mời."}
               </span>
@@ -187,7 +187,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
         </div>
       }
     >
-      <p className="text-sm leading-relaxed text-gray-600">
+      <p className="text-sm leading-relaxed text-gray-600 dark:text-neutral-300">
         {t.rooms?.videoCall?.inviteDescription ||
           "Chọn bạn bè bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia."}
       </p>
@@ -203,10 +203,10 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
         {hasSelection ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500">
+              <span className="text-xs font-semibold text-gray-500 dark:text-[#AAAAAA]">
                 {t.rooms?.videoCall?.inviteSelectedTitle || "Đã chọn"}
               </span>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-50 text-cath-red-700 border border-red-100">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 text-cath-red-700 dark:text-red-400 border border-red-100 dark:border-red-900/40">
                 {selectedCount}
               </span>
             </div>
@@ -220,7 +220,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
                 return (
                   <span
                     key={val}
-                    className="group inline-flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full text-xs font-medium bg-white text-gray-800 border border-gray-200 shadow-xs transition-colors hover:border-cath-red-200 hover:bg-red-50/60"
+                    className="group inline-flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full text-xs font-medium bg-white dark:bg-[#272727] text-gray-800 dark:text-neutral-200 border border-gray-200 dark:border-[#3F3F3F] shadow-xs transition-colors hover:border-cath-red-200 hover:bg-red-50/60 dark:hover:bg-red-950/30"
                   >
                     <Avatar
                       src={
@@ -240,7 +240,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
                       onClick={() => handleRemoveSelected(val)}
                       aria-label={(t.rooms?.videoCall?.inviteRemove ||
                         "Bỏ chọn {{name}}").replace("{{name}}", displayName)}
-                      className="ml-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-100 hover:text-cath-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
+                      className="ml-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-100 dark:hover:bg-red-950/50 hover:text-cath-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
                     >
                       <X size={12} strokeWidth={2.5} />
                     </button>
@@ -250,11 +250,11 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-3 rounded-2xl border border-dashed border-gray-200 bg-gray-50/60 px-3.5 py-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-400">
+          <div className="flex items-center gap-3 rounded-2xl border border-dashed border-gray-200 dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#222222] px-3.5 py-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-[#272727] border border-gray-200 dark:border-[#3F3F3F] text-gray-400 dark:text-[#AAAAAA]">
               <Users size={16} />
             </div>
-            <p className="text-xs leading-relaxed text-gray-500">
+            <p className="text-xs leading-relaxed text-gray-500 dark:text-[#AAAAAA]">
               {t.rooms?.videoCall?.inviteEmptyHint ||
                 "Chọn ít nhất một người bạn để gửi lời mời."}
             </p>

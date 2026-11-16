@@ -204,18 +204,18 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
   return (
     <div className="flex flex-col gap-6">
       {/* ─── DIRECT INVITATION SECTION ─── */}
-      <FluentCard className="p-6">
+      <FluentCard className="p-6 bg-white dark:bg-[#1A1A1A] border-border dark:border-[#3F3F3F]">
         <div className="flex flex-col gap-4">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-              <UserPlus size={18} className="text-[#990011]" />
+            <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+              <UserPlus size={18} className="text-[#990011] dark:text-[#FF6B6B]" />
               <span>
                 {cd.inviteDirect ||
                   cd.inviteByEmail ||
                   "Mời học viên / người dùng"}
               </span>
             </h3>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {cd.inviteDirectDesc ||
                 cd.inviteByEmailDesc ||
                 "Tìm kiếm và gửi lời mời tham gia lớp học đến học viên hoặc người dùng."}
@@ -232,7 +232,7 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
                 value={selectedAccountIds}
                 onChange={(newValues) => setSelectedAccountIds(newValues)}
                 disabled={isInviting}
-                dropdownClassName="w-full min-w-[280px] shadow-xl rounded-2xl"
+                dropdownClassName="w-full min-w-[280px] shadow-xl rounded-2xl dark:bg-[#222222] dark:border-[#3F3F3F]"
               />
             </div>
             <PillButton
@@ -253,15 +253,15 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
       </FluentCard>
 
       {/* ─── FRIENDS LIST INVITATION SECTION ─── */}
-      <FluentCard className="p-6">
+      <FluentCard className="p-6 bg-white dark:bg-[#1A1A1A] border-border dark:border-[#3F3F3F]">
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-[#3F3F3F] pb-4">
             <div>
-              <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-                <Users size={18} className="text-[#990011]" />
+              <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                <Users size={18} className="text-[#990011] dark:text-[#FF6B6B]" />
                 <span>{cd.inviteFriendsList || "Danh sách bạn bè"}</span>
               </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {cd.inviteFriendsListDesc ||
                   "Chọn từ danh sách bạn bè để mời tham gia lớp học."}
               </p>
@@ -301,7 +301,7 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
                 return (
                   <div
                     key={friendId || friend.email}
-                    className="flex items-center justify-between gap-3 p-3.5 bg-gray-50/60 hover:bg-gray-100/70 rounded-2xl border border-gray-100 transition"
+                    className="flex items-center justify-between gap-3 p-3.5 bg-gray-50/60 dark:bg-[#222222] hover:bg-gray-100/70 dark:hover:bg-[#2A2A2A] rounded-2xl border border-gray-100 dark:border-[#3F3F3F] transition"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <Avatar
@@ -315,11 +315,11 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
                         accountId={friendId}
                       />
                       <div className="flex flex-col min-w-0">
-                        <span className="text-sm font-bold text-gray-900 truncate">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
                           {name}
                         </span>
                         {friend.email && (
-                          <span className="text-xs text-gray-500 truncate max-w-[200px]">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
                             {friend.email}
                           </span>
                         )}
@@ -328,12 +328,12 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
 
                     <div className="shrink-0">
                       {isAlreadyInClass ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-400 bg-gray-100 px-3 py-1.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-400 dark:text-gray-400 bg-gray-100 dark:bg-[#2A2A2A] px-3 py-1.5 rounded-full">
                           <CheckCircle2 size={13} />
                           <span>{cd.alreadyJoined || "Đã vào lớp"}</span>
                         </span>
                       ) : isInvited ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 px-3 py-1.5 rounded-full">
                           <UserCheck size={13} />
                           <span>{cd.invited || "Đã mời"}</span>
                         </span>

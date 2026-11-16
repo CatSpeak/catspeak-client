@@ -19,7 +19,7 @@ const MoreMenuMobileView = ({
         className="w-full flex justify-center pb-4 px-4 cursor-pointer shrink-0"
         onClick={() => setShowMoreMenu(false)}
       >
-        <div className="w-10 h-1.5 bg-[#D9D9D9] rounded-full" />
+        <div className="w-10 h-1.5 bg-[#D9D9D9] dark:bg-white/20 rounded-full" />
       </div>
 
       <AnimatePresence mode="wait" initial={false}>

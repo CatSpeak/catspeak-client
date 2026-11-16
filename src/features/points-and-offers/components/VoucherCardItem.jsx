@@ -5,15 +5,15 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 const getCategoryIcon = (iconType) => {
   switch (iconType) {
     case "coffee":
-      return <Coffee size={20} className="text-gray-600" />
+      return <Coffee size={20} className="text-gray-600 dark:text-neutral-300" />
     case "book":
-      return <BookOpen size={20} className="text-gray-600" />
+      return <BookOpen size={20} className="text-gray-600 dark:text-neutral-300" />
     case "headphones":
-      return <Headphones size={20} className="text-gray-600" />
+      return <Headphones size={20} className="text-gray-600 dark:text-neutral-300" />
     case "sparkles":
-      return <Sparkles size={20} className="text-gray-600" />
+      return <Sparkles size={20} className="text-gray-600 dark:text-neutral-300" />
     default:
-      return <Gift size={20} className="text-gray-600" />
+      return <Gift size={20} className="text-gray-600 dark:text-neutral-300" />
   }
 }
 
@@ -74,27 +74,27 @@ const VoucherCardItem = ({
     return (
       <div
         onClick={() => isRedeemable && onRedeem?.(voucher)}
-        className={`group relative bg-white border border-gray-200/90 hover:border-rose-200 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
+        className={`group relative bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] hover:border-rose-200 dark:hover:border-rose-900/40 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
           isRedeemable ? "cursor-pointer" : "opacity-80"
         }`}
       >
         <div>
           <div className="flex items-start justify-between gap-3 mb-2">
-            <h4 className="font-bold text-gray-900 text-sm group-hover:text-[#990011] transition-colors line-clamp-2">
+            <h4 className="font-bold text-gray-900 dark:text-white text-sm group-hover:text-[#990011] dark:group-hover:text-red-400 transition-colors line-clamp-2">
               {voucher.title || voucher.name}
             </h4>
-            <span className="shrink-0 text-[11px] font-semibold text-[#990011] bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded-md">
+            <span className="shrink-0 text-[11px] font-semibold text-[#990011] dark:text-red-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/40 px-2 py-0.5 rounded-md">
               {voucher.badge}
             </span>
           </div>
 
-          <p className="text-xs text-gray-400 mb-3 font-normal">
+          <p className="text-xs text-gray-400 dark:text-neutral-400 mb-3 font-normal">
             {compactExpiryText}
           </p>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-          <div className="flex items-center gap-1.5 font-bold text-gray-900 text-sm">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-[#272727]">
+          <div className="flex items-center gap-1.5 font-bold text-gray-900 dark:text-white text-sm">
             <Star className="text-amber-500 fill-amber-500" size={16} />
             <span>{voucher.pointsRequired}</span>
           </div>
@@ -103,8 +103,8 @@ const VoucherCardItem = ({
             type="button"
             className={`text-xs font-semibold ${
               isRedeemable
-                ? "text-[#990011] group-hover:underline cursor-pointer"
-                : "text-gray-400 cursor-not-allowed"
+                ? "text-[#990011] dark:text-red-400 group-hover:underline cursor-pointer"
+                : "text-gray-400 dark:text-neutral-500 cursor-not-allowed"
             }`}
           >
             {isRedeemable
@@ -118,38 +118,38 @@ const VoucherCardItem = ({
 
   // Full catalog card version for "Đổi Voucher" tab
   return (
-    <div className="bg-white border border-gray-200/90 hover:border-gray-300 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200/90 dark:border-[#3F3F3F] hover:border-gray-300 dark:hover:border-[#555] rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
       <div>
         {/* Top Header: Icon, Title, Badge */}
         <div className="flex items-start gap-3.5 mb-2.5">
-          <div className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-[#272727] flex items-center justify-center shrink-0">
             {getCategoryIcon(voucher.iconType)}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h4 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2">
+              <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-snug line-clamp-2">
                 {voucher.title || voucher.name}
               </h4>
-              <span className="shrink-0 text-[11px] font-bold text-[#990011] bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded-md">
+              <span className="shrink-0 text-[11px] font-bold text-[#990011] dark:text-red-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/40 px-2 py-0.5 rounded-md">
                 {voucher.badge}
               </span>
             </div>
-            <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1 line-clamp-2 leading-relaxed">
               {voucher.description || voucher.conditions || cd.defaultCondition || "Áp dụng khi thanh toán khóa học/lớp học"}
             </p>
           </div>
         </div>
 
         {/* Expiry & Stock info */}
-        <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3.5 pl-0 sm:pl-14">
+        <div className="flex items-center justify-between text-[11px] text-gray-400 dark:text-neutral-400 mb-3.5 pl-0 sm:pl-14">
           <span>{fullExpiryText}</span>
           {voucher.stock !== undefined && (
             <span
               className={
                 voucher.stock <= 5
-                  ? "text-amber-600 font-semibold"
-                  : "text-gray-400"
+                  ? "text-amber-600 dark:text-amber-400 font-semibold"
+                  : "text-gray-400 dark:text-neutral-400"
               }
             >
               {cd.stockRemaining
@@ -161,8 +161,8 @@ const VoucherCardItem = ({
       </div>
 
       {/* Bottom Row: Points + Action Button */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <div className="flex items-center gap-1.5 font-bold text-gray-900 text-sm sm:text-base">
+      <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[#272727]">
+        <div className="flex items-center gap-1.5 font-bold text-gray-900 dark:text-white text-sm sm:text-base">
           <Star className="text-amber-500 fill-amber-500" size={17} />
           <span>{voucher.pointsRequired}</span>
         </div>
@@ -181,7 +181,7 @@ const VoucherCardItem = ({
               <button
                 type="button"
                 disabled
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-[#272727] text-gray-400 dark:text-neutral-400 border border-gray-200 dark:border-[#3F3F3F] cursor-not-allowed"
               >
                 {notRedeemableReason || cd.unavailable || "Không khả dụng"}
               </button>

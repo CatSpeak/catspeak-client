@@ -26,7 +26,7 @@ const FilterDropdown = ({ label, options = [], onSelect }) => {
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         onClick={handleToggle}
-        className={`flex items-center px-3 gap-3 rounded-[5px] hover:bg-[#FAFAFA] text-sm leading-5 border border-border min-w-[130px] min-h-[32px] justify-between`}
+        className={`flex items-center px-3 gap-3 rounded-[5px] bg-white dark:bg-[#1A1A1A] hover:bg-[#FAFAFA] dark:hover:bg-[#272727] text-sm text-gray-900 dark:text-white leading-5 border border-border dark:border-[#3F3F3F] min-w-[130px] min-h-[32px] justify-between`}
       >
         <span className="truncate">{selected ? selected.label : label}</span>
         <ChevronDown
@@ -43,16 +43,16 @@ const FilterDropdown = ({ label, options = [], onSelect }) => {
             <FluentAnimation
               direction="down"
               exit={true}
-              className="rounded-[5px] bg-[#F9F9F9] shadow-lg border border-border overflow-hidden"
+              className="rounded-[5px] bg-[#F9F9F9] dark:bg-[#1A1A1A] shadow-lg border border-border dark:border-[#3F3F3F] overflow-hidden"
             >
               <div className="flex flex-col gap-1 p-1">
                 {options.map((option, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSelect(option)}
-                    className={`w-full h-[32px] rounded-[5px] text-left px-3 text-sm hover:bg-primaryBg ${
+                    className={`w-full h-[32px] rounded-[5px] text-left px-3 text-sm hover:bg-primaryBg dark:hover:bg-[#272727] text-gray-900 dark:text-neutral-200 ${
                       selected?.value === option.value
-                        ? "text-cath-red-700 bg-primaryBg"
+                        ? "text-cath-red-700 dark:text-red-400 bg-primaryBg dark:bg-[#272727] font-semibold"
                         : ""
                     }`}
                   >

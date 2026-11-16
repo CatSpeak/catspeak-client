@@ -124,15 +124,15 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="flex h-[90vh] w-full max-w-5xl flex-col rounded-2xl bg-white shadow-2xl overflow-hidden text-slate-800"
+        className="flex h-[90vh] w-full max-w-5xl flex-col rounded-2xl bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] shadow-2xl overflow-hidden text-slate-800 dark:text-neutral-200"
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#2E2E2E] px-6 py-4">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary2" />
-            <h2 className="text-lg font-bold text-slate-900">{t.rooms.breakoutRooms.setupTitle}</h2>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t.rooms.breakoutRooms.setupTitle}</h2>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-50 hover:text-slate-600">
+          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 dark:text-neutral-400 hover:bg-slate-50 dark:hover:bg-[#272727] hover:text-slate-600 dark:hover:text-white cursor-pointer">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -140,13 +140,13 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
         {/* Modal Body */}
         <div className="flex flex-1 overflow-hidden">
           {/* Left Panel: Settings */}
-          <div className="w-80 border-r border-slate-100 p-6 overflow-y-auto space-y-6 bg-slate-50/50">
+          <div className="w-80 border-r border-slate-100 dark:border-[#2E2E2E] p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-[#202020]">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.rooms.breakoutRooms.roomCount}</label>
+              <label className="block text-xs font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider mb-2">{t.rooms.breakoutRooms.roomCount}</label>
               <select
                 value={roomCount}
                 onChange={(e) => setRoomCount(Number(e.target.value))}
-                className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm focus:border-primary2 focus:ring-1 focus:ring-primary2"
+                className="w-full rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-slate-800 dark:text-white px-3 py-2 text-sm focus:border-primary2 focus:ring-1 focus:ring-primary2"
               >
                 {[2, 3, 4, 5, 6].map((num) => (
                   <option key={num} value={num}>
@@ -156,16 +156,16 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
               </select>
             </div>
 
-            <div className="h-px bg-slate-100" />
+            <div className="h-px bg-slate-100 dark:bg-[#2E2E2E]" />
 
             <div className="space-y-4">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">{t.rooms.breakoutRooms.configTitle}</label>
+              <label className="block text-xs font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">{t.rooms.breakoutRooms.configTitle}</label>
 
               {/* Timer Config */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <Clock className="h-4 w-4 text-slate-400" /> {t.rooms.breakoutRooms.timer}
+                  <span className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-neutral-300">
+                    <Clock className="h-4 w-4 text-slate-400 dark:text-neutral-400" /> {t.rooms.breakoutRooms.timer}
                   </span>
                   <input
                     type="checkbox"
@@ -182,17 +182,17 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                       max={120}
                       value={timerDuration}
                       onChange={(e) => setTimerDuration(Math.max(1, Number(e.target.value)))}
-                      className="w-20 rounded-lg border border-border px-2 py-1 text-sm text-center"
+                      className="w-20 rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-slate-800 dark:text-white px-2 py-1 text-sm text-center"
                     />
-                    <span className="text-xs text-slate-500">{t.rooms.breakoutRooms.minutes}</span>
+                    <span className="text-xs text-slate-500 dark:text-neutral-400">{t.rooms.breakoutRooms.minutes}</span>
                   </div>
                 )}
               </div>
 
               {/* Change Room Config */}
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                  <Settings className="h-4 w-4 text-slate-400" /> {t.rooms.breakoutRooms.allowChangeGroup}
+                <span className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-neutral-300">
+                  <Settings className="h-4 w-4 text-slate-400 dark:text-neutral-400" /> {t.rooms.breakoutRooms.allowChangeGroup}
                 </span>
                 <input
                   type="checkbox"
@@ -205,8 +205,8 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
               {/* Max Participants Config */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <ShieldAlert className="h-4 w-4 text-slate-400" /> {t.rooms.breakoutRooms.memberLimit}
+                  <span className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-neutral-300">
+                    <ShieldAlert className="h-4 w-4 text-slate-400 dark:text-neutral-400" /> {t.rooms.breakoutRooms.memberLimit}
                   </span>
                   <input
                     type="checkbox"
@@ -222,22 +222,22 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                       min={1}
                       value={maxParticipants}
                       onChange={(e) => setMaxParticipants(Math.max(1, Number(e.target.value)))}
-                      className="w-20 rounded-lg border border-border px-2 py-1 text-sm text-center"
+                      className="w-20 rounded-lg border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-slate-800 dark:text-white px-2 py-1 text-sm text-center"
                     />
-                    <span className="text-xs text-slate-500">{t.rooms.breakoutRooms.membersPerRoom}</span>
+                    <span className="text-xs text-slate-500 dark:text-neutral-400">{t.rooms.breakoutRooms.membersPerRoom}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="h-px bg-slate-100" />
+            <div className="h-px bg-slate-100 dark:bg-[#2E2E2E]" />
 
             {/* Quick Actions */}
             <div className="space-y-2">
               <button
                 type="button"
                 onClick={handleRandomAssign}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 px-4 py-2.5 text-sm font-semibold transition"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 dark:bg-[#272727] hover:bg-slate-200 dark:hover:bg-[#333333] text-slate-700 dark:text-neutral-200 px-4 py-2.5 text-sm font-semibold transition cursor-pointer"
               >
                 <RefreshCw className="h-4 w-4" /> {t.rooms.breakoutRooms.randomAllocationBtn}
               </button>
@@ -245,19 +245,19 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
           </div>
 
           {/* Right Panel: Rooms allocation */}
-          <div className="flex-1 p-6 overflow-y-auto bg-slate-50/20">
+          <div className="flex-1 p-6 overflow-y-auto bg-slate-50/20 dark:bg-[#1A1A1A]">
             {students.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center text-slate-400">
+              <div className="flex h-full flex-col items-center justify-center text-slate-400 dark:text-neutral-500">
                 <AlertCircle className="h-10 w-10 mb-2" />
                 <p className="text-sm">{t.rooms.breakoutRooms.noStudentsYet}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 {allocations.map((room, roomIndex) => (
-                  <div key={roomIndex} className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-slate-50 pb-2 mb-3">
-                      <span className="font-bold text-slate-900 text-sm">{room.roomName}</span>
-                      <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">
+                  <div key={roomIndex} className="rounded-xl border border-slate-100 dark:border-[#333333] bg-white dark:bg-[#242424] p-4 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-slate-50 dark:border-[#2E2E2E] pb-2 mb-3">
+                      <span className="font-bold text-slate-900 dark:text-white text-sm">{room.roomName}</span>
+                      <span className="text-xs bg-slate-100 dark:bg-[#2E2E2E] text-slate-600 dark:text-neutral-300 px-2 py-0.5 rounded-full font-semibold">
                         {room.accountIds.length} {t.rooms.breakoutRooms.studentsCount}
                       </span>
                     </div>
@@ -265,19 +265,19 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                     {/* Room Students List */}
                     <div className="min-h-[120px] max-h-[160px] overflow-y-auto space-y-2 mb-2 pr-1">
                       {room.accountIds.length === 0 ? (
-                        <div className="text-xs text-slate-400 italic text-center py-6">{t.rooms.breakoutRooms.dragOrRandom}</div>
+                        <div className="text-xs text-slate-400 dark:text-neutral-500 italic text-center py-6">{t.rooms.breakoutRooms.dragOrRandom}</div>
                       ) : (
                         room.accountIds.map((studentId) => {
                           const student = students.find((s) => s.identity === String(studentId))
                           if (!student) return null
                           const metadata = student.metadata ? JSON.parse(student.metadata) : {}
                           return (
-                            <div key={studentId} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-1.5 border border-slate-100/50">
-                              <span className="text-xs font-semibold text-slate-700 truncate">{student.name || `User #${studentId}`}</span>
+                            <div key={studentId} className="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-[#202020] px-3 py-1.5 border border-slate-100/50 dark:border-[#333333]">
+                              <span className="text-xs font-semibold text-slate-700 dark:text-neutral-200 truncate">{student.name || `User #${studentId}`}</span>
                               <select
                                 value={roomIndex}
                                 onChange={(e) => handleMoveStudent(studentId, Number(e.target.value))}
-                                className="text-[10px] bg-white border border-border rounded px-1 py-0.5 text-slate-600 focus:outline-none"
+                                className="text-[10px] bg-white dark:bg-[#272727] border border-border dark:border-[#3F3F3F] rounded px-1 py-0.5 text-slate-600 dark:text-neutral-300 focus:outline-none"
                               >
                                 {allocations.map((_, idx) => (
                                   <option key={idx} value={idx}>
@@ -298,7 +298,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 bg-slate-50/50">
+        <div className="flex items-center justify-end gap-3 border-t border-slate-100 dark:border-[#2E2E2E] px-6 py-4 bg-slate-50/50 dark:bg-[#202020]">
           <PillButton
             onClick={onClose}
             variant="secondary"

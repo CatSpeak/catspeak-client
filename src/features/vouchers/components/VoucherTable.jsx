@@ -116,7 +116,7 @@ const VoucherTable = ({
       key: "discount",
       label: vt.table?.discount || "Mức giảm",
       headerClassName: "w-[14%]",
-      className: "w-[14%] font-bold text-cath-red-700",
+      className: "w-[14%] font-bold text-cath-red-700 dark:text-red-400",
       render: (voucher) => {
         const isPercent =
           voucher.discountType === DISCOUNT_TYPES.PERCENTAGE ||
@@ -292,14 +292,14 @@ const VoucherTable = ({
         columns={columns}
         data={vouchers}
         rowKey={(voucher) => voucher.id}
-        headerRowClassName="bg-slate-50/80 text-secondary border-b border-border text-sm font-semibold"
+        headerRowClassName="bg-slate-50/80 dark:bg-[#202020] text-secondary dark:text-neutral-300 border-b border-border dark:border-[#3F3F3F] text-sm font-semibold"
         onRowClick={(voucher) => handleViewDetails(voucher)}
         emptyTitle={vt.emptyTitle || "Chưa có voucher nào"}
         emptyDescription={
           vt.emptySubtitle ||
           "Bạn chưa tạo mã voucher nào phù hợp với bộ lọc hiện tại."
         }
-        emptyIcon={<Ticket className="w-8 h-8 text-cath-red-600" />}
+        emptyIcon={<Ticket className="w-8 h-8 text-cath-red-600 dark:text-red-400" />}
         className={className}
         renderMobileCard={(voucher) => (
           <VoucherCard

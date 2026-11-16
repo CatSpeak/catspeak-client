@@ -22,18 +22,18 @@ const CallEndedScreen = () => {
 
   return (
     <div className="flex items-center justify-center h-screen bg-primaryBg animate-fadeIn">
-      <div className="flex flex-col items-center gap-4 max-w-[420px] px-8 py-12 text-center bg-white rounded-3xl border border-border shadow-xl">
-        <div className="text-gray-600 mb-2 bg-gray-100 p-5 rounded-full">
+      <div className="flex flex-col items-center gap-4 max-w-[420px] px-8 py-12 text-center bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] shadow-xl">
+        <div className="text-gray-600 dark:text-[#AAAAAA] mb-2 bg-gray-100 dark:bg-[#272727] p-5 rounded-full">
           <PhoneOff size={40} strokeWidth={1.5} />
         </div>
-        <h1 className="text-2xl font-bold text-black leading-tight">
+        <h1 className="text-2xl font-bold text-black dark:text-white leading-tight">
           {isExpired
             ? t.rooms.callEnded.titleExpired
             : isEnded
               ? (t.rooms.callEnded.titleEnded || t.rooms.callEnded.titleLeft)
               : t.rooms.callEnded.titleLeft}
         </h1>
-        <p className="text-[15px] text-gray-500 leading-relaxed mb-6">
+        <p className="text-[15px] text-gray-500 dark:text-[#AAAAAA] leading-relaxed mb-6">
           {isExpired
             ? t.rooms.callEnded.descExpired
             : isEnded

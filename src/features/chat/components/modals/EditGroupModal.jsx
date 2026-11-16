@@ -57,7 +57,7 @@ const EditGroupModal = ({ open, onClose, conversation }) => {
       open={open}
       onClose={onClose}
       title={t?.chat?.changeGroupName || "Change Group Name"}
-      className="rounded-xl border border-border"
+      className="rounded-xl border border-border dark:border-[#3F3F3F]"
       fullScreenOnMobile={false}
       headerClassName="flex items-center justify-between p-4"
       bodyClassName="px-4 flex-1"

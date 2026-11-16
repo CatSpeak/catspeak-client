@@ -78,17 +78,23 @@ export default {
       "vi-en": "Vietnamese → English"
     },
     lookup: {
-      meaning: "MEANING",
-      instructorNote: "DETAILED EXPLANATION (CAT SPEAK INSTRUCTOR)",
-      example: "EXAMPLE",
-      relatedWords: "Related words:",
+      meaning: "Meaning",
+      instructorNote: "Detailed explanation (Cat Speak Instructor)",
+      example: "Example",
+      relatedWords: "Related words",
       saved: "Saved to notebook",
       save: "Add to notebook",
       collapseExamples: "Collapse examples",
       moreExamples: "View more examples",
       langPlaceholder: "English -> English",
       listenBtn: "Listen to pronunciation",
-      closeBtn: "Close popup"
+      closeBtn: "Close popup",
+      fetchingTitle: "Looking up \"{{word}}\"...",
+      fetchingDesc: "Retrieving definition and phonetics",
+      contributeSuccess: "Feedback submitted!",
+      contributeError: "An error occurred while submitting feedback.",
+      saveSuccess: "Saved word to Vocabulary Notebook!",
+      saveError: "Could not save word. Please try again."
     },
     notFound: {
       title: "No definition found for this word.",

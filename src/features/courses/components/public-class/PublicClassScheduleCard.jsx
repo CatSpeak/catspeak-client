@@ -121,8 +121,7 @@ const PublicClassScheduleCard = ({ classData }) => {
     classDayIndices,
   ])
 
-  // 3. Compute earliest date (minimum among schedule start and all modified sessions)
-  // and latest date (maximum among schedule end and all modified sessions)
+  // 3. Compute earliest date and latest date
   const earliestDate = useMemo(() => {
     let earliest = null
 
@@ -200,7 +199,7 @@ const PublicClassScheduleCard = ({ classData }) => {
     pc.startsOn,
   ])
 
-  // Initial display month (defaults to earliest date if available)
+  // Initial display month
   const initialDate = useMemo(() => {
     if (earliestDate && earliestDate.isValid()) {
       return earliestDate
@@ -319,8 +318,8 @@ const PublicClassScheduleCard = ({ classData }) => {
   const scheduleDaysWithModifiedText =
     modifiedSessions.length > 0
       ? (pc.scheduleWithModified || "{{schedule}} và {{count}} buổi ngoại lệ")
-          .replace("{{schedule}}", scheduleDaysText)
-          .replace("{{count}}", modifiedSessions.length)
+        .replace("{{schedule}}", scheduleDaysText)
+        .replace("{{count}}", modifiedSessions.length)
       : scheduleDaysText
 
   const timeFormatted =
@@ -339,12 +338,12 @@ const PublicClassScheduleCard = ({ classData }) => {
   }
 
   return (
-    <div className="bg-white border border-border rounded-3xl p-5 flex flex-col gap-3.5 shadow-xs">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-5 flex flex-col gap-3.5 shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <CalendarIcon size={18} className="text-[#b20a1c]" />
-          <h3 className="text-base font-bold text-slate-950">
+          <CalendarIcon size={18} className="text-[#b20a1c] dark:text-[#FF6B6B]" />
+          <h3 className="text-base font-bold text-slate-950 dark:text-white">
             {pc.scheduleTitle || "Lịch học"}
           </h3>
         </div>
@@ -354,18 +353,18 @@ const PublicClassScheduleCard = ({ classData }) => {
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-[#2A2A2A] text-slate-600 dark:text-gray-300 transition-colors cursor-pointer"
             aria-label="Previous month"
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="text-xs font-bold text-slate-800 min-w-[96px] text-center">
+          <span className="text-xs font-bold text-slate-800 dark:text-gray-200 min-w-[96px] text-center">
             {localizedMonth}
           </span>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-[#2A2A2A] text-slate-600 dark:text-gray-300 transition-colors cursor-pointer"
             aria-label="Next month"
           >
             <ChevronRight size={16} />
@@ -378,11 +377,10 @@ const PublicClassScheduleCard = ({ classData }) => {
         <button
           type="button"
           onClick={() => setCurrentMonth(dayjs())}
-          className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${
-            currentMonth.isSame(dayjs(), "day")
-              ? "bg-slate-900 text-white border-slate-900 font-bold"
-              : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
-          }`}
+          className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${currentMonth.isSame(dayjs(), "day")
+              ? "bg-slate-900 dark:bg-white text-white dark:text-gray-900 border-slate-900 dark:border-white font-bold"
+              : "bg-slate-50 dark:bg-[#222222] text-slate-600 dark:text-gray-300 border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-100 dark:hover:bg-[#2A2A2A] hover:text-slate-900 dark:hover:text-white"
+            }`}
         >
           {pc.jumpToday || "Hôm nay"}
         </button>
@@ -390,11 +388,10 @@ const PublicClassScheduleCard = ({ classData }) => {
           <button
             type="button"
             onClick={() => setCurrentMonth(earliestDate)}
-            className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${
-              currentMonth.isSame(earliestDate, "day")
-                ? "bg-slate-900 text-white border-slate-900 font-bold"
-                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
-            }`}
+            className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${currentMonth.isSame(earliestDate, "day")
+                ? "bg-slate-900 dark:bg-white text-white dark:text-gray-900 border-slate-900 dark:border-white font-bold"
+                : "bg-slate-50 dark:bg-[#222222] text-slate-600 dark:text-gray-300 border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-100 dark:hover:bg-[#2A2A2A] hover:text-slate-900 dark:hover:text-white"
+              }`}
           >
             {pc.jumpStart || "Bắt đầu"}
           </button>
@@ -403,11 +400,10 @@ const PublicClassScheduleCard = ({ classData }) => {
           <button
             type="button"
             onClick={() => setCurrentMonth(latestDate)}
-            className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${
-              currentMonth.isSame(latestDate, "day")
-                ? "bg-slate-900 text-white border-slate-900 font-bold"
-                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
-            }`}
+            className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${currentMonth.isSame(latestDate, "day")
+                ? "bg-slate-900 dark:bg-white text-white dark:text-gray-900 border-slate-900 dark:border-white font-bold"
+                : "bg-slate-50 dark:bg-[#222222] text-slate-600 dark:text-gray-300 border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-100 dark:hover:bg-[#2A2A2A] hover:text-slate-900 dark:hover:text-white"
+              }`}
           >
             {pc.jumpEnd || "Kết thúc"}
           </button>
@@ -415,11 +411,11 @@ const PublicClassScheduleCard = ({ classData }) => {
       </div>
 
       {/* Weekday Header */}
-      <div className="grid grid-cols-7 gap-1 text-center border-b border-slate-100 pb-2">
+      <div className="grid grid-cols-7 gap-1 text-center border-b border-slate-100 dark:border-[#3F3F3F] pb-2">
         {DAY_LABELS.map((label, idx) => (
           <div
             key={idx}
-            className="text-[11px] font-bold text-slate-400 uppercase tracking-tight"
+            className="text-[11px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-tight"
           >
             {label}
           </div>
@@ -433,7 +429,7 @@ const PublicClassScheduleCard = ({ classData }) => {
             return (
               <div
                 key={`empty-${idx}`}
-                className="h-8 flex items-center justify-center text-xs text-slate-300 select-none"
+                className="h-8 flex items-center justify-center text-xs text-slate-300 dark:text-gray-600 select-none"
               >
                 {item.day}
               </div>
@@ -443,7 +439,7 @@ const PublicClassScheduleCard = ({ classData }) => {
           const isToday =
             item.day === dayjs().date() && currentMonth.isSame(dayjs(), "month")
 
-          let badgeClass = "text-slate-700"
+          let badgeClass = "text-slate-700 dark:text-gray-300"
           let titleText = ""
 
           if (item.isModifiedSession) {
@@ -456,16 +452,16 @@ const PublicClassScheduleCard = ({ classData }) => {
                   : ""
             titleText = `${pc.modifiedSession || "Buổi ngoại lệ"}${mTime ? `: ${mTime}` : ""}`
             badgeClass = isToday
-              ? "bg-amber-100 text-amber-900 border border-slate-900 font-bold"
-              : "bg-amber-100 text-amber-900 font-bold"
+              ? "bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border border-slate-900 dark:border-white font-bold"
+              : "bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 font-bold"
           } else if (item.isClassDay) {
             titleText = pc.classDayLegend || "Ngày có buổi học"
             badgeClass = isToday
-              ? "bg-rose-50 text-[#b20a1c] font-bold border border-slate-900"
-              : "bg-rose-50 text-[#b20a1c] font-bold"
+              ? "bg-rose-50 dark:bg-rose-950/40 text-[#b20a1c] dark:text-[#FF6B6B] font-bold border border-slate-900 dark:border-white"
+              : "bg-rose-50 dark:bg-rose-950/40 text-[#b20a1c] dark:text-[#FF6B6B] font-bold"
           } else if (isToday) {
             titleText = pc.todayLegend || "Hôm nay"
-            badgeClass = "border border-slate-900 text-slate-900 font-bold"
+            badgeClass = "border border-slate-900 dark:border-white text-slate-900 dark:text-white font-bold"
           }
 
           return (
@@ -485,29 +481,29 @@ const PublicClassScheduleCard = ({ classData }) => {
       </div>
 
       {/* Schedule & Duration Info Summary */}
-      <div className="pt-3 border-t border-slate-100 flex flex-col gap-2.5">
+      <div className="pt-3 border-t border-slate-100 dark:border-[#3F3F3F] flex flex-col gap-2.5">
         {dateRangeText && (
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
-            <CalendarDays size={14} className="text-[#b20a1c] shrink-0" />
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-gray-300">
+            <CalendarDays size={14} className="text-[#b20a1c] dark:text-[#FF6B6B] shrink-0" />
             <span>{dateRangeText}</span>
           </div>
         )}
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
-          <CalendarIcon size={14} className="text-[#b20a1c] shrink-0" />
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-gray-300">
+          <CalendarIcon size={14} className="text-[#b20a1c] dark:text-[#FF6B6B] shrink-0" />
           <span>{scheduleDaysWithModifiedText}</span>
         </div>
         {timeFormatted && (
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
-            <Clock size={14} className="text-[#b20a1c] shrink-0" />
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-gray-300">
+            <Clock size={14} className="text-[#b20a1c] dark:text-[#FF6B6B] shrink-0" />
             <span>{timeFormatted}</span>
           </div>
         )}
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-3.5 text-[11px] text-slate-500 font-medium pt-1 flex-wrap">
+      <div className="flex items-center gap-3.5 text-[11px] text-slate-500 dark:text-gray-400 font-medium pt-1 flex-wrap">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#b20a1c]" />
+          <span className="w-2 h-2 rounded-full bg-[#b20a1c] dark:bg-[#FF6B6B]" />
           <span>{pc.classDayLegend || "Ngày học"}</span>
         </div>
         {modifiedSessions.length > 0 && (
@@ -517,7 +513,7 @@ const PublicClassScheduleCard = ({ classData }) => {
           </div>
         )}
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full border border-slate-900" />
+          <span className="w-2 h-2 rounded-full border border-slate-900 dark:border-white" />
           <span>{pc.todayLegend || "Hôm nay"}</span>
         </div>
       </div>

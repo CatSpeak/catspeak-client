@@ -6,9 +6,9 @@ const VoucherCategoryList = ({ title, vouchers, category, selectedVouchers, onTo
   const tc = t.billing.checkoutClass
   if (vouchers.length === 0) return null
 
-  let headerColor = 'text-[#111827]'
-  if (category === 'invalid_class' || category === 'ineligible') headerColor = 'text-[#F59F00]'
-  if (category === 'expired' || category === 'out_of_uses') headerColor = 'text-[#B20000]'
+  let headerColor = 'text-[#111827] dark:text-white'
+  if (category === 'invalid_class' || category === 'ineligible') headerColor = 'text-[#F59F00] dark:text-amber-400'
+  if (category === 'expired' || category === 'out_of_uses') headerColor = 'text-[#B20000] dark:text-red-400'
 
   return (
     <div className="mb-6">

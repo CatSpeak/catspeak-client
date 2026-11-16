@@ -519,7 +519,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     return (
       <div
         role="alert"
-        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+        className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
       >
         <span>
           {requestError
@@ -542,7 +542,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   refetchSubmission()
                 }
               }}
-              className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
+              className="rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-[#1A1A1A] px-3 py-1.5 text-xs font-extrabold text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
             >
               {sa.retry}
             </button>
@@ -550,7 +550,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               <button
                 type="button"
                 onClick={onBack}
-                className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
+                className="rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-[#1A1A1A] px-3 py-1.5 text-xs font-extrabold text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
               >
                 {sa.goBack}
               </button>
@@ -564,7 +564,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
   const getStatusBadge = () => {
     if (!submission) {
       return (
-        <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 uppercase tracking-wide">
+        <span className="bg-red-50 dark:bg-red-950/40 text-red-655 dark:text-red-300 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 dark:border-red-900/40 uppercase tracking-wide">
           {cd.statusNotSubmitted}
         </span>
       )
@@ -578,20 +578,20 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
 
     if (displayStatus === "returned") {
       return (
-        <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-1 rounded border border-emerald-100 uppercase tracking-wide">
+        <span className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded border border-emerald-100 dark:border-emerald-900/40 uppercase tracking-wide">
           {cg.filterReturned}
         </span>
       )
     }
     if (displayStatus === "late") {
       return (
-        <span className="bg-red-50 text-red-650 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 uppercase tracking-wide">
+        <span className="bg-red-50 dark:bg-red-950/40 text-red-650 dark:text-red-300 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 dark:border-red-900/40 uppercase tracking-wide">
           {cg.filterLate}
         </span>
       )
     }
     return (
-      <span className="bg-orange-50 text-orange-655 text-[10px] font-extrabold px-2.5 py-1 rounded border border-orange-100 uppercase tracking-wide">
+      <span className="bg-orange-50 dark:bg-orange-950/40 text-orange-655 dark:text-orange-300 text-[10px] font-extrabold px-2.5 py-1 rounded border border-orange-100 dark:border-orange-900/40 uppercase tracking-wide">
         {cd.statusNeedsGrading}
       </span>
     )
@@ -608,13 +608,13 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     return (
       <div
         key={`${safeUrl || name}-${index}`}
-        className="flex items-center justify-between p-3 bg-gray-50 border border-border rounded-xl hover:bg-gray-100/50 transition-colors"
+        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl hover:bg-gray-100/50 dark:hover:bg-[#2A2A2A] transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
           <FileText size={18} className={getFileIconColorClass(name)} />
           <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold text-gray-800 truncate max-w-[200px] md:max-w-xs">{name}</span>
-            <span className="text-[10px] text-gray-400 font-semibold">{formatSubmissionFileSize(size)}</span>
+            <span className="text-xs font-bold text-gray-800 dark:text-gray-100 truncate max-w-[200px] md:max-w-xs">{name}</span>
+            <span className="text-[10px] text-gray-400 dark:text-gray-400 font-semibold">{formatSubmissionFileSize(size)}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -625,7 +625,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               rel="noopener noreferrer"
               referrerPolicy="no-referrer"
               aria-label={interpolate(sa.viewFileNamed, { fileName: name })}
-              className="p-1.5 text-gray-400 hover:text-[#990011] hover:bg-[#990011]/5 rounded-lg transition-colors"
+              className="p-1.5 text-gray-400 hover:text-[#990011] dark:hover:text-[#FF6B6B] hover:bg-[#990011]/5 dark:hover:bg-[#FF6B6B]/10 rounded-lg transition-colors cursor-pointer"
               title={sa.viewFile}
             >
               <Eye size={14} />
@@ -637,7 +637,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               onClick={() => removePendingFile(index)}
               disabled={isSubmitting}
               aria-label={interpolate(sa.removeFileNamed, { fileName: name })}
-              className="p-1.5 text-gray-400 hover:text-red-655 hover:bg-red-50 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              className="p-1.5 text-gray-400 hover:text-red-655 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
               title={sa.removeFile}
             >
               <Trash2 size={14} />
@@ -649,22 +649,22 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-200">
 
       {/* Header Title & Navigation back */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border dark:border-[#3F3F3F] pb-5">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBack}
             aria-label={sa.goBack}
-            className="p-2.5 border border-border hover:bg-gray-50 text-gray-500 rounded-xl transition-all cursor-pointer shadow-2xs"
+            className="p-2.5 border border-border dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-500 dark:text-gray-400 rounded-xl transition-all cursor-pointer shadow-2xs"
             title={sa.goBack}
           >
             <ChevronLeft size={16} />
           </button>
           <div>
-            <h1 className="text-2xl font-black text-gray-950 tracking-tight leading-tight">
+            <h1 className="text-2xl font-black text-gray-950 dark:text-white tracking-tight leading-tight">
               {typeof assignment.name === "string" && assignment.name.trim()
                 ? assignment.name
                 : sa.untitledAssignment}
@@ -673,25 +673,25 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               {getStatusBadge()}
 
               {!isPublishedAssignment ? (
-                <span className="bg-gray-150 text-gray-500 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide flex items-center gap-1">
+                <span className="bg-gray-150 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide flex items-center gap-1">
                   <Lock size={10} />
                   {isClosed
                     ? cg.badgeClosed
                     : cg.badgeDraft}
                 </span>
               ) : (
-                <span className="bg-emerald-50 text-emerald-600 text-[10px] font-extrabold px-2.5 py-1 rounded border border-emerald-100 uppercase tracking-wide flex items-center gap-1">
+                <span className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-1 rounded border border-emerald-100 dark:border-emerald-900/40 uppercase tracking-wide flex items-center gap-1">
                   <Unlock size={10} />
                   {sa.badgeOpen}
                 </span>
               )}
 
               {dueDateMs !== null && (isExpired ? (
-                <span className="bg-red-50 border border-red-100 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
+                <span className="bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/40 text-red-655 dark:text-red-300 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
                   {cg.badgeExpired}
                 </span>
               ) : (
-                <span className="bg-orange-50 border border-orange-100 text-orange-600 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
+                <span className="bg-orange-50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/40 text-orange-600 dark:text-orange-300 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
                   {cg.badgeUpcoming}
                 </span>
               ))}
@@ -701,11 +701,11 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
 
         {/* Due Date Indicator */}
         {assignment.dueDate && (
-          <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 border border-border rounded-xl px-4 py-2.5 w-fit">
+          <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-400 bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-xl px-4 py-2.5 w-fit">
             <Calendar size={14} className="text-gray-400" />
             <span className="font-semibold">
               {sa.deadlineLabel}{" "}
-              <strong className="text-gray-700 font-extrabold">
+              <strong className="text-gray-700 dark:text-gray-200 font-extrabold">
                 {formatDateTime(assignment.dueDate)}
               </strong>
             </span>
@@ -717,17 +717,17 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
         {/* Left Column (65%) */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           {/* Instructions and Details */}
-          <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-4">
-            <div className="flex items-center gap-2 border-b border-border pb-3">
-              <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
-              <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+            <div className="flex items-center gap-2 border-b border-border dark:border-[#3F3F3F] pb-3">
+              <span className="w-1.5 h-4 bg-[#990011] dark:bg-[#b20a1c] rounded-full" />
+              <h3 className="text-sm font-extrabold text-gray-800 dark:text-white uppercase tracking-wider">
                 {ca.descriptionLabel}
               </h3>
             </div>
 
             <RenderHTML
               html={assignmentDescription}
-              className="text-xs font-semibold text-gray-700 min-h-[80px]"
+              className="text-xs font-semibold text-gray-700 dark:text-gray-200 min-h-[80px]"
               fallback={
                 <span className="italic text-gray-400 font-medium text-xs">
                   {sa.noDetailedDescription}
@@ -737,7 +737,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
 
             {/* Teacher attachments */}
             {parsedTeacherAttachments.length > 0 && (
-              <div className="mt-4 border-t border-border pt-4">
+              <div className="mt-4 border-t border-border dark:border-[#3F3F3F] pt-4">
                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                   <Paperclip size={12} />
                   {ca.attachmentsLabel}
@@ -754,11 +754,11 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
             <form
               onSubmit={handleSubmit}
               aria-busy={isSubmitting}
-              className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-5"
+              className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs flex flex-col gap-5"
             >
-              <div className="flex items-center gap-2 border-b border-gray-50 pb-3">
-                <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
-                <h3 className="text-sm font-extrabold text-[#990011] uppercase tracking-wider">
+              <div className="flex items-center gap-2 border-b border-gray-50 dark:border-[#333333] pb-3">
+                <span className="w-1.5 h-4 bg-[#990011] dark:bg-[#b20a1c] rounded-full" />
+                <h3 className="text-sm font-extrabold text-[#990011] dark:text-[#FF6B6B] uppercase tracking-wider">
                   {submission ? sa.resubmitHeading : sa.submitHeading}
                 </h3>
               </div>
@@ -768,7 +768,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 <div className="flex flex-col gap-2.5">
                   <label
                     htmlFor="assignment-text-submission"
-                    className="text-[10px] font-black text-gray-400 tracking-wider uppercase flex justify-between"
+                    className="text-[10px] font-black text-gray-400 uppercase tracking-wider flex justify-between"
                   >
                     <span>{ca.directInput}</span>
                   </label>
@@ -832,12 +832,12 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                       ? "cursor-not-allowed opacity-60"
                       : "cursor-pointer"
                       } ${dragActive
-                        ? "border-[#990011] bg-[#990011]/5"
-                        : "border-gray-255 hover:border-gray-400 hover:bg-gray-50/50"
+                        ? "border-[#990011] dark:border-[#FF6B6B] bg-[#990011]/5 dark:bg-[#FF6B6B]/10"
+                        : "border-gray-200 dark:border-[#3F3F3F] hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50/50 dark:hover:bg-[#222222]"
                       }`}
                   >
                     <Upload size={24} className="text-gray-400 mb-2" />
-                    <span className="text-xs font-bold text-gray-700 leading-snug">
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-200 leading-snug">
                       {ca.dropzoneMainText}
                     </span>
                   </div>
@@ -870,7 +870,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 type="submit"
                 disabled={isSubmitting}
                 aria-busy={isSubmitting}
-                className="w-full py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider flex items-center justify-center gap-2 active:scale-99 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-3 bg-[#990011] hover:bg-[#80000e] dark:bg-[#b20a1c] dark:hover:bg-[#c9182b] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider flex items-center justify-center gap-2 active:scale-99 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
@@ -893,12 +893,12 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               </button>
             </form>
           ) : (
-            <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-4 border-t-4 border-t-red-500 animate-fadeIn">
-              <h3 className="text-xs font-black text-red-500 uppercase tracking-wider flex items-center gap-1.5 leading-none">
+            <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs flex flex-col gap-4 border-t-4 border-t-red-500 animate-fadeIn">
+              <h3 className="text-xs font-black text-red-500 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5 leading-none">
                 <AlertTriangle size={14} />
                 {sa.submissionsClosedHeading}
               </h3>
-              <p className="text-xs font-semibold text-gray-500 leading-relaxed">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-relaxed">
                 {isClosed
                   ? sa.submissionsLockedDescription
                   : !isPublishedAssignment
@@ -913,13 +913,13 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
         <div className="flex flex-col gap-6">
           {/* Grade and feedback panel (if released/returned) */}
           {submission && submissionStatus === "returned" && (
-            <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
+            <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
               <h3 className="text-xs font-black text-gray-400 tracking-wider uppercase leading-none">
                 {sa.gradingDetails}
               </h3>
 
-              <div className="flex items-center gap-4 bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-2xs">
-                <div className="text-3xl font-black text-emerald-600 font-mono">
+              <div className="flex items-center gap-4 bg-emerald-50/40 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-4 shadow-2xs">
+                <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
                   {submission.grade !== null
                     && submission.grade !== undefined
                     && submission.grade !== ""
@@ -933,7 +933,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                       maxScore: displayMaxScore ?? "—",
                     })}
                   </span>
-                  <span className="text-[9px] bg-emerald-100 text-emerald-700 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider mt-2 inline-block w-fit">
+                  <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider mt-2 inline-block w-fit">
                     {cg.filterReturned}
                   </span>
                 </div>
@@ -945,7 +945,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   {cg.generalFeedback}
                 </span>
                 {submissionComment ? (
-                  <p className="bg-gray-50 border border-border rounded-2xl p-4 text-xs font-semibold text-gray-750 leading-relaxed whitespace-pre-line">
+                  <p className="bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl p-4 text-xs font-semibold text-gray-750 dark:text-gray-200 leading-relaxed whitespace-pre-line">
                     {submissionComment}
                   </p>
                 ) : (
@@ -958,25 +958,25 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
           )}
 
           {/* Submission Details View / Empty State */}
-          <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-4 animate-fadeIn">
-            <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-xs flex flex-col gap-4 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pb-3">
               <div className="flex items-center gap-2">
-                <span className={`w-1.5 h-4 rounded-full ${submission ? "bg-emerald-500" : "bg-gray-300"}`} />
-                <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
+                <span className={`w-1.5 h-4 rounded-full ${submission ? "bg-emerald-500" : "bg-gray-300 dark:bg-gray-600"}`} />
+                <h3 className="text-sm font-extrabold text-gray-800 dark:text-white uppercase tracking-wider">
                   {cg.mySubmission}
                 </h3>
               </div>
               {submission ? (
                 <span className="text-[10px] text-gray-400 font-semibold">
                   {cg.submittedAtLabel}
-                  <strong className="text-gray-600 font-extrabold">
+                  <strong className="text-gray-600 dark:text-gray-300 font-extrabold">
                     {submission.submittedAt
                       ? formatDateTime(submission.submittedAt)
                       : "—"}
                   </strong>
                 </span>
               ) : (
-                <span className="text-[9px] bg-gray-100 text-gray-500 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+                <span className="text-[9px] bg-gray-100 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
                   {cg.filterNotSubmitted}
                 </span>
               )}
@@ -992,7 +992,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                     </h4>
                     <RenderHTML
                       html={displayedSubmissionText}
-                      className="bg-gray-50 border border-border rounded-2xl p-4 text-xs font-semibold text-gray-750"
+                      className="bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl p-4 text-xs font-semibold text-gray-750 dark:text-gray-200"
                       fallback={
                         <span className="italic text-gray-400 text-xs font-medium">
                           {cg.noTextResponse}
@@ -1004,7 +1004,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
 
                 {/* Submission files */}
                 {allowsFileSubmission && parsedSubmissionFiles.length > 0 && (
-                  <div className="border-t border-gray-50">
+                  <div className="border-t border-gray-50 dark:border-[#333333]">
                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                       <Paperclip size={12} />
                       {cg.submittedFilesHeader}
@@ -1016,12 +1016,12 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 )}
               </div>
             ) : (
-              <div className="py-6 flex flex-col items-center justify-center text-center gap-2.5 bg-gray-50/50 rounded-2xl border border-dashed border-border p-4">
-                <div className="w-10 h-10 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center">
+              <div className="py-6 flex flex-col items-center justify-center text-center gap-2.5 bg-gray-50/50 dark:bg-[#222222]/50 rounded-2xl border border-dashed border-border dark:border-[#3F3F3F] p-4">
+                <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-[#2A2A2A] text-gray-400 flex items-center justify-center">
                   <FileText size={20} />
                 </div>
                 <div className="flex flex-col gap-1 max-w-[260px]">
-                  <span className="text-xs font-extrabold text-gray-700">
+                  <span className="text-xs font-extrabold text-gray-700 dark:text-gray-200">
                     {cg.noSubmissionYetTitle}
                   </span>
                   <p className="text-[11px] font-medium text-gray-400 leading-relaxed">

@@ -22,16 +22,16 @@ const PendingDepositConfirmation = ({
         <Clock className="w-12 h-12 mb-4 text-amber-500" />
 
         {/* Title */}
-        <h2 className="font-bold text-xl text-primary tracking-tight mb-4">
+        <h2 className="font-bold text-xl text-primary dark:text-red-400 tracking-tight mb-4">
           {code} — {t?.vouchers?.status?.PendingApproval || "Chờ duyệt"}
         </h2>
 
         {/* Transfer & Waiting Info */}
-        <div className="max-w-sm">
+        <div className="max-w-sm text-neutral-600 dark:text-neutral-300">
           <p>
             {t?.vouchers?.pendingConfirmation?.transferredPrefix ||
               "Bạn đã chuyển khoản"}{" "}
-            <strong className="text-cath-red-700">
+            <strong className="text-cath-red-700 dark:text-red-400">
               {formatCurrency(depositAmount)}
             </strong>
             .

@@ -54,7 +54,7 @@ const AccountInfoPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col p-4 gap-4 w-full max-w-7xl mx-auto">
       <PageTitle>{t.nav?.accountInfo || "Thông tin tài khoản"}</PageTitle>
 
       <div id="account-info-sections" className="w-full">
@@ -81,7 +81,9 @@ const AccountInfoPage = () => {
         open={isOtpModalOpen}
         onClose={() => setIsOtpModalOpen(false)}
         email={profile?.email}
-        title={t.profile?.personalInfo?.verifyChangesTitle || "Xác minh thay đổi"}
+        title={
+          t.profile?.personalInfo?.verifyChangesTitle || "Xác minh thay đổi"
+        }
         onVerify={handleOtpVerify}
         isVerifying={isSavingSecurity}
         onResend={handleOtpResend}

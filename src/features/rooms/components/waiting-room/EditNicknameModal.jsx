@@ -27,7 +27,7 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
       await updateProfile({ nickname: tempName.trim() }).unwrap()
       toast.success(
         t?.rooms?.waitingScreen?.updateNameSuccess ||
-        "Nickname updated successfully",
+          "Nickname updated successfully",
       )
       onClose()
     } catch {
@@ -42,32 +42,18 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
       open={open}
       onClose={onClose}
       title={t?.rooms?.waitingScreen?.editName || "Edit Name"}
+      showCloseButton={false}
       className="md:max-w-[400px]"
-      headerClassName="flex items-center justify-between p-6"
-      bodyClassName="px-6 pb-6 flex-1"
-    >
-      <div className="flex flex-col gap-3">
-        <TextInput
-          type="text"
-          value={tempName}
-          onChange={(e) => setTempName(e.target.value)}
-          placeholder={
-            t?.rooms?.waitingScreen?.namePlaceholder || "Enter nickname"
-          }
-          autoFocus
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSaveName()
-          }}
-          disabled={isUpdating}
-          className="!h-11 text-[15px] rounded-xl"
-          variant="square"
-        />
-        <div className="flex gap-3 justify-end">
+      headerClassName="flex items-center justify-between p-4"
+      bodyClassName="px-4"
+      footerClassName="p-4"
+      footer={
+        <div className="flex gap-2 justify-end">
           <PillButton
-            variant="outline"
+            variant="secondary"
             onClick={onClose}
             disabled={isUpdating}
-            className="flex-1 min-[426px]:flex-none w-20 h-auto font-medium"
+            className="flex-1 sm:flex-none w-20 h-auto font-medium"
           >
             {t?.rooms?.waitingScreen?.cancelEdit || "Cancel"}
           </PillButton>
@@ -75,12 +61,27 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
             onClick={handleSaveName}
             disabled={isUpdating || !tempName.trim()}
             loading={isUpdating}
-            className="flex-1 min-[426px]:flex-none w-20 h-auto"
+            className="flex-1 sm:flex-none w-20 h-auto"
           >
             {t?.rooms?.waitingScreen?.saveName || "Save"}
           </PillButton>
         </div>
-      </div>
+      }
+    >
+      <TextInput
+        type="text"
+        value={tempName}
+        onChange={(e) => setTempName(e.target.value)}
+        placeholder={
+          t?.rooms?.waitingScreen?.namePlaceholder || "Enter nickname"
+        }
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleSaveName()
+        }}
+        disabled={isUpdating}
+        variant="square"
+      />
     </Modal>
   )
 }

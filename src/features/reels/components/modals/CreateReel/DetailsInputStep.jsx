@@ -50,8 +50,8 @@ export const DetailsInputStep = () => {
           }}
           className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
             isActive
-              ? "bg-red-50 text-cath-red-700"
-              : "text-gray-700 hover:bg-gray-50"
+              ? "bg-red-50 dark:bg-rose-950/40 text-cath-red-700 dark:text-red-400"
+              : "text-gray-700 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727]"
           }`}
         >
           <Avatar
@@ -63,7 +63,7 @@ export const DetailsInputStep = () => {
           />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-semibold">{displayName}</span>
-            <span className="block truncate text-xs text-gray-500">@{username}</span>
+            <span className="block truncate text-xs text-gray-500 dark:text-neutral-400">@{username}</span>
           </span>
         </button>
       )
@@ -83,16 +83,16 @@ export const DetailsInputStep = () => {
         }}
         className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
           isActive
-            ? "bg-red-50 text-cath-red-700"
-            : "text-gray-700 hover:bg-gray-50"
+            ? "bg-red-50 dark:bg-rose-950/40 text-cath-red-700 dark:text-red-400"
+            : "text-gray-700 dark:text-neutral-300 hover:bg-gray-50 dark:hover:bg-[#272727]"
         }`}
       >
-        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isActive ? "bg-white" : "bg-gray-100"}`}>
+        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isActive ? "bg-white dark:bg-[#1A1A1A]" : "bg-gray-100 dark:bg-[#272727]"}`}>
           <Hash size={15} />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-semibold">#{hashtagName}</span>
-          <span className="block truncate text-xs text-gray-500">
+          <span className="block truncate text-xs text-gray-500 dark:text-neutral-400">
             {item.isChallenge ? "Challenge" : `${item.useCount || 0} uses`}
           </span>
         </span>
@@ -102,7 +102,7 @@ export const DetailsInputStep = () => {
 
   return (
     <div className={`md:col-span-2 flex-col gap-5 text-left ${mobileTab === "details" ? "flex" : "hidden md:flex"}`}>
-      <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+      <h3 className="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider">
         {t?.catSpeak?.reels?.createModal?.details || "Details"}
       </h3>
 
@@ -118,26 +118,26 @@ export const DetailsInputStep = () => {
         showCount
         error={validationErrors.title}
         required
-        className="rounded-xl border-gray-300"
+        className="rounded-xl border-gray-300 dark:border-[#3F3F3F]"
       />
 
       {/* Description */}
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="description"
-          className="text-sm font-semibold text-gray-700"
+          className="text-sm font-semibold text-gray-700 dark:text-neutral-300"
         >
           {t?.catSpeak?.reels?.createModal?.description || "Description"}
         </label>
         <div className="relative">
-          <div className="relative rounded-xl border border-gray-300 bg-white shadow-sm transition-colors hover:border-cath-red-700 focus-within:border-cath-red-700 focus-within:ring-1 focus-within:ring-cath-red-700">
+          <div className="relative rounded-xl border border-gray-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] shadow-sm transition-colors hover:border-cath-red-700 focus-within:border-cath-red-700 focus-within:ring-1 focus-within:ring-cath-red-700">
             <div
               ref={descriptionHighlightRef}
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl p-3 text-sm leading-5 text-gray-800"
+              className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl p-3 text-sm leading-5 text-gray-800 dark:text-neutral-200"
               style={{ fontFamily: "inherit", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}
             >
-              {renderHighlightedDescription(description, "text-[#2b5db0]")}
+              {renderHighlightedDescription(description, "text-[#2b5db0] dark:text-blue-400")}
             </div>
             <textarea
               ref={descriptionInputRef}
@@ -166,7 +166,7 @@ export const DetailsInputStep = () => {
               }}
               maxLength={DESCRIPTION_MAX_LENGTH}
               rows={3}
-              className="relative z-10 min-h-[84px] w-full resize-none rounded-xl bg-transparent p-3 text-sm leading-5 text-transparent caret-gray-900 outline-none placeholder:text-gray-400"
+              className="relative z-10 min-h-[84px] w-full resize-none rounded-xl bg-transparent p-3 text-sm leading-5 text-transparent caret-gray-900 dark:caret-white outline-none placeholder:text-gray-400 dark:placeholder:text-neutral-500"
               style={{ fontFamily: "inherit", overflowY: "hidden", overflowWrap: "break-word", wordBreak: "break-word" }}
             />
           </div>
@@ -174,10 +174,10 @@ export const DetailsInputStep = () => {
           {showDescriptionSuggestions && (
             <div
               role="listbox"
-              className="absolute left-0 right-0 top-full z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-border bg-white py-1 shadow-xl"
+              className="absolute left-0 right-0 top-full z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] py-1 shadow-xl"
             >
               {isFetchingDescriptionSuggestions ? (
-                <div className="flex items-center gap-2 px-3 py-3 text-sm text-gray-500">
+                <div className="flex items-center gap-2 px-3 py-3 text-sm text-gray-500 dark:text-neutral-400">
                   <Loader2
                     size={15}
                     className="animate-spin text-cath-red-700"
@@ -187,19 +187,19 @@ export const DetailsInputStep = () => {
               ) : activeSuggestions.length > 0 ? (
                 activeSuggestions.map((item, index) => renderDescriptionSuggestion(item, index))
               ) : (
-                <div className="px-3 py-3 text-sm text-gray-500">No matches found</div>
+                <div className="px-3 py-3 text-sm text-gray-500 dark:text-neutral-400">No matches found</div>
               )}
             </div>
           )}
         </div>
-        <span className="self-end px-2 text-[10px] text-gray-400 font-semibold">
+        <span className="self-end px-2 text-[10px] text-gray-400 dark:text-neutral-400 font-semibold">
           {description.length} / {DESCRIPTION_MAX_LENGTH}
         </span>
       </div>
 
       {/* Privacy Badge Selector */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-gray-700">
+        <label className="text-sm font-semibold text-gray-700 dark:text-neutral-300">
           {t?.catSpeak?.reels?.createModal?.privacy || "Privacy"}
         </label>
         <div className="grid grid-cols-3 gap-2">
@@ -213,16 +213,16 @@ export const DetailsInputStep = () => {
                 onClick={() => setPrivacy(item.value)}
                 className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all duration-200 ${
                   isSelected
-                    ? "border-cath-red-700 bg-red-50/40 text-cath-red-700 shadow-sm font-medium scale-[1.01]"
-                    : "border-border hover:border-gray-300 text-gray-600 hover:bg-gray-50/50"
+                    ? "border-cath-red-700 bg-red-50/40 dark:bg-rose-950/40 text-cath-red-700 dark:text-red-400 shadow-sm font-medium scale-[1.01]"
+                    : "border-border dark:border-[#3F3F3F] hover:border-gray-300 dark:hover:border-neutral-500 text-gray-600 dark:text-neutral-300 hover:bg-gray-50/50 dark:hover:bg-[#272727]"
                 }`}
               >
                 <IconComponent
                   size={14}
                   className={
                     isSelected
-                      ? "text-cath-red-700 mb-1"
-                      : "text-gray-400 mb-1"
+                      ? "text-cath-red-700 dark:text-red-400 mb-1"
+                      : "text-gray-400 dark:text-neutral-400 mb-1"
                   }
                 />
                 <span className="text-xs font-semibold">
@@ -235,31 +235,31 @@ export const DetailsInputStep = () => {
       </div>
 
       {/* Cover selection layout */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-border">
+      <div className="flex flex-col gap-2 pt-2 border-t border-border dark:border-[#3F3F3F]">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
-            <Image size={15} className="text-gray-500" />
+          <label className="text-sm font-semibold text-gray-700 dark:text-neutral-300 flex items-center gap-1.5">
+            <Image size={15} className="text-gray-500 dark:text-neutral-400" />
             {t?.catSpeak?.reels?.createModal?.coverThumbnail || "Cover Thumbnail"}
           </label>
-          <div className="flex bg-gray-200/85 p-1 rounded-xl text-xs font-bold shadow-sm">
+          <div className="flex bg-gray-200/85 dark:bg-[#272727] p-1 rounded-xl text-xs font-bold shadow-sm">
             <button
               type="button"
               onClick={() => setCoverType("frame")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${coverType === "frame" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              className={`px-3 py-1.5 rounded-lg transition-all ${coverType === "frame" ? "bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white shadow-sm" : "text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-white"}`}
             >
               {t?.catSpeak?.reels?.createModal?.extractFrame || "Extract Frame"}
             </button>
             <button
               type="button"
               onClick={() => setCoverType("custom")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${coverType === "custom" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              className={`px-3 py-1.5 rounded-lg transition-all ${coverType === "custom" ? "bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white shadow-sm" : "text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-white"}`}
             >
               {t?.catSpeak?.reels?.createModal?.customImage || "Custom Image"}
             </button>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 border border-border/60 rounded-2xl mt-1.5 animate-fadeIn">
+        <div className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 dark:bg-[#202020] border border-border/60 dark:border-[#3F3F3F] rounded-2xl mt-1.5 animate-fadeIn">
           {/* Video Player Container (always mounted, hidden if coverType !== 'frame') */}
           <div className={`relative aspect-[9/16] h-[160px] sm:h-[180px] rounded-xl overflow-hidden bg-black border border-border/80 shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0 ${coverType !== "frame" ? "absolute -left-[9999px] w-[1px] h-[1px] opacity-0 pointer-events-none" : ""
             }`}>
@@ -306,25 +306,25 @@ export const DetailsInputStep = () => {
                   onChange={handleSliderChange}
                   onMouseUp={handleSliderRelease}
                   onTouchEnd={handleSliderRelease}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-cath-red-700 focus:outline-none shadow-inner cover-slider-range"
+                  className="w-full h-2 bg-gray-200 dark:bg-[#272727] rounded-lg appearance-none cursor-pointer accent-cath-red-700 dark:accent-red-400 focus:outline-none shadow-inner cover-slider-range"
                 />
               </div>
 
               {/* Quick Keyframes Filmstrip */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">
+                <span className="text-[10px] font-bold text-gray-500 dark:text-neutral-400 tracking-wider uppercase">
                   {t?.catSpeak?.reels?.createModal?.quickKeyframes || "Quick Keyframes"}
                 </span>
 
                 {isExtractingFilmstrip ? (
-                  <div className="flex items-center justify-center h-14 bg-white border border-border rounded-xl gap-2 shadow-sm">
-                    <div className="w-3.5 h-3.5 border-2 border-cath-red-700 border-t-transparent rounded-full animate-spin" />
-                    <span className="text-[10px] text-gray-400 font-bold">
+                  <div className="flex items-center justify-center h-14 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl gap-2 shadow-sm">
+                    <div className="w-3.5 h-3.5 border-2 border-cath-red-700 dark:border-red-400 border-t-transparent rounded-full animate-spin" />
+                    <span className="text-[10px] text-gray-400 dark:text-neutral-400 font-bold">
                       {t?.catSpeak?.reels?.createModal?.extractingKeyframes || "Extracting keyframes..."}
                     </span>
                   </div>
                 ) : filmstripFrames.length > 0 ? (
-                  <div className="grid grid-cols-6 gap-1 bg-white p-1 border border-border rounded-xl shadow-sm">
+                  <div className="grid grid-cols-6 gap-1 bg-white dark:bg-[#1A1A1A] p-1 border border-border dark:border-[#3F3F3F] rounded-xl shadow-sm">
                     {filmstripFrames.map((frame, index) => (
                       <button
                         key={index}
@@ -332,10 +332,10 @@ export const DetailsInputStep = () => {
                         onClick={() =>
                           handleKeyframeSelect(frame.time)
                         }
-                        className={`relative aspect-[9/16] rounded-md overflow-hidden bg-gray-100 border transition-all duration-200 hover:scale-[1.03] ${
+                        className={`relative aspect-[9/16] rounded-md overflow-hidden bg-gray-100 dark:bg-[#242424] border transition-all duration-200 hover:scale-[1.03] ${
                           Math.abs(currentTime - frame.time) < 0.15
-                            ? "border-cath-red-700 ring-1 ring-cath-red-700 scale-[1.01]"
-                            : "border-transparent hover:border-gray-300"
+                            ? "border-cath-red-700 dark:border-red-400 ring-1 ring-cath-red-700 dark:ring-red-400 scale-[1.01]"
+                            : "border-transparent hover:border-gray-300 dark:hover:border-neutral-500"
                         }`}
                       >
                         <img
@@ -350,22 +350,22 @@ export const DetailsInputStep = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-14 bg-white border border-border rounded-xl shadow-sm">
-                    <span className="text-[10px] text-gray-400 font-bold">
+                  <div className="flex items-center justify-center h-14 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl shadow-sm">
+                    <span className="text-[10px] text-gray-400 dark:text-neutral-400 font-bold">
                       {t?.catSpeak?.reels?.createModal?.noFrames || "No frames available"}
                     </span>
                   </div>
                 )}
               </div>
 
-              <p className="text-[9px] text-gray-400 leading-normal font-medium mt-1">
+              <p className="text-[9px] text-gray-400 dark:text-neutral-400 leading-normal font-medium mt-1">
                 {t?.catSpeak?.reels?.createModal?.coverInstruction || "Scrub the timeline or select a quick keyframe to auto-update the cover image. Your chosen frame will be uploaded as the Reel's cover thumbnail."}
               </p>
             </div>
           ) : (
             /* Custom Image Selection Controls */
             <div className="flex-1 flex flex-col sm:flex-row gap-4 items-center w-full">
-              <div className="relative w-[84px] h-[120px] rounded-xl overflow-hidden bg-gray-100 border border-border/80 shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0">
+              <div className="relative w-[84px] h-[120px] rounded-xl overflow-hidden bg-gray-100 dark:bg-[#242424] border border-border/80 dark:border-[#3F3F3F] shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0">
                 {coverPreviewUrl ? (
                   <img
                     src={coverPreviewUrl}
@@ -373,7 +373,7 @@ export const DetailsInputStep = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <Image className="text-gray-300" size={24} />
+                  <Image className="text-gray-300 dark:text-neutral-600" size={24} />
                 )}
               </div>
 
@@ -387,8 +387,8 @@ export const DetailsInputStep = () => {
                     onClick={() => coverInputRef.current?.click()}
                     className={`border border-dashed rounded-xl h-[96px] flex flex-col items-center justify-center cursor-pointer transition-all duration-250 ${
                       isCoverDragging
-                        ? "border-cath-red-700 bg-red-50/30"
-                        : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 bg-white"
+                        ? "border-cath-red-700 bg-red-50/30 dark:bg-rose-950/40"
+                        : "border-gray-300 dark:border-[#3F3F3F] hover:border-gray-400 dark:hover:border-neutral-500 hover:bg-gray-50 dark:hover:bg-[#272727] bg-white dark:bg-[#242424]"
                     }`}
                   >
                     <input
@@ -400,24 +400,24 @@ export const DetailsInputStep = () => {
                     />
                     <UploadCloud
                       size={18}
-                      className="text-cath-red-700 mb-1"
+                      className="text-cath-red-700 dark:text-red-400 mb-1"
                     />
-                    <p className="text-[10px] font-bold text-gray-700">
+                    <p className="text-[10px] font-bold text-gray-700 dark:text-neutral-200">
                       {t?.catSpeak?.reels?.createModal?.uploadCustomCover || "Upload custom cover"}
                     </p>
-                    <p className="text-[8px] text-gray-400 mt-0.5">
+                    <p className="text-[8px] text-gray-400 dark:text-neutral-400 mt-0.5">
                       {t?.catSpeak?.reels?.createModal?.coverFormat || "PNG, JPG up to 5MB"}
                     </p>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-1">
-                    <span className="text-[9px] text-cath-red-700 font-bold uppercase tracking-wider">
+                    <span className="text-[9px] text-cath-red-700 dark:text-red-400 font-bold uppercase tracking-wider">
                       {t?.catSpeak?.reels?.createModal?.customImageUploaded || "Custom Image Uploaded"}
                     </span>
-                    <div className="text-xs font-bold text-gray-700 truncate max-w-[200px] mt-0.5">
+                    <div className="text-xs font-bold text-gray-700 dark:text-neutral-200 truncate max-w-[200px] mt-0.5">
                       {coverFile?.name}
                     </div>
-                    <div className="text-[9px] text-gray-400 font-semibold font-mono">
+                    <div className="text-[9px] text-gray-400 dark:text-neutral-400 font-semibold font-mono">
                       {(coverFile?.size / (1024 * 1024)).toFixed(2)} MB
                     </div>
                     <button
@@ -432,7 +432,7 @@ export const DetailsInputStep = () => {
                           videoRef.current.currentTime = 0.1
                         }
                       }}
-                      className="mt-2 self-start px-2.5 py-1 text-[10px] bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold transition-colors flex items-center gap-1 shadow-sm border border-red-100/50 active:scale-95"
+                      className="mt-2 self-start px-2.5 py-1 text-[10px] bg-red-50 dark:bg-rose-950/40 hover:bg-red-100 dark:hover:bg-rose-900/50 text-red-600 dark:text-red-400 rounded-lg font-bold transition-colors flex items-center gap-1 shadow-sm border border-red-100/50 dark:border-rose-900/40 active:scale-95"
                     >
                       <Trash2 size={11} />
                       {t?.catSpeak?.reels?.createModal?.removeImage || "Remove Image"}

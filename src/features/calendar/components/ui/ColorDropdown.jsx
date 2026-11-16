@@ -13,10 +13,10 @@ const ColorDropdown = ({ value, onChange }) => {
     <button
       onClick={toggle}
       type="button"
-      className="flex items-center gap-2 border border-white rounded-full px-3 py-1.5 bg-white text-black hover:bg-gray-50 transition-colors"
+      className="flex items-center gap-2 border border-transparent dark:border-[#3F3F3F] rounded-full px-3 py-1.5 bg-white dark:bg-[#272727] text-black dark:text-white hover:bg-gray-50 dark:hover:bg-[#333333] transition-colors"
     >
       <div
-        className="w-3 h-3 rounded-full border-[1.5px] border-white shadow-sm"
+        className="w-3 h-3 rounded-full border-[1.5px] border-white dark:border-[#3F3F3F] shadow-sm"
         style={{ backgroundColor: selectedColor }}
       />
       <span className="text-sm font-medium">{cal.color}</span>

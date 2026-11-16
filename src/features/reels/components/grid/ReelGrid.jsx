@@ -29,7 +29,9 @@ const ReelGrid = memo(function ReelGrid({ reels, onReelClick }) {
           <polygon points="23 7 16 12 23 17 23 7" />
           <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
         </svg>
-        <span className="text-lg font-bold text-gray-700 mb-2">{t.catSpeak.reels.noReelsFound}</span>
+        <span className="text-lg font-bold text-gray-700 mb-2">
+          {t.catSpeak.reels.noReelsFound}
+        </span>
         <span className="text-sm text-gray-400">
           {t.catSpeak.reels.trySelectingDifferentTag}
         </span>
@@ -38,23 +40,10 @@ const ReelGrid = memo(function ReelGrid({ reels, onReelClick }) {
   }
 
   return (
-    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6 w-full mx-auto">
+    <div className="columns-2 sm:columns-3 md:columns-3 lg:columns-4 xl:columns-5 gap-2 w-full mx-auto">
       {reels.map((reel, index) => (
-        <div
-          key={reel.id}
-          className="break-inside-avoid pb-3 sm:pb-4 md:pb-5 lg:pb-6"
-        >
-          {/*
-            Mỗi reel bị giới hạn max-width để không bao giờ full-width viewport.
-            Masonry columns sẽ tự sắp xếp các reel vào các cột theo viewport.
-          */}
-          <div className="mx-auto" style={{ maxWidth: "280px" }}>
-            <ReelCard
-              reel={reel}
-              index={index}
-              onSelect={onReelClick}
-            />
-          </div>
+        <div key={reel.id} className="break-inside-avoid pb-4">
+          <ReelCard reel={reel} index={index} onSelect={onReelClick} />
         </div>
       ))}
     </div>

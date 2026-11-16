@@ -100,7 +100,7 @@ const GeneralSection = ({
 
   return (
     <div
-      className={`bg-white rounded-3xl border border-border shadow-xs overflow-hidden flex flex-col ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] shadow-xs overflow-hidden flex flex-col ${className}`}
     >
       {/* Visual Banner */}
       <div className="relative p-6 sm:p-8 min-h-[380px] flex flex-col justify-end text-white">
@@ -125,7 +125,7 @@ const GeneralSection = ({
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
           <div className="flex flex-col gap-2 max-w-xl">
-            <h2 className="text-2xl sm:text-3xl font-bold leading-tight tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold leading-tight tracking-tight text-white">
               {classData?.title || ui.untitledClass || "Untitled class"}
             </h2>
           </div>
@@ -134,7 +134,7 @@ const GeneralSection = ({
             (isCompletedClass ? (
               <span
                 role="status"
-                className="h-10 px-5 bg-emerald-100 text-emerald-800 font-bold text-sm rounded-full flex items-center justify-center"
+                className="h-10 px-5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-sm rounded-full flex items-center justify-center"
               >
                 {cd.classCompleted || "Class completed"}
               </span>
@@ -146,7 +146,7 @@ const GeneralSection = ({
                   aria-expanded={showActions}
                   aria-haspopup="menu"
                   onClick={() => setShowActions(!showActions)}
-                  className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-bold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] dark:bg-[#b20a1c] dark:hover:bg-[#c9182b] text-white font-bold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Pencil size={14} />
                   <span>{cd.customizeClass || "Customize"}</span>
@@ -155,7 +155,7 @@ const GeneralSection = ({
                 {showActions && (
                   <div
                     role="menu"
-                    className="absolute right-0 mt-2 w-48 bg-white border border-border rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700"
+                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 dark:divide-[#333333] text-gray-700 dark:text-gray-200"
                   >
                     {!isArchivedClass ? (
                       <>
@@ -168,22 +168,10 @@ const GeneralSection = ({
                               `/workspace/courses/edit-class/${encodeURIComponent(String(id))}`,
                             )
                           }}
-                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
+                          className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-xs font-bold transition-colors"
                         >
                           {cd.editClass || "Edit Class"}
                         </button>
-                        {/* <button
-                          type="button"
-                          role="menuitem"
-                          disabled={isActionPending}
-                          onClick={() => {
-                            setShowActions(false)
-                            onCompleteClass?.()
-                          }}
-                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
-                        >
-                          {cd.completeClass || "Complete Class"}
-                        </button> */}
                         <button
                           type="button"
                           role="menuitem"
@@ -192,7 +180,7 @@ const GeneralSection = ({
                             setShowActions(false)
                             onCancelClassClick?.()
                           }}
-                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#BA021C] transition-colors"
+                          className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-xs font-bold text-[#BA021C] dark:text-[#FF6B6B] transition-colors"
                         >
                           {cd.cancelClass || "Cancel Class"}
                         </button>
@@ -207,7 +195,7 @@ const GeneralSection = ({
                             state: { recoverClassId: id },
                           })
                         }}
-                        className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#b20a1c] transition-colors"
+                        className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-xs font-bold text-[#b20a1c] dark:text-[#FF6B6B] transition-colors"
                       >
                         {cd.reopenClass || "Reopen Class (Recover)"}
                       </button>
@@ -222,16 +210,16 @@ const GeneralSection = ({
       {/* Information Card Content */}
       <div className="p-6 flex flex-col gap-6">
         {/* Opening Fee */}
-        <div className="flex items-center justify-between border-b border-border pb-6">
+        <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] text-[#15803D] flex items-center justify-center font-bold text-lg">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] dark:bg-emerald-950/40 text-[#15803D] dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
               $
             </div>
-            <span className="text-sm font-bold text-gray-500">
+            <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
               {cd.classFee || "Class Fee"}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xl font-bold text-[#990011]">
+          <div className="flex items-center gap-1.5 text-xl font-bold text-[#990011] dark:text-[#FF6B6B]">
             <span>
               {classData?.tuitionFee !== undefined &&
               classData?.tuitionFee !== null
@@ -241,7 +229,7 @@ const GeneralSection = ({
                 : "—"}
             </span>
             <span
-              className="w-5 h-5 rounded-full border border-gray-300 text-gray-400 text-xs flex items-center justify-center cursor-help shrink-0"
+              className="w-5 h-5 rounded-full border border-gray-300 dark:border-[#555] text-gray-400 dark:text-gray-400 text-xs flex items-center justify-center cursor-help shrink-0"
               title={cd.classFeeHelp || "Tuition fee charged per student"}
             >
               ?
@@ -252,14 +240,14 @@ const GeneralSection = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Language - Blue */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-blue-400 flex items-center justify-center">
               <Globe size={18} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.language || "—"}
               </span>
-              <span className="text-gray-900 font-bold text-sm mt-0.5">
+              <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                 {getLocalizedLanguageName(classData?.language, t) || "—"}
               </span>
             </div>
@@ -267,11 +255,11 @@ const GeneralSection = ({
 
           {/* Level - Yellow */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#fff9cc] text-[#e3b709] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#fff9cc] dark:bg-amber-950/40 text-[#e3b709] dark:text-amber-400 flex items-center justify-center">
               <GraduationCap size={20} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.level || "Level"}
               </span>
               <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-bold text-white bg-[#e3b709] rounded-full w-fit">
@@ -282,14 +270,14 @@ const GeneralSection = ({
 
           {/* Admission Period - Purple */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#fad9ff] text-[#c460d1] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#fad9ff] dark:bg-purple-950/40 text-[#c460d1] dark:text-purple-400 flex items-center justify-center">
               <Calendar size={18} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.enrollmentPeriod || "Admission Period"}
               </span>
-              <span className="text-gray-900 font-bold text-sm mt-0.5">
+              <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                 {classData?.enrollmentStart && classData?.enrollmentEnd
                   ? `${formatDate(classData.enrollmentStart)} - ${formatDate(classData.enrollmentEnd)}`
                   : ui.tba || "TBA"}
@@ -299,14 +287,14 @@ const GeneralSection = ({
 
           {/* Weekly Schedule - Orange */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#ffebee] text-[#f73b4e] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#ffebee] dark:bg-red-950/40 text-[#f73b4e] dark:text-red-400 flex items-center justify-center">
               <Clock size={18} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.weeklySchedule || "Weekly Schedule"}
               </span>
-              <span className="text-gray-900 font-bold text-sm mt-0.5">
+              <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                 {scheduleText}
               </span>
             </div>
@@ -314,14 +302,14 @@ const GeneralSection = ({
 
           {/* Class Size - Amber/Yellow */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#e2d6ff] text-[#8c65e0] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#e2d6ff] dark:bg-indigo-950/40 text-[#8c65e0] dark:text-indigo-400 flex items-center justify-center">
               <Users size={18} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.classSize || "Class Size"}
               </span>
-              <span className="text-gray-900 font-bold text-sm mt-0.5">
+              <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                 {classData?.slots ?? "—"} {cd.studentsLabel || "students"}
               </span>
             </div>
@@ -329,14 +317,14 @@ const GeneralSection = ({
 
           {/* Total sessions */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[#ffdcc4] text-[#ff8330] flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-[#ffdcc4] dark:bg-orange-950/40 text-[#ff8330] dark:text-orange-400 flex items-center justify-center">
               <Presentation size={18} />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.totalSessions || "Số buổi học"}
               </span>
-              <span className="text-gray-900 font-bold text-sm mt-0.5">
+              <span className="text-gray-900 dark:text-white font-bold text-sm mt-0.5">
                 {total > 0
                   ? `${total} ${cd.sessionsCountLabel || "buổi"}`
                   : classData.totalSessions
@@ -347,19 +335,19 @@ const GeneralSection = ({
           </div>
         </div>
 
-        <div className="flex items-start gap-3 border-t border-border pt-6">
-          <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
+        <div className="flex items-start gap-3 border-t border-border dark:border-[#3F3F3F] pt-6">
+          <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] dark:bg-[#2A2A2A] text-[#4B5563] dark:text-gray-300 flex items-center justify-center">
             <AlignLeft size={18} />
           </div>
           <div className="flex flex-col gap-0 w-full min-w-0">
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-400 dark:text-gray-400">
               {cd.description || "Description"}
             </span>
             <RenderHTML
               html={classData?.description}
-              className="text-gray-600 text-sm leading-relaxed mt-0.5"
+              className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mt-0.5"
               fallback={
-                <span className="text-gray-600 text-sm leading-relaxed mt-0.5">
+                <span className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mt-0.5">
                   {cd.noDescription || "No description provided."}
                 </span>
               }

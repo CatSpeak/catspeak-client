@@ -1,6 +1,6 @@
-import React from "react";
-import DanmakuItem from "./DanmakuItem";
-import StoryCardItem from "./StoryCardItem";
+import React from "react"
+import DanmakuItem from "./DanmakuItem"
+import StoryCardItem from "./StoryCardItem"
 
 /**
  * The danmaku stage container. Renders floating message pills inside
@@ -23,9 +23,9 @@ const ShowStory = ({
     return (
       <div
         ref={stageRef}
-        className="relative w-full h-full flex-1 overflow-hidden min-h-0 md:px-9 px-0 py-3"
+        className="relative w-full h-full flex-1 overflow-y-auto min-h-0 p-4"
       >
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 w-full">
           {listStories.map((story) => (
             <StoryCardItem
               key={story._idx}
@@ -35,19 +35,19 @@ const ShowStory = ({
           ))}
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div
       ref={stageRef}
-      className="relative w-full flex-1 min-h-0 overflow-hidden "
+      className="relative w-full h-full flex-1 min-h-0 overflow-hidden"
     >
       {danmakuItems.map((story) => (
         <DanmakuItem key={story._idx} story={story} onClick={onItemClick} />
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default ShowStory;
+export default ShowStory

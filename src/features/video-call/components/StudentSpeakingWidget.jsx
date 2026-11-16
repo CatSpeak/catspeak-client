@@ -145,10 +145,10 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.92, y: 12 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
-      className={`w-[260px] bg-white rounded-[22px] p-4 shadow-2xl transition-all ${
+      className={`w-[260px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white rounded-2xl p-4 shadow-2xl transition-all ${
         hasError
           ? "border-2 border-red-500 shadow-red-500/10"
-          : "border border-gray-100 shadow-black/10"
+          : "border border-gray-100 dark:border-[#3F3F3F] shadow-black/10"
       }`}
     >
       {/* Header */}
@@ -159,7 +159,7 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
               hasError ? "bg-red-500" : "bg-emerald-500"
             }`}
           />
-          <span className="text-[15px] font-semibold text-gray-800 tracking-tight">
+          <span className="text-[15px] font-semibold text-gray-800 dark:text-white tracking-tight">
             {roomTitle}
           </span>
         </div>
@@ -168,7 +168,7 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors -mr-1 -mt-0.5"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#272727] rounded-lg transition-colors -mr-1 -mt-0.5"
             aria-label="Close"
           >
             <X size={15} />
@@ -177,7 +177,7 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
       </div>
 
       {/* Divider */}
-      <div className="border-b border-gray-100 my-3" />
+      <div className="border-b border-gray-100 dark:border-[#272727] my-3" />
 
       {/* Metrics Row */}
       {hasError ? (
@@ -201,21 +201,21 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
       ) : (
         <div className="flex items-center justify-around text-center py-1">
           <div className="flex-1">
-            <div className="text-3xl font-extrabold text-gray-900 tracking-tight leading-none">
+            <div className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-none">
               {sharePercent}%
             </div>
-            <div className="text-xs text-gray-400 font-medium mt-1.5">
+            <div className="text-xs text-gray-400 dark:text-[#AAAAAA] font-medium mt-1.5">
               {widgetT.speakingPercent || "% phát biểu"}
             </div>
           </div>
 
-          <div className="w-[1px] h-9 bg-gray-100 self-center" />
+          <div className="w-[1px] h-9 bg-gray-100 dark:bg-neutral-800 self-center" />
 
           <div className="flex-1">
-            <div className="text-2xl font-extrabold text-gray-900 tracking-tight leading-none font-mono">
+            <div className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-none font-mono">
               {formatDuration(durationSec)}
             </div>
-            <div className="text-xs text-gray-400 font-medium mt-1.5">
+            <div className="text-xs text-gray-400 dark:text-[#AAAAAA] font-medium mt-1.5">
               {widgetT.cumulativeDuration || "thời lượng nói"}
             </div>
           </div>
@@ -226,7 +226,7 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
       <div className="mt-3 text-left">
         <span
           className={`text-xs ${
-            hasError ? "text-red-500 font-medium" : "text-gray-500 font-normal"
+            hasError ? "text-red-500 font-medium" : "text-gray-500 dark:text-[#AAAAAA] font-normal"
           }`}
         >
           {hasError

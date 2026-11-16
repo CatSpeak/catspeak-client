@@ -35,10 +35,10 @@ const ClassAnalyticsHeader = ({ classData }) => {
 
       {/* Page Title & Subtitle */}
       <div className="flex flex-col gap-1 mt-1">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight">
           {classData?.className || "Tiếng Anh B2 — Nhóm sáng"}
         </h1>
-        <p className="text-xs sm:text-sm text-gray-500 font-medium">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
           {subtitleText}
         </p>
       </div>

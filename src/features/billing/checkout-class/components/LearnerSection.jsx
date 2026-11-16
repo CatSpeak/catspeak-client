@@ -133,8 +133,8 @@ const LearnerSection = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-faq-card border border-border p-6 space-y-4">
-      <h2 className="text-xl font-bold text-[#111827]">{tc.addLearner}</h2>
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-xl shadow-faq-card border border-border dark:border-[#3F3F3F] p-6 space-y-4">
+      <h2 className="text-xl font-bold text-[#111827] dark:text-white">{tc.addLearner}</h2>
 
       {/* Search input with suggestions dropdown */}
       <div className="relative" ref={wrapperRef}>
@@ -156,12 +156,12 @@ const LearnerSection = ({
         {showSuggestions && suggestedFriends.length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute left-0 right-0 top-full mt-1 bg-white border border-border rounded-xl shadow-lg z-50 overflow-hidden"
+            className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-xl shadow-lg z-50 overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-gray-50/80">
-              <Users size={13} className="text-gray-400" />
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border dark:border-[#3F3F3F] bg-gray-50/80 dark:bg-[#242424]">
+              <Users size={13} className="text-gray-400 dark:text-neutral-400" />
+              <span className="text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wide">
                 {tc.friendSuggestions || "Gợi ý từ bạn bè"}
               </span>
             </div>
@@ -176,7 +176,7 @@ const LearnerSection = ({
                     key={id}
                     role="button"
                     tabIndex={0}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-border/50 last:border-0 cursor-pointer select-none"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors border-b border-border/50 dark:border-[#3F3F3F]/50 last:border-0 cursor-pointer select-none"
                     onClick={() => toggleFriend(friend)}
                     onKeyDown={(e) => e.key === "Enter" && toggleFriend(friend)}
                   >
@@ -185,7 +185,7 @@ const LearnerSection = ({
                       className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-150 ${
                         isChecked
                           ? "bg-[#B20000] border-[#B20000]"
-                          : "bg-white border-gray-300"
+                          : "bg-white dark:bg-[#242424] border-gray-300 dark:border-neutral-500"
                       }`}
                     >
                       {isChecked && (
@@ -199,10 +199,10 @@ const LearnerSection = ({
                       src={friend.avatarImageUrl}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#111827] truncate">
+                      <p className="text-sm font-semibold text-[#111827] dark:text-white truncate">
                         {friend.fullName || friend.name || friend.username}
                       </p>
-                      <p className="text-xs text-gray-400 truncate">
+                      <p className="text-xs text-gray-400 dark:text-neutral-400 truncate">
                         {friend.email}
                       </p>
                     </div>
@@ -212,8 +212,8 @@ const LearnerSection = ({
             </div>
 
             {/* Footer with count + Add button */}
-            <div className="px-4 py-3 border-t border-border bg-gray-50/80 flex items-center justify-between gap-3">
-              <span className="text-xs text-gray-500">
+            <div className="px-4 py-3 border-t border-border dark:border-[#3F3F3F] bg-gray-50/80 dark:bg-[#242424] flex items-center justify-between gap-3">
+              <span className="text-xs text-gray-500 dark:text-neutral-400">
                 {selectedFriendIds.size > 0
                   ? (tc.selectedFriendsCount || "Đã chọn {{count}} người").replace(
                       "{{count}}",
@@ -243,7 +243,7 @@ const LearnerSection = ({
         {learners.map((learner) => (
           <div
             key={learner.id || learner.email}
-            className="flex items-center justify-between border-b p-4 border-border last:border-0"
+            className="flex items-center justify-between border-b p-4 border-border dark:border-[#3F3F3F] last:border-0"
           >
             <div className="flex items-center gap-3">
               <Avatar
@@ -252,15 +252,15 @@ const LearnerSection = ({
                 src={learner?.avatarImageUrl}
               />
               <div>
-                <p className="text-base font-semibold text-[#111827]">
+                <p className="text-base font-semibold text-[#111827] dark:text-white">
                   {learner.name}{" "}
                   {learner.isPayer && (
-                    <span className="font-normal text-[#6B7280]">
+                    <span className="font-normal text-[#6B7280] dark:text-neutral-400">
                       {tc.payer}
                     </span>
                   )}
                 </p>
-                <p className="text-sm text-[#6B7280]">{learner.email}</p>
+                <p className="text-sm text-[#6B7280] dark:text-neutral-400">{learner.email}</p>
               </div>
             </div>
 
@@ -277,7 +277,7 @@ const LearnerSection = ({
         ))}
       </div>
 
-      <p className="font-semibold text-[#111827]">
+      <p className="font-semibold text-[#111827] dark:text-white">
         {tc.totalLearners} {learners.length}
       </p>
     </div>

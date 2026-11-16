@@ -1,24 +1,19 @@
-import { Plus, Minus } from "lucide-react";
-import { useMap } from "react-leaflet";
+import { IconButton } from "@/shared/components/ui/buttons"
+import { Plus, Minus } from "lucide-react"
+import { useMap } from "react-leaflet"
 
 export default function MapControl() {
-  const map = useMap();
+  const map = useMap()
 
   return (
-    <div className="absolute bottom-6 right-6 z-[1000] overflow-hidden rounded-full shadow-xl">
-      <button
-        onClick={() => map.zoomIn()}
-        className="w-14 h-14 bg-[#990011] text-white flex items-center justify-center hover:bg-[#7d000d] transition"
-      >
-        <Plus size={26} />
-      </button>
+    <div className="absolute bottom-4 right-4 z-[1000] overflow-hidden flex flex-col gap-2">
+      <IconButton onClick={() => map.zoomIn()} variant="secondary">
+        <Plus />
+      </IconButton>
 
-      <button
-        onClick={() => map.zoomOut()}
-        className="w-14 h-14 bg-[#990011] text-white flex items-center justify-center border-t border-white/20 hover:bg-[#7d000d] transition"
-      >
-        <Minus size={26} />
-      </button>
+      <IconButton onClick={() => map.zoomOut()} variant="secondary">
+        <Minus />
+      </IconButton>
     </div>
-  );
+  )
 }

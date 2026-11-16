@@ -1,42 +1,31 @@
-import React, { useRef, useEffect, useState } from "react"
-import { Toast } from "primereact/toast"
-import { setGlobalToastRef } from "@/shared/utils/toastBridge"
-
-import "primereact/resources/primereact.min.css"
-import "primeicons/primeicons.css"
+import React from "react"
+import { Toaster } from "sonner"
+import { useTheme } from "@/shared/context/ThemeContext"
 
 /**
- * AppToaster Component powered by PrimeReact / PrimeNG Toast
- * - Matches the exact Aura Dark Solid design from Prime documentation:
- *   - Background: Solid dark (#18181b, 0% blur)
- *   - Title: text-sm font-semibold text-white
- *   - Detail: text-xs text-neutral-400 mt-1
- *   - Top-right close button (pi pi-times)
- * - Position: bottom-left (desktop), bottom-center (mobile)
+ * AppToaster Component powered by Sonner (Headless Toaster Engine)
+ *
+ * ARCHITECTURAL NOTE FOR FUTURE DEVELOPERS & AI AGENTS:
+ * -----------------------------------------------------
+ * Do NOT replace this toaster with PrimeReact Toast or legacy react-hot-toast.
+ * All toast calls across the repository (standard toasts, custom render functions,
+ * promises, etc.) route to Sonner via the bridge at `src/shared/utils/toastBridge.jsx`.
+ *
+ * Sonner acts STRICTLY as the headless positioning and stacking engine.
+ * To tweak any visual pixels, colors, padding, borders, or buttons, edit:
+ * `src/shared/components/ui/toast/CatSpeakToast.jsx`.
  */
 const AppToaster = () => {
-  const toastRef = useRef(null)
-  const [position, setPosition] = useState(() =>
-    typeof window !== "undefined" && window.innerWidth < 640
-      ? "bottom-center"
-      : "bottom-left",
+  const { isDark } = useTheme()
+
+  return (
+    <Toaster
+      position="bottom-left"
+      theme={isDark ? "dark" : "light"}
+      gap={8}
+      offset={16}
+    />
   )
-
-  useEffect(() => {
-    setGlobalToastRef(toastRef.current)
-
-    const handleResize = () => {
-      setPosition(window.innerWidth < 640 ? "bottom-center" : "bottom-left")
-    }
-    window.addEventListener("resize", handleResize)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      setGlobalToastRef(null)
-    }
-  }, [])
-
-  return <Toast ref={toastRef} position={position} />
 }
 
 export default AppToaster

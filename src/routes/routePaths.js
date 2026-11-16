@@ -6,6 +6,7 @@
 export const ROUTE_PATHS = {
   // Public routes
   HOME: "/",
+  CONTACT: "/contact",
   POLICY: "/policy",
 
   // User routes

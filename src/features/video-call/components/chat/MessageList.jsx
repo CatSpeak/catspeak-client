@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react"
 import { ArrowDown } from "lucide-react"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 import MessageBubble from "./MessageBubble"
 
 const MessageList = ({
@@ -11,6 +12,7 @@ const MessageList = ({
   onLoadMoreSuggestions,
   onSelectFollowUp,
   onRetryAi,
+  retryingInteractionId = null,
   isUserTyping = false,
 }) => {
   const scrollRef = useRef(null)
@@ -48,23 +50,28 @@ const MessageList = ({
   }
 
   return (
-    <div className="relative flex flex-1 flex-col min-h-0 bg-white">
+    <div className="relative flex flex-1 flex-col min-h-0 bg-white dark:bg-[#1A1A1A]">
       {showScrollBottom && (
-        <button
+        <IconButton
           onClick={scrollToBottom}
-          className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#606060] shadow-md border border-border hover:bg-gray-50 hover:text-[#990011] transition-colors"
+          variant="secondary"
+          className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10"
+          title={t?.rooms?.chatBox?.scrollToBottom || "Scroll to bottom"}
+          aria-label={t?.rooms?.chatBox?.scrollToBottom || "Scroll to bottom"}
         >
-          <ArrowDown size={16} />
-        </button>
+          <ArrowDown />
+        </IconButton>
       )}
       <div
         ref={scrollRef}
         onScroll={checkScroll}
-        className="flex flex-1 flex-col overflow-y-auto p-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px] bg-white min-h-0"
+        className="flex flex-1 flex-col overflow-y-auto p-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-700 hover:[&::-webkit-scrollbar-thumb]:bg-neutral-400 dark:hover:[&::-webkit-scrollbar-thumb]:bg-neutral-600 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px] bg-white dark:bg-[#1A1A1A] min-h-0"
       >
         {messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs text-center text-[#606060]">{emptyText}</p>
+            <p className="text-xs text-center text-[#606060] dark:text-[#AAAAAA]">
+              {emptyText}
+            </p>
           </div>
         ) : (
           <>
@@ -81,6 +88,13 @@ const MessageList = ({
                   onLoadMoreSuggestions={onLoadMoreSuggestions}
                   onSelectFollowUp={onSelectFollowUp}
                   onRetryAi={onRetryAi}
+                  isRetrying={
+                    Boolean(retryingInteractionId) &&
+                    (retryingInteractionId === msg.interactionId ||
+                      retryingInteractionId === msg.id ||
+                      retryingInteractionId === (msg.promptRaw || msg.message))
+                  }
+                  isAnyRetrying={Boolean(retryingInteractionId)}
                   isUserTyping={isUserTyping}
                 />
               ))}

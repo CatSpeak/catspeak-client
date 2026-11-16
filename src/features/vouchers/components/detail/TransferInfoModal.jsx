@@ -68,14 +68,14 @@ const TransferInfoModal = ({ open = false, onClose, voucher = {} }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         {/* Left Column: QR Code Section */}
         <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="max-w-[200px] sm:max-w-[220px] md:max-w-[240px] w-full relative aspect-square flex items-center justify-center">
+          <div className="max-w-[200px] sm:max-w-[220px] md:max-w-[240px] w-full relative aspect-square flex items-center justify-center bg-white rounded-2xl p-2 border border-border dark:border-[#3F3F3F]">
             {isLoadingDepositInfo ? (
               <Skeleton className="w-full aspect-square rounded-xl" />
             ) : (
               <img
                 src={vietQrUrl}
                 alt="VietQR CatSpeak"
-                className="w-full aspect-square object-contain rounded-2xl"
+                className="w-full aspect-square object-contain rounded-xl"
                 onError={(e) => {
                   e.target.onerror = null
                   e.target.src =
@@ -84,7 +84,7 @@ const TransferInfoModal = ({ open = false, onClose, voucher = {} }) => {
               />
             )}
           </div>
-          <span className="text-sm text-secondary text-center">
+          <span className="text-sm text-secondary dark:text-neutral-400 text-center">
             {t?.vouchers?.deposit?.qrInstruction ||
               "Quét mã QR bằng ứng dụng ngân hàng để tự động điền số tiền và nội dung"}
           </span>
@@ -95,30 +95,30 @@ const TransferInfoModal = ({ open = false, onClose, voucher = {} }) => {
           {/* Ngân hàng */}
           <div className="h-[72px] flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-sm text-secondary">
+              <span className="text-sm text-secondary dark:text-neutral-400">
                 {t?.vouchers?.deposit?.bankName || "Ngân hàng"}
               </span>
-              <span>{bankName}</span>
+              <span className="font-semibold text-gray-900 dark:text-white">{bankName}</span>
             </div>
           </div>
 
           {/* Chủ tài khoản */}
           <div className="h-[72px] flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-sm text-secondary">
+              <span className="text-sm text-secondary dark:text-neutral-400">
                 {t?.vouchers?.deposit?.accountName || "Chủ tài khoản"}
               </span>
-              <span>{bankAccountName}</span>
+              <span className="font-semibold text-gray-900 dark:text-white">{bankAccountName}</span>
             </div>
           </div>
 
           {/* Số tài khoản */}
           <div className="h-[72px] flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-sm text-secondary">
+              <span className="text-sm text-secondary dark:text-neutral-400">
                 {t?.vouchers?.deposit?.accountNumber || "Số tài khoản"}
               </span>
-              <span>{bankAccountNumber}</span>
+              <span className="font-semibold text-gray-900 dark:text-white">{bankAccountNumber}</span>
             </div>
 
             <IconButton
@@ -134,9 +134,9 @@ const TransferInfoModal = ({ open = false, onClose, voucher = {} }) => {
             >
               {copiedField ===
               (t?.vouchers?.deposit?.accountNumber || "Số tài khoản") ? (
-                <Check className="text-emerald-600" />
+                <Check className="text-emerald-600 dark:text-emerald-400" />
               ) : (
-                <Copy className="text-secondary" />
+                <Copy className="text-secondary dark:text-neutral-400" />
               )}
             </IconButton>
           </div>
@@ -144,10 +144,10 @@ const TransferInfoModal = ({ open = false, onClose, voucher = {} }) => {
           {/* Số tiền cọc */}
           <div className="h-[72px] flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-sm text-secondary">
+              <span className="text-sm text-secondary dark:text-neutral-400">
                 {t?.vouchers?.deposit?.depositAmount || "Số tiền cọc"}
               </span>
-              <span>{formatCurrency(depositAmount)}</span>
+              <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(depositAmount)}</span>
             </div>
 
             <IconButton
@@ -163,17 +163,17 @@ const TransferInfoModal = ({ open = false, onClose, voucher = {} }) => {
             >
               {copiedField ===
               (t?.vouchers?.deposit?.depositAmount || "Số tiền cọc") ? (
-                <Check className="text-emerald-600" />
+                <Check className="text-emerald-600 dark:text-emerald-400" />
               ) : (
-                <Copy className="text-secondary" />
+                <Copy className="text-secondary dark:text-neutral-400" />
               )}
             </IconButton>
           </div>
 
           {/* Highlighted Transaction Content */}
-          <div className="px-4 h-[72px] rounded-xl bg-rose-50 border border-rose-200 text-cath-red-700 flex items-center justify-between gap-2 mt-4">
+          <div className="px-4 h-[72px] rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-cath-red-700 dark:text-red-400 flex items-center justify-between gap-2 mt-4">
             <div className="min-w-0 flex-1">
-              <span className="text-sm text-cath-red-700/80 block">
+              <span className="text-sm text-cath-red-700/80 dark:text-red-400/80 block">
                 {t?.vouchers?.deposit?.transactionContent ||
                   "Nội dung chuyển khoản"}
               </span>
@@ -195,9 +195,9 @@ const TransferInfoModal = ({ open = false, onClose, voucher = {} }) => {
               {copiedField ===
               (t?.vouchers?.deposit?.transactionContent ||
                 "Nội dung chuyển khoản") ? (
-                <Check className="text-emerald-600" />
+                <Check className="text-emerald-600 dark:text-emerald-400" />
               ) : (
-                <Copy className="text-cath-red-700" />
+                <Copy className="text-cath-red-700 dark:text-red-400" />
               )}
             </IconButton>
           </div>

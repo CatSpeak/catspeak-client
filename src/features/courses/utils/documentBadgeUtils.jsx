@@ -86,7 +86,7 @@ export const DocumentTypeBadge = ({ extension = "PDF", className = "w-8 h-10" })
       viewBox="0 0 36 44"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`${className} shrink-0 drop-shadow-2xs`}
+      className={`${className} shrink-0 drop-shadow-2xs dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]`}
       aria-label={ext}
     >
       {/* Main Document Body with folded corner */}

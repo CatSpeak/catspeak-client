@@ -88,7 +88,13 @@ export default {
       moreExamples: "他の例文を見る",
       langPlaceholder: "英語 -> 日本語",
       listenBtn: "発音を聞く",
-      closeBtn: "ポップアップを閉じる"
+      closeBtn: "ポップアップを閉じる",
+      fetchingTitle: "「{{word}}」を検索中...",
+      fetchingDesc: "辞書の意味と発音を取得しています",
+      contributeSuccess: "フィードバックを送信しました！",
+      contributeError: "フィードバック送信中にエラーが発生しました。",
+      saveSuccess: "単語帳に保存しました！",
+      saveError: "単語を保存できませんでした。もう一度お試しください。"
     },
     notFound: {
       title: "この単語の定義が見つかりませんでした。",

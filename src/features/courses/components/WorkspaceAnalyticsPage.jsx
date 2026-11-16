@@ -197,7 +197,7 @@ const WorkspaceAnalyticsPage = () => {
   const currentTabObj = tabsList.find((tItem) => tItem.key === activeTab) || tabsList[0]
 
   return (
-    <div className="flex flex-col gap-5 text-[#14171F] min-h-full pb-10">
+    <div className="flex flex-col gap-5 text-[#14171F] dark:text-white min-h-full pb-10">
       {/* Breadcrumb Header */}
       <Breadcrumb
         items={[
@@ -209,14 +209,14 @@ const WorkspaceAnalyticsPage = () => {
       {/* Page Title & Icon */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#FFEEF0] text-[#B00020] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#FFEEF0] dark:bg-[#FFEEF0]/10 text-[#B00020] dark:text-[#FF6B6B] flex items-center justify-center flex-shrink-0">
             <BarChart3 size={24} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#12141A] tracking-tight leading-none">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#12141A] dark:text-white tracking-tight leading-none">
               {analyticsT.title || "Thống kê"}
             </h1>
-            <p className="text-xs text-[#6E788C] font-normal mt-1">
+            <p className="text-xs text-[#6E788C] dark:text-gray-400 font-normal mt-1">
               {currentTabObj.subtitle}
             </p>
           </div>
@@ -226,7 +226,7 @@ const WorkspaceAnalyticsPage = () => {
       {/* Main Analytics Container */}
       <div className="w-full flex flex-col gap-4">
         {/* Navigation Tabs Bar */}
-        <div className="flex gap-4 border-b border-[#DEDEE3] bg-transparent px-1 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-4 border-b border-[#DEDEE3] dark:border-[#3F3F3F] bg-transparent px-1 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {tabsList.map((tab) => {
             const isActive = activeTab === tab.key
             return (
@@ -236,13 +236,13 @@ const WorkspaceAnalyticsPage = () => {
                 onClick={() => handleTabChange(tab.key)}
                 className={`pb-3.5 pt-1 text-sm transition-all relative whitespace-nowrap cursor-pointer select-none border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 ${
                   isActive
-                    ? "text-[#B20514] font-bold"
-                    : "text-[#424A5C] hover:text-[#12141A] font-normal"
+                    ? "text-[#B20514] dark:text-[#FF6B6B] font-bold"
+                    : "text-[#424A5C] dark:text-gray-400 hover:text-[#12141A] dark:hover:text-white font-normal"
                 }`}
               >
                 {tab.label}
                 {isActive && (
-                  <span className="absolute left-0 right-0 bottom-0 h-[3px] bg-[#BF0514] rounded-t" />
+                  <span className="absolute left-0 right-0 bottom-0 h-[3px] bg-[#BF0514] dark:bg-[#FF6B6B] rounded-t" />
                 )}
               </button>
             )

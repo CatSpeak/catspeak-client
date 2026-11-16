@@ -80,8 +80,8 @@ const ShareCompletedClassModal = ({
             )}
 
             <div className="flex flex-col">
-              <span>{cc.allowProfileSharing || "Hiển thị trên hồ sơ"}</span>
-              <span className="text-sm text-secondary">
+              <span className="text-gray-900 dark:text-white font-medium">{cc.allowProfileSharing || "Hiển thị trên hồ sơ"}</span>
+              <span className="text-sm text-secondary dark:text-[#AAAAAA]">
                 {isShared
                   ? cc.allowProfileSharingDesc || "Công khai trên hồ sơ của bạn"
                   : cc.allowProfileSharingDescOff || "Đã ẩn khỏi hồ sơ của bạn"}

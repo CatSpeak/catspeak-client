@@ -36,7 +36,7 @@ const VisibilityDropdown = ({ value, onChange, color = "#B91264" }) => {
       <button
         type="button"
         onClick={toggle}
-        className="flex items-center gap-2 border border-white rounded-full px-3 py-1.5 bg-white text-black hover:bg-gray-50 transition-colors"
+        className="flex items-center gap-2 border border-transparent dark:border-[#3F3F3F] rounded-full px-3 py-1.5 bg-white dark:bg-[#272727] text-black dark:text-white hover:bg-gray-50 dark:hover:bg-[#333333] transition-colors"
       >
         <div style={{ color }}>{icon}</div>
         <span className="text-sm font-medium">{selectedOption ? selectedOption.shortLabel : selectedOpt.shortLabel}</span>
@@ -59,7 +59,7 @@ const VisibilityDropdown = ({ value, onChange, color = "#B91264" }) => {
       }}
       trigger={trigger}
       align="right"
-      className="inline-block text-black"
+      className="inline-block text-black dark:text-white"
       dropdownClassName="min-w-[200px]"
     />
   )

@@ -142,12 +142,12 @@ const AnalyticsFilterBar = ({
       ]
 
   const selectClass =
-    "h-10 border border-[#D6D9E0] rounded-lg px-3 text-sm text-[#14171F] bg-white hover:border-[#B20514] focus:outline-none focus:ring-1 focus:ring-[#B20514] transition-all cursor-pointer font-normal"
+    "h-10 border border-[#D6D9E0] dark:border-[#3F3F3F] rounded-lg px-3 text-sm text-[#14171F] dark:text-gray-200 bg-white dark:bg-[#1A1A1A] hover:border-[#B20514] focus:outline-none focus:ring-1 focus:ring-[#B20514] transition-all cursor-pointer font-normal"
 
   return (
-    <section className="bg-white border border-[#DEE0E5] rounded-xl p-3.5 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 items-end shadow-sm">
+    <section className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-3.5 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 items-end shadow-sm">
       {/* Group selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="select-group">{filterT.dataGroup || "Nhóm dữ liệu"}</label>
         <select
           id="select-group"
@@ -156,7 +156,7 @@ const AnalyticsFilterBar = ({
           className={selectClass}
         >
           {Object.keys(filterMeta || {}).map((key) => (
-            <option key={key} value={key}>
+            <option key={key} value={key} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {groupLabels[key] || filterMeta[key].label}
             </option>
           ))}
@@ -164,7 +164,7 @@ const AnalyticsFilterBar = ({
       </div>
 
       {/* Period selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="select-period">{filterT.timePeriod || "Khoảng thời gian"}</label>
         <select
           id="select-period"
@@ -173,7 +173,7 @@ const AnalyticsFilterBar = ({
           className={selectClass}
         >
           {periodOptions.map((item) => (
-            <option key={item.value} value={item.value}>
+            <option key={item.value} value={item.value} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {item.label}
             </option>
           ))}
@@ -182,7 +182,7 @@ const AnalyticsFilterBar = ({
 
       {/* Custom range (only when period === custom) */}
       {isCustom && (
-        <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+        <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
           <label>{filterT.fromDate || "Khoảng thời gian"}</label>
           <div className="grid grid-cols-2 gap-1.5">
             <DatePicker value={customStartDate} onChange={(d) => setCustomStartDate(toDateString(d))} />
@@ -192,7 +192,7 @@ const AnalyticsFilterBar = ({
       )}
 
       {/* Compare selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="select-compare">{filterT.compareTo || "So sánh với"}</label>
         <select
           id="select-compare"
@@ -202,7 +202,7 @@ const AnalyticsFilterBar = ({
           className={selectClass}
         >
           {compareOptions.map((item) => (
-            <option key={item.value} value={item.value}>
+            <option key={item.value} value={item.value} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {item.label}
             </option>
           ))}
@@ -210,7 +210,7 @@ const AnalyticsFilterBar = ({
       </div>
 
       {/* Course selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="select-course">{filterT.course || "Khóa học"}</label>
         <select
           id="select-course"
@@ -218,18 +218,18 @@ const AnalyticsFilterBar = ({
           onChange={handleCourseChange}
           className={selectClass}
         >
-          <option value={ALL_COURSES_VALUE}>{allCoursesLabel}</option>
+          <option value={ALL_COURSES_VALUE} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">{allCoursesLabel}</option>
           {courseList.map((item) => (
-            <option key={item.value} value={item.value}>
+            <option key={item.value} value={item.value} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {item.label}
             </option>
           ))}
-          <option value={UNASSIGNED_VALUE}>{unassignedLabel}</option>
+          <option value={UNASSIGNED_VALUE} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">{unassignedLabel}</option>
         </select>
       </div>
 
       {/* Class selection */}
-      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A] dark:text-gray-400">
         <label htmlFor="select-class">{filterT.class || "Lớp học"}</label>
         <select
           id="select-class"
@@ -238,7 +238,7 @@ const AnalyticsFilterBar = ({
           className={selectClass}
         >
           {getClassOptions().map((item) => (
-            <option key={item.value} value={item.value}>
+            <option key={item.value} value={item.value} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
               {item.label}
             </option>
           ))}
@@ -250,7 +250,7 @@ const AnalyticsFilterBar = ({
         type="button"
         disabled={isExporting}
         onClick={() => onExport && onExport()}
-        className="h-10 border border-[#BF0514] text-[#B20514] hover:bg-[#FFEEF0] bg-white font-semibold rounded-lg flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+        className="h-10 border border-[#BF0514] dark:border-[#FF6B6B] text-[#B20514] dark:text-[#FF6B6B] hover:bg-[#FFEEF0] dark:hover:bg-[#FFEEF0]/10 bg-white dark:bg-[#1A1A1A] font-semibold rounded-lg flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
       >
         <Download size={16} />
         {isExporting ? (filterT.exporting || "Đang xuất...") : (filterT.exportReport || "Xuất báo cáo")}

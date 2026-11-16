@@ -39,10 +39,10 @@ const PublicClassFAQ = () => {
   return (
     <div id="faq" className="scroll-mt-24">
       <div className="flex items-center gap-2 mb-6">
-        <span className="p-2 bg-slate-100 text-slate-700 rounded-xl">
+        <span className="p-2 bg-slate-100 dark:bg-[#2A2A2A] text-slate-700 dark:text-gray-300 rounded-xl">
           <HelpCircle size={20} />
         </span>
-        <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+        <h2 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight">
           {pc.faqTitle || "Các Câu Hỏi Thường Gặp (FAQ)"}
         </h2>
       </div>
@@ -53,21 +53,21 @@ const PublicClassFAQ = () => {
           return (
             <div
               key={idx}
-              className="bg-white border border-border rounded-2xl overflow-hidden shadow-2xs transition-all"
+              className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl overflow-hidden shadow-2xs transition-all"
             >
               <button
                 type="button"
                 onClick={() => toggle(idx)}
-                className="w-full p-4 sm:p-5 flex items-center justify-between text-left font-extrabold text-sm sm:text-base text-slate-900 hover:bg-slate-50 transition-colors"
+                className="w-full p-4 sm:p-5 flex items-center justify-between text-left font-extrabold text-sm sm:text-base text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-[#222222] transition-colors"
               >
                 <span>{faq.q}</span>
-                <span className="p-1 text-slate-400">
+                <span className="p-1 text-slate-400 dark:text-gray-500">
                   {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </span>
               </button>
 
               {isOpen && (
-                <div className="px-5 pb-5 pt-1 text-xs sm:text-sm font-medium text-slate-600 leading-relaxed border-t border-slate-100 bg-slate-50/40">
+                <div className="px-5 pb-5 pt-1 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 leading-relaxed border-t border-slate-100 dark:border-[#333333] bg-slate-50/40 dark:bg-[#222222]/40">
                   {faq.a}
                 </div>
               )}

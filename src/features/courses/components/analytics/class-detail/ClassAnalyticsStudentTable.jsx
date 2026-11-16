@@ -17,20 +17,20 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
         return {
           icon: "↗",
           text: cd.trendImproving || "Cải thiện",
-          colorClass: "text-[#16a34a]",
+          colorClass: "text-[#16a34a] dark:text-emerald-400",
         }
       case "stable":
         return {
           icon: "→",
           text: cd.trendStable || "Ổn định",
-          colorClass: "text-[#4b5563]",
+          colorClass: "text-[#4b5563] dark:text-gray-400",
         }
       case "declining":
       default:
         return {
           icon: "↘",
           text: cd.trendDeclining || "Giảm dần",
-          colorClass: "text-[#dc2626]",
+          colorClass: "text-[#dc2626] dark:text-[#FF6B6B]",
         }
     }
   }
@@ -39,20 +39,20 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
     switch (status) {
       case "normal":
         return (
-          <span className="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-xs font-semibold bg-[#e6f7ef] text-[#107c41]">
+          <span className="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-xs font-semibold bg-[#e6f7ef] dark:bg-emerald-950/40 text-[#107c41] dark:text-emerald-400">
             {cd.statusNormal || "Bình thường"}
           </span>
         )
       case "attention":
         return (
-          <span className="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-xs font-semibold bg-[#fef3c7] text-[#b45309]">
+          <span className="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-xs font-semibold bg-[#fef3c7] dark:bg-amber-950/40 text-[#b45309] dark:text-amber-400">
             {cd.statusAttention || "Cần chú ý"}
           </span>
         )
       case "warning":
       default:
         return (
-          <span className="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-xs font-semibold bg-[#ffe4e6] text-[#e11d48]">
+          <span className="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-xs font-semibold bg-[#ffe4e6] dark:bg-rose-950/40 text-[#e11d48] dark:text-[#FF6B6B]">
             {cd.statusWarning || "Cảnh báo"}
           </span>
         )
@@ -66,14 +66,14 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
     : `Ngưỡng kỳ vọng: mỗi học viên phát biểu ≥ ${thresholdRate}% thời gian (kỳ vọng cân bằng 1/${totalStudents} học viên)`
 
   return (
-    <div className="w-full flex flex-col bg-white">
+    <div className="w-full flex flex-col bg-white dark:bg-[#1A1A1A]">
       {/* Responsive Table Container */}
       <div className="w-full overflow-x-auto">
         <table className="w-full text-left text-sm border-collapse min-w-[700px]">
           <thead>
-            <tr className="bg-[#f4f6f8] text-gray-600 text-xs font-semibold">
+            <tr className="bg-[#f4f6f8] dark:bg-[#222222] text-gray-600 dark:text-gray-300 text-xs font-semibold">
               <th className="py-3 px-4 font-semibold">{cd.colStudent || "Học viên"}</th>
-              <th className="py-3 px-4 font-semibold text-blue-600">{cd.colAvgPercent || "% TB"}</th>
+              <th className="py-3 px-4 font-semibold text-blue-600 dark:text-blue-400">{cd.colAvgPercent || "% TB"}</th>
               <th className="py-3 px-4 font-semibold">{cd.colSessionsMet || "Buổi đạt"}</th>
               <th className="py-3 px-4 font-semibold">{cd.colSessionsUnmet || "Buổi chưa đạt"}</th>
               <th className="py-3 px-4 font-semibold">{cd.colTrend || "Xu hướng"}</th>
@@ -81,22 +81,22 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
               <th className="py-3 px-2 text-right w-10"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-[#333333]">
             {students.map((student) => {
               const trendObj = getTrendDisplay(student.trend)
               return (
                 <tr
                   key={student.id || student.name}
                   onClick={() => onSelectStudent && onSelectStudent(student)}
-                  className="hover:bg-gray-50/70 transition-colors cursor-pointer group"
+                  className="hover:bg-gray-50/70 dark:hover:bg-[#222222]/60 transition-colors cursor-pointer group"
                 >
                   {/* Học viên */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#2A2A2A] border border-gray-200 dark:border-[#3F3F3F] text-gray-700 dark:text-gray-300 font-bold text-xs flex items-center justify-center shrink-0">
                         {student.initial || student.name?.charAt(0) || "U"}
                       </div>
-                      <span className="font-semibold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">
+                      <span className="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {student.name}
                       </span>
                     </div>
@@ -105,25 +105,25 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
                   {/* % TB Progress bar & level */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-2 max-w-[140px]">
-                      <div className="h-3 rounded-full bg-gray-200/80 overflow-hidden flex-1">
+                      <div className="h-3 rounded-full bg-gray-200/80 dark:bg-[#2A2A2A] overflow-hidden flex-1">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${student.barColor || "bg-[#16a34a]"}`}
                           style={{ width: student.barTrackWidth || `${student.avgStbPercent * 2}%` }}
                         />
                       </div>
-                      <span className="text-xs font-semibold text-gray-700 w-4 text-right">
+                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 w-4 text-right">
                         {student.barLevel ?? Math.round(student.avgStbPercent / 10)}
                       </span>
                     </div>
                   </td>
 
                   {/* Buổi đạt */}
-                  <td className="py-3.5 px-4 font-medium text-[#16a34a]">
+                  <td className="py-3.5 px-4 font-medium text-[#16a34a] dark:text-emerald-400">
                     {getSessionsCountText(student.sessionsMet)}
                   </td>
 
                   {/* Buổi chưa đạt */}
-                  <td className="py-3.5 px-4 font-medium text-[#dc2626]">
+                  <td className="py-3.5 px-4 font-medium text-[#dc2626] dark:text-[#FF6B6B]">
                     {getSessionsCountText(student.sessionsUnmet)}
                   </td>
 
@@ -142,7 +142,7 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
 
                   {/* Action Chevron */}
                   <td className="py-3.5 px-2 text-right">
-                    <span className="text-blue-500 font-bold text-base group-hover:translate-x-0.5 transition-transform inline-block">
+                    <span className="text-blue-500 dark:text-blue-400 font-bold text-base group-hover:translate-x-0.5 transition-transform inline-block">
                       <ChevronRight size={18} />
                     </span>
                   </td>
@@ -155,7 +155,7 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
 
       {/* Footer Note */}
       <div className="pt-4">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           {thresholdHintText}
         </p>
       </div>

@@ -24,7 +24,6 @@ import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon"
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
 import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg"
-import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
 import { filterHumanParticipants } from "@/features/video-call/utils/participantIdentity"
 
 const CustomRoomCard = ({
@@ -169,16 +168,15 @@ const CustomRoomCard = ({
 
   return (
     <>
-      <Animated3DCard
+      <div
         onClick={handleCardClick}
         style={{
           fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
-        className="h-full w-full"
-        containerClassName="h-full w-full"
+        className="relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D]"
       >
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-border">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border dark:border-[#3F3F3F]">
           {/* Blurred Background Image */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
@@ -252,7 +250,7 @@ const CustomRoomCard = ({
               >
                 <Bookmark
                   size={16}
-                  className="text-cath-red-700 fill-cath-red-700 scale-110 transition-all duration-200"
+                  className="text-cath-red-700 fill-cath-red-700 dark:text-red-400 dark:fill-red-400 scale-110 transition-all duration-200"
                 />
               </div>
             ) : (
@@ -296,7 +294,7 @@ const CustomRoomCard = ({
           {/* Title & Copy Link */}
           <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">
+              <h3 className="text-lg font-bold line-clamp-1 text-black dark:text-white leading-snug">
                 {room.name}
               </h3>
             </div>
@@ -312,7 +310,7 @@ const CustomRoomCard = ({
                   t?.rooms?.copyLinkTooltip ||
                   "Sao chép liên kết"
                 }
-                className="flex items-center justify-center text-cath-red-800 shrink-0 hover:scale-110 transition-all active:scale-95 cursor-pointer p-1.5 rounded-full hover:bg-red-50"
+                className="flex items-center justify-center text-cath-red-800 dark:text-red-400 shrink-0 hover:scale-110 transition-all active:scale-95 cursor-pointer p-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30"
               >
                 {isCopied ? (
                   <Check size={18} className="text-emerald-600" />
@@ -326,23 +324,23 @@ const CustomRoomCard = ({
 
           {/* Badges: RoomType / Visibility / Language / Activity */}
           <div className="flex flex-wrap gap-1.5 mb-3">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isCustomType ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isCustomType ? "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800" : "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"}`}>
               {t.rooms?.filters?.roomTypes?.[roomTypeBadge] || roomTypeBadge}
             </span>
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isPrivate ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isPrivate ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800" : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"}`}>
               {t.rooms?.filters?.visibilities?.[visibilityBadge] || visibilityBadge}
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 dark:bg-[#272727] text-gray-700 dark:text-neutral-300 border border-gray-200 dark:border-[#3F3F3F]">
               {t.rooms?.aiSettings?.[languageBadge?.toLowerCase()] || languageBadge}
             </span>
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${activityBadge === "InUse" ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${activityBadge === "InUse" ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" : "bg-gray-100 dark:bg-[#272727] text-gray-600 dark:text-neutral-300 border-gray-200 dark:border-[#3F3F3F]"}`}>
               {activityBadge === "InUse" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
               {t.rooms?.filters?.activities?.[activityBadge] || (activityBadge === "InUse" ? "In Use" : "Empty")}
             </span>
           </div>
 
           {isExpired && (
-            <div className="mb-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1 text-center">
+            <div className="mb-2 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-2 py-1 text-center">
               {customRooms.expiredWarning || "Đã hết hạn — sẽ được xóa"}
             </div>
           )}
@@ -351,10 +349,10 @@ const CustomRoomCard = ({
           <div className="mt-auto flex justify-between items-center gap-3 sm:gap-4 flex-wrap">
             {/* Participants */}
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
-                <Users size={14} className="text-[#8B5A2B]" aria-hidden="true" />
+              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-[#EDC589] dark:border-amber-800">
+                <Users size={14} className="text-[#8B5A2B] dark:text-amber-300" aria-hidden="true" />
               </div>
-              <span className="text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
+              <span className="text-[13px] sm:text-[14px] font-medium text-black dark:text-neutral-200 whitespace-nowrap">
                 {maxParticipantsDisplay
                   ? `${currentCount}/${maxParticipantsDisplay} ${t.rooms?.people || "người"}`
                   : `${currentCount} ${t.rooms?.people || "người"}`}
@@ -363,10 +361,10 @@ const CustomRoomCard = ({
 
             {/* Duration */}
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
-                <Clock size={14} className="text-[#8B5A2B]" aria-hidden="true" />
+              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-[#EDC589] dark:border-amber-800">
+                <Clock size={14} className="text-[#8B5A2B] dark:text-amber-300" aria-hidden="true" />
               </div>
-              <div className="flex items-center text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
+              <div className="flex items-center text-[13px] sm:text-[14px] font-medium text-black dark:text-neutral-200 whitespace-nowrap">
                 <span>{durationText}</span>
               </div>
             </div>
@@ -375,7 +373,7 @@ const CustomRoomCard = ({
           {/* Co-host row — owner hoặc khi đã có co-host mới hiển thị */}
           {(isRoomOwner || roomCoHost?.coHostAccountId) && (
             <div
-              className="mt-3 pt-3 border-t border-gray-100"
+              className="mt-3 pt-3 border-t border-gray-100 dark:border-[#3F3F3F]"
               onClick={(e) => e.stopPropagation()}
             >
               <CoHostManager
@@ -401,7 +399,7 @@ const CustomRoomCard = ({
             </div>
           )}
         </div>
-      </Animated3DCard>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <ConfirmationModal

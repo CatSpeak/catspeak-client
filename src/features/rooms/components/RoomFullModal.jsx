@@ -10,8 +10,8 @@ const RoomFullModal = ({ open, onClose }) => {
     <Modal open={open} onClose={onClose} title={t.rooms.roomFullModal.title} fullScreenOnMobile={false}>
       <div className="flex flex-col items-center gap-4 text-center pb-6">
         <div className="flex flex-col gap-2">
-          <p className="m-0 text-base">{t.rooms.roomFullModal.message}</p>
-          <p className="m-0 text-sm text-[#7A7574]">
+          <p className="m-0 text-base text-gray-900 dark:text-white">{t.rooms.roomFullModal.message}</p>
+          <p className="m-0 text-sm text-[#7A7574] dark:text-[#AAAAAA]">
             {t.rooms.roomFullModal.subMessage}
           </p>
         </div>

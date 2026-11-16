@@ -12,7 +12,7 @@ const CourseTablePageHeader = ({
 }) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+      <h1 className="text-2xl font-bold tracking-tight text-gray-950 dark:text-white">
         {title}
       </h1>
 

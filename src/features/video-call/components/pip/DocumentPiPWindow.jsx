@@ -13,6 +13,7 @@ const DocumentPiPWindow = ({ children }) => {
 
   useEffect(() => {
     let activePipWindow = null
+    let themeObserver = null
     let isMounted = true
 
     const openPiP = async () => {
@@ -57,9 +58,27 @@ const DocumentPiPWindow = ({ children }) => {
         })
 
         // Copy tailwind dark mode classes or other classes on body/html
-        newPipWindow.document.body.className = document.body.className
-        newPipWindow.document.documentElement.className =
-          document.documentElement.className
+        const syncTheme = () => {
+          if (!newPipWindow || newPipWindow.closed) return
+  
+          newPipWindow.document.documentElement.className = document.documentElement.className
+          newPipWindow.document.documentElement.style.colorScheme =
+            document.documentElement.style.colorScheme
+          newPipWindow.document.body.className = document.body.className
+          const isDark = document.documentElement.classList.contains("dark")
+          newPipWindow.document.body.style.backgroundColor = isDark
+            ? "#1A1A1A"
+            : "#FFFFFF"
+        }
+        syncTheme()
+
+        themeObserver = new MutationObserver(syncTheme)
+        themeObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["class", "style"],
+        })
+
+
 
         // Listen for user closing the OS window
         const handlePageHide = () => {
@@ -80,6 +99,7 @@ const DocumentPiPWindow = ({ children }) => {
 
     return () => {
       isMounted = false
+      themeObserver?.disconnect()
       
       // Check current Redux state to see if we actually want to exit PiP
       // This prevents React 18 StrictMode from instantly closing the window on remount
@@ -100,7 +120,7 @@ const DocumentPiPWindow = ({ children }) => {
 
   // Render children into the new window's body
   return createPortal(
-    <div className="w-full h-full overflow-hidden m-0 p-0">{children}</div>,
+    <div className="w-full h-full overflow-hidden m-0 p-0 bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white">{children}</div>,
     pipWindow.document.body,
   )
 }

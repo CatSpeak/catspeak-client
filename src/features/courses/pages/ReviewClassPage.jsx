@@ -36,7 +36,7 @@ const StarRating = ({ value, onChange, size = "sm" }) => {
           <Star
             className={`${sizes[size]} transition-colors ${star <= value
               ? "fill-amber-400 text-amber-400"
-              : "fill-transparent text-gray-300"
+              : "fill-transparent text-gray-300 dark:text-gray-600"
               }`}
             strokeWidth={1.8}
           />
@@ -146,11 +146,11 @@ const ReviewClassPage = () => {
   if (isError || !context) {
     return (
       <div className="flex flex-1 min-h-[300px] flex-col items-center justify-center gap-4 p-6">
-        <p className="text-gray-500">{rv.errorLoading || "Đã xảy ra lỗi khi tải thông tin đánh giá."}</p>
+        <p className="text-gray-500 dark:text-gray-400">{rv.errorLoading || "Đã xảy ra lỗi khi tải thông tin đánh giá."}</p>
         <button
           type="button"
           onClick={() => navigate("/workspace/profile")}
-          className="rounded-lg bg-[#990011] px-4 py-2 text-sm font-semibold text-white hover:bg-[#80000e]"
+          className="rounded-lg bg-[#990011] dark:bg-[#FF6B6B] px-4 py-2 text-sm font-semibold text-white dark:text-[#1A1A1A] hover:bg-[#80000e] dark:hover:bg-[#ff8585]"
         >
           {rv.goBack || "Về trang cá nhân"}
         </button>
@@ -161,16 +161,16 @@ const ReviewClassPage = () => {
   if (alreadyReviewed) {
     return (
       <div className="flex flex-1 min-h-[300px] flex-col items-center justify-center gap-4 p-6">
-        <div className="w-16 h-16 rounded-full bg-[#dcfce7] flex items-center justify-center">
-          <Check size={32} className="text-[#16a34a]" strokeWidth={3} />
+        <div className="w-16 h-16 rounded-full bg-[#dcfce7] dark:bg-[#16a34a]/20 flex items-center justify-center">
+          <Check size={32} className="text-[#16a34a] dark:text-[#4ade80]" strokeWidth={3} />
         </div>
-        <p className="text-lg font-semibold text-gray-800">
+        <p className="text-lg font-semibold text-gray-800 dark:text-gray-200">
           {rv.alreadyReviewed || "Bạn đã đánh giá lớp học này"}
         </p>
         <button
           type="button"
           onClick={() => navigate("/workspace/profile")}
-          className="rounded-lg bg-[#990011] px-4 py-2 text-sm font-semibold text-white hover:bg-[#80000e]"
+          className="rounded-lg bg-[#990011] dark:bg-[#FF6B6B] px-4 py-2 text-sm font-semibold text-white dark:text-[#1A1A1A] hover:bg-[#80000e] dark:hover:bg-[#ff8585]"
         >
           {rv.goBack || "Về trang cá nhân"}
         </button>
@@ -197,14 +197,14 @@ const ReviewClassPage = () => {
 
   return (
     <div className="flex w-full flex-1 items-start justify-center py-1 sm:py-3">
-      <div className="w-full max-w-[720px] rounded-2xl sm:rounded-3xl bg-white p-5 sm:p-7 shadow-sm border border-gray-100/90">
+      <div className="w-full max-w-[720px] rounded-2xl sm:rounded-3xl bg-white dark:bg-[#1A1A1A] p-5 sm:p-7 shadow-sm border border-gray-100/90 dark:border-[#3F3F3F]">
         {/* Top Header */}
-        <div className="flex items-start justify-between gap-4 pb-4 border-b border-gray-100 -mx-5 sm:-mx-7 px-5 sm:px-7 mb-5">
+        <div className="flex items-start justify-between gap-4 pb-4 border-b border-gray-100 dark:border-[#3F3F3F] -mx-5 sm:-mx-7 px-5 sm:px-7 mb-5">
           <div>
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">
               {rv.title || "Đánh giá khóa học"}
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
               {rv.subtitle || "Chia sẻ trải nghiệm của bạn để giúp cộng đồng học tập tốt hơn."}
             </p>
           </div>
@@ -212,19 +212,19 @@ const ReviewClassPage = () => {
             type="button"
             aria-label="Close"
             onClick={() => setShowLeaveConfirm(true)}
-            className="w-8.5 h-8.5 p-2 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition cursor-pointer shrink-0"
+            className="w-8.5 h-8.5 p-2 rounded-full flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition cursor-pointer shrink-0"
           >
             <X size={17} />
           </button>
         </div>
 
         {/* Course / Class Summary Card */}
-        <div className="rounded-2xl border border-gray-100/90 bg-white p-4 sm:p-4.5 mb-5">
+        <div className="rounded-2xl border border-gray-100/90 dark:border-[#3F3F3F] bg-white dark:bg-[#222222] p-4 sm:p-4.5 mb-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-5">
             {/* Left: Thumbnail / Initial Letter Fallback + Course Name + Teacher */}
             <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
               {classThumbnailUrl && !thumbError ? (
-                <div className="w-[84px] sm:w-[96px] h-[56px] sm:h-[64px] min-w-[84px] sm:min-w-[96px] rounded-xl sm:rounded-2xl overflow-hidden shrink-0 shadow-xs border border-gray-100 bg-gray-50">
+                <div className="w-[84px] sm:w-[96px] h-[56px] sm:h-[64px] min-w-[84px] sm:min-w-[96px] rounded-xl sm:rounded-2xl overflow-hidden shrink-0 shadow-xs border border-gray-100 dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#2A2A2A]">
                   <img
                     src={classThumbnailUrl}
                     alt={context.courseName || context.className || "Thumbnail"}
@@ -239,17 +239,17 @@ const ReviewClassPage = () => {
               )}
 
               <div className="min-w-0 flex-1">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 leading-snug truncate">
+                <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug truncate">
                   {context.courseName || context.className}
                 </h2>
                 {context.className && (
-                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                     {rv.classTag || "Lớp: "}
                     {context.className}
                   </p>
                 )}
                 {context.language ? (
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mt-0.5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mt-0.5">
                     {getLocalizedLanguageName(context.language, t) || context.language}
                     {Array.isArray(context.levels) && context.levels.length > 0
                       ? ` · ${context.levels.join(" · ")}`
@@ -263,10 +263,10 @@ const ReviewClassPage = () => {
                     size={26}
                   />
                   <div className="leading-tight">
-                    <p className="text-xs sm:text-sm font-semibold text-gray-900">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                       {context.teacher?.name || UNKNOWN}
                     </p>
-                    <p className="text-[11px] text-gray-400">
+                    <p className="text-[11px] text-gray-400 dark:text-gray-500">
                       {rv.teacher || "Giảng viên"}
                     </p>
                   </div>
@@ -275,26 +275,26 @@ const ReviewClassPage = () => {
             </div>
 
             {/* Right: Date & Duration */}
-            <div className="flex sm:flex-col items-start justify-start gap-4 sm:gap-2.5 sm:border-l sm:border-gray-100 sm:pl-5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-50">
+            <div className="flex sm:flex-col items-start justify-start gap-4 sm:gap-2.5 sm:border-l sm:border-gray-100 dark:sm:border-[#3F3F3F] sm:pl-5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-50 dark:border-[#333333]">
               <div className="flex items-start gap-2">
-                <Calendar size={15} className="text-gray-400 mt-0.5 shrink-0" />
+                <Calendar size={15} className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[11px] sm:text-xs text-gray-400 leading-none">
+                  <p className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 leading-none">
                     {rv.completedDate || "Hoàn thành ngày"}
                   </p>
-                  <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5 leading-tight">
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mt-0.5 leading-tight">
                     {formatDisplayDate(context.completedAtUtc || context.completedAt)}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
-                <Clock size={15} className="text-gray-400 mt-0.5 shrink-0" />
+                <Clock size={15} className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[11px] sm:text-xs text-gray-400 leading-none">
+                  <p className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 leading-none">
                     {rv.duration || "Thời lượng"}
                   </p>
-                  <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5 leading-tight">
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mt-0.5 leading-tight">
                     {context.totalSessions ?? 24} {rv.sessions || "buổi học"}
                   </p>
                 </div>
@@ -306,10 +306,10 @@ const ReviewClassPage = () => {
         {/* Section 1: Detailed ratings */}
         <div>
           <div className="flex items-center gap-2.5 mb-3">
-            <span className="flex h-6 w-6 min-w-[24px] min-h-[24px] items-center justify-center rounded-full bg-[#990011] text-xs font-bold text-white shrink-0">
+            <span className="flex h-6 w-6 min-w-[24px] min-h-[24px] items-center justify-center rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-xs font-bold text-white dark:text-[#1A1A1A] shrink-0">
               1
             </span>
-            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
               {rv.detailRating || "Đánh giá chi tiết"}
             </h3>
           </div>
@@ -325,7 +325,7 @@ const ReviewClassPage = () => {
                   key={row.key}
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-0.5"
                 >
-                  <span className="text-xs sm:text-sm font-medium text-gray-800">
+                  <span className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200">
                     {row.label}
                   </span>
                   <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-auto shrink-0">
@@ -337,11 +337,11 @@ const ReviewClassPage = () => {
                     />
                     <span
                       className={`w-20 sm:w-24 text-right text-xs sm:text-sm font-medium whitespace-nowrap shrink-0 ${isPositive
-                        ? "text-[#10b981]"
+                        ? "text-[#10b981] dark:text-[#34d399]"
                         : isNegative
-                          ? "text-[#dc2626]"
+                          ? "text-[#dc2626] dark:text-[#f87171]"
                           : score > 0
-                            ? "text-gray-600"
+                            ? "text-gray-600 dark:text-gray-300"
                             : "text-transparent"
                         }`}
                     >
@@ -355,21 +355,21 @@ const ReviewClassPage = () => {
         </div>
 
         {/* Section Divider */}
-        <div className="border-t border-gray-100 my-5" />
+        <div className="border-t border-gray-100 dark:border-[#3F3F3F] my-5" />
 
         {/* Section 2: Comment experience */}
         <div>
           <div className="flex items-center gap-2.5 mb-3">
-            <span className="flex h-6 w-6 min-w-[24px] min-h-[24px] items-center justify-center rounded-full bg-[#990011] text-xs font-bold text-white shrink-0">
+            <span className="flex h-6 w-6 min-w-[24px] min-h-[24px] items-center justify-center rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-xs font-bold text-white dark:text-[#1A1A1A] shrink-0">
               2
             </span>
-            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
               {rv.shareExperience || "Chia sẻ trải nghiệm của bạn"}
             </h3>
           </div>
 
           <div className="pl-0 sm:pl-8">
-            <div className="relative rounded-2xl border border-gray-200 bg-white p-3 sm:p-3.5 focus-within:border-gray-300 transition-colors">
+            <div className="relative rounded-2xl border border-gray-200 dark:border-[#3F3F3F] bg-white dark:bg-[#222222] p-3 sm:p-3.5 focus-within:border-gray-300 dark:focus-within:border-gray-500 transition-colors">
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value.slice(0, 500))}
@@ -378,16 +378,16 @@ const ReviewClassPage = () => {
                   "Bạn thích điều gì ở khóa học này? Điều gì có thể cải thiện?"
                 }
                 rows={3}
-                className="w-full resize-none border-none p-0 text-xs sm:text-sm text-gray-700 placeholder-gray-400 outline-none"
+                className="w-full resize-none border-none p-0 text-xs sm:text-sm text-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-transparent outline-none"
               />
-              <div className="text-[11px] text-gray-400 text-right mt-1 select-none">
+              <div className="text-[11px] text-gray-400 dark:text-gray-500 text-right mt-1 select-none">
                 {comment.length}/500
               </div>
             </div>
 
             {/* Overall rating */}
             <div className="mt-4">
-              <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-2">
+              <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white mb-2">
                 {rv.overallRating || "Đánh giá tổng quan"}
               </h4>
               <div className="flex flex-wrap items-center gap-3 sm:gap-4">
@@ -395,10 +395,10 @@ const ReviewClassPage = () => {
                 {overall > 0 && (
                   <span
                     className={`inline-flex items-center justify-center rounded-lg px-3 py-1 text-xs sm:text-sm font-semibold ${overall >= 4
-                      ? "bg-[#d1fae5] text-[#059669]"
+                      ? "bg-[#d1fae5] dark:bg-[#059669]/20 text-[#059669] dark:text-[#34d399]"
                       : overall <= 2
-                        ? "bg-red-50 text-red-600 border border-red-100"
-                        : "bg-gray-100 text-gray-700"
+                        ? "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50"
+                        : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-700 dark:text-gray-300"
                       }`}
                   >
                     {overallLabel}
@@ -410,17 +410,17 @@ const ReviewClassPage = () => {
         </div>
 
         {errorMessage && (
-          <p className="mt-3.5 rounded-xl bg-red-50 px-3.5 py-2 text-xs sm:text-sm text-red-600 border border-red-100">
+          <p className="mt-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 px-3.5 py-2 text-xs sm:text-sm text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50">
             {errorMessage}
           </p>
         )}
 
         {/* Bottom Action Footer */}
-        <div className="border-t border-gray-100 -mx-5 sm:-mx-7 mt-5 px-5 sm:px-7 pt-4 flex items-center justify-between gap-4">
+        <div className="border-t border-gray-100 dark:border-[#3F3F3F] -mx-5 sm:-mx-7 mt-5 px-5 sm:px-7 pt-4 flex items-center justify-between gap-4">
           <button
             type="button"
             onClick={() => setShowLeaveConfirm(true)}
-            className="rounded-xl border border-gray-200 bg-white px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition active:scale-[0.98] cursor-pointer shadow-2xs"
+            className="rounded-xl border border-gray-200 dark:border-[#3F3F3F] bg-white dark:bg-[#222222] px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition active:scale-[0.98] cursor-pointer shadow-2xs"
           >
             {rv.back || "Quay lại"}
           </button>
@@ -429,7 +429,7 @@ const ReviewClassPage = () => {
             type="button"
             disabled={isSubmitting}
             onClick={handleSubmit}
-            className="rounded-xl bg-[#990011] hover:bg-[#80000e] px-6 sm:px-8 py-2.5 text-xs sm:text-sm font-semibold text-white transition active:scale-[0.98] cursor-pointer shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] px-6 sm:px-8 py-2.5 text-xs sm:text-sm font-semibold text-white dark:text-[#1A1A1A] transition active:scale-[0.98] cursor-pointer shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? "..." : rv.submit || "Gửi đánh giá"}
           </button>
@@ -442,24 +442,24 @@ const ReviewClassPage = () => {
         onClose={() => setShowLeaveConfirm(false)}
         showCloseButton={false}
         fullScreenOnMobile={false}
-        className="max-w-sm rounded-2xl"
+        className="max-w-sm rounded-2xl bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#3F3F3F]"
       >
         <div className="p-6 text-center">
-          <p className="text-base font-semibold text-gray-900">
+          <p className="text-base font-semibold text-gray-900 dark:text-white">
             {rv.leaveTitle || "Bạn có muốn rời khỏi trang?"}
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
             <button
               type="button"
               onClick={() => setShowLeaveConfirm(false)}
-              className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-[#3F3F3F] px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 transition hover:bg-gray-50 dark:hover:bg-[#222222]"
             >
               {rv.stay || "Ở lại"}
             </button>
             <button
               type="button"
               onClick={confirmLeave}
-              className="rounded-lg bg-[#B10A0A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#870003]"
+              className="rounded-lg bg-[#B10A0A] px-5 py-2.5 text-sm font-semibold text-white dark:text-[#1A1A1A] transition hover:bg-[#870003] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585]"
             >
               {rv.leave || "Rời khỏi"}
             </button>
@@ -473,7 +473,7 @@ const ReviewClassPage = () => {
         showCloseButton={false}
         fullScreenOnMobile={false}
         bodyClassName="p-0 !mb-0"
-        className="max-w-[420px] w-full rounded-3xl border border-gray-100 shadow-2xl overflow-hidden bg-white mx-4 !p-0"
+        className="max-w-[420px] w-full rounded-3xl border border-gray-100 dark:border-[#3F3F3F] shadow-2xl overflow-hidden bg-white dark:bg-[#1A1A1A] mx-4 !p-0"
       >
         <div className="relative p-6 sm:p-7 flex flex-col items-center text-center">
           {/* Close button */}
@@ -481,43 +481,43 @@ const ReviewClassPage = () => {
             type="button"
             aria-label="Close"
             onClick={() => navigate("/workspace/profile")}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-full hover:bg-gray-100 cursor-pointer"
+            className="absolute right-4 top-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-[#2A2A2A] cursor-pointer"
           >
             <X size={18} />
           </button>
 
           {/* Success Check Badge */}
-          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-[#dcfce7] flex items-center justify-center mb-4 sm:mb-5">
+          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-[#dcfce7] dark:bg-[#16a34a]/20 flex items-center justify-center mb-4 sm:mb-5">
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#16a34a] flex items-center justify-center text-white shadow-sm">
               <Check size={22} className="text-white" strokeWidth={3} />
             </div>
           </div>
 
           {/* Title */}
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight text-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight text-center">
             {rv.successTitle || "Đánh giá thành công!"}
           </h2>
 
           {/* Subtitle */}
-          <p className="mt-2 text-xs sm:text-[13px] text-gray-500 text-center max-w-[320px] mx-auto leading-relaxed px-1">
+          <p className="mt-2 text-xs sm:text-[13px] text-gray-500 dark:text-gray-400 text-center max-w-[320px] mx-auto leading-relaxed px-1">
             {rv.successMessage ||
               "Cảm ơn bạn đã chia sẻ trải nghiệm về khóa học. Đánh giá của bạn sẽ giúp cộng đồng học tốt hơn."}
           </p>
 
           {/* Reward Info Card */}
           {rewardPoints > 0 && (
-            <div className="mt-5 w-full bg-[#f9fafb] border border-[#f5d0ce] rounded-2xl p-4 text-left flex items-center gap-3.5">
+            <div className="mt-5 w-full bg-[#f9fafb] dark:bg-[#222222] border border-[#f5d0ce] dark:border-[#FF6B6B]/30 rounded-2xl p-4 text-left flex items-center gap-3.5">
               {/* Golden coin icon */}
-              <div className="w-10 h-10 rounded-full bg-[#fef3c7] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-[#fef3c7] dark:bg-[#f59e0b]/20 flex items-center justify-center shrink-0">
                 <div className="w-6 h-6 rounded-full bg-[#f59e0b] flex items-center justify-center text-white shadow-xs">
                   <Star size={13} className="fill-white text-white" />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-gray-700">
+                <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                   {rv.rewardTitle || "Phần thưởng"}
                 </p>
-                <p className="text-sm sm:text-base font-bold text-gray-900 truncate">
+                <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate">
                   {rv.rewardReceived || "Bạn đã nhận được"}{" "}
                   <span className="text-[#f59e0b] font-bold">
                     {rewardPoints ?? 0} Points
@@ -531,7 +531,7 @@ const ReviewClassPage = () => {
           <button
             type="button"
             onClick={() => navigate("/workspace/profile")}
-            className="mt-6 w-full py-3 rounded-xl bg-[#870003] hover:bg-[#700002] text-white font-semibold text-sm transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+            className="mt-6 w-full py-3 rounded-xl bg-[#870003] hover:bg-[#700002] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] text-white dark:text-[#1A1A1A] font-semibold text-sm transition-all active:scale-[0.98] shadow-sm cursor-pointer"
           >
             {rv.goBack || "Về trang cá nhân"}
           </button>

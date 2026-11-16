@@ -16,9 +16,13 @@ const PasswordInput = ({
   const toggleShow = () => setShow((prev) => !prev)
 
   // Determine border and focus colors based on validation state
-  let borderClass = "border-[#e2e2e2] focus:border-red-900"
-  if (isValid === true) borderClass = "border-green-600 focus:border-green-600"
-  else if (isValid === false) borderClass = "border-red-600 focus:border-red-600"
+  let borderClass = "border-[#e2e2e2] dark:border-[#3F3F3F] focus:border-cath-red-700 dark:focus:border-red-400"
+  if (isValid === true) borderClass = "border-green-600 dark:border-green-500 focus:border-green-600 dark:focus:border-green-500"
+  else if (isValid === false) borderClass = "border-red-600 dark:border-red-500 focus:border-red-600 dark:focus:border-red-500"
+
+  const hasDarkBg = className.split(" ").some((c) => /(^|\s)(!?)dark:bg-/.test(c))
+  const hasLightBg = className.split(" ").some((c) => /(^|\s)(!?)bg-/.test(c) && !/(^|\s)(!?)dark:bg-/.test(c))
+  const bgClass = `${hasLightBg ? "" : "bg-white"} ${hasDarkBg ? "" : "dark:bg-[#242424]"}`
 
   return (
     <div>
@@ -29,12 +33,12 @@ const PasswordInput = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`w-full h-12 rounded-2xl border px-4 pr-10 text-base focus:outline-none transition-colors duration-200 ${borderClass} ${className}`}
+          className={`w-full h-12 rounded-2xl border px-4 pr-10 text-base ${bgClass} text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#AAAAAA] focus:outline-none transition-colors duration-200 ${borderClass} ${className}`}
         />
         <button
           type="button"
           onClick={toggleShow}
-          className="absolute right-4 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+          className="absolute right-4 text-gray-400 hover:text-gray-600 dark:text-[#AAAAAA] dark:hover:text-white focus:outline-none cursor-pointer"
         >
           {show ? <Eye size={18} /> : <EyeOff size={18} />}
         </button>

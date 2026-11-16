@@ -39,6 +39,8 @@ export default {
   loadingDetails: "Loading details...",
   loadingEvents: "Loading events...",
   noEvents: "No events for this day",
+  noEventsDay: "No events for this day",
+  noEventsMonth: "No events in this month",
   timeLabel: "Time",
   description: "Description",
   registeredCount: "Registered amount",
@@ -241,6 +243,8 @@ export default {
   // Event detail
   noDescription: "This event has no description.",
   noRegisteredEvents: "You have not registered for any events this month.",
+  noRegisteredEventsMonth: "You have not registered for any events this month",
+  noRegisteredEventsDay: "You have not registered for any events on this day",
   day: "Day",
   // Workspace Events Page
   workspaceEventsTitle: "My Events",
@@ -273,5 +277,8 @@ export default {
   selectClass: "Select a class",
   prevWeek: "Previous week",
   nextWeek: "Next week",
+  viewMode: "View mode",
+  monthView: "Month",
+  weekView: "Week",
 };
 

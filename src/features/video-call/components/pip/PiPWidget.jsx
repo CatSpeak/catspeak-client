@@ -72,7 +72,7 @@ const FallbackPiPWidget = () => {
 
       <AnimatePresence>
         <motion.div
-          className="fixed z-[9999] w-[calc(100vw-40px)] max-w-[400px] flex flex-col rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.28),0_2px_8px_rgba(0,0,0,0.12)] bg-white cursor-grab active:cursor-grabbing select-none touch-none group"
+          className="fixed z-[9999] w-[calc(100vw-40px)] max-w-[400px] flex flex-col rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.28),0_2px_8px_rgba(0,0,0,0.12)] bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] text-foreground dark:text-white cursor-grab active:cursor-grabbing select-none touch-none group"
           key="pip-widget"
           initial={{ opacity: 0, scale: 0.6 }}
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}

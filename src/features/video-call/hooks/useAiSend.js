@@ -48,7 +48,7 @@ export const useAiSend = () => {
    * @param {object|null} options.replyTarget - The AI message being replied to (or null)
    */
   const sendAiMessage = useCallback(
-    async (text, { isPrivateAi, replyTarget }) => {
+    async (text, { isPrivateAi, replyTarget, retryInteractionId } = {}) => {
       if (sendingRef.current || isCurrentUserPrompting) return
       sendingRef.current = true
 
@@ -68,25 +68,58 @@ export const useAiSend = () => {
         return
       }
 
-      const interactionId = `ai-opt-${Date.now()}`
+      // Permanently strip any stacked AI mention prefixes
+      const cleanText = (text || "")
+        .replace(/^((@(AIPublic|AIPrivate|public-ai|private-ai|AISystem))\s*)+/gi, "")
+        .trim()
+
+      if (!cleanText) {
+        sendingRef.current = false
+        return
+      }
+
+      const isRetry = Boolean(retryInteractionId)
+      const interactionId = retryInteractionId || `ai-opt-${Date.now()}`
 
       try {
-        const isPublic = !isPrivateAi
+        const hasExplicitPublic = /^@(AIPublic|public-ai)\b/i.test(text || "")
+        const hasExplicitPrivate = /^@(AIPrivate|private-ai)\b/i.test(text || "")
+        const effectiveIsPrivate = hasExplicitPublic
+          ? false
+          : hasExplicitPrivate
+            ? true
+            : isPrivateAi
+        const isPublic = !effectiveIsPrivate
         const isSystemReply = replyTarget?.from?.isSystem
         const prefix = isSystemReply
           ? "@AISystem"
           : isPublic
             ? "@AIPublic"
             : "@AIPrivate"
-        const formattedPrompt = `${prefix} ${text}`
+        const formattedPrompt = `${prefix} ${cleanText}`
         const roomName = lkRoomName || "General"
 
+        if (isRetry) {
+          // In-place retry: switch existing interaction to loading without creating duplicates
+          updateAiInteraction(interactionId, {
+            status: "loading",
+            response: null,
+            errorCode: null,
+  
+
+            prompt: formattedPrompt,
+            promptRaw: cleanText,
+          })
+        } else {
         // 1. Optimistic UI update
         addOptimisticAiMessage({
           id: interactionId,
           type: "interaction",
           timestamp: Date.now(),
-          prompt: formattedPrompt,
+
+
+            prompt: formattedPrompt,
+            promptRaw: cleanText,
           topic: isPublic ? "public-ai" : "private-ai",
           questioner: currentUserId,
           response: null,
@@ -106,7 +139,7 @@ export const useAiSend = () => {
             : []
 
           if (parentHistory.length > 0) {
-            continueThread(replyTarget.interactionId, interactionId, text)
+            continueThread(replyTarget.interactionId, interactionId, cleanText)
           } else {
             // Reconstruct a minimal context from the replyTarget UI state
             const initialContext = []
@@ -122,10 +155,10 @@ export const useAiSend = () => {
                 content: replyTarget.message,
               })
             }
-            startNewThread(interactionId, text, initialContext)
+            startNewThread(interactionId, cleanText, initialContext)
           }
         } else {
-          startNewThread(interactionId, text)
+          startNewThread(interactionId, cleanText)
         }
 
         // 3. Broadcast public prompt via LiveKit
@@ -146,6 +179,8 @@ export const useAiSend = () => {
           }
         }
 
+        }
+
         // 4. Call the backend API
         const threadHistory = getConversationThread(interactionId)
         // Remove the last entry (current user prompt) — it goes as `message`
@@ -155,7 +190,7 @@ export const useAiSend = () => {
 
         const payload = {
           roomName,
-          message: text,
+          message: cleanText,
           conversations,
           language: roomLanguage,
           tier: userTier,
@@ -173,6 +208,10 @@ export const useAiSend = () => {
             status: "done",
             response: res.answer,
             followUpSuggestions: res.follow_up_questions || [],
+  
+  
+            prompt: formattedPrompt,
+            promptRaw: cleanText,
             aiFrom: {
               name: isPublic ? "Public AI" : "Private AI",
               isSystem: false,
@@ -195,6 +234,9 @@ export const useAiSend = () => {
         updateAiInteraction(interactionId, {
           status: "error",
           response: errorMsg,
+
+            prompt: formattedPrompt,
+            promptRaw: cleanText,
           errorCode: errorCode || (isQuotaExceeded ? "AI_DAILY_TOKEN_LIMIT_EXCEEDED" : "AI_SERVICE_ERROR"),
           aiFrom: { name: "Cat Speak", isSystem: true, isAi: true },
         })

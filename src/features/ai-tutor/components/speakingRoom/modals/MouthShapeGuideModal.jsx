@@ -40,19 +40,19 @@ const MouthShapeGuideModal = ({
 
       {/* Dialog Container */}
       <div
-        className="relative w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-2xl bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-3xl p-6 sm:p-7 shadow-2xl z-10 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
       >
 
             {/* Header */}
             <div className="flex items-center justify-between gap-4 mb-5">
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 uppercase">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">
                 {guide.toneTitle}
               </h2>
 
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors shrink-0 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#272727] hover:bg-slate-200 dark:hover:bg-[#333333] flex items-center justify-center text-slate-500 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-white transition-colors shrink-0 cursor-pointer"
                 aria-label="Close dialog"
               >
                 <X className="w-4 h-4" />
@@ -110,12 +110,12 @@ const MouthShapeGuideModal = ({
               {/* Right Column: 3 Steps & AI Tip & CTA */}
               <div className="md:col-span-7 flex flex-col justify-between space-y-3.5">
                 {/* 3 Steps Box */}
-                <div className="p-4 sm:p-4.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2 text-left">
-                  <h3 className="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wide">
+                <div className="p-4 sm:p-4.5 rounded-2xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#333333] space-y-2 text-left">
+                  <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white uppercase tracking-wide">
                     3 bước khẩu hình chuẩn:
                   </h3>
 
-                  <div className="space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  <div className="space-y-2 text-xs sm:text-sm text-slate-700 dark:text-neutral-300 leading-relaxed">
                     {guide.steps.map((step, idx) => (
                       <p key={idx}>{step}</p>
                     ))}
@@ -123,12 +123,12 @@ const MouthShapeGuideModal = ({
                 </div>
 
                 {/* AI Tip Box */}
-                <div className="p-4 sm:p-4.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-left space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
-                    <Lightbulb className="w-4 h-4 text-amber-600 shrink-0" />
+                <div className="p-4 sm:p-4.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-left space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 dark:text-amber-300">
+                    <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                     <span>Mẹo từ AI Tutor CatSpeak:</span>
                   </div>
-                  <p className="text-xs text-amber-900/90 italic leading-relaxed pl-5">
+                  <p className="text-xs text-amber-900/90 dark:text-amber-200/90 italic leading-relaxed pl-5">
                     &quot;{guide.aiTip}&quot;
                   </p>
                 </div>

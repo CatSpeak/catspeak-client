@@ -147,7 +147,7 @@ const StudentJoinModal = ({
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="relative w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl p-6 z-10 flex flex-col items-center"
+          className="relative w-full max-w-md bg-white dark:bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-2xl p-6 z-10 flex flex-col items-center border border-border dark:border-[#3F3F3F]"
         >
           {/* Close button (only shown if not submitting and not success) */}
           {!isSubmitting && !success && (
@@ -155,7 +155,7 @@ const StudentJoinModal = ({
               type="button"
               onClick={onClose}
               aria-label={sc.closeEnrollmentDialog}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-colors"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-50 dark:bg-[#2A2A2A] hover:bg-gray-100 dark:hover:bg-[#333333] text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex items-center justify-center transition-colors"
             >
               <X size={16} />
             </button>
@@ -168,23 +168,23 @@ const StudentJoinModal = ({
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: [1.2, 1], opacity: 1 }}
                 transition={{ duration: 0.4, type: "spring" }}
-                className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-5"
+                className="w-16 h-16 rounded-full bg-green-100 dark:bg-emerald-950/40 flex items-center justify-center text-green-600 dark:text-emerald-400 mb-5"
               >
                 <Check size={36} className="stroke-[3.5]" />
               </motion.div>
 
-              <h3 id="student-enrollment-dialog-title" className="text-xl font-black text-gray-950 tracking-tight">
+              <h3 id="student-enrollment-dialog-title" className="text-xl font-black text-gray-950 dark:text-white tracking-tight">
                 {sc.enrollmentConfirmedTitle}
               </h3>
-              <p className="text-sm text-gray-500 font-semibold mt-2.5 px-4 leading-relaxed">
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-semibold mt-2.5 px-4 leading-relaxed">
                 {sc.enrolledSuccess.replace("{{className}}", selectedClass.title)}
               </p>
 
               {/* Class summary card */}
-              <div className="bg-gray-50 rounded-2xl p-4 border border-border w-full text-left my-6 flex flex-col gap-2.5 text-xs text-gray-600 font-semibold">
-                <p className="font-extrabold text-gray-900 text-sm truncate">{course.title}</p>
+              <div className="bg-gray-50 dark:bg-[#242424] rounded-2xl p-4 border border-border dark:border-[#3F3F3F] w-full text-left my-6 flex flex-col gap-2.5 text-xs text-gray-600 dark:text-gray-300 font-semibold">
+                <p className="font-extrabold text-gray-900 dark:text-white text-sm truncate">{course.title}</p>
                 <div className="flex items-center gap-2">
-                  <Calendar size={13} className="text-gray-400" />
+                  <Calendar size={13} className="text-gray-400 dark:text-gray-500" />
                   <span>
                     {formatScheduleDays(
                       selectedClass.schedule?.days,
@@ -195,7 +195,7 @@ const StudentJoinModal = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock size={13} className="text-gray-400" />
+                  <Clock size={13} className="text-gray-400 dark:text-gray-500" />
                   <span>{scheduleTime}</span>
                 </div>
               </div>
@@ -211,25 +211,25 @@ const StudentJoinModal = ({
           ) : (
             /* Confirmation State */
             <div className="w-full flex flex-col items-center">
-              <h3 id="student-enrollment-dialog-title" className="text-lg font-black text-gray-950 tracking-tight text-center mt-2">
+              <h3 id="student-enrollment-dialog-title" className="text-lg font-black text-gray-950 dark:text-white tracking-tight text-center mt-2">
                 {sc.enrollmentConfirmTitle}
               </h3>
 
-              <p className="text-sm text-gray-500 font-semibold text-center mt-3 leading-relaxed px-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-semibold text-center mt-3 leading-relaxed px-2">
                 {sc.enrollmentConfirmMsg
                   .replace("{{className}}", selectedClass.title)
                   .replace("{{courseName}}", course.title)}
               </p>
 
               {/* Fee info */}
-              <div className="w-full bg-gray-50 rounded-2xl p-4 border border-border my-5 flex flex-col gap-2">
+              <div className="w-full bg-gray-50 dark:bg-[#242424] rounded-2xl p-4 border border-border dark:border-[#3F3F3F] my-5 flex flex-col gap-2">
                 <div className="flex justify-between items-center text-xs font-bold">
-                  <span className="text-gray-400">{sc.classBatch}</span>
-                  <span className="text-gray-800 text-right truncate max-w-[200px]">{selectedClass.title}</span>
+                  <span className="text-gray-400 dark:text-gray-400">{sc.classBatch}</span>
+                  <span className="text-gray-800 dark:text-gray-200 text-right truncate max-w-[200px]">{selectedClass.title}</span>
                 </div>
-                <div className="flex justify-between items-center text-xs font-bold border-t border-border/50 pt-2 mt-1">
-                  <span className="text-gray-400 uppercase">{sc.tuition}</span>
-                  <span className="text-[#b20a1c] font-black text-sm">{tuitionLabel}</span>
+                <div className="flex justify-between items-center text-xs font-bold border-t border-border/50 dark:border-[#3F3F3F] pt-2 mt-1">
+                  <span className="text-gray-400 dark:text-gray-400 uppercase">{sc.tuition}</span>
+                  <span className="text-[#b20a1c] dark:text-[#FF6B6B] font-black text-sm">{tuitionLabel}</span>
                 </div>
               </div>
 
@@ -239,7 +239,7 @@ const StudentJoinModal = ({
                   type="button"
                   disabled={isSubmitting}
                   onClick={onConfirm}
-                  className="w-full h-11 bg-[#b20a1c] hover:bg-[#990011] disabled:bg-gray-300 text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs active:scale-95"
+                  className="w-full h-11 bg-[#b20a1c] hover:bg-[#990011] disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs active:scale-95 cursor-pointer"
                 >
                   {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                   <span>{sc.enrollNow}</span>
@@ -249,7 +249,7 @@ const StudentJoinModal = ({
                   type="button"
                   disabled={isSubmitting}
                   onClick={onClose}
-                  className="w-full h-11 bg-white hover:bg-gray-50 border border-gray-250 text-gray-700 font-extrabold text-sm rounded-full flex items-center justify-center transition-colors active:scale-95"
+                  className="w-full h-11 bg-white dark:bg-[#242424] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] border border-gray-250 dark:border-[#3F3F3F] text-gray-700 dark:text-gray-200 font-extrabold text-sm rounded-full flex items-center justify-center transition-colors active:scale-95 cursor-pointer"
                 >
                   {sc.cancel}
                 </button>

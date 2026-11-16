@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react"
 import DOMPurify from "dompurify"
+import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import { CmsCarousel } from "./CmsCarousel"
 import { parseContentSegments } from "../utils/parseContentSegments"
 import { CONTENT_CLASSES } from "../constants/contentClasses"
 import { normalizeContent } from "../utils/contentNormalizer"
 
-const PostContent = ({ html, contentUrl, className = "" }) => {
+const PostContent = ({ html, contentUrl, className = "", fallback = null }) => {
   const [fetchedData, setFetchedData] = useState({ url: null, html: "" })
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const PostContent = ({ html, contentUrl, className = "" }) => {
   const isLoading =
     !html && Boolean(contentUrl) && fetchedData.url !== contentUrl
   const displayHtml =
-    html || (fetchedData.url === contentUrl ? fetchedData.html : "")
+    html || (fetchedData.url === contentUrl ? fetchedData.html : fallback || "")
 
   const segments = useMemo(() => {
     if (!displayHtml) return []
@@ -77,12 +78,12 @@ const PostContent = ({ html, contentUrl, className = "" }) => {
     return parseContentSegments(sanitized)
   }, [displayHtml])
 
-  if (isLoading) {
+  if (isLoading && !displayHtml) {
     return (
-      <div className={`animate-pulse space-y-3 p-2 ${className}`}>
-        <div className="h-4 bg-gray-200 rounded w-3/4" />
-        <div className="h-4 bg-gray-200 rounded w-full" />
-        <div className="h-4 bg-gray-200 rounded w-5/6" />
+      <div className={`space-y-3 p-2 ${className}`}>
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
       </div>
     )
   }

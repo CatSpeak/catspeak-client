@@ -45,18 +45,18 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
       <div className="flex-1 min-w-0">
         {/* Author + time */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="font-semibold text-[15px] text-[#191C1D]">{authorName}</span>
+          <span className="font-semibold text-[15px] text-[#191C1D] dark:text-white">{authorName}</span>
           {isTeacher && (
-            <span className="bg-[#750000] text-white text-[10px] font-bold px-2 py-0.5 rounded">
+            <span className="bg-[#750000] dark:bg-[#FF6B6B] text-white dark:text-gray-950 text-[10px] font-bold px-2 py-0.5 rounded">
               {dict.teacher}
             </span>
           )}
-          <span className="text-sm text-[#7B7979]"> . {time}</span>
+          <span className="text-sm text-[#7B7979] dark:text-gray-400"> . {time}</span>
         </div>
 
         {/* Image attachment */}
         {image && (
-          <div className="rounded-2xl overflow-hidden mb-3 bg-[#E2E2E2] h-[160px]">
+          <div className="rounded-2xl overflow-hidden mb-3 bg-[#E2E2E2] dark:bg-[#222222] h-[160px]">
             <img
               src={image}
               alt={dict.commentAttachmentAlt}
@@ -67,7 +67,7 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
 
         {/* Text content */}
         {content && (
-          <div className="text-[14px] text-[#333333] leading-relaxed mb-2">
+          <div className="text-[14px] text-[#333333] dark:text-gray-200 leading-relaxed mb-2">
             <RenderHTML html={content} />
           </div>
         )}
@@ -78,7 +78,7 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[14px] text-blue-500 hover:underline block mb-2"
+            className="text-[14px] text-blue-500 dark:text-blue-400 hover:underline block mb-2"
           >
             {link}
           </a>
@@ -90,16 +90,16 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
             <>
               <button
                 onClick={() => onViewReplies && onViewReplies(comment)}
-                className="text-[13px] font-semibold text-[#990011] hover:underline"
+                className="text-[13px] font-semibold text-[#990011] dark:text-[#FF6B6B] hover:underline"
               >
                 {dict.viewMoreReplies ? dict.viewMoreReplies.replace("{{count}}", replyCount) : `Xem ${replyCount} phản hồi`}
               </button>
-              <span className="text-[#990011] text-[13px]">.</span>
+              <span className="text-[#990011] dark:text-[#FF6B6B] text-[13px]">.</span>
             </>
           )}
           <button
             onClick={() => onReply && onReply(comment)}
-            className="text-[13px] font-semibold text-[#990011] hover:underline"
+            className="text-[13px] font-semibold text-[#990011] dark:text-[#FF6B6B] hover:underline"
           >
             {dict.reply || "Phản hồi"}
           </button>

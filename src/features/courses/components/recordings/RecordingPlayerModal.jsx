@@ -73,30 +73,30 @@ const RecordingPlayerModal = ({ open, onClose, recording }) => {
       </div>
 
       {/* Thông tin chi tiết */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-neutral-50 rounded-xl border border-neutral-100 text-xs sm:text-sm text-[#4b5563]">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-neutral-50 dark:bg-[#222222] rounded-xl border border-neutral-100 dark:border-[#3F3F3F] text-xs sm:text-sm text-[#4b5563] dark:text-gray-300">
         <div className="flex flex-wrap items-center gap-4">
           {sessionNumber != null && (
-            <span className="font-semibold text-neutral-900 bg-white px-2.5 py-1 rounded-lg border border-neutral-200 shadow-xs">
+            <span className="font-semibold text-neutral-900 dark:text-white bg-white dark:bg-[#1A1A1A] px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-[#3F3F3F] shadow-xs">
               Buổi {sessionNumber}
             </span>
           )}
 
           {sessionDate && (
-            <div className="flex items-center gap-1.5 text-neutral-600">
+            <div className="flex items-center gap-1.5 text-neutral-600 dark:text-gray-300">
               <Calendar className="w-4 h-4 text-neutral-400" />
               <span>{sessionDate}</span>
             </div>
           )}
 
           {durationSeconds != null && durationSeconds > 0 && (
-            <div className="flex items-center gap-1.5 text-neutral-600">
+            <div className="flex items-center gap-1.5 text-neutral-600 dark:text-gray-300">
               <Clock className="w-4 h-4 text-neutral-400" />
               <span>{formatDuration(durationSeconds)}</span>
             </div>
           )}
 
           {fileSizeBytes != null && fileSizeBytes > 0 && (
-            <div className="flex items-center gap-1.5 text-neutral-600">
+            <div className="flex items-center gap-1.5 text-neutral-600 dark:text-gray-300">
               <HardDrive className="w-4 h-4 text-neutral-400" />
               <span>{formatFileSize(fileSizeBytes)}</span>
             </div>
@@ -106,8 +106,8 @@ const RecordingPlayerModal = ({ open, onClose, recording }) => {
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
             isPublished
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              : "bg-amber-50 text-amber-700 border border-amber-200"
+              ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50"
+              : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50"
           }`}
         >
           {isPublished ? "Đã đăng lên giảng đường" : "Bản nháp (Chưa đăng)"}

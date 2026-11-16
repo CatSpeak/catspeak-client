@@ -41,7 +41,7 @@ const FriendRequestToast = ({
     <div
       className={`${
         toastInstance?.visible ? "animate-enter" : "animate-leave"
-      } max-w-sm w-full bg-white shadow-xl rounded-2xl pointer-events-auto border border-gray-100 p-4 transition-all duration-200 overflow-hidden`}
+      } max-w-sm w-full bg-white dark:bg-[#1A1A1A] shadow-xl rounded-2xl pointer-events-auto border border-gray-100 dark:border-[#3F3F3F] p-4 transition-all duration-200 overflow-hidden`}
     >
       <div className="flex items-start gap-3">
         {/* Avatar */}
@@ -51,16 +51,16 @@ const FriendRequestToast = ({
             src={avatarUrl}
             name={displayName}
             accountId={sender?.accountId}
-            className="w-11 h-11 ring-2 ring-cath-red-100 shadow-sm"
+            className="w-11 h-11 ring-2 ring-cath-red-100 dark:ring-red-900/40 shadow-sm"
           />
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0 pr-2">
-          <p className="text-sm font-semibold text-gray-900 truncate">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
             {displayName}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+          <p className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
             {t.profile?.social?.friendRequestReceived ||
               "đã gửi cho bạn một lời mời kết bạn"}
           </p>
@@ -83,7 +83,7 @@ const FriendRequestToast = ({
             <button
               onClick={() => handleAction("decline")}
               disabled={Boolean(loadingAction)}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 disabled:opacity-60 disabled:pointer-events-none text-gray-700 text-xs font-medium py-1.5 px-3 rounded-full transition"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 bg-gray-100 dark:bg-[#272727] hover:bg-gray-200 dark:hover:bg-[#333333] active:scale-95 disabled:opacity-60 disabled:pointer-events-none text-gray-700 dark:text-neutral-200 text-xs font-medium py-1.5 px-3 rounded-full transition"
             >
               {loadingAction === "decline" ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -98,7 +98,7 @@ const FriendRequestToast = ({
         {/* Close Button */}
         <button
           onClick={handleDismiss}
-          className="text-gray-400 hover:text-gray-600 transition p-1 rounded-full hover:bg-gray-100"
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-neutral-300 transition p-1 rounded-full hover:bg-gray-100 dark:hover:bg-[#272727]"
           title="Bỏ qua"
         >
           <X className="w-4 h-4" />

@@ -30,7 +30,7 @@ const GroupDetailsForm = ({
         >
           <ArrowLeft />
         </IconButton>
-        <span className="font-semibold">{t?.chat?.modals?.groupDetailsTitle || "Group details"}</span>
+        <span className="font-semibold text-gray-900 dark:text-white">{t?.chat?.modals?.groupDetailsTitle || "Group details"}</span>
       </div>
 
       {/* Group Name Input */}
@@ -47,7 +47,7 @@ const GroupDetailsForm = ({
 
       {/* Selected Friends Preview */}
       <div className="px-4 flex-1 overflow-hidden flex flex-col min-h-0">
-        <span className="text-xs text-[#606060] mb-2">
+        <span className="text-xs text-[#606060] dark:text-[#AAAAAA] mb-2">
           {t?.chat?.modals?.selectedCount
             ? t.chat.modals.selectedCount.replace("{{count}}", selectedFriendsData.length)
             : `${selectedFriendsData.length} members selected`}
@@ -81,17 +81,17 @@ const GroupDetailsForm = ({
                     }}
                     size="sm"
                     variant="transparent"
-                    className="text-[#606060] hover:text-[#990011] hover:bg-[#E5E5E5] rounded-full shrink-0"
+                    className="text-[#606060] dark:text-[#AAAAAA] hover:text-[#990011] dark:hover:text-red-400 hover:bg-[#E5E5E5] dark:hover:bg-[#272727] rounded-full shrink-0"
                     aria-label={`Remove ${friend.nickname || friend.username}`}
                   >
                     <Trash2 />
                   </IconButton>
                 }
               >
-                <p className="font-medium text-black">
+                <p className="font-medium text-black dark:text-white truncate">
                   {friend.nickname || friend.username}
                 </p>
-                <p className="text-sm text-[#606060]">
+                <p className="text-sm text-[#606060] dark:text-[#AAAAAA]">
                   {friend.level || t?.chat?.userPanel?.student || "Student"}
                 </p>
               </ListItem>
@@ -101,7 +101,7 @@ const GroupDetailsForm = ({
       </div>
 
       {/* Footer Actions */}
-      <div className="border-t border-border flex justify-end gap-2 p-4 shrink-0">
+      <div className="border-t border-border dark:border-[#3F3F3F] flex justify-end gap-2 p-4 shrink-0">
         <PillButton onClick={onBack} variant="secondary-no-outline">
           {t?.chat?.modals?.back || "Back"}
         </PillButton>

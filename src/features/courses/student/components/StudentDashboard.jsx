@@ -305,7 +305,7 @@ const StudentDashboard = ({ t }) => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-100">
       {/* ─── Breadcrumb ─── */}
       <Breadcrumb
         items={[
@@ -315,7 +315,7 @@ const StudentDashboard = ({ t }) => {
       />
 
       {/* ─── Coursera-Style Student Profile Welcome Banner ─── */}
-      <div className="bg-white rounded-3xl p-6 border border-border shadow-xs relative flex flex-col md:flex-row items-center justify-between gap-6 shrink-0 mt-2">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 border border-border dark:border-[#3F3F3F] shadow-xs relative flex flex-col md:flex-row items-center justify-between gap-6 shrink-0 mt-2">
         <div className="flex items-start gap-4 flex-1">
           {/* Avatar initial in dark circle */}
           <div
@@ -326,24 +326,24 @@ const StudentDashboard = ({ t }) => {
           </div>
 
           <div className="flex flex-col gap-1.5 mt-0.5">
-            <h1 className="text-2xl font-black text-gray-900 leading-none">
+            <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-none">
               {getGreeting()}, {displayName}
             </h1>
-            <div className="flex flex-wrap items-center gap-y-1.5 text-xs text-gray-500 font-semibold leading-relaxed mt-0.5">
+            <div className="flex flex-wrap items-center gap-y-1.5 text-xs text-gray-500 dark:text-gray-400 font-semibold leading-relaxed mt-0.5">
               {sc.greetingSubtitle || "Good day to start learning a new language!"}
             </div>
             {profileQuery.isLoading ? (
               <span
                 role="status"
                 aria-live="polite"
-                className="text-[11px] font-semibold text-gray-400"
+                className="text-[11px] font-semibold text-gray-400 dark:text-gray-500"
               >
                 {sc.loadingProfile || "Loading profile..."}
               </span>
             ) : (profileQuery.error || isProfileMalformed) ? (
               <div
                 role="alert"
-                className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-amber-700"
+                className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-amber-700 dark:text-amber-300"
               >
                 <span>
                   {sc.profileUnavailable || "Profile details are unavailable."}
@@ -364,7 +364,7 @@ const StudentDashboard = ({ t }) => {
         </div>
 
         {/* Isometric 3D Portal Illustration on the right */}
-        <div className="w-56 h-36 shrink-0 relative overflow-hidden flex items-center justify-center select-none bg-slate-50/50 rounded-2xl border border-border/50">
+        <div className="w-56 h-36 shrink-0 relative overflow-hidden flex items-center justify-center select-none bg-slate-50/50 dark:bg-[#222222] rounded-2xl border border-border/50 dark:border-[#3F3F3F]/50">
           <svg
             aria-hidden="true"
             focusable="false"
@@ -404,7 +404,7 @@ const StudentDashboard = ({ t }) => {
       <div className="flex flex-col gap-6">
 
         {/* Search & Selection Filters bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full justify-between bg-white rounded-3xl p-5 border border-border shadow-xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full justify-between bg-white dark:bg-[#1A1A1A] rounded-3xl p-5 border border-border dark:border-[#3F3F3F] shadow-xs">
           {/* Search Box */}
           <label className="flex-1">
             <span className="sr-only">
@@ -447,19 +447,19 @@ const StudentDashboard = ({ t }) => {
           {error && joinedClasses.length === 0 ? (
             <div
               role="alert"
-              className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 bg-red-50 p-6 text-center"
+              className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-6 text-center"
             >
-              <h3 className="text-lg font-extrabold text-red-800">
+              <h3 className="text-lg font-extrabold text-red-800 dark:text-red-300">
                 {sc.loadErrorTitle || "Unable to load learning data"}
               </h3>
-              <p className="max-w-sm text-sm font-semibold text-red-700">
+              <p className="max-w-sm text-sm font-semibold text-red-700 dark:text-red-400">
                 {sc.loadErrorDescription || "Check your connection and try again."}
               </p>
               <button
                 type="button"
                 onClick={() => retryList()}
                 disabled={isFetching}
-                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 bg-white px-5 text-xs font-extrabold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 dark:border-red-800 bg-white dark:bg-[#222222] px-5 text-xs font-extrabold text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RefreshCw size={13} aria-hidden="true" />
                 {isFetching
@@ -470,19 +470,19 @@ const StudentDashboard = ({ t }) => {
           ) : hasActiveDataIssue && joinedClasses.length === 0 ? (
             <div
               role="alert"
-              className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-amber-200 bg-amber-50 p-6 text-center"
+              className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 p-6 text-center"
             >
-              <h3 className="text-lg font-extrabold text-amber-900">
+              <h3 className="text-lg font-extrabold text-amber-900 dark:text-amber-200">
                 {sc.invalidDataTitle || "Learning data is unavailable"}
               </h3>
-              <p className="max-w-sm text-sm font-semibold text-amber-800">
+              <p className="max-w-sm text-sm font-semibold text-amber-800 dark:text-amber-300">
                 {sc.invalidDataDescription || "The server returned data in an unexpected format. Please try again."}
               </p>
               <button
                 type="button"
                 onClick={() => retryList()}
                 disabled={isFetching}
-                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-amber-300 bg-white px-5 text-xs font-extrabold text-amber-800 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-amber-300 dark:border-amber-800 bg-white dark:bg-[#222222] px-5 text-xs font-extrabold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RefreshCw size={13} aria-hidden="true" />
                 {isFetching
@@ -495,7 +495,7 @@ const StudentDashboard = ({ t }) => {
               {error && (
                 <div
                   role="alert"
-                  className="flex flex-col justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800 sm:flex-row sm:items-center"
+                  className="flex flex-col justify-between gap-3 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-xs font-semibold text-amber-800 dark:text-amber-300 sm:flex-row sm:items-center"
                 >
                   <span>
                     {sc.refreshError || "The latest data could not be loaded. The displayed information may be out of date."}
@@ -516,9 +516,9 @@ const StudentDashboard = ({ t }) => {
               {visibleFilteredClasses.length === 0 ? (
                 <div
                   role="status"
-                  className="flex min-h-[450px] flex-col items-center justify-center gap-4 rounded-3xl border border-border bg-white p-8 text-center shadow-xs"
+                  className="flex min-h-[450px] flex-col items-center justify-center gap-4 rounded-3xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-8 text-center shadow-xs"
                 >
-                  <div className="w-16 h-16 rounded-3xl bg-red-50 text-[#990011] flex items-center justify-center border border-red-100/60 shadow-xs mb-1 select-none">
+                  <div className="w-16 h-16 rounded-3xl bg-red-50 dark:bg-red-950/40 text-[#990011] dark:text-[#FF6B6B] flex items-center justify-center border border-red-100/60 dark:border-red-900/40 shadow-xs mb-1 select-none">
                     {isFilteredEmpty ? (
                       <Compass size={30} className="stroke-[1.8]" />
                     ) : (
@@ -527,12 +527,12 @@ const StudentDashboard = ({ t }) => {
                   </div>
 
                   <div className="flex flex-col items-center gap-1.5 max-w-md">
-                    <h3 className="text-xl font-black text-gray-900 tracking-tight">
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
                       {isFilteredEmpty
                         ? (sc.noCoursesFound || "No matching classes found")
                         : (sc.noClassesTitle || "No Joined Classes Yet")}
                     </h3>
-                    <p className="text-sm font-semibold text-[#5a5a5a] leading-relaxed">
+                    <p className="text-sm font-semibold text-[#5a5a5a] dark:text-gray-400 leading-relaxed">
                       {isFilteredEmpty
                         ? (sc.noCoursesFoundDesc || "Try adjusting your search query or resetting your language and level filters.")
                         : (sc.noClassesDesc || "You haven't joined any classes yet. Explore our courses & classes catalog to start learning!")}
@@ -544,7 +544,7 @@ const StudentDashboard = ({ t }) => {
                       <button
                         type="button"
                         onClick={clearFilters}
-                        className="h-10 px-5 rounded-full border border-border bg-white hover:bg-gray-50 text-gray-700 text-xs font-extrabold transition-all cursor-pointer active:scale-95"
+                        className="h-10 px-5 rounded-full border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#222222] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-gray-700 dark:text-gray-200 text-xs font-extrabold transition-all cursor-pointer active:scale-95"
                       >
                         {sc.clearFilters || "Clear filters"}
                       </button>
@@ -553,7 +553,7 @@ const StudentDashboard = ({ t }) => {
                     <button
                       type="button"
                       onClick={() => navigate("/explore-courses")}
-                      className="h-11 px-6 rounded-full bg-[#990011] hover:bg-[#b20a1c] text-white text-xs font-black transition-all shadow-md hover:shadow-lg cursor-pointer active:scale-95 flex items-center gap-2"
+                      className="h-11 px-6 rounded-full bg-[#990011] hover:bg-[#b20a1c] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white text-xs font-black transition-all shadow-md hover:shadow-lg cursor-pointer active:scale-95 flex items-center gap-2"
                     >
                       <Compass size={16} />
                       <span>{sc.exploreMore || "Explore Courses"}</span>
@@ -592,17 +592,17 @@ const StudentDashboard = ({ t }) => {
                       <div
                         key={cls.id}
                         onClick={() => handleOpenClassDetail(cls)}
-                        className="group flex cursor-pointer flex-col items-stretch justify-between gap-6 rounded-3xl border border-border bg-white p-5 transition-all duration-300 hover:border-gray-250 hover:shadow-md md:flex-row md:items-center"
+                        className="group flex cursor-pointer flex-col items-stretch justify-between gap-6 rounded-3xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-5 transition-all duration-300 hover:border-gray-250 dark:hover:border-gray-600 hover:shadow-md md:flex-row md:items-center"
                       >
                         <div className="flex flex-1 flex-col gap-2">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[9px] font-bold uppercase text-[#D97706]">
+                            <span className="rounded-full bg-[#FEF3C7] dark:bg-amber-950/50 px-2.5 py-0.5 text-[9px] font-bold uppercase text-[#D97706] dark:text-amber-300">
                               {getLocalizedLanguageName(cls.language, t) || cls.language || UNKNOWN_VALUE}
                             </span>
-                            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[9px] font-bold uppercase text-gray-600">
+                            <span className="rounded-full bg-gray-100 dark:bg-[#2A2A2A] px-2.5 py-0.5 text-[9px] font-bold uppercase text-gray-600 dark:text-gray-300">
                               {cls.levels[0] || UNKNOWN_VALUE}
                             </span>
-                            <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-0.5 text-[9px] font-bold uppercase text-green-700">
+                            <span className="flex items-center gap-1 rounded-full bg-green-50 dark:bg-green-950/40 px-2.5 py-0.5 text-[9px] font-bold uppercase text-green-700 dark:text-green-300">
                               <span
                                 aria-hidden="true"
                                 className="h-1.5 w-1.5 rounded-full bg-green-500"
@@ -611,21 +611,21 @@ const StudentDashboard = ({ t }) => {
                             </span>
                           </div>
 
-                          <h3 className="text-lg font-black leading-snug text-gray-950 transition-colors group-hover:text-[#990011]">
+                          <h3 className="text-lg font-black leading-snug text-gray-950 dark:text-white transition-colors group-hover:text-[#990011] dark:group-hover:text-[#FF6B6B]">
                             {classTitle}
                           </h3>
-                          <p className="-mt-1 text-xs font-bold uppercase tracking-wide text-gray-400">
+                          <p className="-mt-1 text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-400">
                             {sc.courseLabel || "Course: "}
                             {cls.courseName || cls.courseTitle || UNKNOWN_VALUE}
                           </p>
 
-                          <div className="mt-1 flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-500">
+                          <div className="mt-1 flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-500 dark:text-gray-400">
                             <div className="flex items-center gap-1.5">
-                              <Clock size={13} aria-hidden="true" className="text-gray-400" />
+                              <Clock size={13} aria-hidden="true" className="text-gray-400 dark:text-gray-500" />
                               <span>{scheduleDays} | {scheduleTime}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                              <Calendar size={13} aria-hidden="true" className="text-gray-400" />
+                              <Calendar size={13} aria-hidden="true" className="text-gray-400 dark:text-gray-500" />
                               <span>
                                 {formatDisplayDate(cls.startDate, formatDate)}
                                 {" - "}
@@ -635,9 +635,9 @@ const StudentDashboard = ({ t }) => {
                           </div>
                         </div>
 
-                        <div className="flex shrink-0 items-center justify-between gap-6 border-t border-border pt-4 md:justify-end md:border-t-0 md:pt-0">
+                        <div className="flex shrink-0 items-center justify-between gap-6 border-t border-border dark:border-[#3F3F3F] pt-4 md:justify-end md:border-t-0 md:pt-0">
                           <div className="flex min-w-[120px] flex-col gap-1">
-                            <div className="flex items-center justify-between text-[10px] font-bold uppercase text-gray-400">
+                            <div className="flex items-center justify-between text-[10px] font-bold uppercase text-gray-400 dark:text-gray-400">
                               <span>{sc.progress || "Progress"}</span>
                               <span>
                                 {progressPercent === null
@@ -654,14 +654,14 @@ const StudentDashboard = ({ t }) => {
                               aria-valuetext={progressPercent === null
                                 ? (sc.progressUnavailable || "Progress unavailable")
                                 : undefined}
-                              className="mt-0.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-100"
+                              className="mt-0.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-[#2A2A2A]"
                             >
                               <div
                                 className="h-full rounded-full bg-green-500"
                                 style={{ width: `${progressPercent ?? 0}%` }}
                               />
                             </div>
-                            <span className="mt-0.5 text-right text-[10px] font-bold text-gray-400">
+                            <span className="mt-0.5 text-right text-[10px] font-bold text-gray-400 dark:text-gray-400">
                               {cls.progress?.completedSessions ?? UNKNOWN_VALUE}
                               /
                               {cls.progress?.totalSessions ?? UNKNOWN_VALUE}
@@ -677,7 +677,7 @@ const StudentDashboard = ({ t }) => {
                               event.stopPropagation()
                               handleJoinClassRoom(cls)
                             }}
-                            className="flex h-9 items-center justify-center gap-1.5 rounded-full bg-[#990011] px-5 text-xs font-black text-white shadow-xs transition-all hover:bg-[#b20a1c] active:scale-95 group-hover:translate-x-0.5"
+                            className="flex h-9 items-center justify-center gap-1.5 rounded-full bg-[#990011] hover:bg-[#b20a1c] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] px-5 text-xs font-black text-white shadow-xs transition-all active:scale-95 group-hover:translate-x-0.5 cursor-pointer"
                           >
                             <span>{sc.joinRoom || "Join Room"}</span>
                             <ArrowRight size={13} aria-hidden="true" />

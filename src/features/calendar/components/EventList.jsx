@@ -67,11 +67,11 @@ const EventList = ({
   return (
     <>
       <div className={`flex flex-col ${className}`}>
-        <h3 className="text-[28px] leading-[1.1] font-bold text-black tracking-tight uppercase">
+        <h3 className="text-[28px] leading-[1.1] font-bold text-black dark:text-white tracking-tight uppercase">
           {title}
         </h3>
 
-        <div className="flex flex-col gap-1 mt-3 mb-1 max-h-[132px] overflow-y-auto pr-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+        <div className="flex flex-col gap-1 mt-3 mb-1 max-h-[132px] overflow-y-auto pr-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] dark:[&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
           {events.map((event) => (
             <div
               key={event.id}

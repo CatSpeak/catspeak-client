@@ -15,17 +15,17 @@ const GeneralSection = ({
       <div className="w-full flex flex-col items-center">
         {/* Header: Title & Nút Share */}
         <div className="relative w-full flex items-center justify-center min-h-[44px]">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-cath-red-700 text-center px-12 leading-snug">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-cath-red-700 dark:text-[#FF6B6B] text-center px-12 leading-snug">
             {rawCourse?.title}
           </h1>
           <button
             type="button"
             onClick={handleCopyLink}
             title={scd.shareCourse || "Chia sẻ khóa học"}
-            className="absolute right-0 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all active:scale-90 cursor-pointer shrink-0"
+            className="absolute right-0 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#2A2A2A] dark:hover:bg-[#333333] text-gray-700 dark:text-gray-200 transition-all active:scale-90 cursor-pointer shrink-0"
           >
             {linkCopied ? (
-              <Check size={18} className="text-green-600" />
+              <Check size={18} className="text-green-600 dark:text-green-400" />
             ) : (
               <Share2 size={18} />
             )}
@@ -37,7 +37,7 @@ const GeneralSection = ({
           <img
             src={thumbnailUrl || defaultCourseThumbnail}
             alt={rawCourse?.title || "Course thumbnail"}
-            className="w-full max-w-lg aspect-video object-cover rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm block"
+            className="w-full max-w-lg aspect-video object-cover rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-[#3F3F3F] shadow-sm block"
             loading="lazy"
             decoding="async"
           />

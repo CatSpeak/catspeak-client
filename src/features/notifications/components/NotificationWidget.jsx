@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from "react"
 import { createPortal } from "react-dom"
 import { Bell } from "lucide-react"
-import { AnimatePresence, motion } from "framer-motion"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import NotificationDropdown from "./NotificationDropdown"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
@@ -11,6 +10,7 @@ import useScrollLock from "@/shared/hooks/useScrollLock"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useNotifications } from "../hooks/useNotifications"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
+import { M3_MOTION, dropdownVariants } from "@/shared/constants/motion"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -54,18 +54,21 @@ const NotificationWidget = () => {
     <AnimatePresence>
       {isOpen && isMobile && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center">
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={M3_MOTION.standard.effects.default}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
           />
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            transition={{
+              y: M3_MOTION.standard.spatial.fast,
+              opacity: M3_MOTION.standard.effects.fast,
+            }}
             className="relative flex h-full w-full flex-col overflow-hidden bg-white"
           >
             <NotificationDropdown
@@ -76,7 +79,7 @@ const NotificationWidget = () => {
               markAsRead={markAsRead}
               markAllAsRead={markAllAsRead}
             />
-          </motion.div>
+          </Motion.div>
         </div>
       )}
     </AnimatePresence>,
@@ -87,26 +90,27 @@ const NotificationWidget = () => {
     <div className="relative flex items-center" ref={dropdownRef}>
       <IconButton
         onClick={toggleDropdown}
-        variant="filled"
+        variant="ghost"
         aria-label={t.header?.notifications || "Notifications"}
         badge={
           unreadCount > 0 && (
-            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none dark:border-gray-800">
+            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] items-center justify-center rounded-full border-2 border-white bg-cath-red-700 px-1 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none dark:border-gray-800">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )
         }
       >
-        <Bell />
+        <Bell size={20} strokeWidth={2} />
       </IconButton>
 
       <AnimatePresence>
         {isOpen && !isMobile && (
-          <FluentAnimation
-            direction="down"
-            distance={10}
-            exit={true}
-            className="absolute right-0 top-full z-[1200] mt-2 w-80"
+          <Motion.div
+            variants={dropdownVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="absolute right-0 top-full z-[1200] mt-2 w-80 origin-top-right"
           >
             <NotificationDropdown
               onClose={() => setIsOpen(false)}
@@ -115,7 +119,7 @@ const NotificationWidget = () => {
               markAsRead={markAsRead}
               markAllAsRead={markAllAsRead}
             />
-          </FluentAnimation>
+          </Motion.div>
         )}
       </AnimatePresence>
 

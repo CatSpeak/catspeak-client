@@ -129,7 +129,7 @@ const PostDetailPage = () => {
   return (
     <div className="min-h-screen space-y-6">
       <Breadcrumb
-        className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
+        className="text-[#7B7979] dark:text-gray-400 text-xs sm:text-sm flex-wrap"
         items={[
           { label: dict.breadcrumbs.home, onClick: () => navigate("/workspace") },
           { label: isStudent ? dict.breadcrumbs.myLearning : dict.breadcrumbs.myCourses, onClick: () => navigate(basePath) },
@@ -143,15 +143,15 @@ const PostDetailPage = () => {
 
       {/* ── Page Header ── */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-[24px] sm:text-[32px] md:text-[40px] font-semibold text-[#191C1D]">
+        <h1 className="text-[24px] sm:text-[32px] md:text-[40px] font-semibold text-[#191C1D] dark:text-white">
           Chi tiết bài viết
         </h1>
         <div className="flex gap-2">
           {/* Header Action Buttons from image */}
-          <button className="p-2 rounded-lg bg-white border border-[#E2E2E2] hover:bg-gray-50 transition-colors flex items-center justify-center h-10 w-10 shadow-sm">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          <button className="p-2 rounded-lg bg-white dark:bg-[#1A1A1A] border border-[#E2E2E2] dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors flex items-center justify-center h-10 w-10 shadow-sm text-gray-600 dark:text-gray-300">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-300"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
           </button>
-          <button className="p-2 rounded-lg bg-[#990011] text-white hover:bg-[#80000e] transition-colors flex items-center justify-center h-10 w-10 shadow-sm">
+          <button className="p-2 rounded-lg bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-gray-950 hover:bg-[#80000e] dark:hover:bg-[#ff8080] transition-colors flex items-center justify-center h-10 w-10 shadow-sm">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
           </button>
         </div>

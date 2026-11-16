@@ -76,13 +76,13 @@ const CreateBulletinBoardModal = ({
       onClose={onClose}
       title={
         <div className="w-full relative flex items-center justify-center">
-          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D]">
+          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D] dark:text-white">
             {initialData ? dict.editTitle : dict.title || "Tạo bảng tin"}
           </h2>
           <button 
             type="button" 
             onClick={onClose}
-            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-full text-gray-500 dark:text-gray-400 transition-colors"
           >
             <X size={28} strokeWidth={1.5} />
           </button>
@@ -90,7 +90,7 @@ const CreateBulletinBoardModal = ({
       }
       showCloseButton={false}
       fullScreenOnMobile={false}
-      className="md:max-w-[900px] rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px]"
+      className="md:max-w-[900px] rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px] bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F]"
       headerClassName="flex items-center justify-between px-6 md:px-10 py-6 md:py-8"
       bodyClassName="px-6 md:px-10 pb-6 flex-1 overflow-y-auto"
       footerClassName="p-0"
@@ -99,25 +99,24 @@ const CreateBulletinBoardModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-[52px] rounded-full border border-[#990011] text-[#990011] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 transition-colors"
+            className="flex-1 h-[52px] rounded-full border border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
           >
             {dict.cancel || "Hủy"} <X size={18} strokeWidth={2} />
           </button>
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex-1 h-[52px] rounded-full bg-[#990011] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] transition-colors disabled:opacity-70"
+            className="flex-1 h-[52px] rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-gray-950 font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] dark:hover:bg-[#ff8080] transition-colors disabled:opacity-70"
           >
             {initialData ? dict.save || "Lưu" : dict.create || "Tạo bảng tin"} <Plus size={18} strokeWidth={2} />
           </button>
         </div>
       }
-
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title Input */}
         <div>
-          <label className="block text-sm font-semibold text-[#374151] mb-1.5">
+          <label className="block text-sm font-semibold text-[#374151] dark:text-gray-300 mb-1.5">
             {dict.boardName} <span className="text-[#EF4444]">*</span>
           </label>
           <TextInput
@@ -129,13 +128,13 @@ const CreateBulletinBoardModal = ({
             }}
             error={errors.title}
             placeholder={dict.boardPlaceholder}
-            className={`rounded-xl !h-[50px] px-4 text-sm ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
+            className={`rounded-xl !h-[50px] px-4 text-sm bg-white dark:bg-[#222222] text-gray-900 dark:text-white ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
           />
         </div>
 
         {/* Content Input + TinyMCE Rich Text Editor */}
         <div>
-          <label className="block text-sm font-semibold text-[#374151] mb-2">
+          <label className="block text-sm font-semibold text-[#374151] dark:text-gray-300 mb-2">
             {dict.content}  <span className="text-[#EF4444]">*</span>
           </label>
           <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
@@ -160,13 +159,12 @@ const CreateBulletinBoardModal = ({
           </div>
         </div>
 
-
         {/* Toggles */}
         <div className="space-y-3 pt-2">
           {/* Visible to Students Toggle */}
           <ToggleOption
             icon={<Eye size={20} className="text-[#F83B4F]" />}
-            iconBg="bg-[#FFEAED]"
+            iconBg="bg-[#FFEAED] dark:bg-red-950/40"
             title={dict.visibleToStudents}
             description={createPostDict.visibleDesc || ""}
             checked={isVisible}
@@ -176,7 +174,7 @@ const CreateBulletinBoardModal = ({
           {/* Allow Reply Toggle */}
           <ToggleOption
             icon={<MessageSquare size={20} className="text-[#0E6EEC]" />}
-            iconBg="bg-[#8ECAFF]"
+            iconBg="bg-[#8ECAFF] dark:bg-blue-950/40"
             title={dict.allowReply}
             description={createPostDict.allowReplyDesc || ""}
             checked={allowReply}

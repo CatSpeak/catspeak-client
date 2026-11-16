@@ -1,9 +1,13 @@
 import React from "react"
+import { motion, useReducedMotion } from "framer-motion"
 import doodles from "@/shared/assets/images/communities/doodles.png"
 import SessionActionButtons from "./SessionActionButtons"
 import { InteractiveScriptWidget } from "@/features/interactive-script"
+import { M3_MOTION } from "@/shared/constants/motion"
 
 const RoomsBannerContent = ({ sessionProps }) => {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div className="w-full flex flex-col">
       {/* Doodle logo */}
@@ -15,9 +19,18 @@ const RoomsBannerContent = ({ sessionProps }) => {
 
       <div className="flex flex-col gap-4">
         <InteractiveScriptWidget />
-        <div className="-mt-4" data-tour="session-action-buttons">
+        <motion.div
+          layout="position"
+          transition={
+            prefersReducedMotion
+              ? { duration: 0 }
+              : M3_MOTION.standard.spatial.fast
+          }
+          className="-mt-4"
+          data-tour="session-action-buttons"
+        >
           <SessionActionButtons {...sessionProps} />
-        </div>
+        </motion.div>
       </div>
     </div>
   )

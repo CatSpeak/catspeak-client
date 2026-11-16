@@ -37,7 +37,7 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
       {/* Top Header Card */}
       <FluentCard className="p-4 sm:p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">{t.profile?.documents?.title || "Tài liệu chia sẻ"}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t.profile?.documents?.title || "Tài liệu chia sẻ"}</h2>
         </div>
       </FluentCard>
 
@@ -76,10 +76,10 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
                 <FluentCard
                   key={fileId}
                   onClick={() => setPreviewDoc(doc)}
-                  className="flex-row items-center justify-between p-4 sm:p-4 min-h-[80px] hover:border-[#990011]/20 hover:shadow-sm transition-all group cursor-pointer bg-white"
+                  className="flex-row items-center justify-between p-4 sm:p-4 min-h-[80px] hover:border-[#990011]/20 hover:shadow-sm transition-all group cursor-pointer bg-white dark:bg-[#1A1A1A]"
                 >
                   <div className="flex items-center gap-4 overflow-hidden flex-1">
-                    <div className="w-12 h-12 rounded-xl bg-red-50 text-[#990011] flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-red-400 flex items-center justify-center shrink-0">
                       {isArchive ? (
                         <FileArchive className="w-6 h-6" />
                       ) : (
@@ -87,10 +87,10 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
                       )}
                     </div>
                     <div className="flex flex-col overflow-hidden">
-                      <span className="font-semibold text-gray-900 text-[15px] truncate">
+                      <span className="font-semibold text-gray-900 dark:text-white text-[15px] truncate">
                         {doc.fileName || t.profile?.documents?.unnamed || "Tài liệu không tên"}
                       </span>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-[#AAAAAA] mt-1">
                         <span>{formatFileSize(doc.fileSize)}</span>
                       </div>
                     </div>
@@ -100,7 +100,7 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
                       href={doc.mediaUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 text-gray-400 hover:text-[#990011] rounded-full hover:bg-red-50 transition-colors"
+                      className="p-2 text-gray-400 hover:text-[#990011] dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Download className="w-5 h-5" />

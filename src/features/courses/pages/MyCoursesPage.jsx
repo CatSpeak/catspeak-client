@@ -291,7 +291,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 text-[#2e2e2e]">
+    <div className="flex flex-col gap-4 text-[#2e2e2e] dark:text-gray-200">
       {isRefreshing && (
         <span role="status" className="sr-only">
           {isCoursesTab
@@ -309,7 +309,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
 
       {/* ─── Header & Primary Action ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+        <h1 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight">
           {isCoursesTab ? (c.myCoursesTab || "My Courses") : (c.myClassesTab || "My Classes")}
         </h1>
 
@@ -327,16 +327,16 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
           </button>
 
           {isCreateDropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-xl border border-gray-100 dark:border-[#3F3F3F] py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
               <button
                 type="button"
                 onClick={() => {
                   setIsCreateDropdownOpen(false)
                   navigate("/workspace/courses/create")
                 }}
-                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 cursor-pointer transition-colors"
+                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2.5 cursor-pointer transition-colors"
               >
-                <BookOpen size={16} className="text-[#b20a1c]" />
+                <BookOpen size={16} className="text-[#b20a1c] dark:text-[#FF6B6B]" />
                 <span>{c.createCourse?.title || "Tạo khóa học"}</span>
               </button>
 
@@ -346,9 +346,9 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
                   setIsCreateDropdownOpen(false)
                   navigate("/workspace/classes/create-class")
                 }}
-                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 cursor-pointer transition-colors"
+                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-2.5 cursor-pointer transition-colors"
               >
-                <GraduationCap size={16} className="text-[#b20a1c]" />
+                <GraduationCap size={16} className="text-[#b20a1c] dark:text-[#FF6B6B]" />
                 <span>{c.createClass?.createClass || "Tạo lớp học"}</span>
               </button>
             </div>
@@ -367,9 +367,9 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
       </div>
 
       {/* ─── Navigation Tabs & Controls ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between sm:border-b sm:border-gray-200/90 mt-3 mb-3 gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between sm:border-b sm:border-gray-200/90 dark:sm:border-[#3F3F3F] mt-3 mb-3 gap-3 sm:gap-4">
         {/* Left Tabs */}
-        <div className="w-full sm:w-auto overflow-x-auto scrollbar-hidden -mb-[1px] border-b border-gray-200/90 sm:border-b-0">
+        <div className="w-full sm:w-auto overflow-x-auto scrollbar-hidden -mb-[1px] border-b border-gray-200/90 dark:border-[#3F3F3F] sm:border-b-0">
           <Tabs
             tabs={mainTabs}
             activeTab={activeTab}
@@ -489,7 +489,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
             <button
               type="button"
               onClick={() => navigate(isCoursesTab ? "/workspace/courses/all" : "/workspace/classes/all-classes")}
-              className="text-sm font-semibold text-[#b20a1c] hover:underline self-center py-4 cursor-pointer"
+              className="text-sm font-semibold text-[#b20a1c] dark:text-[#FF6B6B] hover:underline self-center py-4 cursor-pointer"
             >
               {c.myCourses?.viewAll || "Xem tất cả"}
             </button>

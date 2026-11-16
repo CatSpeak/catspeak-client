@@ -17,7 +17,7 @@ const SpeakingRoomFilterTabs = ({
             className={`shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap cursor-pointer ${
               isActive
                 ? "bg-[#990011] text-white font-semibold shadow-xs"
-                : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                : "bg-white dark:bg-[#1A1A1A] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#272727]"
             }`}
           >
             {tab.label}

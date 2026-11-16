@@ -165,8 +165,8 @@ const VoiceWaveformPlayer = ({
         aria-label={isPlaying ? "Pause voice message" : "Play voice message"}
         className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-sm cursor-pointer ${
           isOwn
-            ? "bg-white text-[#990011] hover:bg-white/95"
-            : "bg-[#990011] text-white hover:bg-[#80000e]"
+            ? "bg-white text-cath-red-700 hover:bg-white/95"
+            : "bg-cath-red-700 text-white hover:bg-cath-red-800"
         }`}
       >
         {isPlaying ? (
@@ -201,7 +201,7 @@ const VoiceWaveformPlayer = ({
                         ? "bg-white"
                         : "bg-white/40"
                       : isPlayed
-                        ? "bg-[#990011]"
+                        ? "bg-cath-red-700 dark:bg-red-400"
                         : "bg-neutral-300 dark:bg-neutral-600"
                   } ${isHoveringWaveform ? "opacity-90 scale-y-105" : ""}`}
                 />
@@ -228,7 +228,7 @@ const VoiceWaveformPlayer = ({
         className={`px-1.5 py-0.5 text-[11px] font-bold rounded-md shrink-0 transition-colors cursor-pointer select-none ${
           isOwn
             ? "bg-white/20 hover:bg-white/30 text-white"
-            : "bg-neutral-200 dark:bg-zinc-700 hover:bg-neutral-300 text-neutral-700 dark:text-neutral-200"
+            : "bg-neutral-200 dark:bg-zinc-700 hover:bg-neutral-300 dark:hover:bg-zinc-600 text-neutral-700 dark:text-neutral-200"
         }`}
         title={t?.chat?.togglePlaybackSpeed || "Toggle playback speed"}
       >

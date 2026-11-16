@@ -83,8 +83,8 @@ const StudentAnalyticsDetailPage = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3">
-        <div className="w-8 h-8 border-3 border-gray-200 border-t-[#16a34a] rounded-full animate-spin" />
-        <p className="text-sm font-medium text-gray-500">Đang tải lịch sử phát biểu học viên...</p>
+        <div className="w-8 h-8 border-3 border-gray-200 dark:border-[#3F3F3F] border-t-[#16a34a] rounded-full animate-spin" />
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Đang tải lịch sử phát biểu học viên...</p>
       </div>
     )
   }
@@ -97,7 +97,7 @@ const StudentAnalyticsDetailPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e] min-h-full pb-14 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-gray-100 min-h-full pb-14 max-w-7xl mx-auto w-full">
       {/* 1. Header with Breadcrumbs, Title and Subtitle */}
       <StudentDetailHeader data={studentData} />
 
@@ -112,7 +112,7 @@ const StudentAnalyticsDetailPage = () => {
       />
 
       {/* 4. Session-by-Session History Table */}
-      <div className="flex flex-col bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs">
+      <div className="flex flex-col bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#3F3F3F] rounded-2xl p-5 sm:p-6 shadow-xs">
         <StudentSessionHistoryTable
           sessions={studentData.sessions}
           onSessionClick={handleSessionClick}

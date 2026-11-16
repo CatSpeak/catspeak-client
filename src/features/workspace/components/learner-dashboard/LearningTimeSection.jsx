@@ -16,14 +16,14 @@ const CustomTooltip = ({ active, payload, label, isEn }) => {
   if (active && payload && payload.length) {
     const item = payload[0].payload
     return (
-      <div className="bg-white border border-[#DEE0E5] rounded-lg p-2.5 shadow-md text-xs">
-        <p className="font-bold text-[#14171F] mb-1">{isEn && item.labelEn ? item.labelEn : label}</p>
-        <p className="text-[#72000D] font-semibold">
+      <div className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-lg p-2.5 shadow-md text-xs">
+        <p className="font-bold text-[#14171F] dark:text-white mb-1">{isEn && item.labelEn ? item.labelEn : label}</p>
+        <p className="text-[#72000D] dark:text-red-400 font-semibold">
           {isEn ? "Study Time: " : "Thời gian học: "}
           <span className="tabular-nums">{payload[0].value} {isEn ? "hours" : "giờ"}</span>
         </p>
         {item.sessions && (
-          <p className="text-[#6E788C] mt-0.5">
+          <p className="text-[#6E788C] dark:text-neutral-400 mt-0.5">
             {isEn ? "Sessions: " : "Số buổi: "}
             <span className="tabular-nums">{item.sessions}</span>
           </p>
@@ -52,18 +52,18 @@ const LearningTimeSection = ({
   return (
     <section
       aria-labelledby="learning-time-heading"
-      className="bg-white border border-[#DEE0E5] rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between"
+      className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between"
     >
       {/* Header & Granularity Toggle */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#72000D]" />
-            <h2 id="learning-time-heading" className="text-base font-bold text-[#14171F]">
+            <Clock className="w-4 h-4 text-[#72000D] dark:text-red-400" />
+            <h2 id="learning-time-heading" className="text-base font-bold text-[#14171F] dark:text-white">
               {isEn ? "Learning Time Trend" : "Thời gian học tập"}
             </h2>
           </div>
-          <p className="text-xs text-[#6E788C] mt-0.5">
+          <p className="text-xs text-[#6E788C] dark:text-neutral-400 mt-0.5">
             {isEn
               ? "Track your cumulative learning duration and pace"
               : "Thống kê tổng số giờ học tích lũy theo các mốc thời gian"}
@@ -74,7 +74,7 @@ const LearningTimeSection = ({
         <div
           role="tablist"
           aria-label={isEn ? "Time Granularity" : "Độ chia thời gian"}
-          className="inline-flex p-0.5 bg-[#F5F5F7] border border-[#DEE0E5] rounded-lg self-start sm:self-auto"
+          className="inline-flex p-0.5 bg-[#F5F5F7] dark:bg-[#242424] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-lg self-start sm:self-auto"
         >
           {granularityTabs.map((tab) => {
             const isActive = timeGranularity === tab.key
@@ -87,8 +87,8 @@ const LearningTimeSection = ({
                 onClick={() => onGranularityChange(tab.key)}
                 className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
                   isActive
-                    ? "bg-white text-[#72000D] shadow-2xs"
-                    : "text-[#6E788C] hover:text-[#14171F]"
+                    ? "bg-white dark:bg-[#1A1A1A] text-[#72000D] dark:text-red-400 shadow-2xs"
+                    : "text-[#6E788C] dark:text-neutral-400 hover:text-[#14171F] dark:hover:text-white"
                 }`}
               >
                 {isEn ? tab.labelEn : tab.labelVi}
@@ -106,7 +106,7 @@ const LearningTimeSection = ({
               data={data}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#F0F1F3" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F0F1F3" className="stroke-[#F0F1F3] dark:stroke-[#2E2E2E]" vertical={false} />
               <XAxis
                 dataKey={(item) => (isEn && item.labelEn ? item.labelEn : item.label)}
                 tick={{ fontSize: 11, fill: "#6E788C" }}
@@ -131,8 +131,8 @@ const LearningTimeSection = ({
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-1 text-xs">
-            <Info className="w-5 h-5 text-gray-300" />
+          <div className="h-full flex flex-col items-center justify-center text-gray-400 dark:text-neutral-500 gap-1 text-xs">
+            <Info className="w-5 h-5 text-gray-300 dark:text-neutral-600" />
             <span>{isEn ? "No learning session data available." : "Chưa có dữ liệu phiên học trong khoảng này."}</span>
           </div>
         )}

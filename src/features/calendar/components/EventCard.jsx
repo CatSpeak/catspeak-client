@@ -33,8 +33,8 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
     <div
       className={`flex flex-col rounded-2xl transition-all border ${
         isSelected
-          ? "border-[#990011] bg-white shadow-md shadow-[#990011]/10"
-          : "border-transparent bg-[#F5F5F5] hover:border-[#990011]/40"
+          ? "border-[#990011] bg-white shadow-md shadow-[#990011]/10 dark:border-red-400 dark:bg-[#242424] dark:shadow-none"
+          : "border-transparent bg-[#F5F5F5] dark:bg-[#1E1E1E] dark:border-[#3F3F3F] hover:border-[#990011]/40 dark:hover:border-red-400/50"
       }`}
     >
       {/* Shortened card top portion */}
@@ -62,22 +62,22 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
 
         {/* Info */}
         <div className="flex flex-col flex-1 min-w-0 gap-2">
-          <span className="text-[15px] font-semibold text-black truncate leading-tight">
+          <span className="text-[15px] font-semibold text-black dark:text-white truncate leading-tight">
             {event.title || t.calendar?.event || "Sự kiện"}
           </span>
           <CommunityBadge languageCommunity={event.languageCommunity} />
           {timeStr && (
-            <div className="flex items-center gap-2 text-sm text-black/75">
-              <Clock size={14} className="shrink-0 text-black/75" />
+            <div className="flex items-center gap-2 text-sm text-black/75 dark:text-neutral-300">
+              <Clock size={14} className="shrink-0 text-black/75 dark:text-neutral-300" />
               <span className="leading-none">{timeStr}</span>
             </div>
           )}
           {(location || event.isOnline) && (
-            <div className="flex items-center gap-2 text-sm text-black/75">
+            <div className="flex items-center gap-2 text-sm text-black/75 dark:text-neutral-300">
               {event.isOnline ? (
-                <Globe size={14} className="shrink-0 text-black/75" />
+                <Globe size={14} className="shrink-0 text-black/75 dark:text-neutral-300" />
               ) : (
-                <MapPin size={14} className="shrink-0 text-black/75" />
+                <MapPin size={14} className="shrink-0 text-black/75 dark:text-neutral-300" />
               )}
               <span className="truncate leading-none flex-1">
                 {event.isOnline ? "Online" : ""}
@@ -90,19 +90,19 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
         {/* Price + Chevron */}
         <div className="shrink-0 flex flex-col items-end gap-1 min-w-[60px]">
           {/* Price display */}
-          <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-neutral-400">
             <Tag size={12} className="shrink-0" />
             <span>{t.calendar?.ticketPrice || "Giá cả"}</span>
           </div>
           {event.ticketPrice != null && event.ticketPrice > 0 ? (
-            <span className="text-sm font-bold text-[#990011]">
+            <span className="text-sm font-bold text-[#990011] dark:text-red-400">
               {new Intl.NumberFormat("vi-VN", {
                 maximumFractionDigits: 0,
               }).format(event.ticketPrice)}
               k
             </span>
           ) : (
-            <span className="text-sm font-bold text-[#990011]">
+            <span className="text-sm font-bold text-[#990011] dark:text-red-400">
               {t.calendar?.free || "Miễn Phí"}
             </span>
           )}
@@ -110,9 +110,9 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
 
         <div className="shrink-0 self-center">
           {isSelected ? (
-            <ChevronUp size={20} className="text-[#990011]" />
+            <ChevronUp size={20} className="text-[#990011] dark:text-red-400" />
           ) : (
-            <ChevronDown size={20} className="text-gray-400" />
+            <ChevronDown size={20} className="text-gray-400 dark:text-neutral-400" />
           )}
         </div>
       </div>

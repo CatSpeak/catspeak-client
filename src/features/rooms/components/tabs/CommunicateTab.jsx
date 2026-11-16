@@ -1,10 +1,8 @@
 import React, { useState, useCallback, useMemo } from "react"
-
 import { useSearchParams } from "react-router-dom"
 import CategoryRoomSection from "../sections/CategoryRoomSection"
+import EmptyRoomState from "../EmptyRoomState"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { AnimatePresence } from "framer-motion"
-import { FadeAnimation } from "@/shared/components/ui/animations"
 import FilteredRoomsView from "../views/FilteredRoomsView"
 import { getSections } from "../../config/communicateTabConfig"
 
@@ -17,6 +15,7 @@ const CommunicateTab = ({
   languageType,
   requiredLevels,
   topics,
+  isLoading = false,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useLanguage()
@@ -24,19 +23,18 @@ const CommunicateTab = ({
   const handleCategoryClick = (categoryKey) => {
     const newParams = new URLSearchParams(searchParams)
     newParams.set("categories", categoryKey)
-    newParams.set("page", 1) // Reset to page 1
+    newParams.set("page", "1")
     setSearchParams(newParams, { preventScrollReset: true })
-
-    // If setPage is provided (it should be in filtered view, but might be needed to reset parent state)
-    if (setPage) setPage(1)
   }
 
   const handleBackToOverview = () => {
     const newParams = new URLSearchParams(searchParams)
     newParams.delete("categories")
+    newParams.delete("topics")
+    newParams.delete("requiredLevels")
+    newParams.delete("search")
     newParams.delete("page")
     setSearchParams(newParams, { preventScrollReset: true })
-    if (setPage) setPage(1)
   }
 
   const search = searchParams.get("search")
@@ -64,40 +62,52 @@ const CommunicateTab = ({
     })
   }, [t, categoryCounts])
 
+  const allCategoriesLoaded =
+    sortedSections.length > 0 &&
+    sortedSections.every((s) => categoryCounts[s.key] !== undefined)
+  const isAllCategoriesEmpty =
+    allCategoriesLoaded &&
+    sortedSections.every((s) => categoryCounts[s.key] === 0)
+
   return (
     <div className="w-full relative">
-      <AnimatePresence mode="wait">
-        <FadeAnimation
-          key={isFilteredView ? "filtered" : "overview"}
-          className="w-full"
-        >
-          {isFilteredView ? (
-            <FilteredRoomsView
-              rooms={rooms}
-              selectedCategories={selectedCategories}
-              page={page}
-              totalPages={totalPages}
-              setPage={setPage}
-              onBackToOverview={handleBackToOverview}
+      {isFilteredView ? (
+        <FilteredRoomsView
+          rooms={rooms}
+          selectedCategories={selectedCategories}
+          page={page}
+          totalPages={totalPages}
+          setPage={setPage}
+          onBackToOverview={handleBackToOverview}
+          isLoading={isLoading}
+        />
+      ) : (
+        <div className="w-full flex flex-col gap-4">
+          {sortedSections.map((section) => (
+            <CategoryRoomSection
+              key={section.key}
+              categoryKey={section.key}
+              title={section.title}
+              languageType={languageType}
+              requiredLevels={requiredLevels}
+              topics={topics}
+              onSeeMore={handleCategoryClick}
+              onTotalCountLoaded={handleTotalCountLoaded}
             />
-          ) : (
-            <div className="w-full flex flex-col gap-4">
-              {sortedSections.map((section) => (
-                <CategoryRoomSection
-                  key={section.key}
-                  categoryKey={section.key}
-                  title={section.title}
-                  languageType={languageType}
-                  requiredLevels={requiredLevels}
-                  topics={topics}
-                  onSeeMore={handleCategoryClick}
-                  onTotalCountLoaded={handleTotalCountLoaded}
-                />
-              ))}
+          ))}
+
+          {isAllCategoriesEmpty && (
+            <div className="py-4">
+              <EmptyRoomState
+                message={
+                  t?.rooms?.filters?.noRoomsFound ||
+                  "No active rooms available right now"
+                }
+              />
             </div>
           )}
-        </FadeAnimation>
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }

@@ -15,7 +15,8 @@ import {
 import { WorkshopCarousel } from "@/features/workshops"
 
 import { useCreateAISessionMutation } from "@/store/api/roomsApi"
-import { AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion as Motion, LayoutGroup, useReducedMotion } from "framer-motion"
+import { M3_MOTION } from "@/shared/constants/motion"
 import {
   FadeAnimation,
   FluentAnimation,
@@ -35,14 +36,26 @@ const RoomsPage = () => {
   const { isInCall } = useSelector((s) => s.videoCall)
   const dispatch = useDispatch()
 
-  const [page, setPage] = useState(1)
   const [tab, setTab] = useState("communicate")
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { lang } = useParams()
+
+  const pageParam = parseInt(searchParams.get("page") || "1", 10)
+  const page = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1
+
+  const handleSetPage = (newPage) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("page", newPage)
+    setSearchParams(newParams, { preventScrollReset: true })
+  }
 
   const { state, actions } = useRoomsPageLogic()
   const [createAISession] = useCreateAISessionMutation()
+  const prefersReducedMotion = useReducedMotion()
+  const spatialTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : M3_MOTION.standard.spatial.fast
 
   const langMap = {
     en: "English",
@@ -148,7 +161,14 @@ const RoomsPage = () => {
   const topicsValues = searchParams.getAll("topics")
   const topicsArg = topicsValues.length > 0 ? topicsValues : undefined
 
-  const searchArg = searchParams.get("search")
+  const searchArg = searchParams.get("search")?.trim() || undefined
+
+  const isFiltered = Boolean(
+    searchArg ||
+    (categories && categories.length > 0) ||
+    (topicsArg && topicsArg.length > 0) ||
+    (requiredLevelsArg && requiredLevelsArg.length > 0),
+  )
 
   const pageSize = 12
   const shouldFetch =
@@ -157,7 +177,11 @@ const RoomsPage = () => {
   const hasOtherCategory = categories?.includes("Other")
   const apiCategories = hasOtherCategory ? undefined : categories
 
-  const { data: responseData } = useGetRoomsQuery(
+  const {
+    data: responseData,
+    isLoading,
+    isFetching,
+  } = useGetRoomsQuery(
     {
       page: 1,
       pageSize: 1000,
@@ -169,6 +193,8 @@ const RoomsPage = () => {
     },
     { skip: !shouldFetch },
   )
+
+  const isLoadingRooms = shouldFetch && (isLoading || isFetching)
 
   let rooms = responseData?.items ?? []
 
@@ -230,51 +256,67 @@ const RoomsPage = () => {
           direction="up"
           className="w-full h-full flex flex-col"
         >
-          <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start mb-4">
-              <RoomsBannerContent
-                sessionProps={{
-                  handleCreateOneOnOneSession: proceedCreateOneOnOne,
-                  handleCreateStudyGroupSession: proceedCreateStudyGroup,
-                  handleCreateAISession: () => actions.openAISettingsModal(),
-                  handleCreateCustomRoomSession: handleCreateCustomRoom,
-                  isCreatingOneOnOne: state.isCreatingOneOnOne,
-                  isCreatingStudyGroup: state.isCreatingStudyGroup,
-                  isCreatingAI: state.isCreatingAI,
-                  isCreatingCustom: state.isCreatingCustom,
-                  canUseAI: true,
-                  currentLang: lang,
-                }}
-              />
-              <WorkshopCarousel hideTitle={true} />
-            </div>
+          <LayoutGroup id="rooms-page-layout">
+            <div className="w-full flex flex-col">
+              {!isFiltered && (
+                <Motion.div
+                  layout="position"
+                  transition={spatialTransition}
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start p-4"
+                >
+                  <RoomsBannerContent
+                    sessionProps={{
+                      handleCreateOneOnOneSession: proceedCreateOneOnOne,
+                      handleCreateStudyGroupSession: proceedCreateStudyGroup,
+                      handleCreateAISession: () => actions.openAISettingsModal(),
+                      handleCreateCustomRoomSession: handleCreateCustomRoom,
+                      isCreatingOneOnOne: state.isCreatingOneOnOne,
+                      isCreatingStudyGroup: state.isCreatingStudyGroup,
+                      isCreatingAI: state.isCreatingAI,
+                      isCreatingCustom: state.isCreatingCustom,
+                      canUseAI: true,
+                      currentLang: lang,
+                    }}
+                  />
+                  <div className="w-full">
+                    <WorkshopCarousel hideTitle={true} />
+                  </div>
+                </Motion.div>
+              )}
 
-            <div className="w-full flex flex-col" data-tour="rooms-category-section">
-              {/* Tabs hidden temporarily to save vertical space */}
-              {/* <RoomsTabs tab={tab} setTab={setTab} /> */}
+              <Motion.div
+                layout="position"
+                transition={spatialTransition}
+                className={`w-full flex flex-col px-4 pb-4 ${isFiltered ? "pt-4" : "pt-0"}`}
+                data-tour="rooms-category-section"
+              >
+                {/* Tabs hidden temporarily to save vertical space */}
+                {/* <RoomsTabs tab={tab} setTab={setTab} /> */}
 
-              <div className="w-full">
-                <AnimatePresence mode="wait">
-                  <FadeAnimation key={tab} className="w-full">
-                    {tab === "communicate" && (
-                      <CommunicateTab
-                        rooms={rooms}
-                        selectedCategories={categories}
-                        page={page}
-                        totalPages={totalPages}
-                        setPage={setPage}
-                        languageType={languageType}
-                        requiredLevels={requiredLevelsArg}
-                        topics={topicsArg}
-                      />
-                    )}
-                    {tab === "teachers" && <TeachingTab />}
-                    {tab === "forum" && <ForumTab />}
-                  </FadeAnimation>
-                </AnimatePresence>
-              </div>
+                <div className="w-full">
+                  <AnimatePresence mode="wait">
+                    <FadeAnimation key={tab} className="w-full">
+                      {tab === "communicate" && (
+                        <CommunicateTab
+                          rooms={rooms}
+                          selectedCategories={categories}
+                          page={page}
+                          totalPages={totalPages}
+                          setPage={handleSetPage}
+                          languageType={languageType}
+                          requiredLevels={requiredLevelsArg}
+                          topics={topicsArg}
+                          isLoading={isLoadingRooms}
+                        />
+                      )}
+                      {tab === "teachers" && <TeachingTab />}
+                      {tab === "forum" && <ForumTab />}
+                    </FadeAnimation>
+                  </AnimatePresence>
+                </div>
+              </Motion.div>
             </div>
-          </div>
+          </LayoutGroup>
         </FluentAnimation>
       </AnimatePresence>
     </>

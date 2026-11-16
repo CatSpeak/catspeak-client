@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
 import BeautyPicker from "./BeautyPicker"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { Tabs } from "@/shared/components/ui/navigation"
+import { Tabs, TabContent } from "@/shared/components/ui/navigation"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 
@@ -30,8 +30,12 @@ const BackgroundsAndEffectsPanel = () => {
     ...(isBeautyAllowed ? [{ id: "beauty", label: t?.rooms?.beauty?.tabLabel || "Beauty" }] : [])
   ]
 
+  const handleTabChange = (nextTab) => {
+    setActiveTab(nextTab)
+  }
+
   const scrollbarClasses =
-    "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+    "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 dark:[&::-webkit-scrollbar-thumb]:bg-cath-red-1000 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -39,16 +43,24 @@ const BackgroundsAndEffectsPanel = () => {
       <Tabs
         tabs={tabs}
         activeTab={activeTab}
-        onChange={setActiveTab}
+        onChange={handleTabChange}
       />
 
       {/* Tab content */}
-      <div className={`flex-1 overflow-y-auto ${scrollbarClasses}`}>
-        {activeTab === "backgrounds" ? (
-          <VirtualBackgroundPicker />
-        ) : (
-          isBeautyAllowed && <BeautyPicker />
-        )}
+      <div className={`flex-1 overflow-y-auto overflow-x-hidden ${scrollbarClasses}`}>
+        <div className="p-4">
+          <TabContent
+            activeTab={activeTab}
+            tabs={tabs}
+            className="w-full"
+          >
+            {activeTab === "backgrounds" ? (
+              <VirtualBackgroundPicker />
+            ) : (
+              isBeautyAllowed && <BeautyPicker />
+            )}
+          </TabContent>
+        </div>
       </div>
     </div>
   )

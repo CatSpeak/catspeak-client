@@ -22,24 +22,24 @@ const BAND_ICONS = {
 
 const TONES = {
   emerald: {
-    badge: "bg-[#ECFDF5] text-[#059669]",
-    specBox: "bg-slate-50",
-    specText: "text-slate-600",
-    chip: "bg-slate-100 text-slate-600",
+    badge: "bg-[#ECFDF5] dark:bg-emerald-950/40 text-[#059669] dark:text-emerald-400",
+    specBox: "bg-slate-50 dark:bg-[#242424]",
+    specText: "text-slate-600 dark:text-neutral-300",
+    chip: "bg-slate-100 dark:bg-[#272727] text-slate-600 dark:text-neutral-300",
     bar: "bg-emerald-500",
   },
   primary: {
     badge: "bg-cath-red-700 text-white",
-    specBox: "bg-[#FFF1F2]",
-    specText: "text-cath-red-700",
-    chip: "bg-red-100 text-cath-red-700",
-    bar: "bg-cath-red-700",
+    specBox: "bg-[#FFF1F2] dark:bg-rose-950/30",
+    specText: "text-cath-red-700 dark:text-red-400",
+    chip: "bg-red-100 dark:bg-rose-950/40 text-cath-red-700 dark:text-red-400",
+    bar: "bg-cath-red-700 dark:bg-red-500",
   },
   violet: {
-    badge: "bg-violet-100 text-violet-600",
-    specBox: "bg-slate-50",
-    specText: "text-slate-600",
-    chip: "bg-violet-50 text-slate-600",
+    badge: "bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400",
+    specBox: "bg-slate-50 dark:bg-[#242424]",
+    specText: "text-slate-600 dark:text-neutral-300",
+    chip: "bg-violet-50 dark:bg-violet-950/40 text-slate-600 dark:text-violet-300",
     bar: "bg-violet-500",
   },
 }
@@ -57,10 +57,10 @@ const BandStep = ({ copy, onStart, creating }) => {
   return (
     <div className="flex w-full flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-1.5 text-center">
-        <h1 className="text-2xl font-bold leading-8 text-[#09090B]">
+        <h1 className="text-2xl font-bold leading-8 text-[#09090B] dark:text-white">
           {bandCopy.title}
         </h1>
-        <p className="max-w-2xl text-[13px] font-semibold leading-[19px] text-slate-600">
+        <p className="max-w-2xl text-[13px] font-semibold leading-[19px] text-slate-600 dark:text-neutral-300">
           {bandCopy.subtitle}
         </p>
       </div>
@@ -79,10 +79,10 @@ const BandStep = ({ copy, onStart, creating }) => {
               aria-pressed={isSelected}
               onClick={() => setSelected(band.id)}
               className={cn(
-                "flex flex-col justify-between gap-5 rounded-2xl border-2 bg-white p-5 text-left transition-all",
+                "flex flex-col justify-between gap-5 rounded-2xl border-2 bg-white dark:bg-[#1A1A1A] p-5 text-left transition-all",
                 isSelected
-                  ? "border-cath-red-700 shadow-[0_12px_28px_-2px_rgba(153,0,17,0.2),0_2px_6px_rgba(153,0,17,0.1)]"
-                  : "border-slate-300 shadow-sm hover:border-slate-400",
+                  ? "border-cath-red-700 dark:border-red-400 shadow-[0_12px_28px_-2px_rgba(153,0,17,0.2),0_2px_6px_rgba(153,0,17,0.1)]"
+                  : "border-slate-300 dark:border-[#3F3F3F] shadow-sm hover:border-slate-400 dark:hover:border-neutral-500",
               )}
             >
               <div className="flex flex-col gap-2.5">
@@ -100,8 +100,8 @@ const BandStep = ({ copy, onStart, creating }) => {
                     className={cn(
                       "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
                       isSelected
-                        ? "border-cath-red-700 bg-cath-red-700 text-white"
-                        : "border-slate-300 text-transparent",
+                        ? "border-cath-red-700 dark:border-red-400 bg-cath-red-700 dark:bg-red-600 text-white"
+                        : "border-slate-300 dark:border-[#3F3F3F] text-transparent",
                     )}
                   >
                     <Check size={12} strokeWidth={3} />
@@ -110,12 +110,12 @@ const BandStep = ({ copy, onStart, creating }) => {
                 <h2
                   className={cn(
                     "text-[26px] font-bold leading-8",
-                    isSelected ? "text-cath-red-700" : "text-[#09090B]",
+                    isSelected ? "text-cath-red-700 dark:text-red-400" : "text-[#09090B] dark:text-white",
                   )}
                 >
                   {item.title}
                 </h2>
-                <p className="text-xs font-medium leading-[17px] text-slate-600">
+                <p className="text-xs font-medium leading-[17px] text-slate-600 dark:text-neutral-300">
                   {item.desc}
                 </p>
                 <div
@@ -162,7 +162,7 @@ const BandStep = ({ copy, onStart, creating }) => {
                 <span
                   className={cn(
                     "text-[11px] font-semibold leading-4",
-                    isSelected ? "text-cath-red-700" : "text-slate-600",
+                    isSelected ? "text-cath-red-700 dark:text-red-400" : "text-slate-600 dark:text-neutral-400",
                   )}
                 >
                   {bandCopy.difficultyLabel} {item.difficulty}
@@ -173,7 +173,7 @@ const BandStep = ({ copy, onStart, creating }) => {
                       key={step}
                       className={cn(
                         "h-1.5 w-3.5 rounded-full",
-                        step <= band.difficulty ? tone.bar : "bg-slate-200",
+                        step <= band.difficulty ? tone.bar : "bg-slate-200 dark:bg-[#333333]",
                       )}
                     />
                   ))}
@@ -198,7 +198,7 @@ const BandStep = ({ copy, onStart, creating }) => {
             ? formatTemplate(bandCopy.startCta, "band", selectedTitle)
             : bandCopy.startCtaEmpty || "Bắt đầu thi"}
         </PillButton>
-        <span className="flex items-center gap-1.5 text-[11px] font-medium leading-4 text-slate-600">
+        <span className="flex items-center gap-1.5 text-[11px] font-medium leading-4 text-slate-600 dark:text-neutral-400">
           <Lock size={12} className="text-slate-400" />
           {bandCopy.lockedNote}
         </span>

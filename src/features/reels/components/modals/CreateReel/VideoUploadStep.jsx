@@ -24,7 +24,7 @@ export const VideoUploadStep = () => {
         className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-2xl h-[360px] cursor-pointer transition-all duration-300 ${
           isVideoDragging
             ? "border-cath-red-700 bg-red-50/30 scale-[0.99] shadow-inner"
-            : "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
+            : "border-gray-300 dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#242424] hover:bg-gray-100 dark:hover:bg-[#2c2c2c] hover:border-gray-400 dark:hover:border-neutral-500"
         }`}
       >
         <input
@@ -35,18 +35,18 @@ export const VideoUploadStep = () => {
           className="hidden"
         />
 
-        <div className="p-4 bg-white rounded-full shadow-md text-gray-400 mb-4 transition-transform hover:scale-105">
-          <UploadCloud size={36} className="text-cath-red-700" />
+        <div className="p-4 bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-full shadow-md text-gray-400 dark:text-neutral-400 mb-4 transition-transform hover:scale-105">
+          <UploadCloud size={36} className="text-cath-red-700 dark:text-red-400" />
         </div>
 
-        <p className="font-bold text-sm text-gray-700 text-center px-4">
+        <p className="font-bold text-sm text-gray-700 dark:text-neutral-200 text-center px-4">
           {t.catSpeak?.reels?.dragDropVideo || "Drag and drop your video here to upload"}
         </p>
-        <p className="text-xs text-gray-400 text-center mt-1 px-4">
+        <p className="text-xs text-gray-400 dark:text-neutral-400 text-center mt-1 px-4">
           {t.catSpeak?.reels?.clickToBrowse || "or click to browse files"}
         </p>
 
-        <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-2 text-[10px] text-gray-400">
+        <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-2 text-[10px] text-gray-400 dark:text-neutral-400">
           <span>{t.catSpeak?.reels?.formatLimit || "MP4, WebM or MOV"}</span>
           <span>•</span>
           <span>{t.catSpeak?.reels?.sizeLimit || "Max 5 mins, 150MB"}</span>

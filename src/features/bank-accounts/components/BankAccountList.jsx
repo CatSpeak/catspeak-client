@@ -27,10 +27,10 @@ export default function BankAccountList() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-xl font-bold">
+      <div className="flex gap-4 items-end justify-between">
+        <h3 className="text-base font-bold">
           {t?.bankAccounts?.title || "Tài khoản ngân hàng nhận thanh toán"}
         </h3>
 
@@ -101,7 +101,7 @@ export default function BankAccountList() {
         </FluentCard>
       ) : (
         /* Stable Grid Layout (Stripe/Wise Industry Standard: No Position Shift) */
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {accounts.map((acc) => (
             <BankAccountCard key={acc.id} account={acc} />
           ))}

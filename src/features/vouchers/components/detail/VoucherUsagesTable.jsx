@@ -327,21 +327,21 @@ const VoucherUsagesTable = ({
                         }
                         avatarUrl={usage.userAvatar}
                       />
-                      <span className="font-bold text-slate-900 truncate max-w-[150px] sm:max-w-[200px]">
+                      <span className="font-bold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[200px]">
                         {usage.userName || vu.studentFallback || "Học viên"}
                       </span>
                     </div>
                   </td>
 
                   {/* Lớp học */}
-                  <td className="py-4 px-3 text-slate-700 font-medium">
+                  <td className="py-4 px-3 text-slate-700 dark:text-neutral-200 font-medium">
                     <span className="truncate block max-w-[180px] sm:max-w-[240px]">
                       {usage.className || `Lớp học #${usage.classId || 1}`}
                     </span>
                   </td>
 
                   {/* Số tiền giảm */}
-                  <td className="py-4 px-3 font-bold text-cath-red-700 whitespace-nowrap">
+                  <td className="py-4 px-3 font-bold text-cath-red-700 dark:text-red-400 whitespace-nowrap">
                     {formatCurrency(usage.discountAmount || 0)}
                   </td>
 

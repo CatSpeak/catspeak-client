@@ -23,14 +23,14 @@ const FileAttachmentItem = ({
     <ListItem
       as="div"
       lines={2}
-      className={`rounded-xl border border-border bg-white ${className}`}
+      className={`rounded-xl border border-border bg-white dark:bg-[#1A1A1A] ${className}`}
       leftContent={<FileText className="shrink-0" />}
       rightContent={rightAction}
       {...props}
     >
-      <span className="text-black truncate">{fileName}</span>
+      <span className="text-black dark:text-white truncate">{fileName}</span>
       {fileSize ? (
-        <span className="text-sm text-secondary">
+        <span className="text-sm text-secondary dark:text-[#AAAAAA]">
           {formatFileSize(fileSize)}
         </span>
       ) : null}

@@ -4,7 +4,7 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useAiSend } from "@/features/video-call/hooks/useAiSend"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 
 const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   const { t } = useLanguage()
@@ -25,6 +25,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   const [aiReplyTarget, setAiReplyTarget] = useState(null)
   const [roomReplyTarget, setRoomReplyTarget] = useState(null)
   const [isUserTyping, setIsUserTyping] = useState(false)
+  const [retryingInteractionId, setRetryingInteractionId] = useState(null)
 
   const roomTopic =
     room?.topic ||
@@ -59,23 +60,25 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   const chatTabs = [
     {
       id: "room",
-      label: `${roomLabel} (${messages?.length || 0})`,
+      label: roomLabel,
       badge:
         activeChatTab !== "room" && unreadRoomChat > 0
           ? unreadRoomChat > 9
             ? "9+"
             : unreadRoomChat
           : null,
+      badgeColor: "cath-red",
     },
     {
       id: "ai",
-      label: `${aiLabel} (${aiMessages?.length || 0})`,
+      label: aiLabel,
       badge:
         activeChatTab !== "ai" && unreadAiChat > 0
           ? unreadAiChat > 9
             ? "9+"
             : unreadAiChat
           : null,
+      badgeColor: "cath-red",
     },
   ]
 
@@ -106,24 +109,38 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   }
 
   // Handler to retry a failed AI prompt (E-003)
-  const handleRetryAi = (promptText) => {
-    if (!promptText) return
-    sendAiMessage(promptText, { isPrivateAi: true })
+  const handleRetryAi = async (promptText, interactionId, options = {}) => {
+    if (!promptText || retryingInteractionId) return
+    setRetryingInteractionId(interactionId || promptText)
+    try {
+      await sendAiMessage(promptText, {
+        isPrivateAi: options.isPrivateAi !== undefined ? options.isPrivateAi : true,
+        retryInteractionId: interactionId,
+      })
+    } finally {
+      setRetryingInteractionId(null)
+    }
+
   }
 
   return (
-    <div className={`relative flex h-full flex-col bg-white ${className}`}>
+    <div className={`relative flex h-full flex-col bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white ${className}`}>
       {/* Tab Bar */}
       <Tabs
         tabs={chatTabs}
         activeTab={activeChatTab}
         onChange={setActiveChatTab}
         fullWidth={true}
-        className="shrink-0"
+        className="shrink-0 border-b border-border dark:border-[#3F3F3F]"
       />
 
       {/* Tab Content */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <TabContent
+        activeTab={activeChatTab}
+        tabs={chatTabs}
+        className="flex-1 flex flex-col min-h-0 bg-white dark:bg-[#1A1A1A]"
+        containerClassName="flex-1 flex flex-col min-h-0"
+      >
         {/* AI Tab Content */}
         {activeChatTab === "ai" && (
           <>
@@ -139,6 +156,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
               onLoadMoreSuggestions={handleLoadMoreSuggestions}
               onSelectFollowUp={handleSelectFollowUp}
               onRetryAi={handleRetryAi}
+              retryingInteractionId={retryingInteractionId}
               isUserTyping={isUserTyping}
             />
             <ChatInput
@@ -172,7 +190,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
             />
           </>
         )}
-      </div>
+      </TabContent>
     </div>
   )
 }

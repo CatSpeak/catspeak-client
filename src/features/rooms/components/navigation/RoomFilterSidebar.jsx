@@ -26,10 +26,10 @@ const RoomFilterSidebar = ({ inDrawer = false }) => {
 
   return (
     <aside
-      className={`rounded-xl bg-white overflow-hidden flex flex-col ${inDrawer ? "" : "shadow-sm border border-border lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-6.5rem)]"}`}
+      className={`rounded-xl bg-white dark:bg-[#1A1A1A] overflow-hidden flex flex-col ${inDrawer ? "" : "shadow-sm border border-border dark:border-[#3F3F3F] lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-6.5rem)]"}`}
     >
       {/* Search Header */}
-      <div className="border-b border-[#C6C6C6] p-5">
+      <div className="border-b border-[#C6C6C6] dark:border-[#3F3F3F] p-5">
         <SearchInput
           value={searchValue}
           onChange={setSearchValue}
@@ -43,7 +43,7 @@ const RoomFilterSidebar = ({ inDrawer = false }) => {
         {/* Level Filter */}
         <LevelFilter />
 
-        <hr className="my-2 border-[#C6C6C6]" />
+        <hr className="my-2 border-[#C6C6C6] dark:border-[#3F3F3F]" />
 
         {/* Topic Filter */}
         <TopicFilter />

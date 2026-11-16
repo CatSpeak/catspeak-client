@@ -54,9 +54,9 @@ const ClassroomAccessGuard = ({ children, instructorView = false }) => {
 
   if (error || !classData?.id || String(classData.id) !== String(requestedClassId)) {
     return (
-      <div role="alert" className="flex flex-col items-start gap-3 rounded-xl border border-border p-4 text-sm">
+      <div role="alert" className="flex flex-col items-start gap-3 rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-4 text-sm text-gray-800 dark:text-gray-200">
         <span>{labels.classLoadFailed || "This class could not be loaded. Please try again."}</span>
-        <button type="button" onClick={refetch} className="rounded-xl bg-cath-red-700 px-4 py-2 text-xs font-bold text-white">
+        <button type="button" onClick={refetch} className="rounded-xl bg-cath-red-700 hover:bg-cath-red-800 px-4 py-2 text-xs font-bold text-white transition-colors cursor-pointer">
           {labels.retry || "Try again"}
         </button>
       </div>

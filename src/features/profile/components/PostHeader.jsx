@@ -33,43 +33,60 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
           ? t.profile?.post?.header?.privacy?.private || "Chỉ mình tôi"
           : post.privacy
 
+  const handleProfileClick = (e) => {
+    if (authorAccountId) {
+      e.preventDefault?.()
+      e.stopPropagation()
+      navigate(`/workspace/profile/${authorAccountId}`)
+    }
+  }
+
   return (
     <div className="flex items-center gap-2 justify-between">
       <div className="flex items-center gap-4">
-        <Avatar
-          size={40}
-          src={post.avatarUrl}
-          name={post.authorName || "User"}
-          accountId={authorAccountId}
-        />
+        <div
+          onClick={handleProfileClick}
+          className={`relative inline-flex items-center justify-center shrink-0 min-w-[48px] min-h-[48px] -m-1 p-1 rounded-full group ${
+            authorAccountId ? "cursor-pointer touch-manipulation" : ""
+          }`}
+          role={authorAccountId ? "button" : undefined}
+          tabIndex={authorAccountId ? 0 : undefined}
+          onKeyDown={(e) => {
+            if (authorAccountId && (e.key === "Enter" || e.key === " ")) {
+              handleProfileClick(e)
+            }
+          }}
+          aria-label={post.authorName || "User"}
+        >
+          <Avatar
+            size={40}
+            src={post.avatarUrl}
+            name={post.authorName || "User"}
+            accountId={authorAccountId}
+            hoverScale={false}
+            className="group-hover:opacity-85"
+            onClick={handleProfileClick}
+          />
+        </div>
         <div>
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center gap-1 min-w-0">
             <h3
-              onClick={(e) => {
-                if (authorAccountId) {
-                  e.stopPropagation()
-                  navigate(`/workspace/profile/${authorAccountId}`)
-                }
-              }}
-              className={`font-semibold truncate ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+              onClick={handleProfileClick}
+              className={`font-bold truncate inline-flex items-center min-h-[48px] -my-3 py-3 ${authorAccountId ? "cursor-pointer hover:text-cath-red-700 dark:hover:text-red-400 transition-colors touch-manipulation" : ""}`}
             >
               {post.authorName || "User"}
             </h3>
             {isTeacher && <TeacherBadge />}
           </div>
-          <div className="text-sm text-secondary flex items-center flex-wrap gap-x-2">
+
+          <div className="text-sm text-secondary dark:text-[#AAAAAA] flex items-center flex-wrap gap-x-2">
             <span className="whitespace-nowrap">{formattedTime}</span>
             {privacyText && (
               <>
-                <span className="w-1 h-1 rounded-full bg-secondary shrink-0" />
+                <span className="w-1 h-1 rounded-full bg-secondary dark:bg-[#AAAAAA] shrink-0" />
                 <span className="whitespace-nowrap">{privacyText}</span>
               </>
             )}
-            <span className="w-1 h-1 rounded-full bg-[#606060] shrink-0" />
-            <span className="whitespace-nowrap">
-              {post.viewCount || 0}{" "}
-              {t.profile?.post?.header?.views || "lượt xem"}
-            </span>
           </div>
         </div>
       </div>
@@ -93,13 +110,13 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
                 }}
               />
               <MenuItem
-                icon={<Trash2 className="text-red-600" />}
+                icon={<Trash2 className="text-red-600 dark:text-red-400" />}
                 label={
-                  <span className="text-red-600">
+                  <span className="text-red-600 dark:text-red-400">
                     {t.profile?.post?.header?.delete || "Xóa bài viết"}
                   </span>
                 }
-                hoverBg="hover:bg-red-50 group-hover:bg-red-50"
+                hoverBg="hover:bg-red-50 dark:hover:bg-red-950/30 group-hover:bg-red-50 dark:group-hover:bg-red-950/30"
                 onClick={() => {
                   onDelete()
                   close()

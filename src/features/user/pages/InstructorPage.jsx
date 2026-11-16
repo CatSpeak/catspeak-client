@@ -1,40 +1,35 @@
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  useMemo,
-} from "react";
-import { toast } from "react-hot-toast";
-import { isAllowedInstructorLevel } from "../utils/instructorLevels";
-import { useNavigate } from "react-router-dom";
-import { CheckCircle, Loader2, GraduationCap } from "lucide-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { useGetUserProfileQuery } from "@/store/api/userApi";
-import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
-import { store } from "@/store";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react"
+import { toast } from "react-hot-toast"
+import { isAllowedInstructorLevel } from "../utils/instructorLevels"
+import { useNavigate } from "react-router-dom"
+import { CheckCircle, Loader2, GraduationCap } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { store } from "@/store"
 import {
   instructorApi,
   buildInstructorFormData,
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
-} from "@/store/api/instructorApi";
-import { parsePhoneData } from "@/shared/constants/countriesOptions";
-import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
+} from "@/store/api/instructorApi"
+import { parsePhoneData } from "@/shared/constants/countriesOptions"
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
 
-import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState";
-import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner";
-import ApprovedProfilePage from "@/features/user/pages/instructor/ApprovedProfilePage";
+import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState"
+import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner"
+import ApprovedProfilePage from "@/features/user/pages/instructor/ApprovedProfilePage"
 
-import InstructorPersonalInfo from "@/features/user/components/instructor/InstructorPersonalInfo";
-import InstructorLanguages from "@/features/user/components/instructor/InstructorLanguages";
-import InstructorIdentity from "@/features/user/components/instructor/InstructorIdentity";
-import InstructorCredentials from "@/features/user/components/instructor/InstructorCredentials";
-import InstructorMedia from "@/features/user/components/instructor/InstructorMedia";
-import InstructorSubmitSection from "@/features/user/components/instructor/InstructorSubmitSection";
-import PageTitle from "@/shared/components/ui/PageTitle";
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
+import InstructorPersonalInfo from "@/features/user/components/instructor/InstructorPersonalInfo"
+import InstructorLanguages from "@/features/user/components/instructor/InstructorLanguages"
+import InstructorIdentity from "@/features/user/components/instructor/InstructorIdentity"
+import InstructorCredentials from "@/features/user/components/instructor/InstructorCredentials"
+import InstructorMedia from "@/features/user/components/instructor/InstructorMedia"
+import InstructorSubmitSection from "@/features/user/components/instructor/InstructorSubmitSection"
+import PageTitle from "@/shared/components/ui/PageTitle"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import { PillButton } from "@/shared/components/ui/buttons"
 
 const INITIAL_FORM_DATA = {
   fullName: "",
@@ -51,24 +46,24 @@ const INITIAL_FORM_DATA = {
   introduction: "",
   credentials: [],
   videoFile: null,
-};
+}
 
 /**
  * Safely parse a value that may be a JSON string (array), a comma-separated
  * string, or already an array. Returns an array.
  */
 function safeParseArray(value) {
-  if (!value) return [];
-  if (Array.isArray(value)) return value;
-  if (typeof value !== "string") return [];
+  if (!value) return []
+  if (Array.isArray(value)) return value
+  if (typeof value !== "string") return []
   try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [value];
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : [value]
   } catch {
     return value
       .split(",")
       .map((s) => s.trim())
-      .filter(Boolean);
+      .filter(Boolean)
   }
 }
 
@@ -80,25 +75,25 @@ function safeParseArray(value) {
  *  - JSON string of either format above
  */
 function normalizeLanguagesTeach(raw) {
-  const arr = safeParseArray(raw);
+  const arr = safeParseArray(raw)
   return arr.map((item) => {
     if (typeof item === "object" && item !== null) {
       return {
         language: item.language || "",
         level: item.level || "",
-      };
+      }
     }
     // Legacy format: plain string = language name only
-    return { language: String(item), level: "" };
-  });
+    return { language: String(item), level: "" }
+  })
 }
 
 /**
  * Map GET /InstructorProfile/my response into form data shape.
  */
 function mapApplicationToFormData(app) {
-  if (!app) return null;
-  const rawDob = app.dateOfBirth || app.DateOfBirth;
+  if (!app) return null
+  const rawDob = app.dateOfBirth || app.DateOfBirth
   return {
     fullName: app.fullName || app.FullName || "",
     email: app.email || app.Email || "",
@@ -116,27 +111,32 @@ function mapApplicationToFormData(app) {
     introduction: app.introduction || app.Introduction || "",
     credentials: safeParseArray(app.credentialUrls || app.CredentialUrls),
     videoFile: app.introVideoUrl || app.IntroVideoUrl || null,
-  };
+  }
 }
 
 /** Extract status string from API response (case-insensitive normalize).
  * Accepts status names ("Approved", "approved "...), numeric codes (1-4)
  * and camelCase ("requestEdit"). Unknown values pass through. */
 function getApplicationStatus(app) {
-  const raw = app?.status ?? app?.Status ?? app?.statusCode ?? app?.StatusCode ?? "";
-  const normalized = raw.toString().trim().toLowerCase().replace(/[\s_-]+/g, "");
-  if (normalized === "pending" || normalized === "1") return "Pending";
-  if (normalized === "approved" || normalized === "2") return "Approved";
-  if (normalized === "rejected" || normalized === "3") return "Rejected";
-  if (normalized === "requestedit" || normalized === "4") return "RequestEdit";
-  return raw || null;
+  const raw =
+    app?.status ?? app?.Status ?? app?.statusCode ?? app?.StatusCode ?? ""
+  const normalized = raw
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "")
+  if (normalized === "pending" || normalized === "1") return "Pending"
+  if (normalized === "approved" || normalized === "2") return "Approved"
+  if (normalized === "rejected" || normalized === "3") return "Rejected"
+  if (normalized === "requestedit" || normalized === "4") return "RequestEdit"
+  return raw || null
 }
 
 const InstructorPage = () => {
-  const { t } = useLanguage();
-  const navigate = useNavigate();
-  const ins = t.profile?.instructor || {};
-  const { startTask } = useGlobalTask();
+  const { t } = useLanguage()
+  const navigate = useNavigate()
+  const ins = t.profile?.instructor || {}
+  const { startTask } = useGlobalTask()
 
   // --- API hooks ---
   const {
@@ -144,41 +144,41 @@ const InstructorPage = () => {
     isLoading: isLoadingInstructor,
     error: profileError,
     refetch: refetchInstructorProfile,
-  } = useGetInstructorProfileQuery();
+  } = useGetInstructorProfileQuery()
 
   const { data: userProfileData, isLoading: isLoadingProfile } =
-    useGetUserProfileQuery();
+    useGetUserProfileQuery()
 
   // True when the current account is a teacher account, OR the (user) account has
   // a linked teacher account (approved profile re-pointed to the teacher account).
-  const userProfile = userProfileData?.data ?? userProfileData ?? {};
-  const isTeacher = !!userProfile.isTeacher;
+  const userProfile = userProfileData?.data ?? userProfileData ?? {}
+  const isTeacher = !!userProfile.isTeacher
 
-  const { switchRole, isSwitching: isSwitchingAccount } = useRoleOverride();
+  const { switchRole, isSwitching: isSwitchingAccount } = useRoleOverride()
 
   const handleSwitchToTeacherAccount = useCallback(async () => {
-    const success = await switchRole("Teacher");
+    const success = await switchRole("Teacher")
     if (success) {
-      navigate("/");
+      navigate("/")
     }
-  }, [switchRole, navigate]);
+  }, [switchRole, navigate])
 
   const [applyInstructor, { isLoading: isApplying }] =
-    useApplyInstructorMutation();
+    useApplyInstructorMutation()
 
   const [updateInstructor, { isLoading: isUpdating }] =
-    useUpdateInstructorProfileMutation();
+    useUpdateInstructorProfileMutation()
 
-  const isSubmitting = isApplying || isUpdating;
+  const isSubmitting = isApplying || isUpdating
 
   // 404 means user has never applied
   const hasNotApplied =
-    profileError?.status === 404 || profileError?.originalStatus === 404;
+    profileError?.status === 404 || profileError?.originalStatus === 404
 
   // Extract application data and status
   const rawApplication = useMemo(() => {
-    return instructorData?.data || instructorData || null;
-  }, [instructorData]);
+    return instructorData?.data || instructorData || null
+  }, [instructorData])
 
   const applicationStatus = useMemo(
     () =>
@@ -186,7 +186,7 @@ const InstructorPage = () => {
         ? getApplicationStatus(rawApplication)
         : null,
     [rawApplication, hasNotApplied],
-  );
+  )
 
   const existingApplication = useMemo(
     () =>
@@ -194,40 +194,40 @@ const InstructorPage = () => {
         ? mapApplicationToFormData(rawApplication)
         : null,
     [rawApplication, hasNotApplied],
-  );
+  )
 
   // Determine UI mode:
   // - "new"        → first-time application form
   // - "view"       → read-only (Pending, Approved, Rejected)
   // - "requestEdit"→ editable form with resubmit (RequestEdit status)
-  const isRequestEdit = applicationStatus === "RequestEdit";
-  const isViewMode = !!existingApplication && !isRequestEdit;
+  const isRequestEdit = applicationStatus === "RequestEdit"
+  const isViewMode = !!existingApplication && !isRequestEdit
 
   // Local UI state
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-  const [agreed, setAgreed] = useState(false);
-  const [hasPreFilled, setHasPreFilled] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [isReapplying, setIsReapplying] = useState(false);
-  const [isTaskSubmitting, setIsTaskSubmitting] = useState(false);
-  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
-  const [isSavingPersonalInfo, setIsSavingPersonalInfo] = useState(false);
+  const [showForm, setShowForm] = useState(false)
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA)
+  const [agreed, setAgreed] = useState(false)
+  const [hasPreFilled, setHasPreFilled] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [isReapplying, setIsReapplying] = useState(false)
+  const [isTaskSubmitting, setIsTaskSubmitting] = useState(false)
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false)
+  const [isSavingPersonalInfo, setIsSavingPersonalInfo] = useState(false)
 
   // Delete confirmations (replaces native window.confirm):
   // { type: "video" } | { type: "credential", index }
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
   // Snapshot of the original (live) form data to detect changes
-  const originalFormDataRef = useRef(null);
-  const personalInfoBackupRef = useRef(null);
+  const originalFormDataRef = useRef(null)
+  const personalInfoBackupRef = useRef(null)
 
   // Snapshot live values (for change detection / video remove logic).
   useEffect(() => {
     if (existingApplication) {
-      originalFormDataRef.current = existingApplication;
+      originalFormDataRef.current = existingApplication
     }
-  }, [existingApplication]);
+  }, [existingApplication])
 
   // Pre-fill form from user profile (new applications only)
   useEffect(() => {
@@ -237,42 +237,47 @@ const InstructorPage = () => {
       !existingApplication &&
       userProfileData?.data
     ) {
-      const profile = userProfileData.data;
+      const profile = userProfileData.data
       setFormData((prev) => ({
         ...prev,
         fullName: profile.username || prev.fullName,
         email: profile.email || prev.email,
         address: profile.address || prev.address,
-        phoneNumber: parsePhoneData(profile.phoneNumber || prev.phoneNumber).phoneNumber,
-        phonePrefix: parsePhoneData(profile.phoneNumber || prev.phoneNumber).phonePrefix,
+        phoneNumber: parsePhoneData(profile.phoneNumber || prev.phoneNumber)
+          .phoneNumber,
+        phonePrefix: parsePhoneData(profile.phoneNumber || prev.phoneNumber)
+          .phonePrefix,
         nationality: profile.country || prev.nationality,
-        dateOfBirth: profile.dateOfBirth ? String(profile.dateOfBirth).split("T")[0] : prev.dateOfBirth,
-      }));
-      setHasPreFilled(true);
+        dateOfBirth: profile.dateOfBirth
+          ? String(profile.dateOfBirth).split("T")[0]
+          : prev.dateOfBirth,
+      }))
+      setHasPreFilled(true)
       // Capture the auto-filled state as the original for new applications
       setTimeout(() => {
         setFormData((current) => {
-          originalFormDataRef.current = current;
-          return current;
-        });
-      }, 0);
+          originalFormDataRef.current = current
+          return current
+        })
+      }, 0)
     }
-  }, [showForm, userProfileData, hasPreFilled, existingApplication]);
+  }, [showForm, userProfileData, hasPreFilled, existingApplication])
 
   // File input refs
-  const idFrontInputRef = useRef(null);
-  const idBackInputRef = useRef(null);
-  const credentialInputRef = useRef(null);
-  const videoInputRef = useRef(null);
+  const idFrontInputRef = useRef(null)
+  const idBackInputRef = useRef(null)
+  const credentialInputRef = useRef(null)
+  const videoInputRef = useRef(null)
 
   // Can edit when: new form (no existing application) OR RequestEdit status OR Reapplying
-  const canEdit = (showForm && !existingApplication) || isRequestEdit || isReapplying;
+  const canEdit =
+    (showForm && !existingApplication) || isRequestEdit || isReapplying
 
-  const isApproved = applicationStatus === "Approved";
+  const isApproved = applicationStatus === "Approved"
   const isLiveApproved =
-    isApproved && !(rawApplication?.isRevision || rawApplication?.IsRevision);
-  const effectiveCanEdit = canEdit;
-  const canSectionEdit = false;
+    isApproved && !(rawApplication?.isRevision || rawApplication?.IsRevision)
+  const effectiveCanEdit = canEdit
+  const canSectionEdit = false
 
   // Approved banner shows only on first view — dismiss persists per profile in localStorage
   const approvedBannerKey = useMemo(() => {
@@ -281,27 +286,27 @@ const InstructorPage = () => {
       rawApplication?.ProfileId ||
       rawApplication?.accountId ||
       rawApplication?.AccountId ||
-      "global";
-    return `instructor_approved_seen_${id}`;
-  }, [rawApplication]);
-  const [approvedBannerHidden, setApprovedBannerHidden] = useState(false);
+      "global"
+    return `instructor_approved_seen_${id}`
+  }, [rawApplication])
+  const [approvedBannerHidden, setApprovedBannerHidden] = useState(false)
   useEffect(() => {
     try {
-      setApprovedBannerHidden(localStorage.getItem(approvedBannerKey) === "1");
+      setApprovedBannerHidden(localStorage.getItem(approvedBannerKey) === "1")
     } catch {
-      setApprovedBannerHidden(false);
+      setApprovedBannerHidden(false)
     }
-  }, [approvedBannerKey]);
+  }, [approvedBannerKey])
   const handleDismissApprovedBanner = useCallback(() => {
     try {
-      localStorage.setItem(approvedBannerKey, "1");
+      localStorage.setItem(approvedBannerKey, "1")
     } catch {
       // ignore storage errors (private mode, etc.)
     }
-    setApprovedBannerHidden(true);
-  }, [approvedBannerKey]);
+    setApprovedBannerHidden(true)
+  }, [approvedBannerKey])
   const showApprovedBanner =
-    applicationStatus === "Approved" ? !approvedBannerHidden : true;
+    applicationStatus === "Approved" ? !approvedBannerHidden : true
 
   // Handlers for section editing "Thông tin của bạn"
   const handleStartEditPersonalInfo = useCallback(() => {
@@ -313,149 +318,160 @@ const InstructorPage = () => {
       phonePrefix: formData.phonePrefix,
       nationality: formData.nationality,
       dateOfBirth: formData.dateOfBirth,
-    };
-    setIsEditingPersonalInfo(true);
-  }, [formData]);
+    }
+    setIsEditingPersonalInfo(true)
+  }, [formData])
 
   const handleCancelEditPersonalInfo = useCallback(() => {
     if (personalInfoBackupRef.current) {
       setFormData((prev) => ({
         ...prev,
         ...personalInfoBackupRef.current,
-      }));
+      }))
     }
-    setIsEditingPersonalInfo(false);
+    setIsEditingPersonalInfo(false)
     setErrors((prev) => {
-      const newErr = { ...prev };
-      delete newErr.fullName;
-      delete newErr.email;
-      delete newErr.address;
-      delete newErr.phoneNumber;
-      delete newErr.nationality;
-      delete newErr.dateOfBirth;
-      return newErr;
-    });
-  }, []);
+      const newErr = { ...prev }
+      delete newErr.fullName
+      delete newErr.email
+      delete newErr.address
+      delete newErr.phoneNumber
+      delete newErr.nationality
+      delete newErr.dateOfBirth
+      return newErr
+    })
+  }, [])
 
   // Detect if user has made any changes from the original data
   const hasChanges = useMemo(() => {
-    if (!originalFormDataRef.current) return true; // new empty form = always allow
+    if (!originalFormDataRef.current) return true // new empty form = always allow
     return (
       JSON.stringify(formData) !== JSON.stringify(originalFormDataRef.current)
-    );
-  }, [formData]);
+    )
+  }, [formData])
 
   const validateForm = useCallback(() => {
-    const newErrors = {};
+    const newErrors = {}
     if (!formData.fullName?.trim())
-      newErrors.fullName = ins.requiredField || "Trường này là bắt buộc";
+      newErrors.fullName = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.email?.trim())
-      newErrors.email = ins.requiredField || "Trường này là bắt buộc";
+      newErrors.email = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.address?.trim())
-      newErrors.address = ins.requiredField || "Trường này là bắt buộc";
+      newErrors.address = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.phoneNumber?.trim())
-      newErrors.phoneNumber = ins.requiredField || "Trường này là bắt buộc";
+      newErrors.phoneNumber = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.nationality?.trim())
-      newErrors.nationality = ins.requiredField || "Trường này là bắt buộc";
+      newErrors.nationality = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.nativeLanguage?.trim())
-      newErrors.nativeLanguage = ins.requiredField || "Trường này là bắt buộc";
+      newErrors.nativeLanguage = ins.requiredField || "Trường này là bắt buộc"
 
     if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = ins.requiredField || "Trường này là bắt buộc";
+      newErrors.dateOfBirth = ins.requiredField || "Trường này là bắt buộc"
     } else {
-      const dobDate = new Date(formData.dateOfBirth);
-      const today = new Date();
-      let age = today.getFullYear() - dobDate.getFullYear();
-      const m = today.getMonth() - dobDate.getMonth();
+      const dobDate = new Date(formData.dateOfBirth)
+      const today = new Date()
+      let age = today.getFullYear() - dobDate.getFullYear()
+      const m = today.getMonth() - dobDate.getMonth()
       if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
-        age--;
+        age--
       }
       if (isNaN(dobDate.getTime())) {
-        newErrors.dateOfBirth = ins.invalidDateOfBirth || "Ngày sinh không hợp lệ";
+        newErrors.dateOfBirth =
+          ins.invalidDateOfBirth || "Ngày sinh không hợp lệ"
       } else if (age < 18) {
-        newErrors.dateOfBirth = ins.approvedDateOfBirthAge || "Giảng viên phải từ 18 tuổi trở lên";
+        newErrors.dateOfBirth =
+          ins.approvedDateOfBirthAge || "Giảng viên phải từ 18 tuổi trở lên"
       }
     }
 
     if (!formData.languagesTeach || formData.languagesTeach.length === 0) {
       newErrors.languagesTeach =
-        ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
+        ins.selectLanguagesError ||
+        ins.requiredField ||
+        "Vui lòng chọn ngôn ngữ giảng dạy"
     } else {
       for (const lang of formData.languagesTeach) {
         if (!lang.language || !isAllowedInstructorLevel(lang.level)) {
           newErrors.languagesTeachLevel =
-            ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
-          break;
+            ins.selectLevelError ||
+            ins.requiredField ||
+            "Vui lòng chọn trình độ cho từng ngôn ngữ"
+          break
         }
       }
     }
 
     if (!formData.idFrontFile)
-      newErrors.idFrontFile = ins.requiredField || "Vui lòng tải lên mặt trước";
+      newErrors.idFrontFile = ins.requiredField || "Vui lòng tải lên mặt trước"
     if (!formData.idBackFile)
-      newErrors.idBackFile = ins.requiredField || "Vui lòng tải lên mặt sau";
+      newErrors.idBackFile = ins.requiredField || "Vui lòng tải lên mặt sau"
     if (!formData.introduction?.trim() && !formData.videoFile)
-      newErrors.introduction = ins.introOrVideoRequired || "Cần có lời giới thiệu hoặc video giới thiệu";
+      newErrors.introduction =
+        ins.introOrVideoRequired ||
+        "Cần có lời giới thiệu hoặc video giới thiệu"
     if (!formData.credentials || formData.credentials.length === 0)
-      newErrors.credentials = ins.requiredField || "Vui lòng tải lên chứng chỉ";
+      newErrors.credentials = ins.requiredField || "Vui lòng tải lên chứng chỉ"
 
-    setErrors(newErrors);
-    return newErrors;
-  }, [formData, ins]);
+    setErrors(newErrors)
+    return newErrors
+  }, [formData, ins])
 
   // --- Handlers ---
 
   const clearError = (field) => {
     setErrors((prev) => {
-      if (!prev[field]) return prev;
-      const newErrors = { ...prev };
-      delete newErrors[field];
-      return newErrors;
-    });
-  };
+      if (!prev[field]) return prev
+      const newErrors = { ...prev }
+      delete newErrors[field]
+      return newErrors
+    })
+  }
 
   const handleChange = useCallback(
     (e) => {
-      if (!effectiveCanEdit && !isEditingPersonalInfo) return;
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      clearError(name);
+      if (!effectiveCanEdit && !isEditingPersonalInfo) return
+      const { name, value } = e.target
+      setFormData((prev) => ({ ...prev, [name]: value }))
+      clearError(name)
     },
     [effectiveCanEdit, isEditingPersonalInfo],
-  );
+  )
 
   const handleLanguagesChange = useCallback(
     (languages) => {
-      if (!effectiveCanEdit) return;
-      setFormData((prev) => ({ ...prev, languagesTeach: languages }));
-      clearError("languagesTeach");
-      clearError("languagesTeachLevel");
+      if (!effectiveCanEdit) return
+      setFormData((prev) => ({ ...prev, languagesTeach: languages }))
+      clearError("languagesTeach")
+      clearError("languagesTeachLevel")
     },
     [effectiveCanEdit],
-  );
+  )
 
   const handleEdit = useCallback(
     (field) => {
-      if (!effectiveCanEdit) return;
+      if (!effectiveCanEdit) return
       if (field === "idFront") {
-        idFrontInputRef.current?.click();
+        idFrontInputRef.current?.click()
       } else if (field === "idBack") {
-        idBackInputRef.current?.click();
+        idBackInputRef.current?.click()
       }
     },
     [effectiveCanEdit],
-  );
+  )
 
   const handleFileChange = useCallback(
     (fieldName) => (e) => {
-      if (!effectiveCanEdit) return;
-      const file = e.target.files?.[0];
-      if (!file) return;
+      if (!effectiveCanEdit) return
+      const file = e.target.files?.[0]
+      if (!file) return
       // CCCD images: 5MB max, jpg/png/webp only (mirrors backend rule)
-      const ID_MAX_MB = 5;
-      const ID_TYPES = ["image/jpeg", "image/png", "image/webp"];
-      if (!ID_TYPES.includes(file.type) || file.size > ID_MAX_MB * 1024 * 1024) {
-        const actualMb = (file.size / 1024 / 1024).toFixed(1);
+      const ID_MAX_MB = 5
+      const ID_TYPES = ["image/jpeg", "image/png", "image/webp"]
+      if (
+        !ID_TYPES.includes(file.type) ||
+        file.size > ID_MAX_MB * 1024 * 1024
+      ) {
+        const actualMb = (file.size / 1024 / 1024).toFixed(1)
         setErrors((prev) => ({
           ...prev,
           [fieldName]:
@@ -463,89 +479,93 @@ const InstructorPage = () => {
               ?.replace("{max}", ID_MAX_MB)
               ?.replace("{actual}", actualMb) ||
             `Ảnh CCCD phải là JPG/PNG/WebP và nhỏ hơn ${ID_MAX_MB}MB (hiện tại ${actualMb}MB).`,
-        }));
-        e.target.value = "";
-        return;
+        }))
+        e.target.value = ""
+        return
       }
-      setFormData((prev) => ({ ...prev, [fieldName]: file }));
-      clearError(fieldName);
+      setFormData((prev) => ({ ...prev, [fieldName]: file }))
+      clearError(fieldName)
     },
     [effectiveCanEdit, ins],
-  );
+  )
 
   const handleAddCredential = useCallback(() => {
-    if (!effectiveCanEdit) return;
-    credentialInputRef.current?.click();
-  }, [effectiveCanEdit]);
+    if (!effectiveCanEdit) return
+    credentialInputRef.current?.click()
+  }, [effectiveCanEdit])
 
   const handleCredentialFileChange = useCallback(
     (e) => {
-      if (!effectiveCanEdit) return;
-      const files = Array.from(e.target.files || []);
-      if (!files.length) return;
-      const CRED_MAX_MB = 5;
+      if (!effectiveCanEdit) return
+      const files = Array.from(e.target.files || [])
+      if (!files.length) return
+      const CRED_MAX_MB = 5
       // Spec Q12: only PDF (accept=".pdf" is advisory — enforce here too).
       const nonPdf = files.find(
-        (f) => !(f.type === "application/pdf" || f.name?.toLowerCase().endsWith(".pdf")),
-      );
+        (f) =>
+          !(
+            f.type === "application/pdf" ||
+            f.name?.toLowerCase().endsWith(".pdf")
+          ),
+      )
       if (nonPdf) {
         setErrors((prev) => ({
           ...prev,
           credentials:
             ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.",
-        }));
-        toast.error(ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.");
-        e.target.value = "";
-        return;
+        }))
+        toast.error(
+          ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.",
+        )
+        e.target.value = ""
+        return
       }
-      const oversized = files.find((f) => f.size > CRED_MAX_MB * 1024 * 1024);
+      const oversized = files.find((f) => f.size > CRED_MAX_MB * 1024 * 1024)
       if (oversized) {
-        const actualMb = (oversized.size / 1024 / 1024).toFixed(1);
+        const actualMb = (oversized.size / 1024 / 1024).toFixed(1)
         const msg =
           ins.credentialSizeLimit
             ?.replace("{max}", CRED_MAX_MB)
             ?.replace("{actual}", actualMb) ||
-          `Mỗi chứng chỉ phải nhỏ hơn ${CRED_MAX_MB}MB (hiện tại ${actualMb}MB).`;
+          `Mỗi chứng chỉ phải nhỏ hơn ${CRED_MAX_MB}MB (hiện tại ${actualMb}MB).`
         setErrors((prev) => ({
           ...prev,
           credentials: msg,
-        }));
-        toast.error(msg);
-        e.target.value = "";
-        return;
+        }))
+        toast.error(msg)
+        e.target.value = ""
+        return
       }
       setFormData((prev) => {
-        const combined = [...prev.credentials, ...files];
+        const combined = [...prev.credentials, ...files]
         if (combined.length > 4) {
           setErrors((prevErr) => ({
             ...prevErr,
-            credentials:
-              ins.credentialLimit ||
-              "Tối đa 4 file chứng chỉ.",
-          }));
-          return prev;
+            credentials: ins.credentialLimit || "Tối đa 4 file chứng chỉ.",
+          }))
+          return prev
         }
-        return { ...prev, credentials: combined };
-      });
-      clearError("credentials");
-      e.target.value = "";
+        return { ...prev, credentials: combined }
+      })
+      clearError("credentials")
+      e.target.value = ""
     },
     [effectiveCanEdit, ins],
-  );
+  )
 
   const handleSelectVideo = useCallback(() => {
-    if (!effectiveCanEdit) return;
-    videoInputRef.current?.click();
-  }, [effectiveCanEdit]);
+    if (!effectiveCanEdit) return
+    videoInputRef.current?.click()
+  }, [effectiveCanEdit])
 
   const handleVideoFileChange = useCallback(
     (e) => {
-      if (!effectiveCanEdit) return;
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const VIDEO_MAX_MB = 50;
+      if (!effectiveCanEdit) return
+      const file = e.target.files?.[0]
+      if (!file) return
+      const VIDEO_MAX_MB = 50
       if (file.size > VIDEO_MAX_MB * 1024 * 1024) {
-        const actualMb = (file.size / 1024 / 1024).toFixed(1);
+        const actualMb = (file.size / 1024 / 1024).toFixed(1)
         setErrors((prev) => ({
           ...prev,
           videoFile:
@@ -553,62 +573,62 @@ const InstructorPage = () => {
               ?.replace("{max}", VIDEO_MAX_MB)
               ?.replace("{actual}", actualMb) ||
             `Video phải nhỏ hơn ${VIDEO_MAX_MB}MB (hiện tại ${actualMb}MB).`,
-        }));
-        e.target.value = "";
-        return;
+        }))
+        e.target.value = ""
+        return
       }
-      setFormData((prev) => ({ ...prev, videoFile: file }));
-      clearError("videoFile");
-      clearError("introduction");
-      e.target.value = "";
+      setFormData((prev) => ({ ...prev, videoFile: file }))
+      clearError("videoFile")
+      clearError("introduction")
+      e.target.value = ""
     },
     [effectiveCanEdit, ins],
-  );
+  )
 
   const handleRemoveVideo = useCallback(() => {
-    if (!effectiveCanEdit) return;
-    setConfirmDelete({ type: "video" });
-  }, [effectiveCanEdit]);
+    if (!effectiveCanEdit) return
+    setConfirmDelete({ type: "video" })
+  }, [effectiveCanEdit])
 
   const confirmDeleteVideo = useCallback(() => {
-    setFormData((prev) => ({ ...prev, videoFile: null }));
-    if (videoInputRef.current) videoInputRef.current.value = "";
-    clearError("videoFile");
-    setConfirmDelete(null);
-  }, [clearError]);
+    setFormData((prev) => ({ ...prev, videoFile: null }))
+    if (videoInputRef.current) videoInputRef.current.value = ""
+    clearError("videoFile")
+    setConfirmDelete(null)
+  }, [clearError])
 
   const handleUndoVideo = useCallback(() => {
-    if (!effectiveCanEdit) return;
-    const originalVideo = originalFormDataRef.current?.videoFile ?? null;
-    setFormData((prev) => ({ ...prev, videoFile: originalVideo }));
-    clearError("videoFile");
-  }, [effectiveCanEdit]);
+    if (!effectiveCanEdit) return
+    const originalVideo = originalFormDataRef.current?.videoFile ?? null
+    setFormData((prev) => ({ ...prev, videoFile: originalVideo }))
+    clearError("videoFile")
+  }, [effectiveCanEdit])
 
   const handleRemoveCredential = useCallback(
     (index) => {
-      if (!effectiveCanEdit) return;
-      setConfirmDelete({ type: "credential", index });
+      if (!effectiveCanEdit) return
+      setConfirmDelete({ type: "credential", index })
     },
     [effectiveCanEdit],
-  );
+  )
 
   const confirmRemoveCredential = useCallback(() => {
-    if (!confirmDelete || confirmDelete.type !== "credential") return;
-    const index = confirmDelete.index;
+    if (!confirmDelete || confirmDelete.type !== "credential") return
+    const index = confirmDelete.index
     setFormData((prev) => {
-      const newCreds = [...prev.credentials];
-      newCreds.splice(index, 1);
-      return { ...prev, credentials: newCreds };
-    });
-    setConfirmDelete(null);
-  }, [confirmDelete]);
+      const newCreds = [...prev.credentials]
+      newCreds.splice(index, 1)
+      return { ...prev, credentials: newCreds }
+    })
+    setConfirmDelete(null)
+  }, [confirmDelete])
 
   const buildPayload = useCallback(
     (otpCode) => {
-      const originalVideo = originalFormDataRef.current?.videoFile ?? null;
+      const originalVideo = originalFormDataRef.current?.videoFile ?? null
       const originalHadVideo =
-        typeof originalVideo === "string" && !!originalVideo;
-      const removeIntroVideo = originalHadVideo && !formData.videoFile;
+        typeof originalVideo === "string" && !!originalVideo
+      const removeIntroVideo = originalHadVideo && !formData.videoFile
       return {
         fullName: formData.fullName,
         email: formData.email,
@@ -627,74 +647,82 @@ const InstructorPage = () => {
         introVideo: formData.videoFile,
         removeIntroVideo,
         ...(otpCode ? { otpCode } : {}),
-      };
+      }
     },
     [formData],
-  );
+  )
 
   // Teaching-only validation for Approved updates: no personal fields, no ID
   // cards (identity lives in the account page), credentials optional.
   const validateTeachingForm = useCallback(() => {
-    const newErrors = {};
+    const newErrors = {}
     if (!formData.nativeLanguage?.trim())
-      newErrors.nativeLanguage = ins.requiredField || "Trường này là bắt buộc";
+      newErrors.nativeLanguage = ins.requiredField || "Trường này là bắt buộc"
 
     if (!formData.languagesTeach || formData.languagesTeach.length === 0) {
       newErrors.languagesTeach =
-        ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
+        ins.selectLanguagesError ||
+        ins.requiredField ||
+        "Vui lòng chọn ngôn ngữ giảng dạy"
     } else {
       for (const lang of formData.languagesTeach) {
         if (!lang.language || !isAllowedInstructorLevel(lang.level)) {
           newErrors.languagesTeachLevel =
-            ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
-          break;
+            ins.selectLevelError ||
+            ins.requiredField ||
+            "Vui lòng chọn trình độ cho từng ngôn ngữ"
+          break
         }
       }
     }
 
     if (!formData.introduction?.trim() && !formData.videoFile)
-      newErrors.introduction = ins.introOrVideoRequired || "Cần có lời giới thiệu hoặc video giới thiệu";
+      newErrors.introduction =
+        ins.introOrVideoRequired ||
+        "Cần có lời giới thiệu hoặc video giới thiệu"
 
     // Spec Q12: block Save when credentials violate the kept rule
     // (max 4 files, PDF only, each <=5MB). File-picker errors set
     // errors.credentials, but a Save must not wipe them via setErrors(newErrors).
     if (formData.credentials?.length > 4) {
-      newErrors.credentials =
-        ins.credentialLimit || "Tối đa 4 file chứng chỉ.";
+      newErrors.credentials = ins.credentialLimit || "Tối đa 4 file chứng chỉ."
     } else {
       const badCred = (formData.credentials || []).find(
         (c) =>
           c instanceof File &&
           (c.size > 5 * 1024 * 1024 ||
-            !(c.type === "application/pdf" || c.name?.toLowerCase().endsWith(".pdf"))),
-      );
+            !(
+              c.type === "application/pdf" ||
+              c.name?.toLowerCase().endsWith(".pdf")
+            )),
+      )
       if (badCred) {
         const isTypeBad = !(
           badCred.type === "application/pdf" ||
           badCred.name?.toLowerCase().endsWith(".pdf")
-        );
+        )
         if (isTypeBad) {
           newErrors.credentials =
-            ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.";
+            ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF."
         } else {
-          const actualMb = (badCred.size / 1024 / 1024).toFixed(1);
+          const actualMb = (badCred.size / 1024 / 1024).toFixed(1)
           newErrors.credentials =
             ins.credentialSizeLimit
               ?.replace("{max}", 5)
               ?.replace("{actual}", actualMb) ||
-            `Mỗi chứng chỉ phải nhỏ hơn 5MB (hiện tại ${actualMb}MB).`;
+            `Mỗi chứng chỉ phải nhỏ hơn 5MB (hiện tại ${actualMb}MB).`
         }
       }
     }
 
-    setErrors(newErrors);
-    return newErrors;
-  }, [formData, ins]);
+    setErrors(newErrors)
+    return newErrors
+  }, [formData, ins])
 
   const buildTeachingPayload = useCallback(() => {
-    const originalVideo = originalFormDataRef.current?.videoFile ?? null;
+    const originalVideo = originalFormDataRef.current?.videoFile ?? null
     const originalHadVideo =
-      typeof originalVideo === "string" && !!originalVideo;
+      typeof originalVideo === "string" && !!originalVideo
     return {
       languagesTeach: formData.languagesTeach,
       nativeLanguage: formData.nativeLanguage,
@@ -702,43 +730,45 @@ const InstructorPage = () => {
       credentials: formData.credentials,
       introVideo: formData.videoFile,
       removeIntroVideo: originalHadVideo && !formData.videoFile,
-    };
-  }, [formData]);
+    }
+  }, [formData])
 
   const handleSavePersonalInfo = useCallback(async () => {
-    const personalErrors = {};
+    const personalErrors = {}
     if (!formData.fullName?.trim())
-      personalErrors.fullName = ins.requiredField || "Trường này là bắt buộc";
+      personalErrors.fullName = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.email?.trim())
-      personalErrors.email = ins.requiredField || "Trường này là bắt buộc";
+      personalErrors.email = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.address?.trim())
-      personalErrors.address = ins.requiredField || "Trường này là bắt buộc";
+      personalErrors.address = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.phoneNumber?.trim())
-      personalErrors.phoneNumber = ins.requiredField || "Trường này là bắt buộc";
+      personalErrors.phoneNumber = ins.requiredField || "Trường này là bắt buộc"
     if (!formData.nationality?.trim())
-      personalErrors.nationality = ins.requiredField || "Trường này là bắt buộc";
+      personalErrors.nationality = ins.requiredField || "Trường này là bắt buộc"
 
     if (Object.keys(personalErrors).length > 0) {
-      setErrors((prev) => ({ ...prev, ...personalErrors }));
-      return;
+      setErrors((prev) => ({ ...prev, ...personalErrors }))
+      return
     }
 
-    setIsSavingPersonalInfo(true);
+    setIsSavingPersonalInfo(true)
     try {
-      await updateInstructor(buildPayload()).unwrap();
-      toast.success("Cập nhật thông tin giảng viên thành công!");
-      setIsEditingPersonalInfo(false);
-      store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
+      await updateInstructor(buildPayload()).unwrap()
+      toast.success("Cập nhật thông tin giảng viên thành công!")
+      setIsEditingPersonalInfo(false)
+      store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]))
     } catch (err) {
-      console.error("Failed to update personal info:", err);
-      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.");
+      console.error("Failed to update personal info:", err)
+      toast.error(
+        err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.",
+      )
     } finally {
-      setIsSavingPersonalInfo(false);
+      setIsSavingPersonalInfo(false)
     }
-  }, [formData, ins, updateInstructor, buildPayload]);
+  }, [formData, ins, updateInstructor, buildPayload])
 
   const handleSubmit = useCallback(async () => {
-    if (isSubmitting) return;
+    if (isSubmitting) return
 
     if (!agreed) {
       setErrors((prev) => ({
@@ -746,41 +776,43 @@ const InstructorPage = () => {
         agreed:
           ins.certifyError ||
           "Vui lòng xác nhận và đồng ý với các quy định của nền tảng.",
-      }));
+      }))
       setTimeout(() => {
-        const el = document.getElementById("field-agreed");
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 0);
-      return;
+        const el = document.getElementById("field-agreed")
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 0)
+      return
     }
 
-    const newErrors = validateForm();
+    const newErrors = validateForm()
     if (Object.keys(newErrors).length > 0) {
       setTimeout(() => {
-        const firstErrorKey = Object.keys(newErrors)[0];
-        const el = document.getElementById(`field-${firstErrorKey}`);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 0);
-      return;
+        const firstErrorKey = Object.keys(newErrors)[0]
+        const el = document.getElementById(`field-${firstErrorKey}`)
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 0)
+      return
     }
 
     try {
       if (isRequestEdit) {
         // PUT /my for resubmission — full form payload (personal + identity + teaching)
-        await updateInstructor(buildPayload()).unwrap();
-        toast.success(ins.statusPendingDesc || "Đã gửi lại đơn đăng ký thành công!");
-        setShowForm(false);
-        setAgreed(false);
-        setErrors({});
-        setIsReapplying(false);
-        store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
+        await updateInstructor(buildPayload()).unwrap()
+        toast.success(
+          ins.statusPendingDesc || "Đã gửi lại đơn đăng ký thành công!",
+        )
+        setShowForm(false)
+        setAgreed(false)
+        setErrors({})
+        setIsReapplying(false)
+        store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]))
       } else {
         // POST /apply for new applications OR reapplying — Task Progress Bar
-        const rawPayload = buildPayload();
-        const formData = buildInstructorFormData(rawPayload);
+        const rawPayload = buildPayload()
+        const formData = buildInstructorFormData(rawPayload)
 
         // Lock form immediately
-        setIsTaskSubmitting(true);
+        setIsTaskSubmitting(true)
 
         startTask({
           title: t?.uploadWidget?.instructorTaskTitle || "Gửi hồ sơ giảng viên",
@@ -790,39 +822,50 @@ const InstructorPage = () => {
           method: "POST",
           data: formData,
           onSuccess: () => {
-            toast.success(ins.statusPendingDesc || "Đã gửi đơn đăng ký thành công!");
-            setIsTaskSubmitting(false);
-            setShowForm(false);
-            setAgreed(false);
-            setErrors({});
-            setIsReapplying(false);
-            store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
+            toast.success(
+              ins.statusPendingDesc || "Đã gửi đơn đăng ký thành công!",
+            )
+            setIsTaskSubmitting(false)
+            setShowForm(false)
+            setAgreed(false)
+            setErrors({})
+            setIsReapplying(false)
+            store.dispatch(
+              instructorApi.util.invalidateTags(["InstructorProfile"]),
+            )
           },
           onError: (err) => {
-            setIsTaskSubmitting(false);
-            const msg = err?.message || err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.";
+            setIsTaskSubmitting(false)
+            const msg =
+              err?.message ||
+              err?.data?.message ||
+              "Đã có lỗi xảy ra khi gửi đơn đăng ký."
             if (msg.toLowerCase().includes("email")) {
-              setErrors((prev) => ({ ...prev, email: msg }));
+              setErrors((prev) => ({ ...prev, email: msg }))
               setTimeout(() => {
-                const el = document.getElementById("field-email");
-                if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-              }, 0);
+                const el = document.getElementById("field-email")
+                if (el)
+                  el.scrollIntoView({ behavior: "smooth", block: "center" })
+              }, 0)
             }
-            toast.error(msg);
+            toast.error(msg)
           },
-        });
+        })
       }
     } catch (err) {
-      console.error("Failed to submit instructor application:", err);
-      const msg = err?.data?.message || err?.data?.title || "Đã có lỗi xảy ra khi gửi đơn đăng ký.";
+      console.error("Failed to submit instructor application:", err)
+      const msg =
+        err?.data?.message ||
+        err?.data?.title ||
+        "Đã có lỗi xảy ra khi gửi đơn đăng ký."
       if (msg.toLowerCase().includes("email")) {
-        setErrors((prev) => ({ ...prev, email: msg }));
+        setErrors((prev) => ({ ...prev, email: msg }))
         setTimeout(() => {
-          const el = document.getElementById("field-email");
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 0);
+          const el = document.getElementById("field-email")
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+        }, 0)
       }
-      toast.error(msg);
+      toast.error(msg)
     }
   }, [
     agreed,
@@ -837,7 +880,7 @@ const InstructorPage = () => {
     buildTeachingPayload,
     ins,
     t,
-  ]);
+  ])
 
   // --- Render ---
 
@@ -846,7 +889,7 @@ const InstructorPage = () => {
       <div className="flex items-center justify-center py-20">
         <div className="w-8 h-8 border-3 border-cath-red-700 border-t-transparent rounded-full animate-spin" />
       </div>
-    );
+    )
   }
 
   // Non-404 fetch failure with no data: show an error panel instead of a
@@ -854,9 +897,7 @@ const InstructorPage = () => {
   if (profileError && !hasNotApplied && !rawApplication) {
     return (
       <div className="flex flex-col gap-4">
-        <PageTitle>
-          {t.nav?.instructor || "Giảng viên"}
-        </PageTitle>
+        <PageTitle>{t.nav?.instructor || "Giảng viên"}</PageTitle>
         <div className="rounded-xl border border-red-200 bg-red-50 p-5">
           <h3 className="text-sm font-bold text-red-800">
             {ins.loadErrorTitle || "Không tải được hồ sơ giảng viên"}
@@ -873,12 +914,12 @@ const InstructorPage = () => {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   // Live Approved profile (not a staging revision) → dedicated read-only shell.
   if (isLiveApproved) {
-    return <ApprovedProfilePage />;
+    return <ApprovedProfilePage />
   }
 
   // Not applied + not showing form → empty state.
@@ -886,59 +927,61 @@ const InstructorPage = () => {
   // on that teacher account — show a switch CTA instead of the "not applied" state.
   if (hasNotApplied && !showForm) {
     return (
-      <div className="flex flex-col gap-4">
-        <PageTitle>
-          {t.nav?.instructor || "Giảng viên"}
-        </PageTitle>
+      <div className="flex flex-col gap-4 p-4">
+        <PageTitle>{t.nav?.instructor || "Giảng viên"}</PageTitle>
         {isTeacher ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-              <h3 className="text-sm font-bold text-emerald-800">
-                {ins.switchToTeacherTitle || "Hồ sơ đã được duyệt"}
-              </h3>
-            </div>
-            <p className="text-sm text-emerald-700 ml-8 mb-3">
-              {ins.switchToTeacherDesc ||
-                "Hồ sơ Giảng viên của bạn đã được phê duyệt. Chuyển sang tài khoản giáo viên để quản lý nội dung giảng dạy."}
-            </p>
-            <div className="ml-8">
-              <button
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              {/* Status icon + text */}
+              <div className="flex items-start md:items-center gap-4 flex-1 min-w-0">
+                <CheckCircle className="w-6 h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
+
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-emerald-800">
+                    {ins.switchToTeacherTitle || "Hồ sơ đã được duyệt"}
+                  </h3>
+                  <p className="text-sm text-emerald-700">
+                    {ins.switchToTeacherDesc ||
+                      "Hồ sơ Giảng viên của bạn đã được phê duyệt. Chuyển sang tài khoản giáo viên để quản lý nội dung giảng dạy."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action button */}
+              <PillButton
                 onClick={handleSwitchToTeacherAccount}
                 disabled={isSwitchingAccount}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-60"
+                loading={isSwitchingAccount}
+                loadingText={ins.switching || "Đang chuyển..."}
+                startIcon={!isSwitchingAccount && <GraduationCap size={16} />}
+                bgColor="#059669"
+                textColor="#FFFFFF"
+                className="w-full sm:w-auto sm:flex-shrink-0 shadow-sm"
+                innerClassName="hover:!bg-[#047857] active:!bg-[#065F46]"
               >
-                {isSwitchingAccount ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <GraduationCap size={16} />
-                )}
-                {isSwitchingAccount
-                  ? (ins.switching || "Đang chuyển...")
-                  : (ins.switchToTeacherAccount || "Chuyển sang tài khoản giáo viên")}
-              </button>
+                {ins.switchToTeacherAccount ||
+                  "Chuyển sang tài khoản giáo viên"}
+              </PillButton>
             </div>
           </div>
         ) : (
           <InstructorEmptyState onApply={() => setShowForm(true)} t={t} />
         )}
       </div>
-    );
+    )
   }
 
   // Determine readOnly for section components.
   const readOnly =
     (!effectiveCanEdit && !isEditingPersonalInfo) ||
     isSubmitting ||
-    isTaskSubmitting;
+    isTaskSubmitting
 
   return (
     <div className="flex flex-col gap-6">
       {/* Header row: title + Edit / Cancel / Save on the same line */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <PageTitle>
-          {t.nav?.instructor || "Giảng viên"}
-        </PageTitle>
+        <PageTitle>{t.nav?.instructor || "Giảng viên"}</PageTitle>
       </div>
 
       {/* Task submitting banner */}
@@ -946,34 +989,38 @@ const InstructorPage = () => {
         <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 animate-pulse">
           <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
           <span className="font-medium">
-            {t?.uploadWidget?.instructorSubmitting || "Đang gửi hồ sơ giảng viên, vui lòng chờ..."}
+            {t?.uploadWidget?.instructorSubmitting ||
+              "Đang gửi hồ sơ giảng viên, vui lòng chờ..."}
           </span>
         </div>
       )}
 
       {/* Status Banner — shown when an application exists.
           Approved shows only on first view (localStorage dismiss). */}
-      {applicationStatus && (applicationStatus !== "Approved" || showApprovedBanner) && (
-        <InstructorStatusBanner
-          status={applicationStatus}
-          rejectReason={
-            rawApplication?.rejectReason || rawApplication?.RejectReason
-          }
-          banUntil={rawApplication?.banUntil || rawApplication?.BanUntil}
-          editRequestNote={
-            rawApplication?.editRequestNote || rawApplication?.EditRequestNote
-          }
-          isRevision={!!(rawApplication?.isRevision || rawApplication?.IsRevision)}
-          t={t}
-          onReapply={() => setIsReapplying(true)}
-          isReapplying={isReapplying}
-          onDismiss={
-            applicationStatus === "Approved"
-              ? handleDismissApprovedBanner
-              : undefined
-          }
-        />
-      )}
+      {applicationStatus &&
+        (applicationStatus !== "Approved" || showApprovedBanner) && (
+          <InstructorStatusBanner
+            status={applicationStatus}
+            rejectReason={
+              rawApplication?.rejectReason || rawApplication?.RejectReason
+            }
+            banUntil={rawApplication?.banUntil || rawApplication?.BanUntil}
+            editRequestNote={
+              rawApplication?.editRequestNote || rawApplication?.EditRequestNote
+            }
+            isRevision={
+              !!(rawApplication?.isRevision || rawApplication?.IsRevision)
+            }
+            t={t}
+            onReapply={() => setIsReapplying(true)}
+            isReapplying={isReapplying}
+            onDismiss={
+              applicationStatus === "Approved"
+                ? handleDismissApprovedBanner
+                : undefined
+            }
+          />
+        )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {!isApproved && (
@@ -1035,15 +1082,17 @@ const InstructorPage = () => {
         <InstructorSubmitSection
           agreed={agreed}
           onAgreeChange={(val) => {
-            setAgreed(val);
-            if (val) clearError("agreed");
+            setAgreed(val)
+            if (val) clearError("agreed")
           }}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting || isTaskSubmitting}
           disabled={isSubmitting || isTaskSubmitting}
           errors={errors}
           submitLabel={isRequestEdit || isReapplying ? ins.resubmit : undefined}
-          updatingLabel={isRequestEdit || isReapplying ? ins.updating : undefined}
+          updatingLabel={
+            isRequestEdit || isReapplying ? ins.updating : undefined
+          }
           t={t}
         />
       )}
@@ -1112,7 +1161,7 @@ const InstructorPage = () => {
         confirmText={ins.delete || "Xóa"}
       />
     </div>
-  );
-};
+  )
+}
 
-export default InstructorPage;
+export default InstructorPage

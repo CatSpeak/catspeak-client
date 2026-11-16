@@ -17,7 +17,7 @@ const VoucherTableSkeleton = ({ rows = 5 }) => {
       >
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50/80 border-b border-border text-sm font-semibold">
+            <tr className="bg-slate-50/80 dark:bg-[#242424] border-b border-border dark:border-[#3F3F3F] text-sm font-semibold">
               <th className="p-4 w-[16%]">
                 <Skeleton className="h-4 w-24 rounded" />
               </th>
@@ -41,9 +41,9 @@ const VoucherTableSkeleton = ({ rows = 5 }) => {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-border">
+          <tbody className="bg-white dark:bg-[#1A1A1A] divide-y divide-border dark:divide-[#3F3F3F]">
             {Array.from({ length: rows }).map((_, idx) => (
-              <tr key={idx} className="border-b border-border last:border-0">
+              <tr key={idx} className="border-b border-border dark:border-[#3F3F3F] last:border-0">
                 {/* Code & Title */}
                 <td className="px-4 py-3.5 w-[16%]">
                   <div className="space-y-1.5">
@@ -93,7 +93,7 @@ const VoucherTableSkeleton = ({ rows = 5 }) => {
         {Array.from({ length: 3 }).map((_, idx) => (
           <div
             key={idx}
-            className="p-4 rounded-2xl bg-white border border-slate-200/80 space-y-3 shadow-xs"
+            className="p-4 rounded-2xl bg-white dark:bg-[#1A1A1A] border border-slate-200/80 dark:border-[#3F3F3F] space-y-3 shadow-xs"
           >
             {/* Header: Code & Status */}
             <div className="flex items-center justify-between gap-2">
@@ -108,7 +108,7 @@ const VoucherTableSkeleton = ({ rows = 5 }) => {
             </div>
 
             {/* Meta Grid */}
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-[#272727]">
               <div className="space-y-1">
                 <Skeleton className="h-3 w-14 rounded" />
                 <Skeleton className="h-4 w-20 rounded" />
@@ -120,7 +120,7 @@ const VoucherTableSkeleton = ({ rows = 5 }) => {
             </div>
 
             {/* Progress / Footer */}
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <div className="pt-2 border-t border-slate-100 dark:border-[#272727] flex items-center justify-between">
               <Skeleton className="h-3.5 w-24 rounded" />
               <Skeleton className="h-3.5 w-20 rounded" />
             </div>

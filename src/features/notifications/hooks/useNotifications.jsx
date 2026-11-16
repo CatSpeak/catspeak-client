@@ -157,7 +157,7 @@ export function useNotifications() {
                       window.location.href = resolved.resolvedUrl;
                     }
                   }}
-                  className="flex cursor-pointer items-start gap-3 rounded-lg bg-white p-4 shadow-lg ring-1 ring-black/5"
+                  className="flex cursor-pointer items-start gap-3 rounded-lg bg-white dark:bg-[#1A1A1A] p-4 shadow-lg ring-1 ring-black/5 dark:ring-white/10 border border-transparent dark:border-[#3F3F3F]"
                 >
                   {resolved.icon && (
                     <resolved.icon
@@ -166,13 +166,13 @@ export function useNotifications() {
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
                       {resolved.resolvedTitle ||
                         tRef.current.header?.newNotificationTitle ||
                         "Thông báo mới"}
                     </p>
 
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="mt-0.5 text-xs text-gray-500 dark:text-neutral-400">
                       {resolved.resolvedBody ||
                         tRef.current.header?.newNotificationBody ||
                         "Bạn có một thông báo mới cần xem."}

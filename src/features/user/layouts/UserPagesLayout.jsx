@@ -1,13 +1,12 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
-
+import React from "react"
+import { Outlet } from "react-router-dom"
 
 const UserPagesLayout = () => {
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg mx-auto">
       <Outlet />
     </div>
-  );
-};
+  )
+}
 
-export default UserPagesLayout;
+export default UserPagesLayout

@@ -133,17 +133,17 @@ const ActiveCallBanner = ({
     ""
 
   return (
-    <div className="flex gap-4 justify-between px-4 h-[72px] items-center border-b border-border">
+    <div className="flex gap-4 justify-between px-4 h-[72px] items-center border-b border-border dark:border-[#3F3F3F]">
       <div className="flex items-center gap-4 min-w-0">
         {isVideo ? <Video /> : <Phone />}
 
         <div className="min-w-0">
-          <p className="truncate">
+          <p className="truncate font-semibold text-gray-900 dark:text-white">
             {isVideo
               ? t?.chat?.call?.activeVideoCall || "Ongoing Video Call"
               : t?.chat?.call?.activeAudioCall || "Ongoing Voice Call"}
           </p>
-          <p className="text-sm text-secondary truncate">
+          <p className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
             {callerDisplayName
               ? `${t?.chat?.call?.startedBy || "Started by"} ${callerDisplayName}`
               : t?.chat?.call?.inProgress || "Call is currently in progress..."}

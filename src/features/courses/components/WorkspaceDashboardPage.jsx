@@ -50,17 +50,17 @@ const defaultCustomRange = () => {
 
 const SnapshotCard = ({ title, subtitle, onViewDetails, viewDetailsLabel, children }) => {
   return (
-    <section className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+    <section className="bg-white dark:bg-[#1A1A1A] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-4 shadow-sm flex flex-col justify-between">
       <div className="flex items-start justify-between flex-wrap gap-2 mb-3">
         <div>
-          <h2 className="text-base font-bold text-[#14171F]">{title}</h2>
-          {subtitle && <p className="text-xs text-[#6E788C] font-normal mt-0.5">{subtitle}</p>}
+          <h2 className="text-base font-bold text-[#14171F] dark:text-white">{title}</h2>
+          {subtitle && <p className="text-xs text-[#6E788C] dark:text-gray-400 font-normal mt-0.5">{subtitle}</p>}
         </div>
         {onViewDetails && (
           <button
             type="button"
             onClick={onViewDetails}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#B80514] hover:underline cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#B80514] dark:text-[#FF6B6B] hover:underline cursor-pointer"
           >
             {viewDetailsLabel || "Xem chi tiết"} →
           </button>
@@ -73,13 +73,13 @@ const SnapshotCard = ({ title, subtitle, onViewDetails, viewDetailsLabel, childr
 
 const MiniStatBox = ({ label, value, delta = "", isDown = false }) => {
   return (
-    <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2.5 flex flex-col justify-center min-w-0">
-      <span className="text-[#6E788C] text-[11px] font-normal truncate" title={label}>{label}</span>
-      <strong className="text-sm sm:text-base font-bold text-[#14171F] my-0.5 truncate tabular-nums" title={value}>{value}</strong>
+    <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-2.5 flex flex-col justify-center min-w-0">
+      <span className="text-[#6E788C] dark:text-gray-400 text-[11px] font-normal truncate" title={label}>{label}</span>
+      <strong className="text-sm sm:text-base font-bold text-[#14171F] dark:text-white my-0.5 truncate tabular-nums" title={value}>{value}</strong>
       {delta && (
         <span
           className={`text-[10px] sm:text-[11px] font-semibold truncate ${
-            isDown ? "text-[#BF1F1F]" : "text-[#0D9E3D]"
+            isDown ? "text-[#BF1F1F] dark:text-[#FF6B6B]" : "text-[#0D9E3D] dark:text-[#4ADE80]"
           }`}
           title={delta}
         >
@@ -276,7 +276,7 @@ const WorkspaceDashboardPage = () => {
   const revenueChartLabels = revenueTrendPoints.map((p) => p.label || p.date)
 
   return (
-    <div className="flex flex-col gap-5 text-[#14171F] min-h-full pb-10">
+    <div className="flex flex-col gap-5 text-[#14171F] dark:text-white min-h-full pb-10">
       {/* Breadcrumb Header */}
       <Breadcrumb
         items={[
@@ -288,14 +288,14 @@ const WorkspaceDashboardPage = () => {
       {/* Page Title & Icon */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#FFEEF0] text-[#B00020] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#FFEEF0] dark:bg-[#FFEEF0]/10 text-[#B00020] dark:text-[#FF6B6B] flex items-center justify-center flex-shrink-0">
             <LayoutDashboard size={24} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#12141A] tracking-tight leading-none">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#12141A] dark:text-white tracking-tight leading-none">
               {dashT.title || "Dashboard"}
             </h1>
-            <p className="text-xs text-[#6E788C] font-normal mt-1">
+            <p className="text-xs text-[#6E788C] dark:text-gray-400 font-normal mt-1">
               {dashT.subtitle || "Tổng quan tình hình giảng dạy và hoạt động lớp học"}
             </p>
           </div>
@@ -426,44 +426,44 @@ const WorkspaceDashboardPage = () => {
           subtitle={secT.performanceSubtitle || "Snapshot vận hành trong kỳ"}
         >
           <div className="flex flex-col gap-2.5 py-1">
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] border border-[#DEE0E5]">
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F]">
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-full bg-[#E8FAED] text-[#0D9E3D] flex items-center justify-center font-bold text-xs flex-shrink-0">
+                <span className="w-8 h-8 rounded-full bg-[#E8FAED] dark:bg-[#E8FAED]/10 text-[#0D9E3D] dark:text-[#4ADE80] flex items-center justify-center font-bold text-xs flex-shrink-0">
                   ⏱
                 </span>
-                <span className="text-xs text-[#6E788C] font-normal truncate">
+                <span className="text-xs text-[#6E788C] dark:text-gray-400 font-normal truncate">
                   {metricsT.teachingHours || "Tổng giờ giảng dạy"}
                 </span>
               </div>
-              <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
+              <strong className="text-sm font-bold text-[#14171F] dark:text-white flex-shrink-0 ml-2">
                 {numberVi(performance.totalTeachingHours ?? 127.5, 1, language)} {metricsT.hours || "giờ"}
               </strong>
             </div>
 
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] border border-[#DEE0E5]">
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F]">
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-full bg-[#F0E5FF] text-[#7C3AED] flex items-center justify-center font-bold text-xs flex-shrink-0">
+                <span className="w-8 h-8 rounded-full bg-[#F0E5FF] dark:bg-[#F0E5FF]/10 text-[#7C3AED] dark:text-[#C084FC] flex items-center justify-center font-bold text-xs flex-shrink-0">
                   ✓
                 </span>
-                <span className="text-xs text-[#6E788C] font-normal truncate">
+                <span className="text-xs text-[#6E788C] dark:text-gray-400 font-normal truncate">
                   {metricsT.completedSessions || "Buổi đã hoàn thành"}
                 </span>
               </div>
-              <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
+              <strong className="text-sm font-bold text-[#14171F] dark:text-white flex-shrink-0 ml-2">
                 {numberVi(performance.completedSessions ?? 48, 0, language)} {metricsT.sessions || "buổi"}
               </strong>
             </div>
 
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] border border-[#DEE0E5]">
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F]">
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-full bg-[#E5F0FF] text-[#2563EB] flex items-center justify-center font-bold text-xs flex-shrink-0">
+                <span className="w-8 h-8 rounded-full bg-[#E5F0FF] dark:bg-[#E5F0FF]/10 text-[#2563EB] dark:text-[#60A5FA] flex items-center justify-center font-bold text-xs flex-shrink-0">
                   ⏳
                 </span>
-                <span className="text-xs text-[#6E788C] font-normal truncate">
+                <span className="text-xs text-[#6E788C] dark:text-gray-400 font-normal truncate">
                   {metricsT.avgSessionDuration || "Thời lượng TB/buổi"}
                 </span>
               </div>
-              <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
+              <strong className="text-sm font-bold text-[#14171F] dark:text-white flex-shrink-0 ml-2">
                 {performance.averageDurationMinutes != null
                   ? `${numberVi(performance.averageDurationMinutes, 0, language)} ${metricsT.minutes || "phút"}`
                   : `75 ${metricsT.minutes || "phút"}`}
@@ -482,27 +482,27 @@ const WorkspaceDashboardPage = () => {
           <div className="flex flex-col gap-3">
             {/* 3 mini stats in 1 row */}
             <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-              <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
-                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.activeClasses || "Lớp đang mở"}>
+              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-2 text-center min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] dark:text-gray-400 font-normal block truncate" title={kpiT.activeClasses || "Lớp đang mở"}>
                   {kpiT.activeClasses || "Lớp đang mở"}
                 </span>
-                <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
+                <strong className="text-sm sm:text-base font-bold text-[#14171F] dark:text-white block truncate">
                   {courseClass.metrics?.openClasses ?? 14}
                 </strong>
               </div>
-              <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
-                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.avgFillRate || "Lấp đầy TB"}>
+              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-2 text-center min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] dark:text-gray-400 font-normal block truncate" title={kpiT.avgFillRate || "Lấp đầy TB"}>
                   {kpiT.avgFillRate || "Lấp đầy TB"}
                 </span>
-                <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
+                <strong className="text-sm sm:text-base font-bold text-[#14171F] dark:text-white block truncate">
                   {Math.round(courseClass.metrics?.averageFillRate ?? 82)}%
                 </strong>
               </div>
-              <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
-                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.avgCompletionRate || "Hoàn thành TB"}>
+              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-2 text-center min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] dark:text-gray-400 font-normal block truncate" title={kpiT.avgCompletionRate || "Hoàn thành TB"}>
                   {kpiT.avgCompletionRate || "Hoàn thành TB"}
                 </span>
-                <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
+                <strong className="text-sm sm:text-base font-bold text-[#14171F] dark:text-white block truncate">
                   {Math.round(courseClass.metrics?.averageCompletionRate ?? 76)}%
                 </strong>
               </div>
@@ -510,7 +510,7 @@ const WorkspaceDashboardPage = () => {
 
             {/* Top fill rate bars */}
             <div className="mt-1">
-              <span className="text-xs font-semibold text-[#14171F] block mb-2">
+              <span className="text-xs font-semibold text-[#14171F] dark:text-white block mb-2">
                 {secT.topFillRate || "Top lớp theo tỷ lệ lấp đầy"}
               </span>
               <div className="flex flex-col gap-2">
@@ -525,15 +525,15 @@ const WorkspaceDashboardPage = () => {
                   const fillVal = Math.min(Math.max(Math.round(r.fill ?? 0), 0), 100)
                   return (
                     <div key={idx} className="flex items-center justify-between text-xs gap-2 min-w-0">
-                      <span className="font-semibold text-[#B25905] w-4 flex-shrink-0 text-center">{idx + 1}</span>
-                      <span className="text-[#14171F] font-medium truncate flex-1 min-w-0" title={r.className}>{r.className}</span>
-                      <div className="w-16 sm:w-20 h-2 rounded-full bg-[#EDEDF0] overflow-hidden flex-shrink-0">
+                      <span className="font-semibold text-[#B25905] dark:text-[#F59E0B] w-4 flex-shrink-0 text-center">{idx + 1}</span>
+                      <span className="text-[#14171F] dark:text-gray-200 font-medium truncate flex-1 min-w-0" title={r.className}>{r.className}</span>
+                      <div className="w-16 sm:w-20 h-2 rounded-full bg-[#EDEDF0] dark:bg-[#2A2A2A] overflow-hidden flex-shrink-0">
                         <div
-                          className="h-full bg-[#E51A33] rounded-full"
+                          className="h-full bg-[#E51A33] dark:bg-[#FF6B6B] rounded-full"
                           style={{ width: `${fillVal}%` }}
                         />
                       </div>
-                      <span className="font-semibold text-[#14171F] w-9 text-right flex-shrink-0 tabular-nums">{fillVal}%</span>
+                      <span className="font-semibold text-[#14171F] dark:text-white w-9 text-right flex-shrink-0 tabular-nums">{fillVal}%</span>
                     </div>
                   )
                 })}

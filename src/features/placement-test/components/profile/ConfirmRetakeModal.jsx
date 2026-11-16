@@ -38,38 +38,38 @@ const ConfirmRetakeModal = ({
     }
   >
     <div className="flex flex-col items-center gap-3 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FFF1F2] text-cath-red-700 ring-1 ring-[#FECDD3]">
+      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FFF1F2] dark:bg-rose-950/40 text-cath-red-700 dark:text-red-400 ring-1 ring-[#FECDD3] dark:ring-red-900/40">
         <RotateCcw size={24} strokeWidth={2} />
       </span>
-      <h2 className="text-[19px] font-bold leading-[25.65px] text-[#0F172A]">
+      <h2 className="text-[19px] font-bold leading-[25.65px] text-[#0F172A] dark:text-white">
         {copy.title}
       </h2>
-      <p className="max-w-[410px] text-[13px] leading-[18.85px] text-[#475569]">
+      <p className="max-w-[410px] text-[13px] leading-[18.85px] text-[#475569] dark:text-neutral-300">
         {copy.body}
       </p>
     </div>
 
-    <div className="mt-4 flex items-start gap-2.5 rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-3.5 py-3">
+    <div className="mt-4 flex items-start gap-2.5 rounded-[10px] border border-[#FDE68A] dark:border-amber-900/40 bg-[#FFFBEB] dark:bg-amber-950/30 px-3.5 py-3">
       <AlertTriangle
         size={20}
         strokeWidth={2}
-        className="mt-0.5 shrink-0 text-[#92400E]"
+        className="mt-0.5 shrink-0 text-[#92400E] dark:text-amber-400"
       />
       <div className="flex flex-col gap-0.5">
-        <span className="text-[11.5px] font-bold leading-[16.7px] text-[#92400E]">
+        <span className="text-[11.5px] font-bold leading-[16.7px] text-[#92400E] dark:text-amber-400">
           {copy.cooldownTitle}
         </span>
-        <p className="text-[11px] leading-4 text-[#B45309]">
+        <p className="text-[11px] leading-4 text-[#B45309] dark:text-amber-300">
           {copy.cooldownBody}
         </p>
       </div>
     </div>
 
-    <div className="mt-3 flex flex-col gap-1.5 rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2.5">
-      <p className="text-[11.5px] font-medium leading-[16.7px] text-[#334155]">
+    <div className="mt-3 flex flex-col gap-1.5 rounded-[10px] border border-[#E2E8F0] dark:border-[#3F3F3F] bg-[#F8FAFC] dark:bg-[#202020] px-3.5 py-2.5">
+      <p className="text-[11.5px] font-medium leading-[16.7px] text-[#334155] dark:text-neutral-300">
         • {copy.bullet1}
       </p>
-      <p className="text-[11.5px] font-medium leading-[16.7px] text-[#334155]">
+      <p className="text-[11.5px] font-medium leading-[16.7px] text-[#334155] dark:text-neutral-300">
         • {copy.bullet2}
       </p>
     </div>

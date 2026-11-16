@@ -70,7 +70,7 @@ const QuizStudentAvatar = ({ student, size = "md", fallbackInitials = "HV" }) =>
         src={avatarUrl}
         alt={studentName}
         onError={() => setHasError(true)}
-        className={`${sizeClasses} rounded-full object-cover shrink-0 border border-border`}
+        className={`${sizeClasses} rounded-full object-cover shrink-0 border border-border dark:border-[#3F3F3F]`}
       />
     )
   }
@@ -268,9 +268,9 @@ const CustomChartTooltip = ({ active, payload, label }) => {
   const qg = t.courses?.grading?.teacherQuiz || {}
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-2.5 rounded-xl shadow-lg border border-border text-xs">
-        <p className="font-bold text-gray-900">{qg.scoreRange}: {label}</p>
-        <p className="text-[#990011] font-semibold mt-0.5">
+      <div className="bg-white dark:bg-[#222222] p-2.5 rounded-xl shadow-lg border border-border dark:border-[#3F3F3F] text-xs">
+        <p className="font-bold text-gray-900 dark:text-white">{qg.scoreRange}: {label}</p>
+        <p className="text-[#990011] dark:text-[#FF6B6B] font-semibold mt-0.5">
           {qg.studentCount}: {payload[0].value}
         </p>
       </div>
@@ -286,7 +286,7 @@ const StatusBadge = ({ status }) => {
   const lower = String(status || "").toLowerCase()
   if (lower === "published" || lower === "open" || lower === "đang mở") {
     return (
-      <span className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+      <span className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
         {qg.statusOpen}
       </span>
@@ -294,14 +294,14 @@ const StatusBadge = ({ status }) => {
   }
   if (lower === "draft" || lower === "bản nháp") {
     return (
-      <span className="bg-amber-50 text-amber-600 border border-amber-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+      <span className="bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
         {qg.statusDraft}
       </span>
     )
   }
   return (
-    <span className="bg-gray-100 text-gray-600 border border-border text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+    <span className="bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400 border border-border dark:border-[#3F3F3F] text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
       <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
       {qg.statusClosed}
     </span>
@@ -339,7 +339,7 @@ const formatTimeAgo = (dateStr, qg) => {
 const getSubmissionStatus = (student, qg) => {
   const statusRaw = String(student.submissionStatus || student.status || "").toLowerCase()
   if (statusRaw.includes("muộn") || statusRaw.includes("late")) {
-    return { label: qg.submissionLate, style: "bg-[#FDF2F2] text-[#E02424] border border-pink-100" }
+    return { label: qg.submissionLate, style: "bg-[#FDF2F2] dark:bg-pink-950/30 text-[#E02424] dark:text-pink-400 border border-pink-100 dark:border-pink-900/40" }
   }
   if (
     statusRaw.includes("chưa") ||
@@ -347,9 +347,9 @@ const getSubmissionStatus = (student, qg) => {
     statusRaw.includes("unsubmitted") ||
     (student.score == null && !statusRaw.includes("nộp") && !statusRaw.includes("submitted"))
   ) {
-    return { label: qg.submissionNotSubmitted, style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+    return { label: qg.submissionNotSubmitted, style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" }
   }
-  return { label: qg.submissionSubmitted, style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
+  return { label: qg.submissionSubmitted, style: "bg-[#ECFDF5] dark:bg-emerald-950/30 text-[#059669] dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40" }
 }
 
 // Grading Status Helper
@@ -361,7 +361,7 @@ const getGradingStatus = (student, qg) => {
     gradingRaw.includes("draft") ||
     gradingRaw.includes("chờ")
   ) {
-    return { label: qg.gradingNotGraded, style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+    return { label: qg.gradingNotGraded, style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" }
   }
   if (
     gradingRaw.includes("đã") ||
@@ -369,9 +369,9 @@ const getGradingStatus = (student, qg) => {
     gradingRaw.includes("finalized") ||
     (student.score !== null && student.score !== undefined && student.score !== "–")
   ) {
-    return { label: qg.gradingGraded, style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
+    return { label: qg.gradingGraded, style: "bg-[#ECFDF5] dark:bg-emerald-950/30 text-[#059669] dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40" }
   }
-  return { label: qg.gradingNotGraded, style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+  return { label: qg.gradingNotGraded, style: "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#D97706] dark:text-amber-400 border border-amber-100 dark:border-amber-900/40" }
 }
 
 // Custom Audio Player Bar
@@ -401,7 +401,7 @@ const AudioPlayerBar = ({ src }) => {
   }
 
   return (
-    <div className="mt-3 mb-3 w-full bg-gray-50 border border-border p-3.5 rounded-2xl flex items-center gap-3">
+    <div className="mt-3 mb-3 w-full bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] p-3.5 rounded-2xl flex items-center gap-3">
       {src && (
         <audio
           ref={audioRef}
@@ -429,7 +429,7 @@ const AudioPlayerBar = ({ src }) => {
       {/* Progress Track & Time Labels (Full width) */}
       <div className="flex-1 flex flex-col gap-1.5 min-w-0">
         <div
-          className="w-full bg-gray-200 h-2 rounded-full overflow-hidden relative cursor-pointer"
+          className="w-full bg-gray-200 dark:bg-[#333333] h-2 rounded-full overflow-hidden relative cursor-pointer"
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect()
             const pct = (e.clientX - rect.left) / rect.width
@@ -446,7 +446,7 @@ const AudioPlayerBar = ({ src }) => {
           />
         </div>
         {/* Time Labels */}
-        <div className="flex justify-between text-[11px] text-gray-500 font-bold px-0.5">
+        <div className="flex justify-between text-[11px] text-gray-500 dark:text-gray-400 font-bold px-0.5">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
@@ -471,22 +471,22 @@ const TeacherAttemptState = ({
         <button
           type="button"
           onClick={onClose}
-          className="w-9 h-9 rounded-xl border border-border hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-xl border border-border dark:border-[#3F3F3F] hover:bg-gray-100 dark:hover:bg-[#2A2A2A] flex items-center justify-center text-gray-700 dark:text-gray-300 transition-colors cursor-pointer"
           title={qg.goBack}
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl md:text-2xl font-black text-gray-950 tracking-tight">
+        <h1 className="text-xl md:text-2xl font-black text-gray-950 dark:text-white tracking-tight">
           {title}
         </h1>
       </div>
-      <div className="min-h-[360px] bg-white rounded-3xl border border-border flex flex-col items-center justify-center gap-4 p-8 text-center">
+      <div className="min-h-[360px] bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] flex flex-col items-center justify-center gap-4 p-8 text-center">
         {isLoading ? (
           <LoadingSpinner />
         ) : (
           <AlertCircle className="w-10 h-10 text-amber-500" />
         )}
-        <p className="max-w-md text-sm font-semibold text-gray-600">{message}</p>
+        <p className="max-w-md text-sm font-semibold text-gray-600 dark:text-gray-300">{message}</p>
         {!isLoading && onRetry && (
           <button
             type="button"
@@ -782,19 +782,19 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#121212] flex flex-col font-sans">
       {/* Top Header Bar */}
       <div className="pb-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl border border-border hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-xl border border-border dark:border-[#3F3F3F] hover:bg-gray-100 dark:hover:bg-[#2A2A2A] flex items-center justify-center text-gray-700 dark:text-gray-300 transition-colors cursor-pointer"
             title={qg.goBack}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl md:text-2xl font-black text-gray-950 tracking-tight">
+          <h1 className="text-xl md:text-2xl font-black text-gray-950 dark:text-white tracking-tight">
             {attemptTitle}
           </h1>
         </div>
@@ -803,15 +803,15 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end gap-0.5">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">{qg.graded}</span>
-              <span className="text-xs font-black text-gray-800">
+              <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{qg.graded}</span>
+              <span className="text-xs font-black text-gray-800 dark:text-gray-200">
                 {interpolate(qg.gradedQuestionsCount, {
                   graded: gradedQuestionsCount,
                   total: totalQuestionsCount,
                 })}
               </span>
             </div>
-            <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="w-28 h-2 bg-gray-200 dark:bg-[#333333] rounded-full overflow-hidden">
               <div
                 className="bg-[#990011] h-full rounded-full transition-all duration-300"
                 style={{ width: `${totalQuestionsCount ? (gradedQuestionsCount / totalQuestionsCount) * 100 : 0}%` }}
@@ -819,9 +819,9 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             </div>
           </div>
 
-          <div className="bg-red-50 border border-red-100 rounded-2xl px-4 py-2 flex items-center gap-2">
-            <span className="text-xs font-bold text-gray-500">{qg.score}</span>
-            <span className="text-xl md:text-2xl font-black text-[#990011]">
+          <div className="bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 rounded-2xl px-4 py-2 flex items-center gap-2">
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{qg.score}</span>
+            <span className="text-xl md:text-2xl font-black text-[#990011] dark:text-[#FF6B6B]">
               {scoreDisplay}{maxScore !== null && maxScore !== undefined ? `/${maxScore}` : ""}
             </span>
           </div>
@@ -832,13 +832,13 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
       <div className="flex-1 w-full mx-auto grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
         {/* Left Column: Active Question & Answer Details */}
         {currentQuestion ? (
-          <div className="bg-white rounded-3xl p-6 md:p-8 border border-border flex flex-col gap-6 shadow-xs">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 md:p-8 border border-border dark:border-[#3F3F3F] flex flex-col gap-6 shadow-xs">
             {/* Question Header */}
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <h2 className="text-xl md:text-2xl font-black text-[#990011] tracking-tight">
+            <div className="flex items-center justify-between border-b border-border dark:border-[#3F3F3F] pb-4">
+              <h2 className="text-xl md:text-2xl font-black text-[#990011] dark:text-[#FF6B6B] tracking-tight">
                 {interpolate(qg.questionNumber, { number: currentQuestionIndex + 1 })}
               </h2>
-              <span className="px-3.5 py-1 bg-gray-100 border border-border rounded-xl text-xs font-bold text-gray-700">
+              <span className="px-3.5 py-1 bg-gray-100 dark:bg-[#2A2A2A] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300">
                 {pointsMax !== null
                   ? interpolate(qg.points, { count: pointsMax })
                   : qg.noMaximumScore}
@@ -846,20 +846,20 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             </div>
 
             {/* Question Type Label */}
-            <div className="text-sm font-bold text-gray-700">
-              <span className="font-extrabold text-gray-900">{getQuestionTypeLabel(currentQuestion.type, qg)}</span>
+            <div className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              <span className="font-extrabold text-gray-900 dark:text-white">{getQuestionTypeLabel(currentQuestion.type, qg)}</span>
             </div>
 
             {/* Question Prompt */}
             {currentQuestion.content && (
-              <div className="text-sm md:text-base font-bold text-gray-850 leading-relaxed">
+              <div className="text-sm md:text-base font-bold text-gray-850 dark:text-gray-200 leading-relaxed">
                 <RenderHTML html={currentQuestion.content} />
               </div>
             )}
 
             {/* Question Image Media */}
             {(currentQuestion.mediaUrl || currentQuestion.imageUrl) && (
-              <div className="rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center p-2">
+              <div className="rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#222222] flex items-center justify-center p-2">
                 <img
                   src={currentQuestion.mediaUrl || currentQuestion.imageUrl}
                   alt={interpolate(qg.questionIllustration, {
@@ -876,26 +876,26 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             )}
 
             {/* Student Answer Box */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-border">
-              <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wide">
+            <div className="flex flex-col gap-2 pt-2 border-t border-border dark:border-[#3F3F3F]">
+              <span className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 {qg.answerLabel}
               </span>
 
               {isCurrentEssay ? (
-                <div className="bg-gray-50/80 border border-border rounded-2xl p-5 text-sm font-medium text-gray-800 leading-relaxed min-h-[120px] whitespace-pre-wrap">
+                <div className="bg-gray-50/80 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl p-5 text-sm font-medium text-gray-800 dark:text-gray-200 leading-relaxed min-h-[120px] whitespace-pre-wrap">
                   {currentQuestion.studentFillText || currentQuestion.answerText || qg.noStudentEssayAnswer}
                 </div>
               ) : currentQuestion.type === "FillInBlank" ? (
                 <div className="flex flex-col gap-3 text-xs">
-                  <div className="bg-gray-50 border border-border rounded-2xl p-4">
-                    <span className="font-bold text-gray-500 block mb-1">{qg.studentAnswer}</span>
-                    <p className="text-gray-900 font-bold whitespace-pre-wrap">
+                  <div className="bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl p-4">
+                    <span className="font-bold text-gray-500 dark:text-gray-400 block mb-1">{qg.studentAnswer}</span>
+                    <p className="text-gray-900 dark:text-white font-bold whitespace-pre-wrap">
                       {currentQuestion.studentFillText || currentQuestion.answerText || currentQuestion.fillText || qg.noAnswer}
                     </p>
                   </div>
-                  <div className="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 text-emerald-900">
-                    <span className="font-bold text-emerald-700 block mb-1">{qg.correctAnswer}</span>
-                    <p className="font-extrabold text-emerald-950">
+                  <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 rounded-2xl p-4 text-emerald-900 dark:text-emerald-300">
+                    <span className="font-bold text-emerald-700 dark:text-emerald-400 block mb-1">{qg.correctAnswer}</span>
+                    <p className="font-extrabold text-emerald-950 dark:text-emerald-200">
                       {Array.isArray(currentQuestion.correctAnswers)
                         ? currentQuestion.correctAnswers.join(" / ")
                         : (currentQuestion.correctAnswer || qg.noCorrectAnswer)}
@@ -915,16 +915,16 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                     const isRightOpt = correctAnswers.includes(strIdx) || correctAnswers.includes(opt)
                     const isMultipleChoice = currentQuestion.type === "MultipleChoiceMultiple"
 
-                    let style = "bg-gray-50 border-border text-gray-700"
-                    let boxStyle = "border-gray-300 bg-white"
+                    let style = "bg-gray-50 dark:bg-[#222222] border-border dark:border-[#3F3F3F] text-gray-700 dark:text-gray-300"
+                    let boxStyle = "border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1A1A1A]"
                     if (isStudentPick && isRightOpt) {
-                      style = "bg-emerald-50 border-emerald-300 text-emerald-900 font-bold"
+                      style = "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 font-bold"
                       boxStyle = "border-emerald-600 bg-emerald-600 text-white"
                     } else if (isStudentPick && !isRightOpt) {
-                      style = "bg-red-50 border-red-300 text-red-900 font-bold"
+                      style = "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-800 text-red-900 dark:text-red-300 font-bold"
                       boxStyle = "border-red-600 bg-red-600 text-white"
                     } else if (!isStudentPick && isRightOpt) {
-                      style = "bg-blue-50 border-blue-200 text-blue-900 font-bold"
+                      style = "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-300 font-bold"
                       boxStyle = "border-blue-600 bg-blue-600 text-white"
                     }
 
@@ -936,7 +936,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                               {(isStudentPick || isRightOpt) && <Check className="w-3 h-3 stroke-[3]" />}
                             </div>
                           ) : (
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isStudentPick || isRightOpt ? (isStudentPick && isRightOpt ? "border-emerald-600" : isStudentPick ? "border-red-600" : "border-blue-600") : "border-gray-300 bg-white"}`}>
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isStudentPick || isRightOpt ? (isStudentPick && isRightOpt ? "border-emerald-600" : isStudentPick ? "border-red-600" : "border-blue-600") : "border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1A1A1A]"}`}>
                               {(isStudentPick || isRightOpt) && (
                                 <div className={`w-2 h-2 rounded-full ${isStudentPick && isRightOpt ? "bg-emerald-600" : isStudentPick ? "bg-red-600" : "bg-blue-600"}`} />
                               )}
@@ -953,7 +953,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl p-12 text-center text-gray-400 font-bold border border-border">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-12 text-center text-gray-400 dark:text-gray-500 font-bold border border-border dark:border-[#3F3F3F]">
             {qg.questionInformationNotFound}
           </div>
         )}
@@ -961,11 +961,11 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
         {/* Right Column: Questions Navigation Grid & Grading Panel */}
         <div className="flex flex-col gap-6 select-none">
           {/* Card 1: Questions List Navigation Grid */}
-          <div className="bg-white rounded-3xl p-6 border border-border shadow-xs flex flex-col gap-4">
-            <h3 className="text-base font-black text-center text-gray-900 tracking-tight">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 border border-border dark:border-[#3F3F3F] shadow-xs flex flex-col gap-4">
+            <h3 className="text-base font-black text-center text-gray-900 dark:text-white tracking-tight">
               {qg.questionsList}
             </h3>
-            <div className="border-b border-border" />
+            <div className="border-b border-border dark:border-[#3F3F3F]" />
 
             <div className="grid grid-cols-5 gap-3 mx-auto">
               {displayQuestions.map((q, qIdx) => {
@@ -975,11 +975,11 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                 const hasGrade = (essayScores[qId] !== undefined && essayScores[qId] !== "") || (q.essayScore !== undefined && q.essayScore !== null) || q.essayScoreFinalized === true || (q.pointsEarned !== undefined && q.pointsEarned !== null)
                 const isPending = isEssay && !hasGrade
 
-                let btnStyle = "bg-gray-200 text-gray-800 font-bold hover:bg-gray-300"
+                let btnStyle = "bg-gray-200 dark:bg-[#2A2A2A] text-gray-800 dark:text-gray-200 font-bold hover:bg-gray-300 dark:hover:bg-[#333333]"
                 if (isCurrent) {
                   btnStyle = "bg-[#990011] text-white font-extrabold shadow-sm border-2 border-[#990011]"
                 } else if (isPending) {
-                  btnStyle = "border-2 border-red-500 text-red-600 bg-white font-bold hover:bg-red-50"
+                  btnStyle = "border-2 border-red-500 text-red-600 dark:text-red-400 bg-white dark:bg-[#1A1A1A] font-bold hover:bg-red-50 dark:hover:bg-red-950/20"
                 }
 
                 return (
@@ -997,21 +997,21 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
           </div>
 
           {/* Card 2: Grading & Feedback Panel */}
-          <div className="bg-white rounded-3xl p-6 border border-border shadow-xs flex flex-col gap-5">
-            <h3 className="text-base font-black text-center text-gray-900 tracking-tight">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 border border-border dark:border-[#3F3F3F] shadow-xs flex flex-col gap-5">
+            <h3 className="text-base font-black text-center text-gray-900 dark:text-white tracking-tight">
               {isCurrentEssay ? qg.gradingAndFeedback : qg.automaticGradingResult}
             </h3>
-            <div className="border-b border-border" />
+            <div className="border-b border-border dark:border-[#3F3F3F]" />
 
             {/* Student Avatar Card */}
-            <div className="bg-gray-50 border border-border rounded-2xl p-4 flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-full bg-gray-300 shrink-0 flex items-center justify-center text-gray-600 font-bold text-sm">
+            <div className="bg-gray-50 dark:bg-[#222222] border border-border dark:border-[#3F3F3F] rounded-2xl p-4 flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-full bg-gray-300 dark:bg-[#333333] shrink-0 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
                 {studentName.charAt(0).toUpperCase()}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-extrabold text-gray-900 text-sm truncate">{studentName}</span>
-                <span className="text-xs text-gray-500 font-medium">{qg.studentCode}: {studentCode}</span>
-                <span className="text-xs text-gray-400 font-medium">
+                <span className="font-extrabold text-gray-900 dark:text-white text-sm truncate">{studentName}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{qg.studentCode}: {studentCode}</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                   {submissionTime
                     ? `${qg.submitted}: ${formatTimeAgo(submissionTime, qg)}`
                     : qg.noSubmissionTime}
@@ -1023,17 +1023,17 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
               <>
                 {/* Score Stepper */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{qg.score}</label>
-                  <div className="flex items-center rounded-2xl overflow-hidden border border-border bg-gray-50 p-1">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{qg.score}</label>
+                  <div className="flex items-center rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] bg-gray-50 dark:bg-[#222222] p-1">
                     <button
                       type="button"
                       onClick={() => handleStepScore(-0.5)}
-                      className="w-10 h-10 rounded-xl bg-gray-700 hover:bg-gray-800 text-white flex items-center justify-center transition-all cursor-pointer shrink-0"
+                      className="w-10 h-10 rounded-xl bg-gray-700 dark:bg-gray-600 hover:bg-gray-800 dark:hover:bg-gray-500 text-white flex items-center justify-center transition-all cursor-pointer shrink-0"
                       aria-label={qg.decreaseScore}
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    <div className="flex-1 text-center font-extrabold text-sm text-gray-900 flex items-center justify-center gap-1 px-2">
+                    <div className="flex-1 text-center font-extrabold text-sm text-gray-900 dark:text-white flex items-center justify-center gap-1 px-2">
                       <input
                         type="number"
                         step="0.5"
@@ -1042,9 +1042,9 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                         value={currentScoreVal}
                         onChange={(e) => handleScoreInputChange(e.target.value)}
                         placeholder={qg.scorePlaceholder}
-                        className="w-20 text-center font-black text-red-700 bg-transparent focus:outline-none"
+                        className="w-20 text-center font-black text-red-700 dark:text-[#FF6B6B] bg-transparent focus:outline-none"
                       />
-                      <span className="text-gray-400 font-bold">
+                      <span className="text-gray-400 dark:text-gray-500 font-bold">
                         / {pointsMax ?? "—"}
                       </span>
                     </div>
@@ -1061,7 +1061,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
 
                 {/* Feedback Textarea */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{qg.feedback}</label>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{qg.feedback}</label>
                   <textarea
                     value={currentCommentVal}
                     onChange={(e) => {
@@ -1070,7 +1070,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                       }
                     }}
                     placeholder={qg.feedbackPlaceholder}
-                    className="w-full p-4 border border-border rounded-2xl text-xs font-semibold text-gray-800 bg-gray-50/50 min-h-[110px] resize-y focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
+                    className="w-full p-4 border border-border dark:border-[#3F3F3F] rounded-2xl text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-50/50 dark:bg-[#222222] min-h-[110px] resize-y focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-[#990011] transition-all"
                   />
                 </div>
 
@@ -1089,16 +1089,16 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                 </button>
               </>
             ) : (
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-center">
-                <p className="text-xs font-semibold text-blue-800">
+              <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/70 dark:bg-blue-950/30 p-4 text-center">
+                <p className="text-xs font-semibold text-blue-800 dark:text-blue-300">
                   {qg.automaticallyGradedNotice}
                 </p>
-                <p className="mt-2 text-lg font-black text-gray-900">
+                <p className="mt-2 text-lg font-black text-gray-900 dark:text-white">
                   {currentQuestion.pointsEarned ?? "—"}
                   {pointsMax !== null ? `/${pointsMax}` : ""}
                 </p>
                 {typeof currentQuestion.isCorrect === "boolean" && (
-                  <p className={`mt-1 text-xs font-bold ${currentQuestion.isCorrect ? "text-emerald-600" : "text-red-600"}`}>
+                  <p className={`mt-1 text-xs font-bold ${currentQuestion.isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                     {currentQuestion.isCorrect ? qg.correct : qg.incorrect}
                   </p>
                 )}
@@ -1142,14 +1142,14 @@ const QuestionDetailCard = ({ question, index }) => {
   }
 
   return (
-    <div className="bg-white rounded-3xl p-6 shadow-sm border border-border relative mb-4">
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-border dark:border-[#3F3F3F] relative mb-4">
       {/* Header Row */}
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-lg font-bold text-[#990011]">
+        <h4 className="text-lg font-bold text-[#990011] dark:text-[#FF6B6B]">
           {interpolate(qg.questionNumber, { number: index + 1 })}
         </h4>
         <div className="flex items-center gap-3">
-          <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-lg">
+          <span className="bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-300 text-xs font-semibold px-3 py-1 rounded-lg">
             {interpolate(qg.points, { count: points })}
           </span>
           <button
@@ -1167,20 +1167,20 @@ const QuestionDetailCard = ({ question, index }) => {
       </div>
 
       {/* Question Type Info */}
-      <div className="text-sm font-bold text-gray-700 mb-2">
+      <div className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
         <span className="font-extrabold text-gray-900">{getQuestionTypeLabel(type, qg)}</span>
       </div>
 
       {/* Content / Prompt */}
       {content && (
-        <div className="text-sm text-gray-700 font-medium leading-relaxed mb-4">
+        <div className="text-sm text-gray-700 dark:text-gray-300 font-medium leading-relaxed mb-4">
           <RenderHTML html={content} />
         </div>
       )}
 
       {/* Image Media Preview */}
       {imageUrl && (
-        <div className="mb-3 rounded-2xl overflow-hidden border border-border flex justify-center bg-gray-50 p-2">
+        <div className="mb-3 rounded-2xl overflow-hidden border border-border dark:border-[#3F3F3F] flex justify-center bg-gray-50 dark:bg-[#222222] p-2">
           <img
             src={imageUrl}
             alt={interpolate(qg.questionIllustration, { number: index + 1 })}
@@ -1210,13 +1210,13 @@ const QuestionDetailCard = ({ question, index }) => {
               <div
                 key={optIdx}
                 className={`w-full p-4 rounded-2xl border flex items-center gap-3 text-sm font-medium transition-all ${isCorrect
-                  ? "bg-red-50/50 border-red-300 text-red-900 font-bold"
-                  : "bg-gray-50/70 border-border text-gray-700"
+                  ? "bg-red-50/50 dark:bg-red-950/30 border-red-300 dark:border-red-900/40 text-red-900 dark:text-red-200 font-bold"
+                  : "bg-gray-50/70 dark:bg-[#222222] border-border dark:border-[#3F3F3F] text-gray-700 dark:text-gray-300"
                   }`}
               >
                 {isMultipleChoice ? (
                   <div
-                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${isCorrect ? "border-[#990011] bg-[#990011]" : "border-gray-300 bg-white"
+                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${isCorrect ? "border-[#990011] bg-[#990011]" : "border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1A1A1A]"
                       }`}
                   >
                     {isCorrect && (
@@ -1225,7 +1225,7 @@ const QuestionDetailCard = ({ question, index }) => {
                   </div>
                 ) : (
                   <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isCorrect ? "border-[#990011]" : "border-gray-300 bg-white"
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isCorrect ? "border-[#990011]" : "border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1A1A1A]"
                       }`}
                   >
                     {isCorrect && (
@@ -1242,10 +1242,10 @@ const QuestionDetailCard = ({ question, index }) => {
 
       {/* Fill In Blank Correct Answer display */}
       {type === "FillInBlank" && (
-        <div className="mt-3 p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl text-xs text-emerald-900 font-medium flex items-center gap-2.5 shadow-2xs">
+        <div className="mt-3 p-4 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 rounded-2xl text-xs text-emerald-900 dark:text-emerald-300 font-medium flex items-center gap-2.5 shadow-2xs">
           <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
           <div>
-            <span className="font-extrabold text-emerald-800">
+            <span className="font-extrabold text-emerald-800 dark:text-emerald-200">
               {correctAnswers.length > 0
                 ? correctAnswers.join(" / ")
                 : qg.noCorrectAnswer}
@@ -1256,7 +1256,7 @@ const QuestionDetailCard = ({ question, index }) => {
 
       {/* Essay / Text Question info */}
       {type === "Essay" && (
-        <div className="mt-3 p-4 bg-gray-50 rounded-2xl border border-border text-xs text-gray-500 font-medium">
+        <div className="mt-3 p-4 bg-gray-50 dark:bg-[#222222] rounded-2xl border border-border dark:border-[#3F3F3F] text-xs text-gray-500 dark:text-gray-400 font-medium">
           {interpolate(qg.essayManualWordLimit, {
             count: question.maxWordCount || 500,
           })}
@@ -1594,12 +1594,12 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       />
 
       {/* Main Header Card */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-border mb-6">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-border dark:border-[#3F3F3F] mb-6">
         {/* Top Header Row */}
         <div className="flex items-start justify-between gap-3 sm:gap-4">
           <div className="space-y-1.5 min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-              <h1 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900 leading-snug break-words">
+              <h1 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-snug break-words">
                 {quizDetail.name || quizDetail.title || qg.quizDetails}
               </h1>
               <StatusBadge status={quizDetail.status} />
@@ -1611,9 +1611,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             <button
               type="button"
               onClick={onEdit}
-              className="border border-[#990011]/30 hover:border-[#990011] text-[#990011] bg-white hover:bg-red-50/50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all active:scale-98"
+              className="border border-[#990011]/30 hover:border-[#990011] text-[#990011] dark:text-[#FF6B6B] bg-white dark:bg-[#222222] hover:bg-red-50/50 dark:hover:bg-red-950/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all active:scale-98"
             >
-              <Pencil className="w-3.5 h-3.5 text-[#990011]" />
+              <Pencil className="w-3.5 h-3.5 text-[#990011] dark:text-[#FF6B6B]" />
               <span>{qg.edit}</span>
             </button>
 
@@ -1622,14 +1622,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-border hover:bg-gray-50 flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-border dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center justify-center text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
                 aria-label={qg.moreOptions}
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
 
               {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-border py-2 z-30 text-xs font-medium animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#222222] rounded-2xl shadow-xl border border-border dark:border-[#3F3F3F] py-2 z-30 text-xs font-medium animate-in fade-in zoom-in-95 duration-100">
                   {quizDetail.status === "Draft" && (
                     <button
                       type="button"
@@ -1638,7 +1638,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         setIsMenuOpen(false)
                         handlePublish()
                       }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-emerald-600 flex items-center gap-2 disabled:opacity-50"
+                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-emerald-600 dark:text-emerald-400 flex items-center gap-2 disabled:opacity-50"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>{qg.publishQuiz}</span>
@@ -1652,7 +1652,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         setIsMenuOpen(false)
                         handleClose()
                       }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-amber-600 flex items-center gap-2 disabled:opacity-50"
+                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] text-amber-600 dark:text-amber-400 flex items-center gap-2 disabled:opacity-50"
                     >
                       <XCircle className="w-4 h-4" />
                       <span>{qg.closeQuiz}</span>
@@ -1665,7 +1665,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       setIsMenuOpen(false)
                       handleDelete()
                     }}
-                    className="w-full text-left px-4 py-2.5 hover:bg-red-50 text-red-600 flex items-center gap-2 disabled:opacity-50"
+                    className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 flex items-center gap-2 disabled:opacity-50"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span>{qg.deleteQuiz}</span>
@@ -1679,26 +1679,26 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
         {/* 4 Stat Cards Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mt-4 sm:mt-6">
           {/* Card 1: Số câu hỏi */}
-          <div className="bg-gray-100/80 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 border border-gray-200/80 shadow-2xs">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#990011] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50">
+          <div className="bg-gray-100/80 dark:bg-[#222222] rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 border border-gray-200/80 dark:border-[#3F3F3F] shadow-2xs">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50 dark:border-[#3F3F3F]">
               <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.questionCountLabel}</p>
-              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate">{qg.questionCountLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 dark:text-white mt-0.5 truncate">
                 {interpolate(qg.questionCountValue, { count: totalQuestions })}
               </p>
             </div>
           </div>
 
           {/* Card 2: Thời gian */}
-          <div className="bg-gray-100/80 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 border border-gray-200/80 shadow-2xs">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#990011] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50">
+          <div className="bg-gray-100/80 dark:bg-[#222222] rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 border border-gray-200/80 dark:border-[#3F3F3F] shadow-2xs">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50 dark:border-[#3F3F3F]">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.durationLabel}</p>
-              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate">{qg.durationLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 dark:text-white mt-0.5 truncate">
                 {timeLimit !== null && timeLimit !== undefined
                   ? interpolate(qg.minutes, { count: timeLimit })
                   : qg.noTimeLimit}
@@ -1707,26 +1707,26 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           </div>
 
           {/* Card 3: Thời hạn */}
-          <div className="bg-gray-100/80 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 border border-gray-200/80 shadow-2xs">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#990011] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50">
+          <div className="bg-gray-100/80 dark:bg-[#222222] rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 border border-gray-200/80 dark:border-[#3F3F3F] shadow-2xs">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50 dark:border-[#3F3F3F]">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.deadlineLabel}</p>
-              <div className="text-[11px] sm:text-sm font-bold text-gray-900 mt-0.5 leading-snug break-words">
+              <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate">{qg.deadlineLabel}</p>
+              <div className="text-[11px] sm:text-sm font-bold text-gray-900 dark:text-white mt-0.5 leading-snug break-words">
                 {formatDateRange(quizDetail.openTime, quizDetail.closeTime, qg, formatDate)}
               </div>
             </div>
           </div>
 
           {/* Card 4: Số lần nộp */}
-          <div className="bg-gray-100/80 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 border border-gray-200/80 shadow-2xs">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#990011] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50">
+          <div className="bg-gray-100/80 dark:bg-[#222222] rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 border border-gray-200/80 dark:border-[#3F3F3F] shadow-2xs">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-[#1A1A1A] text-[#990011] dark:text-[#FF6B6B] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50 dark:border-[#3F3F3F]">
               <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.attemptCountLabel}</p>
-              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate">{qg.attemptCountLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 dark:text-white mt-0.5 truncate">
                 {maxAttempts ?? "—"}
               </p>
             </div>
@@ -1735,13 +1735,13 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="border-b border-border mb-6 flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar whitespace-nowrap scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="border-b border-border dark:border-[#3F3F3F] mb-6 flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar whitespace-nowrap scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
         <button
           type="button"
           onClick={() => setActiveTab("overview")}
           className={`pb-3 px-1 text-xs sm:text-sm transition-colors cursor-pointer font-bold shrink-0 whitespace-nowrap ${activeTab === "overview"
-            ? "border-b-2 border-[#990011] text-[#990011]"
-            : "text-gray-500 hover:text-gray-700"
+            ? "border-b-2 border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B]"
+            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             }`}
         >
           {qg.overview}
@@ -1750,8 +1750,8 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           type="button"
           onClick={() => setActiveTab("submissions")}
           className={`pb-3 px-1 text-xs sm:text-sm transition-colors cursor-pointer font-bold shrink-0 whitespace-nowrap ${activeTab === "submissions"
-            ? "border-b-2 border-[#990011] text-[#990011]"
-            : "text-gray-500 hover:text-gray-700"
+            ? "border-b-2 border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B]"
+            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             }`}
         >
           {qg.submissions}
@@ -1760,8 +1760,8 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           type="button"
           onClick={() => setActiveTab("stats")}
           className={`pb-3 px-1 text-xs sm:text-sm transition-colors cursor-pointer font-bold shrink-0 whitespace-nowrap ${activeTab === "stats"
-            ? "border-b-2 border-[#990011] text-[#990011]"
-            : "text-gray-500 hover:text-gray-700"
+            ? "border-b-2 border-[#990011] dark:border-[#FF6B6B] text-[#990011] dark:text-[#FF6B6B]"
+            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             }`}
         >
           {qg.statistics}
@@ -1774,9 +1774,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           {/* Left Column (Main Content) */}
           <div className="lg:col-span-8 space-y-6">
             {/* Mô tả Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-border">
-              <h3 className="text-base font-bold text-gray-900 mb-3">{qg.description}</h3>
-              <div className="text-sm text-gray-600 leading-relaxed">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-border dark:border-[#3F3F3F]">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">{qg.description}</h3>
+              <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                 {quizDetail.description ? (
                   <RenderHTML html={quizDetail.description} />
                 ) : (
@@ -1789,13 +1789,13 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             <div>
               {/* Header line */}
               <div className="flex items-center justify-between mb-4 px-1">
-                <h3 className="text-base font-bold text-gray-900">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">
                   {interpolate(qg.questionsListWithCount, { count: totalQuestions })}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setIsQuestionsCollapsed(!isQuestionsCollapsed)}
-                  className="text-xs text-gray-500 hover:text-gray-700 font-medium flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium flex items-center gap-1 cursor-pointer"
                 >
                   <span>{isQuestionsCollapsed ? qg.expand : qg.collapse}</span>
                   {isQuestionsCollapsed ? (
@@ -1814,7 +1814,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       <QuestionDetailCard key={q.id || idx} question={q} index={idx} />
                     ))
                   ) : (
-                    <div className="rounded-3xl border border-border bg-white p-8 text-center text-sm font-medium text-gray-400">
+                    <div className="rounded-3xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-8 text-center text-sm font-medium text-gray-400 dark:text-gray-500">
                       {qg.quizHasNoQuestions}
                     </div>
                   )}
@@ -1854,20 +1854,20 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
           {/* Right Column (Sidebar) */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-border space-y-4">
-              <h3 className="text-base font-bold text-gray-900 mb-4">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-border dark:border-[#3F3F3F] space-y-4">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">
                 {qg.quizConfiguration}
               </h3>
 
-              <div className="divide-y divide-gray-100 text-xs">
+              <div className="divide-y divide-gray-100 dark:divide-[#2A2A2A] text-xs">
                 {/* Xáo trộn câu hỏi */}
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-gray-600 font-medium">{qg.shuffleQuestions}</span>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">{qg.shuffleQuestions}</span>
                   <span
                     className={
                       quizDetail.shuffleQuestions
                         ? "text-[#990011] font-bold"
-                        : "text-gray-900 font-bold"
+                        : "text-gray-900 dark:text-white font-bold"
                     }
                   >
                     {quizDetail.shuffleQuestions ? qg.yes : qg.no}
@@ -1876,12 +1876,12 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
                 {/* Xáo trộn đáp án */}
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-gray-600 font-medium">{qg.shuffleAnswers}</span>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">{qg.shuffleAnswers}</span>
                   <span
                     className={
                       quizDetail.shuffleOptions
                         ? "text-[#990011] font-bold"
-                        : "text-gray-900 font-bold"
+                        : "text-gray-900 dark:text-white font-bold"
                     }
                   >
                     {quizDetail.shuffleOptions ? qg.yes : qg.no}
@@ -1890,14 +1890,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
                 {/* Hiển thị đáp án sau khi nộp */}
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-gray-600 font-medium">
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">
                     {qg.showAnswersAfterSubmission}
                   </span>
                   <span
                     className={
                       quizDetail.showAnswersAfterSubmission
                         ? "text-[#990011] font-bold"
-                        : "text-gray-900 font-bold"
+                        : "text-gray-900 dark:text-white font-bold"
                     }
                   >
                     {quizDetail.showAnswersAfterSubmission ? qg.yes : qg.no}
@@ -1906,12 +1906,12 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
                 {/* Cho phép nộp muộn */}
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-gray-600 font-medium">{qg.allowLateSubmission}</span>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">{qg.allowLateSubmission}</span>
                   <span
                     className={
                       quizDetail.allowLateSubmission
                         ? "text-[#990011] font-bold"
-                        : "text-gray-900 font-bold"
+                        : "text-gray-900 dark:text-white font-bold"
                     }
                   >
                     {quizDetail.allowLateSubmission ? qg.yes : qg.no}
@@ -1930,7 +1930,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           {activeFiltersCount > 0 && (
             <div className="flex md:hidden items-center gap-1.5 flex-wrap pb-3">
               {submissionStatusFilter !== "all" && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-[#990011] text-xs font-semibold border border-red-100">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] text-xs font-semibold border border-red-100 dark:border-red-900/40">
                   <span>{submissionStatusOptions.find((o) => o.value === submissionStatusFilter)?.label}</span>
                   <button
                     type="button"
@@ -1942,7 +1942,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                 </span>
               )}
               {gradingStatusFilter !== "all" && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-[#990011] text-xs font-semibold border border-red-100">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] text-xs font-semibold border border-red-100 dark:border-red-900/40">
                   <span>{gradingStatusOptions.find((o) => o.value === gradingStatusFilter)?.label}</span>
                   <button
                     type="button"
@@ -1954,7 +1954,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                 </span>
               )}
               {scoreFilter !== "all" && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-[#990011] text-xs font-semibold border border-red-100">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/30 text-[#990011] dark:text-[#FF6B6B] text-xs font-semibold border border-red-100 dark:border-red-900/40">
                   <span>{scoreOptions.find((o) => o.value === scoreFilter)?.label}</span>
                   <button
                     type="button"
@@ -2040,7 +2040,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     return (
                       <div
                         key={st.studentId || st.id || idx}
-                        className="bg-white rounded-2xl p-3.5 border border-border shadow-2xs space-y-2.5 hover:border-gray-300 transition-colors"
+                        className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-3.5 border border-border dark:border-[#3F3F3F] shadow-2xs space-y-2.5 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                       >
                         {/* Top Row: Avatar, Name, Time & Eye Action Button */}
                         <div className="flex items-center justify-between gap-3">
@@ -2051,10 +2051,10 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                               fallbackInitials={qg.studentInitials || "HV"}
                             />
                             <div className="min-w-0">
-                              <h5 className="font-bold text-gray-900 text-sm truncate">
+                              <h5 className="font-bold text-gray-900 dark:text-white text-sm truncate">
                                 {studentName}
                               </h5>
-                              <div className="text-[11px] text-gray-400 font-medium flex items-center gap-1 mt-0.5">
+                              <div className="text-[11px] text-gray-400 dark:text-gray-500 font-medium flex items-center gap-1 mt-0.5">
                                 <Clock className="w-3 h-3 text-gray-400 shrink-0" />
                                 <span className="truncate">{interpolate(qg.lastUpdateAt, { time: timeAgo })}</span>
                               </div>
@@ -2080,7 +2080,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         </div>
 
                         {/* Bottom Row: Status Badges & Score */}
-                        <div className="pt-2 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
+                        <div className="pt-2 border-t border-gray-100 dark:border-[#2A2A2A] flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span
                               className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full inline-block ${subStatus.style}`}
@@ -2095,16 +2095,16 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                           </div>
 
                           {/* Score Badge */}
-                          <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 bg-gray-50 px-2 py-0.5 rounded-lg border border-border/60">
+                          <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#222222] px-2 py-0.5 rounded-lg border border-border/60 dark:border-[#3F3F3F]">
                             <span className="text-gray-400 text-[11px]">{qg.score}:</span>
-                            <span className="font-bold text-gray-900">{displayScore}</span>
+                            <span className="font-bold text-gray-900 dark:text-white">{displayScore}</span>
                           </div>
                         </div>
                       </div>
                     )
                   })
                 ) : (
-                  <div className="py-10 text-center text-gray-400 text-xs font-medium bg-gray-50/60 rounded-2xl border border-dashed border-border">
+                  <div className="py-10 text-center text-gray-400 dark:text-gray-500 text-xs font-medium bg-gray-50/60 dark:bg-[#222222]/60 rounded-2xl border border-dashed border-border dark:border-[#3F3F3F]">
                     {submissionSearch || submissionStatusFilter !== "all" || gradingStatusFilter !== "all" || scoreFilter !== "all"
                       ? qg.noMatchingStudents
                       : qg.noStudentSubmissions}
@@ -2113,17 +2113,17 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               </div>
 
               {/* DESKTOP VIEW: Table (>= md) */}
-              <div className="hidden md:block overflow-x-auto rounded-2xl border border-border">
+              <div className="hidden md:block overflow-x-auto rounded-2xl border border-border dark:border-[#3F3F3F]">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#F9FAFB] text-gray-700 font-semibold border-b border-border">
+                    <tr className="bg-[#F9FAFB] dark:bg-[#222222] text-gray-700 dark:text-gray-300 font-semibold border-b border-border dark:border-[#3F3F3F]">
                       {/* Col 1: Student info - no icon */}
-                      <th className="py-4 px-5 border-r border-border">
+                      <th className="py-4 px-5 border-r border-border dark:border-[#3F3F3F]">
                         <span>{qg.studentInformation}</span>
                       </th>
 
                       {/* Col 2: Submission status */}
-                      <th className="py-4 px-5 border-r border-border text-center">
+                      <th className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center">
                         <TableColumnFilter
                           title={qg.submissionStatus}
                           filterTitle={qg.submissionStatus}
@@ -2142,7 +2142,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       </th>
 
                       {/* Col 3: Grading status */}
-                      <th className="py-4 px-5 border-r border-border text-center">
+                      <th className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center">
                         <TableColumnFilter
                           title={qg.gradingStatus}
                           filterTitle={qg.gradingStatus}
@@ -2161,7 +2161,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       </th>
 
                       {/* Col 4: Score */}
-                      <th className="py-4 px-5 border-r border-border text-center">
+                      <th className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center">
                         <TableColumnFilter
                           title={qg.score}
                           filterTitle={qg.score}
@@ -2185,7 +2185,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
+                  <tbody className="divide-y divide-gray-200 dark:divide-[#2A2A2A] bg-white dark:bg-[#1A1A1A]">
                     {filteredStudentsList.length > 0 ? (
                       filteredStudentsList.map((st, idx) => {
                         const subStatus = getSubmissionStatus(st, qg)
@@ -2204,10 +2204,10 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         return (
                           <tr
                             key={st.studentId || st.id || idx}
-                            className="hover:bg-gray-50/60 transition-colors"
+                            className="hover:bg-gray-50/60 dark:hover:bg-[#222222]/60 transition-colors"
                           >
                             {/* Col 1: Student info */}
-                            <td className="py-4 px-5 border-r border-border">
+                            <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F]">
                               <div className="flex items-center gap-3">
                                 <QuizStudentAvatar
                                   student={st}
@@ -2215,10 +2215,10 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                                   fallbackInitials={qg.studentInitials || "HV"}
                                 />
                                 <div>
-                                  <h5 className="font-bold text-gray-900 text-sm">
+                                  <h5 className="font-bold text-gray-900 dark:text-white text-sm">
                                     {studentName}
                                   </h5>
-                                  <div className="text-xs text-gray-400 font-medium flex items-center gap-1 mt-0.5">
+                                  <div className="text-xs text-gray-400 dark:text-gray-500 font-medium flex items-center gap-1 mt-0.5">
                                     <Clock className="w-3.5 h-3.5 text-gray-400" />
                                     <span>{interpolate(qg.lastUpdateAt, { time: timeAgo })}</span>
                                   </div>
@@ -2227,7 +2227,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 2: Submission status */}
-                            <td className="py-4 px-5 border-r border-border text-center">
+                            <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${subStatus.style}`}
                               >
@@ -2236,7 +2236,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 3: Grading status */}
-                            <td className="py-4 px-5 border-r border-border text-center">
+                            <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${gradStatus.style}`}
                               >
@@ -2245,7 +2245,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 4: Score */}
-                            <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800">
+                            <td className="py-4 px-5 border-r border-border dark:border-[#3F3F3F] text-center text-sm font-semibold text-gray-800 dark:text-gray-200">
                               {displayScore}
                             </td>
 
@@ -2274,7 +2274,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       <tr>
                         <td
                           colSpan={5}
-                          className="py-12 text-center text-gray-400 text-xs font-medium"
+                          className="py-12 text-center text-gray-400 dark:text-gray-500 text-xs font-medium"
                         >
                           {submissionSearch || submissionStatusFilter !== "all" || gradingStatusFilter !== "all" || scoreFilter !== "all"
                             ? qg.noMatchingStudents
@@ -2290,7 +2290,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                 page={submissionPage}
                 totalPages={studentsPageData.totalPages || (studentsPageData.hasNextPage ? submissionPage + 1 : 1)}
                 onChangePage={setSubmissionPage}
-                className="pt-4 border-t border-gray-100"
+                className="pt-4 border-t border-gray-100 dark:border-[#2A2A2A]"
               />
             </>
           )}
@@ -2302,7 +2302,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
         (isStatsLoading || (isStatsFetching && statsResponse === undefined)) ? (
           <div
             role="status"
-            className="flex min-h-[320px] items-center justify-center rounded-3xl border border-border bg-white"
+            className="flex min-h-[320px] items-center justify-center rounded-3xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A]"
           >
             <LoadingSpinner />
             <span className="sr-only">{qg.loadingStatistics}</span>
@@ -2310,7 +2310,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
         ) : isStatsError ? (
           <div
             role="alert"
-            className="flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-3xl border border-red-100 bg-white p-8 text-center"
+            className="flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-3xl border border-red-100 dark:border-red-900/40 bg-white dark:bg-[#1A1A1A] p-8 text-center"
           >
             <AlertCircle className="h-10 w-10 text-red-500" />
             <p className="text-sm font-semibold text-gray-600">
@@ -2327,7 +2327,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
         ) : !statsData ? (
           <div
             role="status"
-            className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-white p-8 text-center"
+            className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-8 text-center"
           >
             <BarChart2 className="h-10 w-10 text-gray-300" />
             <p className="text-sm font-semibold text-gray-500">
@@ -2342,10 +2342,10 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               </span>
             )}
             {/* Header Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-border">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-border dark:border-[#3F3F3F]">
               {/* Title & Export Row */}
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                   {interpolate(qg.statisticsTitle, {
                     quizTitle: quizDetail.name || quizDetail.title || qg.quiz,
                   })}
@@ -2364,52 +2364,52 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               {/* 4 Stat Cards Row */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Card 1: Điểm TB */}
-                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-border">
-                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center font-bold text-sm text-[#990011] shrink-0">
+                <div className="bg-gray-50/70 dark:bg-[#222222] rounded-2xl p-4 flex items-center gap-3 border border-border dark:border-[#3F3F3F]">
+                  <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center font-bold text-sm text-[#990011] dark:text-[#FF6B6B] shrink-0">
                     Σ
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">{qg.averageScore}</p>
-                    <p className="text-base font-bold text-gray-900 mt-0.5">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{qg.averageScore}</p>
+                    <p className="text-base font-bold text-gray-900 dark:text-white mt-0.5">
                       {formatStatistic(statsData.averageScore)}
                     </p>
                   </div>
                 </div>
 
                 {/* Card 2: Tỷ lệ hoàn thành */}
-                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-border">
-                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#990011] shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-[#990011]" />
+                <div className="bg-gray-50/70 dark:bg-[#222222] rounded-2xl p-4 flex items-center gap-3 border border-border dark:border-[#3F3F3F]">
+                  <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center text-[#990011] dark:text-[#FF6B6B] shrink-0">
+                    <CheckCircle2 className="w-5 h-5 text-[#990011] dark:text-[#FF6B6B]" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">{qg.completionRate}</p>
-                    <p className="text-base font-bold text-gray-900 mt-0.5">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{qg.completionRate}</p>
+                    <p className="text-base font-bold text-gray-900 dark:text-white mt-0.5">
                       {formatStatistic(statsData.completionRate, "%")}
                     </p>
                   </div>
                 </div>
 
                 {/* Card 3: Điểm cao nhất */}
-                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-border">
-                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#990011] shrink-0">
-                    <TrendingUp className="w-5 h-5 text-[#990011]" />
+                <div className="bg-gray-50/70 dark:bg-[#222222] rounded-2xl p-4 flex items-center gap-3 border border-border dark:border-[#3F3F3F]">
+                  <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center text-[#990011] dark:text-[#FF6B6B] shrink-0">
+                    <TrendingUp className="w-5 h-5 text-[#990011] dark:text-[#FF6B6B]" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">{qg.highestScore}</p>
-                    <p className="text-base font-bold text-gray-900 mt-0.5">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{qg.highestScore}</p>
+                    <p className="text-base font-bold text-gray-900 dark:text-white mt-0.5">
                       {formatStatistic(statsData.highestScore)}
                     </p>
                   </div>
                 </div>
 
                 {/* Card 4: Điểm thấp nhất */}
-                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-border">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 shrink-0">
-                    <TrendingDown className="w-5 h-5 text-gray-700" />
+                <div className="bg-gray-50/70 dark:bg-[#222222] rounded-2xl p-4 flex items-center gap-3 border border-border dark:border-[#3F3F3F]">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#2A2A2A] flex items-center justify-center text-gray-700 dark:text-gray-300 shrink-0">
+                    <TrendingDown className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">{qg.lowestScore}</p>
-                    <p className="text-base font-bold text-gray-900 mt-0.5">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{qg.lowestScore}</p>
+                    <p className="text-base font-bold text-gray-900 dark:text-white mt-0.5">
                       {formatStatistic(statsData.lowestScore)}
                     </p>
                   </div>
@@ -2420,8 +2420,8 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             {/* Bottom Grid: Left (Score Distribution) + Right (Top Missed Questions) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Left Column: Phân bố điểm số */}
-              <div className="lg:col-span-8 bg-white rounded-3xl p-6 shadow-sm border border-border flex flex-col justify-between">
-                <h3 className="text-base font-bold text-gray-900 mb-4">
+              <div className="lg:col-span-8 bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-border dark:border-[#3F3F3F] flex flex-col justify-between">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">
                   {qg.scoreDistribution}
                 </h3>
 
@@ -2471,24 +2471,24 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               </div>
 
               {/* Right Column: Câu hỏi sai nhiều nhất */}
-              <div className="lg:col-span-4 bg-white rounded-3xl p-6 shadow-sm border border-border flex flex-col">
-                <h3 className="text-base font-bold text-gray-900 mb-6">
+              <div className="lg:col-span-4 bg-white dark:bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-border dark:border-[#3F3F3F] flex flex-col">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-6">
                   {qg.mostMissedQuestions}
                 </h3>
 
                 {topMissedList.length > 0 ? (
-                  <div className="divide-y divide-gray-100 space-y-3">
+                  <div className="divide-y divide-gray-100 dark:divide-[#2A2A2A] space-y-3">
                     {topMissedList.map((q, idx) => (
                       <div key={idx} className="pt-3 first:pt-0">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-bold text-gray-900">
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">
                             {interpolate(qg.questionShort, { number: q.questionNumber })}
                           </h4>
-                          <span className="text-xs font-bold text-[#990011]">
+                          <span className="text-xs font-bold text-[#990011] dark:text-[#FF6B6B]">
                             {interpolate(qg.percentCorrect, { percent: q.correctPercent })}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 font-medium line-clamp-1 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium line-clamp-1 mt-1">
                           {q.questionSnippet}
                         </p>
                       </div>
