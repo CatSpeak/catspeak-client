@@ -6,6 +6,7 @@ import {
   getCommunityName,
   getCommunityLanguageId,
   getCommunityCode,
+  getLocalizedCommunityName,
   hasJapaneseKana,
   hasCjkIdeographs,
   isLikelyChineseText,
@@ -57,6 +58,36 @@ test("getCommunityName converts code or id safely", () => {
 
   assert.equal(getCommunityName("vi"), "Vietnamese")
   assert.equal(getCommunityName(null), "English")
+})
+
+test("getLocalizedCommunityName localizes according to translation dictionary", () => {
+  const viT = {
+    header: {
+      countries: {
+        english: "Anh",
+        japan: "Nhật Bản",
+        china: "Trung Quốc",
+      },
+    },
+  }
+  assert.equal(getLocalizedCommunityName("Japanese", viT), "Nhật Bản")
+  assert.equal(getLocalizedCommunityName("ja", viT), "Nhật Bản")
+  assert.equal(getLocalizedCommunityName(3, viT), "Nhật Bản")
+  assert.equal(getLocalizedCommunityName("English", viT), "Anh")
+  assert.equal(getLocalizedCommunityName("Chinese", viT), "Trung Quốc")
+
+  const enT = {
+    header: {
+      countries: {
+        english: "English",
+        japan: "Japan",
+        china: "China",
+      },
+    },
+  }
+  assert.equal(getLocalizedCommunityName("Japanese", enT), "Japan")
+  assert.equal(getLocalizedCommunityName("Chinese", enT), "China")
+  assert.equal(getLocalizedCommunityName("English", enT), "English")
 })
 
 test("detects Japanese kana and Chinese CJK text", () => {

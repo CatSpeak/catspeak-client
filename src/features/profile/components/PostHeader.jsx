@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
@@ -8,6 +8,11 @@ import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import TeacherBadge from "@/shared/components/ui/TeacherBadge"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import {
+  getCommunityName,
+  getLocalizedCommunityName,
+} from "@/features/news/utils/newsUtils"
+import { China, Japan, UK } from "@/shared/assets/icons/flags"
 
 const isUserTeacher = (user) =>
   Boolean(user?.isTeacher ?? user?.authorIsTeacher)
@@ -32,6 +37,24 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
         : post.privacy === "Private"
           ? t.profile?.post?.header?.privacy?.private || "Chỉ mình tôi"
           : post.privacy
+
+  const communityName = post.languageCommunity
+    ? getCommunityName(post.languageCommunity)
+    : null
+
+  const communityConfig = useMemo(() => {
+    if (!communityName || communityName === "All") return null
+    const flag =
+      communityName === "English"
+        ? UK
+        : communityName === "Japanese"
+          ? Japan
+          : China
+    return {
+      flag,
+      label: getLocalizedCommunityName(communityName, t),
+    }
+  }, [communityName, t])
 
   const handleProfileClick = (e) => {
     if (authorAccountId) {
@@ -81,10 +104,39 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
 
           <div className="text-sm text-secondary dark:text-[#AAAAAA] flex items-center flex-wrap gap-x-2">
             <span className="whitespace-nowrap">{formattedTime}</span>
+
+            {communityConfig &&
+              (!post.privacy ||
+                String(post.privacy).toLowerCase() === "public" ||
+                post.privacy === 1) && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-secondary dark:bg-[#AAAAAA] shrink-0" />
+                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="flex h-3.5 w-3.5 shrink-0 overflow-hidden rounded-full border border-border">
+                      <img
+                        src={communityConfig.flag}
+                        alt=""
+                        className="block h-full w-full object-cover"
+                      />
+                    </span>
+                    <span>{communityConfig.label}</span>
+                  </span>
+                </>
+              )}
+
             {privacyText && (
               <>
                 <span className="w-1 h-1 rounded-full bg-secondary dark:bg-[#AAAAAA] shrink-0" />
                 <span className="whitespace-nowrap">{privacyText}</span>
+              </>
+            )}
+
+            {typeof post.viewCount === "number" && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-secondary dark:bg-[#AAAAAA] shrink-0" />
+                <span className="whitespace-nowrap">
+                  {post.viewCount} {t.news?.views || "lượt xem"}
+                </span>
               </>
             )}
           </div>

@@ -202,6 +202,12 @@ export default {
         photo: "写真",
         video: "動画",
         document: "資料",
+        contentRequired: "投稿内容を入力してください。",
+        fileCountLimit: "投稿ごとに添付できるファイルは最大{max}件です。",
+        fileSizeLimit:
+          "ファイル '{fileName}' が最大サイズ{maxSize}MBを超えています。",
+        fileTypeNotAllowed:
+          "ファイル '{fileName}' の形式は許可されていません。許可されている形式：{allowed}。",
         privacy: {
           public: "公開",
           friendsOnly: "友達のみ",

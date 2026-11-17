@@ -222,6 +222,10 @@ export default {
         video: "视频",
         document: "文件",
         contentRequired: "帖子内容不能为空。",
+        fileCountLimit: "每个帖子最多只能添加{max}个附件。",
+        fileSizeLimit: "文件 '{fileName}' 超过了{maxSize}MB的最大限制。",
+        fileTypeNotAllowed:
+          "不支持文件 '{fileName}' 的格式。支持的格式包括：{allowed}。",
         privacy: {
           public: "公开",
           friendsOnly: "好友",
