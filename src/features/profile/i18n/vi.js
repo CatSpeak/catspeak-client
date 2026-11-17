@@ -223,6 +223,10 @@ export default {
         video: "Video",
         document: "Tài liệu",
         contentRequired: "Nội dung bài viết không được để trống.",
+        fileCountLimit: "Tối đa {max} tệp đính kèm cho mỗi bài viết.",
+        fileSizeLimit: "Tệp '{fileName}' vượt quá dung lượng tối đa {maxSize}MB.",
+        fileTypeNotAllowed:
+          "Định dạng tệp '{fileName}' không được hỗ trợ. Các định dạng được phép: {allowed}.",
         privacy: {
           public: "Công khai",
           friendsOnly: "Bạn bè",

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useMemo } from "react"
 import { Editor } from "@tinymce/tinymce-react"
 import {
   Image,
@@ -19,6 +19,9 @@ import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import PostEditorPreviews from "./PostEditorPreviews"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
+import { China, Japan, UK } from "@/shared/assets/icons/flags"
+import { getCommunityName } from "@/features/news/utils/newsUtils"
+import { validatePostFiles } from "@/features/profile/utils/postFileValidation"
 
 const getFileType = (file) => {
   if (file && file.type) {
@@ -72,6 +75,40 @@ const PostEditorModal = ({
       icon: <Lock />,
     },
   ]
+
+  const COMMUNITY_OPTIONS = useMemo(
+    () => [
+      {
+        value: "English",
+        label: t.header?.countries?.english || "English",
+        icon: (
+          <span className="flex h-4 w-4 shrink-0 overflow-hidden rounded-full border border-border">
+            <img src={UK} alt="" className="block h-full w-full object-cover" />
+          </span>
+        ),
+      },
+      {
+        value: "Japanese",
+        label: t.header?.countries?.japan || "Japan",
+        icon: (
+          <span className="flex h-4 w-4 shrink-0 overflow-hidden rounded-full border border-border">
+            <img src={Japan} alt="" className="block h-full w-full object-cover" />
+          </span>
+        ),
+      },
+      {
+        value: "Chinese",
+        label: t.header?.countries?.china || "China",
+        icon: (
+          <span className="flex h-4 w-4 shrink-0 overflow-hidden rounded-full border border-border">
+            <img src={China} alt="" className="block h-full w-full object-cover" />
+          </span>
+        ),
+      },
+    ],
+    [t],
+  )
+
   const [title, setTitle] = useState(initialTitle)
   const [content, setContent] = useState(initialContent)
   const [privacy, setPrivacy] = useState(initialPrivacy)
@@ -79,13 +116,12 @@ const PostEditorModal = ({
   const [removedMediaIds, setRemovedMediaIds] = useState([])
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState("")
-  const [languageCommunity] = useState(() => {
-    if (isEditMode) return initialLanguageCommunity
+  const [languageCommunity, setLanguageCommunity] = useState(() => {
+    if (initialLanguageCommunity && initialLanguageCommunity !== "All") {
+      return getCommunityName(initialLanguageCommunity)
+    }
     const localLang = localStorage.getItem("communityLanguage")
-    if (localLang === "zh") return "Chinese"
-    if (localLang === "en") return "English"
-    if (localLang === "ja") return "Japanese"
-    return "All"
+    return getCommunityName(localLang || "en")
   })
   const [files, setFiles] = useState([])
   const imageInputRef = useRef(null)
@@ -114,24 +150,36 @@ const PostEditorModal = ({
       setTitle(initialTitle)
       setContent(initialContent)
       setPrivacy(initialPrivacy)
+      if (initialLanguageCommunity && initialLanguageCommunity !== "All") {
+        setLanguageCommunity(getCommunityName(initialLanguageCommunity))
+      } else {
+        const localLang = localStorage.getItem("communityLanguage")
+        setLanguageCommunity(getCommunityName(localLang || "en"))
+      }
       setExistingMedias(initialMedias)
       setRemovedMediaIds([])
       setErrors({})
       setSubmitError("")
 
       if (initialFiles && initialFiles.length > 0) {
-        const mapped = initialFiles.map((file) => {
-          const type = getFileType(file)
-          return {
-            file,
-            type,
-            previewUrl:
-              type === "Image" || type === "Video"
-                ? URL.createObjectURL(file)
-                : null,
-          }
-        })
-        setFiles(mapped)
+        const validation = validatePostFiles(initialFiles, 0, t)
+        if (!validation.isValid) {
+          toast.error(validation.error)
+          setFiles([])
+        } else {
+          const mapped = initialFiles.map((file) => {
+            const type = getFileType(file)
+            return {
+              file,
+              type,
+              previewUrl:
+                type === "Image" || type === "Video"
+                  ? URL.createObjectURL(file)
+                  : null,
+            }
+          })
+          setFiles(mapped)
+        }
       } else {
         setFiles([])
       }
@@ -158,17 +206,13 @@ const PostEditorModal = ({
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const incomingFiles = Array.from(e.target.files)
-      const totalCount = files.length + existingMedias.length + incomingFiles.length
-      if (totalCount > 5) {
-        toast.error("Tối đa 5 tệp đính kèm cho mỗi bài viết.")
-        return
-      }
+      const currentCount = files.length + existingMedias.length
+      const validation = validatePostFiles(incomingFiles, currentCount, t)
+      e.target.value = ""
 
-      for (const file of incomingFiles) {
-        if (file.size > 50 * 1024 * 1024) {
-          toast.error(`Tệp ${file.name} vượt quá giới hạn 50MB.`)
-          return
-        }
+      if (!validation.isValid) {
+        toast.error(validation.error)
+        return
       }
 
       const newFiles = incomingFiles.map((file) => {
@@ -235,8 +279,17 @@ const PostEditorModal = ({
         "Nội dung bài viết không được để trống."
     }
 
+    if (privacy === "Public" && (!languageCommunity || languageCommunity === "All")) {
+      validationErrors.LanguageCommunity =
+        t.profile?.post?.editor?.communityRequired ||
+        "Vui lòng chọn cộng đồng nơi hiển thị bài viết."
+    }
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
+      if (validationErrors.LanguageCommunity && !validationErrors.Content) {
+        setSubmitError(validationErrors.LanguageCommunity)
+      }
       return
     }
 
@@ -250,7 +303,9 @@ const PostEditorModal = ({
     )
     formData.append("Content", content)
     formData.append("Privacy", privacy)
-    formData.append("LanguageCommunity", languageCommunity)
+    const targetCommunity =
+      privacy === "Public" ? languageCommunity : languageCommunity || "All"
+    formData.append("LanguageCommunity", targetCommunity)
 
     const fileFieldName = isEditMode ? "NewFiles" : "Files"
     files.forEach((item) => {
@@ -301,7 +356,7 @@ const PostEditorModal = ({
         <input
           type="file"
           multiple
-          accept="image/*"
+          accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
           className="hidden"
           ref={imageInputRef}
           onChange={handleFileChange}
@@ -318,7 +373,7 @@ const PostEditorModal = ({
         <input
           type="file"
           multiple
-          accept="video/*"
+          accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm"
           className="hidden"
           ref={videoInputRef}
           onChange={handleFileChange}
@@ -335,7 +390,7 @@ const PostEditorModal = ({
         <input
           type="file"
           multiple
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.txt,.csv"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar"
           className="hidden"
           ref={documentInputRef}
           onChange={handleFileChange}
@@ -351,7 +406,11 @@ const PostEditorModal = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <PillButton onClick={handleSubmit} variant="primary">
+        <PillButton
+          onClick={handleSubmit}
+          variant="primary"
+          disabled={isSubmitting}
+        >
           {isEditMode
             ? t.profile?.post?.editor?.saveChanges || "Lưu thay đổi"
             : t.profile?.post?.editor?.post || "Đăng"}
@@ -399,11 +458,21 @@ const PostEditorModal = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 flex-wrap">
           <Dropdown
             options={PRIVACY_OPTIONS}
             value={privacy}
-            onChange={(val) => setPrivacy(val)}
+            onChange={(val) => {
+              setPrivacy(val)
+              if (val !== "Public") {
+                if (errors.LanguageCommunity) {
+                  setErrors((prev) => ({ ...prev, LanguageCommunity: null }))
+                }
+                if (submitError && submitError === errors.LanguageCommunity) {
+                  setSubmitError("")
+                }
+              }
+            }}
             dropdownClassName="w-max max-w-[300px]"
             trigger={(isOpen, selectedOption, toggleOpen) => (
               <PillButton
@@ -424,6 +493,40 @@ const PostEditorModal = ({
               </PillButton>
             )}
           />
+
+          {privacy === "Public" && (
+            <Dropdown
+              options={COMMUNITY_OPTIONS}
+              value={languageCommunity}
+              onChange={(val) => {
+                setLanguageCommunity(val)
+                if (errors.LanguageCommunity) {
+                  setErrors((prev) => ({ ...prev, LanguageCommunity: null }))
+                }
+                if (submitError && submitError === errors.LanguageCommunity) {
+                  setSubmitError("")
+                }
+              }}
+              dropdownClassName="w-max max-w-[300px]"
+              trigger={(isOpen, selectedOption, toggleOpen) => (
+                <PillButton
+                  type="button"
+                  onClick={toggleOpen}
+                  variant="secondary"
+                  startIcon={selectedOption?.icon}
+                  endIcon={
+                    <ChevronDown
+                      className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                    />
+                  }
+                >
+                  {selectedOption
+                    ? selectedOption.label
+                    : t.header?.chooseCommunity || "Chọn cộng đồng"}
+                </PillButton>
+              )}
+            />
+          )}
         </div>
 
         <TextInput

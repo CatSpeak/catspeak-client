@@ -222,6 +222,11 @@ export default {
         video: "Video",
         document: "Document",
         contentRequired: "Post content cannot be empty.",
+        fileCountLimit: "Maximum {max} attachments allowed per post.",
+        fileSizeLimit:
+          "File '{fileName}' exceeds the maximum allowed size of {maxSize}MB.",
+        fileTypeNotAllowed:
+          "File extension of '{fileName}' is not allowed. Allowed extensions are: {allowed}.",
         privacy: {
           public: "Public",
           friendsOnly: "Friends",

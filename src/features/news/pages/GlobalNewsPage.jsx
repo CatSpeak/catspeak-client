@@ -1,22 +1,46 @@
 import React, { useState, useRef, useEffect, useMemo } from "react"
+import { useParams } from "react-router-dom"
 import { Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPostsQuery } from "@/store/api/social/postsApi"
 import PostFeedList from "@/features/profile/components/PostFeedList"
+import CreatePostBox from "@/features/profile/components/CreatePostBox"
+import {
+  getCommunityName,
+  getCommunityLanguageId,
+  isPostInCommunity,
+} from "../utils/newsUtils"
 
 const GlobalNewsPage = () => {
-  const { t } = useLanguage()
+  const { lang } = useParams()
+  const { t, language } = useLanguage()
   const [page, setPage] = useState(1)
   const pageSize = 10
 
-  // Fetch social posts using postType = 2 (SocialPost)
+  const currentCommunity = useMemo(() => {
+    return getCommunityName(
+      lang || localStorage.getItem("communityLanguage") || language || "en",
+    )
+  }, [lang, language])
+
+  const currentCommunityId = useMemo(() => {
+    return getCommunityLanguageId(lang || currentCommunity)
+  }, [lang, currentCommunity])
+
+  // Reset page when community changes
+  useEffect(() => {
+    setPage(1)
+  }, [currentCommunityId])
+
+  // Fetch social posts using postType = 2 (SocialPost) and languageCommunity
   const { data, error, isLoading, isFetching } = useGetPostsQuery({
     page,
     pageSize,
     postType: 2,
+    languageCommunity: currentCommunityId,
   })
 
-  // Filter public posts
+  // Filter public posts belonging to current community
   const posts = useMemo(() => {
     const rawList = Array.isArray(data?.data)
       ? data.data
@@ -25,9 +49,10 @@ const GlobalNewsPage = () => {
         : []
     return rawList.filter(
       (post) =>
-        !post.privacy || String(post.privacy).toLowerCase() === "public",
+        (!post.privacy || String(post.privacy).toLowerCase() === "public") &&
+        isPostInCommunity(post, currentCommunityId),
     )
-  }, [data])
+  }, [data, currentCommunityId])
 
   // Infinite scroll observer for vertical social feed
   const lastPostRef = useRef(null)
@@ -46,7 +71,9 @@ const GlobalNewsPage = () => {
   }, [posts, data?.hasMore, isFetching])
 
   return (
-    <div className="flex flex-col w-full max-w-3xl mx-auto p-4">
+    <div className="flex flex-col w-full max-w-3xl mx-auto p-4 gap-4">
+      <CreatePostBox defaultCommunity={currentCommunity} />
+
       <PostFeedList
         posts={posts}
         isLoading={isLoading && page === 1}

@@ -170,6 +170,27 @@ export const getCommunityCode = (codeOrId) => {
   return COMMUNITY_LANGUAGE_CODES[id] || "en"
 }
 
+/**
+ * Maps community name, route code, or numeric ID to localized label using current translation dictionary (t)
+ *
+ * @param {string|number} [codeOrName]
+ * @param {Object} [t]
+ * @returns {string}
+ */
+export const getLocalizedCommunityName = (codeOrName, t) => {
+  const canonical = getCommunityName(codeOrName)
+  if (canonical === "English") {
+    return t?.header?.countries?.english || "Anh"
+  }
+  if (canonical === "Japanese") {
+    return t?.header?.countries?.japan || "Nhật Bản"
+  }
+  if (canonical === "Chinese") {
+    return t?.header?.countries?.china || "Trung Quốc"
+  }
+  return canonical
+}
+
 /** Japanese Hiragana range [\u3040-\u309F] or Katakana range [\u30A0-\u30FF] */
 export const HAS_JAPANESE_KANA_REGEX = /[\u3040-\u309f\u30a0-\u30ff]/
 
