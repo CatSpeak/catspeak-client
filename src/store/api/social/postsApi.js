@@ -35,6 +35,7 @@ export const postsApi = socialApi.injectEndpoints({
         searchKeyword,
         sortBy,
         topicIds,
+        languageCommunity,
       } = {}) => ({
         url: "/Post",
         params: {
@@ -50,6 +51,7 @@ export const postsApi = socialApi.injectEndpoints({
               : topicIds !== undefined && topicIds !== null && topicIds !== ""
                 ? [topicIds]
                 : undefined,
+          languageCommunity,
         },
       }),
       providesTags: ["Post"],
@@ -57,7 +59,12 @@ export const postsApi = socialApi.injectEndpoints({
         const topicKey = Array.isArray(queryArgs?.topicIds)
           ? queryArgs.topicIds.slice().sort().join(",")
           : queryArgs?.topicIds || ""
-        return `${endpointName}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}_${topicKey}`
+        const langKey =
+          queryArgs?.languageCommunity !== undefined &&
+          queryArgs?.languageCommunity !== null
+            ? queryArgs.languageCommunity
+            : "all"
+        return `${endpointName}_${langKey}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}_${topicKey}`
       },
       transformResponse: (response, meta, arg) => {
         const items = Array.isArray(response?.data)
@@ -100,7 +107,12 @@ export const postsApi = socialApi.injectEndpoints({
         currentCache.hasMore = items.length >= (arg?.pageSize || 10)
       },
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg?.page !== previousArg?.page
+        return (
+          currentArg?.page !== previousArg?.page ||
+          currentArg?.languageCommunity !== previousArg?.languageCommunity ||
+          currentArg?.searchKeyword !== previousArg?.searchKeyword ||
+          currentArg?.sortBy !== previousArg?.sortBy
+        )
       },
     }),
     getLandingPosts: builder.query({
