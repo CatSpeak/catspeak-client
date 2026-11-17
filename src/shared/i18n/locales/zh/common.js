@@ -73,6 +73,7 @@ export default {
     speakingRoom: "口语练习室",
     vocabularyNotebook: "生词本",
     historyProgress: "历史与进度",
+    vocabularyGalaxy: "词汇银河",
     messages: "消息",
     settings: "设置",
     help: "帮助",

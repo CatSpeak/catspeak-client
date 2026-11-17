@@ -73,6 +73,7 @@ export default {
     speakingRoom: "スピーキングルーム",
     vocabularyNotebook: "単語帳",
     historyProgress: "履歴と進捗",
+    vocabularyGalaxy: "語彙ギャラクシー",
     messages: "メッセージ",
     settings: "設定",
     help: "ヘルプ",

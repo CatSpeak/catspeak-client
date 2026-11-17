@@ -73,6 +73,7 @@ export default {
     speakingRoom: "Phòng luyện nói",
     vocabularyNotebook: "Sổ tay từ vựng",
     historyProgress: "Lịch sử & Tiến độ",
+    vocabularyGalaxy: "Ngân hà từ vựng",
     messages: "Tin nhắn",
     settings: "Cài đặt",
     help: "Trợ giúp",

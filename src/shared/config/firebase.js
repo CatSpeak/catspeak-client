@@ -12,20 +12,26 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_APPID,
 }
 
+const hasValidConfig = Boolean(
+  firebaseConfig.apiKey &&
+    firebaseConfig.apiKey !== "undefined" &&
+    firebaseConfig.projectId,
+)
+
 let app = null
 let auth = null
 let db = null
 let storage = null
 
 try {
-  if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "undefined") {
+  if (hasValidConfig) {
     app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
     auth = getAuth(app)
     db = getFirestore(app)
     storage = getStorage(app)
   } else {
     console.warn(
-      "[Firebase] VITE_API_KEY missing or not set. Firebase services disabled gracefully.",
+      "[Firebase] Missing or invalid Firebase configuration (VITE_API_KEY / VITE_PROJECTID). Firebase features will be safely disabled.",
     )
   }
 } catch (err) {
@@ -33,4 +39,3 @@ try {
 }
 
 export { app, auth, db, storage }
-
