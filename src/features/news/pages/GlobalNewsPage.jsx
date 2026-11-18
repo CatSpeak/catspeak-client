@@ -2,9 +2,11 @@ import React, { useState, useRef, useEffect, useMemo } from "react"
 import { useParams } from "react-router-dom"
 import { Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useSidebar } from "@/shared/context/SidebarContext"
 import { useGetPostsQuery } from "@/store/api/social/postsApi"
 import PostFeedList from "@/features/profile/components/PostFeedList"
 import CreatePostBox from "@/features/profile/components/CreatePostBox"
+import SidebarRecommendationWidget from "../components/recommendations/SidebarRecommendationWidget"
 import {
   getCommunityName,
   getCommunityLanguageId,
@@ -14,6 +16,7 @@ import {
 const GlobalNewsPage = () => {
   const { lang } = useParams()
   const { t, language } = useLanguage()
+  const { isDesktopExpanded } = useSidebar()
   const [page, setPage] = useState(1)
   const pageSize = 10
 
@@ -71,25 +74,39 @@ const GlobalNewsPage = () => {
   }, [posts, data?.hasMore, isFetching])
 
   return (
-    <div className="flex flex-col w-full max-w-3xl mx-auto p-4 gap-4">
-      <CreatePostBox defaultCommunity={currentCommunity} />
+    <div className="flex w-full max-w-6xl mx-auto px-2 sm:px-4 py-4 gap-4 xl:gap-6 items-start justify-center min-w-0">
+      {/* Main Feed Column */}
+      <div className="flex flex-col w-full min-w-0 max-w-2xl gap-4 flex-1">
+        <CreatePostBox defaultCommunity={currentCommunity} />
 
-      <PostFeedList
-        posts={posts}
-        isLoading={isLoading && page === 1}
-        isFetching={isFetching && page > 1}
-        error={error && page === 1}
-        errorMessage="Không thể tải tin tức thế giới"
-        emptyMessage={t.news?.empty?.title || "Chưa có bài đăng nào"}
-        emptyIcon={Globe}
-        emptyDescription={
-          t.news?.empty?.description ||
-          "Hiện tại chưa có bài đăng nào trong bản tin thế giới. Hãy quay lại sau!"
-        }
-        emptyVariant="page"
-        lastPostRef={lastPostRef}
-        className="flex flex-col gap-2 w-full flex-1"
-      />
+        <PostFeedList
+          posts={posts}
+          isLoading={isLoading && page === 1}
+          isFetching={isFetching && page > 1}
+          error={error && page === 1}
+          errorMessage="Không thể tải tin tức thế giới"
+          emptyMessage={t.news?.empty?.title || "Chưa có bài đăng nào"}
+          emptyIcon={Globe}
+          emptyDescription={
+            t.news?.empty?.description ||
+            "Hiện tại chưa có bài đăng nào trong bản tin thế giới. Hãy quay lại sau!"
+          }
+          emptyVariant="page"
+          lastPostRef={lastPostRef}
+          className="flex flex-col gap-2 w-full flex-1"
+          showRecommendations={true}
+          languageCommunity={currentCommunityId}
+        />
+      </div>
+
+      {/* Right Sidebar - Desktop Only (BR-DX-04 & BR-DX-07) */}
+      <aside
+        className={`flex-col shrink-0 gap-4 sticky top-20 w-[280px] xl:w-[300px] 2xl:w-[320px] ${
+          isDesktopExpanded ? "hidden xl:flex" : "hidden lg:flex"
+        }`}
+      >
+        <SidebarRecommendationWidget languageCommunity={currentCommunityId} />
+      </aside>
     </div>
   )
 }

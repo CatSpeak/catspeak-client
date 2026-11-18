@@ -5,6 +5,7 @@ import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage"
 import ProfilePostCard from "./ProfilePostCard"
 import ProfilePostCardSkeleton from "./ProfilePostCardSkeleton"
+import InFeedRecommendationSection from "@/features/news/components/recommendations/InFeedRecommendationSection"
 
 const PostFeedList = ({
   posts = [],
@@ -20,6 +21,8 @@ const PostFeedList = ({
   isOwnProfile = false,
   lastPostRef = null,
   className = "",
+  showRecommendations = false,
+  languageCommunity = 0,
 }) => {
   // Initial Loading State
   if (isLoading && posts.length === 0) {
@@ -73,14 +76,33 @@ const PostFeedList = ({
   }
 
   // Posts Feed List
+  const CYCLE_TYPES = ["teacher", "group", "user"]
+
   return (
     <div className={className}>
       {posts.map((post, index) => {
         const isLast = index === posts.length - 1
+        // BR-DX-06: Chèn section sau mỗi 5-10 bài tin (ở đây chèn sau các bài thứ 5, 12, 19...)
+        const shouldInsertRecommendation =
+          showRecommendations &&
+          (index + 1 >= 5) &&
+          ((index + 1 - 5) % 7 === 0)
+        const recIndex = Math.floor((index + 1 - 5) / 7)
+        const cycleType = CYCLE_TYPES[recIndex % CYCLE_TYPES.length]
+
         return (
-          <div key={post.postId || index} ref={isLast ? lastPostRef : null}>
-            <ProfilePostCard post={post} isOwnProfile={isOwnProfile} />
-          </div>
+          <React.Fragment key={post.postId || index}>
+            <div ref={isLast ? lastPostRef : null}>
+              <ProfilePostCard post={post} isOwnProfile={isOwnProfile} />
+            </div>
+
+            {shouldInsertRecommendation && (
+              <InFeedRecommendationSection
+                cycleType={cycleType}
+                languageCommunity={languageCommunity}
+              />
+            )}
+          </React.Fragment>
         )
       })}
 
