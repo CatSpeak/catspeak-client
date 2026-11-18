@@ -62,7 +62,13 @@ export const flashcardApi = baseApi
         transformErrorResponse: getFlashcardApiError,
       }),
       lookupFlashcardWord: builder.query({
-        query: (word) => ({ url: "/v1/flashcards/lookup", params: { word } }),
+        query: (arg) => {
+          const params =
+            typeof arg === "string"
+              ? { word: arg }
+              : { word: arg?.word, ...(arg?.pinyin ? { pinyin: arg.pinyin } : {}) }
+          return { url: "/v1/flashcards/lookup", params }
+        },
         transformErrorResponse: getFlashcardApiError,
       }),
       addFlashcardCard: builder.mutation({

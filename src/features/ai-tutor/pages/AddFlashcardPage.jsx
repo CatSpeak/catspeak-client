@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, BookOpen, Check, Loader2 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -14,8 +14,9 @@ import { notebookPaths } from "../utils/flashcardReview"
 const HAN = /[㐀-䶿一-鿿豈-﫿]/
 
 /**
- * fc09 Thêm từ thủ công (FR-FC-017 cách b). Gõ chữ Hán: tra bảng HSK để điền sẵn pinyin,
- * cấp HSK, nghĩa gợi ý; từ không có trong từ điển thì học viên tự nhập nghĩa (OQ-FC-20).
+ * fc09 Thêm từ thủ công (FR-FC-017 cách b, TC-FC-129). Gõ chữ Hán: tra bảng HSK để điền sẵn pinyin,
+ * cấp HSK, nghĩa gợi ý; đổi pinyin thì cập nhật nghĩa chuẩn; từ không có trong từ điển thì
+ * học viên tự nhập nghĩa (OQ-FC-20). Tuyệt đối không dùng lại nghĩa chưa kiểm duyệt của học viên khác.
  * Thẻ mới vào Hộp 1, đến hạn ngày mai như thẻ tự động.
  */
 const AddFlashcardPage = () => {
@@ -31,6 +32,7 @@ const AddFlashcardPage = () => {
   const [folderIds, setFolderIds] = useState(() => new Set())
   const [error, setError] = useState("")
   const [limit, setLimit] = useState(null)
+  const lastLookedUpPinyinRef = useRef("")
   const [lookup, { data: info, isFetching: looking, reset }] = useLazyLookupFlashcardWordQuery()
   const [addCard, { isLoading: saving }] = useAddFlashcardCardMutation()
   const { data: folders } = useGetFlashcardFoldersQuery()
@@ -38,13 +40,18 @@ const AddFlashcardPage = () => {
   const clean = word.replace(/\s+/g, "")
   const validWord = clean.length > 0 && clean.length <= 12 && HAN.test(clean)
 
+  // Tra từ điển theo chữ Hán
   useEffect(() => {
     if (!validWord) return undefined
     const t = setTimeout(() => {
-      lookup(clean)
+      lookup({ word: clean })
         .unwrap()
         .then((res) => {
-          setPinyin((p) => p || res.pinyin || "")
+          setPinyin((p) => {
+            const nextPinyin = p || res.pinyin || ""
+            lastLookedUpPinyinRef.current = nextPinyin.trim()
+            return nextPinyin
+          })
           setMeaning((m) => m || res.meaning_vi || "")
         })
         .catch(() => {})
@@ -52,11 +59,30 @@ const AddFlashcardPage = () => {
     return () => clearTimeout(t)
   }, [clean, validWord, lookup])
 
+  // Cập nhật nghĩa chuẩn khi học viên thay đổi Pinyin (TC-FC-129)
+  useEffect(() => {
+    const trimmedPinyin = pinyin.trim()
+    if (!validWord || !trimmedPinyin || trimmedPinyin === lastLookedUpPinyinRef.current) return undefined
+    const t = setTimeout(() => {
+      lookup({ word: clean, pinyin: trimmedPinyin })
+        .unwrap()
+        .then((res) => {
+          lastLookedUpPinyinRef.current = trimmedPinyin
+          if (res.meaning_vi) {
+            setMeaning(res.meaning_vi)
+          }
+        })
+        .catch(() => {})
+    }, 350)
+    return () => clearTimeout(t)
+  }, [clean, pinyin, validWord, lookup])
+
   const resetForm = () => {
     setWord("")
     setPinyin("")
     setMeaning("")
     setError("")
+    lastLookedUpPinyinRef.current = ""
     reset?.()
   }
 
@@ -123,6 +149,7 @@ const AddFlashcardPage = () => {
                 setWord(e.target.value)
                 setPinyin("")
                 setMeaning("")
+                lastLookedUpPinyinRef.current = ""
               }}
               placeholder="Ví dụ: 学习"
               className="h-12 w-full rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-xl text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
