@@ -12,9 +12,13 @@ const mockLookup = vi.fn((arg) => {
   }
 })
 const mockReset = vi.fn()
-const mockAddCard = vi.fn(() => ({
-  unwrap: () => Promise.resolve({ restored: false }),
-}))
+let mockAddCardImpl = null
+const mockAddCard = vi.fn((...args) => {
+  if (mockAddCardImpl) return mockAddCardImpl(...args)
+  return {
+    unwrap: () => Promise.resolve({ restored: false }),
+  }
+})
 
 vi.mock("react-router-dom", async (importOriginal) => ({
   ...(await importOriginal()),
@@ -59,6 +63,7 @@ describe("AddFlashcardPage - TC-FC-129 / TC-FC-010 lookup and pinyin meaning upd
     globalThis.IS_REACT_ACT_ENVIRONMENT = true
     lookupCalls.length = 0
     mockLookupResult = null
+    mockAddCardImpl = null
     const mod = await import("./AddFlashcardPage")
     AddFlashcardPage = mod.default
     container = document.createElement("div")
@@ -165,5 +170,69 @@ describe("AddFlashcardPage - TC-FC-129 / TC-FC-010 lookup and pinyin meaning upd
 
     expect(lookupCalls).toContainEqual({ word: "行", pinyin: "háng" })
     expect(meaningInput.value).toBe("hàng, ngành nghề")
+  })
+
+  it("xoá lỗi trùng cũ khi đổi sang từ chữ Hán mới và tra lại từ mới (TC-FC-130)", async () => {
+    // 1. Nhập 咖啡, submit bị lỗi FLASHCARD_CARD_EXISTS
+    mockLookupResult = {
+      word: "咖啡",
+      pinyin: "kāfēi",
+      meaning_vi: "cà phê",
+      hsk_level: 3,
+      in_dictionary: true,
+      in_notebook: true,
+    }
+    mockAddCardImpl = vi.fn(() => ({
+      unwrap: () => Promise.reject({ code: "FLASHCARD_CARD_EXISTS" }),
+    }))
+
+    await act(async () => {
+      root.render(<AddFlashcardPage />)
+    })
+
+    const inputs = container.querySelectorAll("input")
+    const wordInput = inputs[0]
+    const form = container.querySelector("form")
+
+    // Nhập '咖啡'
+    await act(async () => {
+      changeInput(wordInput, "咖啡")
+    })
+    await act(async () => {
+      vi.advanceTimersByTime(400)
+    })
+
+    // Bấm 'Thêm vào sổ' (submit form)
+    await act(async () => {
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+    })
+
+    // Hiện dòng lỗi đỏ dưới form
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe("Từ này đã có trong sổ của bạn.")
+
+    // 2. Bôi đen ô Hán tự, nhập 道歉
+    mockLookupResult = {
+      word: "道歉",
+      pinyin: "dàoqiàn",
+      meaning_vi: "xin lỗi",
+      hsk_level: 4,
+      in_dictionary: true,
+      in_notebook: false,
+    }
+
+    await act(async () => {
+      changeInput(wordInput, "道歉")
+    })
+
+    // Dòng lỗi đỏ phải được xoá ngay khi đổi nội dung ô Hán tự
+    expect(container.querySelector('[role="alert"]')).toBeNull()
+
+    // Sau khi debounce chạy, từ mới được tra cứu lại
+    await act(async () => {
+      vi.advanceTimersByTime(400)
+    })
+
+    expect(lookupCalls).toContainEqual({ word: "道歉" })
+    expect(container.querySelector('[role="alert"]')).toBeNull()
   })
 })

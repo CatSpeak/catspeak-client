@@ -149,7 +149,9 @@ const AddFlashcardPage = () => {
                 setWord(e.target.value)
                 setPinyin("")
                 setMeaning("")
+                setError("")
                 lastLookedUpPinyinRef.current = ""
+                reset?.()
               }}
               placeholder="Ví dụ: 学习"
               className="h-12 w-full rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-xl text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
@@ -181,7 +183,10 @@ const AddFlashcardPage = () => {
           <input
             value={pinyin}
             maxLength={80}
-            onChange={(e) => setPinyin(e.target.value)}
+            onChange={(e) => {
+              setPinyin(e.target.value)
+              setError("")
+            }}
             placeholder="Tự điền khi tra được, có thể sửa"
             className="h-11 rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
           />
@@ -192,7 +197,10 @@ const AddFlashcardPage = () => {
           <input
             value={meaning}
             maxLength={200}
-            onChange={(e) => setMeaning(e.target.value)}
+            onChange={(e) => {
+              setMeaning(e.target.value)
+              setError("")
+            }}
             placeholder="Ví dụ: học, học tập"
             className="h-11 rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
           />
