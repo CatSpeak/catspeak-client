@@ -11,7 +11,7 @@ import {
 import { FlashcardLoadError } from "../components/flashcards/FlashcardPageState"
 import FlashcardCardList from "../components/flashcards/library/FlashcardCardList"
 import useCardActions from "../components/flashcards/library/useCardActions"
-import { useReportQueryNetwork } from "../hooks/useOnlineStatus"
+import useOnlineStatus, { useReportQueryNetwork } from "../hooks/useOnlineStatus"
 import { flashcardReviewPath, formatDeckSlug, notebookPaths } from "../utils/flashcardReview"
 
 const PAGE = 50
@@ -60,16 +60,29 @@ const DeckBrowsePage = () => {
     return () => clearTimeout(t)
   }, [term])
 
+  const isOnline = useOnlineStatus()
   const folderId = folderIdOf(deckId)
   const hasFilter = Boolean(search || status)
-  const { data: decks = [] } = useGetFlashcardDecksQuery(undefined, { skip: folderId != null })
-  const { data: folders } = useGetFlashcardFoldersQuery(undefined, { skip: folderId == null })
-  const cardsQuery = useGetDeckCardsQuery({ deckId, limit, search, status })
+  const { data: decks = [] } = useGetFlashcardDecksQuery(undefined, { skip: folderId != null, refetchOnReconnect: true })
+  const { data: folders } = useGetFlashcardFoldersQuery(undefined, { skip: folderId == null, refetchOnReconnect: true })
+  const cardsQuery = useGetDeckCardsQuery({ deckId, limit, search, status }, { refetchOnReconnect: true })
   const { data = { items: [], total: 0 }, isLoading, isFetching, isError, error, refetch } = cardsQuery
+  const hasError = isError && !cardsQuery.data
   // Tổng của cả deck (không lọc) để quyết định empty state và nút "Ôn tập".
   // Chỉ truy vấn khi có bộ lọc active (search hoặc status); khi không lọc, cardsQuery đã chứa tổng của cả deck.
-  const { data: whole } = useGetDeckCardsQuery({ deckId, limit: 1 }, { skip: !hasFilter })
+  const { data: whole } = useGetDeckCardsQuery({ deckId, limit: 1 }, { skip: !hasFilter, refetchOnReconnect: true })
   useReportQueryNetwork(cardsQuery)
+
+  // Tự động tải lại khi có mạng trở lại (CHK-098, TC-FC-100)
+  const prevOnlineRef = React.useRef(isOnline)
+  useEffect(() => {
+    if (isOnline && !prevOnlineRef.current) {
+      if (hasError || !cardsQuery.data) {
+        refetch()
+      }
+    }
+    prevOnlineRef.current = isOnline
+  }, [isOnline, hasError, cardsQuery.data, refetch])
 
   const folder = folders?.items?.find((f) => f.id === folderId)
   const deck = useMemo(() => {
@@ -81,7 +94,7 @@ const DeckBrowsePage = () => {
   }, [decks, deckId, folder, folderId])
 
   const deckTotal = (hasFilter ? whole?.total : data.total) ?? data.total ?? 0
-  const deckEmpty = !isLoading && deckTotal === 0
+  const deckEmpty = !isLoading && !hasError && deckTotal === 0
   const isRecentWrong = deckId === "recent-wrong"
 
   const toggle = (id) =>
@@ -124,7 +137,7 @@ const DeckBrowsePage = () => {
               className="mt-1 h-5 w-16 animate-pulse rounded-md bg-slate-200 dark:bg-[#3F3F3F]"
               aria-label="Đang tải số thẻ"
             />
-          ) : (
+          ) : hasError ? null : (
             <span className="text-sm font-semibold text-slate-500 dark:text-neutral-400">
               {deckTotal} thẻ
             </span>
@@ -134,7 +147,7 @@ const DeckBrowsePage = () => {
           {isRecentWrong && (
             <button
               type="button"
-              disabled={deckEmpty}
+              disabled={deckEmpty || hasError}
               onClick={() => navigate(paths.practice("recent-wrong"))}
               className="inline-flex items-center gap-2 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/40 px-5 py-2.5 font-bold text-[#680411] dark:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -144,9 +157,15 @@ const DeckBrowsePage = () => {
           )}
           <button
             type="button"
-            disabled={deckEmpty}
-            aria-disabled={deckEmpty}
-            title={deckEmpty ? "Deck chưa có từ nào để ôn" : "Ôn tự do cả bộ thẻ, kể cả thẻ chưa đến hạn"}
+            disabled={deckEmpty || hasError}
+            aria-disabled={deckEmpty || hasError}
+            title={
+              hasError
+                ? "Chưa tải được dữ liệu bộ thẻ"
+                : deckEmpty
+                ? "Deck chưa có từ nào để ôn"
+                : "Ôn tự do cả bộ thẻ, kể cả thẻ chưa đến hạn"
+            }
             onClick={() => navigate(flashcardReviewPath(lang, { mode: "free", deckId }))}
             className="inline-flex items-center gap-2 rounded-xl bg-[#680411] dark:bg-cath-red-700 px-6 py-2.5 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-[#272727]"
           >
@@ -167,7 +186,9 @@ const DeckBrowsePage = () => {
         )}
       </div>
 
-      {deckEmpty ? (
+      {hasError ? (
+        <FlashcardLoadError offline={isNetworkError(error)} onRetry={refetch} what="bộ thẻ" />
+      ) : deckEmpty ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-6 py-14 text-center shadow-sm" data-testid="deck-empty">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-950/40 text-[#680411] dark:text-red-400">
             <Layers className="h-6 w-6" />

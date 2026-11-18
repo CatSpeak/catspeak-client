@@ -1,8 +1,12 @@
+// @vitest-environment happy-dom
+import React, { act } from "react"
+import { createRoot } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { formatDeckSlug } from "../utils/flashcardReview"
 
 const getDeckCardsCalls = []
+let mockIsOnline = true
 let mockCardsQuery = {
   data: undefined,
   isLoading: true,
@@ -31,6 +35,7 @@ vi.mock("@/shared/context/LanguageContext", () => ({
 }))
 
 vi.mock("../hooks/useOnlineStatus", () => ({
+  default: () => mockIsOnline,
   useReportQueryNetwork: vi.fn(),
 }))
 
@@ -43,7 +48,7 @@ vi.mock("../components/flashcards/library/FlashcardCardList", () => ({
 }))
 
 vi.mock("../api/flashcardApi", () => ({
-  isNetworkError: () => false,
+  isNetworkError: (err) => err?.status === "FETCH_ERROR" || err?.status === "TIMEOUT_ERROR",
   useGetFlashcardDecksQuery: () => mockDecksQuery,
   useGetFlashcardFoldersQuery: () => mockFoldersQuery,
   useGetDeckCardsQuery: (args, options) => {
@@ -60,9 +65,13 @@ vi.mock("../api/flashcardApi", () => ({
 
 describe("DeckBrowsePage - bug repro and regression verification", () => {
   let DeckBrowsePage
+  let container
+  let root
 
   beforeEach(async () => {
+    globalThis.IS_REACT_ACT_ENVIRONMENT = true
     getDeckCardsCalls.length = 0
+    mockIsOnline = true
     mockParams = { lang: "zh", deckId: "hsk-4" }
     mockCardsQuery = {
       data: undefined,
@@ -81,6 +90,20 @@ describe("DeckBrowsePage - bug repro and regression verification", () => {
     }
     const mod = await import("./DeckBrowsePage")
     DeckBrowsePage = mod.default
+  })
+
+  afterEach(() => {
+    if (root) {
+      act(() => {
+        root.unmount()
+      })
+      root = null
+    }
+    if (container) {
+      container.remove()
+      container = null
+    }
+    document.body.innerHTML = ""
   })
 
   it("does not show '0 thẻ' when loading and displays skeleton for count", () => {
@@ -144,5 +167,76 @@ describe("DeckBrowsePage - bug repro and regression verification", () => {
     expect(formatDeckSlug("non-hsk")).toBe("Ngoài HSK")
     expect(formatDeckSlug("recent-wrong")).toBe("Từ sai gần đây")
     expect(formatDeckSlug("all")).toBe("Toàn bộ sổ")
+  })
+
+  it("shows error state with retry button instead of '0 thẻ' and 'Deck chưa có từ nào' when offline request fails (TC-FC-100)", async () => {
+    mockIsOnline = false
+    mockParams = { lang: "zh", deckId: "hsk-2" }
+    mockCardsQuery = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      error: { status: "FETCH_ERROR" },
+      refetch: vi.fn(),
+    }
+    mockDecksQuery = {
+      data: undefined,
+      isLoading: false,
+    }
+
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+
+    await act(async () => {
+      root.render(<DeckBrowsePage />)
+    })
+
+    const text = document.body.textContent || ""
+
+    // User bug report:
+    // "Offline mở HSK 2 (2 thẻ) vẫn hiện '0 thẻ' + 'Deck chưa có từ nào'"
+    // Kỳ vọng:
+    // "Hiển thị trạng thái lỗi/placeholder 'Không tải được dữ liệu' + nút thử lại (hoặc dữ liệu cache)"
+    expect(text).not.toContain("Deck chưa có từ nào")
+    expect(text).not.toContain("0 thẻ")
+    expect(text).toMatch(/Không tải được|Bạn đang offline|Chưa tải được/)
+    expect(text).toContain("Thử lại")
+  })
+
+  it("auto-refetches when network reconnects (isOnline transitions to true) (TC-FC-100)", async () => {
+    mockIsOnline = false
+    mockParams = { lang: "zh", deckId: "hsk-2" }
+    mockCardsQuery = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      error: { status: "FETCH_ERROR" },
+      refetch: vi.fn(),
+    }
+    mockDecksQuery = {
+      data: undefined,
+      isLoading: false,
+    }
+
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+
+    await act(async () => {
+      root.render(<DeckBrowsePage />)
+    })
+
+    expect(mockCardsQuery.refetch).not.toHaveBeenCalled()
+
+    // Simulate coming back online
+    mockIsOnline = true
+    await act(async () => {
+      root.render(<DeckBrowsePage />)
+    })
+
+    expect(mockCardsQuery.refetch).toHaveBeenCalled()
   })
 })
