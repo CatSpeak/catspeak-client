@@ -84,7 +84,7 @@ const DayScheduleEventDetail = ({
           </div>
 
           {/* Description */}
-          <p className="text-[15px] text-gray-800 dark:text-neutral-200 mb-8 leading-relaxed">
+          <p className="text-[15px] text-gray-800 dark:text-neutral-200 mb-8 leading-relaxed whitespace-pre-wrap">
             {ev.description ? (
               ev.description
             ) : (

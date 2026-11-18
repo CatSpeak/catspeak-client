@@ -133,7 +133,7 @@ const EventCardDetail = ({ event, onBack }) => {
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 relative">
         {/* Subtitle */}
         {event.subtitle && (
-          <p className="text-[15px] text-[#7B7979] dark:text-[#AAAAAA] font-medium pr-12">{event.subtitle}</p>
+          <p className="text-[15px] text-[#7B7979] dark:text-[#AAAAAA] font-medium pr-12 whitespace-pre-wrap leading-relaxed">{event.subtitle}</p>
         )}
 
         {event.status && (
