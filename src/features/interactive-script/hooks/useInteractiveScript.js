@@ -2,6 +2,8 @@ import { useState, useCallback, useMemo, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { useGetRandomScriptQuery } from "@/store/api/interactiveScriptApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { MOCK_SCRIPTS_POOL } from "../mock/mockScripts"
+import { getNextFallbackScriptIndex } from "../utils/fallbackScripts"
 
 const langMap = {
   vi: "Vietnamese",
@@ -10,11 +12,12 @@ const langMap = {
   ja: "Japanese"
 }
 
-export const useInteractiveScript = () => {
+export const useInteractiveScript = (scriptsPool = MOCK_SCRIPTS_POOL) => {
   const { lang } = useParams()
   const language = lang || localStorage.getItem("communityLanguage") || "en"
   const languageCommunity = langMap[language] || "English"
   const [currentScriptId, setCurrentScriptId] = useState(null)
+  const [fallbackScriptIndex, setFallbackScriptIndex] = useState(0)
   
   const { data: apiScript, isFetching: isFading, refetch } = useGetRandomScriptQuery({
     languageCommunity,
@@ -28,6 +31,8 @@ export const useInteractiveScript = () => {
   const [activePopoverKey, setActivePopoverKey] = useState(null)
   
   const { language: appLanguage } = useLanguage()
+  const fallbackScript =
+    scriptsPool[fallbackScriptIndex] || scriptsPool[0]
 
   const [selectedLanguagePair, setSelectedLanguagePair] = useState(() => {
     const saved = localStorage.getItem("catspeak_lang_pair")
@@ -55,7 +60,18 @@ export const useInteractiveScript = () => {
   }, [appLanguage, language])
 
   const currentScript = useMemo(() => {
-    if (!apiScript) return { id: 0, title: "", contentSegments: [] }
+    if (!apiScript) {
+      if (!fallbackScript) return { id: 0, title: "", contentSegments: [] }
+      return {
+        ...fallbackScript,
+        title:
+          fallbackScript.title ||
+          [fallbackScript.titlePart1, fallbackScript.titlePart2]
+            .filter(Boolean)
+            .join(" "),
+        topic: fallbackScript.topic || fallbackScript.tag,
+      }
+    }
 
     // Parse content segments based on highlights
     let segments = []
@@ -90,15 +106,19 @@ export const useInteractiveScript = () => {
       contentSegments: segments,
       featuredQuote: apiScript.highlightPhrase,
     }
-  }, [apiScript, languageCommunity])
+  }, [apiScript, fallbackScript, languageCommunity])
 
   const handleShuffleScript = useCallback(() => {
-    if (currentScript?.id) {
-      setCurrentScriptId(currentScript.id)
+    if (apiScript) {
+      setCurrentScriptId(apiScript.id)
+    } else {
+      setFallbackScriptIndex((index) =>
+        getNextFallbackScriptIndex(scriptsPool, index),
+      )
     }
     refetch()
     setShowTranslation(false)
-  }, [currentScript, refetch])
+  }, [apiScript, refetch, scriptsPool])
 
   const dismissHint = useCallback(() => {
     if (showHint) {
