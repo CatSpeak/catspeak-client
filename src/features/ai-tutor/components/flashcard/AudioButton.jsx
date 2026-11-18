@@ -2,6 +2,23 @@ import React, { useState } from "react"
 import { AlertTriangle, Loader2, Volume2 } from "lucide-react"
 import useSampleAudio from "../../hooks/useSampleAudio"
 
+const resolveAudioPath = (audioPath, pinyin) => {
+  if (!audioPath || !pinyin) return audioPath
+  try {
+    const [base, qs] = audioPath.split("?")
+    if (base.includes("/sample-audio") && qs) {
+      const params = new URLSearchParams(qs)
+      if (!params.has("pinyin")) {
+        params.set("pinyin", pinyin)
+        return `${base}?${params.toString()}`
+      }
+    }
+  } catch {
+    // giữ nguyên audioPath nếu lỗi parse
+  }
+  return audioPath
+}
+
 /**
  * Nút nghe giọng mẫu của một thẻ.
  *
@@ -12,7 +29,8 @@ import useSampleAudio from "../../hooks/useSampleAudio"
  * điền từ phát giọng mẫu ngay lúc chấm đúng. Không truyền thì nút tự quản lý.
  */
 const AudioButton = ({ audioPath, pinyin, audio, size = "md", label = "Nghe phát âm" }) => {
-  const own = useSampleAudio(audioPath)
+  const resolvedPath = resolveAudioPath(audioPath, pinyin)
+  const own = useSampleAudio(resolvedPath)
   const { status, play } = audio || own
   const [showPinyin, setShowPinyin] = useState(false)
 

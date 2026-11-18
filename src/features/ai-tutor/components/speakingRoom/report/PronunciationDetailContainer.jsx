@@ -119,7 +119,7 @@ const PronunciationDetailContainer = ({ sessionId, isOpen, onClose }) => {
             ? () => play(speakingAudioPath.turn(sessionId, word.audio.seq, word.audio.start_ms, word.audio.end_ms))
             : undefined
         }
-        onPlayModel={word ? () => play(speakingAudioPath.sample(word.word, "slow")) : undefined}
+        onPlayModel={word ? () => play(speakingAudioPath.sample(word.word, "slow", word.pinyin)) : undefined}
         onWatchShorts={() => {
           switching.current = true
           setStage("guide")
