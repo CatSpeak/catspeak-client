@@ -36,6 +36,9 @@ export function generateGalaxyLayout(words, clusters) {
   const positions = new Float32Array(n * 3)
   const colors = new Float32Array(n * 3)
   const seeds = new Float32Array(n)
+  // Trạng thái học: 0 = chưa học · 1 = đang học · 2 = đã thuộc · 3 = nhớ lâu dài.
+  // Khớp bảng mapping Task_galaxy.md §1.4.
+  const states = new Float32Array(n)
   const clusterIndex = new Map(clusters.map((c, i) => [c.id, i]))
   const members = clusters.map(() => [])
 
@@ -61,6 +64,7 @@ export function generateGalaxyLayout(words, clusters) {
     positions[i * 3 + 1] = cy + gauss() * 0.07
     positions[i * 3 + 2] = cz + ex * Math.sin(tilt) + ez * Math.cos(tilt)
     colors.set(hexToRgb(clusters[k].color), i * 3)
+    states[i] = w.aState ?? 0
     seeds[i] = r()
     members[k].push(i)
   })
@@ -70,6 +74,7 @@ export function generateGalaxyLayout(words, clusters) {
     positions,
     colors,
     seeds,
+    states,
     ids: words.map((w) => w.id),
     centers,
     members,

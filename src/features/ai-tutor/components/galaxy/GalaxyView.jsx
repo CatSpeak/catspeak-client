@@ -3,6 +3,7 @@ import { Maximize2, ZoomIn, ZoomOut } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGalaxyEngine } from "./hooks/useGalaxyEngine"
 import { useGalaxyControls } from "./hooks/useGalaxyControls"
+import { GALAXY_STATE_COLORS, GALAXY_STATE_LABELS } from "./core/galaxyState"
 import { GALAXY_CLUSTERS, MOCK_GALAXY_WORDS } from "./mocks/mockGalaxyData"
 
 const SHOW_STATS = import.meta.env.DEV
@@ -11,7 +12,13 @@ const SHOW_STATS = import.meta.env.DEV
  * Ngân hà từ vựng (FE-01). Dữ liệu vào qua props -> S4 chỉ cần thay `words`/`clusters` bằng API thật.
  * Canvas chiếm toàn bộ khung; nhãn cụm và Quick Flashcard là React overlay (pointer-events-none).
  */
-const GalaxyView = ({ words = MOCK_GALAXY_WORDS, clusters = GALAXY_CLUSTERS, className = "" }) => {
+const GalaxyView = ({
+  words = MOCK_GALAXY_WORDS,
+  clusters = GALAXY_CLUSTERS,
+  onWordClick = null,
+  showLegend = true,
+  className = "",
+}) => {
   const { t } = useLanguage()
   const g = t?.aiTutor?.vocabularyGalaxy || {}
 
@@ -36,12 +43,30 @@ const GalaxyView = ({ words = MOCK_GALAXY_WORDS, clusters = GALAXY_CLUSTERS, cla
     [hovered, clusters],
   )
 
+  // Đếm số sao theo mức để dựng legend.
+  const counts = useMemo(() => {
+    const c = { 0: 0, 1: 0, 2: 0, 3: 0 }
+    words.forEach((w) => {
+      c[w.aState ?? 0] = (c[w.aState ?? 0] ?? 0) + 1
+    })
+    return c
+  }, [words])
+
+  const handleClick = (e) => {
+    if (!onWordClick || hoverIndex < 0) return
+    const word = words[hoverIndex]
+    if (!word) return
+    onWordClick(word)
+    e.currentTarget.blur?.()
+  }
+
   return (
     <div
       className={`relative isolate overflow-hidden rounded-2xl border border-border bg-[#090c18] ${className}`}
     >
       <canvas
         ref={canvasRef}
+        onClick={handleClick}
         className={`absolute inset-0 h-full w-full touch-none select-none ${hovered ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`}
         aria-label={g.canvasLabel || "Vocabulary galaxy"}
         role="img"
@@ -86,9 +111,40 @@ const GalaxyView = ({ words = MOCK_GALAXY_WORDS, clusters = GALAXY_CLUSTERS, cla
                 {hoveredCluster.label}
               </div>
             )}
+            <div className="mt-2 flex items-center gap-1.5 text-[11px] text-white/80">
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ background: GALAXY_STATE_COLORS[hovered.aState ?? 0] }}
+              />
+              {GALAXY_STATE_LABELS[hovered.aState ?? 0]}
+              {onWordClick && (
+                <span className="ml-auto text-[10px] text-white/50">{g.clickToLearn || "(bấm để học)"}</span>
+              )}
+            </div>
           </div>
         )}
       </div>
+
+      {/* Legend 4 mức trạng thái */}
+      {showLegend && (
+        <div className="pointer-events-none absolute right-3 top-3 rounded-xl border border-white/10 bg-[#0d1226]/70 px-3 py-2 backdrop-blur-md">
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/50">
+            {g.legend || "Trạng thái"}
+          </div>
+          <div className="flex flex-col gap-1">
+            {[0, 1, 2, 3].map((s) => (
+              <div key={s} className="flex items-center gap-1.5 text-[11px] text-white/75">
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: GALAXY_STATE_COLORS[s] }}
+                />
+                <span>{GALAXY_STATE_LABELS[s]}</span>
+                <span className="ml-auto font-mono text-[10px] text-white/40">{counts[s] ?? 0}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Chú thích + điều khiển */}
       <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">

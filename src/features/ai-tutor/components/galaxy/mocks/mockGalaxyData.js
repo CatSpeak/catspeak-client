@@ -1,6 +1,9 @@
 // Mock/Fixture cho FE-01: 12 chủ đề, nhân các từ gốc lên thành ~2.000 từ.
 // Id ổn định (không dùng Math.random) để bố cục sao luôn giống nhau sau mỗi lần tải lại.
-// S4 (FE-07) sẽ thay bằng dữ liệu API thật cùng schema { id, word, pinyin, meaning, clusterId }.
+//
+// S4 (FE-07) sẽ thay bằng dữ liệu API thật cùng schema { id, word, pinyin, meaning, clusterId, aState }.
+// Schema `aState` đã khớp với bảng mapping 4 mức trong Task_galaxy.md §1.4:
+//   0 = chưa học · 1 = đang học · 2 = đã thuộc · 3 = nhớ lâu dài
 
 export const GALAXY_CLUSTERS = [
   { id: "food", label: "Ẩm thực", color: "#f2c46d" },
@@ -33,6 +36,28 @@ const BASE_WORDS = {
   emotion: ["高兴|gāoxìng|vui", "难过|nánguò|buồn", "生气|shēngqì|giận", "害怕|hàipà|sợ", "担心|dānxīn|lo lắng", "紧张|jǐnzhāng|căng thẳng", "骄傲|jiāoào|tự hào", "孤独|gūdú|cô đơn", "感动|gǎndòng|xúc động", "失望|shīwàng|thất vọng", "惊讶|jīngyà|ngạc nhiên", "放松|fàngsōng|thư giãn", "兴奋|xīngfèn|phấn khích", "后悔|hòuhuǐ|hối hận", "满意|mǎnyì|hài lòng", "喜欢|xǐhuan|thích"],
 }
 
+/** FNV-1a 32-bit — cùng thuật toán với layoutGenerator.js để vị trí sao ổn định. */
+function hashSeed(str) {
+  let h = 0x811c9dc5
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
+  }
+  return h >>> 0
+}
+
+/**
+ * Trạng thái học giả lập, phân bố theo id nên cố định giữa các lần tải:
+ *   ~62% chưa học · ~16% đang học · ~14% đã thuộc · ~8% nhớ lâu dài
+ */
+function mockStateFor(id) {
+  const r = (hashSeed(`state-${id}`) % 1000) / 1000
+  if (r < 0.62) return 0
+  if (r < 0.78) return 1
+  if (r < 0.92) return 2
+  return 3
+}
+
 /** Sinh danh sách từ mock. Deterministic: cùng tham số -> cùng kết quả. */
 export function generateMockGalaxyWords(total = 2000) {
   const perCluster = Math.ceil(total / GALAXY_CLUSTERS.length)
@@ -41,12 +66,14 @@ export function generateMockGalaxyWords(total = 2000) {
     const base = BASE_WORDS[cluster.id]
     for (let i = 0; i < perCluster && words.length < total; i++) {
       const [word, pinyin, meaning] = base[i % base.length].split("|")
+      const id = `${cluster.id}-${String(i + 1).padStart(3, "0")}`
       words.push({
-        id: `${cluster.id}-${String(i + 1).padStart(3, "0")}`,
+        id,
         word,
         pinyin,
         meaning,
         clusterId: cluster.id,
+        aState: mockStateFor(id),
       })
     }
   })
