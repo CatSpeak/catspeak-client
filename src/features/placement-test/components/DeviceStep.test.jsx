@@ -35,7 +35,7 @@ const copy = {
   noAudio: {
     instruction: "Hệ thống không nhận được âm thanh từ microphone sau 5 giây thu mẫu.",
     meterLabel: "Không có tín hiệu âm thanh (0 dB)",
-    info: "Vui lòng thử các bước khắc phục bên cạnh trước khi thử lại.",
+    info: "Vui lòng thử các bước khắc phục bên dưới trước khi thử lại.",
     guideTitle: "Hướng Dẫn Khắc Phục Lỗi Thu Âm",
     switchHint: "Nhấp để đổi nguồn microphone khác",
     fixes: [],
@@ -87,5 +87,25 @@ describe("DeviceStep live regions", () => {
     const html = renderToStaticMarkup(<DeviceStep copy={copy} onContinue={() => {}} />)
 
     expect(html).not.toContain('aria-live="assertive"')
+  })
+
+  it("points to the sample sentence above when in pending state", () => {
+    micCaptureMock.mockReturnValue(capture({ status: "pending" }))
+
+    const html = renderToStaticMarkup(<DeviceStep onContinue={() => {}} />)
+
+    expect(html).toContain("Hãy ghi âm thử câu mẫu phía trên. Hệ thống chỉ cho vào phòng kiểm tra khi đo được tín hiệu giọng nói đạt chuẩn.")
+    expect(html).not.toContain("bên trái")
+  })
+
+  it("points to the troubleshooting fixes below when no audio (0 dB) is detected", async () => {
+    micCaptureMock.mockReturnValue(capture({ status: "nosignal" }))
+
+    // Uses vi copy by importing or checking default vi copy
+    const viCopy = (await import("../i18n/vi")).default
+    const html = renderToStaticMarkup(<DeviceStep copy={viCopy.placementTest} onContinue={() => {}} />)
+
+    expect(html).toContain("Vui lòng thử các bước khắc phục bên dưới trước khi thử lại.")
+    expect(html).not.toContain("bên cạnh")
   })
 })

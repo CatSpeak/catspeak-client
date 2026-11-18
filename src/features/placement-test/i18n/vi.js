@@ -72,7 +72,7 @@ export default {
       statusNoSignal: "Chưa phát hiện giọng nói",
       statusError: "Không truy cập được micro",
       statusPending: "Chưa đo tín hiệu",
-      pendingHint: "Hãy ghi âm thử câu mẫu bên trái. Hệ thống chỉ cho vào phòng kiểm tra khi đo được tín hiệu giọng nói đạt chuẩn.",
+      pendingHint: "Hãy ghi âm thử câu mẫu phía trên. Hệ thống chỉ cho vào phòng kiểm tra khi đo được tín hiệu giọng nói đạt chuẩn.",
       instruction:
         "Hãy đọc to câu tiếng Trung mẫu bên dưới để kiểm tra chất lượng giọng nói:",
       sampleHanzi: "你好！欢迎来到 CatSpeak。",
@@ -100,7 +100,7 @@ export default {
       instruction:
         "Hệ thống không nhận được âm thanh từ microphone sau 5 giây thu mẫu.",
       meterLabel: "Không có tín hiệu âm thanh (0 dB)",
-      info: "Vui lòng thử các bước khắc phục bên cạnh trước khi thử lại.",
+      info: "Vui lòng thử các bước khắc phục bên dưới trước khi thử lại.",
       guideTitle: "Hướng Dẫn Khắc Phục Lỗi Thu Âm",
       switchHint: "Nhấp để đổi nguồn microphone khác",
       fixes: [
@@ -396,9 +396,12 @@ export default {
       certificateBadge: "CHỨNG CHỈ HIỆN TẠI",
       scoreLabel: "Điểm: {{score}} / 100",
       bandTitle: "HSK {{band}} · {{tier}}",
-      cefrLabel: "Khung tham chiếu Châu Âu: CEFR {{cefr}} · Đạt chuẩn khẩu ngữ",
+      cefrLabel: "Khung tham chiếu Châu Âu: CEFR {{cefr}}",
+      cefrLabelQualified: "Khung tham chiếu Châu Âu: CEFR {{cefr}} · Đạt chuẩn khẩu ngữ",
       certificateDescription:
         "Khả năng giao tiếp trôi chảy trong công việc & đời sống hàng ngày. Đã hoàn tất bài khảo sát thích ứng AI CAT 5 câu ngày {{date}}.",
+      certificateDescriptionLow:
+        "Đang ở mức nền tảng, cần luyện thêm phát âm và độ trôi chảy. Đã hoàn tất bài khảo sát thích ứng AI CAT 5 câu ngày {{date}}.",
       testDate: "Ngày thi: {{date}}",
       testCode: "Mã bài thi: #{{code}}",
       selfAdjustedNote: "Cấp độ đã được tự điều chỉnh từ HSK {{from}} sang HSK {{to}}.",

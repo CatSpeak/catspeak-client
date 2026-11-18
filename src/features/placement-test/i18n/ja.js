@@ -70,7 +70,7 @@ export default {
       statusNoSignal: "音声が検出されません",
       statusError: "マイクにアクセスできません",
       statusPending: "まだ測定していません",
-      pendingHint: "左の例文を試しに録音してください。音声信号が基準を満たした場合のみテストルームに入れます。",
+      pendingHint: "上の例文を試しに録音してください。音声信号が基準を満たした場合のみテストルームに入れます。",
       instruction:
         "下の中国語サンプル文を声に出して読み、音声品質を確認してください：",
       sampleHanzi: "你好！欢迎来到 CatSpeak。",
@@ -98,7 +98,7 @@ export default {
       instruction:
         "サンプル録音から 5 秒経過しても、マイクから音声を受信できませんでした。",
       meterLabel: "音声信号なし（0 dB）",
-      info: "再試行する前に、横の対処手順をお試しください。",
+      info: "再試行する前に、下の対処手順をお試しください。",
       guideTitle: "録音トラブルシューティングガイド",
       switchHint: "タップして別のマイクに切り替え",
       fixes: [
@@ -392,9 +392,12 @@ export default {
       certificateBadge: "現在の認定",
       scoreLabel: "スコア：{{score}} / 100",
       bandTitle: "HSK {{band}} · {{tier}}",
-      cefrLabel: "CEFR：{{cefr}} · スピーキング基準達成",
+      cefrLabel: "CEFR：{{cefr}}",
+      cefrLabelQualified: "CEFR：{{cefr}} · スピーキング基準達成",
       certificateDescription:
         "仕事と日常生活で流暢にコミュニケーションできます。{{date}} に5問の AI CAT 適応型テストを完了しました。",
+      certificateDescriptionLow:
+        "基礎レベルにあり、発音と流暢さの継続的な練習が必要です。{{date}} に5問の AI CAT 適応型テストを完了しました。",
       testDate: "受験日：{{date}}",
       testCode: "受験コード：#{{code}}",
       selfAdjustedNote: "レベルを HSK {{from}} から HSK {{to}} に自己調整しました。",
