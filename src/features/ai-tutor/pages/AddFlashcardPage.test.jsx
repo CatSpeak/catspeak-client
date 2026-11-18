@@ -5,10 +5,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const lookupCalls = []
 let mockLookupResult = null
+let mockLookupImpl = null
 const mockLookup = vi.fn((arg) => {
   lookupCalls.push(arg)
+  const res = mockLookupImpl ? mockLookupImpl(arg) : mockLookupResult
+  mockLookupResult = res
   return {
-    unwrap: () => Promise.resolve(mockLookupResult),
+    unwrap: () => Promise.resolve(res),
   }
 })
 const mockReset = vi.fn()
@@ -63,6 +66,7 @@ describe("AddFlashcardPage - TC-FC-129 / TC-FC-010 lookup and pinyin meaning upd
     globalThis.IS_REACT_ACT_ENVIRONMENT = true
     lookupCalls.length = 0
     mockLookupResult = null
+    mockLookupImpl = null
     mockAddCardImpl = null
     const mod = await import("./AddFlashcardPage")
     AddFlashcardPage = mod.default
@@ -234,5 +238,118 @@ describe("AddFlashcardPage - TC-FC-129 / TC-FC-010 lookup and pinyin meaning upd
 
     expect(lookupCalls).toContainEqual({ word: "道歉" })
     expect(container.querySelector('[role="alert"]')).toBeNull()
+  })
+
+  it("không hiện badge 'Đã có trong sổ' khi đã có 行 xíng nhưng nhập 行 + pinyin háng (TC-FC-130, TC-FC-010)", async () => {
+    mockLookupImpl = (arg) => {
+      if (arg?.pinyin === "háng") {
+        return {
+          word: "行",
+          pinyin: "háng",
+          meaning_vi: "hàng, ngành nghề",
+          hsk_level: 4,
+          in_dictionary: true,
+          in_notebook: false,
+        }
+      }
+      return {
+        word: "行",
+        pinyin: "xíng",
+        meaning_vi: "đi, được, làm",
+        hsk_level: 4,
+        in_dictionary: true,
+        in_notebook: true,
+      }
+    }
+
+    await act(async () => {
+      root.render(<AddFlashcardPage />)
+    })
+
+    const inputs = container.querySelectorAll("input")
+    const wordInput = inputs[0]
+    const pinyinInput = inputs[1]
+
+    // 1. Nhập '行'
+    await act(async () => {
+      changeInput(wordInput, "行")
+    })
+    await act(async () => {
+      vi.advanceTimersByTime(400)
+    })
+
+    // Đã có 行 xíng trong sổ -> hiện badge
+    expect(container.textContent).toContain("Đã có trong sổ")
+    expect(pinyinInput.value).toBe("xíng")
+
+    // 2. Ngay khi người dùng sửa pinyin sang 'háng' (chưa hoặc đang tra cứu),
+    // badge 'Đã có trong sổ' của âm xíng không được hiển thị cho âm háng
+    await act(async () => {
+      changeInput(pinyinInput, "háng")
+    })
+
+    expect(container.textContent).not.toContain("Đã có trong sổ")
+
+    // Sau khi debounce chạy xong
+    await act(async () => {
+      vi.advanceTimersByTime(400)
+    })
+
+    expect(lookupCalls).toContainEqual({ word: "行", pinyin: "háng" })
+    expect(container.textContent).not.toContain("Đã có trong sổ")
+  })
+
+  it("gõ chữ Hán '行' rồi gõ ngay pinyin 'háng' trước khi debounce chữ Hán hoàn tất vẫn không bị lỗi trùng (TC-FC-130)", async () => {
+    mockLookupImpl = (arg) => {
+      if (arg?.pinyin === "háng") {
+        return {
+          word: "行",
+          pinyin: "háng",
+          meaning_vi: "hàng, ngành nghề",
+          hsk_level: 4,
+          in_dictionary: true,
+          in_notebook: false,
+        }
+      }
+      return {
+        word: "行",
+        pinyin: "xíng",
+        meaning_vi: "đi, được, làm",
+        hsk_level: 4,
+        in_dictionary: true,
+        in_notebook: true,
+      }
+    }
+
+    await act(async () => {
+      root.render(<AddFlashcardPage />)
+    })
+
+    const inputs = container.querySelectorAll("input")
+    const wordInput = inputs[0]
+    const pinyinInput = inputs[1]
+
+    // 1. Nhập '行'
+    await act(async () => {
+      changeInput(wordInput, "行")
+    })
+    // Chưa đợi debounce của chữ Hán chạy xong (chỉ 100ms)
+    await act(async () => {
+      vi.advanceTimersByTime(100)
+    })
+
+    // 2. Nhập ngay pinyin 'háng'
+    await act(async () => {
+      changeInput(pinyinInput, "háng")
+    })
+
+    // Đợi tất cả timer debounce chạy xong
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+    })
+
+    // Kiểm tra: lookup với pinyin 'háng' PHẢI được gọi
+    expect(lookupCalls).toContainEqual({ word: "行", pinyin: "háng" })
+    expect(container.textContent).not.toContain("Đã có trong sổ")
   })
 })

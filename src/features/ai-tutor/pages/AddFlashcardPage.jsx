@@ -39,6 +39,10 @@ const AddFlashcardPage = () => {
 
   const clean = word.replace(/\s+/g, "")
   const validWord = clean.length > 0 && clean.length <= 12 && HAN.test(clean)
+  const isMatchingPinyin =
+    !pinyin.trim() ||
+    !info?.pinyin ||
+    pinyin.trim().toLowerCase() === info.pinyin.toLowerCase()
 
   // Tra từ điển theo chữ Hán
   useEffect(() => {
@@ -48,7 +52,8 @@ const AddFlashcardPage = () => {
         .unwrap()
         .then((res) => {
           setPinyin((p) => {
-            const nextPinyin = p || res.pinyin || ""
+            if (p) return p
+            const nextPinyin = res.pinyin || ""
             lastLookedUpPinyinRef.current = nextPinyin.trim()
             return nextPinyin
           })
@@ -170,7 +175,7 @@ const AddFlashcardPage = () => {
               <span className="rounded-full bg-slate-100 dark:bg-[#272727] px-3 py-1 font-bold text-slate-600 dark:text-neutral-300">Ngoài HSK - tự nhập nghĩa</span>
             )}
             {info.definition_en && <span className="text-slate-500 dark:text-neutral-400">({info.definition_en})</span>}
-            {info.in_notebook && (
+            {info.in_notebook && isMatchingPinyin && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/30 px-3 py-1 font-bold text-amber-700 dark:text-amber-400">
                 <Check className="h-4 w-4" /> Đã có trong sổ
               </span>
