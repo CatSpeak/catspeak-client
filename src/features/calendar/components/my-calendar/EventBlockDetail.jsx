@@ -140,7 +140,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{style.label}</span>
         </div>
         <h2 className="text-2xl font-bold text-[#1A1A1A] dark:text-white">{event.title}</h2>
-        {event.subtitle && <p className="text-gray-600 dark:text-[#AAAAAA] mt-1">{event.subtitle}</p>}
+        {event.subtitle && <p className="text-gray-600 dark:text-[#AAAAAA] mt-1 whitespace-pre-wrap leading-relaxed">{event.subtitle}</p>}
       </div>
 
       {/* Content section */}
