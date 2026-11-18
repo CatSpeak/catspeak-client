@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { CheckCircle2, FolderPlus, MoreHorizontal, Sparkles, Trash2, Undo2 } from "lucide-react"
 import AudioButton from "../../flashcard/AudioButton"
+import FlashcardPreviewModal from "./FlashcardPreviewModal"
 
 /**
  * Menu thao tác một thẻ (fc11, FR-FC-018): Đã biết rồi / bỏ đánh dấu, thêm vào thư
@@ -80,64 +81,132 @@ const StatusBadge = ({ card }) => {
 
 /**
  * Danh sách thẻ ở fc05 (và kết quả tìm từ). Chỉ đọc với lịch ôn: xem, nghe, thao tác
- * quản lý thẻ; không chấm điểm (FR-FC-016). `selectable` để chọn thẻ ôn tự do.
+ * quản lý thẻ; không chấm điểm (FR-FC-016). Bấm vào dòng thẻ (vùng chữ Hán/nghĩa) để
+ * mở xem chi tiết và lật thẻ ở chế độ chỉ đọc (TC-FC-092). `selectable` để chọn thẻ ôn tự do.
  */
-const FlashcardCardList = ({ items = [], selectable = false, selectedIds, onToggleSelect, onKnown, onFolders, onDelete, readOnly = false }) => (
-  <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-sm">
-    <div className="hidden grid-cols-[auto_1.2fr_1fr_1.6fr_auto_auto] items-center gap-4 border-b border-slate-100 dark:border-[#3F3F3F] bg-slate-50 dark:bg-[#242424] px-5 py-3 text-sm font-bold text-slate-600 dark:text-neutral-300 md:grid">
-      <div className="w-5">{selectable && <span className="sr-only">Chọn</span>}</div>
-      <div>Hán tự</div>
-      <div>Pinyin</div>
-      <div>Nghĩa</div>
-      <div>Audio</div>
-      <div className="w-9" />
+const FlashcardCardList = ({
+  items = [],
+  selectable = false,
+  selectedIds,
+  onToggleSelect,
+  onKnown,
+  onFolders,
+  onDelete,
+  readOnly = false,
+  onPreviewCard,
+  previewCard: controlledPreviewCard,
+}) => {
+  const [internalPreview, setInternalPreview] = useState(null)
+  const activePreview = controlledPreviewCard !== undefined ? controlledPreviewCard : internalPreview
+
+  const handleOpenPreview = (card) => {
+    setInternalPreview(card)
+    onPreviewCard?.(card)
+  }
+
+  const handleClosePreview = () => {
+    setInternalPreview(null)
+  }
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-sm">
+      <div className="hidden grid-cols-[auto_1.2fr_1fr_1.6fr_auto_auto] items-center gap-4 border-b border-slate-100 dark:border-[#3F3F3F] bg-slate-50 dark:bg-[#242424] px-5 py-3 text-sm font-bold text-slate-600 dark:text-neutral-300 md:grid">
+        <div className="w-5">{selectable && <span className="sr-only">Chọn</span>}</div>
+        <div>Hán tự</div>
+        <div>Pinyin</div>
+        <div>Nghĩa</div>
+        <div>Audio</div>
+        <div className="w-9" />
+      </div>
+      <ul className="divide-y divide-slate-100 dark:divide-[#272727]">
+        {items.map((card) => {
+          const checked = selectedIds?.has(card.card_id)
+          return (
+            <li
+              key={card.card_id}
+              data-testid={`card-row-${card.card_id}`}
+              className="group grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-3 gap-y-1 px-4 py-3 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#222222] md:grid-cols-[auto_1.2fr_1fr_1.6fr_auto_auto] md:gap-4 md:px-5 md:py-4"
+            >
+              <div
+                className="row-span-2 w-5 md:row-span-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {selectable && (
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-[#990011]"
+                    checked={Boolean(checked)}
+                    onChange={() => onToggleSelect?.(card.card_id)}
+                    aria-label={`Chọn thẻ ${card.word}`}
+                  />
+                )}
+              </div>
+              <div
+                data-testid={`card-preview-trigger-${card.card_id}`}
+                role="button"
+                tabIndex={0}
+                aria-label={`Xem chi tiết thẻ ${card.word}`}
+                onClick={() => handleOpenPreview(card)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    handleOpenPreview(card)
+                  }
+                }}
+                className="contents cursor-pointer"
+              >
+                <div className="flex flex-wrap items-center gap-2 cursor-pointer">
+                  <span
+                    className="text-lg font-bold text-slate-900 transition-colors group-hover:text-[#990011] dark:text-white dark:group-hover:text-red-400"
+                    lang="zh"
+                  >
+                    {card.word}
+                  </span>
+                  {card.card_type === "pronunciation" && (
+                    <span className="rounded-full bg-slate-100 dark:bg-[#272727] px-2 py-0.5 text-[11px] font-bold text-slate-600 dark:text-neutral-300">
+                      Phát âm
+                    </span>
+                  )}
+                  <StatusBadge card={card} />
+                </div>
+                <div className="order-3 col-start-2 text-sm text-slate-600 dark:text-neutral-300 md:order-none md:col-auto cursor-pointer">
+                  {card.pinyin || "-"}
+                </div>
+                <div className="order-4 col-start-2 text-sm md:order-none md:col-auto cursor-pointer">
+                  {card.meaning_vi ? (
+                    <span className="text-slate-700 dark:text-neutral-200">{card.meaning_vi}</span>
+                  ) : (
+                    <span className="italic text-slate-400 dark:text-neutral-500">Đang cập nhật nghĩa</span>
+                  )}
+                </div>
+              </div>
+              <div
+                className="row-span-2 md:row-span-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <AudioButton audioPath={card.audio_url} pinyin={card.pinyin} label={`Nghe phát âm ${card.word}`} />
+              </div>
+              <div
+                className="row-span-2 md:row-span-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {!readOnly && <CardActionsMenu card={card} onKnown={onKnown} onFolders={onFolders} onDelete={onDelete} />}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+
+      {activePreview && (
+        <FlashcardPreviewModal
+          key={activePreview.card_id}
+          card={activePreview}
+          isOpen={Boolean(activePreview)}
+          onClose={handleClosePreview}
+        />
+      )}
     </div>
-    <ul className="divide-y divide-slate-100 dark:divide-[#272727]">
-      {items.map((card) => {
-        const checked = selectedIds?.has(card.card_id)
-        return (
-          <li
-            key={card.card_id}
-            data-testid={`card-row-${card.card_id}`}
-            className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-3 gap-y-1 px-4 py-3 md:grid-cols-[auto_1.2fr_1fr_1.6fr_auto_auto] md:gap-4 md:px-5 md:py-4"
-          >
-            <div className="row-span-2 w-5 md:row-span-1">
-              {selectable && (
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-[#990011]"
-                  checked={Boolean(checked)}
-                  onChange={() => onToggleSelect?.(card.card_id)}
-                  aria-label={`Chọn thẻ ${card.word}`}
-                />
-              )}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-lg font-bold text-slate-900 dark:text-white" lang="zh">{card.word}</span>
-              {card.card_type === "pronunciation" && (
-                <span className="rounded-full bg-slate-100 dark:bg-[#272727] px-2 py-0.5 text-[11px] font-bold text-slate-600 dark:text-neutral-300">Phát âm</span>
-              )}
-              <StatusBadge card={card} />
-            </div>
-            <div className="order-3 col-start-2 text-sm text-slate-600 dark:text-neutral-300 md:order-none md:col-auto">{card.pinyin || "-"}</div>
-            <div className="order-4 col-start-2 text-sm md:order-none md:col-auto">
-              {card.meaning_vi ? (
-                <span className="text-slate-700 dark:text-neutral-200">{card.meaning_vi}</span>
-              ) : (
-                <span className="italic text-slate-400 dark:text-neutral-500">Đang cập nhật nghĩa</span>
-              )}
-            </div>
-            <div className="row-span-2 md:row-span-1">
-              <AudioButton audioPath={card.audio_url} pinyin={card.pinyin} label={`Nghe phát âm ${card.word}`} />
-            </div>
-            <div className="row-span-2 md:row-span-1">
-              {!readOnly && <CardActionsMenu card={card} onKnown={onKnown} onFolders={onFolders} onDelete={onDelete} />}
-            </div>
-          </li>
-        )
-      })}
-    </ul>
-  </div>
-)
+  )
+}
 
 export default FlashcardCardList
