@@ -32,5 +32,10 @@ export default {
     empty: "Sổ từ vựng của bạn còn trống.",
     emptyHint: "Thêm từ vào sổ để thấy chúng thành những vì sao.",
     addWords: "Thêm từ vựng",
+    legend: "Trạng thái",
+    clickToLearn: "(bấm để học)",
+    useMock: "Dùng dữ liệu giả lập",
+    mockNotice:
+      "Chế độ dữ liệu giả lập — AI API staging đang lỗi hạ tầng (Cloudflare 1033). Bấm vào một ngôi sao để giả lập học từ.",
   },
 }

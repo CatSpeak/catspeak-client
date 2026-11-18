@@ -32,5 +32,10 @@ export default {
     empty: "ノートはまだ空です。",
     emptyHint: "単語を追加すると星になります。",
     addWords: "単語を追加",
+    legend: "状態",
+    clickToLearn: "（クリックで学習）",
+    useMock: "モックデータを使う",
+    mockNotice:
+      "モックデータモード — AI API staging のインフラ障害（Cloudflare 1033）。星をクリックして学習をシミュレートできます。",
   },
 }
