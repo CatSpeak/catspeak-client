@@ -31,7 +31,7 @@ const InteractiveScriptWidget = ({
     toggleTranslation,
     togglePopover,
     handleLanguageChange,
-  } = useInteractiveScript()
+  } = useInteractiveScript(scriptsPool)
 
   const translationVariants = {
     initial: {
