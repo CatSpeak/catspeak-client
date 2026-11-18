@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useCallback, useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { ArrowLeft, ChevronRight, Folder, FolderPlus, Lock, Pencil, Plus, Search, Trash2, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -74,6 +74,9 @@ const DeckListPage = () => {
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [limit, setLimit] = useState(null)
   const [formError, setFormError] = useState("")
+
+  const closeEditor = useCallback(() => setEditor(null), [])
+  const closeConfirmDelete = useCallback(() => setConfirmDelete(null), [])
 
   const openCreate = () => {
     if (folders && !folders.can_create) {
@@ -249,7 +252,7 @@ const DeckListPage = () => {
 
       <FlashcardModal
         isOpen={Boolean(editor)}
-        onClose={() => setEditor(null)}
+        onClose={closeEditor}
         title={editor?.mode === "rename" ? "Đổi tên thư mục" : "Tạo thư mục mới"}
         labelledBy="flashcard-folder-editor-title"
       >
@@ -266,7 +269,7 @@ const DeckListPage = () => {
             />
             {formError && <p className="text-sm text-rose-700 dark:text-red-400">{formError}</p>}
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setEditor(null)} className="h-10 rounded-full border border-slate-300 dark:border-[#3F3F3F] text-slate-700 dark:text-neutral-200 px-5 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-[#272727]">
+              <button type="button" onClick={closeEditor} className="h-10 rounded-full border border-slate-300 dark:border-[#3F3F3F] text-slate-700 dark:text-neutral-200 px-5 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-[#272727]">
                 Huỷ
               </button>
               <button type="submit" className="h-10 rounded-full bg-[#990011] dark:bg-cath-red-700 px-5 text-sm font-semibold text-white">
@@ -279,12 +282,12 @@ const DeckListPage = () => {
 
       <FlashcardModal
         isOpen={Boolean(confirmDelete)}
-        onClose={() => setConfirmDelete(null)}
+        onClose={closeConfirmDelete}
         title={`Xoá thư mục "${confirmDelete?.name || ""}"?`}
         labelledBy="flashcard-folder-delete-title"
         footer={
           <>
-            <button type="button" onClick={() => setConfirmDelete(null)} className="h-11 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-slate-700 dark:text-neutral-200 px-6 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-[#3D3D3D]">
+            <button type="button" onClick={closeConfirmDelete} className="h-11 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] text-slate-700 dark:text-neutral-200 px-6 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-[#3D3D3D]">
               Huỷ
             </button>
             <button type="button" onClick={doDelete} className="h-11 rounded-full bg-rose-700 dark:bg-red-700 px-6 text-sm font-semibold text-white">

@@ -1,22 +1,37 @@
 import React, { useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { X } from "lucide-react"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 
 /**
  * Hộp thoại dùng chung cho các màn flashcard. Esc để đóng, focus vào hộp thoại khi mở.
  */
 const FlashcardModal = ({ isOpen, title, onClose, children, footer, labelledBy, maxWidth = "max-w-md" }) => {
   const ref = useRef(null)
+  const onCloseRef = useRef(onClose)
+  useScrollLock(Boolean(isOpen))
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     if (!isOpen) return undefined
     const onKey = (e) => {
-      if (e.key === "Escape") onClose?.()
+      if (e.key === "Escape") onCloseRef.current?.()
     }
     window.addEventListener("keydown", onKey)
-    ref.current?.focus()
     return () => window.removeEventListener("keydown", onKey)
-  }, [isOpen, onClose])
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return undefined
+    // Chỉ focus modal container nếu activeElement chưa nằm bên trong modal
+    // (ví dụ: tránh cướp focus của input có autoFocus hoặc người dùng đang gõ)
+    if (ref.current && !ref.current.contains(document.activeElement)) {
+      ref.current.focus()
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
   const titleId = labelledBy || "flashcard-modal-title"
