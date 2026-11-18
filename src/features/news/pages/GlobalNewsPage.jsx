@@ -7,6 +7,7 @@ import { useGetPostsQuery } from "@/store/api/social/postsApi"
 import PostFeedList from "@/features/profile/components/PostFeedList"
 import CreatePostBox from "@/features/profile/components/CreatePostBox"
 import SidebarRecommendationWidget from "../components/recommendations/SidebarRecommendationWidget"
+import DailyVocabWidget from "../components/daily-vocab/DailyVocabWidget"
 import {
   getCommunityName,
   getCommunityLanguageId,
@@ -16,6 +17,7 @@ import {
 const GlobalNewsPage = () => {
   const { lang } = useParams()
   const { t, language } = useLanguage()
+  const currentLang = lang || language || "en"
   const { isDesktopExpanded } = useSidebar()
   const [page, setPage] = useState(1)
   const pageSize = 10
@@ -43,7 +45,7 @@ const GlobalNewsPage = () => {
     languageCommunity: currentCommunityId,
   })
 
-  // Filter public posts belonging to current community
+  // Filter public posts belonging to the selected language community
   const posts = useMemo(() => {
     const rawList = Array.isArray(data?.data)
       ? data.data
@@ -74,7 +76,7 @@ const GlobalNewsPage = () => {
   }, [posts, data?.hasMore, isFetching])
 
   return (
-    <div className="flex w-full max-w-6xl mx-auto px-2 sm:px-4 py-4 gap-4 xl:gap-6 items-start justify-center min-w-0">
+    <div className="flex w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 gap-4 xl:gap-6 items-start justify-center min-w-0">
       {/* Main Feed Column */}
       <div className="flex flex-col w-full min-w-0 max-w-2xl gap-4 flex-1">
         <CreatePostBox defaultCommunity={currentCommunity} />
@@ -99,12 +101,16 @@ const GlobalNewsPage = () => {
         />
       </div>
 
-      {/* Right Sidebar - Desktop Only (BR-DX-04 & BR-DX-07) */}
+      {/* Right Sidebar - Desktop Only: Daily Vocab Widget & Sidebar Recommendation Widget */}
       <aside
-        className={`flex-col shrink-0 gap-4 sticky top-20 w-[280px] xl:w-[300px] 2xl:w-[320px] ${
+        className={`flex-col shrink-0 gap-4 sticky top-20 w-[280px] xl:w-[320px] 2xl:w-[350px] ${
           isDesktopExpanded ? "hidden xl:flex" : "hidden lg:flex"
         }`}
       >
+        {/* Thẻ Từ vựng của ngày / Ôn tập từ vựng BR-VOCAB-01 */}
+        <DailyVocabWidget lang={currentLang} />
+
+        {/* Widget Đề xuất */}
         <SidebarRecommendationWidget languageCommunity={currentCommunityId} />
       </aside>
     </div>
