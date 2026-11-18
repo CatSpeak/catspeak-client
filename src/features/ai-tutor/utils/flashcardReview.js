@@ -144,3 +144,19 @@ export const notebookPaths = (lang = "vi") => {
     search: (term) => `${base}/decks?search=${encodeURIComponent(term)}`,
   }
 }
+
+/** Tên hiển thị người dùng cho các mã deck hệ thống khi chưa tải xong danh mục từ API. */
+export const formatDeckSlug = (deckId) => {
+  if (!deckId) return ""
+  if (deckId === "all") return "Toàn bộ sổ"
+  if (deckId === "recent-wrong") return "Từ sai gần đây"
+  if (deckId === "non-hsk") return "Ngoài HSK"
+  const m = /^hsk-([1-6])$/i.exec(deckId)
+  if (m) return `HSK ${m[1]}`
+  if (deckId.startsWith("topic-")) {
+    const raw = deckId.slice(6).replace(/[-_]+/g, " ")
+    return raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : "Chủ đề"
+  }
+  return deckId
+}
+

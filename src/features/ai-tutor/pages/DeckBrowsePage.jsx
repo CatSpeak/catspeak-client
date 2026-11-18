@@ -12,7 +12,7 @@ import { FlashcardLoadError } from "../components/flashcards/FlashcardPageState"
 import FlashcardCardList from "../components/flashcards/library/FlashcardCardList"
 import useCardActions from "../components/flashcards/library/useCardActions"
 import { useReportQueryNetwork } from "../hooks/useOnlineStatus"
-import { flashcardReviewPath, notebookPaths } from "../utils/flashcardReview"
+import { flashcardReviewPath, formatDeckSlug, notebookPaths } from "../utils/flashcardReview"
 
 const PAGE = 50
 const MAX_SELECT = 20
@@ -61,22 +61,26 @@ const DeckBrowsePage = () => {
   }, [term])
 
   const folderId = folderIdOf(deckId)
+  const hasFilter = Boolean(search || status)
   const { data: decks = [] } = useGetFlashcardDecksQuery(undefined, { skip: folderId != null })
   const { data: folders } = useGetFlashcardFoldersQuery(undefined, { skip: folderId == null })
   const cardsQuery = useGetDeckCardsQuery({ deckId, limit, search, status })
   const { data = { items: [], total: 0 }, isLoading, isFetching, isError, error, refetch } = cardsQuery
   // Tổng của cả deck (không lọc) để quyết định empty state và nút "Ôn tập".
-  const { data: whole } = useGetDeckCardsQuery({ deckId, limit: 1 })
+  // Chỉ truy vấn khi có bộ lọc active (search hoặc status); khi không lọc, cardsQuery đã chứa tổng của cả deck.
+  const { data: whole } = useGetDeckCardsQuery({ deckId, limit: 1 }, { skip: !hasFilter })
   useReportQueryNetwork(cardsQuery)
 
   const folder = folders?.items?.find((f) => f.id === folderId)
   const deck = useMemo(() => {
     if (folderId != null) return { name: folder?.name || "Thư mục", category: "folder" }
     if (deckId === "all") return { name: "Toàn bộ sổ", category: "system" }
-    return decks.find((item) => item.id === deckId) || { name: deckId, category: "system" }
+    const found = decks.find((item) => item.id === deckId)
+    if (found) return found
+    return { name: formatDeckSlug(deckId), category: "system" }
   }, [decks, deckId, folder, folderId])
 
-  const deckTotal = whole?.total ?? data.total ?? 0
+  const deckTotal = (hasFilter ? whole?.total : data.total) ?? data.total ?? 0
   const deckEmpty = !isLoading && deckTotal === 0
   const isRecentWrong = deckId === "recent-wrong"
 
@@ -115,7 +119,16 @@ const DeckBrowsePage = () => {
           <h1 className="text-2xl font-black text-slate-900 dark:text-white">
             {deck.category === "folder" ? "Thư mục" : "Bộ thẻ"}: {deck.name}
           </h1>
-          <span className="text-sm font-semibold text-slate-500 dark:text-neutral-400">{deckTotal} thẻ</span>
+          {isLoading ? (
+            <div
+              className="mt-1 h-5 w-16 animate-pulse rounded-md bg-slate-200 dark:bg-[#3F3F3F]"
+              aria-label="Đang tải số thẻ"
+            />
+          ) : (
+            <span className="text-sm font-semibold text-slate-500 dark:text-neutral-400">
+              {deckTotal} thẻ
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {isRecentWrong && (
