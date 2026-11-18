@@ -15,6 +15,7 @@ import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
 import NewsPage from "@/features/news/pages/NewsPage"
 import GlobalNewsPage from "@/features/news/pages/GlobalNewsPage"
 import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
+import RecommendationAllPage from "@/features/news/pages/RecommendationAllPage"
 import DiscoverPage from "@/features/discover/DiscoverPage"
 import LettersPage from "@/features/stories/pages/LettersPage.jsx"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
@@ -489,6 +490,10 @@ const routesConfig = [
                   {
                     path: "global-news",
                     element: <GlobalNewsPage />,
+                  },
+                  {
+                    path: "recommendations",
+                    element: <RecommendationAllPage />,
                   },
                   {
                     path: "news/:slug",
