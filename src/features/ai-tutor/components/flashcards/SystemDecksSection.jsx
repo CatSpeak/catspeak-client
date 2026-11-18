@@ -89,17 +89,24 @@ const SystemDecksSection = ({ decks = [], onSelectDeck }) => {
         </div>
       </div>
 
-      {/* Nhóm 2: Chủ đề */}
-      {topicDecks.length > 0 && (
-        <div className="space-y-2.5 pt-2">
-          <h4 className="text-xs sm:text-sm font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">
-            Chủ đề
-          </h4>
+      {/* Nhóm 2: Theo chủ đề */}
+      <div className="space-y-2.5 pt-2">
+        <h4 className="text-xs sm:text-sm font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">
+          Theo chủ đề
+        </h4>
+        {topicDecks.length === 0 ? (
+          <div
+            data-testid="topic-decks-empty"
+            className="rounded-2xl border border-dashed border-slate-200 dark:border-[#3F3F3F] p-6 text-center text-sm text-slate-500 dark:text-neutral-400"
+          >
+            Chưa có bộ thẻ theo chủ đề nào. Hoàn thành các buổi luyện nói để lưu từ vựng theo chủ đề.
+          </div>
+        ) : (
           <div className="space-y-2">
             {topicDecks.map(renderDeckRow)}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
