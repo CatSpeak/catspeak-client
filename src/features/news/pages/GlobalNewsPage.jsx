@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect, useMemo } from "react"
+import { useParams } from "react-router-dom"
 import { Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPostsQuery } from "@/store/api/social/postsApi"
 import PostFeedList from "@/features/profile/components/PostFeedList"
+import DailyVocabWidget from "../components/daily-vocab/DailyVocabWidget"
 
 const GlobalNewsPage = () => {
-  const { t } = useLanguage()
+  const { lang } = useParams()
+  const { t, language } = useLanguage()
+  const currentLang = lang || language || "en"
   const [page, setPage] = useState(1)
   const pageSize = 10
 
@@ -46,23 +50,31 @@ const GlobalNewsPage = () => {
   }, [posts, data?.hasMore, isFetching])
 
   return (
-    <div className="flex flex-col w-full max-w-3xl mx-auto p-4">
-      <PostFeedList
-        posts={posts}
-        isLoading={isLoading && page === 1}
-        isFetching={isFetching && page > 1}
-        error={error && page === 1}
-        errorMessage="Không thể tải tin tức thế giới"
-        emptyMessage={t.news?.empty?.title || "Chưa có bài đăng nào"}
-        emptyIcon={Globe}
-        emptyDescription={
-          t.news?.empty?.description ||
-          "Hiện tại chưa có bài đăng nào trong bản tin thế giới. Hãy quay lại sau!"
-        }
-        emptyVariant="page"
-        lastPostRef={lastPostRef}
-        className="flex flex-col gap-2 w-full flex-1"
-      />
+    <div className="flex flex-col lg:flex-row gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 items-start">
+      {/* Cột trái: Feed bản tin thế giới */}
+      <div className="flex-1 min-w-0 w-full max-w-3xl mx-auto">
+        <PostFeedList
+          posts={posts}
+          isLoading={isLoading && page === 1}
+          isFetching={isFetching && page > 1}
+          error={error && page === 1}
+          errorMessage="Không thể tải tin tức thế giới"
+          emptyMessage={t.news?.empty?.title || "Chưa có bài đăng nào"}
+          emptyIcon={Globe}
+          emptyDescription={
+            t.news?.empty?.description ||
+            "Hiện tại chưa có bài đăng nào trong bản tin thế giới. Hãy quay lại sau!"
+          }
+          emptyVariant="page"
+          lastPostRef={lastPostRef}
+          className="flex flex-col gap-2 w-full flex-1"
+        />
+      </div>
+
+      {/* Cột phải: Thẻ Từ vựng của ngày / Ôn tập từ vựng BR-VOCAB-01 */}
+      <aside className="w-full lg:w-80 xl:w-96 shrink-0 lg:sticky lg:top-20">
+        <DailyVocabWidget lang={currentLang} />
+      </aside>
     </div>
   )
 }
