@@ -37,6 +37,10 @@ vi.mock("@/components/ui/toast", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
+vi.mock("../components/flashcard/AudioButton", () => ({
+  default: () => <button type="button">MockAudio</button>,
+}))
+
 vi.mock("../api/flashcardApi", () => ({
   useLazyLookupFlashcardWordQuery: () => [
     mockLookup,
@@ -351,5 +355,88 @@ describe("AddFlashcardPage - TC-FC-129 / TC-FC-010 lookup and pinyin meaning upd
     // Kiểm tra: lookup với pinyin 'háng' PHẢI được gọi
     expect(lookupCalls).toContainEqual({ word: "行", pinyin: "háng" })
     expect(container.textContent).not.toContain("Đã có trong sổ")
+  })
+
+  it("disable nút 'Thêm vào sổ' và 'Lưu và thêm từ khác' khi từ đã có trong sổ (TC-FC-130)", async () => {
+    mockLookupResult = {
+      word: "咖啡",
+      pinyin: "kāfēi",
+      meaning_vi: "cà phê",
+      hsk_level: 2,
+      in_dictionary: true,
+      in_notebook: true,
+    }
+
+    await act(async () => {
+      root.render(<AddFlashcardPage />)
+    })
+
+    const wordInput = container.querySelectorAll("input")[0]
+    const submitBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent.includes("Thêm vào sổ"),
+    )
+    const saveAndAddBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent.includes("Lưu và thêm từ khác"),
+    )
+
+    // Ban đầu chưa nhập từ -> form chưa submit được
+    expect(submitBtn).toBeDefined()
+
+    // 1. Nhập '咖啡' đã có trong sổ
+    await act(async () => {
+      changeInput(wordInput, "咖啡")
+    })
+    await act(async () => {
+      vi.advanceTimersByTime(400)
+    })
+
+    // Hiện badge 'Đã có trong sổ'
+    expect(container.textContent).toContain("Đã có trong sổ")
+
+    // Nút "Thêm vào sổ" và "Lưu và thêm từ khác" phải bị disable
+    expect(submitBtn.disabled).toBe(true)
+    expect(saveAndAddBtn.disabled).toBe(true)
+
+    // Form submit không được gọi API addCard khi đã biết trùng
+    await act(async () => {
+      const form = container.querySelector("form")
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+    })
+    expect(mockAddCard).not.toHaveBeenCalled()
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+      "Từ này đã có trong sổ của bạn.",
+    )
+
+    // Nút "Mở thẻ hiện có" hiển thị bên cạnh badge
+    const openCardBtn = container.querySelector('[data-testid="open-existing-card-btn"]')
+    expect(openCardBtn).not.toBeNull()
+    expect(openCardBtn.textContent).toContain("Mở thẻ hiện có")
+
+    // Bấm "Mở thẻ hiện có" -> mở preview modal xem chi tiết thẻ
+    await act(async () => {
+      openCardBtn.click()
+    })
+    expect(document.body.textContent).toContain("Chi tiết thẻ")
+    expect(document.body.textContent).toContain("Chỉ đọc - không ảnh hưởng lịch ôn")
+
+    // 2. Khi người dùng đổi sang từ chưa có trong sổ -> nút được enable lại
+    mockLookupResult = {
+      word: "你好",
+      pinyin: "nǐhǎo",
+      meaning_vi: "xin chào",
+      hsk_level: 1,
+      in_dictionary: true,
+      in_notebook: false,
+    }
+    await act(async () => {
+      changeInput(wordInput, "你好")
+    })
+    await act(async () => {
+      vi.advanceTimersByTime(400)
+    })
+
+    expect(container.textContent).not.toContain("Đã có trong sổ")
+    expect(submitBtn.disabled).toBe(false)
+    expect(saveAndAddBtn.disabled).toBe(false)
   })
 })
