@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { CheckCircle2, FolderPlus, MoreHorizontal, Sparkles, Trash2, Undo2 } from "lucide-react"
 import AudioButton from "../../flashcard/AudioButton"
 import FlashcardPreviewModal from "./FlashcardPreviewModal"
@@ -6,62 +7,193 @@ import FlashcardPreviewModal from "./FlashcardPreviewModal"
 /**
  * Menu thao tác một thẻ (fc11, FR-FC-018): Đã biết rồi / bỏ đánh dấu, thêm vào thư
  * mục, xoá. Mở bằng chuột hoặc bàn phím, Esc để đóng.
+ * Render qua Portal ra document.body và tự động lật lên trên (flip up) khi ở dòng cuối
+ * hoặc thiếu khoảng trống phía dưới để không bị khung bảng cắt (TC-FC-134, TC-FC-135, TC-FC-136).
  */
-export const CardActionsMenu = ({ card, onKnown, onFolders, onDelete }) => {
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
+export const CardActionsMenu = ({
+  card,
+  onKnown,
+  onFolders,
+  onDelete,
+  isLastRow = false,
+  isOpen: controlledIsOpen,
+  defaultOpen = false,
+  onOpenChange,
+}) => {
+  const isControlled = controlledIsOpen !== undefined
+  const [internalOpen, setInternalOpen] = useState(defaultOpen)
+  const open = isControlled ? controlledIsOpen : internalOpen
+  const [coords, setCoords] = useState(null)
+  const containerRef = useRef(null)
+  const buttonRef = useRef(null)
+  const menuRef = useRef(null)
+
+  const setOpen = useCallback(
+    (next) => {
+      const nextVal = typeof next === "function" ? next(open) : next
+      if (!isControlled) {
+        setInternalOpen(nextVal)
+      }
+      onOpenChange?.(nextVal)
+    },
+    [isControlled, open, onOpenChange]
+  )
+
+  const updatePosition = useCallback(() => {
+    if (!buttonRef.current || typeof window === "undefined") return
+    const rect = buttonRef.current.getBoundingClientRect()
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    const menuHeight = menuRef.current?.offsetHeight || 145
+    const menuWidth = menuRef.current?.offsetWidth || 224
+
+    const flipUp = isLastRow || (spaceBelow < menuHeight + 12 && spaceAbove > spaceBelow)
+
+    let top = flipUp ? rect.top - menuHeight - 6 : rect.bottom + 6
+    let left = rect.right - menuWidth
+
+    // Đảm bảo không tràn viền trái / phải màn hình
+    const minLeft = 8
+    const maxLeft = Math.max(8, window.innerWidth - menuWidth - 8)
+    left = Math.max(minLeft, Math.min(left, maxLeft))
+
+    setCoords({
+      top: Math.round(top),
+      left: Math.round(left),
+      flipUp,
+    })
+  }, [isLastRow])
+
+  useLayoutEffect(() => {
+    if (open) {
+      updatePosition()
+    }
+  }, [open, updatePosition])
 
   useEffect(() => {
-    if (!open) return undefined
-    const close = (e) => {
-      if (!ref.current?.contains(e.target)) setOpen(false)
+    if (!open) {
+      setCoords(null)
+      return undefined
     }
-    const esc = (e) => e.key === "Escape" && setOpen(false)
-    document.addEventListener("mousedown", close)
-    document.addEventListener("keydown", esc)
+
+    updatePosition()
+
+    const handleScrollOrResize = () => {
+      updatePosition()
+    }
+
+    const handleOutside = (e) => {
+      if (
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target) &&
+        menuRef.current &&
+        !menuRef.current.contains(e.target)
+      ) {
+        setOpen(false)
+      }
+    }
+
+    const handleKey = (e) => {
+      if (e.key === "Escape") setOpen(false)
+    }
+
+    window.addEventListener("scroll", handleScrollOrResize, true)
+    window.addEventListener("resize", handleScrollOrResize)
+    document.addEventListener("mousedown", handleOutside)
+    document.addEventListener("keydown", handleKey)
+
     return () => {
-      document.removeEventListener("mousedown", close)
-      document.removeEventListener("keydown", esc)
+      window.removeEventListener("scroll", handleScrollOrResize, true)
+      window.removeEventListener("resize", handleScrollOrResize)
+      document.removeEventListener("mousedown", handleOutside)
+      document.removeEventListener("keydown", handleKey)
     }
-  }, [open])
+  }, [open, updatePosition, setOpen])
 
   const run = (fn) => () => {
     setOpen(false)
     fn?.(card)
   }
 
-  return (
-    <div className="relative" ref={ref}>
+  const isClientPortal = typeof document !== "undefined" && Boolean(document?.body)
+  const shouldFlip = coords?.flipUp ?? isLastRow
+
+  const menuElement = (
+    <div
+      ref={menuRef}
+      role="menu"
+      data-testid={`card-menu-dropdown-${card.card_id}`}
+      style={
+        isClientPortal && coords
+          ? {
+              position: "fixed",
+              top: `${coords.top}px`,
+              left: `${coords.left}px`,
+            }
+          : undefined
+      }
+      className={`z-[1050] w-56 overflow-hidden rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] py-1 text-sm shadow-xl ${
+        isClientPortal && coords
+          ? ""
+          : `absolute right-0 ${shouldFlip ? "bottom-full mb-1" : "top-10"}`
+      }`}
+      onClick={(e) => e.stopPropagation()}
+    >
       <button
         type="button"
+        role="menuitem"
+        onClick={run(onKnown)}
+        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-slate-800 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727]"
+      >
+        {card.is_known ? (
+          <Undo2 className="h-4 w-4 text-slate-500 dark:text-neutral-400" />
+        ) : (
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+        )}
+        {card.is_known ? "Bỏ đánh dấu Đã biết" : "Đã biết rồi"}
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        onClick={run(onFolders)}
+        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-slate-800 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727]"
+      >
+        <FolderPlus className="h-4 w-4 text-slate-500 dark:text-neutral-400" />
+        Thêm vào thư mục
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        onClick={run(onDelete)}
+        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-rose-700 dark:text-red-400 hover:bg-rose-50 dark:hover:bg-red-950/20"
+      >
+        <Trash2 className="h-4 w-4" />
+        Xoá thẻ
+      </button>
+    </div>
+  )
+
+  return (
+    <div className="relative inline-flex items-center justify-center" ref={containerRef}>
+      <button
+        type="button"
+        ref={buttonRef}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Thao tác với thẻ ${card.word}`}
         data-testid={`card-menu-${card.card_id}`}
-        onClick={() => setOpen((v) => !v)}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (!open) {
+            updatePosition()
+          }
+          setOpen((v) => !v)
+        }}
         className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-[#272727]"
       >
         <MoreHorizontal className="h-5 w-5" />
       </button>
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-10 z-30 w-56 overflow-hidden rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] py-1 text-sm shadow-xl"
-        >
-          <button type="button" role="menuitem" onClick={run(onKnown)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-slate-800 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727]">
-            {card.is_known ? <Undo2 className="h-4 w-4 text-slate-500 dark:text-neutral-400" /> : <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />}
-            {card.is_known ? "Bỏ đánh dấu Đã biết" : "Đã biết rồi"}
-          </button>
-          <button type="button" role="menuitem" onClick={run(onFolders)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-slate-800 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#272727]">
-            <FolderPlus className="h-4 w-4 text-slate-500 dark:text-neutral-400" />
-            Thêm vào thư mục
-          </button>
-          <button type="button" role="menuitem" onClick={run(onDelete)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-rose-700 dark:text-red-400 hover:bg-rose-50 dark:hover:bg-red-950/20">
-            <Trash2 className="h-4 w-4" />
-            Xoá thẻ
-          </button>
-        </div>
-      )}
+      {open && (isClientPortal ? createPortal(menuElement, document.body) : menuElement)}
     </div>
   )
 }
@@ -119,8 +251,9 @@ const FlashcardCardList = ({
         <div className="w-9" />
       </div>
       <ul className="divide-y divide-slate-100 dark:divide-[#272727]">
-        {items.map((card) => {
+        {items.map((card, index) => {
           const checked = selectedIds?.has(card.card_id)
+          const isLastRow = index === items.length - 1
           return (
             <li
               key={card.card_id}
@@ -190,7 +323,15 @@ const FlashcardCardList = ({
                 className="row-span-2 md:row-span-1"
                 onClick={(e) => e.stopPropagation()}
               >
-                {!readOnly && <CardActionsMenu card={card} onKnown={onKnown} onFolders={onFolders} onDelete={onDelete} />}
+                {!readOnly && (
+                  <CardActionsMenu
+                    card={card}
+                    isLastRow={isLastRow}
+                    onKnown={onKnown}
+                    onFolders={onFolders}
+                    onDelete={onDelete}
+                  />
+                )}
               </div>
             </li>
           )
