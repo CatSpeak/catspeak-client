@@ -48,6 +48,8 @@ export const socialApi = createApi({
     "Messages",
     "Friendship",
     "Friend",
+    "SearchTrend",
+    "RecentSearch",
     "Follower",
     "Following",
     "Recommendation",

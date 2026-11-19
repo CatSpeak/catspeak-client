@@ -1,12 +1,23 @@
 import { useState, useEffect, useMemo } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import DOMPurify from "dompurify"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import { CmsCarousel } from "./CmsCarousel"
 import { parseContentSegments } from "../utils/parseContentSegments"
 import { CONTENT_CLASSES } from "../constants/contentClasses"
 import { normalizeContent } from "../utils/contentNormalizer"
+import { processContentHtml } from "../utils/contentHighlighter"
 
-const PostContent = ({ html, contentUrl, className = "", fallback = null }) => {
+const PostContent = ({
+  html,
+  contentUrl,
+  className = "",
+  fallback = null,
+  searchKeyword = "",
+  onHashtagClick,
+}) => {
+  const navigate = useNavigate()
+  const { lang } = useParams()
   const [fetchedData, setFetchedData] = useState({ url: null, html: "" })
 
   useEffect(() => {
@@ -47,7 +58,8 @@ const PostContent = ({ html, contentUrl, className = "", fallback = null }) => {
 
   const segments = useMemo(() => {
     if (!displayHtml) return []
-    const normalizedHtml = normalizeContent(displayHtml)
+    const highlightedHtml = processContentHtml(displayHtml, searchKeyword)
+    const normalizedHtml = normalizeContent(highlightedHtml)
     const sanitized = DOMPurify.sanitize(normalizedHtml, {
       ADD_TAGS: [
         "mark",
@@ -59,6 +71,7 @@ const PostContent = ({ html, contentUrl, className = "", fallback = null }) => {
         "u",
         "strike",
         "iframe",
+        "span",
       ],
       ADD_ATTR: [
         "style",
@@ -73,10 +86,28 @@ const PostContent = ({ html, contentUrl, className = "", fallback = null }) => {
         "rel",
         "colspan",
         "rowspan",
+        "data-hashtag",
+        "role",
+        "tabindex",
       ],
     })
     return parseContentSegments(sanitized)
-  }, [displayHtml])
+  }, [displayHtml, searchKeyword])
+
+  const handleContainerClick = (e) => {
+    const hashtagEl = e.target.closest("[data-hashtag]")
+    if (hashtagEl) {
+      e.preventDefault()
+      e.stopPropagation()
+      const tag = hashtagEl.getAttribute("data-hashtag")
+      if (onHashtagClick) {
+        onHashtagClick(tag)
+      } else {
+        const targetLang = lang || "en"
+        navigate(`/${targetLang}/cat-speak/global-news?search=${encodeURIComponent(tag)}`)
+      }
+    }
+  }
 
   if (isLoading && !displayHtml) {
     return (
@@ -89,7 +120,10 @@ const PostContent = ({ html, contentUrl, className = "", fallback = null }) => {
   }
 
   return (
-    <div className={`${CONTENT_CLASSES} ${className}`}>
+    <div
+      className={`${CONTENT_CLASSES} ${className}`}
+      onClick={handleContainerClick}
+    >
       {segments.map((seg, i) =>
         seg.type === "carousel" && seg.images ? (
           <CmsCarousel key={`carousel-${i}`} images={seg.images} />

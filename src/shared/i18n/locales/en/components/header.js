@@ -18,6 +18,11 @@ export default {
   clearAll: "Clear all",
   resultsFound: "{{count}} results found",
   searching: "Searching for rooms...",
+  searchSuggestions: "Search suggestions",
+  trendingBadge: "Trending",
+  searchGlobalNews: 'Search "{{keyword}}" in World News',
+  pressEnterToSearch: 'Press Enter to search "{{keyword}}" in World News',
+  searchingSuggestions: "Searching suggestions...",
   filterRooms: "Filter rooms",
   languages: {
     vi: "Vietnamese",

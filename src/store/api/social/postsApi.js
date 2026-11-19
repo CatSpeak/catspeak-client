@@ -36,6 +36,11 @@ export const postsApi = socialApi.injectEndpoints({
         sortBy,
         topicIds,
         languageCommunity,
+        fromDate,
+        toDate,
+        hasComments,
+        hasMedia,
+        mediaTypes,
       } = {}) => ({
         url: "/Post",
         params: {
@@ -52,6 +57,11 @@ export const postsApi = socialApi.injectEndpoints({
                 ? [topicIds]
                 : undefined,
           languageCommunity,
+          fromDate,
+          toDate,
+          hasComments,
+          hasMedia,
+          mediaTypes,
         },
       }),
       providesTags: ["Post"],
@@ -64,7 +74,8 @@ export const postsApi = socialApi.injectEndpoints({
           queryArgs?.languageCommunity !== null
             ? queryArgs.languageCommunity
             : "all"
-        return `${endpointName}_${langKey}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}_${topicKey}`
+        const filterKey = `${queryArgs?.fromDate || ""}_${queryArgs?.toDate || ""}_${queryArgs?.hasComments ?? ""}_${queryArgs?.hasMedia ?? ""}_${Array.isArray(queryArgs?.mediaTypes) ? queryArgs.mediaTypes.join(",") : queryArgs?.mediaTypes || ""}`
+        return `${endpointName}_${langKey}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}_${topicKey}_${filterKey}`
       },
       transformResponse: (response, meta, arg) => {
         const items = Array.isArray(response?.data)
@@ -77,6 +88,7 @@ export const postsApi = socialApi.injectEndpoints({
             ? response
             : {}),
           data: items,
+          totalCount: response?.totalCount ?? response?.TotalCount ?? items.length,
           hasMore: items.length >= (arg?.pageSize || 10),
         }
       },
@@ -111,7 +123,12 @@ export const postsApi = socialApi.injectEndpoints({
           currentArg?.page !== previousArg?.page ||
           currentArg?.languageCommunity !== previousArg?.languageCommunity ||
           currentArg?.searchKeyword !== previousArg?.searchKeyword ||
-          currentArg?.sortBy !== previousArg?.sortBy
+          currentArg?.sortBy !== previousArg?.sortBy ||
+          currentArg?.fromDate !== previousArg?.fromDate ||
+          currentArg?.toDate !== previousArg?.toDate ||
+          currentArg?.hasComments !== previousArg?.hasComments ||
+          currentArg?.hasMedia !== previousArg?.hasMedia ||
+          JSON.stringify(currentArg?.mediaTypes) !== JSON.stringify(previousArg?.mediaTypes)
         )
       },
     }),

@@ -18,6 +18,11 @@ export default {
   clearAll: "Xoá tất cả",
   resultsFound: "Tìm thấy {{count}} kết quả",
   searching: "Đang tìm kiếm phòng...",
+  searchSuggestions: "Gợi ý tìm kiếm",
+  trendingBadge: "Xu hướng",
+  searchGlobalNews: 'Tìm kiếm "{{keyword}}" trên bản tin thế giới',
+  pressEnterToSearch: 'Nhấn Enter để tìm "{{keyword}}" trên bản tin thế giới',
+  searchingSuggestions: "Đang tìm kiếm gợi ý...",
   filterRooms: "Lọc phòng",
   languages: {
     vi: "Tiếng Việt",

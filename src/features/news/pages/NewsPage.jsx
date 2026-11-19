@@ -433,7 +433,13 @@ const NewsPage = ({ postType = "1" }) => {
       ) : (
         /* ── 4. Content Masonry Grid ── */
         <>
-          <div className="flex flex-row w-full gap-2 items-start">
+          <div
+            className={`flex flex-row w-full gap-2 items-start transition-opacity duration-200 ${
+              isFetching && page === 1
+                ? "opacity-50 pointer-events-none filter blur-[0.5px]"
+                : "opacity-100"
+            }`}
+          >
             {columns.map((col, colIndex) => (
               <div
                 key={colIndex}

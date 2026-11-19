@@ -10,30 +10,13 @@ import {
   ChevronDown,
 } from "lucide-react"
 import { useGetAllRecommendationsQuery } from "@/store/api/social/recommendationsApi"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { getCommunityLanguageId } from "../utils/newsUtils"
 import { useRecommendationTracking } from "../hooks/useRecommendationTracking"
 
-const TABS = [
-  { key: "teacher", label: "Giảng viên" },
-  { key: "group", label: "Nhóm" },
-  { key: "user", label: "Cá nhân" },
-]
-
-const LANG_OPTIONS = [
-  { id: 0, label: "Tất cả" },
-  { id: 3, label: "Tiếng Nhật" },
-  { id: 1, label: "Tiếng Anh" },
-  { id: 2, label: "Tiếng Trung" },
-]
-
-const SORT_OPTIONS = [
-  { value: "relevance", label: "Độ phù hợp cao nhất" },
-  { value: "popular", label: "Nhiều người quan tâm nhất" },
-  { value: "newest", label: "Mới nhất" },
-]
-
 // ── Detail Card for Grid (No action button as per spec page 13, 14) ───────────
 const DetailGridCard = ({ item, languageCommunity, onNavigate }) => {
+  const { t } = useLanguage()
   const { elementRef, trackCardClick } = useRecommendationTracking({
     itemType: item.type,
     targetId: item.id,
@@ -130,7 +113,12 @@ const DetailGridCard = ({ item, languageCommunity, onNavigate }) => {
             </div>
             <div className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
-              <span>{item.memberCount?.toLocaleString() || 0} học viên</span>
+              <span>
+                {(t.recommendations?.counts?.students || "{{count}} học viên").replace(
+                  "{{count}}",
+                  item.memberCount?.toLocaleString() || 0,
+                )}
+              </span>
             </div>
           </>
         )}
@@ -139,11 +127,16 @@ const DetailGridCard = ({ item, languageCommunity, onNavigate }) => {
           <>
             <div className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
-              <span>{item.memberCount?.toLocaleString() || 0} thành viên</span>
+              <span>
+                {(t.recommendations?.counts?.members || "{{count}} thành viên").replace(
+                  "{{count}}",
+                  item.memberCount?.toLocaleString() || 0,
+                )}
+              </span>
             </div>
             <div className="flex items-center gap-1 text-cath-red-600 dark:text-rose-400">
               <BookOpen className="w-3.5 h-3.5" />
-              <span>{item.postCountInfo || "Hoạt động"}</span>
+              <span>{item.postCountInfo || t.recommendations?.active || "Hoạt động"}</span>
             </div>
           </>
         )}
@@ -152,10 +145,15 @@ const DetailGridCard = ({ item, languageCommunity, onNavigate }) => {
           <>
             <div className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
-              <span>{item.mutualFriendCount || 0} bạn chung</span>
+              <span>
+                {(t.recommendations?.counts?.mutualFriends || "{{count}} bạn chung").replace(
+                  "{{count}}",
+                  item.mutualFriendCount || 0,
+                )}
+              </span>
             </div>
             <div>
-              <span>{item.postCountInfo || "Tích cực"}</span>
+              <span>{item.postCountInfo || t.recommendations?.engaged || "Tích cực"}</span>
             </div>
           </>
         )}
@@ -169,6 +167,44 @@ const RecommendationAllPage = () => {
   const navigate = useNavigate()
   const { lang = "vi" } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t } = useLanguage()
+
+  const tabs = useMemo(
+    () => [
+      { key: "teacher", label: t.recommendations?.tabs?.teacher || "Giảng viên" },
+      { key: "group", label: t.recommendations?.tabs?.group || "Nhóm" },
+      { key: "user", label: t.recommendations?.tabs?.user || "Cá nhân" },
+    ],
+    [t],
+  )
+
+  const langOptions = useMemo(
+    () => [
+      { id: 0, label: t.recommendations?.languages?.all || "Tất cả" },
+      { id: 3, label: t.recommendations?.languages?.ja || "Tiếng Nhật" },
+      { id: 1, label: t.recommendations?.languages?.en || "Tiếng Anh" },
+      { id: 2, label: t.recommendations?.languages?.zh || "Tiếng Trung" },
+    ],
+    [t],
+  )
+
+  const sortOptions = useMemo(
+    () => [
+      {
+        value: "relevance",
+        label: t.recommendations?.sort?.relevance || "Độ phù hợp cao nhất",
+      },
+      {
+        value: "popular",
+        label: t.recommendations?.sort?.popular || "Nhiều người quan tâm nhất",
+      },
+      {
+        value: "newest",
+        label: t.recommendations?.sort?.newest || "Mới nhất",
+      },
+    ],
+    [t],
+  )
 
   const defaultTab = searchParams.get("tab") || "teacher"
   const [activeTab, setActiveTab] = useState(defaultTab)
@@ -234,22 +270,22 @@ const RecommendationAllPage = () => {
           className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-neutral-300 hover:text-cath-red-600 dark:hover:text-rose-400 transition-colors cursor-pointer w-fit"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Quay lại Bản tin</span>
+          <span>{t.recommendations?.backToNews || "Quay lại Bản tin"}</span>
         </button>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-1">
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-                Đề xuất dành cho bạn
+                {t.recommendations?.title || "Đề xuất dành cho bạn"}
               </h1>
               <span className="inline-flex items-center gap-1 text-xs font-bold text-cath-red-600 dark:text-rose-400 bg-rose-100/70 dark:bg-rose-950/60 px-2.5 py-1 rounded-full">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>AI Match</span>
+                <span>{t.recommendations?.aiMatch || "AI Match"}</span>
               </span>
             </div>
             <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">
-              Khám phá danh sách đối tượng phù hợp nhất dựa trên mục tiêu học tập và thói quen luyện phát âm của bạn.
+              {t.recommendations?.description || "Khám phá danh sách đối tượng phù hợp nhất dựa trên mục tiêu học tập và thói quen luyện phát âm của bạn."}
             </p>
           </div>
         </div>
@@ -257,7 +293,7 @@ const RecommendationAllPage = () => {
 
       {/* Tabs Row */}
       <div className="flex items-center gap-2 sm:gap-4 border-b border-slate-200 dark:border-neutral-800 pb-2">
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const isSelected = activeTab === tab.key
           return (
             <button
@@ -283,7 +319,7 @@ const RecommendationAllPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Language Pills */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
-          {LANG_OPTIONS.map((opt) => (
+          {langOptions.map((opt) => (
             <button
               key={opt.id}
               type="button"
@@ -301,13 +337,15 @@ const RecommendationAllPage = () => {
 
         {/* Sort Select */}
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          <span className="text-xs text-slate-500 dark:text-neutral-400">Sắp xếp:</span>
+          <span className="text-xs text-slate-500 dark:text-neutral-400">
+            {t.recommendations?.sortBy || "Sắp xếp:"}
+          </span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="text-xs font-medium bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg px-3 py-1.5 text-slate-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-cath-red-600"
           >
-            {SORT_OPTIONS.map((s) => (
+            {sortOptions.map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
               </option>
@@ -337,10 +375,10 @@ const RecommendationAllPage = () => {
         /* Empty State */
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="text-base font-semibold text-slate-700 dark:text-neutral-300">
-            Chưa có gợi ý phù hợp cho bộ lọc hiện tại.
+            {t.recommendations?.empty?.title || "Chưa có gợi ý phù hợp cho bộ lọc hiện tại."}
           </p>
           <p className="text-xs text-slate-400 dark:text-neutral-500 mt-1">
-            Hãy thử chọn ngôn ngữ khác hoặc quay lại sau nhé!
+            {t.recommendations?.empty?.description || "Hãy thử chọn ngôn ngữ khác hoặc quay lại sau nhé!"}
           </p>
         </div>
       ) : (
@@ -361,12 +399,12 @@ const RecommendationAllPage = () => {
             {isFetching && (
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-neutral-400">
                 <div className="w-5 h-5 border-2 border-cath-red-600 border-t-transparent rounded-full animate-spin" />
-                <span>Đang tự động tải thêm đề xuất...</span>
+                <span>{t.recommendations?.loadingMore || "Đang tự động tải thêm đề xuất..."}</span>
               </div>
             )}
             {!hasMore && items.length > 0 && (
               <span className="text-xs text-slate-400 dark:text-neutral-500">
-                Đã hiển thị tất cả đề xuất phù hợp.
+                {t.recommendations?.allLoaded || "Đã hiển thị tất cả đề xuất phù hợp."}
               </span>
             )}
           </div>

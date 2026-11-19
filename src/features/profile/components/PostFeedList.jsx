@@ -11,6 +11,7 @@ const PostFeedList = ({
   posts = [],
   isLoading = false,
   isFetching = false,
+  isFilterLoading = false,
   error = null,
   errorMessage = "",
   skeletonCount = 3,
@@ -23,9 +24,12 @@ const PostFeedList = ({
   className = "",
   showRecommendations = false,
   languageCommunity = 0,
+  searchKeyword = "",
 }) => {
-  // Initial Loading State
-  if (isLoading && posts.length === 0) {
+  const isInitialOrFilterLoading = isLoading || isFilterLoading
+
+  // Initial Loading or Filter Loading State (when no posts are rendered)
+  if (isInitialOrFilterLoading && posts.length === 0) {
     return (
       <div className={className}>
         {Array.from({ length: skeletonCount }).map((_, i) => (
@@ -44,8 +48,8 @@ const PostFeedList = ({
     )
   }
 
-  // Empty State
-  if (!isLoading && posts.length === 0) {
+  // Empty State (only when NOT loading and posts is empty)
+  if (!isInitialOrFilterLoading && posts.length === 0) {
     if (emptyVariant === "page") {
       return (
         <div className="flex-1 flex flex-col items-center justify-center w-full my-auto">
@@ -75,11 +79,17 @@ const PostFeedList = ({
     )
   }
 
-  // Posts Feed List
+  // Posts Feed List (with dimming transition if refetching/applying filter over existing posts)
   const CYCLE_TYPES = ["teacher", "group", "user"]
 
   return (
-    <div className={className}>
+    <div
+      className={`${className} transition-opacity duration-200 ${
+        isFilterLoading
+          ? "opacity-50 pointer-events-none filter blur-[0.5px]"
+          : "opacity-100"
+      }`}
+    >
       {posts.map((post, index) => {
         const isLast = index === posts.length - 1
         // BR-DX-06: Chèn section sau mỗi 5-10 bài tin (ở đây chèn sau các bài thứ 5, 12, 19...)
@@ -93,7 +103,11 @@ const PostFeedList = ({
         return (
           <React.Fragment key={post.postId || index}>
             <div ref={isLast ? lastPostRef : null}>
-              <ProfilePostCard post={post} isOwnProfile={isOwnProfile} />
+              <ProfilePostCard
+                post={post}
+                isOwnProfile={isOwnProfile}
+                searchKeyword={searchKeyword}
+              />
             </div>
 
             {shouldInsertRecommendation && (

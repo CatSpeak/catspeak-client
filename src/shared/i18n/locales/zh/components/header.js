@@ -17,6 +17,11 @@ export default {
   clearAll: "清除全部",
   resultsFound: "找到 {{count}} 个结果",
   searching: "正在搜索房间...",
+  searchSuggestions: "搜索建议",
+  trendingBadge: "热搜",
+  searchGlobalNews: '在世界新闻中搜索“{{keyword}}”',
+  pressEnterToSearch: '按 Enter 在世界新闻中搜索“{{keyword}}”',
+  searchingSuggestions: "正在搜索建议...",
   filterRooms: "筛选房间",
   languages: {
     vi: "越南语",

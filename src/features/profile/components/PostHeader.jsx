@@ -135,7 +135,7 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
               <>
                 <span className="w-1 h-1 rounded-full bg-secondary dark:bg-[#AAAAAA] shrink-0" />
                 <span className="whitespace-nowrap">
-                  {post.viewCount} {t.news?.views || "lượt xem"}
+                  {post.viewCount} {t.profile?.post?.header?.views || t.news?.views || "views"}
                 </span>
               </>
             )}

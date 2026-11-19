@@ -223,6 +223,7 @@ export default {
         },
         edit: "編集",
         delete: "投稿を削除",
+        views: "閲覧",
       },
       actions: {
         share: "共有",

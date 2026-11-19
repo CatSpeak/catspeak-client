@@ -2,6 +2,7 @@ export default {
   title: "ニュース",
   description: "近日公開: 最新ニュースをチェックしましょう。",
   loadMore: "さらに読み込む",
+  views: "閲覧",
   error: {
     notFound: "投稿が見つかりません",
     backToNews: "ニュースに戻る",

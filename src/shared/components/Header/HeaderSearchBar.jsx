@@ -6,6 +6,7 @@ import {
   ArrowRight,
   History,
   X,
+  Hash,
 } from "lucide-react"
 import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -21,6 +22,8 @@ import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import useDebounce from "@/shared/hooks/useDebounce"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
+import { useGetSearchSuggestionsQuery } from "@/store/api/social/searchApi"
+import { getCommunityLanguageId } from "@/features/news/utils/newsUtils"
 
 const RECENT_SEARCHES_KEY = "catspeak_recent_searches"
 
@@ -59,6 +62,24 @@ const HeaderSearchBar = () => {
   const debouncedSearch = useDebounce(searchValue, 250)
   const isQueryActive = debouncedSearch.trim().length > 0
 
+  const isGlobalNews =
+    location.pathname.includes("/global-news") ||
+    location.pathname.includes("/news")
+  const currentCommunityId = getCommunityLanguageId(lang || language || "en")
+
+  // Live suggestions query for Global News
+  const { data: suggestionsData, isFetching: isFetchingSuggestions } =
+    useGetSearchSuggestionsQuery(
+      {
+        prefix: debouncedSearch.trim(),
+        languageCommunity: currentCommunityId,
+      },
+      {
+        skip: !isExpanded || !isQueryActive || !isGlobalNews,
+      },
+    )
+  const suggestions = Array.isArray(suggestionsData) ? suggestionsData : []
+
   // Live rooms query
   const { data: searchResults, isFetching } = useGetRoomsQuery(
     {
@@ -67,7 +88,7 @@ const HeaderSearchBar = () => {
       pageSize: 5,
     },
     {
-      skip: !isExpanded || !isQueryActive,
+      skip: !isExpanded || !isQueryActive || isGlobalNews,
     },
   )
 
@@ -96,7 +117,9 @@ const HeaderSearchBar = () => {
     ? "Tìm từ vựng…"
     : isLearningPath
       ? "Tìm chủ đề..."
-      : t.header?.searchPlaceholder || "Tìm kiếm phòng"
+      : isGlobalNews
+        ? "Tìm kiếm bài viết, #hashtag..."
+        : t.header?.searchPlaceholder || "Tìm kiếm phòng"
 
   // Escape key listener to close overlay
   useEffect(() => {
@@ -157,6 +180,18 @@ const HeaderSearchBar = () => {
     if (isVocabulary) {
       const base = `/${lang || "vi"}/ai-tutor/vocabulary-notebook/decks`
       navigate(trimmed ? `${base}?search=${encodeURIComponent(trimmed)}` : base)
+      setIsExpanded(false)
+      return
+    }
+
+    if (isGlobalNews) {
+      const targetLang = lang || "en"
+      const targetPath = `/${targetLang}/cat-speak/global-news`
+      const params = new URLSearchParams()
+      if (trimmed) {
+        params.set("search", trimmed)
+      }
+      navigate(params.toString() ? `${targetPath}?${params.toString()}` : targetPath)
       setIsExpanded(false)
       return
     }
@@ -279,6 +314,75 @@ const HeaderSearchBar = () => {
                     >
                       {/* Case 1: Active query with live search results */}
                       {isQueryActive ? (
+                        isGlobalNews ? (
+                          <div className="flex flex-col overflow-y-auto">
+                            {isFetchingSuggestions && suggestions.length === 0 ? (
+                              <LoadingSpinner
+                                size="sm"
+                                className="flex flex-col items-center justify-center py-8 text-sm text-gray-500 dark:text-[#AAAAAA]"
+                                text={t.header?.searchingSuggestions || "Đang tìm kiếm gợi ý..."}
+                              />
+                            ) : suggestions.length > 0 ? (
+                              <div>
+                                <div className="pl-4 pr-4 h-[44px] flex items-center text-xs font-semibold text-secondary dark:text-[#AAAAAA] border-b border-border dark:border-[#3F3F3F]">
+                                  <span>{t.header?.searchSuggestions || "Gợi ý tìm kiếm"} ({suggestions.length})</span>
+                                </div>
+                                {suggestions.map((item, sIdx) => {
+                                  const kw = typeof item === "string" ? item : item.keyword
+                                  const isTag = (item.isHashtag) || kw.startsWith("#")
+                                  return (
+                                    <div
+                                      key={kw || sIdx}
+                                      className="flex items-center justify-between pl-4 pr-4 h-[48px] hover:bg-[#F2F2F2] dark:hover:bg-[#272727] transition-colors cursor-pointer group"
+                                      onClick={() => {
+                                        setSearchValue(kw)
+                                        handleSearch(kw)
+                                      }}
+                                    >
+                                      <div className="flex items-center gap-3 flex-1 min-w-0 mr-2">
+                                        {isTag ? (
+                                          <Hash className="w-4 h-4 text-cath-red-700 shrink-0" />
+                                        ) : item.source === "history" ? (
+                                          <History className="w-4 h-4 text-secondary dark:text-[#AAAAAA] shrink-0" />
+                                        ) : (
+                                          <Search className="w-4 h-4 text-secondary dark:text-[#AAAAAA] shrink-0" />
+                                        )}
+                                        <span className="text-sm dark:text-gray-200 truncate group-hover:text-cath-red-700 dark:group-hover:text-white transition-colors">
+                                          {kw}
+                                        </span>
+                                      </div>
+                                      {item.source === "trending" && (
+                                        <span className="text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-sm">
+                                          {t.header?.trendingBadge || t.news?.trendLabel || "Xu hướng"}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )
+                                })}
+                                <div className="border-t border-border dark:border-[#3F3F3F]">
+                                  <div
+                                    className="flex items-center justify-between pl-4 pr-4 h-[48px] hover:bg-[#F2F2F2] dark:hover:bg-[#272727] transition-colors cursor-pointer group text-cath-red-700 dark:text-white font-medium text-sm"
+                                    onClick={() => handleSearch(searchValue)}
+                                  >
+                                    <div className="flex items-center gap-3 flex-1 min-w-0 mr-2">
+                                      <Search className="w-4 h-4 shrink-0 text-cath-red-700 dark:text-white" />
+                                      <span className="truncate">
+                                        {(t.header?.searchGlobalNews || 'Tìm kiếm "{{keyword}}" trên bản tin thế giới').replace("{{keyword}}", searchValue)}
+                                      </span>
+                                    </div>
+                                    <ArrowRight className="w-4 h-4 shrink-0" />
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="py-6 px-4 text-center">
+                                <p className="text-sm text-gray-700 dark:text-gray-200">
+                                  {(t.header?.pressEnterToSearch || 'Nhấn Enter để tìm "{{keyword}}" trên bản tin thế giới').replace("{{keyword}}", debouncedSearch)}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
                         <div className="flex flex-col overflow-y-auto">
                           {isFetching && matchingRooms.length === 0 ? (
                             <LoadingSpinner
@@ -368,6 +472,7 @@ const HeaderSearchBar = () => {
                             </div>
                           )}
                         </div>
+                        )
                       ) : (
                         /* Case 2: Empty query - Recent Searches */
                         recentSearches.length > 0 && (
