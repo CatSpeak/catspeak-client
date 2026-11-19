@@ -1,6 +1,7 @@
 import React from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import doodles from "@/shared/assets/images/communities/doodles.png"
+import doodlesDark from "@/shared/assets/images/communities/doodles-dark.png"
 import SessionActionButtons from "./SessionActionButtons"
 import { InteractiveScriptWidget } from "@/features/interactive-script"
 import { M3_MOTION } from "@/shared/constants/motion"
@@ -14,7 +15,12 @@ const RoomsBannerContent = ({ sessionProps }) => {
       <img
         src={doodles}
         alt="Cat Speak doodles"
-        className="w-52 mb-4 object-contain object-left"
+        className="w-52 mb-4 object-contain object-left dark:hidden"
+      />
+      <img
+        src={doodlesDark}
+        alt="Cat Speak doodles"
+        className="w-52 mb-4 object-contain object-left hidden dark:block"
       />
 
       <div className="flex flex-col gap-4">

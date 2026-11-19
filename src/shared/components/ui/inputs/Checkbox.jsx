@@ -10,7 +10,7 @@ import { Check } from "lucide-react"
  * @param {boolean} disabled - Disabled state.
  * @param {"default" | "white" | "large"} variant - Styling variant.
  * @param {boolean} withWrapper - Optional 48px touch target with 40px hover circle.
- * @param {number | "sm" | "md" | "lg"} size - Indicator box size in px (defaults to 24).
+ * @param {number | "sm" | "md" | "lg"} size - Indicator box size in px (defaults to 18).
  * @param {"button" | "div"} as - Element type when withWrapper/large is used.
  * @param {string} className - Optional styling overrides for outer wrapper.
  * @param {string} innerClassName - Optional styling overrides for indicator.
@@ -22,7 +22,7 @@ const Checkbox = ({
   disabled = false,
   variant = "default",
   withWrapper = false,
-  size = 24,
+  size = 18,
   as = "button",
   className = "",
   innerClassName = "",
@@ -39,8 +39,8 @@ const Checkbox = ({
     md: { box: "w-5 h-5 rounded-[4px]", icon: 14 },
     lg: { box: "w-6 h-6 rounded-[4px]", icon: 16 },
   }[size] || {
-    box: typeof size === "number" ? `w-[${size}px] h-[${size}px] rounded-[4px]` : "w-6 h-6 rounded-[4px]",
-    icon: typeof size === "number" ? Math.round(size * 0.65) : 16,
+    box: typeof size === "number" ? `w-[${size}px] h-[${size}px] rounded-[4px]` : "w-[18px] h-[18px] rounded-[3px]",
+    icon: typeof size === "number" ? Math.round(size * 0.65) : 12,
   }
 
   const outerBorderClass = isWhite

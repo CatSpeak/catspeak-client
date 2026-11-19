@@ -173,7 +173,7 @@ const VideoCallControlBar = () => {
   }
 
   return (
-    <div className="relative flex w-full shrink-0 items-center justify-center bg-white dark:bg-[#1A1A1A] px-4 min-h-[56px] h-[calc(56px+env(safe-area-inset-bottom,0px))] pb-[env(safe-area-inset-bottom,0px)] md:pb-0 border-t border-border dark:border-[#3F3F3F]">
+    <div className="relative flex w-full shrink-0 items-center justify-center bg-white dark:bg-[#1A1A1A] px-4 min-h-[56px] h-[calc(56px+env(safe-area-inset-bottom,0px))] pb-[env(safe-area-inset-bottom,0px)] md:pb-0 border-t border-border dark:border-darkBorder">
       {/* Centered call controls across the entire bar width */}
       <div className="flex items-center justify-center gap-2">
         <IconButton

@@ -3,6 +3,7 @@ import { useAuth } from "@/features/auth"
 import { useNavigate } from "react-router-dom"
 import { motion as Motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
+import { getScrollTransition } from "@/shared/constants/motion"
 import LanguageCard from "./LanguageCard"
 
 const HeroSection = ({ openAuthModal }) => {
@@ -35,7 +36,7 @@ const HeroSection = ({ openAuthModal }) => {
           <Motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.08 }}
+            transition={getScrollTransition("default", 0.08)}
             className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#990011] sm:text-sm"
           >
             <span className="h-2 w-2 shrink-0 rounded-full bg-[#70D6B2]" />
@@ -49,7 +50,7 @@ const HeroSection = ({ openAuthModal }) => {
           <Motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.16 }}
+            transition={getScrollTransition("default", 0.16)}
             className="max-w-[720px] text-[clamp(2.35rem,4.2vw,3.35rem)] font-bold leading-[1.08] tracking-[-0.045em] text-[#171717] dark:text-white"
           >
             {heroT.titlePrefix || homeT.heroTitle1 || "Tự tin luyện nói ngoại ngữ cùng"}{" "}
@@ -62,7 +63,7 @@ const HeroSection = ({ openAuthModal }) => {
           <Motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.24 }}
+            transition={getScrollTransition("default", 0.24)}
             className="mt-6 max-w-[680px] text-base leading-[1.75] text-[#555] dark:text-gray-300 sm:text-lg"
           >
             {heroT.description ||
@@ -73,7 +74,7 @@ const HeroSection = ({ openAuthModal }) => {
           <Motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.32 }}
+            transition={getScrollTransition("default", 0.32)}
             className="mt-7"
           >
             <button
@@ -93,7 +94,7 @@ const HeroSection = ({ openAuthModal }) => {
           <Motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={getScrollTransition("default", 0.4)}
             className="mt-6 grid grid-cols-3 border-t border-[#EEEEEE] pt-4 dark:border-[#333]"
           >
             {[
@@ -129,7 +130,7 @@ const HeroSection = ({ openAuthModal }) => {
         <Motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
+          transition={getScrollTransition("default", 0.2)}
           className="w-full justify-self-center lg:justify-self-end"
         >
           <LanguageCard />

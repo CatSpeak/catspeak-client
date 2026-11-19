@@ -404,8 +404,6 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
       const navigateFn = getNavigate()
       const locationObj = getLocation()
       if (locationObj && locationObj.pathname.includes("/meet/")) {
-        navigateFn(getCommunityPath(language), { replace: true })
-
         const createDate = callInfo?.roomData?.createDate
         const duration = callInfo?.roomData?.duration
         const timeExpired =
@@ -416,6 +414,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
               new Date(createDate).getTime() + duration * 60 * 1000)
 
         if (timeExpired) {
+          navigateFn(getCommunityPath(language), { replace: true })
           toast.error(
             t?.rooms?.callEnded?.expiredToast ??
               "Cuộc gọi đã kết thúc do hết thời lượng phòng",
@@ -425,6 +424,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
           !endedByThisClient &&
           reason === DisconnectReason.ROOM_DELETED
         ) {
+          navigateFn(getCommunityPath(language), { replace: true })
           // Host/co-host ended the live for everyone: the backend deleted the
           // room, so the members' only signal is this disconnect.
           toast.error(
@@ -433,6 +433,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
             { id: "room-ended", duration: 5000 },
           )
         }
+        // If voluntary leave, do not navigate away so user returns to WaitingScreen
       }
     }
 

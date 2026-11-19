@@ -31,7 +31,7 @@ export default {
     english: "英语",
     japan: "日本",
   },
-  switchRole: "切换角色",
+  switchRole: "角色",
   studentRole: "学生",
   teacherRole: "教师",
   noPermissionTeacher: "您没有权限切换到教师角色！",

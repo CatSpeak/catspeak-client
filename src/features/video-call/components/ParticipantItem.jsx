@@ -6,7 +6,6 @@ import {
   Video,
   VideoOff,
   Hand,
-  Ellipsis,
   MessageSquareOff,
   ShieldAlert,
 } from "lucide-react"
@@ -14,7 +13,6 @@ import { useIsSpeaking } from "@livekit/components-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
-import IconButton from "@/shared/components/ui/buttons/IconButton"
 import { ParticipantActionPopover } from "./ParticipantActionPopover"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
@@ -106,7 +104,7 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
         }`}
       >
         {React.isValidElement(icon)
-          ? React.cloneElement(icon, { size: icon.props.size ?? 20 })
+          ? React.cloneElement(icon, { size: icon.props.size ?? 18 })
           : icon}
         <span className="sr-only">{on ? onTitle : offTitle}</span>
       </span>
@@ -114,7 +112,7 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
   }
 
   const rightContent = (
-    <div className="flex items-center gap-2 shrink-0">
+    <div className="flex items-center gap-1 shrink-0">
       {isChatRestricted && (
         <span
           title={pl.chatRestrictedBadge || "Chat restricted"}
@@ -152,7 +150,7 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
           className="flex flex-shrink-0 items-center justify-center"
         >
           <Hand
-            size={20}
+            size={18}
             className="text-amber-500 dark:text-amber-400"
             aria-hidden="true"
           />
@@ -162,51 +160,49 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
         isMicOn,
         pl.micOn,
         pl.micOff,
-        <Mic size={20} />,
-        <MicOff size={20} />,
+        <Mic size={18} />,
+        <MicOff size={18} />,
       )}
       {statusChip(
         isCameraOn,
         pl.camOn,
         pl.camOff,
-        <Video size={20} />,
-        <VideoOff size={20} />,
+        <Video size={18} />,
+        <VideoOff size={18} />,
       )}
-      <ParticipantActionPopover participant={participant}>
-        <IconButton
-          variant="ghost"
-          title={pl.actions || "Tùy chọn"}
-          aria-label={pl.actions || "Tùy chọn"}
-        >
-          <Ellipsis />
-        </IconButton>
-      </ParticipantActionPopover>
     </div>
   )
 
   return (
-    <ListItem
-      contentClassName="!pr-1"
-      lines={1}
-      leftContent={leftContent}
-      rightContent={rightContent}
+    <ParticipantActionPopover
+      participant={participant}
+      className="w-full block"
+      triggerClassName="w-full block text-left"
     >
-      <div className="flex min-w-0 items-center gap-1">
-        <span className="min-w-0 truncate text-neutral-900 dark:text-neutral-100 font-medium">
-          {name} {isLocal && pl.youSuffix}
-        </span>
-        {isThisHost && (
-          <span className="shrink-0 rounded-md bg-cath-red-700/10 dark:bg-red-500/20 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-cath-red-700 dark:text-red-400">
-            {pl.hostBadge || "Chủ phòng"}
+      <ListItem
+        hoverEffect={true}
+        contentClassName="cursor-pointer active:bg-itemActiveHover dark:active:bg-[#3D3D3D]"
+        lines={1}
+        leftContent={leftContent}
+        rightContent={rightContent}
+      >
+        <div className="flex min-w-0 items-center gap-1">
+          <span className="min-w-0 truncate text-neutral-900 dark:text-neutral-100 font-medium">
+            {name} {isLocal && pl.youSuffix}
           </span>
-        )}
-        {isThisCoHost && (
-          <span className="shrink-0 rounded-md bg-amber-100 dark:bg-amber-950/40 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400">
-            {pl.coHostBadge || "Co-host"}
-          </span>
-        )}
-      </div>
-    </ListItem>
+          {isThisHost && (
+            <span className="shrink-0 rounded-md bg-cath-red-700/10 dark:bg-red-500/20 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-cath-red-700 dark:text-red-400">
+              {pl.hostBadge || "Chủ phòng"}
+            </span>
+          )}
+          {isThisCoHost && (
+            <span className="shrink-0 rounded-md bg-amber-100 dark:bg-amber-950/40 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+              {pl.coHostBadge || "Co-host"}
+            </span>
+          )}
+        </div>
+      </ListItem>
+    </ParticipantActionPopover>
   )
 }
 

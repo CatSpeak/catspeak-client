@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useInView, animate } from "framer-motion"
+import { M3_MOTION } from "@/shared/constants/motion"
 
 /**
  * AnimatedCounter component
@@ -26,7 +27,7 @@ const AnimatedCounter = ({
     const controls = animate(from, to, {
       duration,
       delay,
-      ease: [0.16, 1, 0.3, 1], // Fast start, ultra-smooth deceleration
+      ease: M3_MOTION.standard.spatial.default.ease, // M3 standard spatial deceleration curve
       onUpdate: (latest) => {
         setCount(Math.floor(latest))
       },

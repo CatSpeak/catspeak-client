@@ -99,11 +99,11 @@ const MobileLanguageSwitcher = ({ onOpen }) => {
             <ChevronRight className="shrink-0 text-gray-400 dark:text-neutral-500" />
           </div>
         }
-        className="transition-all duration-200 w-full"
-        contentClassName="transition-all duration-200 px-4 hover:bg-neutral-100 dark:hover:bg-[#272727]"
+        className="w-full"
+        contentClassName="px-4 hover:bg-neutral-100 dark:hover:bg-[#272727]"
         title={t.header?.language || "Ngôn ngữ"}
       >
-        <span className="text-base font-normal text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate text-gray-900 dark:text-neutral-200">
+        <span className="text-base font-normal text-left whitespace-nowrap min-w-0 flex-1 truncate text-gray-900 dark:text-neutral-200">
           {t.header?.language || "Ngôn ngữ"}
         </span>
       </ListItem>

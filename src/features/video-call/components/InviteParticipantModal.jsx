@@ -1,18 +1,36 @@
-import React, { useState } from "react"
-import { Check, Send, UserPlus, Users, X } from "lucide-react"
+import React, { useState, useMemo } from "react"
+import { useSelector } from "react-redux"
+import { Users, Search } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
-import InvititeDropdown from "@/shared/components/ui/InvititeDropdown"
 import Avatar from "@/shared/components/ui/Avatar"
-import { useLanguage } from "@/shared/context/LanguageContext"
+import ListItem from "@/shared/components/ui/ListItem"
+import Checkbox from "@/shared/components/ui/inputs/Checkbox"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
+import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import toast from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { selectCurrentUser } from "@/store/slices/authSlice"
+import { useGetFriendsQuery } from "@/store/api/social/friendshipApi"
 import { useInviteToRoomMutation } from "@/store/api/roomsApi"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 const InviteParticipantModal = ({ open, onClose, roomId }) => {
   const { t } = useLanguage()
+  const currentUser = useSelector(selectCurrentUser)
   const [selectedAccountIds, setSelectedAccountIds] = useState([])
-  const [selectedUsers, setSelectedUsers] = useState({})
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const effectiveAccountId =
+    currentUser?.accountId ?? currentUser?.id ?? currentUser?.userId
+
+  const { data: friendsResponse, isLoading: isFriendsLoading } =
+    useGetFriendsQuery(effectiveAccountId, {
+      skip: !open || !effectiveAccountId,
+      refetchOnFocus: false,
+    })
+
   const [inviteToRoom, { isLoading: isInviting }] = useInviteToRoomMutation()
 
   const { id: contextRoomId } = useGlobalVideoCall()
@@ -20,27 +38,62 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
 
   const handleModalClose = () => {
     setSelectedAccountIds([])
-    setSelectedUsers({})
+    setSearchQuery("")
     onClose?.()
   }
 
-  if (!open) return null
+  // Normalize friends list
+  const friendsList = useMemo(() => {
+    if (!friendsResponse) return []
+    const list = Array.isArray(friendsResponse)
+      ? friendsResponse
+      : Array.isArray(friendsResponse.data)
+        ? friendsResponse.data
+        : []
 
-  const handleSelectChange = (newValues, newOptions) => {
-    setSelectedAccountIds(newValues)
-    if (newOptions && Array.isArray(newOptions)) {
-      const nextMap = { ...selectedUsers }
-      newOptions.forEach((opt) => {
-        if (opt?.value != null) {
-          nextMap[opt.value] = opt.user || opt.friend || opt
+    return list
+      .map((item) => {
+        const userObj = item.friend || item.user || item
+        const rawId =
+          userObj.accountId ??
+          userObj.id ??
+          userObj.userId ??
+          item.accountId ??
+          item.id
+        const accountId = rawId != null ? Number(rawId) : undefined
+        return {
+          ...userObj,
+          accountId,
+          username: userObj.username || userObj.name || userObj.nickname,
+          email: userObj.email,
+          avatarImageUrl:
+            userObj.avatarImageUrl ||
+            userObj.avatarUrl ||
+            userObj.meetingAvatarUrl,
         }
       })
-      setSelectedUsers(nextMap)
-    }
-  }
+      .filter((u) => u && u.accountId != null)
+  }, [friendsResponse])
 
-  const handleRemoveSelected = (val) => {
-    setSelectedAccountIds((prev) => prev.filter((item) => item !== val))
+  // Filter friends by search query
+  const filteredFriends = useMemo(() => {
+    if (!searchQuery.trim()) return friendsList
+    const q = searchQuery.toLowerCase().trim()
+    return friendsList.filter((friend) => {
+      const name = (friend.username || friend.name || "").toLowerCase()
+      const email = (friend.email || "").toLowerCase()
+      return name.includes(q) || email.includes(q)
+    })
+  }, [friendsList, searchQuery])
+
+  if (!open) return null
+
+  const handleToggleSelect = (accountId) => {
+    setSelectedAccountIds((prev) =>
+      prev.includes(accountId)
+        ? prev.filter((id) => id !== accountId)
+        : [...prev, accountId],
+    )
   }
 
   const handleInvite = async () => {
@@ -116,149 +169,107 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
   const selectedCount = selectedAccountIds.length
   const hasSelection = selectedCount > 0
 
-  const readyHint =
-    t.rooms?.videoCall?.inviteReadyHint ||
-    "Sẵn sàng gửi lời mời đến {{count}} người bạn."
-
   return (
     <Modal
       open={open}
       onClose={handleModalClose}
+      title={title}
       ariaLabel={title}
       showCloseButton
       fullScreenOnMobile={false}
-      className="md:max-w-lg rounded-3xl"
-      headerClassName="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 border-b border-gray-100 dark:border-[#3F3F3F]"
-      title={
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cath-red-700 to-cath-red-500 text-white shadow-sm ring-4 ring-red-50 dark:ring-red-950/30">
-            <UserPlus size={20} className="stroke-[2.2]" />
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
-              {title}
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-[#AAAAAA] mt-0.5 truncate">
-              {t.rooms?.videoCall?.inviteSubtitle ||
-                "Gửi lời mời tham gia đến bạn bè của bạn"}
-            </p>
-          </div>
-        </div>
-      }
-      bodyClassName="px-5 sm:px-6 py-5 flex flex-col gap-4 flex-1 overflow-y-auto"
-      footerClassName="px-5 sm:px-6 py-4 bg-gray-50/70 dark:bg-[#1f1f1f] border-t border-gray-100 dark:border-[#3F3F3F]"
+      className="md:max-w-md rounded-3xl"
+      bodyClassName="px-0 flex flex-col flex-1 overflow-hidden min-h-0"
+      footerClassName="p-4 flex justify-end shrink-0"
       footer={
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full">
-          <div className="hidden sm:flex items-center gap-2 min-w-0 text-xs">
-            {hasSelection ? (
-              <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100">
-                  <Check size={11} strokeWidth={3} />
-                </span>
-                {readyHint.replace("{{count}}", String(selectedCount))}
-              </span>
-            ) : (
-              <span className="text-gray-400 dark:text-[#AAAAAA] truncate">
-                {t.rooms?.videoCall?.inviteEmptyHint ||
-                  "Chọn ít nhất một người bạn để gửi lời mời."}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center justify-end gap-2.5 shrink-0">
-            <PillButton onClick={handleModalClose} variant="secondary">
-              {t.cancel || "Hủy"}
-            </PillButton>
-
-            <PillButton
-              onClick={handleInvite}
-              disabled={isInviting || !hasSelection}
-              loading={isInviting}
-              loadingText={t.common?.sending || "Đang gửi..."}
-              variant="primary"
-              startIcon={<Send size={18} />}
-              className="min-w-[132px]"
-            >
-              {`${t.rooms?.videoCall?.sendInvite || "Gửi lời mời"}${
-                hasSelection ? ` (${selectedCount})` : ""
-              }`}
-            </PillButton>
-          </div>
+        <div className="flex items-center justify-end w-full">
+          <PillButton
+            onClick={handleInvite}
+            disabled={isInviting || !hasSelection}
+            loading={isInviting}
+            loadingText={t.common?.sending || "Đang gửi..."}
+            variant="primary"
+          >
+            {`${t.rooms?.videoCall?.sendInvite || "Gửi lời mời"}${
+              hasSelection ? ` (${selectedCount})` : ""
+            }`}
+          </PillButton>
         </div>
       }
     >
-      <p className="text-sm leading-relaxed text-gray-600 dark:text-neutral-300">
-        {t.rooms?.videoCall?.inviteDescription ||
-          "Chọn bạn bè bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia."}
-      </p>
+      {/* Search Input when friends list is available */}
+      {friendsList.length > 5 && (
+        <div className="p-4">
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onClear={() => setSearchQuery("")}
+            placeholder={
+              t?.inviteDropdown?.searchFriends || "Tìm kiếm bạn bè..."
+            }
+          />
+        </div>
+      )}
 
-      <div className="flex flex-col gap-2.5">
-        <InvititeDropdown
-          mode="friends"
-          value={selectedAccountIds}
-          onChange={handleSelectChange}
-          disabled={isInviting}
-        />
-
-        {hasSelection ? (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500 dark:text-[#AAAAAA]">
-                {t.rooms?.videoCall?.inviteSelectedTitle || "Đã chọn"}
-              </span>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 text-cath-red-700 dark:text-red-400 border border-red-100 dark:border-red-900/40">
-                {selectedCount}
-              </span>
-            </div>
-
-            {/* Chip collection reflows with flex-wrap so labels are never clipped */}
-            <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
-              {selectedAccountIds.map((val) => {
-                const user = selectedUsers[val]
-                const displayName =
-                  user?.username || user?.name || `User #${val}`
-                return (
-                  <span
-                    key={val}
-                    className="group inline-flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full text-xs font-medium bg-white dark:bg-[#272727] text-gray-800 dark:text-neutral-200 border border-gray-200 dark:border-[#3F3F3F] shadow-xs transition-colors hover:border-cath-red-200 hover:bg-red-50/60 dark:hover:bg-red-950/30"
-                  >
-                    <Avatar
-                      src={
-                        user?.avatarImageUrl ||
-                        user?.avatarUrl ||
-                        user?.meetingAvatarUrl
-                      }
-                      name={displayName}
-                      size={20}
-                      clickable={false}
-                    />
-                    <span className="max-w-[120px] truncate font-semibold">
-                      {displayName}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSelected(val)}
-                      aria-label={(t.rooms?.videoCall?.inviteRemove ||
-                        "Bỏ chọn {{name}}").replace("{{name}}", displayName)}
-                      className="ml-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-100 dark:hover:bg-red-950/50 hover:text-cath-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
-                    >
-                      <X size={12} strokeWidth={2.5} />
-                    </button>
-                  </span>
-                )
-              })}
-            </div>
+      {/* Scrollable Friends List */}
+      <div className="flex-1 overflow-y-auto min-h-[220px] max-h-[360px] flex flex-col scrollbar-thin">
+        {isFriendsLoading ? (
+          <div className="flex-1 flex items-center justify-center py-12">
+            <LoadingSpinner text={t.common?.loading || "Đang tải..."} />
           </div>
+        ) : friendsList.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title={t.rooms?.videoCall?.noFriendsFound || "Chưa có bạn bè"}
+            description={
+              t.rooms?.videoCall?.noFriendsHint ||
+              "Hãy kết bạn để có thể mời bạn bè vào phòng."
+            }
+            variant="component"
+          />
+        ) : filteredFriends.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title={t.common?.noResultsFound || "Không tìm thấy bạn bè nào"}
+            description={
+              t.common?.tryAnotherSearch || "Thử tìm kiếm với từ khóa khác."
+            }
+            variant="component"
+          />
         ) : (
-          <div className="flex items-center gap-3 rounded-2xl border border-dashed border-gray-200 dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#222222] px-3.5 py-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-[#272727] border border-gray-200 dark:border-[#3F3F3F] text-gray-400 dark:text-[#AAAAAA]">
-              <Users size={16} />
-            </div>
-            <p className="text-xs leading-relaxed text-gray-500 dark:text-[#AAAAAA]">
-              {t.rooms?.videoCall?.inviteEmptyHint ||
-                "Chọn ít nhất một người bạn để gửi lời mời."}
-            </p>
-          </div>
+          filteredFriends.map((friend) => {
+            const isSelected = selectedAccountIds.includes(friend.accountId)
+            const displayName =
+              friend.username || friend.name || `User #${friend.accountId}`
+
+            return (
+              <ListItem
+                key={friend.accountId}
+                onClick={() => handleToggleSelect(friend.accountId)}
+                hoverEffect={true}
+                selected={isSelected}
+                lines={friend.email ? 2 : 1}
+                className="w-full cursor-pointer"
+                leftContent={
+                  <Avatar
+                    size={40}
+                    name={displayName}
+                    src={friend.avatarImageUrl}
+                    clickable={false}
+                  />
+                }
+                rightContent={<Checkbox checked={isSelected} as="div" />}
+              >
+                <span className="text-base text-gray-900 dark:text-white truncate">
+                  {displayName}
+                </span>
+                {friend.email && (
+                  <span className="text-sm text-secondary dark:text-[#AAAAAA] truncate">
+                    {friend.email}
+                  </span>
+                )}
+              </ListItem>
+            )
+          })
         )}
       </div>
     </Modal>

@@ -1,5 +1,6 @@
 import { useState, useRef } from "react"
 import { motion as Motion, AnimatePresence } from "framer-motion"
+import { M3_MOTION } from "@/shared/constants/motion"
 import DesktopNavItem from "./DesktopNavItem"
 import DesktopSubNavDropdown from "./DesktopSubNavDropdown"
 import { DesktopSubNavContent } from "./DesktopSubNavContent"
@@ -33,7 +34,7 @@ const DesktopNav = ({ onRequestLogin }) => {
 
   return (
     <nav
-      className="relative hidden items-center justify-center p-1 gap-2 text-black min-[1280px]:flex"
+      className="relative hidden items-center justify-center p-1 gap-2 text-black xl:flex"
       onMouseLeave={handleMouseLeave}
     >
       {navLinks
@@ -69,7 +70,10 @@ const DesktopNav = ({ onRequestLogin }) => {
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                      transition={{
+                        y: M3_MOTION.standard.spatial.fast,
+                        opacity: M3_MOTION.standard.effects.fast,
+                      }}
                       className="absolute top-full left-0 mt-2 z-50 rounded-2xl border border-border shadow-2xl bg-white overflow-hidden pointer-events-auto before:absolute before:-top-3 before:left-0 before:right-0 before:h-4 before:content-['']"
                       onMouseEnter={() => {
                         if (closeTimer.current) clearTimeout(closeTimer.current)

@@ -147,15 +147,16 @@ export const useCallActions = ({
     await leaveMeetingFn()
     dispatch(leaveCallAction())
 
-    // Navigate away if on the call page (not in PiP)
+    // If leaving while in PiP mode (not on the call page), navigate away
     const navigate = getNavigate();
-    if (!isPiP && navigate) {
+    if (isPiP && navigate) {
       if (callInfo?.isLearningPath) {
         navigate(`/${language || "vi"}/learning-path`, { replace: true });
       } else {
         navigate(getCommunityPath(language), { replace: true });
       }
     }
+    // On call page, stay on URL so VideoCallProvider re-opens WaitingScreen (allows rejoin or exit)
   }, [isPiP, language, leaveMeetingFn, dispatch, callInfo?.isLearningPath]);
 
   // ── Copy link ──

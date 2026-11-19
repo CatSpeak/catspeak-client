@@ -5,7 +5,8 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
-import LanguageMenuItem from "@/shared/components/Header/LanguageMenuItem"
+import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import Radio from "@/shared/components/ui/inputs/Radio"
 
 /**
  * UI languages. Standard Vietnamese (`vi`) is fully enabled.
@@ -109,26 +110,47 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
             initial="initial"
             animate="animate"
             exit="exit"
-            className={`absolute top-full z-50 mt-2 min-w-[220px] w-max max-w-[calc(100vw-2rem)] ${alignClass} overflow-hidden rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] shadow-xl`}
+            className={`absolute top-full z-50 mt-2 min-w-[200px] w-max max-w-[calc(100vw-2rem)] ${alignClass}`}
           >
-            <div
-              className="flex flex-col gap-1 p-1"
-              role="listbox"
-              aria-label="Language"
-            >
-              {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => (
-                <LanguageMenuItem
-                  key={key}
-                  code={key}
-                  label={t.header?.languages?.[key] || label}
-                  flag={flag}
-                  disabled={disabled}
-                  soonLabel={soonLabel || t.header?.soon || "Soon"}
-                  isActive={language === key}
-                  onSelect={() => handleLanguageSelect(key)}
-                />
-              ))}
-            </div>
+            <MenuList className="py-1 min-w-[200px] shadow-xl">
+              {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }, index) => {
+                const isSelected = language === key
+                const itemLabel = t.header?.languages?.[key] || label
+
+                return (
+                  <MenuItem
+                    key={key}
+                    icon={
+                      <span className="flex h-5 w-5 shrink-0 overflow-hidden rounded-full border border-border">
+                        <img
+                          src={flag}
+                          alt={itemLabel}
+                          className={`block h-full w-full object-cover ${
+                            disabled ? "grayscale opacity-50" : ""
+                          }`}
+                          draggable={false}
+                        />
+                      </span>
+                    }
+                    label={itemLabel}
+                    isSelected={isSelected}
+                    disabled={disabled}
+                    rightContent={
+                      disabled ? (
+                        <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">
+                          {soonLabel || t.header?.soon || "Soon"}
+                        </span>
+                      ) : (
+                        <Radio checked={isSelected} />
+                      )
+                    }
+                    onClick={() => handleLanguageSelect(key)}
+                    isFirst={index === 0}
+                    isLast={index === LANGUAGES.length - 1}
+                  />
+                )
+              })}
+            </MenuList>
           </Motion.div>
         )}
       </AnimatePresence>

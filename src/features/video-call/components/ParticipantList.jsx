@@ -20,11 +20,15 @@ import ParticipantItem from "./ParticipantItem"
 
 import AdvancedModerationActions from "./AdvancedModerationActions"
 import InviteParticipantModal from "./InviteParticipantModal"
-import IconButton from "@/shared/components/ui/buttons/IconButton"
+import { IconButton, PillButton } from "@/shared/components/ui/buttons"
 import Label from "@/shared/components/ui/Label"
 import WaitingQueueTab from "./waiting/WaitingQueueTab"
 import BannedListTab from "./settings/BannedListTab"
 import RoomPoliciesTab from "./settings/RoomPoliciesTab"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import { EmptyState } from "@/shared/components/ui/indicators"
+import { AnimatePresence, motion as Motion } from "framer-motion"
+import { accordionVariants } from "@/shared/constants/motion"
 
 const parseMetadata = (metadata) => {
   if (!metadata) return {}
@@ -56,6 +60,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [activeTab, setActiveTab] = useState("members")
 
   const pl = t.rooms.videoCall.participantList
@@ -191,7 +196,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   return (
     <div className="flex flex-col h-full w-full bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white overflow-hidden">
       {/* Header Bar */}
-      <div className="flex items-center justify-between border-b border-neutral-200/80 dark:border-[#3F3F3F] pl-4 pr-1 py-1 min-h-[56px] bg-white dark:bg-[#1A1A1A] shrink-0 gap-2">
+      <div className="flex items-center justify-between pl-4 pr-1 py-1 min-h-[56px] bg-white dark:bg-[#1A1A1A] shrink-0 gap-2">
         {canViewWaiting || canViewBanned || canManagePolicies ? (
           <div
             className="flex items-center gap-1.5 overflow-x-auto scrollbar-hidden flex-1 min-w-0"
@@ -282,15 +287,29 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             )}
           </div>
         ) : !hideTitle ? (
-          <span className="text-base font-bold text-neutral-800 dark:text-white truncate flex-1">
+          <span className="text-xl font-bold text-neutral-800 dark:text-white truncate flex-1">
             {pl.membersTab || pl.title} ({participants.length})
           </span>
         ) : (
           <div className="flex-1" />
         )}
 
-        {/* Invite action button */}
+        {/* Action buttons: Search & Invite */}
         <div className="flex items-center shrink-0">
+          <IconButton
+            variant="ghost"
+            onClick={() => {
+              setIsSearchOpen((prev) => !prev)
+              if (isSearchOpen && searchQuery) {
+                setSearchQuery("")
+              }
+            }}
+            title={pl.searchPlaceholder || "Tìm kiếm"}
+            aria-label={pl.searchPlaceholder || "Tìm kiếm"}
+          >
+            <Search />
+          </IconButton>
+
           <IconButton
             variant="ghost"
             onClick={() => setIsInviteModalOpen(true)}
@@ -301,7 +320,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"
             }
           >
-            <UserPlus size={14} />
+            <UserPlus />
           </IconButton>
         </div>
       </div>
@@ -309,34 +328,31 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       {/* Tab 1: Members */}
       {activeTab === "members" && (
         <div className="flex flex-col flex-1 min-h-0">
-          {/* Integrated Search Input (when room has > 5 participants or active query) */}
-          {(participants.length > 5 || searchQuery) && (
-            <div className="px-2.5 pt-2 shrink-0">
-              <div className="relative flex items-center">
-                <Search
-                  size={13}
-                  className="absolute left-2.5 text-neutral-400 dark:text-[#AAAAAA] pointer-events-none"
-                />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={pl.searchPlaceholder || "Tìm theo tên..."}
-                  className="w-full h-7.5 pl-8 pr-7 text-xs bg-neutral-100/90 hover:bg-neutral-100 focus:bg-white dark:bg-[#272727] dark:hover:bg-[#333333] dark:focus:bg-[#1A1A1A] border border-transparent focus:border-cath-red-700 dark:focus:border-red-500 rounded-lg outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-[#AAAAAA] text-neutral-900 dark:text-white"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-2 text-neutral-400 hover:text-neutral-600 dark:text-[#AAAAAA] dark:hover:text-white p-0.5"
-                    aria-label="Clear search"
-                  >
-                    <X size={12} />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Integrated Search Input (when toggled open or when search query is active) */}
+          <AnimatePresence initial={false}>
+            {(isSearchOpen || searchQuery) && (
+              <Motion.div
+                variants={accordionVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="overflow-hidden shrink-0"
+              >
+                <div
+                  className={`p-4 ${
+                    raisedHandParticipants.length > 0 ? "pb-0" : ""
+                  }`}
+                >
+                  <SearchInput
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    onClear={() => setSearchQuery("")}
+                    placeholder={pl.searchPlaceholder || "Tìm theo tên..."}
+                  />
+                </div>
+              </Motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Thao tác nâng cao (Collapsible advanced actions toolbar & modals) */}
           <AdvancedModerationActions coHost={coHost} />
@@ -345,22 +361,20 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           <div className="flex-1 overflow-y-auto">
             {/* Empty search */}
             {filteredParticipants.length === 0 && searchQuery && (
-              <div className="flex flex-col items-center justify-center py-10 px-4 text-center gap-2">
-                <Search
-                  size={24}
-                  className="text-neutral-300 dark:text-[#3F3F3F]"
-                />
-                <span className="text-xs text-neutral-500 dark:text-[#AAAAAA]">
-                  {pl.noSearchResults || "Không tìm thấy thành viên nào."}
-                </span>
-                <button
-                  type="button"
+              <EmptyState
+                icon={Search}
+                title={pl.noSearchResults || "Không tìm thấy thành viên nào."}
+                variant="component"
+              >
+                <PillButton
+                  variant="ghost"
                   onClick={() => setSearchQuery("")}
-                  className="text-xs text-cath-red-700 dark:text-red-400 font-medium hover:underline"
+                  className="mt-2"
+                  innerClassName="!text-cath-red-700 hover:!text-cath-red-800 dark:!text-red-400 dark:hover:!text-red-300 font-semibold"
                 >
-                  Xóa tìm kiếm
-                </button>
-              </div>
+                  {t?.courses?.clearSearch || pl?.clearSearch || "Xóa tìm kiếm"}
+                </PillButton>
+              </EmptyState>
             )}
 
             {/* Section: Đang giơ tay */}
@@ -393,7 +407,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                 {raisedHandParticipants.length > 0 && (
                   <Label as="div" className="px-4 pt-4 mb-1">
                     <span>
-                      {pl.membersSection || "Thành viên trong phòng"} (
+                      {pl.membersSection || "Thành viên khác"} (
                       {otherParticipants.length})
                     </span>
                   </Label>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
-import { Sun, Moon, Monitor } from "lucide-react"
+import { Sun, Moon, SunMoon } from "lucide-react"
 import { AnimatePresence, motion as Motion } from "framer-motion"
 import { dropdownVariants } from "@/shared/constants/motion"
 import { useTheme } from "@/shared/context/ThemeContext"
@@ -33,7 +33,7 @@ const THEME_OPTIONS = [
   },
   {
     key: "system",
-    icon: Monitor,
+    icon: SunMoon,
     iconColor: "text-slate-500 dark:text-neutral-400",
     label: {
       vi: "Hệ thống",
@@ -125,7 +125,7 @@ const ThemeToggle = ({
   const renderTriggerIcon = () => {
     if (theme === "system") {
       return (
-        <Monitor className="w-5 h-5 text-slate-600 dark:text-[#AAAAAA] transition-transform duration-200" />
+        <SunMoon className="w-5 h-5 text-slate-600 dark:text-[#AAAAAA] transition-transform duration-200" />
       )
     }
     if (theme === "dark") {

@@ -19,6 +19,7 @@ export default {
   header: {
     language: "言語",
     community: "コミュニティ",
+    settings: "設定",
     soon: "近日公開",
     countries: {
       vietnam: "ベトナム",
@@ -90,6 +91,12 @@ export default {
     back: "戻る",
     accountInfo: "アカウント情報",
     systemConfig: "システム設定",
+    themeTitle: "外観",
+    themeLight: "ライト",
+    themeDark: "ダーク",
+    themeSystem: "システム設定に従う",
+    languageDesc: "CatSpeakインターフェースの表示言語を選択します。",
+    otherSettings: "その他",
     emailNotifyTitle: "CatSpeakからのメール通知・ニュースを受け取る",
     emailNotifyDesc:
       "重要なアップデート、新機能、アカウント通知をメールで受け取ることを許可します。",

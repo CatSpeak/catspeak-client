@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useParams, Link } from "react-router-dom"
-import { MainLogo } from "@/shared/assets/icons/logo"
+import { MainLogo, MainLogoDark } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useSessionTimer } from "@/features/video-call"
@@ -53,7 +53,7 @@ const RoomHeader = () => {
     hostParticipant.identity === localParticipant.identity
 
   return (
-    <div className="flex items-center justify-between bg-white dark:bg-[#1A1A1A] px-4 h-14 shrink-0 border-b border-border dark:border-[#3F3F3F]">
+    <div className="flex items-center justify-between bg-white dark:bg-[#1A1A1A] px-4 h-14 shrink-0 border-b border-border dark:border-darkBorder">
       <div className="flex items-center gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">
@@ -65,7 +65,12 @@ const RoomHeader = () => {
               <img
                 src={MainLogo}
                 alt="Cat Speak logo"
-                className="h-10 w-auto"
+                className="h-10 w-auto dark:hidden"
+              />
+              <img
+                src={MainLogoDark}
+                alt="Cat Speak logo"
+                className="h-10 w-auto hidden dark:block"
               />
             </Link>
           </div>

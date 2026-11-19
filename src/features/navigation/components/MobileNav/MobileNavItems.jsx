@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react"
 import { Settings, ChevronRight, ChevronLeft, Globe, Users } from "lucide-react"
+import { motion, useReducedMotion } from "framer-motion"
+import { M3_MOTION } from "@/shared/constants/motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "../DesktopNav/DesktopNavItem"
 import {
   navLinks,
   footerLinks,
-  settingNavLinks,
   isNavItemVisible,
 } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
@@ -15,9 +16,6 @@ import ListItem from "@/shared/components/ui/ListItem"
 import MobileCommunitySwitcher, {
   MobileCommunityContent,
 } from "./MobileCommunitySwitcher"
-import MobileLanguageSwitcher, {
-  MobileLanguageContent,
-} from "./MobileLanguageSwitcher"
 
 const NavIcon = ({ img, icon: Icon, color, size = 24 }) => {
   const [imgError, setImgError] = useState(false)
@@ -60,9 +58,28 @@ const MobileNavItems = ({
   const { isTeacher, activeRole } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
+  const prefersReducedMotion = useReducedMotion()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
+  // Preserve last active drilldown item so content does not flash/empty during exit transition
+  const [displayedDrilldownItem, setDisplayedDrilldownItem] = useState(null)
   const { user } = useAuth()
   const userId = user?.accountId || user?.id || ""
+
+  useEffect(() => {
+    if (activeDrilldownItem) {
+      setDisplayedDrilldownItem(activeDrilldownItem)
+    }
+  }, [activeDrilldownItem])
+
+  const hasDrilldown = Boolean(activeDrilldownItem)
+  const currentDrilldownItem = activeDrilldownItem || displayedDrilldownItem
+
+  const transition = prefersReducedMotion
+    ? { duration: 0 }
+    : {
+        x: M3_MOTION.standard.spatial.fast,
+        opacity: M3_MOTION.standard.effects.fast,
+      }
 
   const communityNavItem = {
     key: "communitySwitcher",
@@ -72,42 +89,8 @@ const MobileNavItems = ({
     icon: Users,
   }
 
-  const languageNavItem = {
-    key: "languageSwitcher",
-    labelKey: "language",
-    defaultLabel: "Language",
-    label: t.header?.language || "Ngôn ngữ",
-    icon: Globe,
-  }
-
-  const settingNavItem = {
-    key: "settings",
-    labelKey: "settings",
-    defaultLabel: "Settings",
-    icon: Settings,
-    hasDropdown: true,
-    subItems: settingNavLinks,
-  }
-
   // Sync drilldown state when drawer opens or when navigating
-  const isSettings =
-    pathname.startsWith("/setting") ||
-    pathname.startsWith("/billing") ||
-    pathname.startsWith("/refunds")
-
   useEffect(() => {
-    if (isSettings) {
-      if (isMobileOpen) {
-        setActiveDrilldownItem(settingNavItem)
-      } else {
-        const timer = setTimeout(() => {
-          setActiveDrilldownItem(settingNavItem)
-        }, 300)
-        return () => clearTimeout(timer)
-      }
-      return
-    }
-
     const activeItem = navLinks.find(
       (item) =>
         item.hasDropdown &&
@@ -163,10 +146,20 @@ const MobileNavItems = ({
       {/* ============================================================ */}
       {/* DRAWER PAGE 1: MAIN ROOT VIEW                                */}
       {/* Initial menu page (Community Switcher, Nav Links, Footers).   */}
-      {/* Slides left (-translate-x-full) when a subpage is opened.     */}
+      {/* Slides left (-25%) with parallax depth when a subpage opens.  */}
       {/* ============================================================ */}
-      <div
-        className={`absolute inset-0 w-full h-full bg-white dark:bg-[#0F0F0F] flex flex-col transition-transform duration-300 ${activeDrilldownItem ? "-translate-x-full" : "translate-x-0"}`}
+      <motion.div
+        initial={false}
+        animate={{
+          x: hasDrilldown ? "-25%" : "0%",
+          opacity: hasDrilldown ? 0 : 1,
+        }}
+        transition={transition}
+        style={{
+          pointerEvents: hasDrilldown ? "none" : "auto",
+        }}
+        aria-hidden={hasDrilldown}
+        className="absolute inset-0 w-full h-full bg-white dark:bg-[#0F0F0F] flex flex-col"
       >
         <div className="shrink-0 border-b border-border dark:border-[#3F3F3F]">
           <MobileCommunitySwitcher
@@ -218,8 +211,8 @@ const MobileNavItems = ({
                     rightContent={
                       <ChevronRight className="shrink-0 text-gray-400 dark:text-neutral-500" />
                     }
-                    className="transition-all duration-200 w-full"
-                    contentClassName={`transition-all duration-200 px-4 ${
+                    className="w-full"
+                    contentClassName={`px-4 ${
                       checkIsActive(item)
                         ? "bg-itemActive dark:bg-[#272727] hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D] text-gray-900 dark:text-white"
                         : "text-gray-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-[#272727] hover:text-gray-900 dark:hover:text-white"
@@ -227,7 +220,7 @@ const MobileNavItems = ({
                     title={label}
                   >
                     <span
-                      className="text-base text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate text-gray-800 dark:text-neutral-200"
+                      className="text-base text-left whitespace-nowrap min-w-0 flex-1 truncate text-gray-800 dark:text-neutral-200"
                       style={item.color ? { color: item.color } : undefined}
                     >
                       {label}
@@ -250,44 +243,10 @@ const MobileNavItems = ({
             })}
         </div>
 
-        <div className="pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex flex-col mt-auto border-t border-border dark:border-[#3F3F3F] shrink-0">
-          <MobileLanguageSwitcher
-            onOpen={() => setActiveDrilldownItem(languageNavItem)}
-          />
+        <div className="flex flex-col mt-auto border-t border-border dark:border-[#3F3F3F] shrink-0">
           {footerLinks.map((item) => {
             const label = t.nav?.[item.key] || item.label || item.key
             const IconComponent = item.icon || Settings
-
-            if (item.key === "settings") {
-              return (
-                <ListItem
-                  key={item.key}
-                  selected={isSettings}
-                  onClick={() => setActiveDrilldownItem(settingNavItem)}
-                  leftContent={
-                    <NavIcon
-                      img={item.img}
-                      icon={IconComponent}
-                      color={item.color}
-                    />
-                  }
-                  rightContent={
-                    <ChevronRight className="shrink-0 text-gray-400 dark:text-neutral-500" />
-                  }
-                  className="transition-all duration-200 w-full"
-                  contentClassName={`transition-all duration-200 px-4 ${
-                    isSettings
-                      ? "bg-itemActive dark:bg-[#272727] hover:bg-itemActiveHover dark:hover:bg-[#3D3D3D] text-gray-900 dark:text-white"
-                      : "text-gray-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-[#272727] hover:text-gray-900 dark:hover:text-white"
-                  }`}
-                  title={label}
-                >
-                  <span className="text-base text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate text-gray-800 dark:text-neutral-200">
-                    {label}
-                  </span>
-                </ListItem>
-              )
-            }
 
             return (
               <DesktopNavItem
@@ -302,15 +261,25 @@ const MobileNavItems = ({
             )
           })}
         </div>
-      </div>
+      </motion.div>
 
       {/* ============================================================ */}
       {/* DRAWER PAGE 2: DRILLDOWN / SUBPAGE VIEW                      */}
       {/* Submenu page (Cat Speak, Community, Settings, AI Tutor, etc.)*/}
-      {/* Slides in from right (translate-x-0) when item is opened.     */}
+      {/* Slides in from right (100% -> 0%) when item is opened.       */}
       {/* ============================================================ */}
-      <div
-        className={`absolute inset-0 w-full h-full bg-white dark:bg-[#0F0F0F] flex flex-col transition-transform duration-300 ${activeDrilldownItem ? "translate-x-0" : "translate-x-full"}`}
+      <motion.div
+        initial={false}
+        animate={{
+          x: hasDrilldown ? "0%" : "100%",
+          opacity: hasDrilldown ? 1 : 0,
+        }}
+        transition={transition}
+        style={{
+          pointerEvents: hasDrilldown ? "auto" : "none",
+        }}
+        aria-hidden={!hasDrilldown}
+        className="absolute inset-0 w-full h-full bg-white dark:bg-[#0F0F0F] flex flex-col shadow-[-4px_0_16px_rgba(0,0,0,0.06)] dark:shadow-[-4px_0_16px_rgba(0,0,0,0.4)]"
       >
         {/* Drilldown Header */}
         <div className="flex items-center shrink-0">
@@ -318,49 +287,42 @@ const MobileNavItems = ({
             onClick={() => setActiveDrilldownItem(null)}
             className="flex items-center w-full px-4 h-14 gap-4 text-gray-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-neutral-200 dark:active:bg-[#333333] transition-colors cursor-pointer"
             title={
-              activeDrilldownItem
-                ? t.nav?.[activeDrilldownItem.key] ||
-                  activeDrilldownItem.label ||
-                  activeDrilldownItem.key
+              currentDrilldownItem
+                ? t.nav?.[currentDrilldownItem.key] ||
+                  currentDrilldownItem.label ||
+                  currentDrilldownItem.key
                 : undefined
             }
           >
             <ChevronLeft className="shrink-0 text-gray-700 dark:text-neutral-300" />
-            {activeDrilldownItem && (
+            {currentDrilldownItem && (
               <span
                 className="font-bold text-xl text-gray-900 dark:text-white truncate max-w-[80%]"
                 style={
-                  activeDrilldownItem.color
-                    ? { color: activeDrilldownItem.color }
+                  currentDrilldownItem.color
+                    ? { color: currentDrilldownItem.color }
                     : undefined
                 }
               >
-                {t.nav?.[activeDrilldownItem.key] ||
-                  activeDrilldownItem.label ||
-                  activeDrilldownItem.key}
+                {t.nav?.[currentDrilldownItem.key] ||
+                  currentDrilldownItem.label ||
+                  currentDrilldownItem.key}
               </span>
             )}
           </button>
         </div>
 
         {/* Drilldown Links */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {activeDrilldownItem?.key === "communitySwitcher" ? (
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-[calc(2rem+env(safe-area-inset-bottom,0px))] sm:pb-0 flex flex-col scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {currentDrilldownItem?.key === "communitySwitcher" ? (
             <MobileCommunityContent
               onSelect={() => {
                 setActiveDrilldownItem(null)
                 setIsMobileOpen?.(false)
               }}
             />
-          ) : activeDrilldownItem?.key === "languageSwitcher" ? (
-            <MobileLanguageContent
-              onSelect={() => {
-                setActiveDrilldownItem(null)
-                setIsMobileOpen?.(false)
-              }}
-            />
           ) : (
-            getVisibleGroupsForDrilldown(activeDrilldownItem).map(
+            getVisibleGroupsForDrilldown(currentDrilldownItem).map(
               (group, groupIdx) => (
                 <React.Fragment key={group.key}>
                   {groupIdx > 0 && (
@@ -392,7 +354,7 @@ const MobileNavItems = ({
             )
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
