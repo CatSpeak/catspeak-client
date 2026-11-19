@@ -13,7 +13,11 @@ const AuthModalContext = createContext(null)
 export const useAuthModal = () => {
     const context = useContext(AuthModalContext)
     if (!context) {
-        throw new Error('useAuthModal must be used within AuthModalProvider')
+        return {
+            openAuthModal: () => {},
+            closeAuthModal: () => {},
+            redirectAfterLogin: null,
+        }
     }
     return context
 }

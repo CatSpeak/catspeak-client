@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/features/auth"
 import { toast } from "@/shared/utils/toastBridge"
 import {
   SpeakingRoomHeader,
@@ -19,6 +20,69 @@ import {
 
 
 // --- Default Fallbacks & Configurations ---
+const GUEST_FALLBACK_TOPICS = [
+  {
+    id: "hsk1-intro",
+    hsk_level: 1,
+    title_vi: "Chào hỏi & Giới thiệu bản thân",
+    title_zh: "问候与自我介绍",
+    opening_zh: "你好！很高兴认识你。",
+    script_turns: 3,
+    keywords: ["你好", "名字", "认识"],
+    is_premium: false,
+  },
+  {
+    id: "hsk1-daily",
+    hsk_level: 1,
+    title_vi: "Ăn uống & Gọi món đơn giản",
+    title_zh: "简单点餐",
+    opening_zh: "你想吃什么？",
+    script_turns: 3,
+    keywords: ["米饭", "喝水", "喜欢"],
+    is_premium: false,
+  },
+  {
+    id: "hsk2-shopping",
+    hsk_level: 2,
+    title_vi: "Mua sắm ở siêu thị",
+    title_zh: "超市购物",
+    opening_zh: "这个多少钱？",
+    script_turns: 3,
+    keywords: ["多少钱", "太贵了", "买"],
+    is_premium: false,
+  },
+  {
+    id: "hsk2-traffic",
+    hsk_level: 2,
+    title_vi: "Hỏi đường & Đi lại",
+    title_zh: "问路与交通",
+    opening_zh: "请问地铁站在哪里？",
+    script_turns: 3,
+    keywords: ["地铁", "出租车", "怎么走"],
+    is_premium: false,
+  },
+  {
+    id: "hsk3-travel",
+    hsk_level: 3,
+    title_vi: "Kế hoạch đi du lịch",
+    title_zh: "旅游计划",
+    opening_zh: "你周末打算去哪儿玩？",
+    script_turns: 4,
+    keywords: ["旅游", "风景", "打算"],
+    is_premium: false,
+  },
+  {
+    id: "hsk4-work",
+    hsk_level: 4,
+    title_vi: "Phỏng vấn & Môi trường làm việc",
+    title_zh: "面试与工作环境",
+    opening_zh: "你能谈谈你的工作经历吗？",
+    script_turns: 4,
+    keywords: ["经历", "负责", "机会"],
+    is_premium: true,
+  },
+]
+
 const DEFAULT_QUOTA = {
   currentPlan: "Gói Free: 2 buổi/ngày",
   used: 0,
@@ -57,10 +121,14 @@ function getTopicEmoji(topic, index = 0) {
 
 const SelectionPage = ({ onStartSpeaking, onQuotaExceeded, onActiveSessionConflict, isStarting = false }) => {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const { data: rawTopics = [], isLoading: isLoadingTopics, isError: topicsError, refetch: refetchTopics } = useGetSpeakingTopicsQuery()
-  const { data: quotaData } = useGetSpeakingQuotaQuery()
-  const { data: levelProfile } = useGetSpeakingLevelQuery()
-  const { data: activeSession } = useGetActiveSpeakingSessionQuery(undefined, { refetchOnMountOrArgChange: true })
+  const { data: quotaData } = useGetSpeakingQuotaQuery(undefined, { skip: !isAuthenticated })
+  const { data: levelProfile } = useGetSpeakingLevelQuery(undefined, { skip: !isAuthenticated })
+  const { data: activeSession } = useGetActiveSpeakingSessionQuery(undefined, {
+    skip: !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  })
   const [endSession, { isLoading: isEndingSession }] = useEndSpeakingSessionMutation()
   const [manualHskNumber, setManualHskNumber] = useState(null)
   const [selectedTopicId, setSelectedTopicId] = useState("")
@@ -81,9 +149,14 @@ const SelectionPage = ({ onStartSpeaking, onQuotaExceeded, onActiveSessionConfli
 
   const currentLevel = USER_LEVEL.options.find((option) => option.value === currentHskNumber)?.label || USER_LEVEL.current
 
+  const effectiveTopics = useMemo(() => {
+    if (rawTopics && rawTopics.length > 0) return rawTopics
+    return GUEST_FALLBACK_TOPICS
+  }, [rawTopics])
+
   // Map raw API topics to UI card models
   const allTopics = useMemo(() => {
-    return rawTopics.map((t, idx) => {
+    return effectiveTopics.map((t, idx) => {
       const hskNum = t.hsk_level || 1
       const isHigherLevel = hskNum > currentHskNumber
       return {
@@ -311,7 +384,7 @@ const SelectionPage = ({ onStartSpeaking, onQuotaExceeded, onActiveSessionConfli
           sections={filteredSections}
           selectedTopicId={selectedTopicId}
           onSelectTopic={setSelectedTopicId}
-          errorMessage={topicsError ? "Không thể tải danh sách chủ đề." : null}
+          errorMessage={topicsError && effectiveTopics.length === 0 ? "Không thể tải danh sách chủ đề." : null}
           hasTopics={allTopics.length > 0}
           onRetry={refetchTopics}
         />

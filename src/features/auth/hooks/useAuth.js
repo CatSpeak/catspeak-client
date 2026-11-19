@@ -8,7 +8,7 @@ import {
   selectUserRole,
   selectAuthStatus,
   logout,
-} from "@store/slices/authSlice"
+} from "@/store/slices/authSlice"
 
 import { baseApi } from "@/store/api/baseApi"
 import { socialApi } from "@/store/api/social/socialApi"

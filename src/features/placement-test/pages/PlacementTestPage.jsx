@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "@/components/ui/toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth/hooks/useAuth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 import { useGetPlacementPermissionQuery } from "@/store/api/plansApi"
@@ -28,7 +29,9 @@ const PlacementTestPage = () => {
   const copy = t.placementTest || {}
   const lifecycleCopy = copy.lifecycle || {}
   const navigate = useNavigate()
+  const { openAuthModal } = useAuthModal()
   const { user, isAuthenticated } = useAuth()
+  const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : ""
   const { hasFeature, isLoading: isPlanLoading } = usePlanFeatures()
   // The AI API authorizes POST /v1/placement/sessions/start with
   // GET /api/v1/Plans/placement-permission. Gate on that same source so a plan
@@ -63,6 +66,10 @@ const PlacementTestPage = () => {
   }, [navigate, shouldOpenProfile])
 
   const handleRequestMic = async () => {
+    if (!isAuthenticated) {
+      openAuthModal("login", currentPath)
+      return false
+    }
     const granted = await request()
     setHasGrantedMic(granted)
     return granted
@@ -73,6 +80,10 @@ const PlacementTestPage = () => {
   }
 
   const handleStart = async () => {
+    if (!isAuthenticated) {
+      openAuthModal("login", currentPath)
+      return
+    }
     if (hasGrantedMic) {
       setStep(PLACEMENT_TEST_STEPS.DEVICE)
       return

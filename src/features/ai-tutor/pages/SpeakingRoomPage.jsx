@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from "react"
 import { useNavigate, useOutletContext } from "react-router-dom"
+import { useAuth } from "@/features/auth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { toast } from "@/shared/utils/toastBridge"
 import {
   ActiveSessionConflictModal,
@@ -11,6 +13,9 @@ import { useStartSpeakingSessionMutation } from "../api/speakingApi"
 const SpeakingRoomPage = () => {
   const navigate = useNavigate()
   const { setSessionCredentials } = useOutletContext()
+  const { isAuthenticated } = useAuth()
+  const { openAuthModal } = useAuthModal()
+  const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : ""
   const [startSession, { isLoading }] = useStartSpeakingSessionMutation()
   const [isQuotaModalOpen, setQuotaModalOpen] = useState(false)
   const [conflictSession, setConflictSession] = useState(null)
@@ -21,6 +26,10 @@ const SpeakingRoomPage = () => {
   const handleStartSpeaking = useCallback(
     async (topic, hskLevel) => {
       if (!topic?.id || isLoading || startingRef.current) return
+      if (!isAuthenticated) {
+        openAuthModal("login", currentPath)
+        return
+      }
       startingRef.current = true
       try {
         const session = await startSession({
