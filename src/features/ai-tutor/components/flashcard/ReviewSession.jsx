@@ -78,9 +78,50 @@ const ReviewSession = ({
       .then((data) => {
         if (cancelled) return
         // Thẻ đã chấm nhưng chưa lên server (offline, tải lại trang) cũng tính là xong.
-        const pendingIds = data.session_id
-          ? createReviewQueue().forSession(data.session_id).map((i) => i.cardId)
+        const pendingReviews = data.session_id
+          ? createReviewQueue().forSession(data.session_id)
           : []
+        const pendingIds = pendingReviews.map((i) => i.cardId)
+
+        // Gộp kết quả đã chấm trước khi resume (từ server và từ bộ đệm offline)
+        // để khi hết thẻ, màn kết quả offline có đủ toàn bộ số liệu của cả phiên.
+        const cardMap = new Map((data.cards || []).map((c) => [Number(c.card_id), c]))
+        if (data.answered_results?.length) {
+          for (const res of data.answered_results) {
+            const cid = Number(res.card_id)
+            const c = cardMap.get(cid)
+            results.current.set(cid, {
+              cardId: cid,
+              word: c?.word || "",
+              isCorrect: Boolean(res.is_correct),
+              isOverride: Boolean(res.is_override),
+            })
+          }
+        } else if (data.answered_card_ids?.length) {
+          for (const rawId of data.answered_card_ids) {
+            const cid = Number(rawId)
+            if (!results.current.has(cid)) {
+              const c = cardMap.get(cid)
+              results.current.set(cid, {
+                cardId: cid,
+                word: c?.word || "",
+                isCorrect: true,
+                isOverride: false,
+              })
+            }
+          }
+        }
+        for (const item of pendingReviews) {
+          const cid = Number(item.cardId)
+          const c = cardMap.get(cid)
+          results.current.set(cid, {
+            cardId: cid,
+            word: c?.word || "",
+            isCorrect: Boolean(item.isCorrect),
+            isOverride: Boolean(item.isOverride),
+          })
+        }
+
         setSession(data)
         setQueue(remainingCards(data.cards, data.answered_card_ids, pendingIds))
         setIndex(0)
@@ -217,7 +258,11 @@ const ReviewSession = ({
           type="button"
           onClick={() => {
             leaving.current = true
-            onFinished?.(session.session_id, { localResults: [], totalCards: total, mode: session.mode })
+            onFinished?.(session.session_id, {
+              localResults: [...results.current.values()],
+              totalCards: total,
+              mode: session.mode,
+            })
           }}
           className="h-10 px-6 rounded-full bg-[#990011] text-white text-sm font-medium"
         >
