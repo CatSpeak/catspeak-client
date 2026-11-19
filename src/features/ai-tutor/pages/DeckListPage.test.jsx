@@ -124,5 +124,26 @@ describe("DeckListPage: folder limits and plan badge honesty (TC-FC-131, TC-FC-1
       expect(html).toContain("5 thẻ")
       expect(html).toContain("2 đến hạn")
     })
+
+    it("renders both total cards and due cards count on each deck row even when due_count is 0 (TC-FC-087, FR-FC-015)", () => {
+      mockFoldersQuery = {
+        data: { items: [], plan: "free", max_folders: 3, can_create: true },
+        isLoading: false,
+      }
+      mockDecksQuery = {
+        data: [
+          { id: "hsk-1", name: "HSK 1", category: "system", total_cards: 0, due_count: 0 },
+          { id: "hsk-2", name: "HSK 2", category: "system", total_cards: 2, due_count: 0 },
+          { id: "hsk-4", name: "HSK 4", category: "system", total_cards: 2, due_count: 0 },
+        ],
+        isLoading: false,
+      }
+
+      const html = renderToStaticMarkup(<DeckListPage />)
+
+      // Expected: Each deck displays total cards AND due count (FR-FC-015)
+      expect(html).toContain("2 thẻ")
+      expect(html).toContain("0 đến hạn")
+    })
   })
 })

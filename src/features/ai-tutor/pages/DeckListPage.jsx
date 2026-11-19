@@ -210,6 +210,17 @@ const DeckListPage = () => {
                   )}
                 </button>
                 <span className="shrink-0 text-sm font-semibold text-slate-500 dark:text-neutral-400">{f.card_count} thẻ</span>
+                {f.due_count != null && (
+                  <span
+                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${
+                      f.due_count > 0
+                        ? "bg-rose-50 dark:bg-rose-950/40 text-[#680411] dark:text-red-400"
+                        : "bg-slate-100 dark:bg-[#272727] text-slate-500 dark:text-neutral-400"
+                    }`}
+                  >
+                    {f.due_count} đến hạn
+                  </span>
+                )}
                 {!f.read_only && (
                   <button
                     type="button"
