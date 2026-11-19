@@ -14,6 +14,7 @@ import {
   UserCheck,
 } from "lucide-react"
 import AuthModalContext from "@/shared/context/AuthModalContext"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useFollowUserMutation,
   useSendFriendRequestMutation,
@@ -30,6 +31,7 @@ const InFeedCard = ({
   onFriendRequest,
   onJoinGroup,
 }) => {
+  const { t } = useLanguage()
   const { elementRef, trackCardClick, trackActionClick } = useRecommendationTracking({
     itemType: item.type,
     targetId: item.id,
@@ -192,10 +194,10 @@ const InFeedCard = ({
             {localStatus === "following" ? (
               <>
                 <Check className="w-3.5 h-3.5" />
-                <span>Đang theo dõi</span>
+                <span>{t.recommendations?.actions?.following || "Đang theo dõi"}</span>
               </>
             ) : (
-              <span>Theo dõi</span>
+              <span>{t.recommendations?.actions?.follow || "Theo dõi"}</span>
             )}
           </button>
         )}
@@ -213,11 +215,11 @@ const InFeedCard = ({
             }`}
           >
             {localStatus === "requested" ? (
-              <span>Đã gửi yêu cầu</span>
+              <span>{t.recommendations?.actions?.requestSent || "Đã gửi yêu cầu"}</span>
             ) : localStatus === "joined" ? (
-              <span>Xem nhóm</span>
+              <span>{t.recommendations?.actions?.joined || "Đã tham gia"}</span>
             ) : (
-              <span>Tham gia nhóm</span>
+              <span>{t.recommendations?.actions?.joinGroup || "Tham gia nhóm"}</span>
             )}
           </button>
         )}
@@ -235,12 +237,12 @@ const InFeedCard = ({
             {localStatus === "requested" ? (
               <>
                 <UserCheck className="w-3.5 h-3.5" />
-                <span>Đã gửi lời mời</span>
+                <span>{t.recommendations?.actions?.friendRequestSent || "Đã gửi lời mời"}</span>
               </>
             ) : (
               <>
                 <UserPlus className="w-3.5 h-3.5" />
-                <span>Kết bạn</span>
+                <span>{t.recommendations?.actions?.addFriend || "Kết bạn"}</span>
               </>
             )}
           </button>
@@ -259,6 +261,7 @@ const InFeedRecommendationSection = ({
   const { lang = "vi" } = useParams()
   const token = useSelector((s) => s.auth?.token)
   const { openAuthModal } = useContext(AuthModalContext)
+  const { t } = useLanguage()
 
   const [followUser] = useFollowUserMutation()
   const [sendFriendRequest] = useSendFriendRequestMutation()
@@ -352,8 +355,11 @@ const InFeedRecommendationSection = ({
     return null
   }
 
-  const title = data?.title || "Đề xuất dành cho bạn"
-  const subTitle = data?.subTitle || "Gợi ý kết nối và cùng nhau học tập ngoại ngữ"
+  const title = data?.title || t.recommendations?.inFeed?.defaultTitle || "Đề xuất dành cho bạn"
+  const subTitle =
+    data?.subTitle ||
+    t.recommendations?.inFeed?.defaultSubTitle ||
+    "Gợi ý kết nối và cùng nhau học tập ngoại ngữ"
 
   return (
     <div className="w-full my-4 p-4 sm:p-5 bg-gradient-to-br from-slate-50 to-white dark:from-[#141414] dark:to-[#1A1A1A] rounded-3xl border border-slate-200/80 dark:border-neutral-800 shadow-xs">
@@ -362,7 +368,7 @@ const InFeedRecommendationSection = ({
         <div className="flex flex-col">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[11px] font-bold uppercase tracking-wider text-cath-red-600 dark:text-rose-400 bg-rose-100/70 dark:bg-rose-950/60 px-2 py-0.5 rounded-full">
-              Đề xuất
+              {t.recommendations?.badge || "Đề xuất"}
             </span>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
               {title}
@@ -384,7 +390,7 @@ const InFeedRecommendationSection = ({
                 ? "text-slate-700 dark:text-neutral-200 hover:bg-slate-50 cursor-pointer shadow-xs"
                 : "text-slate-300 dark:text-neutral-600 opacity-50 cursor-not-allowed"
             }`}
-            aria-label="Cuộn sang trái"
+            aria-label={t.recommendations?.inFeed?.scrollLeft || "Cuộn sang trái"}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -397,7 +403,7 @@ const InFeedRecommendationSection = ({
                 ? "text-slate-700 dark:text-neutral-200 hover:bg-slate-50 cursor-pointer shadow-xs"
                 : "text-slate-300 dark:text-neutral-600 opacity-50 cursor-not-allowed"
             }`}
-            aria-label="Cuộn sang phải"
+            aria-label={t.recommendations?.inFeed?.scrollRight || "Cuộn sang phải"}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -448,12 +454,11 @@ const InFeedRecommendationSection = ({
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-cath-red-600 dark:text-rose-400 hover:text-cath-red-700 hover:underline transition-colors cursor-pointer"
         >
           <span>
-            Xem tất cả{" "}
             {data?.cycleType === "teacher"
-              ? "giảng viên"
+              ? t.recommendations?.inFeed?.viewAllTeachers || "Xem tất cả giảng viên"
               : data?.cycleType === "group"
-                ? "nhóm học"
-                : "bạn bè"}
+                ? t.recommendations?.inFeed?.viewAllGroups || "Xem tất cả nhóm học"
+                : t.recommendations?.inFeed?.viewAllFriends || "Xem tất cả bạn bè"}
           </span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>

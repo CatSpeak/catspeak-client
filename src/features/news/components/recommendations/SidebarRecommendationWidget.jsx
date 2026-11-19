@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Star, Users, ArrowRight, ShieldCheck } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetSidebarRecommendationsQuery } from "@/store/api/social/recommendationsApi"
 import { useRecommendationTracking } from "../../hooks/useRecommendationTracking"
 
-const TAB_CONFIGS = [
-  { key: "teacher", label: "Giáo viên", dataKey: "teachers" },
-  { key: "group", label: "Nhóm học", dataKey: "groups" },
-  { key: "user", label: "Cá nhân", dataKey: "users" },
-]
-
 const SidebarItem = ({ item, languageCommunity, onNavigate }) => {
+  const { t } = useLanguage()
   const { elementRef, trackCardClick } = useRecommendationTracking({
     itemType: item.type,
     targetId: item.id,
@@ -67,7 +63,7 @@ const SidebarItem = ({ item, languageCommunity, onNavigate }) => {
         {/* Subtitle / Additional info based on tab */}
         {item.type === "teacher" && (
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
-            <span className="truncate">{item.subTitle || "Giảng viên"}</span>
+            <span className="truncate">{item.subTitle || t.recommendations?.tabs?.teacher || "Giảng viên"}</span>
             <span className="flex items-center text-amber-500 font-medium shrink-0">
               <Star className="w-3 h-3 fill-amber-400 text-amber-400 mr-0.5" />
               {item.rating?.toFixed(1) || "5.0"}
@@ -78,17 +74,22 @@ const SidebarItem = ({ item, languageCommunity, onNavigate }) => {
         {item.type === "group" && (
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
             <Users className="w-3 h-3 shrink-0" />
-            <span>{item.memberCount?.toLocaleString() || 0} thành viên</span>
+            <span>
+              {(t.recommendations?.counts?.members || "{{count}} thành viên").replace(
+                "{{count}}",
+                item.memberCount?.toLocaleString() || 0,
+              )}
+            </span>
           </div>
         )}
 
         {item.type === "user" && (
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400 mt-0.5">
             <span className="text-cath-red-600 dark:text-rose-400 font-medium">
-              {item.tags?.[1] || "Học viên"}
+              {item.tags?.[1] || t.recommendations?.tabs?.user || "Học viên"}
             </span>
             <span>•</span>
-            <span className="truncate">{item.postCountInfo || "Tích cực"}</span>
+            <span className="truncate">{item.postCountInfo || t.recommendations?.engaged || "Tích cực"}</span>
           </div>
         )}
       </div>
@@ -100,6 +101,16 @@ const SidebarRecommendationWidget = ({ languageCommunity = 0 }) => {
   const [activeTab, setActiveTab] = useState("teacher")
   const navigate = useNavigate()
   const { lang = "vi" } = useParams()
+  const { t } = useLanguage()
+
+  const tabConfigs = useMemo(
+    () => [
+      { key: "teacher", label: t.recommendations?.tabs?.teacher || "Giáo viên", dataKey: "teachers" },
+      { key: "group", label: t.recommendations?.tabs?.group || "Nhóm học", dataKey: "groups" },
+      { key: "user", label: t.recommendations?.tabs?.user || "Cá nhân", dataKey: "users" },
+    ],
+    [t],
+  )
 
   // Single batch fetch for all 3 recommendation categories (teachers, groups, users)
   const { data, isError, isLoading } = useGetSidebarRecommendationsQuery({
@@ -110,11 +121,11 @@ const SidebarRecommendationWidget = ({ languageCommunity = 0 }) => {
   // Determine available tabs dynamically: only tabs with non-empty data will be shown
   const availableTabs = useMemo(() => {
     if (!data) return []
-    return TAB_CONFIGS.filter((tab) => {
+    return tabConfigs.filter((tab) => {
       const list = data[tab.dataKey] || data[tab.key] || []
       return Array.isArray(list) && list.length > 0
     })
-  }, [data])
+  }, [data, tabConfigs])
 
   // Automatically select the first available tab if current activeTab has no data
   useEffect(() => {
@@ -126,10 +137,10 @@ const SidebarRecommendationWidget = ({ languageCommunity = 0 }) => {
   // Items for currently active tab
   const currentItems = useMemo(() => {
     if (!data) return []
-    const currentTab = TAB_CONFIGS.find((tab) => tab.key === activeTab)
+    const currentTab = tabConfigs.find((tab) => tab.key === activeTab)
     const key = currentTab?.dataKey || activeTab
     return data[key] || data[activeTab] || []
-  }, [data, activeTab])
+  }, [data, activeTab, tabConfigs])
 
   // Sidebar is ONLY hidden if an actual error occurs
   if (isError) {
@@ -153,10 +164,10 @@ const SidebarRecommendationWidget = ({ languageCommunity = 0 }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-neutral-300">
-          GỢI Ý KẾT NỐI & HỌC TẬP
+          {t.recommendations?.sidebarTitle || "GỢI Ý KẾT NỐI & HỌC TẬP"}
         </h3>
         <span className="text-[11px] font-medium text-rose-500 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-full">
-          Đề xuất
+          {t.recommendations?.badge || "Đề xuất"}
         </span>
       </div>
 
@@ -212,7 +223,7 @@ const SidebarRecommendationWidget = ({ languageCommunity = 0 }) => {
           ))
         ) : (
           <div className="py-6 text-center text-xs text-slate-400 dark:text-neutral-500">
-            Chưa có gợi ý phù hợp vào lúc này.
+            {t.recommendations?.empty?.title || "Chưa có gợi ý phù hợp vào lúc này."}
           </div>
         )}
       </div>
@@ -225,7 +236,7 @@ const SidebarRecommendationWidget = ({ languageCommunity = 0 }) => {
             onClick={handleViewAll}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-cath-red-600 dark:text-rose-400 hover:text-cath-red-700 hover:underline transition-colors"
           >
-            <span>Xem tất cả gợi ý</span>
+            <span>{t.recommendations?.viewAllRecommendations || "Xem tất cả gợi ý"}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>

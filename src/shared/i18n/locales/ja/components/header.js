@@ -17,6 +17,11 @@ export default {
   clearAll: "すべて削除",
   resultsFound: "{{count}} 件の結果が見つかりました",
   searching: "ルームを検索中...",
+  searchSuggestions: "検索候補",
+  trendingBadge: "急上昇",
+  searchGlobalNews: '世界ニュースで「{{keyword}}」を検索',
+  pressEnterToSearch: 'Enterキーを押して世界ニュースで「{{keyword}}」を検索',
+  searchingSuggestions: "候補を検索中...",
   filterRooms: "ルームを絞り込む",
   languages: {
     vi: "ベトナム語",

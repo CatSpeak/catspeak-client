@@ -13,13 +13,14 @@ import PostMediaGallery from "./PostMediaGallery"
 import ShareModal from "@/features/news/components/ShareModal"
 import CommentsSection from "@/features/news/components/CommentsSection"
 import PostContent from "@/features/news/components/PostContent"
+import HighlightedText from "@/features/news/components/HighlightedText"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import PostHeader from "./PostHeader"
 import PostActionBar from "./PostActionBar"
 import ReactionStackedBadges from "@/features/news/components/ReactionStackedBadges"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const ProfilePostCard = ({ post, isOwnProfile }) => {
+const ProfilePostCard = ({ post, isOwnProfile, searchKeyword = "" }) => {
   const navigate = useNavigate()
   const { lang: paramLang } = useParams()
   const { t, language } = useLanguage()
@@ -125,7 +126,9 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
 
           {post.title && post.title !== "Untitled" && (
             <h4
-              onClick={() => {
+              onClick={(e) => {
+                // If user clicked directly on a hashtag token inside title, let hashtag handler handle it
+                if (e.target.closest("[data-hashtag]")) return
                 if (post.slug || post.postId) {
                   navigate(
                     `/${currentLang}/cat-speak/news/${post.slug || post.postId}`,
@@ -138,7 +141,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                   : ""
               }`}
             >
-              {post.title}
+              <HighlightedText text={post.title} searchKeyword={searchKeyword} />
             </h4>
           )}
 
@@ -152,6 +155,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                   html={isExpanded ? resolvedContent : post?.content || excerpt}
                   contentUrl={isExpanded ? resolvedContentUrl : null}
                   fallback={excerpt}
+                  searchKeyword={searchKeyword}
                   className={
                     !isExpanded
                       ? "text-sm text-secondary dark:text-neutral-300"
@@ -188,7 +192,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
               {typeof post?.viewCount === "number"
                 ? post.viewCount.toLocaleString()
                 : post?.viewCount || 0}{" "}
-              {t.profile?.post?.header?.views || "lượt xem"}
+              {t.profile?.post?.header?.views || t.news?.views || "views"}
             </span>
 
             <ReactionStackedBadges
