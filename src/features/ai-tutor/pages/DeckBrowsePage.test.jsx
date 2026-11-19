@@ -239,4 +239,133 @@ describe("DeckBrowsePage - bug repro and regression verification", () => {
 
     expect(mockCardsQuery.refetch).toHaveBeenCalled()
   })
+
+  it("renders 'Không tìm thấy' or 'Không có quyền truy cập' instead of 'Thư mục: Thư mục' when accessing folder of another account (TC-FC-104)", async () => {
+    mockIsOnline = true
+    mockParams = { lang: "zh", deckId: "folder-2" }
+    mockCardsQuery = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      error: { status: 404, code: "FLASHCARD_FOLDER_NOT_FOUND", message: "Không tìm thấy thư mục." },
+      refetch: vi.fn(),
+    }
+    // Folders query returns user A's folders (id 5), not folder 2
+    mockFoldersQuery = {
+      data: { items: [{ id: 5, name: "Thư mục cá nhân" }] },
+      isLoading: false,
+    }
+
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+
+    await act(async () => {
+      root.render(<DeckBrowsePage />)
+    })
+
+    const text = document.body.textContent || ""
+
+    // User bug report TC-FC-104:
+    // Hiện trạng: "/decks/folder-2 (thư mục của tài khoản khác) vẫn render trang giả 'Thư mục: Thư mục', không 404"
+    // Kỳ vọng: "Trả về trang 'Không tìm thấy / Không có quyền truy cập'"
+    expect(text).not.toContain("Thư mục: Thư mục")
+    expect(text).not.toContain("Deck chưa có từ nào")
+    expect(text).toMatch(/Không tìm thấy|Không có quyền truy cập/i)
+  })
+
+  it("renders 'Không tìm thấy' instead of fake deck page when deck does not exist (e.g. hsk-9) (TC-FC-104)", async () => {
+    mockIsOnline = true
+    mockParams = { lang: "zh", deckId: "hsk-9" }
+    mockCardsQuery = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      error: { status: 404, code: "FLASHCARD_DECK_NOT_FOUND", message: "Không tìm thấy bộ thẻ." },
+      refetch: vi.fn(),
+    }
+    mockDecksQuery = {
+      data: [
+        { id: "hsk-1", name: "HSK 1", total_cards: 10, category: "system" },
+        { id: "hsk-2", name: "HSK 2", total_cards: 20, category: "system" },
+      ],
+      isLoading: false,
+    }
+
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+
+    await act(async () => {
+      root.render(<DeckBrowsePage />)
+    })
+
+    const text = document.body.textContent || ""
+
+    // User bug report TC-FC-104:
+    // Hiện trạng: "/decks/hsk-9 vẫn render trang giả, không 404"
+    // Kỳ vọng: "Trả về trang 'Không tìm thấy / Không có quyền truy cập'"
+    expect(text).not.toContain("Deck chưa có từ nào")
+    expect(text).toMatch(/Không tìm thấy|Không có quyền truy cập/i)
+  })
+
+  it("renders 'Không tìm thấy' when folder is not in user's folders even before cardsQuery finishes", async () => {
+    mockIsOnline = true
+    mockParams = { lang: "zh", deckId: "folder-99" }
+    mockCardsQuery = {
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    }
+    mockFoldersQuery = {
+      data: { items: [{ id: 1, name: "Thư mục 1" }] },
+      isLoading: false,
+    }
+
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+
+    await act(async () => {
+      root.render(<DeckBrowsePage />)
+    })
+
+    const text = document.body.textContent || ""
+    expect(text).not.toContain("Thư mục: Thư mục")
+    expect(text).toMatch(/Không tìm thấy|Không có quyền truy cập/i)
+  })
+
+  it("renders 'Không tìm thấy hoặc không có quyền truy cập' when cardsQuery returns 403 Forbidden", async () => {
+    mockIsOnline = true
+    mockParams = { lang: "zh", deckId: "folder-3" }
+    mockCardsQuery = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      error: { status: 403, message: "Forbidden" },
+      refetch: vi.fn(),
+    }
+    mockFoldersQuery = {
+      data: undefined,
+      isLoading: true,
+    }
+
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+
+    await act(async () => {
+      root.render(<DeckBrowsePage />)
+    })
+
+    const text = document.body.textContent || ""
+    expect(text).not.toContain("Thư mục: Thư mục")
+    expect(text).toMatch(/Không tìm thấy|Không có quyền truy cập/i)
+  })
 })
