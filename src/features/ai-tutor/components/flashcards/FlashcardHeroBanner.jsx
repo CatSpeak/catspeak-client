@@ -12,7 +12,7 @@ import { ArrowRight, Play, Shuffle } from "lucide-react"
  * @param {Function} [props.onStartDue] - Callback khi bấm "Bắt đầu ôn"
  * @param {Function} [props.onStartFree] - Callback khi bấm "Ôn tập" (ôn tự do, FR-FC-021)
  * @param {Function} [props.onResume] - Callback khi bấm "Tiếp tục ôn" (FR-FC-009)
- * @param {Function} [props.onStartSpeaking] - Callback khi bấm "Luyện nói với AI"
+ * @param {Function} [props.onStartSpeaking] - Callback khi bấm "Đi luyện nói" (empty state)
  */
 const FlashcardHeroBanner = ({
   dueCount = 0,
@@ -48,18 +48,20 @@ const FlashcardHeroBanner = ({
       <div className="relative z-10 flex flex-col items-start gap-4 sm:gap-6">
         {/* Title */}
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
-          {isEmpty && "Chưa có từ nào trong sổ"}
+          {isEmpty && "Chưa có từ nào"}
           {isDone && "Đã ôn hết thẻ hôm nay"}
           {hasDue && `${dueCount} thẻ cần ôn hôm nay`}
         </h2>
 
         {/* Badge & Subtitle */}
         <div className="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm">
-          <span className="rounded-full bg-white px-3.5 py-1 font-bold text-[#680411] shadow-xs">
-            {isEmpty || isDone ? "0 quá hạn" : `${overdueCount} quá hạn`}
-          </span>
+          {!isEmpty && (
+            <span className="rounded-full bg-white px-3.5 py-1 font-bold text-[#680411] shadow-xs">
+              {isDone ? "0 quá hạn" : `${overdueCount} quá hạn`}
+            </span>
+          )}
           <span className="text-white/90 font-medium">
-            {isEmpty && "— luyện nói với AI để tạo thẻ đầu tiên"}
+            {isEmpty && "— luyện nói với AI để thêm từ vào sổ"}
             {isDone && "— bấm Ôn tập để ôn tự do, hoặc quay lại vào ngày mai"}
             {hasDue && "— ưu tiên ôn thẻ quá hạn trước"}
           </span>
@@ -108,7 +110,7 @@ const FlashcardHeroBanner = ({
               onClick={onStartSpeaking}
               className="inline-flex items-center gap-1.5 rounded-xl bg-white px-6 py-2.5 text-sm sm:text-base font-bold text-[#680411] shadow-xs transition-all hover:bg-white/95 active:scale-98"
             >
-              Luyện nói với AI
+              Đi luyện nói
               <ArrowRight className="h-4 w-4 stroke-[2.5]" />
             </button>
           )}
