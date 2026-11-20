@@ -110,18 +110,22 @@ const NewsDetailActionBar = ({
       return
     }
 
-    if (navigator.share) {
-      navigator
-        .share({
-          title: newsItem?.title || "CatSpeak",
-          text: newsItem?.excerpt || newsItem?.title || "",
-          url: window.location.href,
-        })
-        .catch((err) => {
-          if (err?.name !== "AbortError") {
-            console.error("Error sharing:", err)
-          }
-        })
+    const shareData = {
+      title: newsItem?.title || "CatSpeak",
+      text: newsItem?.excerpt || newsItem?.title || "",
+      url: window.location.href,
+    }
+
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function" &&
+      (!navigator.canShare || navigator.canShare(shareData))
+    ) {
+      navigator.share(shareData).catch((err) => {
+        if (err?.name !== "AbortError") {
+          console.error("Error sharing:", err)
+        }
+      })
     }
   }
 

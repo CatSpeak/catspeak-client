@@ -6,8 +6,8 @@ import {
   useGetPostBySlugQuery,
   useGetSharedPostQuery,
   useGetPostReactionsQuery,
-  useSharePostMutation,
 } from "@/store/api/social/postsApi"
+import useSharePost from "@/shared/hooks/useSharePost"
 import usePostReaction from "@/shared/hooks/usePostReaction"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
@@ -99,64 +99,19 @@ const NewsDetailPage = () => {
   })
   const { handleReact } = usePostReaction(newsItem)
 
-  const [sharePost] = useSharePostMutation()
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
-  const [shareUrl, setShareUrl] = useState("")
   const [previewDoc, setPreviewDoc] = useState(null)
+  const {
+    shareUrl,
+    isShareModalOpen,
+    setIsShareModalOpen,
+    handleShare: triggerShare,
+  } = useSharePost()
 
-  const handleShare = async () => {
-    if (!newsItem?.postId) return
-    try {
-      const result = await sharePost(newsItem.postId).unwrap()
-      let url =
-        (typeof result === "string" ? result : result?.shareLink) ||
-        window.location.href
-
-      if (url && !url.startsWith("http")) {
-        url = url.startsWith("/") ? url : `/${url}`
-        url = `${window.location.origin}${url}`
-      }
-
-      const finalShareUrl = url
-        ? getShareUrlWithVersion(url)
-        : window.location.href
-
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: newsItem.title || "CatSpeak",
-            text: newsItem.excerpt || newsItem.title || "",
-            url: finalShareUrl,
-          })
-        } catch (err) {
-          if (err.name === "NotAllowedError") {
-            setShareUrl(finalShareUrl)
-            setIsShareModalOpen(true)
-          } else if (err.name !== "AbortError") {
-            console.error("Share failed", err)
-          }
-        }
-      } else {
-        setShareUrl(finalShareUrl)
-        setIsShareModalOpen(true)
-      }
-    } catch (e) {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: newsItem?.title || "CatSpeak",
-            text: newsItem?.excerpt || newsItem?.title || "",
-            url: window.location.href,
-          })
-        } catch (err) {
-          if (err.name !== "AbortError") {
-            console.error("Share failed", err)
-          }
-        }
-      } else {
-        console.error("Share failed", e)
-      }
-    }
+  const handleShare = (e) => {
+    triggerShare(e, {
+      ...newsItem,
+      url: window.location.href,
+    })
   }
 
   if (isLoading) {
