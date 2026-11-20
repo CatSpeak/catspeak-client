@@ -184,7 +184,7 @@ export const dockNavGroups = [
       {
         key: "aiTutor",
         icon: Bot,
-        path: "/ai-tutor/level-assessment",
+        path: "/ai-tutor/learning-path",
         hasSublinks: true,
         lang: "zh",
       },
@@ -312,6 +312,7 @@ export const navLinks = [
     key: "aiTutor",
     hasDropdown: true,
     icon: Bot,
+    lang: "zh",
     subItems: [
       {
         key: "levelAssessment",
@@ -323,17 +324,25 @@ export const navLinks = [
         key: "learningPath",
         path: "/ai-tutor/learning-path",
         icon: CalendarDays,
+        lang: "zh",
       },
-      { key: "speakingRoom", path: "/ai-tutor/speaking-room", icon: Mic },
+      {
+        key: "speakingRoom",
+        path: "/ai-tutor/speaking-room",
+        icon: Mic,
+        lang: "zh",
+      },
       {
         key: "vocabularyNotebook",
         path: "/ai-tutor/vocabulary-notebook",
         icon: Layers,
+        lang: "zh",
       },
       {
         key: "historyProgress",
         path: "/ai-tutor/history-progress",
         icon: History,
+        lang: "zh",
       },
     ],
   },

@@ -31,8 +31,13 @@ export const speakingAudioPath = {
     const qs = q.toString()
     return `/v1/speaking/sessions/${sid(sessionId)}/turns/${seq}/audio${qs ? `?${qs}` : ""}`
   },
-  sample: (text, rate = "slow") =>
-    `/v1/speaking/sample-audio?text=${encodeURIComponent(text)}&rate=${rate}`,
+  sample: (text, rate = "slow", pinyin = null) => {
+    const q = new URLSearchParams()
+    if (text) q.set("text", text)
+    if (pinyin) q.set("pinyin", pinyin)
+    q.set("rate", rate)
+    return `/v1/speaking/sample-audio?${q.toString()}`
+  },
 }
 
 export const speakingPedagogyApi = api.injectEndpoints({

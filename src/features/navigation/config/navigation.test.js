@@ -28,7 +28,7 @@ const aiTutorEntries = [
   aiTutorNavLink,
   catSpeakLevelAssessment,
   catSpeakNavLevelAssessment,
-]
+].filter(Boolean)
 
 describe("AI Tutor navigation visibility", () => {
   it.each(["en", "ja"])("hides every AI Tutor entry in %s", (currentLang) => {

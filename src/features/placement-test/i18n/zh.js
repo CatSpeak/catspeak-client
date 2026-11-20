@@ -70,7 +70,7 @@ export default {
       statusNoSignal: "未检测到语音",
       statusError: "无法访问麦克风",
       statusPending: "尚未检测信号",
-      pendingHint: "请先录一遍左侧的例句。只有检测到合格的语音信号后才能进入测试室。",
+      pendingHint: "请先录一遍上方的例句。只有检测到合格的语音信号后才能进入测试室。",
       instruction: "请大声朗读下方中文示例句，以检测你的语音质量：",
       sampleHanzi: "你好！欢迎来到 CatSpeak。",
       samplePinyin: "Nǐ hǎo! Huānyíng lái dào CatSpeak.",
@@ -95,7 +95,7 @@ export default {
     noAudio: {
       instruction: "录制样本 5 秒后，系统仍未从麦克风收到任何声音。",
       meterLabel: "无音频信号（0 dB）",
-      info: "重试之前，请先尝试旁边的修复步骤。",
+      info: "重试之前，请先尝试下方的修复步骤。",
       guideTitle: "录音故障排除指南",
       switchHint: "点击切换其他麦克风来源",
       fixes: [
@@ -377,9 +377,12 @@ export default {
       certificateBadge: "当前证书",
       scoreLabel: "得分：{{score}} / 100",
       bandTitle: "HSK {{band}} · {{tier}}",
-      cefrLabel: "欧洲语言参考框架：CEFR {{cefr}} · 口语达标",
+      cefrLabel: "欧洲语言参考框架：CEFR {{cefr}}",
+      cefrLabelQualified: "欧洲语言参考框架：CEFR {{cefr}} · 口语达标",
       certificateDescription:
         "能够在工作与日常生活中流利沟通。已于 {{date}} 完成 5 题 AI CAT 自适应测评。",
+      certificateDescriptionLow:
+        "处于基础水平，需进一步练习发音与流利度。已于 {{date}} 完成 5 题 AI CAT 自适应测评。",
       testDate: "考试日期：{{date}}",
       testCode: "考试编号：#{{code}}",
       selfAdjustedNote: "等级已自行调整：从 HSK {{from}} 调整为 HSK {{to}}。",

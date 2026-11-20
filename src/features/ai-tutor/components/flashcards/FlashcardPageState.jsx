@@ -1,5 +1,5 @@
 import React from "react"
-import { CloudOff, RefreshCw } from "lucide-react"
+import { CloudOff, FolderX, RefreshCw } from "lucide-react"
 
 /** Khung xương khi đang tải (CHK-109): không để trắng màn. */
 export const FlashcardSkeleton = ({ rows = 4 }) => (
@@ -45,5 +45,48 @@ export const FlashcardLoadError = ({ offline, onRetry, what = "sổ từ vựng"
         Thử lại
       </button>
     )}
+  </div>
+)
+
+/**
+ * Màn hình báo lỗi không tìm thấy bộ thẻ/thư mục hoặc không có quyền truy cập (404/403, TC-FC-104).
+ */
+export const DeckNotFoundError = ({ onBack, onHome, what = "bộ thẻ" }) => (
+  <div
+    role="alert"
+    data-testid="deck-not-found"
+    className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-6 py-14 text-center shadow-sm"
+  >
+    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-950/40 text-[#680411] dark:text-red-400">
+      <FolderX className="h-7 w-7" />
+    </div>
+    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+      Không tìm thấy hoặc không có quyền truy cập
+    </h2>
+    <p className="max-w-md text-sm text-slate-500 dark:text-neutral-400">
+      {what === "thư mục"
+        ? "Thư mục này không tồn tại hoặc bạn không có quyền truy cập."
+        : "Bộ thẻ này không tồn tại hoặc bạn không có quyền truy cập."}
+    </p>
+    <div className="mt-2 flex flex-wrap justify-center gap-2">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="h-10 rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 text-sm font-semibold text-white hover:brightness-95 cursor-pointer"
+        >
+          Danh mục bộ thẻ
+        </button>
+      )}
+      {onHome && (
+        <button
+          type="button"
+          onClick={onHome}
+          className="h-10 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-6 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#3D3D3D] cursor-pointer"
+        >
+          Về Sổ tay từ vựng
+        </button>
+      )}
+    </div>
   </div>
 )

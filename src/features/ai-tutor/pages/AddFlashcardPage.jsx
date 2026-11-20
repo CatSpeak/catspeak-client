@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { ArrowLeft, BookOpen, Check, Loader2 } from "lucide-react"
+import { ArrowLeft, BookOpen, Check, ExternalLink, Loader2 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "@/components/ui/toast"
 import {
@@ -8,14 +8,16 @@ import {
   useGetFlashcardFoldersQuery,
   useLazyLookupFlashcardWordQuery,
 } from "../api/flashcardApi"
+import FlashcardPreviewModal from "../components/flashcards/library/FlashcardPreviewModal"
 import FolderLimitModal from "../components/flashcards/library/FolderLimitModal"
 import { notebookPaths } from "../utils/flashcardReview"
 
 const HAN = /[㐀-䶿一-鿿豈-﫿]/
 
 /**
- * fc09 Thêm từ thủ công (FR-FC-017 cách b). Gõ chữ Hán: tra bảng HSK để điền sẵn pinyin,
- * cấp HSK, nghĩa gợi ý; từ không có trong từ điển thì học viên tự nhập nghĩa (OQ-FC-20).
+ * fc09 Thêm từ thủ công (FR-FC-017 cách b, TC-FC-129). Gõ chữ Hán: tra bảng HSK để điền sẵn pinyin,
+ * cấp HSK, nghĩa gợi ý; đổi pinyin thì cập nhật nghĩa chuẩn; từ không có trong từ điển thì
+ * học viên tự nhập nghĩa (OQ-FC-20). Tuyệt đối không dùng lại nghĩa chưa kiểm duyệt của học viên khác.
  * Thẻ mới vào Hộp 1, đến hạn ngày mai như thẻ tự động.
  */
 const AddFlashcardPage = () => {
@@ -31,20 +33,48 @@ const AddFlashcardPage = () => {
   const [folderIds, setFolderIds] = useState(() => new Set())
   const [error, setError] = useState("")
   const [limit, setLimit] = useState(null)
+  const [previewCard, setPreviewCard] = useState(null)
+  const lastLookedUpPinyinRef = useRef("")
   const [lookup, { data: info, isFetching: looking, reset }] = useLazyLookupFlashcardWordQuery()
   const [addCard, { isLoading: saving }] = useAddFlashcardCardMutation()
   const { data: folders } = useGetFlashcardFoldersQuery()
 
   const clean = word.replace(/\s+/g, "")
   const validWord = clean.length > 0 && clean.length <= 12 && HAN.test(clean)
+  const isMatchingPinyin =
+    !pinyin.trim() ||
+    !info?.pinyin ||
+    pinyin.trim().toLowerCase() === info.pinyin.toLowerCase()
+  const isDuplicate = Boolean(validWord && info && info.word === clean && info.in_notebook && isMatchingPinyin)
+  const isDuplicateError = error === "Từ này đã có trong sổ của bạn."
+  const isSubmitDisabled = saving || isDuplicate || isDuplicateError
 
+  const handleOpenExistingCard = () => {
+    if (!info) return
+    setPreviewCard({
+      card_id: info.card_id,
+      word: clean,
+      pinyin: info.pinyin || pinyin.trim() || null,
+      meaning_vi: info.meaning_vi || meaning.trim() || "",
+      hsk_level: info.hsk_level,
+      definition_en: info.definition_en,
+      is_known: false,
+    })
+  }
+
+  // Tra từ điển theo chữ Hán
   useEffect(() => {
     if (!validWord) return undefined
     const t = setTimeout(() => {
-      lookup(clean)
+      lookup({ word: clean })
         .unwrap()
         .then((res) => {
-          setPinyin((p) => p || res.pinyin || "")
+          setPinyin((p) => {
+            if (p) return p
+            const nextPinyin = res.pinyin || ""
+            lastLookedUpPinyinRef.current = nextPinyin.trim()
+            return nextPinyin
+          })
           setMeaning((m) => m || res.meaning_vi || "")
         })
         .catch(() => {})
@@ -52,17 +82,40 @@ const AddFlashcardPage = () => {
     return () => clearTimeout(t)
   }, [clean, validWord, lookup])
 
+  // Cập nhật nghĩa chuẩn khi học viên thay đổi Pinyin (TC-FC-129)
+  useEffect(() => {
+    const trimmedPinyin = pinyin.trim()
+    if (!validWord || !trimmedPinyin || trimmedPinyin === lastLookedUpPinyinRef.current) return undefined
+    const t = setTimeout(() => {
+      lookup({ word: clean, pinyin: trimmedPinyin })
+        .unwrap()
+        .then((res) => {
+          lastLookedUpPinyinRef.current = trimmedPinyin
+          if (res.meaning_vi) {
+            setMeaning(res.meaning_vi)
+          }
+        })
+        .catch(() => {})
+    }, 350)
+    return () => clearTimeout(t)
+  }, [clean, pinyin, validWord, lookup])
+
   const resetForm = () => {
     setWord("")
     setPinyin("")
     setMeaning("")
     setError("")
+    lastLookedUpPinyinRef.current = ""
     reset?.()
   }
 
   const submit = async (e, { stay = false } = {}) => {
     e?.preventDefault()
     setError("")
+    if (isDuplicate) {
+      setError("Từ này đã có trong sổ của bạn.")
+      return
+    }
     if (!validWord) {
       setError("Nhập từ bằng chữ Hán (tối đa 12 ký tự).")
       return
@@ -123,6 +176,9 @@ const AddFlashcardPage = () => {
                 setWord(e.target.value)
                 setPinyin("")
                 setMeaning("")
+                setError("")
+                lastLookedUpPinyinRef.current = ""
+                reset?.()
               }}
               placeholder="Ví dụ: 学习"
               className="h-12 w-full rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-xl text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
@@ -141,10 +197,20 @@ const AddFlashcardPage = () => {
               <span className="rounded-full bg-slate-100 dark:bg-[#272727] px-3 py-1 font-bold text-slate-600 dark:text-neutral-300">Ngoài HSK - tự nhập nghĩa</span>
             )}
             {info.definition_en && <span className="text-slate-500 dark:text-neutral-400">({info.definition_en})</span>}
-            {info.in_notebook && (
+            {info.in_notebook && isMatchingPinyin && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/30 px-3 py-1 font-bold text-amber-700 dark:text-amber-400">
                 <Check className="h-4 w-4" /> Đã có trong sổ
               </span>
+            )}
+            {isDuplicate && (
+              <button
+                type="button"
+                data-testid="open-existing-card-btn"
+                onClick={handleOpenExistingCard}
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#990011] dark:text-red-400 hover:underline cursor-pointer"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Mở thẻ hiện có
+              </button>
             )}
           </div>
         )}
@@ -154,7 +220,10 @@ const AddFlashcardPage = () => {
           <input
             value={pinyin}
             maxLength={80}
-            onChange={(e) => setPinyin(e.target.value)}
+            onChange={(e) => {
+              setPinyin(e.target.value)
+              setError("")
+            }}
             placeholder="Tự điền khi tra được, có thể sửa"
             className="h-11 rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
           />
@@ -165,7 +234,10 @@ const AddFlashcardPage = () => {
           <input
             value={meaning}
             maxLength={200}
-            onChange={(e) => setMeaning(e.target.value)}
+            onChange={(e) => {
+              setMeaning(e.target.value)
+              setError("")
+            }}
             placeholder="Ví dụ: học, học tập"
             className="h-11 rounded-xl border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 text-sm text-slate-900 dark:text-white outline-none focus:border-[#990011] dark:focus:border-red-400 placeholder:text-slate-400 dark:placeholder:text-neutral-500"
           />
@@ -196,29 +268,48 @@ const AddFlashcardPage = () => {
         )}
 
         {error && (
-          <p role="alert" className="text-sm font-medium text-rose-700 dark:text-red-400">
-            {error}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p role="alert" className="text-sm font-medium text-rose-700 dark:text-red-400">
+              {error}
+            </p>
+            {(isDuplicate || isDuplicateError) && info?.in_notebook && (
+              <button
+                type="button"
+                onClick={handleOpenExistingCard}
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#990011] dark:text-red-400 hover:underline cursor-pointer"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Mở thẻ hiện có
+              </button>
+            )}
+          </div>
         )}
 
         <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
           <button
             type="button"
-            disabled={saving}
+            disabled={isSubmitDisabled}
             onClick={(e) => submit(e, { stay: true })}
-            className="h-11 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-6 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#3D3D3D] disabled:opacity-60 cursor-pointer transition-colors"
+            className="h-11 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-6 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#3D3D3D] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             Lưu và thêm từ khác
           </button>
           <button
             type="submit"
-            disabled={saving}
-            className="h-11 rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 text-sm font-semibold text-white hover:brightness-95 dark:hover:bg-red-800 disabled:opacity-60 cursor-pointer transition-colors"
+            disabled={isSubmitDisabled}
+            className="h-11 rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 text-sm font-semibold text-white hover:brightness-95 dark:hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             {saving ? "Đang lưu..." : "Thêm vào sổ"}
           </button>
         </div>
       </form>
+
+      {previewCard && (
+        <FlashcardPreviewModal
+          card={previewCard}
+          isOpen={Boolean(previewCard)}
+          onClose={() => setPreviewCard(null)}
+        />
+      )}
 
       <FolderLimitModal isOpen={limit != null} maxFolders={limit || 3} onClose={() => setLimit(null)} onUpgrade={() => navigate("/pricing")} />
     </div>

@@ -72,7 +72,7 @@ export default {
       statusNoSignal: "No voice detected",
       statusError: "Microphone unavailable",
       statusPending: "Signal not measured yet",
-      pendingHint: "Record the sample sentence on the left. You can enter the test room only after a clear voice signal is measured.",
+      pendingHint: "Record the sample sentence above. You can enter the test room only after a clear voice signal is measured.",
       instruction:
         "Read the Chinese sample sentence below out loud to check your voice quality:",
       sampleHanzi: "你好！欢迎来到 CatSpeak。",
@@ -100,7 +100,7 @@ export default {
       instruction:
         "The system received no audio from your microphone after 5 seconds of sample recording.",
       meterLabel: "No audio signal (0 dB)",
-      info: "Please try the fixes on the side before retrying.",
+      info: "Please try the fixes below before retrying.",
       guideTitle: "Recording Troubleshooting Guide",
       switchHint: "Tap to switch to another microphone source",
       fixes: [
@@ -399,9 +399,12 @@ export default {
       certificateBadge: "CURRENT CERTIFICATE",
       scoreLabel: "Score: {{score}} / 100",
       bandTitle: "HSK {{band}} · {{tier}}",
-      cefrLabel: "CEFR: {{cefr}} · Speaking standard met",
+      cefrLabel: "CEFR: {{cefr}}",
+      cefrLabelQualified: "CEFR: {{cefr}} · Speaking standard met",
       certificateDescription:
         "Fluent communication at work and in daily life. Completed the 5-question adaptive AI CAT assessment on {{date}}.",
+      certificateDescriptionLow:
+        "Currently at a foundational level; needs further practice in pronunciation and fluency. Completed the 5-question adaptive AI CAT assessment on {{date}}.",
       testDate: "Test date: {{date}}",
       testCode: "Test code: #{{code}}",
       selfAdjustedNote: "Level was self-adjusted from HSK {{from}} to HSK {{to}}.",

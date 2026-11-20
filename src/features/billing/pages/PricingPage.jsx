@@ -3,9 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PlanCard from "../subscription/components/PlanCard";
 import { useGetPlansQuery } from "@/store/api/plansApi";
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
-import { useAuth } from "@/features/auth";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { getGridClasses } from "../utils/planUtils";
+import {
+  getGridClasses,
+  isDefaultPlan,
+  isFeatureEnabled,
+  isFeatureSuperiorToDefault,
+} from "../utils/planUtils";
 import { X } from "lucide-react";
 
 const PricingPage = () => {
@@ -91,35 +95,93 @@ const PricingPage = () => {
     sorted.forEach(([k, v]) => map.set(k, v));
   });
 
+  // Default plan per applicableRole (prefers price === 0, falls back to planName containing "free")
+  const defaultPlanByRole = {};
+  publishedPlans.forEach((plan) => {
+    const role = (plan.applicableRole || "__all__").toLowerCase();
+    const existing = defaultPlanByRole[role];
+    if (!isDefaultPlan(plan)) return;
+    if (!existing || (Number(plan.priceVnd) === 0 && Number(existing.priceVnd) !== 0)) {
+      defaultPlanByRole[role] = plan;
+    }
+  });
+
   const formattedPlans = publishedPlans.map((plan) => {
     const role = (plan.applicableRole || "__all__").toLowerCase();
     const union = unionByRole[role] || new Map();
+    const defaultPlan = defaultPlanByRole[role];
+    const isPlanDefault =
+      isDefaultPlan(plan) || (defaultPlan && plan.planId === defaultPlan.planId);
+
     const ownByCode = new Map(
       (plan.subscriptionFeatures || []).map((f) => [
         (f.featureCode || "").toUpperCase(),
         f,
       ]),
     );
-    const features = [...union.entries()].map(([key, u]) => {
-      const own = ownByCode.get(key);
-      if (!own) {
+
+    let features;
+    if (isPlanDefault) {
+      // Keep default plan display intact (including crossed-out / missing items for contrast)
+      features = [...union.entries()].map(([key, u]) => {
+        const own = ownByCode.get(key);
+        if (!own) {
+          return {
+            id: `missing-${key}`,
+            name: u.name,
+            code: u.code,
+            isMissing: true,
+          };
+        }
         return {
-          id: `missing-${key}`,
-          name: u.name,
-          code: u.code,
-          isMissing: true,
+          id: own.id,
+          name: own.featureName,
+          limitValue: own.limitValue,
+          valueType: own.valueType?.toLowerCase(),
+          code: own.featureCode,
+          isActive: own.isActive,
+          displayOrder: own.displayOrder,
         };
-      }
-      return {
-        id: own.id,
-        name: own.featureName,
-        limitValue: own.limitValue,
-        valueType: own.valueType?.toLowerCase(),
-        code: own.featureCode,
-        isActive: own.isActive,
-        displayOrder: own.displayOrder,
-      };
-    });
+      });
+    } else {
+      // For paid/upgrade plans:
+      // 1. Hide all crossed-out / missing / disabled items.
+      // 2. Only show features superior to the default plan (if default plan exists).
+      const defaultOwnByCode = new Map(
+        (defaultPlan?.subscriptionFeatures || []).map((f) => [
+          (f.featureCode || "").toUpperCase(),
+          f,
+        ]),
+      );
+
+      features = [...union.entries()]
+        .map(([key]) => {
+          const own = ownByCode.get(key);
+          if (!own) return null;
+
+          const formattedFeature = {
+            id: own.id,
+            name: own.featureName,
+            limitValue: own.limitValue,
+            valueType: own.valueType?.toLowerCase(),
+            code: own.featureCode,
+            isActive: own.isActive,
+            displayOrder: own.displayOrder,
+          };
+
+          if (defaultPlan) {
+            const defaultFeature = defaultOwnByCode.get(key);
+            if (!isFeatureSuperiorToDefault(formattedFeature, defaultFeature)) {
+              return null;
+            }
+          } else if (!isFeatureEnabled(formattedFeature)) {
+            return null;
+          }
+
+          return formattedFeature;
+        })
+        .filter(Boolean);
+    }
     return {
       id: plan.planId,
       name: plan.planName,
@@ -134,7 +196,7 @@ const PricingPage = () => {
   });
 
   return (
-    <div className="relative w-full h-screen max-h-screen overflow-hidden bg-primaryBg dark:bg-[#0F0F0F] flex items-center justify-center px-4 sm:px-6 lg:px-8 select-none animate-in fade-in duration-300">
+    <div className="relative w-full min-h-screen md:h-screen md:max-h-screen md:overflow-hidden bg-primaryBg dark:bg-[#0F0F0F] flex items-center justify-center px-4 py-14 sm:px-6 sm:py-16 md:py-0 lg:px-8 select-none animate-in fade-in duration-300">
       {/* Top-Right Close Button (X) */}
       <button
         onClick={handleClose}
