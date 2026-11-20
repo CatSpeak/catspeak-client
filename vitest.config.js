@@ -20,6 +20,7 @@ export default defineConfig({
       "src/features/learning-path/**/*.test.{js,jsx}",
       "src/features/navigation/**/*.test.{js,jsx}",
       "src/features/rooms/components/**/*.test.{js,jsx}",
+      "src/features/billing/**/*.test.{js,jsx}",
     ],
   },
 })
