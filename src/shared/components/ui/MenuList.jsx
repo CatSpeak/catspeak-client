@@ -5,11 +5,12 @@ import React from "react"
  *
  * @param {React.ReactNode} children - Menu items (e.g. MenuItem).
  * @param {string} className - Additional CSS classes.
+ * @param {string} py - Optional vertical padding override (defaults to "py-[2px]").
  */
-const MenuList = ({ children, className = "", ...props }) => {
+const MenuList = ({ children, className = "", py = "py-[2px]", ...props }) => {
   return (
     <div
-      className={`bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] text-gray-900 dark:text-gray-100 rounded-2xl shadow-lg py-[2px] min-w-[140px] w-max max-w-xs flex flex-col ${className}`}
+      className={`bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] text-gray-900 dark:text-gray-100 rounded-2xl shadow-lg ${py} min-w-[140px] w-max max-w-xs flex flex-col ${className}`}
       {...props}
     >
       {children}

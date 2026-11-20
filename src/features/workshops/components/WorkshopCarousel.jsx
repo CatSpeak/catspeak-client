@@ -37,6 +37,7 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
         items={slides}
         containerClassName="w-full"
         className="sm:aspect-video"
+        rounded="rounded-none"
         autoHeight
         autoPlay
         interval={5000}

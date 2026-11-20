@@ -238,13 +238,13 @@ const CommunityRoomCard = ({ room }) => {
           fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
-        className={`group relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out ${
+        className={`group relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-darkBorder shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out ${
           !isActionHovered
             ? "hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D]"
             : ""
         }`}
       >
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border dark:border-[#3F3F3F]">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border dark:border-darkBorder">
           {/* Blurred Background Image */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
@@ -331,18 +331,18 @@ const CommunityRoomCard = ({ room }) => {
                 ? t?.rooms?.unbookmark || "Bo luu phong"
                 : t?.rooms?.bookmark || "Luu phong"
             }
-            className="absolute top-0 right-3.5 z-20 w-6.5 sm:w-7 cursor-pointer outline-none transition-colors duration-150 select-none drop-shadow-md bg-cath-red-700 hover:bg-cath-red-800"
+            className="absolute top-0 right-4 z-20 w-6 cursor-pointer outline-none transition-colors duration-150 select-none drop-shadow-md bg-cath-red-700 hover:bg-cath-red-800"
           />
         </div>
 
         {/* Content Section — no badges row */}
         <div className="flex flex-1 flex-col pl-4 pb-4 gap-2">
           {/* Title & Link */}
-          <div className="flex items-start justify-between gap-2 pr-1">
+          <div className="flex items-start justify-between gap-1 pr-1">
             <h3 className="pt-4 text-base font-bold line-clamp-2 text-black dark:text-white leading-snug">
               {translatedName}
             </h3>
-            <div className="shrink-0 pt-3">
+            <div className="shrink-0 pt-1">
               <IconButton
                 variant="ghost"
                 onPointerDown={(e) => e.stopPropagation()}

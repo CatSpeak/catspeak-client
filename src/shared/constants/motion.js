@@ -76,6 +76,74 @@ export const getTabTransition = (shouldReduceMotion = false, preset = "fast") =>
       }
 
 /**
+ * Standard scroll reveal transition matching M3 spatial + effects pairing.
+ * Used for sections and elements entering the viewport as the user scrolls down.
+ */
+export const getScrollTransition = (preset = "default", delay = 0, shouldReduceMotion = false) =>
+  shouldReduceMotion
+    ? { duration: 0 }
+    : {
+        y: delay
+          ? { ...(M3_MOTION.standard.spatial[preset] || M3_MOTION.standard.spatial.default), delay }
+          : M3_MOTION.standard.spatial[preset] || M3_MOTION.standard.spatial.default,
+        opacity: delay
+          ? { ...(M3_MOTION.standard.effects[preset] || M3_MOTION.standard.effects.slow), delay }
+          : M3_MOTION.standard.effects[preset] || M3_MOTION.standard.effects.slow,
+      }
+
+/**
+ * Standard scroll reveal variants for landing page sections and cards
+ */
+export const getScrollRevealVariants = (shouldReduceMotion = false, preset = "default", yOffset = 24) =>
+  shouldReduceMotion
+    ? {
+        hidden: { opacity: 1, y: 0 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0 } },
+      }
+    : {
+        hidden: { opacity: 0, y: yOffset },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            y: M3_MOTION.standard.spatial[preset] || M3_MOTION.standard.spatial.default,
+            opacity: M3_MOTION.standard.effects[preset] || M3_MOTION.standard.effects.slow,
+          },
+        },
+      }
+
+export const scrollRevealVariants = getScrollRevealVariants(false, "default", 24)
+
+/**
+ * Standard M3 expand/collapse (accordion) variants for animated height containers
+ * Animates height smoothly so sibling elements below are pushed down / pulled up with M3 spatial easing.
+ */
+export const accordionVariants = {
+  initial: {
+    height: 0,
+    opacity: 0,
+  },
+  animate: {
+    height: "auto",
+    opacity: 1,
+    transition: {
+      height: M3_MOTION.standard.spatial.fast,
+      opacity: M3_MOTION.standard.effects.fast,
+    },
+  },
+  exit: {
+    height: 0,
+    opacity: 0,
+    transition: {
+      height: { ...M3_MOTION.standard.spatial.fast, duration: 0.25 },
+      opacity: M3_MOTION.standard.effects.fast,
+    },
+  },
+}
+
+export const collapseVariants = accordionVariants
+
+/**
  * Standard M3 dropdown / menu transition variants (vertical unroll matching Dropdown.jsx)
  */
 export const dropdownVariants = {

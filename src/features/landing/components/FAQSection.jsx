@@ -4,6 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import { motion as Motion, AnimatePresence } from "framer-motion"
 import { Minus, Plus } from "lucide-react"
 import { useState } from "react"
+import { M3_MOTION } from "@/shared/constants/motion"
 import ScrollReveal, { ScrollItem } from "./ScrollReveal"
 
 const FAQSection = () => {
@@ -133,26 +134,16 @@ const FAQSection = () => {
                             height: "auto",
                             opacity: 1,
                             transition: {
-                              height: {
-                                duration: 0.3,
-                                ease: [0.16, 1, 0.3, 1],
-                              },
-                              opacity: {
-                                duration: 0.25,
-                                delay: 0.05,
-                                ease: "easeOut",
-                              },
+                              height: M3_MOTION.standard.spatial.fast,
+                              opacity: M3_MOTION.standard.effects.fast,
                             },
                           }}
                           exit={{
                             height: 0,
                             opacity: 0,
                             transition: {
-                              height: {
-                                duration: 0.25,
-                                ease: [0.16, 1, 0.3, 1],
-                              },
-                              opacity: { duration: 0.15, ease: "easeIn" },
+                              height: M3_MOTION.standard.spatial.fast,
+                              opacity: M3_MOTION.standard.effects.fast,
                             },
                           }}
                           className="overflow-hidden w-full"

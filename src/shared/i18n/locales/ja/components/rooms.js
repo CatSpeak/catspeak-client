@@ -670,6 +670,8 @@ export default {
       quickActions: "クイック操作",
       management: "管理オプション",
       settingsTab: "設定",
+      raisedHandsSection: "挙手",
+      membersSection: "その他",
       bannedTabShort: "禁止",
       groupStudentPermissions: "生徒の権限",
       groupStudentPermissionsRoom: "参加者の権限",

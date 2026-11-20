@@ -6,6 +6,10 @@ const VARIANT_CLASSES = {
     "bg-cath-red-700 hover:bg-cath-red-800 active:bg-cath-red-900 group-hover/pill:bg-cath-red-800 group-active/pill:bg-cath-red-900 text-white border-transparent",
   secondary:
     "bg-white dark:bg-[#272727] hover:bg-primaryBg dark:hover:bg-[#3D3D3D] active:bg-[#e0e0e0] dark:active:bg-[#333333] group-hover/pill:bg-primaryBg dark:group-hover/pill:bg-[#3D3D3D] group-active/pill:bg-[#e0e0e0] dark:group-active/pill:bg-[#333333] text-black dark:text-neutral-200 hover:text-black dark:hover:text-white group-hover/pill:text-black dark:group-hover/pill:text-white border-[#e5e5e5] dark:border-[#3F3F3F]",
+  white:
+    "bg-white dark:bg-white hover:bg-gray-100 dark:hover:bg-gray-100 active:bg-gray-200 dark:active:bg-gray-200 group-hover/pill:bg-gray-100 dark:group-hover/pill:bg-gray-100 group-active/pill:bg-gray-200 dark:group-active/pill:bg-gray-200 text-[#990011] dark:text-[#990011] hover:text-[#7f000e] dark:hover:text-[#7f000e] group-hover/pill:text-[#7f000e] dark:group-hover/pill:text-[#7f000e] font-semibold border-transparent shadow-sm",
+  "white-black":
+    "bg-white dark:bg-white hover:bg-gray-100 dark:hover:bg-gray-100 active:bg-gray-200 dark:active:bg-gray-200 group-hover/pill:bg-gray-100 dark:group-hover/pill:bg-gray-100 group-active/pill:bg-gray-200 dark:group-active/pill:bg-gray-200 text-black dark:text-black hover:text-black dark:hover:text-black group-hover/pill:text-black dark:group-hover/pill:text-black font-semibold border-transparent shadow-sm",
   outline:
     "bg-transparent hover:bg-primaryBg dark:hover:bg-red-950/20 active:bg-[#e5e5e5] dark:active:bg-red-950/40 group-hover/pill:bg-primaryBg dark:group-hover/pill:bg-red-950/20 group-active/pill:bg-[#e5e5e5] dark:group-active/pill:bg-red-950/40 text-cath-red-700 dark:text-[#FF6B6B] border-cath-red-700 dark:border-[#FF6B6B]/70 border-[1.5px] hover:border-cath-red-800 dark:hover:border-[#FF6B6B] group-hover/pill:border-cath-red-800 dark:group-hover/pill:border-[#FF6B6B]",
   subtle:
@@ -62,7 +66,9 @@ const PillButton = ({
     variant === "secondary-no-outline" ||
     variant === "ghost" ||
     variant === "outline" ||
-    variant === "control"
+    variant === "control" ||
+    variant === "white" ||
+    variant === "white-black"
 
   const variantStyle = VARIANT_CLASSES[variant] || VARIANT_CLASSES.primary
   const disabledStyle = isActuallyDisabled
@@ -85,6 +91,8 @@ const PillButton = ({
       ? "!bg-neutral-200/80 dark:!bg-[#3D3D3D] !text-black dark:!text-white"
       : variant === "secondary" || variant === "secondary-no-outline"
       ? "!bg-[#E5E5E5] dark:!bg-[#3D3D3D] !text-black dark:!text-white"
+      : variant === "white" || variant === "white-black"
+      ? "!bg-gray-200 dark:!bg-gray-200"
       : ""
     : ""
 

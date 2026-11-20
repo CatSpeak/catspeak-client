@@ -709,7 +709,7 @@ export default {
       searchPlaceholder: "Search participants...",
       noSearchResults: "No participants found.",
       raisedHandsSection: "Raised hands",
-      membersSection: "In the room",
+      membersSection: "Others",
       dangerZone: "Danger zone",
       endLiveDesc: "End the live session for all students and participants.",
       endLiveDescRoom: "Close the room and end the session for all members.",

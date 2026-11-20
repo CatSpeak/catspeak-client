@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react"
 import { AnimatePresence, motion as Motion } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { M3_MOTION } from "@/shared/constants/motion"
 
 import LanguageMenuItem from "@/shared/components/Header/LanguageMenuItem"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
@@ -90,7 +91,7 @@ const DesktopCommunityDropdown = ({ navKey }) => {
         <span>{t.nav?.[navKey] || "Community"}</span>
         <Motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          transition={M3_MOTION.standard.spatial.fast}
           className="inline-flex shrink-0 items-center justify-center"
         >
           <ChevronDown size={16} />

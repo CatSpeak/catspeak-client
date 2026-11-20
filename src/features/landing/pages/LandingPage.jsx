@@ -1,5 +1,6 @@
-import { useState } from "react"
-import { motion as Motion } from "framer-motion"
+import { useState, useMemo } from "react"
+import { motion as Motion, useReducedMotion } from "framer-motion"
+import { getScrollRevealVariants, getScrollTransition } from "@/shared/constants/motion"
 import { LoginPopup, RegisterPopup, VerifyEmailOtpPopup } from "@/features/auth"
 import HeroSection from "@/features/landing/components/HeroSection"
 import PartnerNetworkSection from "@/features/landing/components/PartnerNetworkSection"
@@ -20,7 +21,33 @@ import FAQSection from "@/features/landing/components/FAQSection"
 import LandingContactSection from "@/features/landing/components/LandingContactSection"
 import LeadingTeamSection from "@/features/landing/components/LeadingTeamSection"
 
+/**
+ * Lightweight scroll reveal wrapper for landing page sections.
+ * Uses Material Design 3 tokens from motion.js without double-nesting
+ * animations on sections that already manage their own internal reveals.
+ */
+const SectionReveal = ({ children, className = "" }) => {
+  const prefersReducedMotion = useReducedMotion()
+  const variants = useMemo(
+    () => getScrollRevealVariants(prefersReducedMotion),
+    [prefersReducedMotion]
+  )
+
+  return (
+    <Motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.15, margin: "0px 0px -60px 0px" }}
+      variants={variants}
+      className={className}
+    >
+      {children}
+    </Motion.div>
+  )
+}
+
 const LandingPage = () => {
+  const prefersReducedMotion = useReducedMotion()
   const [authModal, setAuthModal] = useState({
     isOpen: false,
     mode: "login",
@@ -112,35 +139,47 @@ const LandingPage = () => {
       <Motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        transition={getScrollTransition("default", 0, prefersReducedMotion)}
         className="relative w-full"
       >
         <HeroSection openAuthModal={openAuthModal} />
       </Motion.div>
 
       {/* 2. Partner network */}
-      <PartnerNetworkSection />
+      <SectionReveal>
+        <PartnerNetworkSection />
+      </SectionReveal>
 
       {/* Instructor recruitment banner */}
       <LeadingTeamSection openAuthModal={openAuthModal} />
 
       {/* 3. Trust / proof section */}
-      <TrustSection />
+      <SectionReveal>
+        <TrustSection />
+      </SectionReveal>
 
       {/* 4. Achievements */}
-      <AchievementsSection />
+      <SectionReveal>
+        <AchievementsSection />
+      </SectionReveal>
 
       {/* 5. Learning barriers */}
-      <LearningBarriersSection />
+      <SectionReveal>
+        <LearningBarriersSection />
+      </SectionReveal>
 
       {/* CAT SPEAK solutions */}
-      <SolutionSection />
+      <SectionReveal>
+        <SolutionSection />
+      </SectionReveal>
 
       {/* Existing CatSpeak news section is temporarily hidden. */}
       {/* <NewsSection /> */}
 
       {/* 6. Core features */}
-      <CoreFeaturesSection />
+      <SectionReveal>
+        <CoreFeaturesSection />
+      </SectionReveal>
 
       {/* Existing Explore Ecosystem section is temporarily hidden. */}
       {/* <ExploreEcosystemSection /> */}
@@ -149,16 +188,22 @@ const LandingPage = () => {
       <ResponseSection />
 
       {/* 7. How CAT SPEAK works */}
-      <HowItWorksSection />
+      <SectionReveal>
+        <HowItWorksSection />
+      </SectionReveal>
 
       {/* Existing Core Values section is temporarily hidden. */}
       {/* <ValuesSection /> */}
 
       {/* 8. Target audience */}
-      <TargetAudienceSection />
+      <SectionReveal>
+        <TargetAudienceSection />
+      </SectionReveal>
 
       {/* 9. Method comparison */}
-      <MethodComparisonSection />
+      <SectionReveal>
+        <MethodComparisonSection />
+      </SectionReveal>
 
       {/* 10. AI practice - "Cộng đồng ngôn ngữ tốt nhất" */}
       <AISection />
@@ -167,7 +212,9 @@ const LandingPage = () => {
       <FAQSection />
 
       {/* 12. Contact CTA */}
-      <LandingContactSection />
+      <SectionReveal>
+        <LandingContactSection />
+      </SectionReveal>
 
       {/* Auth Modal */}
       {renderAuthPopup()}

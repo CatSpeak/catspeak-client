@@ -110,13 +110,9 @@ const Carousel = ({
       <div
         className={
           isFullscreen
-            ? "fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm select-none group flex flex-col overflow-hidden"
-            : `relative flex flex-col select-none group ${widthClass} ${containerClassName}`
+            ? "fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm select-none flex flex-col overflow-hidden"
+            : `relative flex flex-col select-none ${widthClass} ${containerClassName}`
         }
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onTouchStart={() => setIsHovered(true)}
-        onTouchEnd={() => setIsHovered(false)}
       >
       {/* Close Fullscreen Button */}
       {isFullscreen && (
@@ -134,7 +130,7 @@ const Carousel = ({
 
       {/* Slide / Image Container */}
       <div
-        className={`relative w-full overflow-hidden ${
+        className={`relative w-full overflow-hidden group ${
           isFullscreen
             ? "h-full flex-1"
             : `${resolvedRoundedClass} ${className}`
@@ -144,6 +140,10 @@ const Carousel = ({
             ? { aspectRatio: `${firstAspectRatio}` }
             : undefined
         }
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={() => setIsHovered(true)}
+        onTouchEnd={() => setIsHovered(false)}
       >
         {/* Slides (Sliding Effect with Framer Motion) */}
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
@@ -239,7 +239,7 @@ const Carousel = ({
       {/* Indicators (Under the slide, centered) */}
       {showIndicators && !isFullscreen && totalSlides > 1 && (
         <div
-          className={`flex items-center justify-center gap-2 mt-2 sm:mt-4 ${indicatorClassName}`}
+          className={`flex items-center justify-center gap-2 mt-2 ${indicatorClassName}`}
         >
           {slides.map((_, index) => (
             <button
@@ -248,7 +248,7 @@ const Carousel = ({
                 e.stopPropagation()
                 goToSlide(index)
               }}
-              className={`transition-all duration-300 rounded-full ${
+              className={`transition-all duration-350 ease-m3-standard-fast-spatial rounded-full ${
                 currentIndex === index
                   ? "w-8 h-2 bg-cath-red-700"
                   : "w-2 h-2 bg-gray-300 dark:bg-neutral-600 hover:bg-gray-400 dark:hover:bg-neutral-500"

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Menu, LayoutGrid } from "lucide-react"
 import HeaderUserControls from "./HeaderUserControls"
 import HeaderGuestControls from "./HeaderGuestControls"
+import GuestSettingsControls from "./GuestSettingsControls"
 import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
 import ThemeToggle from "@/shared/components/ui/ThemeToggle"
 import { useAuth } from "@/features/auth"
@@ -11,7 +12,7 @@ import CommunitySwitcher from "./CommunitySwitcher"
 import OnlinePresence from "./OnlinePresence"
 import HeaderSearchBar from "./HeaderSearchBar"
 import { Link, useLocation } from "react-router-dom"
-import { MainLogo, IconLogo } from "@/shared/assets/icons/logo"
+import { MainLogo, MainLogoDark, IconLogo } from "@/shared/assets/icons/logo"
 import { IconButton } from "../ui/buttons"
 
 const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
@@ -43,7 +44,7 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
 
   return (
     <header
-      className={`sticky top-0 z-40 h-14 transition-all duration-300 border-b border-border dark:border-[#3F3F3F] ${
+      className={`sticky top-0 z-40 h-14 transition-all duration-300 border-b border-border dark:border-darkBorder ${
         scrolled
           ? "bg-white/90 dark:bg-[#0F0F0F]/90 backdrop-blur-md shadow-sm"
           : "bg-white dark:bg-[#0F0F0F]"
@@ -73,7 +74,12 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
             <img
               src={MainLogo}
               alt="Cat Speak"
-              className="h-6 w-auto hidden sm:block"
+              className="h-6 w-auto hidden sm:block dark:hidden"
+            />
+            <img
+              src={MainLogoDark}
+              alt="Cat Speak"
+              className="h-6 w-auto hidden dark:sm:block"
             />
           </Link>
 
@@ -108,18 +114,25 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
             <HeaderSearchBar />
           </div>
 
-          {/* Language flag */}
-          <div className="hidden lg:block" data-tour="language-switcher">
-            <LanguageSwitcher />
-          </div>
-
-          {/* Theme Toggle */}
-          <ThemeToggle />
-
           {isLoggedIn ? (
-            <HeaderUserControls />
+            <>
+              {/* Language flag */}
+              <div className="hidden lg:block" data-tour="language-switcher">
+                <LanguageSwitcher />
+              </div>
+
+              {/* Theme Toggle - Visible on lg screens, centralized inside profile on smaller screens */}
+              <div className="hidden lg:block">
+                <ThemeToggle />
+              </div>
+
+              <HeaderUserControls />
+            </>
           ) : (
-            <HeaderGuestControls onGetStarted={onGetStarted} />
+            <>
+              <GuestSettingsControls />
+              <HeaderGuestControls onGetStarted={onGetStarted} />
+            </>
           )}
         </div>
       </div>

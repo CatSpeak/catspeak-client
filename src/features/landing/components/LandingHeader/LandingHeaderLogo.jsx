@@ -1,24 +1,31 @@
-import { IconLogo } from "@/shared/assets/icons/logo"
+import { IconLogo, MainLogo, MainLogoDark } from "@/shared/assets/icons/logo"
 import { Link } from "react-router-dom"
-import { LandingPageLogo } from "../../assets"
 
 const LandingHeaderLogo = () => {
   return (
     <div className="flex items-center">
-      <Link to="/" className="flex items-center" aria-label="Cat Speak Home">
-        {/* Mobile & Tablet (< 1280px) */}
+      <Link to="/" className="flex items-center gap-2" aria-label="Cat Speak Home">
+        {/* Cat Icon (all screens) */}
         <img
           src={IconLogo}
-          alt="Cat Speak logo"
-          className="block h-9 w-auto min-[1280px]:hidden"
+          alt="Cat Speak"
+          className="h-10 w-10 shrink-0"
           draggable={false}
         />
 
-        {/* Desktop (>= 1280px) */}
+        {/* Wordmark: Light Mode (>= xl) */}
         <img
-          src={LandingPageLogo}
-          alt="Cat Speak logo"
-          className="hidden h-9 w-auto min-[1280px]:block"
+          src={MainLogo}
+          alt="Cat Speak"
+          className="h-6 w-auto shrink-0 hidden xl:block dark:hidden"
+          draggable={false}
+        />
+
+        {/* Wordmark: Dark Mode (>= xl) */}
+        <img
+          src={MainLogoDark}
+          alt="Cat Speak"
+          className="h-6 w-auto shrink-0 hidden dark:xl:block"
           draggable={false}
         />
       </Link>

@@ -37,7 +37,7 @@ export default {
     english: "Anh",
     japan: "Nhật Bản",
   },
-  switchRole: "Chuyển vai trò",
+  switchRole: "Vai trò",
   studentRole: "Học viên",
   teacherRole: "Giảng viên",
   noPermissionTeacher: "Bạn không có quyền chuyển sang vai trò Giảng viên!",

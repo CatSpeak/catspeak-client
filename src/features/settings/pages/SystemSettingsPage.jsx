@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { Sun, Moon, Monitor } from "lucide-react"
+import { Sun, Moon, SunMoon } from "lucide-react"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import SegmentedControl from "@/shared/components/ui/inputs/SegmentedControl"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTheme } from "@/shared/context/ThemeContext"
+import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
+import { useAuth } from "@/features/auth"
 import { useTabAnimation } from "@/shared/hooks/useTabAnimation"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import PageTitle from "@/shared/components/ui/PageTitle"
@@ -23,12 +25,37 @@ import ChangePasswordSection from "@/features/settings/components/ChangePassword
 import { setCredentials } from "@/store/slices/authSlice"
 import { toast } from "react-hot-toast"
 
+const LANGUAGES = [
+  { key: "vi", fallbackLabel: "Tiếng Việt", flag: VietNam },
+  { key: "zh", fallbackLabel: "中文", flag: China },
+  { key: "en", fallbackLabel: "English", flag: UK },
+  { key: "ja", fallbackLabel: "日本語", flag: Japan },
+]
+
 const SystemSettingsPage = () => {
-  const { t, language } = useLanguage()
+  const { t, language, setLanguage } = useLanguage()
   const { theme, setTheme, isDark, toggleTheme } = useTheme()
   const timezoneOptions = useMemo(
     () => getTimezoneOptions(language),
     [language],
+  )
+  const languageOptions = useMemo(
+    () =>
+      LANGUAGES.map((l) => ({
+        value: l.key,
+        label: t.header?.languages?.[l.key] || l.fallbackLabel,
+        icon: (
+          <span className="flex h-5 w-5 shrink-0 overflow-hidden rounded-full border border-border">
+            <img
+              src={l.flag}
+              alt=""
+              className="block h-full w-full object-cover"
+              draggable={false}
+            />
+          </span>
+        ),
+      })),
+    [t],
   )
   const themeOptions = useMemo(
     () => [
@@ -47,23 +74,32 @@ const SystemSettingsPage = () => {
       {
         value: "system",
         label: t.nav?.themeSystem || "Hệ thống",
-        icon: Monitor,
+        icon: SunMoon,
         iconClassName: "text-slate-500 dark:text-neutral-400",
       },
     ],
     [t],
   )
-  const { receiveSystemMsgs, setReceiveSystemMsgs } = useGlobalVideoCall()
+  const {
+    receiveSystemMsgs,
+    setReceiveSystemMsgs,
+    joinLeaveSound,
+    setJoinLeaveSound,
+  } = useGlobalVideoCall()
+  const gt = t?.rooms?.videoCall?.general || {}
   const { animationsEnabled: tabAnimationsEnabled, setTabAnimationPreference } =
     useTabAnimation()
   const [searchParams] = useSearchParams()
+  const { isAuthenticated } = useAuth()
   const user = useSelector((state) => state.auth?.user)
   const token = useSelector((state) => state.auth?.token)
   const dispatch = useDispatch()
   const [updateUserProfile] = userApi.useUpdateUserProfileMutation()
 
   // Credentials (username, nickname) moved from /setting/account.
-  const { data: privateProfileData } = useGetUserProfileQuery()
+  const { data: privateProfileData } = useGetUserProfileQuery(undefined, {
+    skip: !isAuthenticated,
+  })
   const profile = privateProfileData?.data ?? privateProfileData ?? null
   const stateHooks = useProfileState(profile)
   const mutationHooks = useProfileMutations(t, profile, stateHooks)
@@ -141,17 +177,6 @@ const SystemSettingsPage = () => {
         console.error("Update email notification preference error:", err),
       )
     }
-
-    if (checked) {
-      toast.success(
-        t.nav?.emailNotifyOn ||
-          "Đã bật nhận email thông báo & tin tức từ CatSpeak.",
-      )
-    } else {
-      toast.success(
-        t.nav?.emailNotifyOff || "Đã tắt nhận email thông báo từ CatSpeak.",
-      )
-    }
   }
 
   const handleTimeZoneChange = async (newTz) => {
@@ -185,30 +210,60 @@ const SystemSettingsPage = () => {
 
   return (
     <div className="p-4 pb-24 max-w-7xl mx-auto">
-      <PageTitle>{t.nav?.systemConfig || "Thiết lập hệ thống"}</PageTitle>
+      <PageTitle className="mb-4">
+        {t.nav?.systemConfig || "Thiết lập hệ thống"}
+      </PageTitle>
 
-      <div className="flex flex-col gap-4 w-full mt-4">
-        <AccountCredentialsForm
-          formData={formData}
-          editingField={editingField}
-          isUpdating={isUpdating}
-          onEdit={handleEdit}
-          onCancel={handleCancel}
-          onSave={handleSave}
-          onChange={handleChange}
-          errors={errors}
-          t={t}
-        />
+      {isAuthenticated ? (
+        <div className="flex flex-col gap-4 w-full mb-4">
+          <AccountCredentialsForm
+            formData={formData}
+            editingField={editingField}
+            isUpdating={isUpdating}
+            onEdit={handleEdit}
+            onCancel={handleCancel}
+            onSave={handleSave}
+            onChange={handleChange}
+            errors={errors}
+            t={t}
+          />
 
-        <ChangePasswordSection t={t} />
-      </div>
+          <ChangePasswordSection t={t} />
+        </div>
+      ) : null}
 
-      <div className="mt-4">
-        <h2 className="text-base font-bold text-gray-900 dark:text-white mb-1">
-          Others
-        </h2>
+      <div>
+        {isAuthenticated && (
+          <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2">
+            {t.nav?.otherSettings || "Khác"}
+          </h2>
+        )}
 
         <div className="flex flex-col gap-2">
+          {/* Language Preference */}
+          <FluentCard>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <label className="text-base font-medium block text-gray-900 dark:text-white">
+                  {t.header?.language || "Ngôn ngữ"}
+                </label>
+                <p className="text-sm text-gray-500 dark:text-neutral-400">
+                  {t.nav?.languageDesc ||
+                    "Chọn ngôn ngữ hiển thị giao diện cho CatSpeak."}
+                </p>
+              </div>
+
+              <div className="w-full sm:w-auto">
+                <Dropdown
+                  options={languageOptions}
+                  value={language}
+                  onChange={setLanguage}
+                  placeholder={t.header?.language || "Chọn ngôn ngữ"}
+                />
+              </div>
+            </div>
+          </FluentCard>
+
           {/* Theme Preference (Light / Dark / System) */}
           <FluentCard>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -254,16 +309,44 @@ const SystemSettingsPage = () => {
             </div>
           </FluentCard>
 
+          {/* Room System Messages Preference */}
           <FluentCard>
             <div className="flex items-center justify-between gap-4">
-              <label className="text-base font-medium text-gray-900 dark:text-white">
-                {t.rooms?.chatBox?.showSystemMessages ||
-                  "Show Cat Speak suggestion messages"}
-              </label>
+              <div>
+                <label className="text-base font-medium block text-gray-900 dark:text-white">
+                  {gt.receiveSystemMsgs || "Nhận thông báo tin nhắn hệ thống"}
+                </label>
+                <p className="text-sm text-gray-500 dark:text-neutral-400">
+                  {gt.receiveSystemMsgsDesc ||
+                    "Hiển thị các thông báo tự động từ hệ thống trong khi cuộc họp đang diễn ra."}
+                </p>
+              </div>
 
               <Switch
                 checked={receiveSystemMsgs}
                 onChange={(e) => setReceiveSystemMsgs(e.target.checked)}
+                colorClass="peer-checked:bg-[#8f0d15] dark:peer-checked:bg-red-600"
+                showLabel={true}
+              />
+            </div>
+          </FluentCard>
+
+          {/* Room Join / Leave Sound Alert Preference */}
+          <FluentCard>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <label className="text-base font-medium block text-gray-900 dark:text-white">
+                  {gt.joinLeaveSound || "Âm thanh khi người dùng vào / ra phòng"}
+                </label>
+                <p className="text-sm text-gray-500 dark:text-neutral-400">
+                  {gt.joinLeaveSoundDesc ||
+                    "Phát chuông thông báo âm thanh khi có thành viên mới vào hoặc rời khỏi cuộc họp."}
+                </p>
+              </div>
+
+              <Switch
+                checked={joinLeaveSound === true}
+                onChange={(e) => setJoinLeaveSound(e.target.checked)}
                 colorClass="peer-checked:bg-[#8f0d15] dark:peer-checked:bg-red-600"
                 showLabel={true}
               />
@@ -294,29 +377,32 @@ const SystemSettingsPage = () => {
             </div>
           </FluentCard>
 
-          <FluentCard>
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex-1">
-                <label className="text-base font-medium block text-gray-900 dark:text-white">
-                  {t.nav?.timezoneTitle || "Múi giờ"}
-                </label>
-                <p className="text-sm text-gray-500 dark:text-neutral-400">
-                  {t.nav?.timezoneDesc ||
-                    "Điều chỉnh lịch hẹn, lịch sử trò chuyện và thống kê theo múi giờ của bạn."}
-                </p>
-              </div>
+          {/* Time Zone Preference */}
+          {isAuthenticated && (
+            <FluentCard>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex-1">
+                  <label className="text-base font-medium block text-gray-900 dark:text-white">
+                    {t.nav?.timezoneTitle || "Múi giờ"}
+                  </label>
+                  <p className="text-sm text-gray-500 dark:text-neutral-400">
+                    {t.nav?.timezoneDesc ||
+                      "Điều chỉnh lịch hẹn, lịch sử trò chuyện và thống kê theo múi giờ của bạn."}
+                  </p>
+                </div>
 
-              <div className="w-full sm:w-auto">
-                <Dropdown
-                  options={timezoneOptions}
-                  value={selectedTz}
-                  onChange={handleTimeZoneChange}
-                  disabled={savingTz}
-                  placeholder={t.nav?.timezoneSelect || "Chọn múi giờ"}
-                />
+                <div className="w-full sm:w-auto">
+                  <Dropdown
+                    options={timezoneOptions}
+                    value={selectedTz}
+                    onChange={handleTimeZoneChange}
+                    disabled={savingTz}
+                    placeholder={t.nav?.timezoneSelect || "Chọn múi giờ"}
+                  />
+                </div>
               </div>
-            </div>
-          </FluentCard>
+            </FluentCard>
+          )}
         </div>
       </div>
     </div>

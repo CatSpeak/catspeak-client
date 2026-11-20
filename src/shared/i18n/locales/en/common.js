@@ -19,6 +19,7 @@ export default {
   header: {
     language: "Language",
     community: "Community",
+    settings: "Settings",
     soon: "Soon",
     countries: {
       vietnam: "Vietnam",
@@ -91,6 +92,12 @@ export default {
     back: "Back",
     accountInfo: "Account Info",
     systemConfig: "System Configuration",
+    themeTitle: "Theme",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeSystem: "System",
+    languageDesc: "Choose the display language for the CatSpeak interface.",
+    otherSettings: "Others",
     emailNotifyTitle: "Receive email notifications & news from CatSpeak",
     emailNotifyDesc: "Allow the system to send important updates, new features, and account notifications via email.",
     timezoneTitle: "Timezone",

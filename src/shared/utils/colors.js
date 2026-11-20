@@ -79,8 +79,9 @@ export const darkColors = {
   placeholder: "#888888",
 
   // ── Borders ──
-  border: "#3F3F3F", // Dark border (WCAG contrast-safe)
-  borderColor: "#3F3F3F", // Alias for consistent naming with light mode
+  border: "#1D1D1D", // Dark border (counterpart of lightColors.border: "#E5E5E5")
+  borderColor: "#1D1D1D", // Alias for consistent naming with light mode
+  darkBorder: "#1D1D1D",
   borderSubtle: "#2A2A2A",
   borderFocus: "#f87171",
 

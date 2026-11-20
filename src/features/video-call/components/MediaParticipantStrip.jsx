@@ -46,11 +46,11 @@ const MediaParticipantStrip = ({ participants }) => {
       {/* Responsive fixed grid — 2 cols on phones, 4 on sm+.
           Cells are aspect-video so one participant takes half a row
           (never a full-width banner); no x/y scroll ever. */}
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {visible.map((p) => (
           <div
             key={p.identity}
-            className="aspect-video min-w-0 overflow-hidden rounded-2xl bg-gray-100 dark:bg-neutral-900 shadow-sm ring-1 ring-black/10 dark:ring-white/10"
+            className="aspect-video min-w-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-neutral-900 shadow-sm ring-1 ring-black/10 dark:ring-white/10"
           >
             <VideoTile participant={p} compact />
           </div>
@@ -61,7 +61,7 @@ const MediaParticipantStrip = ({ participants }) => {
             onClick={() => openParticipantList?.("participants")}
             aria-label={`Xem thêm ${overflowCount} người đang cùng xem`}
             title="Xem danh sách tham gia"
-            className="flex aspect-video min-w-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-2xl bg-neutral-900 text-white shadow-sm ring-1 ring-black/10 dark:ring-white/10 transition-colors hover:bg-neutral-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            className="flex aspect-video min-w-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl bg-neutral-900 text-white shadow-sm ring-1 ring-black/10 dark:ring-white/10 transition-colors hover:bg-neutral-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <span className="text-xl font-bold leading-none sm:text-2xl">+{overflowCount}</span>
             <span className="text-[10px] font-medium text-neutral-300">Xem thêm</span>

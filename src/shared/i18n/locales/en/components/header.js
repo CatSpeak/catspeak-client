@@ -37,7 +37,7 @@ export default {
     english: "English",
     japan: "Japan",
   },
-  switchRole: "Switch Role",
+  switchRole: "Role",
   studentRole: "Student",
   teacherRole: "Teacher",
   noPermissionTeacher: "You do not have permission to switch to the Teacher role!",

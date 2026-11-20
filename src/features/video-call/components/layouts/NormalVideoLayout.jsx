@@ -38,7 +38,7 @@ const NormalVideoLayout = ({
       return (
         <div
           key={item.key}
-          className={`relative overflow-hidden rounded-2xl ${extraClass}`}
+          className={`relative overflow-hidden rounded-xl ${extraClass}`}
         >
           <ScreenShareTile
             trackRef={item.data}
@@ -65,7 +65,7 @@ const NormalVideoLayout = ({
     return (
       <div
         key={item.key}
-        className={`relative overflow-hidden rounded-2xl ${extraClass}`}
+        className={`relative overflow-hidden rounded-xl ${extraClass}`}
       >
         <VideoTile
           participant={item.data}
@@ -102,7 +102,7 @@ const NormalVideoLayout = ({
 
   return (
     <div className="relative h-full w-full overflow-hidden p-0">
-      <div className={`h-full w-full gap-1 ${getGridClass()}`}>
+      <div className={`h-full w-full gap-2 ${getGridClass()}`}>
         {visibleItems.map((item) =>
           renderTile(item, "w-full h-full min-h-0 min-w-0"),
         )}

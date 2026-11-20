@@ -419,7 +419,7 @@ const VideoCallRoomContent = () => {
               className="hidden lg:flex flex-col overflow-hidden relative shrink-0"
 
             >
-              <div className="w-[360px] min-w-[360px] h-full flex flex-col shrink-0 bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white rounded-2xl shadow-sm border border-border dark:border-[#3F3F3F] overflow-hidden">
+              <div className="w-[360px] min-w-[360px] h-full flex flex-col shrink-0 bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white rounded-xl shadow-sm border border-border dark:border-darkBorder overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showSpeakingTimeBalance &&
                   isHost &&
@@ -471,7 +471,7 @@ const VideoCallRoomContent = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.18, ease: "easeOut" }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-2xl flex flex-col border-l border-border dark:border-[#3F3F3F] overflow-hidden"
+              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-2xl flex flex-col border-l border-border dark:border-darkBorder overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {showParticipants && <ParticipantList />}

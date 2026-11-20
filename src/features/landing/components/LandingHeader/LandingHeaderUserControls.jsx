@@ -6,10 +6,10 @@ import { NotificationWidget } from "@/features/notifications"
 const LandingHeaderUserControls = () => {
   const { isAuthenticated } = useAuth()
   return (
-    <div className="flex items-center gap-1">
-      {isAuthenticated && <MessageWidget />}
-
+    <div className="flex items-center gap-2">
       <NotificationWidget />
+
+      {isAuthenticated && <MessageWidget />}
 
       <ProfileDropdown />
     </div>

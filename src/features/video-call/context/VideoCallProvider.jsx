@@ -153,10 +153,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     }
   }, [location.state?.callEnded, phase, fromQueue])
 
-  // If the active call ends (or user leaves), phase shouldn't stay stuck on "in-call"
+  // If the active call ends (or user leaves), phase returns to "waiting" lobby
   useEffect(() => {
     if (!isInCall && phase === "in-call") {
-      setPhase("ended")
+      setPhase("waiting")
     }
   }, [isInCall, phase])
 
@@ -840,8 +840,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     )
   }
 
-  // ---- PHASE: WAITING ----
-  if (phase === "waiting") {
+  // ---- PHASE: WAITING / JOINING ----
+  if (phase === "waiting" || (phase === "joining" && !shouldAutoJoin)) {
     const displaySession = {
       name: room.name,
       roomName: room.name,
@@ -865,6 +865,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           onToggleMic={toggleMic}
           onToggleCam={toggleCamera}
           onJoin={handleJoinClick}
+          isJoining={phase === "joining"}
           isFull={isRoomFull}
           maxParticipants={maxParticipants}
           deviceSelection={deviceSelection}
@@ -873,7 +874,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     )
   }
 
-  // ---- PHASE: JOINING ----
+  // ---- PHASE: JOINING (auto-join or direct join) ----
   if (phase === "joining") {
     return (
       <>
@@ -896,13 +897,37 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   }
 
   // ---- PHASE: IN-CALL ----
-  // If Redux indicates the call has ended or was torn down, immediately render CallEndedScreen
-  // so children (VideoCallRoomContent) are not rendered without an active LiveKitRoom.
+  // If Redux indicates the call has ended or was torn down, render WaitingScreen
+  // so user can choose to rejoin or exit cleanly.
   if (!isInCall) {
+    const displaySession = {
+      name: room?.name,
+      roomName: room?.name,
+      topic: room?.topic,
+      requiredLevel: room?.requiredLevel,
+      participants: [],
+    }
+
     return (
       <>
         {switchModal}
-        <CallEndedScreen />
+        <WaitingScreen
+          session={displaySession}
+          room={room}
+          participantCount={currentParticipantCount}
+          user={user}
+          micOn={micOn}
+          cameraOn={cameraOn}
+          localStream={localStream}
+          lkVideoTrack={lkVideoTrack}
+          onToggleMic={toggleMic}
+          onToggleCam={toggleCamera}
+          onJoin={handleJoinClick}
+          isJoining={phase === "joining"}
+          isFull={isRoomFull}
+          maxParticipants={maxParticipants}
+          deviceSelection={deviceSelection}
+        />
       </>
     )
   }

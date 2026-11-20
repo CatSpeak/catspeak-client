@@ -21,7 +21,10 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Slider from "@/shared/components/ui/Slider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { isRoomHost, isClassOrCustom } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  isRoomHost,
+  isClassOrCustom,
+} from "@/features/video-call/utils/roomTypeHelpers"
 import { selectCurrentUser } from "@/store/slices/authSlice"
 import {
   getSavedParticipantVolume,
@@ -47,7 +50,11 @@ import {
 } from "@/features/co-host/constants"
 import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
 
-export const ParticipantVolumeSlider = ({ participant, className = "", isInline = false }) => {
+export const ParticipantVolumeSlider = ({
+  participant,
+  className = "",
+  isInline = false,
+}) => {
   const { t } = useLanguage()
   const pl = t.rooms.videoCall.participantList
   const currentUser = useSelector(selectCurrentUser)
@@ -93,8 +100,8 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
       typeof eOrVal === "object" && eOrVal !== null && "target" in eOrVal
         ? parseFloat(eOrVal.target.value)
         : Array.isArray(eOrVal)
-        ? eOrVal[0]
-        : Number(eOrVal)
+          ? eOrVal[0]
+          : Number(eOrVal)
 
     if (isNaN(val)) return
     setVolume(val)
@@ -151,7 +158,9 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
   }
 
   return (
-    <div className={`p-3 w-60 flex flex-col gap-2 bg-white dark:bg-[#1A1A1A] rounded-xl text-foreground dark:text-white border border-border dark:border-[#3F3F3F] ${className}`}>
+    <div
+      className={`p-3 w-60 flex flex-col gap-2 bg-white dark:bg-[#1A1A1A] rounded-xl text-foreground dark:text-white border border-border dark:border-[#3F3F3F] ${className}`}
+    >
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider">
           {pl.volume}
@@ -189,7 +198,12 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
   )
 }
 
-export const ParticipantActionPopover = ({ participant, children }) => {
+export const ParticipantActionPopover = ({
+  participant,
+  children,
+  className = "shrink-0",
+  triggerClassName = "shrink-0 inline-flex items-center justify-center",
+}) => {
   const { t } = useLanguage()
   const pl = t.rooms?.videoCall?.participantList || {}
   const {
@@ -200,11 +214,14 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     isHost: isCurrentHostFromContext,
     restrictionByAccountId,
   } = useVideoCallContext()
-  const isCurrentHost = isCurrentHostFromContext || isRoomHost(room, user?.accountId)
+  const isCurrentHost =
+    isCurrentHostFromContext || isRoomHost(room, user?.accountId)
   const [popoverOpen, setPopoverOpen] = useState(false)
 
-  const [kickParticipant, { isLoading: isKicking }] = useKickParticipantMutation()
-  const [muteParticipant, { isLoading: isMuting }] = useMuteParticipantMutation()
+  const [kickParticipant, { isLoading: isKicking }] =
+    useKickParticipantMutation()
+  const [muteParticipant, { isLoading: isMuting }] =
+    useMuteParticipantMutation()
 
   const parseMetadata = (metadata) => {
     if (!metadata) return {}
@@ -217,19 +234,24 @@ export const ParticipantActionPopover = ({ participant, children }) => {
 
   const meta = parseMetadata(participant?.metadata)
   const targetAccountId =
-    meta.accountId || (participant?.isLocal ? user?.accountId : null) || participant?.identity
+    meta.accountId ||
+    (participant?.isLocal ? user?.accountId : null) ||
+    participant?.identity
   const isTargetSelf = Boolean(
     participant?.isLocal ||
-      (user?.accountId && targetAccountId && String(user.accountId) === String(targetAccountId)),
+    (user?.accountId &&
+      targetAccountId &&
+      String(user.accountId) === String(targetAccountId)),
   )
   const participantName =
     participant?.name || participant?.identity || String(targetAccountId ?? "")
 
   // Ticket 02: only offer the action that matches the target's current state,
   // so "restrict" does not sit next to "unrestrict" for the same channel.
-  const targetRestriction = targetAccountId != null
-    ? restrictionByAccountId?.[String(targetAccountId)] || {}
-    : {}
+  const targetRestriction =
+    targetAccountId != null
+      ? restrictionByAccountId?.[String(targetAccountId)] || {}
+      : {}
   const isTargetChatRestricted = targetRestriction.isChatRestricted === true
   const isTargetVoiceRestricted = targetRestriction.isVoiceRestricted === true
 
@@ -255,16 +277,28 @@ export const ParticipantActionPopover = ({ participant, children }) => {
   // Ticket 02: quyền media của chính mình (host bypass, co-host theo từng quyền con).
   const canToggleMic =
     isCurrentHost ||
-    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.MIC_TOGGLE)
+    hasCoHostPermission(
+      liveCoHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.MIC_TOGGLE,
+    )
   const canToggleCam =
     isCurrentHost ||
-    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.CAMERA_TOGGLE)
+    hasCoHostPermission(
+      liveCoHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.CAMERA_TOGGLE,
+    )
   const canModerateMedia = canToggleMic || canToggleCam
 
   // Ticket 03: co-host with remove_student kicks from live (kick-only, no ban).
   const canKick =
     isCurrentHost ||
-    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.REMOVE_STUDENT)
+    hasCoHostPermission(
+      liveCoHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.REMOVE_STUDENT,
+    )
 
   // Stopping an ongoing member share has its own code; manage_student_share is
   // only the "allow members to share" policy.
@@ -273,33 +307,58 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     hasCoHostPermission(
       liveCoHost,
       user?.accountId,
-      CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE
+      CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE,
     )
 
-  const [kickConfirm, setKickConfirm] = React.useState({ open: false, banRejoin: false })
+  const [kickConfirm, setKickConfirm] = React.useState({
+    open: false,
+    banRejoin: false,
+  })
 
   // Restrict chat and restrict voice are separate codes; mute_all/remove_student
   // no longer imply either.
   const canRestrictChat =
     isCurrentHost ||
-    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.RESTRICT_CHAT)
+    hasCoHostPermission(
+      liveCoHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.RESTRICT_CHAT,
+    )
   const canRestrictVoice =
     isCurrentHost ||
-    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.RESTRICT_VOICE)
-  const [restrictChatApi, { isLoading: isRestrictingChat }] = useRestrictChatMutation()
-  const [unrestrictChatApi, { isLoading: isUnrestrictingChat }] = useUnrestrictChatMutation()
-  const [restrictVoiceApi, { isLoading: isRestrictingVoice }] = useRestrictVoiceMutation()
-  const [unrestrictVoiceApi, { isLoading: isUnrestrictingVoice }] = useUnrestrictVoiceMutation()
-  const [restrictConfirm, setRestrictConfirm] = React.useState({ open: false, type: null })
+    hasCoHostPermission(
+      liveCoHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.RESTRICT_VOICE,
+    )
+  const [restrictChatApi, { isLoading: isRestrictingChat }] =
+    useRestrictChatMutation()
+  const [unrestrictChatApi, { isLoading: isUnrestrictingChat }] =
+    useUnrestrictChatMutation()
+  const [restrictVoiceApi, { isLoading: isRestrictingVoice }] =
+    useRestrictVoiceMutation()
+  const [unrestrictVoiceApi, { isLoading: isUnrestrictingVoice }] =
+    useUnrestrictVoiceMutation()
+  const [restrictConfirm, setRestrictConfirm] = React.useState({
+    open: false,
+    type: null,
+  })
 
   const handleRestrict = async (type) => {
     if (!roomId || !targetAccountId) return
     const idNum = Number(targetAccountId)
     try {
-      if (type === "chat") await restrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
-      else if (type === "voice") await restrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
-      else if (type === "unrestrict_chat") await unrestrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
-      else if (type === "unrestrict_voice") await unrestrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
+      if (type === "chat")
+        await restrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
+      else if (type === "voice")
+        await restrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
+      else if (type === "unrestrict_chat")
+        await unrestrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
+      else if (type === "unrestrict_voice")
+        await unrestrictVoiceApi({
+          id: roomId,
+          targetAccountId: idNum,
+        }).unwrap()
       const msgMap = {
         chat: pl.successRestrictChat,
         voice: pl.successRestrictVoice,
@@ -333,10 +392,8 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         resolveCoHostErrorMessage(
           err,
           t,
-          trackKind === "screen"
-            ? pl.forbiddenStopScreen
-            : pl.forbiddenMedia
-        )
+          trackKind === "screen" ? pl.forbiddenStopScreen : pl.forbiddenMedia,
+        ),
       )
       return
     }
@@ -352,7 +409,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             muted,
             senderId: String(user?.accountId ?? ""),
             senderIdentity: String(lkRoom.localParticipant.identity ?? ""),
-          })
+          }),
         )
         lkRoom.localParticipant.publishData(payload, {
           topic: "moderation",
@@ -368,14 +425,12 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         trackKind === "audio"
           ? pl.successMuteMic
           : trackKind === "screen"
-          ? pl.successStopScreen
-          : pl.successMuteCam
+            ? pl.successStopScreen
+            : pl.successMuteCam,
       )
     } else {
       toast.success(
-        trackKind === "audio"
-          ? pl.successUnmuteMic
-          : pl.successUnmuteCam
+        trackKind === "audio" ? pl.successUnmuteMic : pl.successUnmuteCam,
       )
     }
   }
@@ -400,13 +455,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       }).unwrap()
     } catch (err) {
       console.warn("Backend kick API response:", err)
-      toast.error(
-        resolveCoHostErrorMessage(
-          err,
-          t,
-          pl.forbiddenKick
-        )
-      )
+      toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenKick))
       return
     }
 
@@ -418,7 +467,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             targetId: String(targetAccountId),
             targetIdentity: String(participant.identity),
             banRejoin,
-          })
+          }),
         )
         lkRoom.localParticipant.publishData(payload, {
           topic: "moderation",
@@ -488,7 +537,9 @@ export const ParticipantActionPopover = ({ participant, children }) => {
               }}
               disabled={isMuting}
               className={isMuting ? "opacity-50 cursor-not-allowed" : ""}
-              icon={isTargetCamOn ? <VideoOff size={20} /> : <Video size={20} />}
+              icon={
+                isTargetCamOn ? <VideoOff size={20} /> : <Video size={20} />
+              }
               label={isTargetCamOn ? pl.muteCam : pl.unmuteCam}
             />
           )}
@@ -576,7 +627,9 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             disabled={isKicking}
             className={isKicking ? "opacity-50 cursor-not-allowed" : ""}
             hoverBg="hover:bg-red-50 group-hover:bg-red-50 dark:hover:bg-red-950/40 dark:group-hover:bg-red-950/40"
-            icon={<UserX size={20} className="text-red-600 dark:text-red-400" />}
+            icon={
+              <UserX size={20} className="text-red-600 dark:text-red-400" />
+            }
             label={
               <span className="text-red-600 dark:text-red-400 font-medium">
                 {pl.kick}
@@ -592,7 +645,9 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             disabled={isKicking}
             className={isKicking ? "opacity-50 cursor-not-allowed" : ""}
             hoverBg="hover:bg-red-50 group-hover:bg-red-50 dark:hover:bg-red-950/40 dark:group-hover:bg-red-950/40"
-            icon={<UserX size={20} className="text-red-600 dark:text-red-400" />}
+            icon={
+              <UserX size={20} className="text-red-600 dark:text-red-400" />
+            }
             label={
               <span className="text-red-600 dark:text-red-400 font-medium">
                 {pl.ban}
@@ -685,8 +740,8 @@ export const ParticipantActionPopover = ({ participant, children }) => {
   return (
     <>
       <Popover
-        className="shrink-0"
-        triggerClassName="shrink-0 inline-flex items-center justify-center"
+        className={className}
+        triggerClassName={triggerClassName}
         onOpenChange={setPopoverOpen}
         trigger={
           <div
@@ -700,7 +755,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
                 e.currentTarget.click()
               }
             }}
-            className="shrink-0 inline-flex items-center justify-center cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
+            className={`cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 ${triggerClassName}`}
           >
             {children}
           </div>
@@ -714,7 +769,10 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         onClose={() => setKickConfirm({ open: false, banRejoin: false })}
         onConfirm={confirmKick}
         title={kickConfirm.banRejoin ? pl.confirmBanTitle : pl.confirmKickTitle}
-        message={(kickConfirm.banRejoin ? pl.confirmBan : pl.confirmKick).replace("{name}", participantName)}
+        message={(kickConfirm.banRejoin
+          ? pl.confirmBan
+          : pl.confirmKick
+        ).replace("{name}", participantName)}
         confirmText={kickConfirm.banRejoin ? pl.ban : pl.kick}
         confirmVariant="destructive"
         isPending={isKicking}
@@ -732,23 +790,32 @@ export const ParticipantActionPopover = ({ participant, children }) => {
           restrictConfirm.type === "chat"
             ? pl.confirmRestrictChatTitle
             : restrictConfirm.type === "unrestrict_chat"
-            ? pl.confirmUnrestrictChatTitle
-            : restrictConfirm.type === "voice"
-            ? pl.confirmRestrictVoiceTitle
-            : pl.confirmUnrestrictVoiceTitle
+              ? pl.confirmUnrestrictChatTitle
+              : restrictConfirm.type === "voice"
+                ? pl.confirmRestrictVoiceTitle
+                : pl.confirmUnrestrictVoiceTitle
         }
         message={
           restrictConfirm.type === "chat"
             ? pl.confirmRestrictChat.replace("{name}", participantName)
             : restrictConfirm.type === "unrestrict_chat"
-            ? pl.confirmUnrestrictChat.replace("{name}", participantName)
-            : restrictConfirm.type === "voice"
-            ? pl.confirmRestrictVoice.replace("{name}", participantName)
-            : pl.confirmUnrestrictVoice.replace("{name}", participantName)
+              ? pl.confirmUnrestrictChat.replace("{name}", participantName)
+              : restrictConfirm.type === "voice"
+                ? pl.confirmRestrictVoice.replace("{name}", participantName)
+                : pl.confirmUnrestrictVoice.replace("{name}", participantName)
         }
         confirmText={t.confirm}
-        confirmVariant={restrictConfirm.type?.startsWith("unrestrict") ? "default" : "destructive"}
-        isPending={isRestrictingChat || isRestrictingVoice || isUnrestrictingChat || isUnrestrictingVoice}
+        confirmVariant={
+          restrictConfirm.type?.startsWith("unrestrict")
+            ? "default"
+            : "destructive"
+        }
+        isPending={
+          isRestrictingChat ||
+          isRestrictingVoice ||
+          isUnrestrictingChat ||
+          isUnrestrictingVoice
+        }
       />
 
       {/* Revoke trong live cũng cần confirm riêng */}

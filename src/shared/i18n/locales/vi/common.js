@@ -19,6 +19,7 @@ export default {
   header: {
     language: "Ngôn ngữ",
     community: "Cộng đồng",
+    settings: "Cài đặt",
     soon: "Sắp có",
     countries: {
       vietnam: "Việt Nam",
@@ -91,6 +92,12 @@ export default {
     back: "Quay lại",
     accountInfo: "Thông tin tài khoản",
     systemConfig: "Thiết lập hệ thống",
+    themeTitle: "Giao diện",
+    themeLight: "Sáng",
+    themeDark: "Tối",
+    themeSystem: "Hệ thống",
+    languageDesc: "Chọn ngôn ngữ hiển thị giao diện cho CatSpeak.",
+    otherSettings: "Khác",
     emailNotifyTitle: "Nhận email thông báo & tin tức từ CatSpeak",
     emailNotifyDesc: "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email.",
     timezoneTitle: "Múi giờ",

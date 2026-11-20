@@ -19,6 +19,7 @@ export default {
   header: {
     language: "语言",
     community: "社区",
+    settings: "设置",
     soon: "敬请期待",
     countries: {
       vietnam: "越南",
@@ -91,6 +92,12 @@ export default {
     back: "返回",
     accountInfo: "账户信息",
     systemConfig: "系统设置",
+    themeTitle: "外观",
+    themeLight: "浅色",
+    themeDark: "深色",
+    themeSystem: "跟随系统",
+    languageDesc: "选择 CatSpeak 界面的显示语言。",
+    otherSettings: "其他",
     emailNotifyTitle: "接收来自 CatSpeak 的电子邮件通知和最新消息",
     emailNotifyDesc: "允许系统通过电子邮件发送重要更新、新功能和账户通知。",
     timezoneTitle: "时区",

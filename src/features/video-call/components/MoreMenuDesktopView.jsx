@@ -166,6 +166,7 @@ const MoreMenuDesktopView = ({
 
       <div className="flex flex-col">
         <MenuItem
+          roundedClass="rounded"
           onClick={() => {
             if (isRecording) {
               confirmStopRecording()

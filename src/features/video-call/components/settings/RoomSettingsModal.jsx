@@ -54,12 +54,11 @@ const RoomSettingsModal = ({
       onClose={onClose}
       title={waitingT.deviceSettings || "Cài đặt"}
       className="md:max-w-[720px] w-full flex flex-col h-full md:!h-[560px] max-h-none md:max-h-[80vh]"
-      headerClassName="flex items-center justify-between p-4 border-b border-border dark:border-[#3F3F3F] shrink-0"
       bodyClassName="!p-0 !px-0 !mb-0 flex-1 overflow-hidden flex flex-col min-h-0"
       fullScreenOnMobile={true}
     >
       {/* Navigation Tabs - Edge to edge across top */}
-      <div className="bg-white dark:bg-[#1A1A1A] border-b border-border dark:border-[#3F3F3F] shrink-0">
+      <div className="bg-white dark:bg-[#1A1A1A] shrink-0">
         <Tabs
           tabs={tabs}
           activeTab={activeTab}
@@ -73,13 +72,9 @@ const RoomSettingsModal = ({
         role="tabpanel"
         id="room-settings-panel"
         aria-labelledby={`room-settings-tab-${activeTab}`}
-        className="bg-white dark:bg-[#1A1A1A] flex-1 overflow-y-auto overflow-x-hidden min-h-0 h-full p-4 sm:p-6"
+        className="bg-white dark:bg-[#1A1A1A] flex-1 overflow-y-auto overflow-x-hidden min-h-0 h-full"
       >
-        <TabContent
-          activeTab={activeTab}
-          tabs={tabs}
-          className="w-full"
-        >
+        <TabContent activeTab={activeTab} tabs={tabs} className="w-full">
           {activeTab === "audio-video" && (
             <AudioVideoTab
               waitingT={waitingT}

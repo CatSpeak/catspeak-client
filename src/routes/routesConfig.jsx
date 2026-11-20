@@ -1461,11 +1461,7 @@ const routesConfig = [
       },
 
       {
-        element: (
-          <AuthGuard>
-            <MainLayout showFooter={false} />
-          </AuthGuard>
-        ),
+        element: <MainLayout showFooter={false} />,
         children: [
           {
             element: <UserPagesLayout />,
@@ -1480,22 +1476,26 @@ const routesConfig = [
                   {
                     path: "account",
                     element: (
-                      <RoleGuard
-                        allowedRoles={["Student", "Admin"]}
-                        fallbackPath="/setting/system"
-                      >
-                        <LazyRoute>
-                          <AccountInfoPage />
-                        </LazyRoute>
-                      </RoleGuard>
+                      <AuthGuard>
+                        <RoleGuard
+                          allowedRoles={["Student", "Admin"]}
+                          fallbackPath="/setting/system"
+                        >
+                          <LazyRoute>
+                            <AccountInfoPage />
+                          </LazyRoute>
+                        </RoleGuard>
+                      </AuthGuard>
                     ),
                   },
                   {
                     path: "instructor",
                     element: (
-                      <LazyRoute>
-                        <InstructorPage />
-                      </LazyRoute>
+                      <AuthGuard>
+                        <LazyRoute>
+                          <InstructorPage />
+                        </LazyRoute>
+                      </AuthGuard>
                     ),
                   },
                   {
@@ -1511,30 +1511,40 @@ const routesConfig = [
               {
                 path: "organization",
                 element: (
-                  <LazyRoute>
-                    <OrganizationPage />
-                  </LazyRoute>
+                  <AuthGuard>
+                    <LazyRoute>
+                      <OrganizationPage />
+                    </LazyRoute>
+                  </AuthGuard>
                 ),
               },
               {
                 path: "billing",
                 element: (
-                  <LazyRoute>
-                    <BillingFeature />
-                  </LazyRoute>
+                  <AuthGuard>
+                    <LazyRoute>
+                      <BillingFeature />
+                    </LazyRoute>
+                  </AuthGuard>
                 ),
               },
               {
                 path: "billing/result",
                 element: (
-                  <LazyRoute>
-                    <PaymentResultPage />
-                  </LazyRoute>
+                  <AuthGuard>
+                    <LazyRoute>
+                      <PaymentResultPage />
+                    </LazyRoute>
+                  </AuthGuard>
                 ),
               },
               {
                 path: "refunds",
-                element: <Navigate to="/billing?tab=refunds" replace />,
+                element: (
+                  <AuthGuard>
+                    <Navigate to="/billing?tab=refunds" replace />
+                  </AuthGuard>
+                ),
               },
               { path: "*", element: <PageNotFound /> },
             ],
