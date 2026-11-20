@@ -110,7 +110,7 @@ const ProfilePostCard = ({ post, isOwnProfile, searchKeyword = "" }) => {
   }
 
   const handleShare = (e) => {
-    triggerShare(e, post?.postId)
+    triggerShare(e, post)
   }
 
   return (
