@@ -262,10 +262,7 @@ const InvititeDropdown = ({
     const isMultiple = dropdownMode === "multiple"
 
     return (
-      <div
-        className={`w-full px-3 py-2 flex items-center justify-between transition-colors rounded-xl text-left text-sm hover:bg-neutral-100 ${isSelected ? "bg-neutral-50" : ""
-          }`}
-      >
+      <div className="w-full px-3 py-2 flex items-center justify-between rounded-xl text-left text-sm bg-transparent">
         <div className="flex items-center gap-2.5 overflow-hidden flex-1 min-w-0">
           <Avatar
             src={user.avatarImageUrl || user.avatarUrl || user.meetingAvatarUrl}
@@ -275,17 +272,17 @@ const InvititeDropdown = ({
           />
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-sm font-medium text-gray-900 truncate">
+              <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
                 {user.username || user.name || option.label || "User"}
               </span>
               {isTeacher && (
-                <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
                   {teacherLabel}
                 </span>
               )}
             </div>
             {user.email && (
-              <span className="text-xs text-gray-500 truncate">
+              <span className="text-xs text-gray-500 dark:text-[#AAAAAA] truncate">
                 {user.email}
               </span>
             )}
@@ -295,15 +292,21 @@ const InvititeDropdown = ({
         <div className="flex items-center ml-2 shrink-0">
           {isMultiple ? (
             <div
-              className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${isSelected
-                ? "bg-[#990011] border-[#990011] text-white"
-                : "border-gray-300 bg-white group-hover:border-gray-400"
-                }`}
+              className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
+                isSelected
+                  ? "bg-cath-red-700 dark:bg-cath-red-1000 border-cath-red-700 dark:border-cath-red-1000 text-white"
+                  : "border-gray-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] group-hover:border-gray-400 dark:group-hover:border-[#555555]"
+              }`}
             >
               {isSelected && <Check size={12} strokeWidth={3} />}
             </div>
           ) : (
-            isSelected && <Check size={16} className="text-[#990011]" />
+            isSelected && (
+              <Check
+                size={16}
+                className="text-cath-red-700 dark:text-red-400"
+              />
+            )
           )}
         </div>
       </div>

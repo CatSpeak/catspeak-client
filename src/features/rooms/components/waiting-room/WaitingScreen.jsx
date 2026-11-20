@@ -1,8 +1,9 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Copy, Mic, Video, Volume2, Info, Check, X, Edit2 } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import ProgressBar from "@/shared/components/ui/ProgressBar"
 import ParticipantsPreview from "./ParticipantsPreview"
 import VideoPreview from "./VideoPreview"
 import RoomInformation from "./RoomInformation"
@@ -34,6 +35,7 @@ const WaitingScreen = ({
   onToggleMic,
   onToggleCam,
   onJoin,
+  isJoining = false,
   isFull = false,
   maxParticipants = 5,
   deviceSelection,
@@ -56,6 +58,44 @@ const WaitingScreen = ({
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
 
   const [isEditingName, setIsEditingName] = useState(false)
+
+  // Wait time guidelines: <200ms (no indicator), 200ms-5s (loading indicator), >5s (progress indicator)
+  const [showButtonSpinner, setShowButtonSpinner] = useState(false)
+  const [isLongJoining, setIsLongJoining] = useState(false)
+  const [longProgress, setLongProgress] = useState(25)
+
+  useEffect(() => {
+    if (!isJoining) {
+      setShowButtonSpinner(false)
+      setIsLongJoining(false)
+      setLongProgress(25)
+      return
+    }
+
+    // Instant (< 200ms): suppress indicator
+    const instantTimer = setTimeout(() => {
+      setShowButtonSpinner(true)
+    }, 200)
+
+    // Long (> 5s): escalate to progress indicator
+    const longTimer = setTimeout(() => {
+      setIsLongJoining(true)
+    }, 5000)
+
+    return () => {
+      clearTimeout(instantTimer)
+      clearTimeout(longTimer)
+    }
+  }, [isJoining])
+
+  // Long wait progress simulation (> 5s)
+  useEffect(() => {
+    if (!isLongJoining) return
+    const interval = setInterval(() => {
+      setLongProgress((prev) => (prev < 90 ? prev + (90 - prev) * 0.12 : prev))
+    }, 600)
+    return () => clearInterval(interval)
+  }, [isLongJoining])
 
   const webview = detectWebView()
 
@@ -139,8 +179,14 @@ const WaitingScreen = ({
             <div className="flex w-full flex-col sm:flex-row gap-2">
               <PillButton
                 onClick={onJoin}
-                disabled={isFull}
-                aria-disabled={isFull}
+                disabled={isFull || isJoining}
+                loading={showButtonSpinner}
+                loadingText={
+                  isLongJoining
+                    ? (t?.rooms?.videoCall?.provider?.connecting ?? "Đang kết nối...")
+                    : t.rooms.waitingScreen.joinNow
+                }
+                aria-disabled={isFull || isJoining}
                 title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
                 className="w-full sm:flex-1"
               >
@@ -148,12 +194,29 @@ const WaitingScreen = ({
               </PillButton>
               <PillButton
                 onClick={handleCopyLink}
+                disabled={isJoining}
                 variant="secondary"
                 className="w-full sm:flex-1"
               >
                 {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
               </PillButton>
             </div>
+
+            {/* Long wait (> 5s): Progress indicator */}
+            {isLongJoining && (
+              <div className="w-full mt-3 animate-fadeIn">
+                <ProgressBar
+                  progress={longProgress}
+                  heightClass="h-1.5"
+                  colorClass="bg-cath-red-700 dark:bg-red-500"
+                  trackColorClass="bg-neutral-200 dark:bg-neutral-800"
+                />
+                <p className="mt-1.5 text-center text-xs text-neutral-500 dark:text-neutral-400 animate-pulse">
+                  {t?.rooms?.videoCall?.provider?.connectingLongWait ??
+                    "Đang chuẩn bị phòng học, vui lòng đợi trong giây lát..."}
+                </p>
+              </div>
+            )}
 
             {isFull && (
               <p className="text-sm text-red-600 dark:text-red-400">

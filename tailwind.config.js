@@ -49,6 +49,7 @@ export default {
         secondary: "#606060",
         dusk: "#1a1a2e",
         border: "hsl(var(--border))",
+        darkBorder: "#1D1D1D",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         primaryBg: "#F5F5F7",
@@ -120,8 +121,9 @@ export default {
         sm: "640px",
         md: "768px",
         lg: "1024px",
-        xl: "1800px",
-        "2xl": "2024px",
+        xl: "1280px",
+        "2xl": "1536px",
+        "3xl": "1800px",
       },
       backgroundImage: {
         "gradient-faq":

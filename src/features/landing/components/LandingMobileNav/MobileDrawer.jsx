@@ -10,7 +10,7 @@ const MobileDrawer = ({ open, onClose }) => {
   useScrollLock(open);
 
   return createPortal(
-    <div className="fixed inset-0 z-[2000] min-[1280px]:hidden pointer-events-none">
+    <div className="fixed inset-0 z-[2000] xl:hidden pointer-events-none">
       {/* Backdrop - renders instantly and unmounts instantly */}
       {open && (
         <div

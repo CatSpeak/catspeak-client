@@ -687,7 +687,7 @@ export default {
       searchPlaceholder: "Tìm theo tên...",
       noSearchResults: "Không tìm thấy thành viên nào.",
       raisedHandsSection: "Đang giơ tay",
-      membersSection: "Thành viên trong phòng",
+      membersSection: "Thành viên khác",
       advancedActions: "Thao tác nâng cao",
       dangerZone: "Khu vực nguy hiểm",
       endLiveDesc: "Đóng phiên họp trực tiếp cho toàn bộ học viên và người tham gia.",

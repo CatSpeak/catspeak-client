@@ -124,7 +124,7 @@
   --cath-bg: #0F0F0F;
   --cath-surface: #1A1A1A;
   --cath-card: #1A1A1A;
-  --cath-border: #3F3F3F;
+  --cath-border: #1D1D1D;
 }
 
 
@@ -559,4 +559,38 @@ input[type="number"] {
 .chat-message-highlight {
   box-shadow: inset 2px 0 0 0 var(--cath-primary, #72000d) !important;
   background-color: rgba(114, 0, 13, 0.1) !important;
+}
+
+/* ── Mobile-style Indeterminate Circular Progress ── */
+/* Arc grows, sweeps forward, and its tail catches up/collapses into itself */
+@keyframes circular-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes circular-dash {
+  0% {
+    stroke-dasharray: 1px, 150px;
+    stroke-dashoffset: 0px;
+  }
+  50% {
+    stroke-dasharray: 75px, 150px;
+    stroke-dashoffset: -10px;
+  }
+  100% {
+    stroke-dasharray: 75px, 150px;
+    stroke-dashoffset: -100px;
+  }
+}
+
+.animate-circular-rotate {
+  animation: circular-rotate 1.4s linear infinite;
+}
+
+.animate-circular-dash {
+  animation: circular-dash 1.4s ease-in-out infinite;
 }

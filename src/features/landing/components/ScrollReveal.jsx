@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import { M3_MOTION, getScrollTransition } from "@/shared/constants/motion"
 
 export const defaultItemVariants = {
   hidden: { opacity: 0, y: 24 },
@@ -6,8 +7,8 @@ export const defaultItemVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.8,
-      ease: [0.16, 1, 0.3, 1], // Gentle, luxurious deceleration curve
+      y: M3_MOTION.standard.spatial.default,
+      opacity: M3_MOTION.standard.effects.slow,
     },
   },
 }
@@ -20,13 +21,14 @@ export const ScrollReveal = ({
   children,
   className = "",
   delay = 0,
-  yOffset = 32,
-  duration = 0.85,
+  yOffset = 24,
+  preset = "default",
   once = true,
   amount = 0.15,
   margin = "0px 0px -70px 0px",
   stagger = false,
-  staggerDelay = 0.14,
+  staggerDelay = 0.1,
+  shouldReduceMotion = false,
 }) => {
   if (stagger) {
     return (
@@ -56,11 +58,7 @@ export const ScrollReveal = ({
       initial={{ opacity: 0, y: yOffset }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once, amount, margin }}
-      transition={{
-        duration,
-        delay,
-        ease: [0.16, 1, 0.3, 1],
-      }}
+      transition={getScrollTransition(preset, delay, shouldReduceMotion)}
       className={className}
     >
       {children}
@@ -77,7 +75,7 @@ export const ScrollItem = ({
   children,
   className = "",
   yOffset = 24,
-  duration = 0.8,
+  preset = "default",
   customVariants,
 }) => {
   const variants = customVariants || {
@@ -86,8 +84,8 @@ export const ScrollItem = ({
       opacity: 1,
       y: 0,
       transition: {
-        duration,
-        ease: [0.16, 1, 0.3, 1],
+        y: M3_MOTION.standard.spatial[preset] || M3_MOTION.standard.spatial.default,
+        opacity: M3_MOTION.standard.effects[preset] || M3_MOTION.standard.effects.slow,
       },
     },
   }

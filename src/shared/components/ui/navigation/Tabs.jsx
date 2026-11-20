@@ -102,13 +102,19 @@ const Tabs = memo(
     const scrollLeftStartRef = useRef(0)
     const hasDraggedRef = useRef(false)
 
-    // Tự động cuộn tab đang chọn vào khung nhìn (khi deep link hoặc đổi tab)
+    // Tự động cuộn tab đang chọn vào khung nhìn (khi deep link hoặc đổi tab) chỉ khi thanh tab bị tràn
     useEffect(() => {
-      if (activeTabRef.current) {
-        activeTabRef.current.scrollIntoView({
+      const container = scrollContainerRef.current
+      const tab = activeTabRef.current
+      if (!container || !tab) return
+
+      // Chỉ cuộn nếu thanh tabs thực sự có overflow chiều ngang
+      if (container.scrollWidth > container.clientWidth + 1) {
+        const targetScrollLeft =
+          tab.offsetLeft - (container.clientWidth - tab.clientWidth) / 2
+        container.scrollTo({
+          left: Math.max(0, targetScrollLeft),
           behavior: "smooth",
-          block: "nearest",
-          inline: "center",
         })
       }
     }, [activeTab])

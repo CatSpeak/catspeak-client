@@ -5,6 +5,7 @@ import { motion as Motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { useAuth } from "@/features/auth"
+import { M3_MOTION } from "@/shared/constants/motion"
 
 /**
  * Trigger pill component for desktop sub-nav dropdowns (e.g. catSpeak, workspace, community).
@@ -61,7 +62,7 @@ const DesktopSubNavDropdown = React.forwardRef(
         {!isLocked && (
           <Motion.span
             animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            transition={M3_MOTION.standard.spatial.fast}
             className="inline-flex shrink-0 items-center justify-center"
           >
             <ChevronDown size={16} />

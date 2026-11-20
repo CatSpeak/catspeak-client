@@ -89,7 +89,7 @@ const AISection = () => {
               <ScrollItem>
                 <div className="text-left">
                   <PillButton
-                    variant="secondary"
+                    variant="white"
                     onClick={handleAction}
                     className="w-full lg:inline-flex lg:w-auto"
                   >

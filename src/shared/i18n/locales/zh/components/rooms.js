@@ -665,6 +665,8 @@ export default {
       quickActions: "快捷操作",
       management: "管理选项",
       settingsTab: "设置",
+      raisedHandsSection: "举手",
+      membersSection: "其他",
       bannedTabShort: "封禁",
       groupStudentPermissions: "学生权限",
       groupStudentPermissionsRoom: "成员权限",

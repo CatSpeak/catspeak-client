@@ -272,13 +272,6 @@ export const getActiveDockSection = (pathname) => {
   if (cleanPath.startsWith("/pricing")) {
     return "pricing"
   }
-  if (
-    cleanPath.startsWith("/setting") ||
-    cleanPath.startsWith("/billing") ||
-    cleanPath.startsWith("/refunds")
-  ) {
-    return "settings"
-  }
   if (cleanPath.startsWith("/workspace") || cleanPath.includes("/workspace")) {
     return "workspace"
   }
@@ -434,18 +427,23 @@ export const navLinks = [
 ]
 
 export const settingNavLinks = [
+  { key: "systemConfig", path: "/setting/system", icon: Settings },
   {
     key: "accountInfo",
     path: "/setting/account",
     icon: User,
     roles: ["Student", "Admin"],
+    isPrivate: true,
   },
-  { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
-  { key: "billing", path: "/billing", icon: CreditCard },
-  { key: "systemConfig", path: "/setting/system", icon: Settings },
+  {
+    key: "instructor",
+    path: "/setting/instructor",
+    icon: GraduationCap,
+    isPrivate: true,
+  },
+  { key: "billing", path: "/billing", icon: CreditCard, isPrivate: true },
 ]
 
 export const footerLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard },
-  { key: "settings", path: "/setting", icon: Settings },
 ]

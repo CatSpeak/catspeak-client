@@ -31,7 +31,7 @@ export default {
     english: "英語",
     japan: "日本",
   },
-  switchRole: "役割を切り替え",
+  switchRole: "役割",
   studentRole: "生徒",
   teacherRole: "講師",
   noPermissionTeacher:

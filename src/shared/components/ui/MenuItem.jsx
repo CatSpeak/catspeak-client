@@ -110,7 +110,7 @@ const MenuItem = ({
         {(rightText !== undefined || rightContent || hasSubmenu) && (
           <div className="flex items-center shrink-0 ml-2">
             {rightText !== undefined && (
-              <span className="text-xs mr-1.5 text-secondary dark:text-[#AAAAAA]">
+              <span className="text-xs mr-1 text-secondary dark:text-[#AAAAAA]">
                 {rightText}
               </span>
             )}

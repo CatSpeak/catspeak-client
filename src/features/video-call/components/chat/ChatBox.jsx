@@ -124,7 +124,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   }
 
   return (
-    <div className={`relative flex h-full flex-col bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white ${className}`}>
+    <div className={`relative flex h-full flex-col overflow-hidden bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white ${className}`}>
       {/* Tab Bar */}
       <Tabs
         tabs={chatTabs}
@@ -138,8 +138,8 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
       <TabContent
         activeTab={activeChatTab}
         tabs={chatTabs}
-        className="flex-1 flex flex-col min-h-0 bg-white dark:bg-[#1A1A1A]"
-        containerClassName="flex-1 flex flex-col min-h-0"
+        className="flex-1 flex flex-col min-h-0 overflow-hidden bg-white dark:bg-[#1A1A1A]"
+        containerClassName="flex-1 flex flex-col min-h-0 overflow-hidden"
       >
         {/* AI Tab Content */}
         {activeChatTab === "ai" && (

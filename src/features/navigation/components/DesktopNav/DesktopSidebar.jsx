@@ -12,7 +12,6 @@ import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 import {
   navSections,
   footerLinks,
-  settingNavLinks,
   dockNavGroups,
   getActiveDockSection,
   isNavItemVisible,
@@ -72,22 +71,11 @@ const DesktopSidebar = () => {
 
   const activeDockSection = getActiveDockSection(pathname)
 
-  const isSettingsPage =
-    pathname.startsWith("/setting") ||
-    pathname.startsWith("/billing") ||
-    pathname.startsWith("/refunds")
-
   // Record last selected sublink on route change (guarded to avoid redundant context re-renders)
   useEffect(() => {
     const cleanPath = normalizePath(pathname)
     let section = null
     if (
-      pathname.startsWith("/setting") ||
-      pathname.startsWith("/billing") ||
-      pathname.startsWith("/refunds")
-    ) {
-      section = "settings"
-    } else if (
       pathname.includes("/learning-path") ||
       pathname.includes("/placement-test")
     ) {
@@ -110,10 +98,9 @@ const DesktopSidebar = () => {
     (s) => s.key === activeDockSection,
   )
   const currentHasSublinks =
-    activeDockSection === "settings" ||
-    (Boolean(currentSectionData?.items?.length) &&
-      (!currentSectionData?.excludeLangs ||
-        !currentSectionData.excludeLangs.includes(currentLang)))
+    Boolean(currentSectionData?.items?.length) &&
+    (!currentSectionData?.excludeLangs ||
+      !currentSectionData.excludeLangs.includes(currentLang))
 
   // Auto-expand secondary sidebar panel when switching into a section with sublinks (guarded)
   const prevSectionRef = useRef(activeDockSection)
@@ -217,22 +204,12 @@ const DesktopSidebar = () => {
   }
 
   const getFooterLinkPath = (item) => {
-    if (item.key === "settings" && lastSublinks?.settings) {
-      const remembered = lastSublinks.settings
-      if (
-        remembered.startsWith("/setting") ||
-        remembered.startsWith("/billing") ||
-        remembered.startsWith("/refunds")
-      ) {
-        return resolvePath(remembered)
-      }
-    }
     return resolvePath(item.path)
   }
 
   // Determine if secondary sidebar panel should be open
   const isPanelOpen = isDesktopExpanded && currentHasSublinks
-  const currentSectionKey = isSettingsPage ? "settings" : activeDockSection
+  const currentSectionKey = activeDockSection
 
   const renderDockItem = (item) => (
     <DockButton
@@ -251,7 +228,7 @@ const DesktopSidebar = () => {
       data-tour="main-sidebar"
     >
       {/* 1. PRIMARY SLIM DOCK (ALWAYS DOCKED - 72px) */}
-      <div className="h-full w-[72px] bg-cath-red-700 dark:bg-[#0F0F0F] text-white flex flex-col items-center shrink-0 shadow-lg relative z-20 transition-colors duration-200 border-r border-border dark:border-[#3F3F3F]">
+      <div className="h-full w-[72px] bg-cath-red-700 dark:bg-[#0F0F0F] text-white flex flex-col items-center shrink-0 shadow-lg relative z-20 transition-colors duration-200 border-r border-border dark:border-darkBorder">
         {/* Brand Icon */}
         <div className="py-4 flex items-center justify-center relative z-10">
           <Link
@@ -280,7 +257,7 @@ const DesktopSidebar = () => {
               return (
                 <React.Fragment key={group.key}>
                   {groupIdx > 0 && (
-                    <div className="w-8 h-[1px] bg-white/20 dark:bg-[#3F3F3F] shrink-0" />
+                    <div className="w-8 h-[1px] bg-white/20 dark:bg-darkBorder shrink-0" />
                   )}
                   {visibleItems.map(renderDockItem)}
                 </React.Fragment>
@@ -288,35 +265,18 @@ const DesktopSidebar = () => {
             })}
           </div>
 
-          {/* Bottom Dock Links (Settings / Footer) */}
+          {/* Bottom Dock Links (Footer) */}
           <div className="flex flex-col gap-1 items-center w-full">
-            <div className="w-8 h-[1px] bg-white/20 dark:bg-[#3F3F3F] shrink-0" />
-            {footerLinks.map((item) => {
-              const isSettingsItem = item.key === "settings"
-              const isActive = isSettingsItem
-                ? activeDockSection === "settings" || isSettingsPage
-                : activeDockSection === item.key
-
-              return (
-                <DockButton
-                  key={item.key}
-                  to={getFooterLinkPath(item)}
-                  onClick={(e) => {
-                    if (isSettingsItem) {
-                      if (activeDockSection === "settings" || isSettingsPage) {
-                        e.preventDefault()
-                        setIsDesktopExpanded((prev) => !prev)
-                      } else {
-                        setIsDesktopExpanded(true)
-                      }
-                    }
-                  }}
-                  icon={item.icon || Settings}
-                  label={t.nav?.[item.key] || item.key}
-                  isActive={isActive}
-                />
-              )
-            })}
+            <div className="w-8 h-[1px] bg-white/20 dark:bg-darkBorder shrink-0" />
+            {footerLinks.map((item) => (
+              <DockButton
+                key={item.key}
+                to={getFooterLinkPath(item)}
+                icon={item.icon}
+                label={t.nav?.[item.key] || item.key}
+                isActive={activeDockSection === item.key}
+              />
+            ))}
           </div>
         </LayoutGroup>
       </div>
@@ -332,9 +292,9 @@ const DesktopSidebar = () => {
               opacity: 0,
               borderRightWidth: 0,
               transition: {
-                width: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
-                opacity: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
-                borderRightWidth: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+                width: M3_MOTION.standard.spatial.fast,
+                opacity: M3_MOTION.standard.effects.fast,
+                borderRightWidth: { duration: 0.05 },
               },
             }}
             transition={{
@@ -342,80 +302,49 @@ const DesktopSidebar = () => {
               opacity: M3_MOTION.standard.effects.fast,
               borderRightWidth: { duration: 0.05 },
             }}
-            className="h-full bg-white dark:bg-[#0F0F0F] border-r border-border dark:border-[#3F3F3F] overflow-hidden relative z-10 shrink-0"
+            className="h-full bg-white dark:bg-[#0F0F0F] border-r border-border dark:border-darkBorder overflow-hidden relative z-10 shrink-0"
           >
             <div className="w-[280px] h-full flex flex-col">
               {/* Secondary Header */}
               <div className="h-[56px] px-4 flex items-center shrink-0">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">
-                  {isSettingsPage
-                    ? t.nav?.settings || "Settings"
-                    : t.nav?.[
-                        currentSectionData?.labelKey || activeDockSection
-                      ] ||
-                      currentSectionData?.defaultLabel ||
-                      "Navigation"}
+                  {t.nav?.[currentSectionData?.labelKey || activeDockSection] ||
+                    currentSectionData?.defaultLabel ||
+                    "Navigation"}
                 </h2>
               </div>
 
               {/* Content Sub-Links: Stable, instant list without stagger flicker or duplicate-key collisions */}
               <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
-                {isSettingsPage
-                  ? settingNavLinks
-                      .filter((item) =>
-                        isNavItemVisible(item, {
-                          currentLang,
-                          isAuthenticated,
-                          activeRole,
-                        }),
-                      )
-                      .map((item) => {
+                {getVisibleGroupsForSection(currentSectionKey).map(
+                  (group, groupIdx) => (
+                    <React.Fragment key={`${currentSectionKey}-${group.key}`}>
+                      {groupIdx > 0 && (
+                        <div className="my-1 mx-2 h-px bg-border dark:bg-darkBorder shrink-0" />
+                      )}
+                      {group.items.map((item) => {
                         const label =
                           t.nav?.[item.key] || item.label || item.key
+                        let itemPath = item.path
+                        if (item.key === "profile" && user) {
+                          itemPath = `/workspace/profile/${user.accountId || user.id || ""}`
+                        }
                         return (
                           <DesktopNavItem
-                            key={`settings-${item.key}`}
-                            to={resolvePath(item.path)}
+                            key={`${currentSectionKey}-${item.key}`}
+                            to={resolvePath(itemPath)}
                             icon={item.icon}
                             label={label}
                             color={item.color}
                             img={item.img}
                             isDocked={false}
-                            sectionId="settings"
+                            sectionId={currentSectionKey}
                           />
                         )
-                      })
-                  : getVisibleGroupsForSection(currentSectionKey).map(
-                      (group, groupIdx) => (
-                        <React.Fragment
-                          key={`${currentSectionKey}-${group.key}`}
-                        >
-                          {groupIdx > 0 && (
-                            <div className="my-1 mx-2 h-px bg-border dark:bg-[#3F3F3F] shrink-0" />
-                          )}
-                          {group.items.map((item) => {
-                            const label =
-                              t.nav?.[item.key] || item.label || item.key
-                            let itemPath = item.path
-                            if (item.key === "profile" && user) {
-                              itemPath = `/workspace/profile/${user.accountId || user.id || ""}`
-                            }
-                            return (
-                              <DesktopNavItem
-                                key={`${currentSectionKey}-${item.key}`}
-                                to={resolvePath(itemPath)}
-                                icon={item.icon}
-                                label={label}
-                                color={item.color}
-                                img={item.img}
-                                isDocked={false}
-                                sectionId={currentSectionKey}
-                              />
-                            )
-                          })}
-                        </React.Fragment>
-                      ),
-                    )}
+                      })}
+                    </React.Fragment>
+                  ),
+                )}
               </div>
             </div>
           </Motion.div>

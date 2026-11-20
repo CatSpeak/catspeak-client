@@ -1,14 +1,16 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Menu } from "lucide-react"
 import { useLocation } from "react-router-dom"
 
 import { useAuth } from "@/features/auth"
-import ThemeToggle from "@/shared/components/ui/ThemeToggle"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { IconButton, PillButton } from "@/shared/components/ui/buttons"
+import { ArrowRight } from "lucide-react"
+import GuestSettingsControls from "@/shared/components/Header/GuestSettingsControls"
 import LandingHeaderLogo from "./LandingHeaderLogo"
-import LandingHeaderGuestControls from "./LandingHeaderGuestControls"
 import LandingHeaderUserControls from "./LandingHeaderUserControls"
 import { MobileSidebar } from "@/features/navigation"
+import ThemeToggle from "@/shared/components/ui/ThemeToggle"
 
 const LandingHeader = ({ onGetStarted }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
@@ -16,10 +18,26 @@ const LandingHeader = ({ onGetStarted }) => {
   const { pathname } = useLocation()
   const isContactPage = pathname === "/contact"
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
+
+  useEffect(() => {
+    let ticking = false
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 10)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const headerT = t?.landing?.header || {}
   const homePrefix = isContactPage ? "/" : ""
@@ -45,30 +63,39 @@ const LandingHeader = ({ onGetStarted }) => {
   ]
 
   return (
-    <header className="sticky top-0 z-[60] h-[72px] w-full border-b border-gray-100 bg-white dark:border-[#272727] dark:bg-[#0F0F0F]">
-      <div className="mx-auto grid h-full w-full max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center gap-2">
-          <button
-            aria-label="open drawer"
+    <header
+      className={`sticky top-0 z-40 h-14 w-full transition-all duration-300 border-b border-border dark:border-darkBorder ${
+        scrolled
+          ? "bg-white/90 dark:bg-[#0F0F0F]/90 backdrop-blur-md shadow-sm"
+          : "bg-white dark:bg-[#0F0F0F]"
+      }`}
+    >
+      <div className="relative flex h-full w-full items-center justify-between px-1 xl:pl-4 xl:pr-1">
+        <div className="flex items-center gap-2 shrink-0 z-10">
+          <IconButton
             onClick={handleDrawerToggle}
-            className="shrink-0 rounded-full p-2 text-gray-700 transition-colors hover:bg-black/[0.06] dark:text-gray-200 min-[1024px]:hidden"
+            variant="ghost"
+            className="xl:hidden"
+            aria-label="open drawer"
           >
             <Menu />
-          </button>
-          <div className="flex min-w-0 shrink-0 items-center">
+          </IconButton>
+          <div className="flex shrink-0 items-center">
             <LandingHeaderLogo />
           </div>
         </div>
 
         <nav
           aria-label="Main navigation"
-          className="hidden items-center gap-7 whitespace-nowrap text-sm text-[#292929] dark:text-gray-200 min-[1024px]:flex"
+          className="absolute left-1/2 -translate-x-1/2 hidden items-center gap-4 xl:gap-7 whitespace-nowrap text-sm text-[#292929] dark:text-gray-200 xl:flex"
         >
           {navItems.map(({ label, href }) => (
             <a
               key={href}
               href={href}
-              aria-current={isContactPage && href === "/contact" ? "page" : undefined}
+              aria-current={
+                isContactPage && href === "/contact" ? "page" : undefined
+              }
               className={`transition-colors hover:text-[#990011] dark:hover:text-[#FF8599] ${
                 isContactPage && href === "/contact"
                   ? "font-semibold text-[#A90016] underline underline-offset-8 dark:text-[#FF8599]"
@@ -80,18 +107,23 @@ const LandingHeader = ({ onGetStarted }) => {
           ))}
         </nav>
 
-        <div className="flex min-w-0 items-center justify-end gap-3">
-          <ThemeToggle
-            className="!h-[38px] !w-[38px] !rounded-xl border border-gray-200 dark:border-[#3F3F3F]"
-            innerClassName="!h-[36px] !w-[36px] !rounded-[11px] [&>svg]:!h-4 [&>svg]:!w-4"
-          />
+        <div className="flex min-w-0 items-center justify-end gap-2 z-10">
           {isLoggedIn ? (
-            <LandingHeaderUserControls />
+            <>
+              <ThemeToggle />
+              <LandingHeaderUserControls />
+            </>
           ) : (
-            <LandingHeaderGuestControls
-              onGetStarted={onGetStarted}
-              label={headerT.joinNow || "Tham gia ngay"}
-            />
+            <>
+              <GuestSettingsControls />
+              <PillButton
+                variant="primary"
+                onClick={() => onGetStarted?.("register")}
+                endIcon={<ArrowRight />}
+              >
+                {headerT.joinNow || "Tham gia ngay"}
+              </PillButton>
+            </>
           )}
         </div>
       </div>
