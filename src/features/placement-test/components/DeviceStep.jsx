@@ -418,7 +418,7 @@ const DeviceStep = ({ copy, onContinue }) => {
                 />
                 <span className="text-xs font-medium leading-[17px] text-slate-600 dark:text-neutral-300">
                   {device.pendingHint ||
-                    "Hãy ghi âm thử câu mẫu bên trái. Hệ thống chỉ cho vào phòng kiểm tra khi đo được tín hiệu giọng nói đạt chuẩn."}
+                    "Hãy ghi âm thử câu mẫu phía trên. Hệ thống chỉ cho vào phòng kiểm tra khi đo được tín hiệu giọng nói đạt chuẩn."}
                 </span>
               </div>
             )}

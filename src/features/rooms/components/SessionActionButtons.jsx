@@ -1,6 +1,6 @@
 import { motion as Motion } from "framer-motion"
 import { Bot } from "lucide-react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { badges } from "@/shared/constants/constants"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Button3D from "@/shared/components/ui/buttons/Button3D"
@@ -10,6 +10,7 @@ const SessionActionButtons = ({
   handleCreateStudyGroupSession,
   handleCreateAISession,
   handleCreateCustomRoomSession,
+  onAiChatClick,
   isCreatingOneOnOne,
   isCreatingStudyGroup,
   isCreatingAI,
@@ -17,12 +18,16 @@ const SessionActionButtons = ({
   currentLang,
 }) => {
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const { lang: paramLang } = useParams()
   const effectiveLang = currentLang ?? paramLang
   const isZhCommunity = effectiveLang === "zh"
-  const voxisUrl = `https://voxis.click/speaking?ref=catspeak&lang=${effectiveLang || "zh"}`
-  const handleVoxisClick = () => {
-    window.open(voxisUrl, "_blank", "noopener,noreferrer")
+  const handleAiChatClick = () => {
+    if (typeof onAiChatClick === "function") {
+      onAiChatClick()
+      return
+    }
+    navigate(`/${effectiveLang || "zh"}/ai-tutor/speaking-room`)
   }
 
   return (
@@ -83,7 +88,7 @@ const SessionActionButtons = ({
         {isZhCommunity && (
           <Motion.div
             className="flex items-center w-full sm:w-auto"
-            onClick={handleVoxisClick}
+            onClick={handleAiChatClick}
           >
             <Button3D
               aria-label={

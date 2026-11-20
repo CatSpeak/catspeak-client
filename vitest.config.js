@@ -19,6 +19,7 @@ export default defineConfig({
       "src/features/ai-tutor/**/*.test.{js,jsx}",
       "src/features/learning-path/**/*.test.{js,jsx}",
       "src/features/navigation/**/*.test.{js,jsx}",
+      "src/features/rooms/components/**/*.test.{js,jsx}",
     ],
   },
 })

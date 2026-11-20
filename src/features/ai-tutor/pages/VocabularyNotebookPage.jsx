@@ -2,6 +2,8 @@ import React from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ChevronRight, Layers, Plus } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 import {
   isNetworkError,
   useGetDeckCardsQuery,
@@ -24,14 +26,33 @@ const VocabularyNotebookPage = () => {
   const navigate = useNavigate()
   const { lang: paramLang } = useParams()
   const { language, t } = useLanguage()
+  const { isAuthenticated } = useAuth()
+  const { openAuthModal } = useAuthModal()
+  const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : ""
   const lang = paramLang || language || "vi"
   const paths = notebookPaths(lang)
 
-  const homeQuery = useGetFlashcardHomeQuery(undefined, { refetchOnMountOrArgChange: true })
+  const homeQuery = useGetFlashcardHomeQuery(undefined, {
+    skip: !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  })
   const { data: home = EMPTY_HOME, isLoading, isError, error, refetch } = homeQuery
-  const { data: decks = [] } = useGetFlashcardDecksQuery()
-  const { data: wrong = { items: [], total: 0 } } = useGetDeckCardsQuery({ deckId: "recent-wrong", limit: 6 })
+  const { data: decks = [] } = useGetFlashcardDecksQuery(undefined, {
+    skip: !isAuthenticated,
+  })
+  const { data: wrong = { items: [], total: 0 } } = useGetDeckCardsQuery(
+    { deckId: "recent-wrong", limit: 6 },
+    { skip: !isAuthenticated },
+  )
   useReportQueryNetwork(homeQuery)
+
+  const handleAuthAction = (action) => {
+    if (!isAuthenticated) {
+      openAuthModal("login", currentPath)
+      return
+    }
+    action()
+  }
 
   const title = (
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -45,7 +66,7 @@ const VocabularyNotebookPage = () => {
       </div>
       <button
         type="button"
-        onClick={() => navigate(paths.add)}
+        onClick={() => handleAuthAction(() => navigate(paths.add))}
         className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-white dark:bg-[#1A1A1A] px-4 py-2 text-sm font-bold text-[#680411] dark:text-red-400 shadow-xs hover:bg-rose-50 dark:hover:bg-[#272727]"
       >
         <Plus className="h-4 w-4" />
@@ -63,7 +84,7 @@ const VocabularyNotebookPage = () => {
     )
   }
 
-  if (isError && !homeQuery.data) {
+  if (isError && !homeQuery.data && isAuthenticated) {
     return (
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 pb-12">
         {title}
@@ -82,9 +103,9 @@ const VocabularyNotebookPage = () => {
         totalCards={home.total_cards}
         overdueCount={home.overdue_count || 0}
         activeSession={active}
-        onStartDue={() => navigate(flashcardReviewPath(lang))}
-        onStartFree={() => navigate(flashcardReviewPath(lang, { mode: "free", deckId: "all" }))}
-        onResume={() => active && navigate(flashcardReviewPath(lang, { mode: active.mode, sessionId: active.session_id }))}
+        onStartDue={() => handleAuthAction(() => navigate(flashcardReviewPath(lang)))}
+        onStartFree={() => handleAuthAction(() => navigate(flashcardReviewPath(lang, { mode: "free", deckId: "all" })))}
+        onResume={() => active && handleAuthAction(() => navigate(flashcardReviewPath(lang, { mode: active.mode, sessionId: active.session_id })))}
         onStartSpeaking={() => navigate(`/${lang}/ai-tutor/speaking-room`)}
       />
       <FlashcardStatCards totalCards={home.total_cards} dueCount={home.due_today_count} streakDays={home.streak_days || 0} />
@@ -93,7 +114,7 @@ const VocabularyNotebookPage = () => {
           items={wrong.items}
           total={home.recent_wrong_count || wrong.total || 0}
           onOpen={() => navigate(paths.deck("recent-wrong"))}
-          onPractice={() => navigate(paths.practice("recent-wrong"))}
+          onPractice={() => handleAuthAction(() => navigate(paths.practice("recent-wrong")))}
         />
       )}
       <div className="flex items-center justify-between pt-2">

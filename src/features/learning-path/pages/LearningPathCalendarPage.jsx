@@ -6,6 +6,8 @@ import {
   RotateCcw,
   X,
 } from "lucide-react"
+import { useAuth } from "@/features/auth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { toast } from "@/shared/utils/toastBridge"
 import {
   useGetCalendarQuery,
@@ -24,6 +26,84 @@ import QuotaLockedModal from "../components/QuotaLockedModal"
 import CycleSummaryModal from "../components/CycleSummaryModal"
 import LevelChangedModal from "../components/LevelChangedModal"
 import ComingSoonPage from "./ComingSoonPage"
+
+const GUEST_CALENDAR = {
+  status: "Active",
+  hskLevel: "HSK 1",
+  cycleId: 1,
+  totalSessions: 5,
+  completedSessions: 0,
+  streak: 0,
+  averageScore: null,
+  quota: {
+    usedSessions: 0,
+    maxSessions: 2,
+    remainingSessions: 2,
+    isPremium: false,
+  },
+  cards: [
+    {
+      cardId: 1,
+      dayIndex: 1,
+      scheduledDate: dayjs().format("YYYY-MM-DD"),
+      topicId: 1,
+      topicTitle: "Luyện tập các mẫu câu cơ bản",
+      topicDescription: "Chào hỏi & Giới thiệu bản thân (问候与自我介绍)",
+      category: "Core",
+      status: "Incomplete",
+      isToday: true,
+      canLaunch: true,
+    },
+    {
+      cardId: 2,
+      dayIndex: 2,
+      scheduledDate: dayjs().add(1, "day").format("YYYY-MM-DD"),
+      topicId: 2,
+      topicTitle: "Miêu tả các thành viên",
+      topicDescription: "Gia đình và Người thân",
+      category: "Core",
+      status: "Scheduled",
+      isToday: false,
+      canLaunch: false,
+    },
+    {
+      cardId: 3,
+      dayIndex: 3,
+      scheduledDate: dayjs().add(2, "day").format("YYYY-MM-DD"),
+      topicId: 3,
+      topicTitle: "Nói về giờ giấc, các mốc thời gian",
+      topicDescription: "Thời gian & Lịch trình hàng ngày",
+      category: "Core",
+      status: "Scheduled",
+      isToday: false,
+      canLaunch: false,
+    },
+    {
+      cardId: 4,
+      dayIndex: 4,
+      scheduledDate: dayjs().add(3, "day").format("YYYY-MM-DD"),
+      topicId: 4,
+      topicTitle: "Giao tiếp khi mua sắm cơ bản",
+      topicDescription: "Mua sắm & Hỏi giá cả",
+      category: "Core",
+      status: "Scheduled",
+      isToday: false,
+      canLaunch: false,
+    },
+    {
+      cardId: 5,
+      dayIndex: 5,
+      scheduledDate: dayjs().add(4, "day").format("YYYY-MM-DD"),
+      topicId: 5,
+      topicTitle: "Bày tỏ sở thích ăn uống",
+      topicDescription: "Ẩm thực & Món ăn yêu thích",
+      category: "Core",
+      status: "Scheduled",
+      isToday: false,
+      canLaunch: false,
+    },
+  ],
+}
 
 const CalendarLoadingSkeleton = () => (
   <div className="w-full max-w-6xl mx-auto py-6 px-4 sm:px-6 flex flex-col gap-6 animate-pulse">
@@ -72,6 +152,9 @@ const LearningPathCalendarPage = () => {
   const navigate = useNavigate()
   const { lang } = useParams()
   const currentLang = lang || "zh"
+  const { isAuthenticated } = useAuth()
+  const { openAuthModal } = useAuthModal()
+  const currentPath = typeof window !== "undefined" ? window.location.pathname + window.location.search : ""
 
   // Navigation tabs: 'cycle' (Chu kỳ) vs 'today' (Hôm nay) - Figma screen 10
   const [activeTab, setActiveTab] = useState("cycle")
@@ -101,15 +184,21 @@ const LearningPathCalendarPage = () => {
 
   // API hooks
   const {
-    data: calendarData,
+    data: serverCalendarData,
     isLoading,
     isFetching,
     isError,
     error,
     refetch,
   } = useGetCalendarQuery(undefined, {
+    skip: !isAuthenticated,
     pollingInterval: 120000,
   })
+
+  const calendarData =
+    (!isAuthenticated || (isError && !serverCalendarData))
+      ? GUEST_CALENDAR
+      : serverCalendarData
 
   const isSummaryModalOpen = Boolean(
     calendarData?.summaryModal && !hasDismissedSummary,
@@ -177,8 +266,20 @@ const LearningPathCalendarPage = () => {
     todayCard.status !== "Completed" &&
     todayCard.status !== "Skipped"
 
+  const handleOpenLevelModal = () => {
+    if (!isAuthenticated) {
+      openAuthModal("login", currentPath)
+      return
+    }
+    setIsLevelModalOpen(true)
+  }
+
   // Level change handler
   const handleConfirmLevelChange = async (newLevel) => {
+    if (!isAuthenticated) {
+      openAuthModal("login", currentPath)
+      return
+    }
     try {
       await changeLevel({ newLevel }).unwrap()
       toast.success(`Đã chuyển sang trình độ ${newLevel}!`)
@@ -193,6 +294,10 @@ const LearningPathCalendarPage = () => {
 
   // Card click / selection
   const handleSelectCard = (card) => {
+    if (!isAuthenticated) {
+      openAuthModal("login", currentPath)
+      return
+    }
     if (card.status === "QuotaLocked" || card.isQuotaLocked) {
       setIsQuotaLockedOpen(true)
       return
@@ -204,6 +309,10 @@ const LearningPathCalendarPage = () => {
 
   // Skip card handler - Figma screen 14
   const handleSkipCard = (card) => {
+    if (!isAuthenticated) {
+      openAuthModal("login", currentPath)
+      return
+    }
     setSkippedCardIds((prev) => new Set([...prev, card.cardId]))
     toast.info("Đã bỏ qua buổi học hôm nay.")
   }
@@ -262,6 +371,10 @@ const LearningPathCalendarPage = () => {
   }
 
   const handleLaunchCard = (card) => {
+    if (!isAuthenticated) {
+      openAuthModal("login", currentPath)
+      return
+    }
     if (card.status === "QuotaLocked" || card.isQuotaLocked) {
       setIsQuotaLockedOpen(true)
       return
@@ -280,14 +393,14 @@ const LearningPathCalendarPage = () => {
       <ComingSoonPage
         hskLevel={calendarData?.hskLevel || "HSK 4"}
         onChangeLevel={handleConfirmLevelChange}
-        onOpenLevelModal={() => setIsLevelModalOpen(true)}
+        onOpenLevelModal={handleOpenLevelModal}
         isChangingLevel={isChangingLevel}
       />
     )
   }
 
   // Error state
-  if (isError && !calendarData) {
+  if (isError && !calendarData && isAuthenticated) {
     return (
       <div className="w-full max-w-xl mx-auto py-16 px-4 text-center">
         <div className="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center mx-auto mb-4 border border-rose-200 dark:border-rose-800">
@@ -352,7 +465,7 @@ const LearningPathCalendarPage = () => {
         {/* Level badge / change level trigger */}
         <button
           type="button"
-          onClick={() => setIsLevelModalOpen(true)}
+          onClick={handleOpenLevelModal}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-neutral-200 bg-white dark:bg-[#1A1A1A] hover:bg-gray-50 dark:hover:bg-[#272727] border border-gray-200 dark:border-[#3F3F3F] shadow-2xs transition-all cursor-pointer"
         >
           <span>{calendarData?.hskLevel || "HSK 2"}</span>
@@ -382,7 +495,7 @@ const LearningPathCalendarPage = () => {
             averageScore={calendarData?.averageScore}
             streak={calendarData?.streak ?? 0}
             startsTomorrow={startsTomorrow}
-            onOpenLevelModal={() => setIsLevelModalOpen(true)}
+            onOpenLevelModal={handleOpenLevelModal}
           />
 
           {/* 2. Five-Card Calendar Header */}

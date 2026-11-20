@@ -276,11 +276,9 @@ const AiLevelAssessmentRoute = () => {
 
   return (
     <CommunityGuard>
-      <AuthGuard>
-        <LazyRoute>
-          <PlacementTestPage />
-        </LazyRoute>
-      </AuthGuard>
+      <LazyRoute>
+        <PlacementTestPage />
+      </LazyRoute>
     </CommunityGuard>
   )
 }
@@ -566,7 +564,7 @@ const routesConfig = [
                 children: [
                   {
                     index: true,
-                    element: <Navigate to="level-assessment" replace />,
+                    element: <Navigate to="learning-path" replace />,
                   },
                   {
                     path: "level-assessment",
@@ -672,15 +670,13 @@ const routesConfig = [
                     ),
                   },
                   {
-                    // TASK-AI-16: Sổ tay từ vựng (flashcard). Bắt đăng nhập (CHK-103),
-                    // khung chung có banner offline và bộ đệm offline (CHK-098..100).
+                    // TASK-AI-16: Sổ tay từ vựng (flashcard). Cho phép xem tổng quan sổ thẻ,
+                    // chặn AuthGuard ở các hành động ôn bài, thêm thẻ, phát âm.
                     path: "vocabulary-notebook",
                     element: (
-                      <AuthGuard>
-                        <LazyRoute>
-                          <AiFlashcardLayout />
-                        </LazyRoute>
-                      </AuthGuard>
+                      <LazyRoute>
+                        <AiFlashcardLayout />
+                      </LazyRoute>
                     ),
                     errorElement: <AiFlashcardRouteError />,
                     children: [
@@ -695,17 +691,21 @@ const routesConfig = [
                       {
                         path: "review",
                         element: (
-                          <LazyRoute>
-                            <AiFlashcardReviewPage />
-                          </LazyRoute>
+                          <AuthGuard>
+                            <LazyRoute>
+                              <AiFlashcardReviewPage />
+                            </LazyRoute>
+                          </AuthGuard>
                         ),
                       },
                       {
                         path: "review/:sessionId/result",
                         element: (
-                          <LazyRoute>
-                            <AiFlashcardResultPage />
-                          </LazyRoute>
+                          <AuthGuard>
+                            <LazyRoute>
+                              <AiFlashcardResultPage />
+                            </LazyRoute>
+                          </AuthGuard>
                         ),
                       },
                       {
@@ -727,17 +727,21 @@ const routesConfig = [
                       {
                         path: "add",
                         element: (
-                          <LazyRoute>
-                            <AiAddFlashcardPage />
-                          </LazyRoute>
+                          <AuthGuard>
+                            <LazyRoute>
+                              <AiAddFlashcardPage />
+                            </LazyRoute>
+                          </AuthGuard>
                         ),
                       },
                       {
                         path: "practice",
                         element: (
-                          <LazyRoute>
-                            <AiPronunciationPracticePage />
-                          </LazyRoute>
+                          <AuthGuard>
+                            <LazyRoute>
+                              <AiPronunciationPracticePage />
+                            </LazyRoute>
+                          </AuthGuard>
                         ),
                       },
                     ],

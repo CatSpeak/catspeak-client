@@ -8,6 +8,10 @@ const { calendarState, previewProps, quotaProps } = vi.hoisted(() => ({
   quotaProps: { current: null },
 }))
 
+vi.mock("@/features/auth", () => ({
+  useAuth: () => ({ isAuthenticated: true, user: { id: 1 } }),
+}))
+
 vi.mock("../api/learningPathApi", () => ({
   useGetCalendarQuery: () => ({
     data: calendarState.data,
@@ -23,6 +27,7 @@ vi.mock("../api/learningPathApi", () => ({
 
 vi.mock("react-router-dom", async (importOriginal) => ({
   ...(await importOriginal()),
+  useLocation: () => ({ pathname: "/zh/ai-tutor/learning-path", search: "" }),
   useNavigate: () => vi.fn(),
   useParams: () => ({ lang: "zh" }),
   useSearchParams: () => [

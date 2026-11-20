@@ -18,6 +18,7 @@ import {
 import { DEFAULT_TARGET_BAND } from "../constants/bands"
 import {
   DIMENSION_KEYS,
+  STANDARD_SCORE_THRESHOLD,
   computeOverallScore,
   getAllDimensionScores,
   getBandDescriptor,
@@ -344,9 +345,17 @@ const PlacementProfilePage = () => {
               tierLabel={tierLabel}
               cefr={descriptor.cefr}
               score={view.overall}
-              description={formatTemplate(copy.certificateDescription, {
-                date: view.testDate,
-              })}
+              description={formatTemplate(
+                view.overall !== null &&
+                  view.overall !== undefined &&
+                  view.overall < STANDARD_SCORE_THRESHOLD &&
+                  copy.certificateDescriptionLow
+                  ? copy.certificateDescriptionLow
+                  : copy.certificateDescription,
+                {
+                  date: view.testDate,
+                },
+              )}
               testDate={view.testDate}
               code={view.code}
               adjustmentNote={view.adjustmentNote}

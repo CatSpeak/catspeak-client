@@ -4,6 +4,7 @@ import { clearPlacementCache } from "@/features/placement-test/utils/sessionStor
 // Helper to safely parse user from localStorage
 const getUserFromStorage = () => {
   try {
+    if (typeof localStorage === "undefined") return null
     const userStr = localStorage.getItem("user")
     return userStr ? JSON.parse(userStr) : null
   } catch {
@@ -11,10 +12,19 @@ const getUserFromStorage = () => {
   }
 }
 
+const getStorageItem = (key) => {
+  try {
+    if (typeof localStorage === "undefined") return null
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
 const initialState = {
   user: getUserFromStorage(),
-  token: localStorage.getItem("token") || null,
-  refreshToken: localStorage.getItem("refreshToken") || null,
+  token: getStorageItem("token") || null,
+  refreshToken: getStorageItem("refreshToken") || null,
   status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
 }
 
@@ -43,10 +53,12 @@ const authSlice = createSlice({
       if (refreshToken) state.refreshToken = refreshToken
       state.status = "succeeded"
 
-      if (state.user) localStorage.setItem("user", JSON.stringify(state.user))
-      if (state.token) localStorage.setItem("token", state.token)
-      if (state.refreshToken)
-        localStorage.setItem("refreshToken", state.refreshToken)
+      if (typeof localStorage !== "undefined") {
+        if (state.user) localStorage.setItem("user", JSON.stringify(state.user))
+        if (state.token) localStorage.setItem("token", state.token)
+        if (state.refreshToken)
+          localStorage.setItem("refreshToken", state.refreshToken)
+      }
 
       // Diagnostic: log token expiry so we can correlate with 401 events
       const exp = decodeJwtExp(state.token)
@@ -64,9 +76,11 @@ const authSlice = createSlice({
       state.refreshToken = null
       state.status = "idle"
 
-      localStorage.removeItem("user")
-      localStorage.removeItem("token")
-      localStorage.removeItem("refreshToken")
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("user")
+        localStorage.removeItem("token")
+        localStorage.removeItem("refreshToken")
+      }
       clearPlacementCache()
     },
     setLoading: (state) => {

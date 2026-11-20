@@ -9,7 +9,10 @@ const SpeakingRoomFlowLayout = () => {
 
   // BUG-SS-12: hết hạn đăng nhập giữa phiên (refresh token thất bại thì store
   // logout) thì mở đăng nhập, đăng nhập xong quay lại đúng trang đang dùng.
-  if (!isAuthenticated) {
+  // Cho phép người dùng chưa đăng nhập xem danh sách chủ đề ở trang chọn (/speaking-room).
+  // Chỉ chuyển hướng đăng nhập khi truy cập vào phiên luyện nói thực tế (/sessions/).
+  const isInActiveSession = location.pathname.includes("/sessions/")
+  if (!isAuthenticated && isInActiveSession) {
     return (
       <Navigate
         to="/"

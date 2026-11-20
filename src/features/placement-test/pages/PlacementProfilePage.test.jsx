@@ -345,4 +345,52 @@ describe("PlacementProfilePage score sourcing", () => {
     expect(html).toContain(viCopy.placementTest.planRequiredTitle)
     expect(html).not.toContain("Đánh Giá 4 Kỹ Năng Khẩu Ngữ Đầu Vào")
   })
+
+  it("omits 'Đạt chuẩn khẩu ngữ' and shows foundational description when score is low (17/100)", () => {
+    readResultMock.mockReturnValue({
+      band: 3,
+      code: "psess_low",
+      scoredAt: new Date(2026, 10, 1, 12).getTime(),
+      pronunciation: 6,
+      vocabulary: 42,
+      grammar: 20,
+      fluency: 0,
+    })
+    retakeStatusState.value = {
+      ...defaultRetakeStatus,
+      currentHskLevel: 3,
+    }
+
+    const html = renderToStaticMarkup(<PlacementProfilePage />)
+
+    // Score is 17/100 (6+42+20+0)/4 = 17
+    expect(html).toContain("Điểm: 17 / 100")
+    expect(html).toContain("Khung tham chiếu Châu Âu: CEFR B1")
+    expect(html).not.toContain("Đạt chuẩn khẩu ngữ")
+    expect(html).toContain("Đang ở mức nền tảng, cần luyện thêm phát âm và độ trôi chảy. Đã hoàn tất bài khảo sát thích ứng AI CAT 5 câu ngày 01/11/2026.")
+    expect(html).not.toContain("Khả năng giao tiếp trôi chảy")
+  })
+
+  it("includes 'Đạt chuẩn khẩu ngữ' and shows fluent description when score is passing (>= 60)", () => {
+    readResultMock.mockReturnValue({
+      band: 3,
+      code: "psess_high",
+      scoredAt: new Date(2026, 10, 1, 12).getTime(),
+      pronunciation: 70,
+      vocabulary: 75,
+      grammar: 65,
+      fluency: 70,
+    })
+    retakeStatusState.value = {
+      ...defaultRetakeStatus,
+      currentHskLevel: 3,
+    }
+
+    const html = renderToStaticMarkup(<PlacementProfilePage />)
+
+    expect(html).toContain("Điểm: 70 / 100")
+    expect(html).toContain("Khung tham chiếu Châu Âu: CEFR B1 · Đạt chuẩn khẩu ngữ")
+    expect(html).toContain("Khả năng giao tiếp trôi chảy")
+    expect(html).toContain("01/11/2026")
+  })
 })

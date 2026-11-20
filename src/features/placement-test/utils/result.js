@@ -77,6 +77,7 @@ export const computeOverallScore = (result = {}) => {
 
 /** Ngưỡng coi một kỹ năng là điểm mạnh — cùng mức 60 với điểm yếu. */
 const STRENGTH_THRESHOLD = 60
+export const STANDARD_SCORE_THRESHOLD = 60
 
 export const getStrengthDimension = (result = {}) => {
   const scores = getDimensionScores(result)

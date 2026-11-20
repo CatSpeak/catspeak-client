@@ -61,11 +61,15 @@ const SystemDecksSection = ({ decks = [], onSelectDeck }) => {
             {deck.total_cards} thẻ
           </span>
 
-          {deck.due_count > 0 && (
-            <span className="rounded-full bg-rose-50 dark:bg-rose-950/40 px-3 py-1 text-xs font-bold text-[#680411] dark:text-red-400">
-              {deck.due_count} đến hạn
-            </span>
-          )}
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-bold ${
+              deck.due_count > 0
+                ? "bg-rose-50 dark:bg-rose-950/40 text-[#680411] dark:text-red-400"
+                : "bg-slate-100 dark:bg-[#272727] text-slate-500 dark:text-neutral-400"
+            }`}
+          >
+            {deck.due_count || 0} đến hạn
+          </span>
 
           <ChevronRight className="h-4 w-4 text-slate-400 dark:text-neutral-400 stroke-[2.2] transition-transform group-hover:translate-x-0.5" />
         </div>
@@ -89,17 +93,24 @@ const SystemDecksSection = ({ decks = [], onSelectDeck }) => {
         </div>
       </div>
 
-      {/* Nhóm 2: Chủ đề */}
-      {topicDecks.length > 0 && (
-        <div className="space-y-2.5 pt-2">
-          <h4 className="text-xs sm:text-sm font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">
-            Chủ đề
-          </h4>
+      {/* Nhóm 2: Theo chủ đề */}
+      <div className="space-y-2.5 pt-2">
+        <h4 className="text-xs sm:text-sm font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">
+          Theo chủ đề
+        </h4>
+        {topicDecks.length === 0 ? (
+          <div
+            data-testid="topic-decks-empty"
+            className="rounded-2xl border border-dashed border-slate-200 dark:border-[#3F3F3F] p-6 text-center text-sm text-slate-500 dark:text-neutral-400"
+          >
+            Chưa có bộ thẻ theo chủ đề nào. Hoàn thành các buổi luyện nói để lưu từ vựng theo chủ đề.
+          </div>
+        ) : (
           <div className="space-y-2">
             {topicDecks.map(renderDeckRow)}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

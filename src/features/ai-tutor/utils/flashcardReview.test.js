@@ -50,9 +50,19 @@ describe("fc03 ngôn ngữ người học", () => {
     const lines = resultLines({ answered: 10, remembered: 8, improved: 6, need_review_soon: 2, entered_long_term: 1 })
     const text = lines.map((l) => l.text).join(" | ")
     expect(text).toContain("8/10 thẻ nhớ được")
+    expect(text).toContain("6 thẻ nhớ tốt hơn lần trước")
     expect(text).toContain("2 thẻ cần ôn lại sớm")
     expect(text).toContain("1 thẻ vào bộ nhớ dài hạn")
     expect(text.toLowerCase()).not.toContain("hộp")
+  })
+
+  it("ẩn dòng so sánh khi thẻ chưa có lịch sử ôn hoặc không có thẻ nhớ tốt hơn (TC-FC-071, TC-FC-072)", () => {
+    const lines = resultLines({ answered: 6, remembered: 5, improved: 0, need_review_soon: 1, entered_long_term: 0 })
+    const keys = lines.map((l) => l.key)
+    expect(keys).toEqual(["remembered", "soon"])
+    expect(lines.find((l) => l.key === "improved")).toBeUndefined()
+    const text = lines.map((l) => l.text).join(" | ")
+    expect(text).not.toContain("nhớ tốt hơn lần trước")
   })
 
   it("tổng kết tạm khi offline tính cả lượt override", () => {

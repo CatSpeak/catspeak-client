@@ -43,7 +43,10 @@ const FlipCardExercise = ({ card, onResult, onNext }) => {
             )}
           </div>
         ) : (
-          <CardBack card={card} />
+          <div className="flex flex-col items-center gap-3 text-center">
+            <CardBack card={card} />
+            <AudioButton audioPath={card.audio_url} pinyin={card.pinyin} />
+          </div>
         )}
       </div>
 
