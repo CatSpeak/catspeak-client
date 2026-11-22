@@ -22,7 +22,7 @@ const NewsAdvancedFilterModal = ({
   const sortOptions = [
     { id: "createDate", label: t.news?.filters?.newest || "Mới nhất" },
     { id: "viewCount", label: t.news?.filters?.mostViewed || "Xem nhiều nhất" },
-    { id: "reactions", label: t.news?.filters?.mostReactions || "Tương tác nhiều" },
+    { id: "reactionCount", label: t.news?.filters?.mostReactions || "Tương tác nhiều" },
   ]
 
   const [fromDate, setFromDate] = useState("")
