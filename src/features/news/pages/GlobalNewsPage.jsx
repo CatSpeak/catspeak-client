@@ -38,7 +38,7 @@ const GlobalNewsPage = () => {
   const sortTabs = useMemo(() => [
     { id: "createDate", label: t.news?.filters?.newest || "Mới nhất", icon: Clock },
     { id: "viewCount", label: t.news?.filters?.mostViewed || "Xem nhiều nhất", icon: Eye },
-    { id: "reactions", label: t.news?.filters?.mostReactions || "Tương tác nhiều", icon: Heart },
+    { id: "reactionCount", label: t.news?.filters?.mostReactions || "Tương tác nhiều", icon: Heart },
   ], [t])
 
   const searchKeyword = searchParams.get("search") || ""
