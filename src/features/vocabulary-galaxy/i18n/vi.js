@@ -20,4 +20,7 @@ export default {
   useMock: "Dùng dữ liệu giả lập",
   mockNotice:
     "Chế độ dữ liệu giả lập — AI API staging đang lỗi hạ tầng (Cloudflare 1033). Bấm vào một ngôi sao để giả lập học từ.",
+  states: ["Chưa học", "Đang học", "Đã thuộc", "Nhớ lâu dài"],
+  practice: "Ôn tập từ vựng",
+  openGalaxy: "Mở Ngân hà từ vựng",
 }

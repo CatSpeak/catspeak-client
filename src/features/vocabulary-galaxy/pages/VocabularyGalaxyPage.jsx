@@ -1,6 +1,9 @@
 import React, { Suspense, lazy } from "react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { Sparkles } from "lucide-react"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { Keyboard, Sparkles } from "lucide-react"
+import { FEATURES } from "@/shared/config/featureFlags"
+import DueReminderBanner from "@/features/vocabulary-practice/components/DueReminderBanner"
+import { practicePath } from "@/features/vocabulary-practice/utils/practicePaths"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
@@ -38,10 +41,21 @@ const VocabularyGalaxyPage = () => {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="p-4">
-        <PageTitle>
-          {g.title || t?.common?.vocabularyGalaxy || "Ngân hà từ vựng"}
-        </PageTitle>
+      <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <PageTitle>
+            {g.title || t?.common?.vocabularyGalaxy || "Ngân hà từ vựng"}
+          </PageTitle>
+          {FEATURES.vocabPractice && (
+            <Link
+              to={practicePath()}
+              className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-300 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-4 text-sm font-semibold text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-[#333]"
+            >
+              <Keyboard className="h-4 w-4" /> {g.practice || "Ôn tập từ vựng"}
+            </Link>
+          )}
+        </div>
+        {!useMock && FEATURES.vocabPractice && <DueReminderBanner />}
       </div>
 
       <div className="flex flex-1 flex-col">

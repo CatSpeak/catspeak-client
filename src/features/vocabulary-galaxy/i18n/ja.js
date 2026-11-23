@@ -20,4 +20,7 @@ export default {
   useMock: "モックデータを使う",
   mockNotice:
     "モックデータモード — AI API staging のインフラ障害（Cloudflare 1033）。星をクリックして学習をシミュレートできます。",
+  states: ["未学習", "学習中", "習得済み", "長期記憶"],
+  practice: "単語を練習",
+  openGalaxy: "語彙ギャラクシーを開く",
 }

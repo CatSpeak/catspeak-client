@@ -17,10 +17,12 @@ const GalaxyView = ({
   clusters = GALAXY_CLUSTERS,
   onWordClick = null,
   showLegend = true,
+  compact = false,
   className = "",
 }) => {
   const { t } = useLanguage()
   const g = t?.vocabularyGalaxy || {}
+  const stateLabel = (s) => g.states?.[s] || GALAXY_STATE_LABELS[s]
 
   const canvasRef = useRef(null)
   const tooltipRef = useRef(null)
@@ -73,7 +75,7 @@ const GalaxyView = ({
       />
 
       {/* Nhãn cụm chủ đề, vị trí được hook cập nhật mỗi frame */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div className={`pointer-events-none absolute inset-0 overflow-hidden ${compact ? "hidden" : ""}`} aria-hidden="true">
         {clusters.map((c, k) => (
           <span
             key={c.id}
@@ -116,7 +118,7 @@ const GalaxyView = ({
                 className="h-2 w-2 rounded-full"
                 style={{ background: GALAXY_STATE_COLORS[hovered.aState ?? 0] }}
               />
-              {GALAXY_STATE_LABELS[hovered.aState ?? 0]}
+              {stateLabel(hovered.aState ?? 0)}
               {onWordClick && (
                 <span className="ml-auto text-[10px] text-white/50">{g.clickToLearn || "(bấm để học)"}</span>
               )}
@@ -126,7 +128,7 @@ const GalaxyView = ({
       </div>
 
       {/* Legend 4 mức trạng thái */}
-      {showLegend && (
+      {showLegend && !compact && (
         <div className="pointer-events-none absolute right-3 top-3 rounded-xl border border-white/10 bg-[#0d1226]/70 px-3 py-2 backdrop-blur-md">
           <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/50">
             {g.legend || "Trạng thái"}
@@ -138,7 +140,7 @@ const GalaxyView = ({
                   className="h-2 w-2 rounded-full"
                   style={{ background: GALAXY_STATE_COLORS[s] }}
                 />
-                <span>{GALAXY_STATE_LABELS[s]}</span>
+                <span>{stateLabel(s)}</span>
                 <span className="ml-auto font-mono text-[10px] text-white/40">{counts[s] ?? 0}</span>
               </div>
             ))}
@@ -146,7 +148,8 @@ const GalaxyView = ({
         </div>
       )}
 
-      {/* Chú thích + điều khiển */}
+      {/* Chú thích + điều khiển (ẩn ở mini Galaxy) */}
+      {!compact && (
       <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
         <div className="max-w-[60%] text-[11px] leading-relaxed text-white/60 sm:text-xs">
           <div>{g.hint || "Drag to rotate · scroll or pinch to zoom · right-drag or two fingers to pan"}</div>
@@ -168,6 +171,7 @@ const GalaxyView = ({
           </GalaxyButton>
         </div>
       </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 export { default as VocabularyGalaxyPage } from "./pages/VocabularyGalaxyPage"
 export { default as GalaxyView } from "./components/GalaxyView"
+export { default as MiniGalaxy } from "./components/MiniGalaxy"
 export * from "./hooks/useGalaxyWords"
 export * from "./hooks/useGalaxyWordsMock"
 export * from "./hooks/useGalaxyEngine"

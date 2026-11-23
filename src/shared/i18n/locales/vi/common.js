@@ -75,6 +75,7 @@ export default {
     vocabularyNotebook: "Sổ tay từ vựng",
     historyProgress: "Lịch sử & Tiến độ",
     vocabularyGalaxy: "Ngân hà từ vựng",
+    vocabularyPractice: "Luyện tập từ vựng",
     messages: "Tin nhắn",
     settings: "Cài đặt",
     help: "Trợ giúp",

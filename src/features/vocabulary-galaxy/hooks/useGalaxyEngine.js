@@ -37,6 +37,8 @@ export function useGalaxyEngine({ words, clusters, canvasRef, tooltipRef, labelR
   const rendererRef = useRef(null)
   const [hoverIndex, setHoverIndex] = useState(-1)
   const [isWebGL, setIsWebGL] = useState(true)
+  // Tăng lên khi WebGL context được trình duyệt trả lại -> dựng lại renderer (FE-04).
+  const [contextGen, setContextGen] = useState(0)
 
   if (!cameraRef.current) cameraRef.current = new GalaxyCamera()
 
@@ -58,7 +60,8 @@ export function useGalaxyEngine({ words, clusters, canvasRef, tooltipRef, labelR
     const canvas = canvasRef.current
     if (!canvas) return undefined
     const camera = cameraRef.current
-    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+    const motionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)")
+    let reducedMotion = motionQuery?.matches ?? false
     const renderer = new GalaxyRenderer(canvas, layout, { quality: detectQuality(), reducedMotion })
     const picker = new StarPicker(layout.positions)
     rendererRef.current = renderer
@@ -142,15 +145,62 @@ export function useGalaxyEngine({ words, clusters, canvasRef, tooltipRef, labelR
       }
       raf = requestAnimationFrame(frame)
     }
+
+    // FE-04: chỉ vẽ khi tab đang hiện VÀ canvas nằm trong khung nhìn. rAF tự dừng khi tab ẩn
+    // ở hầu hết trình duyệt, nhưng không dừng khi canvas bị cuộn khuất (mini Galaxy).
+    let onScreen = true
+    const start = () => {
+      if (raf || document.hidden || !onScreen) return
+      last = performance.now() // không cộng dồn dt của quãng dừng
+      fpsStart = last
+      frames = 0
       raf = requestAnimationFrame(frame)
+    }
+    const stop = () => {
+      cancelAnimationFrame(raf)
+      raf = 0
+    }
+    const sync = () => (document.hidden || !onScreen ? stop() : start())
+    document.addEventListener("visibilitychange", sync)
+    const io =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(([entry]) => {
+            onScreen = entry.isIntersecting
+            sync()
+          })
+        : null
+    io?.observe(canvas)
+
+    // Reduce Motion đổi khi đang mở trang: áp dụng ngay, không cần tải lại.
+    const onMotion = (e) => {
+      reducedMotion = e.matches
+      renderer.opts.reducedMotion = e.matches
+    }
+    motionQuery?.addEventListener?.("change", onMotion)
+
+    // GPU reset / tab nền lâu: giữ canvas, chờ context về rồi dựng lại.
+    const onLost = (e) => {
+      e.preventDefault()
+      stop()
+    }
+    const onRestored = () => setContextGen((n) => n + 1)
+    canvas.addEventListener("webglcontextlost", onLost)
+    canvas.addEventListener("webglcontextrestored", onRestored)
+
+    start()
 
     return () => {
-      cancelAnimationFrame(raf)
+      stop()
       ro.disconnect()
+      io?.disconnect()
+      document.removeEventListener("visibilitychange", sync)
+      motionQuery?.removeEventListener?.("change", onMotion)
+      canvas.removeEventListener("webglcontextlost", onLost)
+      canvas.removeEventListener("webglcontextrestored", onRestored)
       renderer.dispose()
       rendererRef.current = null
     }
-  }, [layout, canvasRef, tooltipRef, labelRefs, statsRef])
+  }, [layout, canvasRef, tooltipRef, labelRefs, statsRef, contextGen])
 
   // Đồng bộ trạng thái học vào buffer GPU mỗi khi `words` đổi.
   // Chỉ ghi buffer `states` — không dựng lại renderer, nên camera giữ nguyên.
@@ -164,7 +214,7 @@ export function useGalaxyEngine({ words, clusters, canvasRef, tooltipRef, labelR
     })
     renderer.setStates(states)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stateKey đại diện cho words
-  }, [stateKey, layout])
+  }, [stateKey, layout, contextGen])
 
   return {
     layout,

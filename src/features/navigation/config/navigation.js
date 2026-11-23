@@ -1,5 +1,7 @@
+import { FEATURES } from "@/shared/config/featureFlags"
 import {
   Home,
+  Keyboard,
   LayoutDashboard,
   GraduationCap,
   Settings,
@@ -149,12 +151,12 @@ export const navSections = [
             path: "/workspace/vocabulary",
             icon: Bookmark,
           },
-          {
-            key: "vocabularyGalaxy",
-            path: "/workspace/vocabulary-galaxy",
-            icon: Orbit,
-            lang: "zh",
-          },
+          ...(FEATURES.vocabPractice
+            ? [{ key: "vocabularyPractice", path: "/workspace/vocabulary-practice", icon: Keyboard, lang: "zh" }]
+            : []),
+          ...(FEATURES.vocabGalaxy
+            ? [{ key: "vocabularyGalaxy", path: "/workspace/vocabulary-galaxy", icon: Orbit, lang: "zh" }]
+            : []),
           {
             key: "myCalendar",
             path: "/workspace/my-calendar",
@@ -420,12 +422,12 @@ export const navLinks = [
             path: "/workspace/vocabulary",
             icon: Bookmark,
           },
-          {
-            key: "vocabularyGalaxy",
-            path: "/workspace/vocabulary-galaxy",
-            icon: Orbit,
-            lang: "zh",
-          },
+          ...(FEATURES.vocabPractice
+            ? [{ key: "vocabularyPractice", path: "/workspace/vocabulary-practice", icon: Keyboard, lang: "zh" }]
+            : []),
+          ...(FEATURES.vocabGalaxy
+            ? [{ key: "vocabularyGalaxy", path: "/workspace/vocabulary-galaxy", icon: Orbit, lang: "zh" }]
+            : []),
           {
             key: "myCalendar",
             path: "/workspace/my-calendar",
