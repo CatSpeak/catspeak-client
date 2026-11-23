@@ -57,5 +57,5 @@ test("compact geometry: bottom pill clears the centered avatar (the clipped-card
 test("full-size avatar and pill stay untouched for grid layouts", () => {
   assert.equal(getVideoTileAvatarSize(), 64)
   assert.ok(getVideoTileAvatarClass().includes("48px"))
-  assert.ok(getVideoTileOverlayPillClass().includes("px-4"))
+  assert.ok(getVideoTileOverlayPillClass().includes("sm:px-3"))
 })

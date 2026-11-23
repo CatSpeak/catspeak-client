@@ -568,6 +568,21 @@ export default {
       syncError: "Could not load the video. Check your connection and try again.",
       switchButton: "Switch to this video",
       switchLabel: "Paste a new YouTube link to switch",
+      searchLabel: "Search videos or paste a YouTube link",
+      searchPlaceholder: "Keywords or https://www.youtube.com/watch?v=...",
+      searchButton: "Search videos",
+      searching: "Searching...",
+      searchResults: "Search results",
+      loadMoreResults: "Load more results",
+      loadingMore: "Loading...",
+      noResults: "No matching videos. Try another keyword.",
+      searchQueryLength: "Keywords must be 2–100 characters.",
+      searchNotConfigured:
+        "YouTube search is not configured. You can still paste a YouTube link to play it.",
+      searchQuotaExceeded:
+        "YouTube search quota is exhausted for today. You can still paste a YouTube link to play it.",
+      searchError:
+        "Could not search videos. You can still paste a YouTube link to play it.",
       nowPlaying: "Now playing",
       captionsOn: "Turn on captions",
       captionsOff: "Turn off captions",

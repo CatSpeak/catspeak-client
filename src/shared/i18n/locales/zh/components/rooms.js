@@ -530,6 +530,21 @@ export default {
       syncError: "无法加载视频，请检查网络后重试。",
       switchButton: "切换到此视频",
       switchLabel: "粘贴新的 YouTube 链接以切换",
+      searchLabel: "搜索视频或粘贴 YouTube 链接",
+      searchPlaceholder: "关键词或 https://www.youtube.com/watch?v=...",
+      searchButton: "搜索视频",
+      searching: "正在搜索...",
+      searchResults: "搜索结果",
+      loadMoreResults: "加载更多结果",
+      loadingMore: "正在加载...",
+      noResults: "没有找到匹配的视频，请尝试其他关键词。",
+      searchQueryLength: "关键词需为 2 到 100 个字符。",
+      searchNotConfigured:
+        "YouTube 搜索尚未配置。您仍然可以粘贴 YouTube 链接直接播放。",
+      searchQuotaExceeded:
+        "今日的 YouTube 搜索配额已用完。您仍然可以粘贴 YouTube 链接直接播放。",
+      searchError:
+        "无法搜索视频。您仍然可以粘贴 YouTube 链接直接播放。",
       nowPlaying: "正在播放",
       captionsOn: "打开字幕",
       captionsOff: "关闭字幕",

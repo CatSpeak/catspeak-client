@@ -535,6 +535,21 @@ export default {
       syncError: "動画を読み込めませんでした。接続を確認してもう一度お試しください。",
       switchButton: "この動画に切り替え",
       switchLabel: "新しいYouTubeリンクを貼って切り替え",
+      searchLabel: "動画を検索、または YouTube リンクを貼り付け",
+      searchPlaceholder: "キーワード または https://www.youtube.com/watch?v=...",
+      searchButton: "動画を検索",
+      searching: "検索中...",
+      searchResults: "検索結果",
+      loadMoreResults: "さらに結果を読み込む",
+      loadingMore: "読み込み中...",
+      noResults: "一致する動画が見つかりません。別のキーワードをお試しください。",
+      searchQueryLength: "キーワードは2〜100文字で入力してください。",
+      searchNotConfigured:
+        "YouTube 検索が設定されていません。YouTube リンクを直接貼り付けて再生できます。",
+      searchQuotaExceeded:
+        "本日の YouTube 検索の上限に達しました。YouTube リンクを直接貼り付けて再生できます。",
+      searchError:
+        "動画を検索できませんでした。YouTube リンクを直接貼り付けて再生できます。",
       nowPlaying: "再生中",
       captionsOn: "字幕をオン",
       captionsOff: "字幕をオフ",

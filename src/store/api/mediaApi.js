@@ -42,6 +42,27 @@ export const mediaApi = baseApi.injectEndpoints({
       providesTags: ["Media"],
       transformResponse: (response) => (response ? mapMediaDto(response) : null),
     }),
+    searchMedia: builder.query({
+      query: ({ sessionId, q, pageToken }) => ({
+        url: "/livekit/media/search",
+        method: "GET",
+        params: { sessionId, q, pageToken },
+      }),
+      transformResponse: (response) => ({
+        items: (response?.items || []).map((item) => ({
+          videoId: item.videoId,
+          watchUrl: item.watchUrl,
+          title: item.title,
+          channelTitle: item.channelTitle,
+          thumbnailUrl: item.thumbnailUrl,
+          duration: item.duration,
+          durationSeconds: item.durationSeconds,
+          publishedAt: item.publishedAt,
+        })),
+        nextPageToken: response?.nextPageToken || null,
+        fromCache: Boolean(response?.fromCache),
+      }),
+    }),
   }),
 })
 
@@ -49,4 +70,5 @@ export const {
   useStartMediaMutation,
   useStopMediaMutation,
   useGetMediaStatusQuery,
+  useLazySearchMediaQuery,
 } = mediaApi
