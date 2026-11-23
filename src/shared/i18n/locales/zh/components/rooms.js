@@ -403,6 +403,29 @@ export default {
     connected: "已连接",
     connectingStatus: "连接中",
   },
+  desktopLauncher: {
+    betaBadge: "BETA",
+    title: "使用 Catspeak Desktop 更顺畅地进入房间",
+    subtitle:
+      "桌面应用让屏幕共享更稳定，支持实时标注，并在整节课中保持更好的连接。",
+    version: "版本 {{version}}",
+    downloadWindows: "下载 Windows 版",
+    downloadMacArm: "下载 macOS 版（Apple Silicon）",
+    downloadMacIntel: "下载 macOS 版（Intel）",
+    downloadGeneric: "下载安装包",
+    betaTitle: "Beta 安装指南",
+    betaNote:
+      "Beta 版本尚未进行代码签名，首次打开时系统可能会提示警告，这是正常现象。",
+    betaWindows: "Windows SmartScreen：点击“更多信息”，然后选择“仍要运行”。",
+    betaMac:
+      "macOS Gatekeeper：右键点击应用并选择“打开”，或在“系统设置 → 隐私与安全性”中允许。",
+    joinInBrowser: "在浏览器中参加",
+    rememberChoice: "记住我的选择",
+    loadingRelease: "正在加载最新版本...",
+    releaseUnavailable:
+      "无法加载最新安装包信息，你仍然可以在浏览器中参加。",
+    openDesktop: "打开 Catspeak Desktop",
+  },
   waitingScreen: {
     backToCommunity: "返回",
     readyToJoin: "准备好加入了吗？",

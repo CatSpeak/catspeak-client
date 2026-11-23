@@ -11,6 +11,9 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@styles": path.resolve(__dirname, "./src/shared/styles"),
+      // Pre-existing video-call unit tests import `node:test`; run them
+      // through vitest instead of failing with "No test suite found".
+      "node:test": path.resolve(__dirname, "./src/test/nodeTestShim.js"),
     },
   },
   test: {
@@ -21,6 +24,7 @@ export default defineConfig({
       "src/features/navigation/**/*.test.{js,jsx}",
       "src/features/rooms/components/**/*.test.{js,jsx}",
       "src/features/billing/**/*.test.{js,jsx}",
+      "src/features/video-call/**/*.test.{js,jsx}",
     ],
   },
 })
