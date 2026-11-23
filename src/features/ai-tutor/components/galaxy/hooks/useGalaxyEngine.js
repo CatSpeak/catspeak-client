@@ -21,7 +21,15 @@ const PICK_RADIUS_MOUSE = 14
  * @param {React.RefObject<HTMLElement>} [p.statsRef]  hiển thị FPS (tùy chọn)
  */
 export function useGalaxyEngine({ words, clusters, canvasRef, tooltipRef, labelRefs, statsRef }) {
-  const layout = useMemo(() => generateGalaxyLayout(words, clusters), [words, clusters])
+  // Layout chỉ phụ thuộc vị trí (theo id) — không phụ thuộc trạng thái học.
+  // Nhờ vậy học xong 1 từ chỉ đổi buffer `states`, không dựng lại renderer,
+  // nên camera giữ nguyên và vị trí sao không nhảy.
+  const idKey = useMemo(() => words.map((w) => w.id).join("|"), [words])
+  const layout = useMemo(
+    () => generateGalaxyLayout(words, clusters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- idKey đại diện cho words
+    [idKey, clusters],
+  )
   const cameraRef = useRef(null)
   const draggingRef = useRef(false)
   const pointerRef = useRef(null) // {x, y} hoặc null
@@ -134,7 +142,7 @@ export function useGalaxyEngine({ words, clusters, canvasRef, tooltipRef, labelR
       }
       raf = requestAnimationFrame(frame)
     }
-    raf = requestAnimationFrame(frame)
+      raf = requestAnimationFrame(frame)
 
     return () => {
       cancelAnimationFrame(raf)
@@ -143,6 +151,20 @@ export function useGalaxyEngine({ words, clusters, canvasRef, tooltipRef, labelR
       rendererRef.current = null
     }
   }, [layout, canvasRef, tooltipRef, labelRefs, statsRef])
+
+  // Đồng bộ trạng thái học vào buffer GPU mỗi khi `words` đổi.
+  // Chỉ ghi buffer `states` — không dựng lại renderer, nên camera giữ nguyên.
+  const stateKey = useMemo(() => words.map((w) => w.aState ?? 0).join(","), [words])
+  useEffect(() => {
+    const renderer = rendererRef.current
+    if (!renderer) return
+    const states = new Float32Array(words.length)
+    words.forEach((w, i) => {
+      states[i] = w.aState ?? 0
+    })
+    renderer.setStates(states)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stateKey đại diện cho words
+  }, [stateKey, layout])
 
   return {
     layout,

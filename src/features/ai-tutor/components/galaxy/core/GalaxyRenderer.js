@@ -96,6 +96,8 @@ export class GalaxyRenderer {
     const posBuf = this.buffer(gl, L.positions)
     const colBuf = this.buffer(gl, L.colors)
     const seedBuf = this.buffer(gl, L.seeds)
+    const stateBuf = this.buffer(gl, L.states)
+    this.stateBuf = stateBuf
 
     this.starVao = gl.createVertexArray()
     this.res.vaos.push(this.starVao)
@@ -103,6 +105,7 @@ export class GalaxyRenderer {
     this.bindAttr(gl, this.starProg, "aPos", posBuf, 3)
     this.bindAttr(gl, this.starProg, "aColor", colBuf, 3)
     this.bindAttr(gl, this.starProg, "aSeed", seedBuf, 1)
+    this.bindAttr(gl, this.starProg, "aState", stateBuf, 1)
 
     // Đường nối dùng lại VBO vị trí/màu của sao + index buffer (không nhân đôi dữ liệu đỉnh).
     this.lineVao = gl.createVertexArray()
@@ -157,6 +160,19 @@ export class GalaxyRenderer {
 
   replayIntro() {
     if (!this.opts.reducedMotion) this.introStart = performance.now()
+  }
+
+  /**
+   * Cập nhật trạng thái học của các sao (0..3) mà không cần dựng lại layout.
+   * Dùng khi người dùng học xong 1 từ → sao tương ứng sáng lên ngay.
+   *
+   * @param {Float32Array} states mảng trạng thái mới, cùng độ dài với layout.states
+   */
+  setStates(states) {
+    if (!this.gl || !this.stateBuf || !states || states.length !== this.layout.n) return
+    const gl = this.gl
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.stateBuf)
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, states)
   }
 
   intro(now) {
@@ -219,14 +235,23 @@ export class GalaxyRenderer {
     g.fillStyle = bg
     g.fillRect(0, 0, this.width, this.height)
     g.globalCompositeOperation = "lighter"
-    const { positions, colors, n } = this.layout
+    const { positions, colors, states, n } = this.layout
     for (let i = 0; i < n; i++) {
       const s = camera.worldToScreen(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
       if (!s) continue
       const hot = i === this.hover
-      const size = Math.max(1.5, ((hot ? 14 : 4) * Math.min(this.width, this.height)) / 520 / s.depth)
-      const a = (hot ? 1 : 0.55 * (0.7 + 0.3 * Math.sin(t + i))) * intro
-      g.fillStyle = `rgba(${(colors[i * 3] * 255) | 0},${(colors[i * 3 + 1] * 255) | 0},${(colors[i * 3 + 2] * 255) | 0},${a})`
+      const st = states[i] ?? 0
+      // Cùng quy tắc kích thước với shader: chưa học nhỏ, đã thuộc to.
+      const baseSize = st > 2.5 ? 13 : st > 1.5 ? 10 : st > 0.5 ? 7.5 : 3.4 + (i % 10) * 0.16
+      const size = Math.max(1.5, ((hot ? 14 : baseSize) * Math.min(this.width, this.height)) / 520 / s.depth)
+      const a = (hot ? 1 : (st > 0.5 ? 1 : 0.55 * (0.7 + 0.3 * Math.sin(t + i)))) * intro
+      let r = colors[i * 3] * 255
+      let gg = colors[i * 3 + 1] * 255
+      let b = colors[i * 3 + 2] * 255
+      if (st > 2.5) { r = 255; gg = 189; b = 87 }
+      else if (st > 1.5) { r = r * 0.4 + 255 * 0.6; gg = gg * 0.4 + 247 * 0.6; b = b * 0.4 + 230 * 0.6 }
+      else if (st > 0.5) { r = r * 0.65 + 255 * 0.35; gg = gg * 0.65 + 217 * 0.35; b = b * 0.65 + 128 * 0.35 }
+      g.fillStyle = `rgba(${r | 0},${gg | 0},${b | 0},${a})`
       g.fillRect(s.x - size / 2, s.y - size / 2, size, size)
     }
     g.globalCompositeOperation = "source-over"

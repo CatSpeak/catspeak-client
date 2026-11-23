@@ -32,5 +32,10 @@ export default {
     empty: "Your notebook is empty.",
     emptyHint: "Add words to see them become stars.",
     addWords: "Add words",
+    legend: "Status",
+    clickToLearn: "(click to learn)",
+    useMock: "Use mock data",
+    mockNotice:
+      "Mock data mode — AI API staging is down (Cloudflare 1033). Click any star to simulate learning that word.",
   },
 }

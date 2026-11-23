@@ -1,9 +1,9 @@
 // GLSL cho Galaxy. Shader sao/nebula được rút gọn từ src/galaxy/engine.ts của Word Atlas.
 
 export const STAR_VS = `#version 300 es
-in vec3 aPos; in vec3 aColor; in float aSeed;
+in vec3 aPos; in vec3 aColor; in float aSeed; in float aState;
 uniform mat4 uVP; uniform float uTime, uIntro, uScale, uHover, uMotion;
-out vec3 vColor; out float vAlpha; out float vHot;
+out vec3 vColor; out float vAlpha; out float vHot; out float vGold;
 void main(){
   float t = clamp((uIntro - aSeed * 0.4) / 0.6, 0.0, 1.0);
   float e = 1.0 - pow(1.0 - t, 3.0);
@@ -14,10 +14,17 @@ void main(){
   vec4 clip = uVP * vec4(p, 1.0);
   gl_Position = clip;
   float tw = mix(1.0, 0.7 + 0.3 * sin(uTime * (1.0 + aSeed * 2.5) + aSeed * 50.0), uMotion);
-  float size = 4.2 + aSeed * 2.0;
+
+  // ── Trạng thái học quyết định độ sáng / kích thước / màu ──
+  float size = 3.4 + aSeed * 1.6;   // chưa học: bụi sao nhỏ
   float alpha = 0.85;
   vec3 col = mix(aColor, vec3(0.85, 0.88, 1.0), 0.25);
-  vHot = 0.0;
+  vGold = 0.0;
+
+  if (aState > 0.5) { size = 7.5;  alpha = 1.0; col = mix(aColor, vec3(1.0, 0.85, 0.5), 0.35); }  // đang học
+  if (aState > 1.5) { size = 10.0; alpha = 1.0; col = mix(aColor, vec3(1.0, 0.97, 0.9), 0.60); }  // đã thuộc
+  if (aState > 2.5) { size = 13.0; alpha = 1.0; col = vec3(1.0, 0.74, 0.34); vGold = 1.0; }    // nhớ lâu dài
+
   if (abs(float(gl_VertexID) - uHover) < 0.5) { size = 20.0; alpha = 1.0; col = vec3(1.0); vHot = 1.0; }
   gl_PointSize = max(1.5, size * uScale / clip.w);
   vColor = col;
@@ -26,7 +33,7 @@ void main(){
 
 export const STAR_FS = `#version 300 es
 precision mediump float;
-in vec3 vColor; in float vAlpha; in float vHot;
+in vec3 vColor; in float vAlpha; in float vHot; in float vGold;
 out vec4 o;
 void main(){
   vec2 c = gl_PointCoord * 2.0 - 1.0;
@@ -34,7 +41,7 @@ void main(){
   if (d > 1.0) discard;
   // Lõi sáng + hào quang mềm (smoothstep/exp), mạnh hơn khi hover.
   float core = exp(-d * mix(9.0, 30.0, vHot));
-  float halo = exp(-d * 2.6) * mix(0.3, 0.6, vHot);
+  float halo = exp(-d * mix(2.6, 3.5, vGold)) * mix(0.3, 0.55, vGold);
   float a = (core + halo) * vAlpha;
   o = vec4(vColor * a, a);
 }`

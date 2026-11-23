@@ -32,5 +32,10 @@ export default {
     empty: "你的生词本还是空的。",
     emptyHint: "添加词汇，让它们变成星星。",
     addWords: "添加词汇",
+    legend: "状态",
+    clickToLearn: "（点击学习）",
+    useMock: "使用模拟数据",
+    mockNotice:
+      "模拟数据模式 — AI API staging 基础设施故障（Cloudflare 1033）。点击任意星标即可模拟学习该词。",
   },
 }
