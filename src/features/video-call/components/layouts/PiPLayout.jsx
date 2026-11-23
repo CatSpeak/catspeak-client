@@ -136,7 +136,7 @@ const PiPLayout = ({
     setDragging(false)
   }, [getNearestCorner])
 
-  const renderItem = (item) => {
+  const renderItem = (item, { readOnly = true } = {}) => {
     if (item.type === "screen") {
       return (
         <ScreenShareTile
@@ -147,7 +147,7 @@ const PiPLayout = ({
             "Unknown"
           }
           isLocal={item.data.participant?.isLocal}
-          readOnly
+          readOnly={readOnly}
           onClick={() =>
             handleTileClick({ type: "screen", trackRef: item.data })
           }
@@ -191,7 +191,7 @@ const PiPLayout = ({
       >
         {/* Main Background Video */}
         <div className="absolute inset-0 w-full h-full p-2">
-          {renderItem(allItems[0])}
+          {renderItem(allItems[0], { readOnly: false })}
         </div>
       </div>
     )
@@ -257,7 +257,7 @@ const PiPLayout = ({
     <div ref={containerRef} className="relative h-full w-full overflow-hidden">
       {/* Main Background Video */}
       <div className="absolute inset-0 w-full h-full">
-        {renderItem(mainItem)}
+        {renderItem(mainItem, { readOnly: false })}
       </div>
 
       {/* Floating PiP Video — draggable, snaps to 4 corners */}

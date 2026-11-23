@@ -628,6 +628,10 @@ export default {
       presenterUnlock: "Unlock member drawing",
       lockedByPresenter: "Presenter locked drawing",
       policyDisabled: "Drawing is turned off",
+      overlayActive: "Full-screen overlay active",
+      overlayMouseMode: "Mouse mode",
+      overlayDrawMode: "Draw mode",
+      overlayUnavailable: "Could not open the full-screen overlay.",
     },
     moreOptions: "More options",
     watchTogether: {

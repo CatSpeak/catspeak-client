@@ -13,6 +13,8 @@ import {
   normalizeCoHost,
 } from "@/features/co-host/constants"
 import { useScreenAnnotation } from "@/features/video-call/hooks/useScreenAnnotation"
+import { useDesktopOverlay } from "@/features/video-call/hooks/useDesktopOverlay"
+import { shouldHideInAppCanvas } from "@/features/video-call/utils/desktopOverlay"
 import { resolveAllowAnnotation } from "@/features/video-call/utils/annotationPolicy"
 import {
   ANNOTATION_COLORS,
@@ -55,6 +57,7 @@ const ScreenShareTile = ({
     isHost: isHostFromContext,
     isPiP,
     id: roomId,
+    screenShareSelection,
   } = useGlobalVideoCall()
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
@@ -98,6 +101,40 @@ const ScreenShareTile = ({
       "Guest",
     allowAnnotation,
     moderatorAccountIds,
+  })
+
+  /*
+   * Ticket 09: only the interactive (non-readOnly) local presenter tile owns
+   * the OS overlay, so a second read-only copy can never start it twice.
+   */
+  const desktopOverlay = useDesktopOverlay({
+    annotation,
+    trackSid: screenTrackSid,
+    isPresenter: isPresenter && !readOnly,
+    isShareActive:
+      isPresenter && !readOnly && Boolean(screenTrackSid) && !trackRef?.isMockScreen,
+    selection: screenShareSelection,
+    tool: annotationTool,
+    color: annotationColor,
+    width: annotationWidth,
+    onToolChange: setAnnotationTool,
+    onColorChange: setAnnotationColor,
+    onWidthChange: setAnnotationWidth,
+  })
+
+  /*
+   * Double-stroke prevention belongs to every copy of the local presenter's
+   * tile, not just the interactive spotlight one: a read-only sidebar/thumbnail
+   * copy would otherwise bake the DataChannel strokes into the captured screen.
+   * Hide the in-app canvas for the whole full-display share on the local
+   * machine; viewers keep rendering the same vector items normally.
+   */
+  const hideLocalFullDisplayCanvas = shouldHideInAppCanvas({
+    bridgeAvailable: desktopOverlay.available,
+    isLocalPresenter: isPresenter,
+    isFullDisplay: screenShareSelection?.isFullDisplay === true,
+    trackSid: screenTrackSid,
+    isMock: trackRef?.isMockScreen === true,
   })
 
   // Volume state (0 to 1)
@@ -267,7 +304,13 @@ const ScreenShareTile = ({
         />
       )}
 
-      {!trackRef?.isMockScreen && (
+      {/*
+       * Double-stroke prevention: while this machine presents a full display,
+       * every local copy hides the in-app canvas. The overlay windows are
+       * content-protected, so the captured screen contains neither the native
+       * strokes nor a second baked-in copy of the DataChannel vector layer.
+       */}
+      {!trackRef?.isMockScreen && !hideLocalFullDisplayCanvas && (
         <AnnotationCanvas
           containerRef={containerRef}
           videoRef={videoRef}
@@ -291,6 +334,34 @@ const ScreenShareTile = ({
           onErase={annotation.eraseAt}
           onToolChange={setAnnotationTool}
         />
+      )}
+
+      {desktopOverlay.active && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`pointer-events-none absolute left-2 top-2 z-20 flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm transition-opacity duration-300 ${
+            isHovered ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <MonitorUp size={13} />
+          <span>
+            {annotationCopy.overlayActive || "Full-screen overlay"} ·{" "}
+            {desktopOverlay.mode === "draw"
+              ? annotationCopy.overlayDrawMode || "Draw mode"
+              : annotationCopy.overlayMouseMode || "Mouse mode"}
+          </span>
+        </div>
+      )}
+
+      {desktopOverlay.error && (
+        <div
+          role="alert"
+          className="pointer-events-none absolute left-2 top-2 z-20 flex items-center gap-1.5 rounded-full bg-amber-500/90 px-2.5 py-1 text-[11px] font-semibold text-neutral-900"
+        >
+          {annotationCopy.overlayUnavailable ||
+            "Could not open the full-screen overlay."}
+        </div>
       )}
 
       {/* Control Overlay */}
@@ -364,7 +435,7 @@ const ScreenShareTile = ({
         </div>
       </div>
 
-      {isAnnotating && !readOnly && (
+      {isAnnotating && !readOnly && !hideLocalFullDisplayCanvas && (
         <AnnotationToolbar
           tool={annotationTool}
           color={annotationColor}

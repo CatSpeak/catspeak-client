@@ -585,6 +585,10 @@ export default {
       presenterUnlock: "解除成员绘制锁定",
       lockedByPresenter: "演示者已锁定绘制",
       policyDisabled: "绘制已关闭",
+      overlayActive: "全屏叠加层已启用",
+      overlayMouseMode: "鼠标模式",
+      overlayDrawMode: "绘制模式",
+      overlayUnavailable: "无法打开全屏叠加层。",
     },
     moreOptions: "更多选项",
     watchTogether: {
