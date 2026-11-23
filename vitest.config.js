@@ -15,6 +15,8 @@ export default defineConfig({
   },
   test: {
     include: [
+      "og/**/*.test.js",
+      "src/routes/**/*.test.{js,jsx}",
       "src/features/placement-test/**/*.test.{js,jsx}",
       "src/features/ai-tutor/**/*.test.{js,jsx}",
       "src/features/learning-path/**/*.test.{js,jsx}",

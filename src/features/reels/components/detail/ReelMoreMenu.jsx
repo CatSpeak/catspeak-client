@@ -4,6 +4,8 @@ import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useBookmarkReelMutation, useNotInterestedReelMutation } from "@/store/api/reelsApi"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
+import { getCommunityLang } from "@/shared/utils/navigation"
+import { communityCodeFromValue } from "@/features/calendar/utils/community"
 import ReelReportModal from "../modals/ReelReportModal"
 import ReelPlaylistModal from "../modals/ReelPlaylistModal"
 import {
@@ -30,7 +32,7 @@ const MENU_ITEMS_KEYS = [
  * Self-contained: manages its own open/close state and click-outside dismissal.
  */
 const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, reel }) {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const menuRef = useRef(null)
   const navigate = useNavigate()
@@ -73,7 +75,8 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
       },
 
       copyLink: async () => {
-        const langCode = localStorage.getItem("communityLanguage") || language || "en"
+        const langCode =
+          communityCodeFromValue(reel?.languageCommunity) || getCommunityLang(language)
         const url = getShareUrlWithVersion(`${window.location.origin}/${langCode}/cat-speak/reels/${reel.id}`)
         await navigator.clipboard.writeText(url)
         toast.success(t?.catSpeak?.reels?.detail?.moreMenu?.copySuccess || "Link copied to clipboard.")
@@ -119,7 +122,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
     } catch (err) {
       toast.error(t?.catSpeak?.reels?.detail?.moreMenu?.actionFailed || "Failed to perform action.")
     }
-  }, [showMenu, onClose, reel, bookmarkReel, notInterestedReel])
+  }, [showMenu, onClose, reel, bookmarkReel, notInterestedReel, language])
 
   /* Close on outside click or Escape */
   useEffect(() => {

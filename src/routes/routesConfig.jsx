@@ -99,6 +99,7 @@ import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/Li
 import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage"
 
 import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton"
+import LegacyProfileRedirect from "./LegacyProfileRedirect"
 const PlacementTestPage = lazy(
   () => import("@/features/placement-test/pages/PlacementTestPage"),
 )
@@ -1605,6 +1606,10 @@ const routesConfig = [
             ),
           },
         ],
+      },
+      {
+        path: "/profile/:accountId",
+        element: <LegacyProfileRedirect />,
       },
       {
         path: "/invite/:code",

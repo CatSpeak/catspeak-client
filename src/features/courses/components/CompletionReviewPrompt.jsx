@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react"
+import { getProfilePath } from "@/shared/utils/navigation"
 import { useSelector } from "react-redux"
 import { Share2, X, Trophy } from "lucide-react"
 import Confetti from "react-confetti"
@@ -159,7 +160,7 @@ const CompletionReviewPrompt = () => {
   const completionDateStr = completionDate ? formatDateStr(completionDate) : "—"
 
   const handleShare = async () => {
-    const profileUrl = `${window.location.origin}/profile/${userId}`
+    const profileUrl = `${window.location.origin}${getProfilePath(userId)}`
     const shareText = (
       popupT.shareText || "Tôi đã hoàn thành khóa học {courseName} trên CatSpeak!"
     ).replace("{courseName}", courseDisplayName)

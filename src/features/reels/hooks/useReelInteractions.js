@@ -1,6 +1,8 @@
 import { useCallback } from "react"
 import toast from "react-hot-toast"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
+import { getCommunityLang } from "@/shared/utils/navigation"
+import { communityCodeFromValue } from "@/features/calendar/utils/community"
 import {
   useToggleLikeReelMutation,
   useCreateReelCommentMutation,
@@ -45,7 +47,11 @@ export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t })
 
   const handleShare = useCallback(async () => {
     if (!reel?.id) return
-    const url = getShareUrlWithVersion(`${window.location.origin}/vi/cat-speak/reels/${reel.id}`)
+    const langCode =
+      communityCodeFromValue(reel.languageCommunity) || getCommunityLang()
+    const url = getShareUrlWithVersion(
+      `${window.location.origin}/${langCode}/cat-speak/reels/${reel.id}`,
+    )
     try {
       if (navigator.share) {
         await navigator.share({
