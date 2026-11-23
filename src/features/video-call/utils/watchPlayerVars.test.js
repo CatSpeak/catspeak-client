@@ -1,4 +1,4 @@
-import test from "node:test" // eslint-disable-line import/no-unresolved
+import { test } from "vitest"
 // eslint-disable-next-line import/no-unresolved
 import assert from "node:assert/strict"
 

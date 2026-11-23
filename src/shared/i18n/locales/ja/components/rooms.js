@@ -488,6 +488,17 @@ export default {
         "{{name}}さんが画面を共有中です。新しい画面共有を開始すると{{name}}さんのプレゼンを停止します。",
       hostProtected: "ホストがプレゼン中です。参加者はホストのプレゼンを上書きできません。",
     },
+    annotation: {
+      button: "注釈",
+      toolbar: "注釈ツール",
+      mouse: "マウス",
+      pen: "ペン",
+      highlighter: "蛍光ペン",
+      color: "色",
+      width: "線の太さ",
+      clearMine: "自分の注釈を消去",
+      exit: "注釈を終了",
+    },
     moreOptions: "その他のオプション",
     watchTogether: {
       toggleButton: "一緒に視聴",

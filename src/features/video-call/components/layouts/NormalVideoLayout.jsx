@@ -48,6 +48,7 @@ const NormalVideoLayout = ({
               "Unknown"
             }
             isLocal={item.data.participant?.isLocal}
+            readOnly
             onClick={
               isClickable
                 ? () =>

@@ -21,6 +21,7 @@ export default defineConfig({
       "src/features/navigation/**/*.test.{js,jsx}",
       "src/features/rooms/components/**/*.test.{js,jsx}",
       "src/features/billing/**/*.test.{js,jsx}",
+      "src/features/video-call/**/*.test.{js,jsx}",
     ],
   },
 })
