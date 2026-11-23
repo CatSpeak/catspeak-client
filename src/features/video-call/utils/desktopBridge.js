@@ -137,6 +137,32 @@ export function getProtocolScheme(releaseInfo) {
   return "catspeak"
 }
 
+/**
+ * The launcher may only open a release that actually resolved with at least one
+ * download. An empty payload (GitHub outage with no fallback) must show the
+ * unavailable notice instead of opening a guessed environment scheme.
+ */
+export function getDesktopReleaseState({
+  release = null,
+  isLoading = false,
+  isError = false,
+} = {}) {
+  const downloads = release?.downloads
+  const hasDownloads = Boolean(
+    downloads &&
+      typeof downloads === "object" &&
+      Object.keys(downloads).length > 0,
+  )
+
+  return {
+    ready: Boolean(release) && !isLoading && !isError && hasDownloads,
+    unavailable:
+      Boolean(isError) ||
+      (!isLoading && !release) ||
+      (Boolean(release) && !hasDownloads),
+  }
+}
+
 export function buildDesktopDeepLink({ scheme, roomId, lang, code } = {}) {
   const resolvedScheme =
     typeof scheme === "string" && scheme.trim()

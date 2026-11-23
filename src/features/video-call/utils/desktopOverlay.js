@@ -89,18 +89,18 @@ export const overlayModeForTool = (tool) =>
 
 /**
  * Double-stroke prevention decision. Every local copy of the presenter's tile
- * hides its in-app canvas for the whole full-display share: the OS overlay is
- * content-protected, so the captured screen must not contain baked-in strokes.
+ * hides its in-app canvas only while the OS overlay is actually active: if the
+ * overlay fails to start or the presenter exits it, the in-app canvas returns.
  */
 export const shouldHideInAppCanvas = ({
-  bridgeAvailable = false,
+  overlayActive = false,
   isLocalPresenter = false,
   isFullDisplay = false,
   trackSid = null,
   isMock = false,
 } = {}) =>
   Boolean(
-    bridgeAvailable &&
+    overlayActive &&
       isLocalPresenter &&
       isFullDisplay &&
       typeof trackSid === "string" &&

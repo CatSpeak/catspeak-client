@@ -468,10 +468,6 @@ export const roomsApi = baseApi.injectEndpoints({
     // --- Ticket 04 (room upgrade): screen-share annotation gate ---
     // Host or co-host with manage_student_share toggles. The value is read
     // from the room-state cache; the PUT invalidates it for the toggler.
-    getAnnotationPolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/annotation-policy`,
-      providesTags: (result, error, id) => [{ type: "RoomState", id }],
-    }),
     updateAnnotationPolicy: builder.mutation({
       query: ({ id, allow }) => ({
         url: `/rooms/${id}/moderation/annotation-policy`,
@@ -1085,7 +1081,6 @@ export const {
   // Ticket 02: student share + member recording policies (state-backed)
   useUpdateStudentSharePolicyMutation,
   useUpdateMemberRecordingPolicyMutation,
-  useGetAnnotationPolicyQuery,
   useUpdateAnnotationPolicyMutation,
   useRestrictChatMutation,
   useUnrestrictChatMutation,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { RoomEvent } from "livekit-client"
 
 import {
@@ -65,58 +65,6 @@ export const shouldFlushPointBatch = (
   now,
   interval = ANNOTATION_POINT_BATCH_MS,
 ) => now - lastFlushAt >= interval
-
-export const DESKTOP_ANNOTATION_CHANNEL = "annotation:event"
-
-/**
- * Bridge to the Electron OS overlay. The preload seam is optional; in a plain
- * browser every method is an inert no-op so ticket 07 can wire it later.
- */
-export const createDesktopAnnotationBridge = (
-  scope = typeof window !== "undefined" ? window : null,
-) => {
-  const ipc =
-    scope?.catspeakDesktop?.annotation ??
-    scope?.electronAPI?.annotation ??
-    null
-  const available = Boolean(ipc && typeof ipc.send === "function")
-
-  return {
-    available,
-    channel: DESKTOP_ANNOTATION_CHANNEL,
-    emit: (event) => {
-      if (!available) return false
-      try {
-        ipc.send(event)
-        return true
-      } catch {
-        return false
-      }
-    },
-    subscribe: (handler) => {
-      if (!available || typeof ipc.on !== "function") return () => {}
-      const wrapped = (_event, payload) => {
-        try {
-          handler(payload)
-        } catch {
-          // The overlay must never break the in-app renderer.
-        }
-      }
-      try {
-        ipc.on(DESKTOP_ANNOTATION_CHANNEL, wrapped)
-      } catch {
-        return () => {}
-      }
-      return () => {
-        try {
-          ipc.off?.(DESKTOP_ANNOTATION_CHANNEL, wrapped)
-        } catch {
-          // ignore
-        }
-      }
-    },
-  }
-}
 
 /**
  * canAnnotate: host, presenter or a co-host holding `manage_student_share`
@@ -482,7 +430,9 @@ export const applyAnnotationPacketToState = (
       }
     }
     case "presenter-lock":
-      return { ...state, presenterLocked: packet.locked }
+      // Control packets are moderator-only: a regular participant must never
+      // be able to lock/unlock everyone else's toolbar.
+      return senderModerates ? { ...state, presenterLocked: packet.locked } : state
     default:
       // sync-req/sync-snap are consumed by their own handlers.
       return state
@@ -494,6 +444,62 @@ const participantAuthorId = (participant) => {
   const meta = parseMetadata(participant.metadata)
   if (meta?.accountId != null) return String(meta.accountId)
   return participant.identity ?? null
+}
+
+/**
+ * Host, presenter and co-hosts with `manage_student_share` arrive in
+ * `moderatorAccountIds`; everything else is a regular participant.
+ */
+export const isAnnotationModerator = (
+  senderAuthorId,
+  moderatorAccountIds = [],
+) =>
+  senderAuthorId != null &&
+  (moderatorAccountIds ?? []).some(
+    (id) => id != null && String(id) === String(senderAuthorId),
+  )
+
+export const resolveAnnotationSenderAuthority = (
+  participant,
+  moderatorAccountIds = [],
+) => {
+  const senderAuthorId = participantAuthorId(participant)
+  return {
+    senderAuthorId,
+    senderCanModerate: isAnnotationModerator(
+      senderAuthorId,
+      moderatorAccountIds,
+    ),
+  }
+}
+
+/**
+ * `sync-snap` carries authoritative late-joiner state, so only a resolved
+ * moderator may apply it. Returns null when the sender is untrusted.
+ */
+export const handleAnnotationSyncSnapshot = (
+  buffers,
+  packet,
+  senderCanModerate = false,
+) => {
+  if (senderCanModerate !== true) return null
+  const result = reassembleSyncChunk(buffers, packet)
+  return { buffers: result.buffers, result }
+}
+
+/**
+ * Only the interactive/spotlight copy of the tile answers `sync-req`; grid,
+ * sidebar and PiP duplicates would otherwise broadcast N identical snapshots.
+ */
+export const resolveSyncRequestResponse = ({
+  isPrimary = false,
+  isPresenter = false,
+  isHost = false,
+} = {}) => {
+  if (!isPrimary) return "ignore"
+  if (isPresenter) return "snapshot"
+  if (isHost) return "fallback"
+  return "ignore"
 }
 
 const pointCoordinates = (point) =>
@@ -566,8 +572,6 @@ export const useScreenAnnotation = ({
     trackSid: null,
   })
   const sendSnapshotRef = useRef(() => {})
-
-  const bridge = useMemo(() => createDesktopAnnotationBridge(), [])
 
   const permissions = computeAnnotationPermissions({
     enabled,
@@ -689,13 +693,22 @@ export const useScreenAnnotation = ({
       const packet = decodeAnnotationPacket(payload)
       if (!packet || packet.trackSid !== trackSid) return
 
+      // Resolve the sender before interpreting any control packet: late-joiner
+      // snapshots and presenter locks are moderator-only.
+      const { senderAuthorId, senderCanModerate } =
+        resolveAnnotationSenderAuthority(
+          participant,
+          latestRef.current.moderatorAccountIds,
+        )
+
       if (packet.t === "sync-req") {
         const requestedAt = Date.now()
-        if (latestRef.current.isPresenter) {
+        const response = resolveSyncRequestResponse(latestRef.current)
+        if (response === "snapshot") {
           sendSnapshotRef.current()
           return
         }
-        if (!latestRef.current.isHost) return
+        if (response !== "fallback") return
         if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current)
         fallbackTimerRef.current = setTimeout(() => {
           fallbackTimerRef.current = null
@@ -706,25 +719,24 @@ export const useScreenAnnotation = ({
       }
 
       if (packet.t === "sync-snap") {
+        const handled = handleAnnotationSyncSnapshot(
+          syncBuffersRef.current,
+          packet,
+          senderCanModerate,
+        )
+        if (!handled) return
+
         lastSyncSnapAtRef.current = Date.now()
         if (fallbackTimerRef.current) {
           clearTimeout(fallbackTimerRef.current)
           fallbackTimerRef.current = null
         }
-        const result = reassembleSyncChunk(syncBuffersRef.current, packet)
-        syncBuffersRef.current = result.buffers
-        if (result.complete) {
-          setState((prev) => applySyncSnapshotToState(prev, result))
+        syncBuffersRef.current = handled.buffers
+        if (handled.result.complete) {
+          setState((prev) => applySyncSnapshotToState(prev, handled.result))
         }
         return
       }
-
-      const senderAuthorId = participantAuthorId(participant)
-      const senderCanModerate =
-        senderAuthorId != null &&
-        (latestRef.current.moderatorAccountIds ?? []).some(
-          (id) => id != null && String(id) === String(senderAuthorId),
-        )
 
       setState((prev) =>
         applyAnnotationPacketToState(prev, packet, {
@@ -837,10 +849,9 @@ export const useScreenAnnotation = ({
         }),
         false,
       )
-      bridge.emit({ type: "stroke-start", id, trackSid: current.trackSid })
       return id
     },
-    [bridge, publishPacket, setState],
+    [publishPacket, setState],
   )
 
   const extendStroke = useCallback(
@@ -891,9 +902,8 @@ export const useScreenAnnotation = ({
           flushStrokePending(stroke)
         }, delay)
       }
-      bridge.emit({ type: "stroke-point", id: stroke.id, pt: point })
     },
-    [bridge, flushStrokePending, setState],
+    [flushStrokePending, setState],
   )
 
   const endStroke = useCallback(() => {
@@ -964,9 +974,8 @@ export const useScreenAnnotation = ({
       }),
       true,
     )
-    bridge.emit({ type: "stroke-end", item })
     return item
-  }, [bridge, flushStrokePending, publishPacket, setState])
+  }, [flushStrokePending, publishPacket, setState])
 
   const flushLaserPending = useCallback(
     (laser) => {
@@ -1050,9 +1059,8 @@ export const useScreenAnnotation = ({
           }, delay)
         }
       }
-      bridge.emit({ type: "laser-move", x: point[0], y: point[1] })
     },
-    [bridge, flushLaserPending, publishPacket, setState],
+    [flushLaserPending, publishPacket, setState],
   )
 
   const beginShape = useCallback(
@@ -1146,9 +1154,8 @@ export const useScreenAnnotation = ({
       }),
       true,
     )
-    bridge.emit({ type: "shape-commit", item })
     return item
-  }, [bridge, publishPacket, setState])
+  }, [publishPacket, setState])
 
   const commitText = useCallback(
     ({
@@ -1193,10 +1200,9 @@ export const useScreenAnnotation = ({
         }),
         true,
       )
-      bridge.emit({ type: "text-commit", item })
       return item
     },
-    [bridge, publishPacket, setState],
+    [publishPacket, setState],
   )
 
   const eraseAt = useCallback(
@@ -1238,10 +1244,9 @@ export const useScreenAnnotation = ({
         buildErasePacket({ trackSid: current.trackSid, ids }),
         true,
       )
-      bridge.emit({ type: "erase", ids })
       return ids
     },
-    [bridge, publishPacket, setState],
+    [publishPacket, setState],
   )
 
   const undo = useCallback(() => {
@@ -1264,9 +1269,8 @@ export const useScreenAnnotation = ({
       buildUndoPacket({ trackSid: current.trackSid, id: result.item.id }),
       true,
     )
-    bridge.emit({ type: "undo", id: result.item.id })
     return true
-  }, [bridge, publishPacket, setState])
+  }, [publishPacket, setState])
 
   const redo = useCallback(() => {
     const current = latestRef.current
@@ -1287,9 +1291,8 @@ export const useScreenAnnotation = ({
       buildRedoPacket({ trackSid: current.trackSid, item: result.item }),
       true,
     )
-    bridge.emit({ type: "redo", item: result.item })
     return true
-  }, [bridge, publishPacket, setState])
+  }, [publishPacket, setState])
 
   const setPresenterLock = useCallback(
     (locked) => {
@@ -1302,10 +1305,9 @@ export const useScreenAnnotation = ({
         buildPresenterLockPacket({ trackSid: current.trackSid, locked: next }),
         true,
       )
-      bridge.emit({ type: "presenter-lock", locked: next })
       return true
     },
-    [bridge, publishPacket, setState],
+    [publishPacket, setState],
   )
 
   const clearScope = useCallback(
@@ -1335,10 +1337,9 @@ export const useScreenAnnotation = ({
         }),
       )
       publishPacket(packet, true)
-      bridge.emit({ type: "clear", scope })
       return true
     },
-    [bridge, publishPacket, setState],
+    [publishPacket, setState],
   )
 
   const clearMine = useCallback(() => clearScope("mine"), [clearScope])
@@ -1414,7 +1415,6 @@ export const useScreenAnnotation = ({
     applyLocalPacket,
     authorId: accountId === null || accountId === undefined ? "anonymous" : String(accountId),
     authorName: authorName || "Guest",
-    bridge,
   }
 }
 

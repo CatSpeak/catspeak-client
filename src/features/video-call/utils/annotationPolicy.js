@@ -39,8 +39,8 @@ export const applyRoomSettingsChanged = (roomState, settings) => {
   return roomState.data ? { ...roomState, data: nextPayload } : nextPayload
 }
 
-/** Host, or a co-host holding `manage_student_share`, may see/toggle the row. */
-export const canSeeAnnotationPolicyRow = ({
+/** Host, or a co-host holding `manage_student_share`, may manage the policy. */
+export const canManageAnnotationPolicy = ({
   isHost = false,
   coHost = null,
   accountId = null,

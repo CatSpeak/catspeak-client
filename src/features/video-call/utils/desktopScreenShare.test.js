@@ -12,6 +12,7 @@ import {
   normalizeScreenSources,
   normalizeScreenSourcesResponse,
   screenShareSelectionMetadata,
+  shouldRequestDesktopShareAudio,
   toSelectSourcePayload,
 } from "./desktopScreenShare.js"
 
@@ -312,5 +313,13 @@ describe("loadDesktopScreenSources", () => {
       permission: null,
       error: "SCREEN_SOURCES_FAILED",
     })
+  })
+})
+
+describe("desktop share audio", () => {
+  it("omits audio on macOS and requests it elsewhere", () => {
+    expect(shouldRequestDesktopShareAudio("darwin")).toBe(false)
+    expect(shouldRequestDesktopShareAudio("win32")).toBe(true)
+    expect(shouldRequestDesktopShareAudio(undefined)).toBe(true)
   })
 })

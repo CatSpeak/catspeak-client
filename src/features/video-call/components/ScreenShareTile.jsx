@@ -130,7 +130,7 @@ const ScreenShareTile = ({
    * machine; viewers keep rendering the same vector items normally.
    */
   const hideLocalFullDisplayCanvas = shouldHideInAppCanvas({
-    bridgeAvailable: desktopOverlay.available,
+    overlayActive: desktopOverlay.active,
     isLocalPresenter: isPresenter,
     isFullDisplay: screenShareSelection?.isFullDisplay === true,
     trackSid: screenTrackSid,

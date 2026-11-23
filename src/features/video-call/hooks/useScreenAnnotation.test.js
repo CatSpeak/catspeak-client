@@ -7,11 +7,14 @@ import {
   computeAnnotationPermissions,
   createAnnotationHistory,
   createAnnotationState,
-  createDesktopAnnotationBridge,
+  handleAnnotationSyncSnapshot,
+  isAnnotationModerator,
   isLaserTrailExpired,
   pruneAnnotationLasers,
   recordAnnotationHistoryCommit,
   resetAnnotationStateForTrack,
+  resolveAnnotationSenderAuthority,
+  resolveSyncRequestResponse,
   shouldFlushPointBatch,
   takeRedoEntry,
   takeUndoEntry,
@@ -21,13 +24,16 @@ import {
   buildClearPacket,
   buildErasePacket,
   buildLaserMovePacket,
+  buildPresenterLockPacket,
   buildRedoPacket,
   buildShapeCommitPacket,
   buildStrokeEndPacket,
   buildStrokePointPacket,
   buildStrokeStartPacket,
+  buildSyncSnapshotChunks,
   buildTextCommitPacket,
   buildUndoPacket,
+  createAnnotationSyncBuffers,
 } from "../utils/annotationProtocol.js"
 import { LASER_TTL_MS } from "../utils/annotationRenderer.js"
 
@@ -301,23 +307,39 @@ describe("applyAnnotationPacketToState", () => {
     expect(state.items).toHaveLength(0)
   })
 
-  test("tracks presenter-lock state for ticket 04", () => {
+  test("tracks presenter-lock state from a moderator", () => {
     const state = createAnnotationState(TRACK)
-    const locked = {
-      v: 1,
-      trackSid: TRACK,
-      t: "presenter-lock",
-      locked: true,
-    }
+    const locked = buildPresenterLockPacket({ trackSid: TRACK, locked: true })
     expect(
-      applyAnnotationPacketToState(state, locked).presenterLocked,
+      applyAnnotationPacketToState(state, locked, {
+        senderCanModerate: true,
+      }).presenterLocked,
     ).toBe(true)
     expect(
       applyAnnotationPacketToState(
-        applyAnnotationPacketToState(state, locked),
-        { ...locked, locked: false },
+        applyAnnotationPacketToState(state, locked, {
+          senderCanModerate: true,
+        }),
+        buildPresenterLockPacket({ trackSid: TRACK, locked: false }),
+        { senderCanModerate: true },
       ).presenterLocked,
     ).toBe(false)
+  })
+
+  test("ignores presenter-lock packets from non-moderators", () => {
+    const state = createAnnotationState(TRACK)
+    const locked = buildPresenterLockPacket({ trackSid: TRACK, locked: true })
+
+    expect(
+      applyAnnotationPacketToState(state, locked, {
+        senderCanModerate: false,
+      }),
+    ).toBe(state)
+    expect(
+      applyAnnotationPacketToState(state, locked, {
+        canModerate: false,
+      }),
+    ).toBe(state)
   })
 
   test("member draw packets are ignored while member drawing is locked", () => {
@@ -411,38 +433,78 @@ describe("track changes and late joiners", () => {
   })
 })
 
-describe("point batching and desktop bridge", () => {
+describe("point batching", () => {
   test("batches stroke points at no more than 30fps", () => {
     expect(ANNOTATION_POINT_BATCH_MS).toBeGreaterThanOrEqual(33)
     expect(shouldFlushPointBatch(0, 20)).toBe(false)
     expect(shouldFlushPointBatch(0, ANNOTATION_POINT_BATCH_MS)).toBe(true)
   })
+})
 
-  test("the Electron bridge is an inert no-op outside Electron", () => {
-    const bridge = createDesktopAnnotationBridge({})
-    expect(bridge.available).toBe(false)
-    expect(bridge.emit({ t: "stroke-start" })).toBe(false)
-    expect(bridge.subscribe(() => {})).toBeTypeOf("function")
+describe("trusted annotation control packets", () => {
+  const participant = (accountId) => ({
+    identity: "participant",
+    metadata: JSON.stringify({ accountId }),
   })
 
-  test("the Electron bridge forwards through the preload seam when present", () => {
-    const sent = []
-    const listeners = []
-    const bridge = createDesktopAnnotationBridge({
-      catspeakDesktop: {
-        annotation: {
-          send: (event) => sent.push(event),
-          on: (channel, cb) => listeners.push({ channel, cb }),
-          off: () => {},
-        },
-      },
+  test("resolves host, presenter and co-host ids as moderators", () => {
+    const moderators = [1, 2, 3]
+
+    expect(isAnnotationModerator("1", moderators)).toBe(true)
+    expect(isAnnotationModerator(2, moderators)).toBe(true)
+    expect(isAnnotationModerator("99", moderators)).toBe(false)
+    expect(isAnnotationModerator(null, moderators)).toBe(false)
+
+    expect(
+      resolveAnnotationSenderAuthority(participant(2), moderators),
+    ).toEqual({ senderAuthorId: "2", senderCanModerate: true })
+    expect(
+      resolveAnnotationSenderAuthority(participant(99), moderators),
+    ).toEqual({ senderAuthorId: "99", senderCanModerate: false })
+  })
+
+  test("ignores a sync snapshot from a non-moderator", () => {
+    const buffers = createAnnotationSyncBuffers()
+    const [packet] = buildSyncSnapshotChunks({
+      trackSid: TRACK,
+      items: [makeItem("a")],
     })
 
-    expect(bridge.available).toBe(true)
-    expect(bridge.emit({ t: "laser-move" })).toBe(true)
-    expect(sent).toEqual([{ t: "laser-move" }])
-    bridge.subscribe(() => {})
-    expect(listeners[0].channel).toBe("annotation:event")
+    expect(handleAnnotationSyncSnapshot(buffers, packet, false)).toBeNull()
+    expect(handleAnnotationSyncSnapshot(buffers, packet, null)).toBeNull()
+  })
+
+  test("accepts a snapshot from the presenter/host moderator", () => {
+    const [packet] = buildSyncSnapshotChunks({
+      trackSid: TRACK,
+      items: [makeItem("a")],
+      presenterLocked: true,
+    })
+
+    const handled = handleAnnotationSyncSnapshot(
+      createAnnotationSyncBuffers(),
+      packet,
+      true,
+    )
+
+    expect(handled.result.complete).toBe(true)
+    expect(handled.result.items.map((item) => item.id)).toEqual(["a"])
+    expect(handled.result.presenterLocked).toBe(true)
+  })
+
+  test("only the primary tile answers sync requests", () => {
+    expect(
+      resolveSyncRequestResponse({ isPrimary: false, isPresenter: true }),
+    ).toBe("ignore")
+    expect(
+      resolveSyncRequestResponse({ isPrimary: true, isPresenter: true }),
+    ).toBe("snapshot")
+    expect(
+      resolveSyncRequestResponse({ isPrimary: true, isHost: true }),
+    ).toBe("fallback")
+    expect(
+      resolveSyncRequestResponse({ isPrimary: true, isHost: false }),
+    ).toBe("ignore")
   })
 })
 

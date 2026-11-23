@@ -134,6 +134,14 @@ export function toSelectSourcePayload(source, { audio = true } = {}) {
   return { sourceId: source.id, audio: audio === true }
 }
 
+/**
+ * The desktop display-media handler deliberately omits audio on macOS;
+ * requesting it there can reject the whole screen share.
+ */
+export function shouldRequestDesktopShareAudio(platform) {
+  return platform !== "darwin"
+}
+
 export function normalizeScreenSourcesResponse(result) {
   if (Array.isArray(result)) {
     return {
