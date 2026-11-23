@@ -1,12 +1,16 @@
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation, useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { Apple, Download, Loader2, Monitor, ShieldAlert } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetDesktopLatestReleaseQuery } from "@/store/api/authApi"
+import {
+  useCreateDesktopLaunchCodeMutation,
+  useGetDesktopLatestReleaseQuery,
+} from "@/store/api/authApi"
 import { selectIsAuthenticated } from "@/store/slices/authSlice"
 import { MainLogo, MainLogoDark } from "@/shared/assets/icons/logo"
+import { buildHandoffDeepLink } from "../utils/desktopHandoff"
 import {
   detectDesktopPlatform,
   getJoinPreference,
@@ -39,8 +43,10 @@ const formatSize = (bytes) => {
  * Otherwise it offers the environment-correct desktop installer, macOS Intel
  * as a secondary link, Beta install guidance and "Join in browser".
  *
- * Ticket 06 owns the launch-code handoff: pass `onOpenDesktop` to expose the
- * "Open Catspeak Desktop" action (it receives `{ scheme, roomId, lang, release }`).
+ * Ticket 06 owns the launch-code handoff: the primary action requests a fresh
+ * one-time code and opens `${scheme}://join?roomId=...&lang=...&code=...`.
+ * The first launcher session also auto-attempts that deep link once, after the
+ * release payload (and therefore the environment scheme) is available.
  */
 const RoomLauncherGate = ({ children, onOpenDesktop }) => {
   const { lang, id: roomId } = useParams()
@@ -51,6 +57,11 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
   const [preference] = useState(() => getJoinPreference())
   const [rememberChoice, setRememberChoice] = useState(false)
   const [forceBrowser, setForceBrowser] = useState(false)
+  const [isOpeningDesktop, setIsOpeningDesktop] = useState(false)
+  const [openError, setOpenError] = useState(null)
+  const autoAttemptedRef = useRef(false)
+  const openingRef = useRef(false)
+  const [createLaunchCode] = useCreateDesktopLaunchCodeMutation()
 
   const showLauncher = useMemo(
     () =>
@@ -72,6 +83,49 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
   const scheme = getProtocolScheme(release)
   const downloads = release?.downloads || {}
   const copy = t.rooms?.desktopLauncher || {}
+
+  const requestLaunchCode = useCallback(
+    async ({ silent }) => {
+      if (!roomId || !lang || openingRef.current) return
+      openingRef.current = true
+      if (!silent) {
+        setIsOpeningDesktop(true)
+        setOpenError(null)
+      }
+
+      try {
+        const result = await createLaunchCode({ roomId, lang }).unwrap()
+        if (!result?.code) throw new Error("Desktop launch code missing")
+        const url = buildHandoffDeepLink({
+          release,
+          roomId,
+          lang,
+          code: result.code,
+        })
+        if (typeof onOpenDesktop === "function") {
+          onOpenDesktop({ scheme, roomId, lang, release, code: result.code, url })
+        } else if (typeof window !== "undefined") {
+          window.location.href = url
+        }
+      } catch (error) {
+        // The automatic attempt stays quiet unless the account is throttled.
+        if (!silent || error?.status === 429) {
+          setOpenError(error?.status === 429 ? "rateLimited" : "failed")
+        }
+      } finally {
+        openingRef.current = false
+        if (!silent) setIsOpeningDesktop(false)
+      }
+    },
+    [createLaunchCode, lang, onOpenDesktop, release, roomId, scheme],
+  )
+
+  useEffect(() => {
+    if (!showLauncher || forceBrowser || !release) return
+    if (autoAttemptedRef.current) return
+    autoAttemptedRef.current = true
+    requestLaunchCode({ silent: true })
+  }, [forceBrowser, release, requestLaunchCode, showLauncher])
 
   if (!showLauncher || forceBrowser) return children
 
@@ -98,9 +152,8 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
   }
 
   const handleOpenDesktop = () => {
-    if (typeof onOpenDesktop !== "function") return
     rememberIfNeeded("desktop")
-    onOpenDesktop({ scheme, roomId, lang, release })
+    requestLaunchCode({ silent: false })
   }
 
   const renderDownloadLink = (key, isPrimary) => {
@@ -196,15 +249,26 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
             </div>
           )}
 
-          {typeof onOpenDesktop === "function" && (
-            <PillButton
-              variant="secondary"
-              className="w-full"
-              startIcon={<Download size={20} />}
-              onClick={handleOpenDesktop}
+          <PillButton
+            variant="secondary"
+            className="w-full"
+            startIcon={<Download size={20} />}
+            loading={isOpeningDesktop}
+            loadingText={copy.openingDesktop}
+            onClick={handleOpenDesktop}
+          >
+            {copy.openDesktop}
+          </PillButton>
+
+          {openError && (
+            <p
+              role="alert"
+              className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300"
             >
-              {copy.openDesktop}
-            </PillButton>
+              {openError === "rateLimited"
+                ? copy.openDesktopRateLimited
+                : copy.openDesktopFailed}
+            </p>
           )}
 
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">

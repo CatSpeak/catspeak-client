@@ -350,6 +350,9 @@ export function createReauthBaseQuery(queryResolver) {
     const url = typeof args === "string" ? args : args?.url
     const isAuthEndpoint =
       url === "/Auth/refresh-token" || url === "/Auth/login"
+    // The desktop exchange is anonymous and single-use: never rotate (or
+    // logout) the browser session while trading the code for desktop tokens.
+    const isDesktopLaunchExchange = url === "/auth/desktop-launch-exchange"
     // Switch carries a refreshToken in its *body* that is captured at call
     // time. A proactive refresh right before the switch would rotate that
     // token (revoking the one in the body) and force the switch into the
@@ -358,7 +361,8 @@ export function createReauthBaseQuery(queryResolver) {
     // server-side grace handling) still recovers if the JWT was already
     // expired.
     const isSwitchEndpoint = url === "/Auth/switch-account-type"
-    const shouldProactiveRefresh = !isAuthEndpoint && !isSwitchEndpoint
+    const shouldProactiveRefresh =
+      !isAuthEndpoint && !isSwitchEndpoint && !isDesktopLaunchExchange
 
     const requestToken = api.getState().auth.token
 
@@ -382,7 +386,7 @@ export function createReauthBaseQuery(queryResolver) {
       console.warn(AUTH_LOG, `401 on ${url}`)
 
       // Never retry auth endpoints to avoid infinite loops
-      if (isAuthEndpoint) {
+      if (isAuthEndpoint || isDesktopLaunchExchange) {
         return result
       }
 

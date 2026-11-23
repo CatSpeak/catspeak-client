@@ -125,6 +125,26 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // Authenticated: one-time launch code that hands this browser session to
+    // Catspeak Desktop. The API stores only its SHA-256 hash (120s TTL).
+    createDesktopLaunchCode: builder.mutation({
+      query: (body) => ({
+        url: "/auth/desktop-launch-code",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    // Anonymous: atomically consumes the launch code and returns a new
+    // JWT + refresh token pair for the desktop app.
+    exchangeDesktopLaunchCode: builder.mutation({
+      query: (body) => ({
+        url: "/auth/desktop-launch-exchange",
+        method: "POST",
+        body,
+      }),
+    }),
+
     verifyEmail: builder.mutation({
       query: (body) => ({
         url: "/Auth/verify-email",
@@ -191,6 +211,8 @@ export const {
   useLogoutMutation,
   useGetProfileQuery,
   useGetDesktopLatestReleaseQuery,
+  useCreateDesktopLaunchCodeMutation,
+  useExchangeDesktopLaunchCodeMutation,
 
   useVerifyEmailMutation,
   useVerifyEmailOtpMutation,

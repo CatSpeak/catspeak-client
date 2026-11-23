@@ -455,6 +455,41 @@ export default {
     releaseUnavailable:
       "Couldn't load the latest installer. You can still join in the browser.",
     openDesktop: "Open Catspeak Desktop",
+    openingDesktop: "Opening Catspeak Desktop...",
+    openDesktopFailed:
+      "Couldn't open Catspeak Desktop. Download the installer below or join in the browser.",
+    openDesktopRateLimited:
+      "Too many attempts. Please wait a minute, then try again.",
+  },
+  desktopHandoff: {
+    badge: "DESKTOP",
+    title: "Signing you in to Catspeak Desktop",
+    exchanging: "Validating your one-time launch code...",
+    redirecting: "Verified. Taking you to the room...",
+    invalidTitle: "This link can't be used",
+    invalidMessage:
+      "The launch code is missing or malformed. Go back to the room and choose “Open Catspeak Desktop” to create a new one.",
+    expiredTitle: "Launch code expired",
+    expiredMessage:
+      "Launch codes are valid for 2 minutes. Go back to the room and create a new one.",
+    usedTitle: "Launch code already used",
+    usedMessage:
+      "This code was already exchanged. Go back to the room to get a new one.",
+    rateLimitedTitle: "Too many attempts",
+    rateLimitedMessage: "Please wait a minute, then try again.",
+    networkTitle: "Can't reach the server",
+    networkMessage:
+      "Catspeak couldn't be reached. Check your connection and try again.",
+    serverTitle: "Server is busy",
+    serverMessage: "The server hit a temporary problem. Please try again shortly.",
+    unknownTitle: "Couldn't sign you in",
+    unknownMessage:
+      "The launch code couldn't be exchanged. Try again or join the room on the web.",
+    retry: "Try again",
+    backToRoom: "Back to the room on web",
+    backToHome: "Back to the community",
+    newCodeHint:
+      "If the code expired or was already used, go back to the room and choose “Open Catspeak Desktop” for a fresh one.",
   },
   waitingScreen: {
     backToCommunity: "Back",
