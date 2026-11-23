@@ -20,4 +20,7 @@ export default {
   useMock: "Use mock data",
   mockNotice:
     "Mock data mode — AI API staging is down (Cloudflare 1033). Click any star to simulate learning that word.",
+  states: ["Not learned", "Learning", "Mastered", "Long-term"],
+  practice: "Practise words",
+  openGalaxy: "Open vocabulary galaxy",
 }

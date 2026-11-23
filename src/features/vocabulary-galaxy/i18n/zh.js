@@ -20,4 +20,7 @@ export default {
   useMock: "使用模拟数据",
   mockNotice:
     "模拟数据模式 — AI API staging 基础设施故障（Cloudflare 1033）。点击任意星标即可模拟学习该词。",
+  states: ["未学", "学习中", "已掌握", "长期记忆"],
+  practice: "练习词汇",
+  openGalaxy: "打开词汇银河",
 }

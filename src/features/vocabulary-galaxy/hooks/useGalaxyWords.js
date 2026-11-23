@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react"
 import { useDispatch } from "react-redux"
 import { flashcardApi, useGetFlashcardDecksQuery } from "@/features/ai-tutor/api/flashcardApi"
+import { FEATURES } from "@/shared/config/featureFlags"
+import { useGetGalaxyQuery } from "../api/galaxyApi"
+import { toGalaxyState } from "../core/galaxyState"
 
 // Bảng màu cho cụm (xoay vòng nếu nhiều deck hơn số màu).
 const PALETTE = [
@@ -20,6 +23,38 @@ const EXCLUDED_DECKS = new Set(["all", "recent-wrong"])
  * @returns {{ words: Array, clusters: Array, status: "loading"|"ready"|"empty"|"error", error: any, retry: () => void }}
  */
 export function useGalaxyWords({ enabled = true } = {}) {
+  const compact = useCompactGalaxy({ enabled: enabled && FEATURES.galaxyApi })
+  const crawled = useDeckGalaxy({ enabled: enabled && !FEATURES.galaxyApi })
+  return FEATURES.galaxyApi ? compact : crawled
+}
+
+/** Có BE-05: một payload gọn cho cả Ngân hà (có ETag). */
+function useCompactGalaxy({ enabled }) {
+  const q = useGetGalaxyQuery(undefined, { skip: !enabled })
+  return useMemo(() => {
+    const retry = () => q.refetch()
+    if (q.isError) return { words: [], clusters: [], status: "error", error: q.error, retry }
+    if (!q.data) return { words: [], clusters: [], status: "loading", error: null, retry }
+    const clusters = (q.data.clusters ?? []).map((c, i) => ({
+      id: String(c.id),
+      label: c.label ?? c.name ?? String(c.id),
+      color: c.color || PALETTE[i % PALETTE.length],
+    }))
+    const words = (q.data.words ?? []).slice(0, MAX_WORDS).map((w) => ({
+      id: String(w.id),
+      word: w.word,
+      pinyin: w.pinyin || "",
+      meaning: w.meaning ?? w.meaning_vi ?? "",
+      clusterId: String(w.cluster_id ?? w.clusterId),
+      aState: toGalaxyState(w),
+    }))
+    return { words, clusters, status: words.length ? "ready" : "empty", error: null, retry }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- q.refetch ổn định theo query
+  }, [q.data, q.isError, q.error])
+}
+
+/** Chưa có BE-05: gom từ các deck của sổ từ vựng. */
+function useDeckGalaxy({ enabled }) {
   const dispatch = useDispatch()
   const decksQuery = useGetFlashcardDecksQuery(undefined, { skip: !enabled })
   const [state, setState] = useState({ words: [], clusters: [], status: "loading", error: null })
@@ -87,6 +122,7 @@ export function useGalaxyWords({ enabled = true } = {}) {
               isKnown: Boolean(c.is_known),
               isDue: Boolean(c.is_due),
               isLongTerm: Boolean(c.is_long_term),
+              aState: toGalaxyState(c),
             })
           })
         })
