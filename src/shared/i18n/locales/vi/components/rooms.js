@@ -559,6 +559,17 @@ export default {
       takeoverMessage: "{{name}} đang chia sẻ màn hình. Bắt đầu chia sẻ màn hình mới sẽ dừng phần trình bày của {{name}}.",
       hostProtected: "Chủ phòng đang thuyết trình. Bạn không thể ghi đè màn hình của chủ phòng.",
     },
+    annotation: {
+      button: "Chú thích",
+      toolbar: "Công cụ chú thích",
+      mouse: "Chuột",
+      pen: "Bút",
+      highlighter: "Bút dạ quang",
+      color: "Màu",
+      width: "Cỡ nét",
+      clearMine: "Xóa của tôi",
+      exit: "Thoát chú thích",
+    },
     moreOptions: "Tùy chọn khác",
     watchTogether: {
       toggleButton: "Xem video chung",

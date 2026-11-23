@@ -537,6 +537,17 @@ export default {
       takeoverMessage: "{{name}} 正在共享屏幕。开始新的屏幕共享将停止 {{name}} 的演示。",
       hostProtected: "主持人正在演示。与会者不能覆盖主持人的演示。",
     },
+    annotation: {
+      button: "批注",
+      toolbar: "批注工具",
+      mouse: "鼠标",
+      pen: "画笔",
+      highlighter: "荧光笔",
+      color: "颜色",
+      width: "线条粗细",
+      clearMine: "清除我的批注",
+      exit: "退出批注",
+    },
     moreOptions: "更多选项",
     watchTogether: {
       toggleButton: "一起观看",
