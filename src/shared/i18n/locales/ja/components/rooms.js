@@ -421,6 +421,42 @@ export default {
     releaseUnavailable:
       "最新のインストーラー情報を取得できませんでした。ブラウザから参加できます。",
     openDesktop: "Catspeak Desktop を開く",
+    openingDesktop: "Catspeak Desktop を開いています...",
+    openDesktopFailed:
+      "Catspeak Desktop を開けませんでした。下のインストーラーをダウンロードするか、ブラウザで参加してください。",
+    openDesktopRateLimited:
+      "試行回数が多すぎます。1 分ほど待ってからもう一度お試しください。",
+  },
+  desktopHandoff: {
+    badge: "DESKTOP",
+    title: "Catspeak Desktop にサインインしています",
+    exchanging: "ワンタイム起動コードを確認しています...",
+    redirecting: "確認できました。ルームへ移動しています...",
+    invalidTitle: "このリンクは使用できません",
+    invalidMessage:
+      "起動コードが見つからないか形式が正しくありません。ルームに戻り、「Catspeak Desktop を開く」から新しいコードを発行してください。",
+    expiredTitle: "起動コードの有効期限が切れました",
+    expiredMessage:
+      "起動コードの有効期限は 2 分です。ルームに戻って新しいコードを発行してください。",
+    usedTitle: "起動コードは使用済みです",
+    usedMessage:
+      "このコードはすでに交換済みです。ルームに戻って新しいコードを発行してください。",
+    rateLimitedTitle: "試行回数が多すぎます",
+    rateLimitedMessage: "1 分ほど待ってからもう一度お試しください。",
+    networkTitle: "サーバーに接続できません",
+    networkMessage:
+      "Catspeak に接続できませんでした。通信状況を確認して再試行してください。",
+    serverTitle: "サーバーが混み合っています",
+    serverMessage:
+      "サーバーで一時的な問題が発生しました。しばらくしてから再試行してください。",
+    unknownTitle: "サインインできませんでした",
+    unknownMessage:
+      "起動コードを交換できませんでした。再試行するか、Web でルームに参加してください。",
+    retry: "再試行",
+    backToRoom: "Web でルームに戻る",
+    backToHome: "コミュニティに戻る",
+    newCodeHint:
+      "コードの有効期限が切れた、または使用済みの場合は、ルームに戻って「Catspeak Desktop を開く」から新しいコードを発行してください。",
   },
   waitingScreen: {
     backToCommunity: "戻る",

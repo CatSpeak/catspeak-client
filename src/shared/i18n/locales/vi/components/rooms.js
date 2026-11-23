@@ -432,6 +432,41 @@ export default {
     releaseUnavailable:
       "Chưa tải được thông tin bộ cài. Bạn vẫn có thể tham gia bằng trình duyệt.",
     openDesktop: "Mở Catspeak Desktop",
+    openingDesktop: "Đang mở Catspeak Desktop...",
+    openDesktopFailed:
+      "Chưa mở được Catspeak Desktop. Hãy tải bộ cài bên dưới hoặc tham gia bằng trình duyệt.",
+    openDesktopRateLimited:
+      "Bạn đã thử quá nhiều lần. Vui lòng đợi một phút rồi thử lại.",
+  },
+  desktopHandoff: {
+    badge: "DESKTOP",
+    title: "Đang đăng nhập vào Catspeak Desktop",
+    exchanging: "Đang xác thực mã bàn giao một lần...",
+    redirecting: "Đã xác thực. Đang chuyển bạn vào phòng...",
+    invalidTitle: "Liên kết không hợp lệ",
+    invalidMessage:
+      "Mã bàn giao bị thiếu hoặc không đúng định dạng. Hãy quay lại phòng và bấm “Mở Catspeak Desktop” để tạo mã mới.",
+    expiredTitle: "Mã bàn giao đã hết hạn",
+    expiredMessage:
+      "Mã chỉ có hiệu lực trong 2 phút. Hãy quay lại phòng và tạo mã mới.",
+    usedTitle: "Mã bàn giao đã được dùng",
+    usedMessage:
+      "Mã này đã được sử dụng một lần. Hãy quay lại phòng để tạo mã mới.",
+    rateLimitedTitle: "Bạn thao tác quá nhanh",
+    rateLimitedMessage: "Vui lòng đợi một phút rồi thử lại.",
+    networkTitle: "Không kết nối được máy chủ",
+    networkMessage:
+      "Không thể liên hệ Catspeak. Hãy kiểm tra kết nối mạng rồi thử lại.",
+    serverTitle: "Máy chủ đang bận",
+    serverMessage: "Máy chủ gặp sự cố tạm thời. Vui lòng thử lại sau ít phút.",
+    unknownTitle: "Chưa thể đăng nhập",
+    unknownMessage:
+      "Không thể đổi mã bàn giao. Hãy thử lại hoặc tham gia phòng trên web.",
+    retry: "Thử lại",
+    backToRoom: "Quay về phòng trên web",
+    backToHome: "Về trang cộng đồng",
+    newCodeHint:
+      "Nếu mã đã hết hạn hoặc đã dùng, hãy quay lại phòng và bấm “Mở Catspeak Desktop” để nhận mã mới.",
   },
   waitingScreen: {
     backToCommunity: "Quay lại",
