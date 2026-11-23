@@ -169,7 +169,10 @@ export class GalaxyRenderer {
    * @param {Float32Array} states mảng trạng thái mới, cùng độ dài với layout.states
    */
   setStates(states) {
-    if (!this.gl || !this.stateBuf || !states || states.length !== this.layout.n) return
+    if (!states || states.length !== this.layout.n) return
+    // Fallback 2D đọc layout.states mỗi frame; renderer dựng lại (mất context) cũng lấy từ đây.
+    this.layout.states.set(states)
+    if (!this.gl || !this.stateBuf) return
     const gl = this.gl
     gl.bindBuffer(gl.ARRAY_BUFFER, this.stateBuf)
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, states)
