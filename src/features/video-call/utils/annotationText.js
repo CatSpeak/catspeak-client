@@ -23,6 +23,8 @@ export const shouldCommitAnnotationText = (text) =>
  */
 export const resolveAnnotationTextKey = (event) => {
   if (!event) return null
+  // Enter also confirms an IME composition; it must not commit the note then.
+  if (event.isComposing || event.nativeEvent?.isComposing) return null
   if (event.key === "Escape") return "cancel"
   if (event.key === "Enter" && !event.shiftKey) return "commit"
   return null

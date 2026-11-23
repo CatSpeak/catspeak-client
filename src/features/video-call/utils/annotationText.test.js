@@ -16,6 +16,17 @@ describe("annotation text editor helpers", () => {
     expect(resolveAnnotationTextKey(null)).toBeNull()
   })
 
+  test("IME composition Enter never commits the note", () => {
+    expect(resolveAnnotationTextKey({ key: "Enter", isComposing: true }))
+      .toBeNull()
+    expect(
+      resolveAnnotationTextKey({
+        key: "Enter",
+        nativeEvent: { isComposing: true },
+      }),
+    ).toBeNull()
+  })
+
   test("normalizes CRLF, trims and bounds the text note", () => {
     expect(normalizeAnnotationText("  line 1\r\nline 2  ")).toBe(
       "line 1\nline 2",
