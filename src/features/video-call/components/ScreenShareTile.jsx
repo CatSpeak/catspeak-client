@@ -5,9 +5,13 @@ import Slider from "@/shared/components/ui/Slider"
 import { Track } from "livekit-client"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { parseMetadata } from "@/features/video-call/hooks/useParticipantList"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { useGetRoomCoHostQuery } from "@/store/api/roomsApi"
-import { normalizeCoHost } from "@/features/co-host/constants"
+import {
+  CO_HOST_PERMISSIONS,
+  normalizeCoHost,
+} from "@/features/co-host/constants"
 import { useScreenAnnotation } from "@/features/video-call/hooks/useScreenAnnotation"
 import {
   ANNOTATION_COLORS,
@@ -54,12 +58,23 @@ const ScreenShareTile = ({
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   const { data: coHostData } = useGetRoomCoHostQuery(roomId, {
-    skip: !roomId || readOnly,
+    skip: !roomId,
   })
   const coHost = normalizeCoHost(coHostData)
   const screenTrackSid = trackRef?.publication?.trackSid ?? null
   const isPresenter = Boolean(participant?.isLocal)
   const allowAnnotation = true // Ticket 04 wires the room policy into this seam.
+  const presenterAccountId = participant
+    ? (parseMetadata(participant.metadata)?.accountId ?? participant.identity)
+    : null
+  const coHostCanManageShare = (coHost?.permissions ?? []).includes(
+    CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE,
+  )
+  const moderatorAccountIds = [
+    room?.creatorId,
+    presenterAccountId,
+    coHostCanManageShare ? coHost?.coHostAccountId : null,
+  ].filter((id) => id != null)
   const annotation = useScreenAnnotation({
     room: lkRoom,
     screenTrackSid,
@@ -76,6 +91,7 @@ const ScreenShareTile = ({
       user?.email ||
       "Guest",
     allowAnnotation,
+    moderatorAccountIds,
   })
 
   // Volume state (0 to 1)
@@ -251,15 +267,23 @@ const ScreenShareTile = ({
           videoRef={videoRef}
           items={annotation.items}
           liveStrokes={annotation.liveStrokes}
+          draftShape={annotation.draftShape}
+          lasers={annotation.lasers}
           readOnly={readOnly}
           canAnnotate={annotation.canAnnotate}
           tool={annotationTool}
           color={annotationColor}
           width={annotationWidth}
-          showAuthorPills={!readOnly}
           onStrokeStart={annotation.beginStroke}
           onStrokePoint={annotation.extendStroke}
           onStrokeEnd={annotation.endStroke}
+          onShapeStart={annotation.beginShape}
+          onShapePoint={annotation.extendShape}
+          onShapeEnd={annotation.endShape}
+          onTextCommit={annotation.commitText}
+          onLaserMove={annotation.sendLaserMove}
+          onErase={annotation.eraseAt}
+          onToolChange={setAnnotationTool}
         />
       )}
 
@@ -339,10 +363,13 @@ const ScreenShareTile = ({
           tool={annotationTool}
           color={annotationColor}
           width={annotationWidth}
+          canModerate={annotation.canModerateAnnotation}
           onToolChange={setAnnotationTool}
           onColorChange={setAnnotationColor}
           onWidthChange={setAnnotationWidth}
-          onClearMine={annotation.clearMine}
+          onUndo={annotation.undo}
+          onRedo={annotation.redo}
+          onClear={annotation.clearScope}
           onExit={exitAnnotation}
         />
       )}

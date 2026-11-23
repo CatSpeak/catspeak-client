@@ -8,11 +8,16 @@ import {
   appendAnnotationItem,
   buildClearPacket,
   buildErasePacket,
+  buildLaserMovePacket,
+  buildRedoPacket,
+  buildShapeCommitPacket,
   buildStrokeEndPacket,
   buildStrokePointPacket,
   buildStrokeStartPacket,
   buildSyncRequestPacket,
   buildSyncSnapshotChunks,
+  buildTextCommitPacket,
+  buildUndoPacket,
   canApplyClearScope,
   clearAnnotationItems,
   createAnnotationSyncBuffers,
@@ -22,6 +27,7 @@ import {
   prepareStrokePoints,
   reassembleSyncChunk,
   removeAnnotationItems,
+  validateAnnotationItem,
   validateAnnotationPacket,
 } from "./annotationProtocol.js"
 
@@ -39,6 +45,34 @@ const makeStrokeItem = (id, pointCount = 2) => ({
     Number((i / Math.max(1, pointCount - 1)).toFixed(4)),
     Number((0.2 + i * 0.0001).toFixed(4)),
   ]),
+})
+
+const makeShapeItem = (id, overrides = {}) => ({
+  id,
+  kind: "shape",
+  tool: "arrow",
+  color: "#3b82f6",
+  width: 4,
+  authorId: "42",
+  authorName: "An",
+  x1: 0.1,
+  y1: 0.2,
+  x2: 0.6,
+  y2: 0.7,
+  ...overrides,
+})
+
+const makeTextItem = (id, overrides = {}) => ({
+  id,
+  kind: "text",
+  color: "#eab308",
+  fontSize: 24,
+  authorId: "42",
+  authorName: "An",
+  x: 0.3,
+  y: 0.4,
+  text: "Hello\nWorld",
+  ...overrides,
 })
 
 const makeStrokeStart = (overrides = {}) =>
@@ -302,6 +336,120 @@ describe("store helpers", () => {
   })
 })
 
+describe("ticket 03 packets", () => {
+  test("round-trips shape-commit for every shape tool", () => {
+    for (const tool of ["line", "arrow", "rect", "ellipse"]) {
+      const packet = buildShapeCommitPacket({
+        trackSid: TRACK,
+        item: makeShapeItem(`shape-${tool}`, { tool }),
+      })
+      expect(decodeAnnotationPacket(encodeAnnotationPacket(packet))).toEqual(
+        packet,
+      )
+    }
+  })
+
+  test("rejects shape commits with an invalid tool, coords or author", () => {
+    const packet = buildShapeCommitPacket({
+      trackSid: TRACK,
+      item: makeShapeItem("s1"),
+    })
+    expect(
+      validateAnnotationPacket({
+        ...packet,
+        item: { ...packet.item, tool: "pen" },
+      }),
+    ).toBeNull()
+    expect(
+      validateAnnotationPacket({
+        ...packet,
+        item: { ...packet.item, x2: 1.4 },
+      }),
+    ).toBeNull()
+    expect(
+      validateAnnotationPacket({
+        ...packet,
+        item: { ...packet.item, authorId: "" },
+      }),
+    ).toBeNull()
+  })
+
+  test("round-trips multi-line text-commit and rejects invalid text items", () => {
+    const packet = buildTextCommitPacket({
+      trackSid: TRACK,
+      item: makeTextItem("t1"),
+    })
+    expect(decodeAnnotationPacket(encodeAnnotationPacket(packet))).toEqual(
+      packet,
+    )
+    expect(
+      validateAnnotationPacket({
+        ...packet,
+        item: { ...packet.item, text: "" },
+      }),
+    ).toBeNull()
+    expect(
+      validateAnnotationPacket({
+        ...packet,
+        item: { ...packet.item, fontSize: 0 },
+      }),
+    ).toBeNull()
+    expect(
+      validateAnnotationPacket({
+        ...packet,
+        item: { ...packet.item, x: -0.1 },
+      }),
+    ).toBeNull()
+  })
+
+  test("round-trips laser-move, undo and redo", () => {
+    const laser = buildLaserMovePacket({
+      trackSid: TRACK,
+      authorName: "An",
+      color: "#fff",
+      x: 0.2,
+      y: 0.3,
+      ts: 1234,
+    })
+    expect(decodeAnnotationPacket(encodeAnnotationPacket(laser))).toEqual(laser)
+
+    const undo = buildUndoPacket({ trackSid: TRACK, id: "s1" })
+    expect(decodeAnnotationPacket(encodeAnnotationPacket(undo))).toEqual(undo)
+    expect(
+      validateAnnotationPacket({ ...undo, id: "" }),
+    ).toBeNull()
+
+    const redo = buildRedoPacket({
+      trackSid: TRACK,
+      item: makeShapeItem("s1"),
+    })
+    expect(decodeAnnotationPacket(encodeAnnotationPacket(redo))).toEqual(redo)
+    expect(
+      validateAnnotationPacket({
+        ...redo,
+        item: { ...redo.item, kind: "unknown" },
+      }),
+    ).toBeNull()
+  })
+
+  test("validateAnnotationItem normalizes every supported item kind", () => {
+    expect(validateAnnotationItem(makeStrokeItem("s1"))).toMatchObject({
+      kind: "stroke",
+      id: "s1",
+    })
+    expect(validateAnnotationItem(makeShapeItem("s2"))).toMatchObject({
+      kind: "shape",
+      id: "s2",
+    })
+    expect(validateAnnotationItem(makeTextItem("t1"))).toMatchObject({
+      kind: "text",
+      id: "t1",
+      text: "Hello\nWorld",
+    })
+    expect(validateAnnotationItem({ ...makeShapeItem("s3"), kind: "text" })).toBeNull()
+  })
+})
+
 describe("sync snapshot chunking", () => {
   test("chunks a large snapshot into packets of at most 12 KB", () => {
     const items = Array.from({ length: 60 }, (_, i) =>
@@ -373,6 +521,30 @@ describe("sync snapshot chunking", () => {
 
     expect(first.complete).toBe(false)
     expect(first.items).toBeNull()
+  })
+
+  test("snapshots carry strokes, shapes and text to late joiners", () => {
+    const items = [
+      makeStrokeItem("s1"),
+      makeShapeItem("shape-1", { tool: "ellipse" }),
+      makeTextItem("text-1"),
+    ]
+    const chunks = buildSyncSnapshotChunks({
+      trackSid: TRACK,
+      items,
+      snapId: "mixed-1",
+    })
+    const result = reassembleSyncChunk(
+      createAnnotationSyncBuffers(),
+      chunks[0],
+    )
+
+    expect(result.complete).toBe(true)
+    expect(result.items.map((item) => item.kind)).toEqual([
+      "stroke",
+      "shape",
+      "text",
+    ])
   })
 
   test("ignores mismatched totalChunks and empty item lists", () => {

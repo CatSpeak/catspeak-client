@@ -3,7 +3,9 @@ import { describe, expect, test } from "vitest"
 import {
   clientPointToNormalized,
   computeContainedMediaRect,
+  estimateTextBounds,
   hitTestAnnotation,
+  hitTestAnnotations,
   normalizedToCanvas,
   simplifyPoints,
 } from "./annotationGeometry.js"
@@ -159,5 +161,101 @@ describe("hitTestAnnotation", () => {
     expect(hitTestAnnotation([null, {}, stroke], { x: 0.3, y: 0.1 })).toBe(
       stroke,
     )
+  })
+
+  test("hits lines and arrows along their segment", () => {
+    const line = {
+      id: "line",
+      kind: "shape",
+      tool: "line",
+      x1: 0.1,
+      y1: 0.1,
+      x2: 0.5,
+      y2: 0.1,
+    }
+    const arrow = { ...line, id: "arrow", tool: "arrow" }
+
+    expect(hitTestAnnotation([line], { x: 0.3, y: 0.12 }, { tolerance: 0.03 })).toBe(
+      line,
+    )
+    expect(hitTestAnnotation([arrow], { x: 0.3, y: 0.3 }, { tolerance: 0.03 })).toBeNull()
+  })
+
+  test("hits a rectangle border but not its empty interior", () => {
+    const rect = {
+      id: "rect",
+      kind: "shape",
+      tool: "rect",
+      x1: 0.2,
+      y1: 0.2,
+      x2: 0.6,
+      y2: 0.5,
+    }
+
+    expect(hitTestAnnotation([rect], { x: 0.4, y: 0.51 }, { tolerance: 0.02 })).toBe(
+      rect,
+    )
+    expect(hitTestAnnotation([rect], { x: 0.4, y: 0.35 }, { tolerance: 0.02 })).toBeNull()
+  })
+
+  test("hits an ellipse outline", () => {
+    const ellipse = {
+      id: "ellipse",
+      kind: "shape",
+      tool: "ellipse",
+      x1: 0.2,
+      y1: 0.3,
+      x2: 0.8,
+      y2: 0.7,
+    }
+
+    expect(
+      hitTestAnnotation([ellipse], { x: 0.8, y: 0.5 }, { tolerance: 0.02 }),
+    ).toBe(ellipse)
+    expect(
+      hitTestAnnotation([ellipse], { x: 0.5, y: 0.5 }, { tolerance: 0.02 }),
+    ).toBeNull()
+  })
+
+  test("hits a text note inside its estimated bounds", () => {
+    const text = {
+      id: "text",
+      kind: "text",
+      x: 0.2,
+      y: 0.3,
+      fontSize: 24,
+      text: "Hello\nWorld",
+    }
+    const bounds = estimateTextBounds(text)
+
+    expect(bounds.x1).toBe(0.2)
+    expect(bounds.x2).toBeGreaterThan(0.25)
+    expect(hitTestAnnotation([text], { x: 0.22, y: 0.32 })).toBe(text)
+    expect(hitTestAnnotation([text], { x: 0.9, y: 0.9 })).toBeNull()
+  })
+
+  test("hitTestAnnotations returns every touched annotation", () => {
+    const a = {
+      id: "a",
+      kind: "stroke",
+      pts: [
+        [0.1, 0.1],
+        [0.5, 0.1],
+      ],
+    }
+    const b = {
+      id: "b",
+      kind: "stroke",
+      pts: [
+        [0.1, 0.11],
+        [0.5, 0.11],
+      ],
+    }
+
+    expect(
+      hitTestAnnotations([a, b], { x: 0.3, y: 0.105 }, { tolerance: 0.02 }).map(
+        (item) => item.id,
+      ),
+    ).toEqual(["a", "b"])
   })
 })
