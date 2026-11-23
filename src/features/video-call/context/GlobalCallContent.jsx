@@ -64,6 +64,7 @@ import {
   isSpeakingTimeBalanceSupported,
 } from "@/features/video-call/utils/roomTypeHelpers"
 import { resolveCallPolicy } from "@/features/video-call/utils/callPolicy"
+import { applyRoomSettingsChanged } from "@/features/video-call/utils/annotationPolicy"
 import {
   moderationNoticeSeverity,
   resolveBlockAllMicsNotice,
@@ -580,10 +581,7 @@ const GlobalCallContent = ({
             roomsApi.util.updateQueryData(
               "getRoomState",
               currentRoomId,
-              (draft) => {
-                if (!draft?.settings) return
-                draft.settings = { ...draft.settings, ...settings }
-              },
+              (draft) => applyRoomSettingsChanged(draft, settings),
             ),
           )
         }

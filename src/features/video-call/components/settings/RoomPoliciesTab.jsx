@@ -14,6 +14,7 @@ import {
   Gauge,
   AlertTriangle,
   PhoneOff,
+  Pencil,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -40,6 +41,7 @@ import {
   useEndLiveSessionMutation,
   useUpdateStudentSharePolicyMutation,
   useUpdateMemberRecordingPolicyMutation,
+  useUpdateAnnotationPolicyMutation,
   useUpdateGamePolicyMutation,
   useUpdateHighQualityPolicyMutation,
   useUpdateRequireApprovalPolicyMutation,
@@ -49,6 +51,7 @@ import {
   CO_HOST_PERMISSIONS,
 } from "@/features/co-host/constants"
 import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
+import { canSeeAnnotationPolicyRow } from "@/features/video-call/utils/annotationPolicy"
 
 /**
  * Tab 4: Room Policies & Host Settings.
@@ -105,13 +108,11 @@ const RoomPoliciesTab = ({ coHost }) => {
   const canEndLive =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.END_CLASS)
-  const canManageStudentShare =
-    isHost ||
-    hasCoHostPermission(
-      coHost,
-      user?.accountId,
-      CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE
-    )
+  const canManageStudentShare = canSeeAnnotationPolicyRow({
+    isHost,
+    coHost,
+    accountId: user?.accountId,
+  })
   const canManageMemberRecording =
     isHost ||
     hasCoHostPermission(
@@ -132,6 +133,7 @@ const RoomPoliciesTab = ({ coHost }) => {
   const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
   const allowSelfCamera = roomStatePayload?.settings?.allowSelfCamera ?? true
   const allowStudentShare = roomStatePayload?.settings?.allowStudentShare ?? true
+  const allowAnnotation = roomStatePayload?.settings?.allowAnnotation ?? true
   const allowMemberRecording =
     roomStatePayload?.settings?.allowMemberRecording ?? true
   const isLocked = roomStatePayload?.settings?.roomLocked ?? false
@@ -145,6 +147,8 @@ const RoomPoliciesTab = ({ coHost }) => {
     useUpdateSelfCameraPolicyMutation()
   const [updateStudentShare, { isLoading: isTogglingStudentShare }] =
     useUpdateStudentSharePolicyMutation()
+  const [updateAnnotationPolicy, { isLoading: isTogglingAnnotation }] =
+    useUpdateAnnotationPolicyMutation()
   const [updateMemberRecording, { isLoading: isTogglingMemberRecording }] =
     useUpdateMemberRecordingPolicyMutation()
   const [updateRoomLock, { isLoading: isTogglingLock }] =
@@ -273,6 +277,21 @@ const RoomPoliciesTab = ({ coHost }) => {
       )
     } catch (err) {
       toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenStudentShare))
+    }
+  }
+
+  const handleToggleAnnotation = async () => {
+    if (!roomId) return
+    try {
+      const next = !allowAnnotation
+      await updateAnnotationPolicy({ id: roomId, allow: next }).unwrap()
+      toast.success(
+        next
+          ? pl.annotationOn || "Đã cho phép vẽ chú thích màn hình."
+          : pl.annotationOff || "Đã tắt quyền vẽ chú thích màn hình."
+      )
+    } catch (err) {
+      toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenAnnotation))
     }
   }
 
@@ -551,6 +570,18 @@ const RoomPoliciesTab = ({ coHost }) => {
               checked={allowStudentShare}
               disabled={isTogglingStudentShare}
               onChange={handleToggleStudentShare}
+            />
+          )}
+          {canManageStudentShare && (
+            <PolicyRow
+              icon={<Pencil size={15} aria-hidden="true" />}
+              label={
+                pl.allowAnnotation ||
+                "Cho phép vẽ chú thích khi chia sẻ màn hình"
+              }
+              checked={allowAnnotation}
+              disabled={isTogglingAnnotation}
+              onChange={handleToggleAnnotation}
             />
           )}
           {canManagePrivateAi && (

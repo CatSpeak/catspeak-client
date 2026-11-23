@@ -4,6 +4,8 @@ import {
   Circle,
   Eraser,
   Highlighter,
+  Lock,
+  LockOpen,
   Minus,
   MousePointer2,
   Pen,
@@ -65,12 +67,16 @@ const AnnotationToolbar = ({
   color = ANNOTATION_COLORS[0],
   width = ANNOTATION_WIDTHS[1],
   canModerate = false,
+  presenterLocked = false,
+  canToggleLock = false,
+  disabled = false,
   onToolChange,
   onColorChange,
   onWidthChange,
   onUndo,
   onRedo,
   onClear,
+  onTogglePresenterLock,
   onExit,
   readOnly = false,
 }) => {
@@ -88,7 +94,7 @@ const AnnotationToolbar = ({
       }
 
       const modifier = event.ctrlKey || event.metaKey
-      if (!modifier || isTypingTarget(event.target)) return
+      if (!modifier || disabled || isTypingTarget(event.target)) return
       const key = event.key.toLowerCase()
       if (key === "z") {
         event.preventDefault()
@@ -101,7 +107,7 @@ const AnnotationToolbar = ({
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [onRedo, onToolChange, onUndo, readOnly])
+  }, [disabled, onRedo, onToolChange, onUndo, readOnly])
 
   if (readOnly) return null
 
@@ -124,7 +130,11 @@ const AnnotationToolbar = ({
       onClick={stop}
       className="absolute left-1/2 top-2 z-30 flex max-w-[calc(100%-1rem)] -translate-x-1/2 items-center gap-1 rounded-2xl border border-slate-200 bg-white/95 px-2 py-1.5 text-slate-700 shadow-xl backdrop-blur-sm dark:border-white/15 dark:bg-neutral-900/95 dark:text-neutral-100"
     >
-      <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
+      <div
+        className={`flex min-w-0 items-center gap-1 overflow-x-auto ${
+          disabled ? "pointer-events-none opacity-50" : ""
+        }`}
+      >
         <ToolButton
           active={tool === "mouse"}
           label={copy.mouse || "Mouse"}
@@ -255,7 +265,11 @@ const AnnotationToolbar = ({
 
       <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
 
-      <div className="flex shrink-0 items-center gap-1">
+      <div
+        className={`flex shrink-0 items-center gap-1 ${
+          disabled ? "pointer-events-none opacity-50" : ""
+        }`}
+      >
         <ToolButton label={copy.undo || "Undo"} onClick={() => onUndo?.()}>
           <Undo2 size={16} />
         </ToolButton>
@@ -266,7 +280,46 @@ const AnnotationToolbar = ({
 
       <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
 
-      <div className="relative flex shrink-0 items-center gap-1">
+      {(canToggleLock || disabled) && (
+        <>
+          {canToggleLock ? (
+            <ToolButton
+              active={presenterLocked}
+              label={
+                presenterLocked
+                  ? copy.presenterUnlock || "Mở khóa vẽ chú thích"
+                  : copy.presenterLock || "Khóa vẽ chú thích"
+              }
+              onClick={() => onTogglePresenterLock?.()}
+            >
+              {presenterLocked ? <Lock size={16} /> : <LockOpen size={16} />}
+            </ToolButton>
+          ) : (
+            <span
+              title={
+                presenterLocked
+                  ? copy.lockedByPresenter || "Presenter đã khóa vẽ chú thích."
+                  : copy.policyDisabled || "Host đã tắt quyền vẽ chú thích."
+              }
+              className="flex h-8 shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 text-[11px] font-semibold text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
+            >
+              <Lock size={14} />
+              <span className="hidden sm:inline">
+                {presenterLocked
+                  ? copy.lockedByPresenter || "Presenter đã khóa vẽ"
+                  : copy.policyDisabled || "Đã tắt vẽ chú thích"}
+              </span>
+            </span>
+          )}
+          <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
+        </>
+      )}
+
+      <div
+        className={`relative flex shrink-0 items-center gap-1 ${
+          disabled ? "pointer-events-none opacity-50" : ""
+        }`}
+      >
         <ToolButton
           active={clearMenuOpen}
           label={copy.clear || "Clear annotations"}
