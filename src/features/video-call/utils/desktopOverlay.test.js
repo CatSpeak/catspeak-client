@@ -200,9 +200,9 @@ describe("evaluateOverlayLifecycle", () => {
     expect(overlayModeForTool("eraser")).toBe("draw")
   })
 
-  it("hides every local in-app canvas only for a bridge-backed full-display share", () => {
+  it("hides every local in-app canvas only while the OS overlay is active", () => {
     const base = {
-      bridgeAvailable: true,
+      overlayActive: true,
       isLocalPresenter: true,
       isFullDisplay: true,
       trackSid: TRACK,
@@ -211,9 +211,19 @@ describe("evaluateOverlayLifecycle", () => {
     expect(shouldHideInAppCanvas(base)).toBe(true)
     expect(shouldHideInAppCanvas({ ...base, isLocalPresenter: false })).toBe(false)
     expect(shouldHideInAppCanvas({ ...base, isFullDisplay: false })).toBe(false)
-    expect(shouldHideInAppCanvas({ ...base, bridgeAvailable: false })).toBe(false)
     expect(shouldHideInAppCanvas({ ...base, trackSid: null })).toBe(false)
     expect(shouldHideInAppCanvas({ ...base, isMock: true })).toBe(false)
+  })
+
+  it("restores the in-app canvas after an overlay failure or exit", () => {
+    const base = {
+      isLocalPresenter: true,
+      isFullDisplay: true,
+      trackSid: TRACK,
+    }
+
+    expect(shouldHideInAppCanvas({ ...base, overlayActive: false })).toBe(false)
+    expect(shouldHideInAppCanvas({ ...base, overlayActive: true })).toBe(true)
   })
 })
 

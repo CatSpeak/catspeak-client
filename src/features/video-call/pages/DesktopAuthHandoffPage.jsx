@@ -64,7 +64,11 @@ const DesktopAuthHandoffPage = () => {
 
     try {
       const auth = await runHandoffExchangeOnce(parsed.code, () =>
-        exchangeLaunchCode({ code: parsed.code }).unwrap(),
+        exchangeLaunchCode({
+          code: parsed.code,
+          roomId: parsed.roomId,
+          lang: parsed.lang,
+        }).unwrap(),
       )
       dispatch(setCredentials(auth))
       if (mountedRef.current) {

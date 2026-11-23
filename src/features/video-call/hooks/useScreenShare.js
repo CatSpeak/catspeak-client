@@ -12,6 +12,7 @@ import { isCatspeakDesktop } from "@/features/video-call/utils/desktopBridge"
 import {
   loadDesktopScreenSources,
   screenShareSelectionMetadata,
+  shouldRequestDesktopShareAudio,
   toSelectSourcePayload,
 } from "@/features/video-call/utils/desktopScreenShare"
 import {
@@ -110,11 +111,9 @@ export const useScreenShare = ({
   const [isLoadingScreenSources, setIsLoadingScreenSources] = useState(false)
   const [screenPickerError, setScreenPickerError] = useState(null)
   const [screenShareSelection, setScreenShareSelection] = useState(null)
-  const screenShareSelectionRef = useRef(null)
   const isStartingScreenShareRef = useRef(false)
 
   const clearScreenShareSelection = useCallback(() => {
-    screenShareSelectionRef.current = null
     setScreenShareSelection(null)
   }, [])
 
@@ -173,7 +172,10 @@ export const useScreenShare = ({
     async (source) => {
       if (isStartingScreenShareRef.current) return
 
-      const payload = toSelectSourcePayload(source, { audio: true })
+      // The desktop display-media handler deliberately omits audio on macOS;
+      // asking LiveKit for it there can reject the whole share.
+      const requestAudio = shouldRequestDesktopShareAudio(desktopBridge?.platform)
+      const payload = toSelectSourcePayload(source, { audio: requestAudio })
       if (!payload) {
         setScreenPickerError("INVALID_SOURCE")
         return
@@ -199,11 +201,10 @@ export const useScreenShare = ({
         }
 
         await room.localParticipant.setScreenShareEnabled(true, {
-          audio: true,
+          audio: requestAudio,
         })
 
         const metadata = screenShareSelectionMetadata(source)
-        screenShareSelectionRef.current = metadata
         setScreenShareSelection(metadata)
         setShowScreenPicker(false)
         setScreenSources([])
@@ -349,8 +350,6 @@ export const useScreenShare = ({
     isLoadingScreenSources,
     screenPickerError,
     screenShareSelection,
-    screenShareSelectionRef,
-    getScreenShareSelection: () => screenShareSelectionRef.current,
     closeScreenPicker,
     confirmScreenPicker,
     refreshScreenSources: loadScreenSources,

@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest"
 
 import {
   applyRoomSettingsChanged,
-  canSeeAnnotationPolicyRow,
+  canManageAnnotationPolicy,
   resolveAllowAnnotation,
 } from "./annotationPolicy.js"
 
@@ -67,13 +67,13 @@ describe("RoomSettingsChanged patch", () => {
 describe("annotation policy row visibility", () => {
   test("the host always sees the row", () => {
     expect(
-      canSeeAnnotationPolicyRow({ isHost: true, accountId: 10 }),
+      canManageAnnotationPolicy({ isHost: true, accountId: 10 }),
     ).toBe(true)
   })
 
   test("a co-host holding manage_student_share sees the row", () => {
     expect(
-      canSeeAnnotationPolicyRow({
+      canManageAnnotationPolicy({
         isHost: false,
         accountId: 20,
         coHost: {
@@ -86,7 +86,7 @@ describe("annotation policy row visibility", () => {
 
   test("a co-host without the permission and regular members do not", () => {
     expect(
-      canSeeAnnotationPolicyRow({
+      canManageAnnotationPolicy({
         accountId: 20,
         coHost: {
           coHostAccountId: 20,
@@ -95,7 +95,7 @@ describe("annotation policy row visibility", () => {
       }),
     ).toBe(false)
     expect(
-      canSeeAnnotationPolicyRow({
+      canManageAnnotationPolicy({
         accountId: 30,
         coHost: {
           coHostAccountId: 20,

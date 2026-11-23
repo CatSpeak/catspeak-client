@@ -78,14 +78,12 @@ const AnnotationToolbar = ({
   onClear,
   onTogglePresenterLock,
   onExit,
-  readOnly = false,
 }) => {
   const { t } = useLanguage()
   const copy = t.rooms?.videoCall?.annotation ?? {}
   const [clearMenuOpen, setClearMenuOpen] = useState(false)
 
   useEffect(() => {
-    if (readOnly) return undefined
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         setClearMenuOpen(false)
@@ -107,9 +105,7 @@ const AnnotationToolbar = ({
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [disabled, onRedo, onToolChange, onUndo, readOnly])
-
-  if (readOnly) return null
+  }, [disabled, onRedo, onToolChange, onUndo])
 
   const stop = (event) => {
     event.stopPropagation()

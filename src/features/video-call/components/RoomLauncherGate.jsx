@@ -13,8 +13,8 @@ import { MainLogo, MainLogoDark } from "@/shared/assets/icons/logo"
 import { buildHandoffDeepLink } from "../utils/desktopHandoff"
 import {
   detectDesktopPlatform,
+  getDesktopReleaseState,
   getJoinPreference,
-  getProtocolScheme,
   isCatspeakDesktop,
   isMobileDevice,
   setJoinPreference,
@@ -48,7 +48,7 @@ const formatSize = (bytes) => {
  * The first launcher session also auto-attempts that deep link once, after the
  * release payload (and therefore the environment scheme) is available.
  */
-const RoomLauncherGate = ({ children, onOpenDesktop }) => {
+const RoomLauncherGate = ({ children }) => {
   const { lang, id: roomId } = useParams()
   const location = useLocation()
   const { t } = useLanguage()
@@ -80,13 +80,14 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
     useGetDesktopLatestReleaseQuery(undefined, { skip: !showLauncher })
 
   const platform = useMemo(() => detectDesktopPlatform(), [])
-  const scheme = getProtocolScheme(release)
   const downloads = release?.downloads || {}
+  const { ready: canOpenDesktop, unavailable: isReleaseUnavailable } =
+    getDesktopReleaseState({ release, isLoading, isError })
   const copy = t.rooms?.desktopLauncher || {}
 
   const requestLaunchCode = useCallback(
     async ({ silent }) => {
-      if (!roomId || !lang || openingRef.current) return
+      if (!roomId || !lang || !release || openingRef.current) return
       openingRef.current = true
       if (!silent) {
         setIsOpeningDesktop(true)
@@ -102,9 +103,7 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
           lang,
           code: result.code,
         })
-        if (typeof onOpenDesktop === "function") {
-          onOpenDesktop({ scheme, roomId, lang, release, code: result.code, url })
-        } else if (typeof window !== "undefined") {
+        if (typeof window !== "undefined") {
           window.location.href = url
         }
       } catch (error) {
@@ -117,15 +116,15 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
         if (!silent) setIsOpeningDesktop(false)
       }
     },
-    [createLaunchCode, lang, onOpenDesktop, release, roomId, scheme],
+    [createLaunchCode, lang, release, roomId],
   )
 
   useEffect(() => {
-    if (!showLauncher || forceBrowser || !release) return
+    if (!showLauncher || forceBrowser || !canOpenDesktop) return
     if (autoAttemptedRef.current) return
     autoAttemptedRef.current = true
     requestLaunchCode({ silent: true })
-  }, [forceBrowser, release, requestLaunchCode, showLauncher])
+  }, [canOpenDesktop, forceBrowser, requestLaunchCode, showLauncher])
 
   if (!showLauncher || forceBrowser) return children
 
@@ -152,6 +151,7 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
   }
 
   const handleOpenDesktop = () => {
+    if (!release) return
     rememberIfNeeded("desktop")
     requestLaunchCode({ silent: false })
   }
@@ -232,7 +232,7 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
             </div>
           )}
 
-          {(isError || (!isLoading && !release)) && (
+          {isReleaseUnavailable && (
             <p
               role="alert"
               className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300"
@@ -255,6 +255,7 @@ const RoomLauncherGate = ({ children, onOpenDesktop }) => {
             startIcon={<Download size={20} />}
             loading={isOpeningDesktop}
             loadingText={copy.openingDesktop}
+            disabled={!canOpenDesktop}
             onClick={handleOpenDesktop}
           >
             {copy.openDesktop}

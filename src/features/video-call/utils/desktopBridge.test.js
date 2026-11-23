@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   buildDesktopDeepLink,
   detectDesktopPlatform,
+  getDesktopReleaseState,
   getJoinPreference,
   getProtocolScheme,
   isAiOrLearningPathRoom,
@@ -230,5 +231,39 @@ describe("buildDesktopDeepLink", () => {
         code: "c",
       }),
     ).toBe("catspeak-staging://join?roomId=r1&lang=ja&code=c")
+  })
+})
+
+describe("getDesktopReleaseState", () => {
+  const release = {
+    protocolScheme: "catspeak-staging",
+    downloads: { "win-x64": { url: "https://cdn.test/win.exe" } },
+  }
+
+  it("is ready only for a loaded release with downloads", () => {
+    expect(getDesktopReleaseState({ release })).toEqual({
+      ready: true,
+      unavailable: false,
+    })
+    expect(getDesktopReleaseState({ release, isLoading: true })).toEqual({
+      ready: false,
+      unavailable: false,
+    })
+    expect(getDesktopReleaseState({ release, isError: true })).toEqual({
+      ready: false,
+      unavailable: true,
+    })
+  })
+
+  it("marks an empty download payload unavailable instead of button-less", () => {
+    expect(
+      getDesktopReleaseState({
+        release: { protocolScheme: "catspeak", downloads: {} },
+      }),
+    ).toEqual({ ready: false, unavailable: true })
+    expect(getDesktopReleaseState({ release: null })).toEqual({
+      ready: false,
+      unavailable: true,
+    })
   })
 })

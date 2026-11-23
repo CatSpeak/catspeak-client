@@ -51,7 +51,7 @@ import {
   CO_HOST_PERMISSIONS,
 } from "@/features/co-host/constants"
 import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
-import { canSeeAnnotationPolicyRow } from "@/features/video-call/utils/annotationPolicy"
+import { canManageAnnotationPolicy } from "@/features/video-call/utils/annotationPolicy"
 
 /**
  * Tab 4: Room Policies & Host Settings.
@@ -108,7 +108,7 @@ const RoomPoliciesTab = ({ coHost }) => {
   const canEndLive =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.END_CLASS)
-  const canManageStudentShare = canSeeAnnotationPolicyRow({
+  const canManageStudentShare = canManageAnnotationPolicy({
     isHost,
     coHost,
     accountId: user?.accountId,
