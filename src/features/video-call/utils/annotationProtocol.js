@@ -450,6 +450,9 @@ export const buildClearPacket = ({ trackSid, scope, authorId }) =>
     ...(isNonEmptyString(authorId) ? { authorId } : {}),
   })
 
+export const buildPresenterLockPacket = ({ trackSid, locked }) =>
+  packet(trackSid, { t: "presenter-lock", locked: Boolean(locked) })
+
 export const buildSyncRequestPacket = ({ trackSid, requesterId }) =>
   packet(trackSid, { t: "sync-req", requesterId: String(requesterId ?? "") })
 
@@ -476,7 +479,6 @@ export const buildSyncSnapshotChunks = ({
   presenterLocked = false,
 }) => {
   const validItems = (items ?? []).map(validateAnnotationItem).filter(Boolean)
-  if (validItems.length === 0) return []
 
   const header = {
     v: ANNOTATION_PROTOCOL_VERSION,
@@ -486,6 +488,12 @@ export const buildSyncSnapshotChunks = ({
     chunkIndex: 0,
     totalChunks: 1,
     presenterLocked: Boolean(presenterLocked),
+  }
+
+  // An empty store normally needs no snapshot, but a locked presenter must
+  // still tell late joiners that member drawing is disabled for this track.
+  if (validItems.length === 0) {
+    return presenterLocked ? [{ ...header, itemsChunk: [] }] : []
   }
 
   const groups = []

@@ -7,12 +7,13 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { parseMetadata } from "@/features/video-call/hooks/useParticipantList"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
-import { useGetRoomCoHostQuery } from "@/store/api/roomsApi"
+import { useGetRoomCoHostQuery, useGetRoomStateQuery } from "@/store/api/roomsApi"
 import {
   CO_HOST_PERMISSIONS,
   normalizeCoHost,
 } from "@/features/co-host/constants"
 import { useScreenAnnotation } from "@/features/video-call/hooks/useScreenAnnotation"
+import { resolveAllowAnnotation } from "@/features/video-call/utils/annotationPolicy"
 import {
   ANNOTATION_COLORS,
   ANNOTATION_WIDTHS,
@@ -61,9 +62,14 @@ const ScreenShareTile = ({
     skip: !roomId,
   })
   const coHost = normalizeCoHost(coHostData)
+  // Ticket 04: the annotation policy arrives with the join snapshot and is
+  // patched in place by the SignalR RoomSettingsChanged handler.
+  const { data: roomStateData } = useGetRoomStateQuery(roomId, {
+    skip: !roomId,
+  })
   const screenTrackSid = trackRef?.publication?.trackSid ?? null
   const isPresenter = Boolean(participant?.isLocal)
-  const allowAnnotation = true // Ticket 04 wires the room policy into this seam.
+  const allowAnnotation = resolveAllowAnnotation(roomStateData)
   const presenterAccountId = participant
     ? (parseMetadata(participant.metadata)?.accountId ?? participant.identity)
     : null
@@ -364,6 +370,12 @@ const ScreenShareTile = ({
           color={annotationColor}
           width={annotationWidth}
           canModerate={annotation.canModerateAnnotation}
+          presenterLocked={annotation.presenterLocked}
+          canToggleLock={annotation.canTogglePresenterLock}
+          disabled={!annotation.canAnnotate}
+          onTogglePresenterLock={() =>
+            annotation.setPresenterLock(!annotation.presenterLocked)
+          }
           onToolChange={setAnnotationTool}
           onColorChange={setAnnotationColor}
           onWidthChange={setAnnotationWidth}

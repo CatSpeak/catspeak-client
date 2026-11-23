@@ -547,6 +547,24 @@ describe("sync snapshot chunking", () => {
     ])
   })
 
+  test("an empty locked store still tells late joiners the lock", () => {
+    const chunks = buildSyncSnapshotChunks({
+      trackSid: TRACK,
+      items: [],
+      snapId: "lock-only",
+      presenterLocked: true,
+    })
+
+    expect(chunks).toHaveLength(1)
+    const result = reassembleSyncChunk(
+      createAnnotationSyncBuffers(),
+      chunks[0],
+    )
+    expect(result.complete).toBe(true)
+    expect(result.items).toEqual([])
+    expect(result.presenterLocked).toBe(true)
+  })
+
   test("ignores mismatched totalChunks and empty item lists", () => {
     expect(
       buildSyncSnapshotChunks({ trackSid: TRACK, items: [], snapId: "x" }),
