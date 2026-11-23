@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from "react"
+import { useCallback, useState, useMemo, useRef } from "react"
 import {
   useRoomContext,
   useLocalParticipant,
@@ -8,6 +8,12 @@ import { Track } from "livekit-client"
 import { toast } from "react-hot-toast"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { parseMetadata } from "@/features/video-call/hooks/useParticipantList"
+import { isCatspeakDesktop } from "@/features/video-call/utils/desktopBridge"
+import {
+  loadDesktopScreenSources,
+  screenShareSelectionMetadata,
+  toSelectSourcePayload,
+} from "@/features/video-call/utils/desktopScreenShare"
 import {
   isCoHostUser,
   hasCoHostPermission,
@@ -89,6 +95,136 @@ export const useScreenShare = ({
   const [isTogglingScreenShare, setIsTogglingScreenShare] = useState(false)
   const [showTakeoverModal, setShowTakeoverModal] = useState(false)
 
+  // Desktop (Electron) screen picker. The browser flow never opens it.
+  const desktopBridge =
+    typeof window !== "undefined" ? window.catspeakDesktop : undefined
+  const isDesktopApp = isCatspeakDesktop({ bridge: desktopBridge })
+  const hasDesktopScreenPicker = Boolean(
+    isDesktopApp &&
+      desktopBridge &&
+      typeof desktopBridge.getScreenSources === "function",
+  )
+  const [showScreenPicker, setShowScreenPicker] = useState(false)
+  const [screenSources, setScreenSources] = useState([])
+  const [screenPermission, setScreenPermission] = useState(null)
+  const [isLoadingScreenSources, setIsLoadingScreenSources] = useState(false)
+  const [screenPickerError, setScreenPickerError] = useState(null)
+  const [screenShareSelection, setScreenShareSelection] = useState(null)
+  const screenShareSelectionRef = useRef(null)
+  const isStartingScreenShareRef = useRef(false)
+
+  const clearScreenShareSelection = useCallback(() => {
+    screenShareSelectionRef.current = null
+    setScreenShareSelection(null)
+  }, [])
+
+  const loadScreenSources = useCallback(async () => {
+    setIsLoadingScreenSources(true)
+    setScreenPickerError(null)
+
+    const result = await loadDesktopScreenSources(desktopBridge)
+    if (result.ok) {
+      setScreenSources(result.sources)
+      setScreenPermission(result.permission)
+    } else {
+      setScreenSources([])
+      setScreenPermission(null)
+      setScreenPickerError(result.error)
+    }
+
+    setIsLoadingScreenSources(false)
+  }, [desktopBridge])
+
+  const openScreenPicker = useCallback(() => {
+    setShowScreenPicker(true)
+    setShowTakeoverModal(false)
+    loadScreenSources()
+  }, [loadScreenSources])
+
+  const closeScreenPicker = useCallback(() => {
+    setShowScreenPicker(false)
+    setScreenSources([])
+    setScreenPermission(null)
+    setScreenPickerError(null)
+    setIsLoadingScreenSources(false)
+
+    // Cancel must drop any pending selection in the main process.
+    if (desktopBridge && typeof desktopBridge.clearScreenSource === "function") {
+      Promise.resolve(desktopBridge.clearScreenSource()).catch(() => {})
+    }
+  }, [desktopBridge])
+
+  const openScreenPermissionSettings = useCallback(async () => {
+    if (
+      !desktopBridge ||
+      typeof desktopBridge.openScreenPermissionSettings !== "function"
+    ) {
+      return
+    }
+
+    try {
+      await desktopBridge.openScreenPermissionSettings()
+    } catch {
+      // The modal keeps the manual System Settings instructions visible.
+    }
+  }, [desktopBridge])
+
+  const confirmScreenPicker = useCallback(
+    async (source) => {
+      if (isStartingScreenShareRef.current) return
+
+      const payload = toSelectSourcePayload(source, { audio: true })
+      if (!payload) {
+        setScreenPickerError("INVALID_SOURCE")
+        return
+      }
+
+      isStartingScreenShareRef.current = true
+      setIsTogglingScreenShare(true)
+      setScreenPickerError(null)
+
+      try {
+        if (
+          !desktopBridge ||
+          typeof desktopBridge.selectScreenSource !== "function"
+        ) {
+          setScreenPickerError("BRIDGE_UNAVAILABLE")
+          return
+        }
+
+        const selection = await desktopBridge.selectScreenSource(payload)
+        if (!selection || selection.ok !== true) {
+          setScreenPickerError(selection?.error || "SELECT_FAILED")
+          return
+        }
+
+        await room.localParticipant.setScreenShareEnabled(true, {
+          audio: true,
+        })
+
+        const metadata = screenShareSelectionMetadata(source)
+        screenShareSelectionRef.current = metadata
+        setScreenShareSelection(metadata)
+        setShowScreenPicker(false)
+        setScreenSources([])
+        setScreenPermission(null)
+        setShowTakeoverModal(false)
+      } catch {
+        // Never leave the picker spinning or a pending main-process selection.
+        setScreenPickerError("SCREEN_SHARE_FAILED")
+        try {
+          await desktopBridge?.clearScreenSource?.()
+        } catch {
+          // Best effort; the handler also consumes/clears on the next request.
+        }
+      } finally {
+        isStartingScreenShareRef.current = false
+        setIsTogglingScreenShare(false)
+      }
+    },
+    [desktopBridge, room],
+  )
+
   // Ticket 06 (G7): co-host screen-share capability follows share_screen.
   // Host and students are unaffected (server-side grant is authoritative).
   const isSelfCoHost = isCoHostUser(coHost, user?.accountId)
@@ -112,8 +248,27 @@ export const useScreenShare = ({
       await room.localParticipant.setScreenShareEnabled(false)
     } finally {
       setIsTogglingScreenShare(false)
+      clearScreenShareSelection()
+      if (
+        desktopBridge &&
+        typeof desktopBridge.clearScreenSource === "function"
+      ) {
+        Promise.resolve(desktopBridge.clearScreenSource()).catch(() => {})
+      }
     }
-  }, [room])
+  }, [clearScreenShareSelection, desktopBridge, room])
+
+  // Desktop opens the picker; the browser keeps its native getDisplayMedia
+  // flow byte-for-byte. A desktop build without the bridge falls back to the
+  // browser flow instead of opening an unusable modal.
+  const beginScreenShare = useCallback(async () => {
+    if (hasDesktopScreenPicker) {
+      openScreenPicker()
+      return
+    }
+
+    await startScreenShare()
+  }, [hasDesktopScreenPicker, openScreenPicker, startScreenShare])
 
   const toggleScreenShare = useCallback(async () => {
     if (isTogglingScreenShare) return
@@ -157,7 +312,7 @@ export const useScreenShare = ({
     }
 
     // Otherwise, start screen share directly
-    await startScreenShare()
+    await beginScreenShare()
   }, [
     isTogglingScreenShare,
     isScreenShareEnabled,
@@ -170,7 +325,7 @@ export const useScreenShare = ({
     allowStudentShare,
     t,
     stopScreenShare,
-    startScreenShare,
+    beginScreenShare,
   ])
 
   return {
@@ -185,6 +340,20 @@ export const useScreenShare = ({
     presenterDisplayName,
     showTakeoverModal,
     setShowTakeoverModal,
-    confirmTakeoverScreenShare: startScreenShare,
+    confirmTakeoverScreenShare: beginScreenShare,
+    // Desktop picker (ticket 08). Ticket 09 reads the full-display metadata to
+    // decide whether to show the OS overlay.
+    showScreenPicker,
+    screenSources,
+    screenPermission,
+    isLoadingScreenSources,
+    screenPickerError,
+    screenShareSelection,
+    screenShareSelectionRef,
+    getScreenShareSelection: () => screenShareSelectionRef.current,
+    closeScreenPicker,
+    confirmScreenPicker,
+    refreshScreenSources: loadScreenSources,
+    openScreenPermissionSettings,
   }
 }
