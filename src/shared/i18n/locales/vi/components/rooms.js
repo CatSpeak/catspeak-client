@@ -523,6 +523,21 @@ export default {
       syncError: "Không thể tải video. Kiểm tra kết nối rồi thử lại.",
       switchButton: "Đổi sang video này",
       switchLabel: "Dán link YouTube mới để đổi video",
+      searchLabel: "Tìm video hoặc dán link YouTube",
+      searchPlaceholder: "Từ khóa hoặc https://www.youtube.com/watch?v=...",
+      searchButton: "Tìm video",
+      searching: "Đang tìm...",
+      searchResults: "Kết quả tìm kiếm",
+      loadMoreResults: "Tải thêm kết quả",
+      loadingMore: "Đang tải...",
+      noResults: "Không tìm thấy video phù hợp. Thử từ khóa khác.",
+      searchQueryLength: "Từ khóa cần từ 2 đến 100 ký tự.",
+      searchNotConfigured:
+        "Tìm kiếm YouTube chưa được cấu hình. Bạn vẫn có thể dán link YouTube trực tiếp để phát.",
+      searchQuotaExceeded:
+        "Đã hết hạn mức tìm kiếm YouTube hôm nay. Bạn vẫn có thể dán link YouTube trực tiếp để phát.",
+      searchError:
+        "Không thể tìm kiếm video. Bạn vẫn có thể dán link YouTube trực tiếp để phát.",
       nowPlaying: "Đang phát",
       captionsOn: "Bật phụ đề",
       captionsOff: "Tắt phụ đề",
