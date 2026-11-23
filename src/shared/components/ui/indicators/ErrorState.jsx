@@ -40,22 +40,35 @@ const ErrorState = ({
   const displayTitle = title || message
   const displaySubtext = subtext || description
 
+  const renderTextContent = () => {
+    return (
+      <div className="flex flex-col items-center gap-1 text-center max-w-md">
+        <div className="text-base font-bold text-gray-900 dark:text-white">
+          {displayTitle}
+        </div>
+        {renderDescription()}
+      </div>
+    )
+  }
+
   const renderDescription = () => {
     if (!displaySubtext && !statusCode) return null
 
     return (
-      <div className="flex flex-col items-center gap-1 mt-1 text-center max-w-md">
+      <>
         {displaySubtext && (
-          <p className="text-sm text-neutral-600">
-            {typeof displaySubtext === "string" ? displaySubtext : displaySubtext}
+          <p className="text-sm font-normal text-[#606060] dark:text-[#AAAAAA]">
+            {typeof displaySubtext === "string"
+              ? displaySubtext
+              : displaySubtext}
           </p>
         )}
         {statusCode && (
-          <span className="text-xs font-mono text-neutral-400">
+          <span className="text-xs font-mono font-normal text-neutral-500 dark:text-neutral-400">
             HTTP Status: {statusCode}
           </span>
         )}
-      </div>
+      </>
     )
   }
 
@@ -67,7 +80,6 @@ const ErrorState = ({
           variant="primary"
           onClick={onRetry}
           startIcon={<RefreshCw className="w-4 h-4" />}
-          className="mt-4"
         >
           {retryText}
         </PillButton>
@@ -79,15 +91,16 @@ const ErrorState = ({
   if (variant === "component") {
     return (
       <div
-        className={`flex flex-col items-center justify-center py-8 px-4 text-center ${className}`}
+        className={`flex flex-col items-center justify-center gap-4 py-8 px-4 text-center text-[#606060] dark:text-[#AAAAAA] ${className}`}
       >
         {Icon && (
           <Icon
-            className={iconClassName || "w-8 h-8 mb-2 text-red-500 stroke-[1.5]"}
+            className={
+              iconClassName || "w-6 h-6 text-red-500 dark:text-red-400"
+            }
           />
         )}
-        <div className="text-sm font-semibold text-neutral-800">{displayTitle}</div>
-        {renderDescription()}
+        {renderTextContent()}
         {renderAction()}
         {children}
       </div>
@@ -97,17 +110,18 @@ const ErrorState = ({
   if (variant === "page") {
     return (
       <div
-        className={`flex-1 w-full flex flex-col items-center justify-center ${
+        className={`flex-1 w-full flex flex-col items-center justify-center gap-4 ${
           fullPage ? "min-h-[50vh] py-12" : "py-12"
-        } px-4 text-center ${className}`}
+        } px-4 text-center text-[#606060] dark:text-[#AAAAAA] ${className}`}
       >
         {Icon && (
           <Icon
-            className={iconClassName || "w-16 h-16 mb-3 text-red-500 stroke-[1.5]"}
+            className={
+              iconClassName || "w-6 h-6 text-red-500 dark:text-red-400"
+            }
           />
         )}
-        <div className="font-semibold text-lg text-neutral-900">{displayTitle}</div>
-        {renderDescription()}
+        {renderTextContent()}
         {renderAction()}
         {children}
       </div>
@@ -117,17 +131,18 @@ const ErrorState = ({
   if (variant === "detailed" || Icon) {
     return (
       <div
-        className={`flex flex-col items-center justify-center ${
+        className={`flex flex-col items-center justify-center gap-4 ${
           fullPage ? "min-h-[50vh] py-12" : "py-12"
-        } px-4 text-center ${className}`}
+        } px-4 text-center text-[#606060] dark:text-[#AAAAAA] ${className}`}
       >
         {Icon && (
           <Icon
-            className={iconClassName || "w-12 h-12 mb-3 text-red-500 stroke-[1.5]"}
+            className={
+              iconClassName || "w-6 h-6 text-red-500 dark:text-red-400"
+            }
           />
         )}
-        <div className="font-semibold text-base text-neutral-900">{displayTitle}</div>
-        {renderDescription()}
+        {renderTextContent()}
         {renderAction()}
         {children}
       </div>
@@ -135,11 +150,15 @@ const ErrorState = ({
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center ${className || "p-10"}`}>
-      <div className="text-sm text-red-600 font-medium text-center">
-        {displayTitle}
-      </div>
-      {renderDescription()}
+    <div
+      className={`flex flex-col items-center justify-center gap-4 text-[#7A7574] dark:text-[#AAAAAA] ${className || "p-10"}`}
+    >
+      {Icon && (
+        <Icon
+          className={iconClassName || "w-6 h-6 text-red-500 dark:text-red-400"}
+        />
+      )}
+      {renderTextContent()}
       {renderAction()}
       {children}
     </div>

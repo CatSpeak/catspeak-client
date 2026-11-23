@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react"
-import HelpButton from "./HelpButton"
 import HelpChatBox from "./HelpChatBox"
 import BugReportModal from "@/features/bug-report/components/BugReportModal"
 import { isHelpHidden } from "../utils/helpVisibility"
@@ -82,21 +81,29 @@ export default function HelpWidget() {
     return () => window.removeEventListener("catspeak:chat-assistant-opened", onChatOpen)
   }, [])
 
-  const handleHelpToggle = useCallback(() => {
-    // Q4 extra: if chat is open, Help click closes chat instead of toggling box
-    if (isChatOpen) {
-      window.dispatchEvent(new CustomEvent("catspeak:close-chat-assistant"))
-      return
+  // Listen to open/close help event triggered from header dropdowns
+  useEffect(() => {
+    const onOpenHelp = () => {
+      if (isChatOpen) {
+        window.dispatchEvent(new CustomEvent("catspeak:close-chat-assistant"))
+      }
+      setIsBoxOpen(true)
     }
-    setIsBoxOpen((v) => !v)
+    const onCloseHelp = () => setIsBoxOpen(false)
+
+    window.addEventListener("catspeak:open-help", onOpenHelp)
+    window.addEventListener("catspeak:close-help", onCloseHelp)
+    return () => {
+      window.removeEventListener("catspeak:open-help", onOpenHelp)
+      window.removeEventListener("catspeak:close-help", onCloseHelp)
+    }
   }, [isChatOpen])
 
-  // Q1: ẩn toàn bộ Help global khi vào room (/:lang/meet/:id) hoặc trang /chat.
-  if (isHidden) return null
+  // Q1: ẩn toàn bộ Help global khi vào room (/:lang/meet/:id) hoặc trang /chat nếu không chủ động mở.
+  if (isHidden && !isBoxOpen && !isReportOpen) return null
 
   return (
     <>
-      <HelpButton onClick={handleHelpToggle} isActive={isBoxOpen || isChatOpen} />
       <HelpChatBox
         open={isBoxOpen}
         onClose={() => setIsBoxOpen(false)}

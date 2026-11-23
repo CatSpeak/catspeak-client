@@ -16,6 +16,7 @@ import {
 } from "../api/ragClient"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import useChatHistory from "../hooks/useChatHistory"
+import Modal from "@/shared/components/ui/Modal"
 import ContactSupportModal from "./ContactSupportModal"
 import MessageBubble from "./MessageBubble"
 import SourceDrawer from "./SourceDrawer"
@@ -321,23 +322,31 @@ export default function ChatAssistantWidget() {
   if (!open) return null
 
   return (
-    <div className="fixed bottom-[88px] right-6 z-[60] flex h-[560px] max-h-[calc(100vh-10.5rem)] w-[385px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-          <header className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
-            <div>
-              <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                {L.title}
-              </p>
-              <p className="text-[11px] text-neutral-500">{L.subtitle}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label={L.closeLabel}
-              className="rounded-full p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-            >
-              <X size={18} />
-            </button>
-          </header>
+    <Modal
+      open={open}
+      onClose={() => setOpen(false)}
+      fullScreenOnMobile={false}
+      className="w-[420px] max-w-[calc(100vw-2rem)] h-[580px] max-h-[85vh] rounded-3xl overflow-hidden"
+      bodyClassName="!p-0 !mb-0 flex flex-col flex-1 overflow-hidden"
+      showCloseButton={false}
+      ariaLabel={L.title}
+    >
+      <header className="flex items-center justify-between border-b border-border px-4 py-3 dark:border-[#3F3F3F] shrink-0">
+        <div>
+          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+            {L.title}
+          </p>
+          <p className="text-[11px] text-neutral-500 dark:text-[#AAAAAA]">{L.subtitle}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label={L.closeLabel}
+          className="rounded-full p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
+        >
+          <X size={18} />
+        </button>
+      </header>
 
           <div className="relative flex-1 overflow-hidden">
             <div ref={listRef} className="h-full space-y-3 overflow-y-auto px-4 py-3">
@@ -450,6 +459,6 @@ export default function ChatAssistantWidget() {
               </span>
             </div>
           </form>
-        </div>
+    </Modal>
   )
 }

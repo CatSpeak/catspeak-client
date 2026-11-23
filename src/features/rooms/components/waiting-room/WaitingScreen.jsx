@@ -183,7 +183,8 @@ const WaitingScreen = ({
                 loading={showButtonSpinner}
                 loadingText={
                   isLongJoining
-                    ? (t?.rooms?.videoCall?.provider?.connecting ?? "Đang kết nối...")
+                    ? (t?.rooms?.videoCall?.provider?.connecting ??
+                      "Đang kết nối...")
                     : t.rooms.waitingScreen.joinNow
                 }
                 aria-disabled={isFull || isJoining}

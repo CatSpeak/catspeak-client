@@ -7,6 +7,7 @@ import {
   Moon,
   SunMoon,
   Globe,
+  HelpCircle,
   ChevronRight as ChevronRightIcon,
 } from "lucide-react"
 import { createPortal } from "react-dom"
@@ -327,6 +328,19 @@ const GuestSettingsDropdown = ({ className = "" }) => {
               hasSubmenu: true,
               rightText: currentLanguageOption?.label,
               onClick: () => setCurrentView("language"),
+              isFirst: false,
+              isLast: false,
+            })}
+
+            {/* Help & Support Trigger */}
+            {renderItem({
+              key: "help",
+              icon: <HelpCircle />,
+              label: t.helpBox?.helpTooltip || t.header?.help || "Trợ giúp",
+              onClick: () => {
+                handleCloseMenu()
+                window.dispatchEvent(new CustomEvent("catspeak:open-help"))
+              },
               isFirst: false,
               isLast: true,
             })}

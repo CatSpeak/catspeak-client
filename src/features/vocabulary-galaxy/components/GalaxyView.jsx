@@ -62,7 +62,7 @@ const GalaxyView = ({
 
   return (
     <div
-      className={`relative isolate overflow-hidden rounded-2xl border border-border bg-[#090c18] ${className}`}
+      className={`relative isolate overflow-hidden border-t border-border dark:border-darkBorder bg-[#090c18] ${className}`}
     >
       <canvas
         ref={canvasRef}

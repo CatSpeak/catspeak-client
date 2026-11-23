@@ -10,7 +10,7 @@ export default {
   resetView: "Đặt lại góc nhìn",
   canvasLabel: "Ngân hà từ vựng 3D",
   loading: "Đang tải từ vựng của bạn...",
-  error: "Không tải được từ vựng.",
+  error: "Không tải được từ vựng",
   retry: "Thử lại",
   empty: "Sổ từ vựng của bạn còn trống.",
   emptyHint: "Thêm từ vào sổ để thấy chúng thành những vì sao.",

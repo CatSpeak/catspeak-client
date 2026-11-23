@@ -28,11 +28,22 @@ const EmptyState = ({
   const displayTitle = title || message
   const displaySubtext = subtext || description
 
+  const renderTextContent = () => {
+    return (
+      <div className="flex flex-col items-center gap-1 text-center max-w-md">
+        <div className="text-base font-bold text-gray-900 dark:text-white">
+          {displayTitle}
+        </div>
+        {renderDescription()}
+      </div>
+    )
+  }
+
   const renderDescription = () => {
     if (!displaySubtext) return null
     if (typeof displaySubtext === "string") {
       return (
-        <p className="text-sm text-[#606060] dark:text-[#AAAAAA] mt-1 text-center max-w-sm">
+        <p className="text-sm font-normal text-[#606060] dark:text-[#AAAAAA]">
           {displaySubtext}
         </p>
       )
@@ -43,11 +54,16 @@ const EmptyState = ({
   if (variant === "component") {
     return (
       <div
-        className={`flex flex-col items-center justify-center py-12 text-[#606060] dark:text-[#AAAAAA] ${className}`}
+        className={`flex flex-col items-center justify-center gap-4 py-8 px-4 text-center text-[#606060] dark:text-[#AAAAAA] ${className}`}
       >
-        {Icon && <Icon className={iconClassName || "w-8 h-8 mb-2 text-[#606060] dark:text-[#AAAAAA]"} />}
-        <div className="text-sm text-center font-medium text-gray-900 dark:text-white">{displayTitle}</div>
-        {renderDescription()}
+        {Icon && (
+          <Icon
+            className={
+              iconClassName || "w-6 h-6 text-[#606060] dark:text-[#AAAAAA]"
+            }
+          />
+        )}
+        {renderTextContent()}
         {action}
         {children}
       </div>
@@ -57,13 +73,18 @@ const EmptyState = ({
   if (variant === "page") {
     return (
       <div
-        className={`flex-1 w-full flex flex-col items-center justify-center ${
+        className={`flex-1 w-full flex flex-col items-center justify-center gap-4 ${
           fullPage ? "min-h-[50vh] py-12" : "py-12"
-        } text-[#606060] dark:text-[#AAAAAA] ${className}`}
+        } px-4 text-center text-[#606060] dark:text-[#AAAAAA] ${className}`}
       >
-        {Icon && <Icon className={iconClassName || "w-16 h-16 mb-3 text-[#606060] dark:text-[#AAAAAA]"} />}
-        <div className="font-semibold text-lg text-center text-gray-900 dark:text-white">{displayTitle}</div>
-        {renderDescription()}
+        {Icon && (
+          <Icon
+            className={
+              iconClassName || "w-6 h-6 text-[#606060] dark:text-[#AAAAAA]"
+            }
+          />
+        )}
+        {renderTextContent()}
         {action}
         {children}
       </div>
@@ -73,13 +94,18 @@ const EmptyState = ({
   if (variant === "detailed" || Icon) {
     return (
       <div
-        className={`flex flex-col items-center justify-center ${
-          fullPage ? "min-h-[50vh] py-12" : "py-16"
-        } text-[#606060] dark:text-[#AAAAAA] ${className}`}
+        className={`flex flex-col items-center justify-center gap-4 ${
+          fullPage ? "min-h-[50vh] py-12" : "py-12"
+        } px-4 text-center text-[#606060] dark:text-[#AAAAAA] ${className}`}
       >
-        {Icon && <Icon className={iconClassName || "w-14 h-14 mb-3 text-[#606060] dark:text-[#AAAAAA]"} />}
-        <div className="font-semibold text-base text-center text-gray-900 dark:text-white">{displayTitle}</div>
-        {renderDescription()}
+        {Icon && (
+          <Icon
+            className={
+              iconClassName || "w-6 h-6 text-[#606060] dark:text-[#AAAAAA]"
+            }
+          />
+        )}
+        {renderTextContent()}
         {action}
         {children}
       </div>
@@ -87,9 +113,17 @@ const EmptyState = ({
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center text-[#7A7574] dark:text-[#AAAAAA] ${className || "p-10"}`}>
-      <div className="text-base text-center font-medium text-gray-900 dark:text-white">{displayTitle}</div>
-      {renderDescription()}
+    <div
+      className={`flex flex-col items-center justify-center gap-4 text-[#7A7574] dark:text-[#AAAAAA] ${className || "p-10"}`}
+    >
+      {Icon && (
+        <Icon
+          className={
+            iconClassName || "w-6 h-6 text-[#606060] dark:text-[#AAAAAA]"
+          }
+        />
+      )}
+      {renderTextContent()}
       {action}
       {children}
     </div>

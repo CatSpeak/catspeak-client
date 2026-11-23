@@ -14,6 +14,7 @@ import {
   GraduationCap,
   BookOpen,
   HelpCircle,
+  Compass,
   Globe,
   Sun,
   Moon,
@@ -583,8 +584,20 @@ const ProfileDropdown = () => {
             })}
 
             {renderItem({
-              key: "tour",
+              key: "help",
               icon: <HelpCircle />,
+              label: t.helpBox?.helpTooltip || t.header?.help || "Trợ giúp",
+              onClick: () => {
+                handleCloseMenu()
+                window.dispatchEvent(new CustomEvent("catspeak:open-help"))
+              },
+              isFirst: false,
+              isLast: false,
+            })}
+
+            {renderItem({
+              key: "tour",
+              icon: <Compass />,
               label: t.header?.tourGuide || "Hướng dẫn người dùng mới",
               onClick: () => {
                 handleCloseMenu()

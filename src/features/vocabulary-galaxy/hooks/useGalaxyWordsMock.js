@@ -63,7 +63,7 @@ export function useGalaxyWordsMock({ enabled = true } = {}) {
   return {
     words,
     clusters,
-    status: enabled ? "ready" : "loading",
+    status: !enabled ? "loading" : words.length === 0 ? "empty" : "ready",
     error: null,
     retry: () => {},
     markStudied,
