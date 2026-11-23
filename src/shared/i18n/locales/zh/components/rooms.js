@@ -425,6 +425,36 @@ export default {
     releaseUnavailable:
       "无法加载最新安装包信息，你仍然可以在浏览器中参加。",
     openDesktop: "打开 Catspeak Desktop",
+    openingDesktop: "正在打开 Catspeak Desktop...",
+    openDesktopFailed:
+      "无法打开 Catspeak Desktop。请下载下方安装包，或在浏览器中参加。",
+    openDesktopRateLimited: "尝试次数过多，请等待一分钟后再试。",
+  },
+  desktopHandoff: {
+    badge: "DESKTOP",
+    title: "正在登录 Catspeak Desktop",
+    exchanging: "正在验证一次性启动码...",
+    redirecting: "验证成功，正在进入房间...",
+    invalidTitle: "此链接无法使用",
+    invalidMessage:
+      "启动码缺失或格式不正确。请返回房间，点击“打开 Catspeak Desktop”获取新的启动码。",
+    expiredTitle: "启动码已过期",
+    expiredMessage: "启动码有效期为 2 分钟。请返回房间获取新的启动码。",
+    usedTitle: "启动码已被使用",
+    usedMessage: "此启动码已经使用过一次。请返回房间获取新的启动码。",
+    rateLimitedTitle: "尝试次数过多",
+    rateLimitedMessage: "请等待一分钟后再试。",
+    networkTitle: "无法连接服务器",
+    networkMessage: "无法连接 Catspeak，请检查网络后重试。",
+    serverTitle: "服务器繁忙",
+    serverMessage: "服务器出现临时问题，请稍后重试。",
+    unknownTitle: "无法登录",
+    unknownMessage: "启动码兑换失败。请重试，或在网页中参加房间。",
+    retry: "重试",
+    backToRoom: "返回网页房间",
+    backToHome: "返回社区",
+    newCodeHint:
+      "如果启动码已过期或已被使用，请返回房间并点击“打开 Catspeak Desktop”获取新的启动码。",
   },
   waitingScreen: {
     backToCommunity: "返回",
