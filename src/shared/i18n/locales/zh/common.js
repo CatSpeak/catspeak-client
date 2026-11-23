@@ -75,6 +75,7 @@ export default {
     vocabularyNotebook: "生词本",
     historyProgress: "历史与进度",
     vocabularyGalaxy: "词汇银河",
+    vocabularyPractice: "词汇练习",
     messages: "消息",
     settings: "设置",
     help: "帮助",

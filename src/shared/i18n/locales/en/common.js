@@ -75,6 +75,7 @@ export default {
     vocabularyNotebook: "Vocabulary Notebook",
     historyProgress: "History & Progress",
     vocabularyGalaxy: "Vocabulary Galaxy",
+    vocabularyPractice: "Vocabulary Practice",
     messages: "Messages",
     settings: "Settings",
     help: "Help",

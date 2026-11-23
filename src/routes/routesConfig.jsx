@@ -70,6 +70,10 @@ const AiFlashcardLayout = lazy(
   () => import("@/features/ai-tutor/layouts/FlashcardLayout"),
 )
 import VocabularyGalaxyPage from "@/features/vocabulary-galaxy/pages/VocabularyGalaxyPage"
+import { FEATURES } from "@/shared/config/featureFlags"
+const VocabularyPracticePage = lazy(
+  () => import("@/features/vocabulary-practice/pages/VocabularyPracticePage"),
+)
 const AiHistoryProgressPage = lazy(
   () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
 )
@@ -963,10 +967,21 @@ const routesConfig = [
                   </LazyRoute>
                 ),
               },
-              {
-                path: "vocabulary-galaxy",
-                element: <VocabularyGalaxyPage />,
-              },
+              ...(FEATURES.vocabGalaxy
+                ? [{ path: "vocabulary-galaxy", element: <VocabularyGalaxyPage /> }]
+                : []),
+              ...(FEATURES.vocabPractice
+                ? [
+                    {
+                      path: "vocabulary-practice",
+                      element: (
+                        <LazyRoute>
+                          <VocabularyPracticePage />
+                        </LazyRoute>
+                      ),
+                    },
+                  ]
+                : []),
               {
                 path: "teaching-tasks",
                 element: (
