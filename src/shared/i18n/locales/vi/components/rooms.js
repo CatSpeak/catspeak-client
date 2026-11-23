@@ -607,6 +607,10 @@ export default {
       presenterUnlock: "Mở khóa vẽ của thành viên",
       lockedByPresenter: "Presenter đã khóa vẽ",
       policyDisabled: "Đã tắt quyền vẽ chú thích",
+      overlayActive: "Overlay toàn màn hình đang bật",
+      overlayMouseMode: "Chế độ chuột",
+      overlayDrawMode: "Chế độ vẽ",
+      overlayUnavailable: "Không thể mở overlay toàn màn hình.",
     },
     moreOptions: "Tùy chọn khác",
     watchTogether: {

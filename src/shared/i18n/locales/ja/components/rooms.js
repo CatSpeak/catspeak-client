@@ -596,6 +596,10 @@ export default {
       presenterUnlock: "メンバーの描画ロックを解除",
       lockedByPresenter: "発表者が描画をロック中",
       policyDisabled: "描画は無効です",
+      overlayActive: "全画面オーバーレイが有効です",
+      overlayMouseMode: "マウスモード",
+      overlayDrawMode: "描画モード",
+      overlayUnavailable: "全画面オーバーレイを開けませんでした。",
     },
     moreOptions: "その他のオプション",
     watchTogether: {

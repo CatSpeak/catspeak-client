@@ -1343,6 +1343,50 @@ export const useScreenAnnotation = ({
 
   const clearMine = useCallback(() => clearScope("mine"), [clearScope])
 
+  /**
+   * Ticket 09: apply a packet produced by the local OS overlay. It goes
+   * through the same reducer and DataChannel publisher as an in-app gesture,
+   * so the presenter's own screen and every viewer stay in lockstep.
+   */
+  const applyLocalPacket = useCallback(
+    (packet) => {
+      const current = latestRef.current
+      if (!current.trackSid || !current.canAnnotate) return false
+      if (!packet || packet.trackSid !== current.trackSid) return false
+
+      const validated = validateAnnotationPacket(packet)
+      if (!validated) return false
+
+      setState((prev) =>
+        applyAnnotationPacketToState(prev, validated, {
+          now: Date.now(),
+          senderAuthorId: resolveAuthorId(current),
+          senderCanModerate: current.canModerateAnnotation,
+          memberDrawAllowed: current.memberDrawAllowed,
+        }),
+      )
+
+      if (
+        validated.t === "stroke-end" ||
+        validated.t === "shape-commit" ||
+        validated.t === "text-commit"
+      ) {
+        historyRef.current = recordAnnotationHistoryCommit(
+          historyRef.current,
+          validated.item,
+        )
+      }
+
+      const lossy =
+        validated.t === "stroke-start" ||
+        validated.t === "stroke-point" ||
+        validated.t === "laser-move"
+      publishPacket(validated, !lossy)
+      return true
+    },
+    [publishPacket, setState],
+  )
+
   return {
     trackSid,
     items: state.items,
@@ -1367,6 +1411,9 @@ export const useScreenAnnotation = ({
     setPresenterLock,
     clearScope,
     clearMine,
+    applyLocalPacket,
+    authorId: accountId === null || accountId === undefined ? "anonymous" : String(accountId),
+    authorName: authorName || "Guest",
     bridge,
   }
 }
