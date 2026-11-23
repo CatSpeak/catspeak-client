@@ -11,6 +11,7 @@
  */
 
 import { clamp01, simplifyPoints } from "./annotationGeometry.js"
+import { ANNOTATION_TEXT_MAX_LENGTH } from "./annotationText.js"
 
 export const ANNOTATION_TOPIC = "screen-annotation"
 export const ANNOTATION_PROTOCOL_VERSION = 1
@@ -31,6 +32,8 @@ export const MAX_ERASE_IDS = 500
 export const SYNC_REQUEST_FALLBACK_MS = 400
 
 export const ANNOTATION_TOOLS = new Set(["pen", "highlighter"])
+export const SHAPE_TOOLS = new Set(["line", "arrow", "rect", "ellipse"])
+export const ANNOTATION_ITEM_KINDS = new Set(["stroke", "shape", "text"])
 export const CLEAR_SCOPES = new Set(["mine", "others", "all"])
 
 export const ANNOTATION_PACKET_TYPES = new Set([
@@ -95,15 +98,18 @@ const isValidIdList = (ids) =>
   ids.length <= MAX_ERASE_IDS &&
   ids.every(isNonEmptyString)
 
+const hasItemIdentity = (item) =>
+  isNonEmptyString(item.id) &&
+  isNonEmptyString(item.color) &&
+  isNonEmptyString(item.authorId) &&
+  isNonEmptyString(item.authorName)
+
 const validateStrokeItem = (item) => {
   if (!item || typeof item !== "object") return null
   if (item.kind !== "stroke") return null
-  if (!isNonEmptyString(item.id)) return null
+  if (!hasItemIdentity(item)) return null
   if (!ANNOTATION_TOOLS.has(item.tool)) return null
-  if (!isNonEmptyString(item.color)) return null
   if (!isWidth(item.width)) return null
-  if (!isNonEmptyString(item.authorId)) return null
-  if (!isNonEmptyString(item.authorName)) return null
   if (
     !Array.isArray(item.pts) ||
     item.pts.length === 0 ||
@@ -123,6 +129,77 @@ const validateStrokeItem = (item) => {
     authorName: item.authorName,
     pts: normalizePoints(item.pts),
   }
+}
+
+const validateShapeItem = (item) => {
+  if (!item || typeof item !== "object") return null
+  if (item.kind !== "shape") return null
+  if (!hasItemIdentity(item)) return null
+  if (!SHAPE_TOOLS.has(item.tool)) return null
+  if (!isWidth(item.width)) return null
+  if (
+    !isNormalizedCoordinate(item.x1) ||
+    !isNormalizedCoordinate(item.y1) ||
+    !isNormalizedCoordinate(item.x2) ||
+    !isNormalizedCoordinate(item.y2)
+  ) {
+    return null
+  }
+
+  return {
+    id: item.id,
+    kind: "shape",
+    tool: item.tool,
+    color: item.color,
+    width: item.width,
+    authorId: item.authorId,
+    authorName: item.authorName,
+    x1: Number(clamp01(item.x1).toFixed(4)),
+    y1: Number(clamp01(item.y1).toFixed(4)),
+    x2: Number(clamp01(item.x2).toFixed(4)),
+    y2: Number(clamp01(item.y2).toFixed(4)),
+  }
+}
+
+const isValidFontSize = (value) =>
+  isFiniteNumber(value) && value > 0 && value <= 200
+
+const validateTextItem = (item) => {
+  if (!item || typeof item !== "object") return null
+  if (item.kind !== "text") return null
+  if (!hasItemIdentity(item)) return null
+  if (!isValidFontSize(item.fontSize)) return null
+  if (!isNormalizedCoordinate(item.x) || !isNormalizedCoordinate(item.y)) {
+    return null
+  }
+  if (
+    typeof item.text !== "string" ||
+    item.text.length === 0 ||
+    item.text.length > ANNOTATION_TEXT_MAX_LENGTH
+  ) {
+    return null
+  }
+
+  return {
+    id: item.id,
+    kind: "text",
+    color: item.color,
+    fontSize: item.fontSize,
+    authorId: item.authorId,
+    authorName: item.authorName,
+    x: Number(clamp01(item.x).toFixed(4)),
+    y: Number(clamp01(item.y).toFixed(4)),
+    text: item.text,
+  }
+}
+
+/** Validate and normalize any store item (stroke, shape or text note). */
+export const validateAnnotationItem = (item) => {
+  if (!item || typeof item !== "object") return null
+  if (!ANNOTATION_ITEM_KINDS.has(item.kind)) return null
+  if (item.kind === "stroke") return validateStrokeItem(item)
+  if (item.kind === "shape") return validateShapeItem(item)
+  return validateTextItem(item)
 }
 
 /**
@@ -177,6 +254,22 @@ export const validateAnnotationPacket = (raw) => {
       const item = validateStrokeItem(raw.item)
       return item ? { ...base, item } : null
     }
+    case "shape-commit": {
+      const item = validateShapeItem(raw.item)
+      return item ? { ...base, item } : null
+    }
+    case "text-commit": {
+      const item = validateTextItem(raw.item)
+      return item ? { ...base, item } : null
+    }
+    case "undo":
+      return isNonEmptyString(raw.id) && raw.id.length <= 256
+        ? { ...base, id: raw.id }
+        : null
+    case "redo": {
+      const item = validateAnnotationItem(raw.item)
+      return item ? { ...base, item } : null
+    }
     case "erase":
       return isValidIdList(raw.ids) ? { ...base, ids: [...raw.ids] } : null
     case "clear": {
@@ -223,7 +316,7 @@ export const validateAnnotationPacket = (raw) => {
       if (!Array.isArray(raw.itemsChunk)) return null
 
       const itemsChunk = raw.itemsChunk
-        .map(validateStrokeItem)
+        .map(validateAnnotationItem)
         .filter(Boolean)
         .slice(0, MAX_ANNOTATION_ITEMS)
 
@@ -236,8 +329,6 @@ export const validateAnnotationPacket = (raw) => {
         itemsChunk,
       }
     }
-    // Shapes, text and undo/redo are declared in protocol v1 but implemented
-    // by ticket 03. Ignore them safely until the store/renderer grow support.
     default:
       return null
   }
@@ -320,6 +411,35 @@ export const buildStrokeEndPacket = ({ trackSid, item }) =>
     },
   })
 
+export const buildShapeCommitPacket = ({ trackSid, item }) =>
+  packet(trackSid, { t: "shape-commit", item: { ...item } })
+
+export const buildTextCommitPacket = ({ trackSid, item }) =>
+  packet(trackSid, { t: "text-commit", item: { ...item } })
+
+export const buildLaserMovePacket = ({
+  trackSid,
+  authorName,
+  color,
+  x,
+  y,
+  ts,
+}) =>
+  packet(trackSid, {
+    t: "laser-move",
+    authorName,
+    color,
+    x,
+    y,
+    ts,
+  })
+
+export const buildUndoPacket = ({ trackSid, id }) =>
+  packet(trackSid, { t: "undo", id })
+
+export const buildRedoPacket = ({ trackSid, item }) =>
+  packet(trackSid, { t: "redo", item: { ...item } })
+
 export const buildErasePacket = ({ trackSid, ids }) =>
   packet(trackSid, { t: "erase", ids: [...(ids ?? [])] })
 
@@ -355,7 +475,7 @@ export const buildSyncSnapshotChunks = ({
   snapId = createSnapshotId(),
   presenterLocked = false,
 }) => {
-  const validItems = (items ?? []).map(validateStrokeItem).filter(Boolean)
+  const validItems = (items ?? []).map(validateAnnotationItem).filter(Boolean)
   if (validItems.length === 0) return []
 
   const header = {

@@ -163,39 +163,151 @@ export const simplifyPoints = (points, tolerance = 0.001) => {
   return simplified
 }
 
+/** Reference frame used to estimate a text note's bounds in normalized space. */
+export const TEXT_REFERENCE_HEIGHT = 720
+export const TEXT_LINE_HEIGHT_FACTOR = 1.25
+export const TEXT_CHAR_WIDTH_FACTOR = 0.6
+
+/** Conservative normalized bounding box for a multi-line text note. */
+export const estimateTextBounds = (item) => {
+  const fontSize = isFiniteNumber(item?.fontSize) ? item.fontSize : 24
+  const scale = fontSize / TEXT_REFERENCE_HEIGHT
+  const lines = String(item?.text ?? "").split("\n")
+  const longest = lines.reduce((max, line) => Math.max(max, line.length), 0)
+  const x = isFiniteNumber(item?.x) ? item.x : 0
+  const y = isFiniteNumber(item?.y) ? item.y : 0
+
+  return {
+    x1: x,
+    y1: y,
+    x2: clamp01(x + longest * scale * TEXT_CHAR_WIDTH_FACTOR),
+    y2: clamp01(y + Math.max(1, lines.length) * scale * TEXT_LINE_HEIGHT_FACTOR),
+  }
+}
+
+const pointRectDistanceSq = (point, rect) => {
+  const centerX = (rect.x1 + rect.x2) / 2
+  const centerY = (rect.y1 + rect.y2) / 2
+  const halfWidth = Math.abs(rect.x2 - rect.x1) / 2
+  const halfHeight = Math.abs(rect.y2 - rect.y1) / 2
+  const dx = Math.max(Math.abs(point[0] - centerX) - halfWidth, 0)
+  const dy = Math.max(Math.abs(point[1] - centerY) - halfHeight, 0)
+
+  if (dx === 0 && dy === 0) {
+    // Inside: the border is the closest edge.
+    const edge = Math.min(
+      halfWidth - Math.abs(point[0] - centerX),
+      halfHeight - Math.abs(point[1] - centerY),
+    )
+    return Math.max(0, edge) ** 2
+  }
+  return dx * dx + dy * dy
+}
+
+const ELLIPSE_SAMPLES = 64
+
+const pointEllipseDistanceSq = (point, shape) => {
+  const centerX = (shape.x1 + shape.x2) / 2
+  const centerY = (shape.y1 + shape.y2) / 2
+  const radiusX = Math.abs(shape.x2 - shape.x1) / 2
+  const radiusY = Math.abs(shape.y2 - shape.y1) / 2
+  if (radiusX <= 1e-9 || radiusY <= 1e-9) {
+    return pointSegmentDistanceSq(
+      point,
+      [shape.x1, shape.y1],
+      [shape.x2, shape.y2],
+    )
+  }
+
+  let closest = Infinity
+  let previous = [centerX + radiusX, centerY]
+  for (let i = 1; i <= ELLIPSE_SAMPLES; i += 1) {
+    const angle = (i / ELLIPSE_SAMPLES) * Math.PI * 2
+    const current = [
+      centerX + radiusX * Math.cos(angle),
+      centerY + radiusY * Math.sin(angle),
+    ]
+    closest = Math.min(closest, pointSegmentDistanceSq(point, previous, current))
+    previous = current
+  }
+  return closest
+}
+
+const hitTestItem = (item, target, toleranceSq) => {
+  if (!item) return false
+
+  if (item.kind === "stroke") {
+    if (!Array.isArray(item.pts)) return false
+    const pts = item.pts.filter(isPoint)
+    if (pts.length === 0) return false
+    if (pts.length === 1) {
+      return pointSegmentDistanceSq(target, pts[0], pts[0]) <= toleranceSq
+    }
+    for (let i = 1; i < pts.length; i += 1) {
+      if (pointSegmentDistanceSq(target, pts[i - 1], pts[i]) <= toleranceSq) {
+        return true
+      }
+    }
+    return false
+  }
+
+  if (item.kind === "shape") {
+    if (
+      !isFiniteNumber(item.x1) ||
+      !isFiniteNumber(item.y1) ||
+      !isFiniteNumber(item.x2) ||
+      !isFiniteNumber(item.y2)
+    ) {
+      return false
+    }
+
+    if (item.tool === "line" || item.tool === "arrow") {
+      return (
+        pointSegmentDistanceSq(
+          target,
+          [item.x1, item.y1],
+          [item.x2, item.y2],
+        ) <= toleranceSq
+      )
+    }
+    if (item.tool === "rect") {
+      return pointRectDistanceSq(target, item) <= toleranceSq
+    }
+    if (item.tool === "ellipse") {
+      return pointEllipseDistanceSq(target, item) <= toleranceSq
+    }
+    return false
+  }
+
+  if (item.kind === "text") {
+    const bounds = estimateTextBounds(item)
+    const inside =
+      target[0] >= bounds.x1 &&
+      target[0] <= bounds.x2 &&
+      target[1] >= bounds.y1 &&
+      target[1] <= bounds.y2
+    return inside || pointRectDistanceSq(target, bounds) <= toleranceSq
+  }
+
+  return false
+}
+
 /**
- * First annotation whose stroke passes within `tolerance` of the point.
- * Shapes/text arrive in ticket 03; the return contract is already "item".
+ * Every annotation touched at `point` (eraser). Geometry is author-agnostic;
+ * the caller applies the ownership/moderation filter.
  */
-export const hitTestAnnotation = (
+export const hitTestAnnotations = (
   items,
   point,
   { tolerance = DEFAULT_HIT_TOLERANCE } = {},
 ) => {
-  if (!isPoint([point?.x, point?.y])) return null
+  if (!isPoint([point?.x, point?.y])) return []
   const target = [point.x, point.y]
+  const toleranceSq = Math.max(0, tolerance) ** 2
 
-  for (const item of items ?? []) {
-    if (!item || item.kind !== "stroke" || !Array.isArray(item.pts)) continue
-    const pts = item.pts.filter(isPoint)
-    if (pts.length === 0) continue
-
-    if (pts.length === 1) {
-      const dx = target[0] - pts[0][0]
-      const dy = target[1] - pts[0][1]
-      if (dx * dx + dy * dy <= tolerance * tolerance) return item
-      continue
-    }
-
-    for (let i = 1; i < pts.length; i += 1) {
-      if (
-        pointSegmentDistanceSq(target, pts[i - 1], pts[i]) <=
-        tolerance * tolerance
-      ) {
-        return item
-      }
-    }
-  }
-
-  return null
+  return (items ?? []).filter((item) => hitTestItem(item, target, toleranceSq))
 }
+
+/** First annotation touched at `point`, or null. */
+export const hitTestAnnotation = (items, point, options = {}) =>
+  hitTestAnnotations(items, point, options)[0] ?? null

@@ -1,5 +1,20 @@
-import { useEffect } from "react"
-import { Highlighter, MousePointer2, Pen, Trash2, X } from "lucide-react"
+import { useEffect, useState } from "react"
+import {
+  ArrowUpRight,
+  Circle,
+  Eraser,
+  Highlighter,
+  Minus,
+  MousePointer2,
+  Pen,
+  Redo2,
+  Square,
+  Trash2,
+  Type,
+  Undo2,
+  X,
+  Zap,
+} from "lucide-react"
 
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -13,53 +28,92 @@ const idleButton =
   "text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-white/10"
 const activeButton =
   "bg-cath-red-700 text-white shadow-sm dark:bg-red-500 dark:text-white"
+const disabledButton = "cursor-not-allowed opacity-40"
 
-const ToolButton = ({ active, label, onClick, children }) => (
+const ToolButton = ({ active, disabled, label, onClick, children }) => (
   <button
     type="button"
     title={label}
     aria-label={label}
     aria-pressed={active}
+    disabled={disabled}
     onClick={onClick}
-    className={`${baseButton} ${active ? activeButton : idleButton}`}
+    className={`${baseButton} ${active ? activeButton : idleButton} ${
+      disabled ? disabledButton : ""
+    }`}
   >
     {children}
   </button>
 )
 
+const isTypingTarget = (target) =>
+  Boolean(
+    target &&
+      (target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
+        target.isContentEditable),
+  )
+
 /**
- * Zoom-style annotation toolbar. Ticket 02 exposes mouse/pen/highlighter,
- * 8 colours, 3 widths, clear-mine and exit; shapes/text/laser/eraser/undo are
- * added by ticket 03 in the same extension points.
+ * Zoom-style annotation toolbar: mouse, pen, highlighter, text, shapes,
+ * laser, eraser, 8 colours, 3 widths, undo/redo, clear scopes and exit.
+ * Ticket 04 owns the presenter lock button and policy row.
  */
 const AnnotationToolbar = ({
   tool = "mouse",
   color = ANNOTATION_COLORS[0],
   width = ANNOTATION_WIDTHS[1],
+  canModerate = false,
   onToolChange,
   onColorChange,
   onWidthChange,
-  onClearMine,
+  onUndo,
+  onRedo,
+  onClear,
   onExit,
   readOnly = false,
 }) => {
   const { t } = useLanguage()
   const copy = t.rooms?.videoCall?.annotation ?? {}
+  const [clearMenuOpen, setClearMenuOpen] = useState(false)
 
   useEffect(() => {
     if (readOnly) return undefined
     const handleKeyDown = (event) => {
-      if (event.key !== "Escape") return
-      onToolChange?.("mouse")
+      if (event.key === "Escape") {
+        setClearMenuOpen(false)
+        onToolChange?.("mouse")
+        return
+      }
+
+      const modifier = event.ctrlKey || event.metaKey
+      if (!modifier || isTypingTarget(event.target)) return
+      const key = event.key.toLowerCase()
+      if (key === "z") {
+        event.preventDefault()
+        if (event.shiftKey) onRedo?.()
+        else onUndo?.()
+      } else if (key === "y") {
+        event.preventDefault()
+        onRedo?.()
+      }
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [onToolChange, readOnly])
+  }, [onRedo, onToolChange, onUndo, readOnly])
 
   if (readOnly) return null
 
   const stop = (event) => {
     event.stopPropagation()
+  }
+
+  const selectTool = (value) => () => onToolChange?.(value)
+
+  const clear = (scope) => () => {
+    onClear?.(scope)
+    setClearMenuOpen(false)
   }
 
   return (
@@ -68,106 +122,202 @@ const AnnotationToolbar = ({
       aria-label={copy.toolbar || "Annotation tools"}
       onPointerDown={stop}
       onClick={stop}
-      className="absolute left-1/2 top-2 z-30 flex max-w-[calc(100%-1rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white/95 px-2 py-1.5 text-slate-700 shadow-xl backdrop-blur-sm dark:border-white/15 dark:bg-neutral-900/95 dark:text-neutral-100"
+      className="absolute left-1/2 top-2 z-30 flex max-w-[calc(100%-1rem)] -translate-x-1/2 items-center gap-1 rounded-2xl border border-slate-200 bg-white/95 px-2 py-1.5 text-slate-700 shadow-xl backdrop-blur-sm dark:border-white/15 dark:bg-neutral-900/95 dark:text-neutral-100"
     >
-      <ToolButton
-        active={tool === "mouse"}
-        label={copy.mouse || "Mouse"}
-        onClick={() => onToolChange?.("mouse")}
-      >
-        <MousePointer2 size={16} />
-      </ToolButton>
-      <ToolButton
-        active={tool === "pen"}
-        label={copy.pen || "Pen"}
-        onClick={() => onToolChange?.("pen")}
-      >
-        <Pen size={16} />
-      </ToolButton>
-      <ToolButton
-        active={tool === "highlighter"}
-        label={copy.highlighter || "Highlighter"}
-        onClick={() => onToolChange?.("highlighter")}
-      >
-        <Highlighter size={16} />
-      </ToolButton>
+      <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
+        <ToolButton
+          active={tool === "mouse"}
+          label={copy.mouse || "Mouse"}
+          onClick={selectTool("mouse")}
+        >
+          <MousePointer2 size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "pen"}
+          label={copy.pen || "Pen"}
+          onClick={selectTool("pen")}
+        >
+          <Pen size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "highlighter"}
+          label={copy.highlighter || "Highlighter"}
+          onClick={selectTool("highlighter")}
+        >
+          <Highlighter size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "text"}
+          label={copy.text || "Text"}
+          onClick={selectTool("text")}
+        >
+          <Type size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "line"}
+          label={copy.line || "Line"}
+          onClick={selectTool("line")}
+        >
+          <Minus size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "arrow"}
+          label={copy.arrow || "Arrow"}
+          onClick={selectTool("arrow")}
+        >
+          <ArrowUpRight size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "rect"}
+          label={copy.rect || "Rectangle"}
+          onClick={selectTool("rect")}
+        >
+          <Square size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "ellipse"}
+          label={copy.ellipse || "Ellipse"}
+          onClick={selectTool("ellipse")}
+        >
+          <Circle size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "laser"}
+          label={copy.laser || "Laser pointer"}
+          onClick={selectTool("laser")}
+        >
+          <Zap size={16} />
+        </ToolButton>
+        <ToolButton
+          active={tool === "eraser"}
+          label={copy.eraser || "Eraser"}
+          onClick={selectTool("eraser")}
+        >
+          <Eraser size={16} />
+        </ToolButton>
 
-      <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
+        <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
 
-      <div
-        className="flex shrink-0 items-center gap-1"
-        role="group"
-        aria-label={copy.color || "Color"}
-      >
-        {ANNOTATION_COLORS.map((swatch) => {
-          const active = swatch === color
-          return (
-            <button
-              key={swatch}
-              type="button"
-              title={swatch}
-              aria-label={`${copy.color || "Color"} ${swatch}`}
-              aria-pressed={active}
-              onClick={() => onColorChange?.(swatch)}
-              className={`h-6 w-6 shrink-0 rounded-full border transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700 dark:focus-visible:ring-red-400 ${
-                active
-                  ? "scale-110 border-white ring-2 ring-slate-500 dark:ring-white"
-                  : "border-black/10 hover:scale-105 dark:border-white/25"
-              }`}
-              style={{ backgroundColor: swatch }}
-            />
-          )
-        })}
-      </div>
-
-      <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
-
-      <div
-        className="flex shrink-0 items-center gap-1"
-        role="group"
-        aria-label={copy.width || "Stroke width"}
-      >
-        {ANNOTATION_WIDTHS.map((value) => {
-          const active = value === width
-          return (
-            <button
-              key={value}
-              type="button"
-              title={`${copy.width || "Stroke width"} ${value}`}
-              aria-label={`${copy.width || "Stroke width"} ${value}`}
-              aria-pressed={active}
-              onClick={() => onWidthChange?.(value)}
-              className={`${baseButton} ${active ? activeButton : idleButton}`}
-            >
-              <span
-                className="block rounded-full bg-current"
-                style={{ width: 14, height: Math.max(2, value / 2) }}
+        <div
+          className="flex shrink-0 items-center gap-1"
+          role="group"
+          aria-label={copy.color || "Color"}
+        >
+          {ANNOTATION_COLORS.map((swatch) => {
+            const active = swatch === color
+            return (
+              <button
+                key={swatch}
+                type="button"
+                title={swatch}
+                aria-label={`${copy.color || "Color"} ${swatch}`}
+                aria-pressed={active}
+                onClick={() => onColorChange?.(swatch)}
+                className={`h-6 w-6 shrink-0 rounded-full border transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700 dark:focus-visible:ring-red-400 ${
+                  active
+                    ? "scale-110 border-white ring-2 ring-slate-500 dark:ring-white"
+                    : "border-black/10 hover:scale-105 dark:border-white/25"
+                }`}
+                style={{ backgroundColor: swatch }}
               />
-            </button>
-          )
-        })}
+            )
+          })}
+        </div>
+
+        <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
+
+        <div
+          className="flex shrink-0 items-center gap-1"
+          role="group"
+          aria-label={copy.width || "Stroke width"}
+        >
+          {ANNOTATION_WIDTHS.map((value) => {
+            const active = value === width
+            return (
+              <button
+                key={value}
+                type="button"
+                title={`${copy.width || "Stroke width"} ${value}`}
+                aria-label={`${copy.width || "Stroke width"} ${value}`}
+                aria-pressed={active}
+                onClick={() => onWidthChange?.(value)}
+                className={`${baseButton} ${active ? activeButton : idleButton}`}
+              >
+                <span
+                  className="block rounded-full bg-current"
+                  style={{ width: 14, height: Math.max(2, value / 2) }}
+                />
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
 
-      <button
-        type="button"
-        title={copy.clearMine || "Clear mine"}
-        aria-label={copy.clearMine || "Clear mine"}
-        onClick={() => onClearMine?.()}
-        className={`${baseButton} ${idleButton}`}
-      >
-        <Trash2 size={16} />
-      </button>
-      <button
-        type="button"
-        title={copy.exit || "Exit annotation"}
-        aria-label={copy.exit || "Exit annotation"}
-        onClick={() => onExit?.()}
-        className={`${baseButton} ${idleButton}`}
-      >
-        <X size={16} />
-      </button>
+      <div className="flex shrink-0 items-center gap-1">
+        <ToolButton label={copy.undo || "Undo"} onClick={() => onUndo?.()}>
+          <Undo2 size={16} />
+        </ToolButton>
+        <ToolButton label={copy.redo || "Redo"} onClick={() => onRedo?.()}>
+          <Redo2 size={16} />
+        </ToolButton>
+      </div>
+
+      <span className="mx-0.5 h-6 w-px shrink-0 bg-slate-200 dark:bg-white/15" />
+
+      <div className="relative flex shrink-0 items-center gap-1">
+        <ToolButton
+          active={clearMenuOpen}
+          label={copy.clear || "Clear annotations"}
+          onClick={() => setClearMenuOpen((open) => !open)}
+        >
+          <Trash2 size={16} />
+        </ToolButton>
+        {clearMenuOpen && (
+          <div
+            role="menu"
+            className="absolute right-0 top-full z-40 mt-2 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 text-xs font-medium text-slate-700 shadow-xl dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-100"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={clear("mine")}
+              className="block w-full px-3 py-2 text-left hover:bg-slate-100 dark:hover:bg-white/10"
+            >
+              {copy.clearMine || "Clear mine"}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={!canModerate}
+              onClick={clear("others")}
+              className={`block w-full px-3 py-2 text-left hover:bg-slate-100 dark:hover:bg-white/10 ${
+                canModerate ? "" : disabledButton
+              }`}
+            >
+              {copy.clearOthers || "Clear others"}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={!canModerate}
+              onClick={clear("all")}
+              className={`block w-full px-3 py-2 text-left hover:bg-slate-100 dark:hover:bg-white/10 ${
+                canModerate ? "" : disabledButton
+              }`}
+            >
+              {copy.clearAll || "Clear all"}
+            </button>
+          </div>
+        )}
+        <ToolButton
+          label={copy.exit || "Exit annotation"}
+          onClick={() => onExit?.()}
+        >
+          <X size={16} />
+        </ToolButton>
+      </div>
     </div>
   )
 }

@@ -6,7 +6,10 @@
  * text and laser helpers are ready for ticket 03 to wire to its toolbar.
  */
 
-import { normalizedToCanvas } from "./annotationGeometry.js"
+import {
+  TEXT_REFERENCE_HEIGHT,
+  normalizedToCanvas,
+} from "./annotationGeometry.js"
 
 export const HIGHLIGHTER_ALPHA = 0.35
 export const AUTHOR_PILL_MS = 3000
@@ -157,7 +160,8 @@ export const drawTextAnnotation = (
 ) => {
   if (!ctx || !item?.text) return
   const point = normalizedToCanvas(item.x, item.y, width, height)
-  const fontSize = Math.max(8, item.fontSize || 16)
+  const referenceScale = height > 0 ? height / TEXT_REFERENCE_HEIGHT : 1
+  const fontSize = Math.max(8, (item.fontSize || 24) * referenceScale)
   const lines = String(item.text).split("\n")
 
   ctx.save()
@@ -265,6 +269,7 @@ export const renderAnnotationFrame = (
   {
     items = [],
     liveStrokes = [],
+    lasers = [],
     width = 0,
     height = 0,
     now = Date.now(),
@@ -288,6 +293,7 @@ export const renderAnnotationFrame = (
 
   items.forEach(drawOne)
   liveStrokes.forEach(drawOne)
+  lasers.forEach((laser) => drawLaser(ctx, laser, { width, height }, now))
 
   if (!showAuthorPills) return
   const all = [...items, ...liveStrokes]
