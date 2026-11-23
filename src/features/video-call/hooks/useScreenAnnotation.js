@@ -272,7 +272,9 @@ const roundLocalPoint = (point) => [
 let localStrokeSequence = 0
 const createStrokeId = () => {
   localStrokeSequence += 1
-  return `stroke-${Date.now().toString(36)}-${localStrokeSequence.toString(36)}`
+  return `stroke-${Date.now().toString(36)}-${localStrokeSequence.toString(36)}-${Math.random()
+    .toString(36)
+    .slice(2, 6)}`
 }
 
 /**

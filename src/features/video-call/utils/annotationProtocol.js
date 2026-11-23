@@ -336,7 +336,9 @@ export const buildSyncRequestPacket = ({ trackSid, requesterId }) =>
 let snapshotSequence = 0
 export const createSnapshotId = () => {
   snapshotSequence += 1
-  return `snap-${Date.now().toString(36)}-${snapshotSequence.toString(36)}`
+  return `snap-${Date.now().toString(36)}-${snapshotSequence.toString(36)}-${Math.random()
+    .toString(36)
+    .slice(2, 6)}`
 }
 
 const measurePacket = (chunk, totalChunks) =>
