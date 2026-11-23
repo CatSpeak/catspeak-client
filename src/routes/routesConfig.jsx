@@ -6,6 +6,7 @@ import PolicyPage from "@/features/auth/pages/PolicyPage"
 import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage"
 import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage"
 import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom"
+import RoomLauncherGate from "@/features/video-call/components/RoomLauncherGate"
 import QueuePage from "@/features/queue/pages/QueuePage"
 import RoomsPage from "@/features/rooms/pages/RoomsPage"
 import ContactPage from "@/features/landing/pages/ContactPage"
@@ -799,7 +800,9 @@ const routesConfig = [
                 path: ":id",
                 element: (
                   <AuthGuard>
-                    <VideoCallRoom />
+                    <RoomLauncherGate>
+                      <VideoCallRoom />
+                    </RoomLauncherGate>
                   </AuthGuard>
                 ),
               },

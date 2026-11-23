@@ -398,6 +398,30 @@ export default {
     connected: "接続済み",
     connectingStatus: "接続中",
   },
+  desktopLauncher: {
+    betaBadge: "BETA",
+    title: "Catspeak Desktop でより快適に参加",
+    subtitle:
+      "デスクトップアプリなら画面共有が安定し、注釈を描きながらレッスン中も接続を保ちやすくなります。",
+    version: "バージョン {{version}}",
+    downloadWindows: "Windows 版をダウンロード",
+    downloadMacArm: "macOS 版（Apple Silicon）をダウンロード",
+    downloadMacIntel: "macOS 版（Intel）をダウンロード",
+    downloadGeneric: "インストーラーをダウンロード",
+    betaTitle: "ベータ版のインストール方法",
+    betaNote:
+      "ベータ版はまだコード署名されていないため、初回起動時に OS の警告が表示される場合があります。",
+    betaWindows:
+      "Windows SmartScreen：「詳細情報」→「実行」をクリックしてください。",
+    betaMac:
+      "macOS Gatekeeper：アプリを右クリックして「開く」を選択するか、システム設定 → プライバシーとセキュリティで許可してください。",
+    joinInBrowser: "ブラウザで参加",
+    rememberChoice: "選択を記憶する",
+    loadingRelease: "最新バージョンを読み込み中...",
+    releaseUnavailable:
+      "最新のインストーラー情報を取得できませんでした。ブラウザから参加できます。",
+    openDesktop: "Catspeak Desktop を開く",
+  },
   waitingScreen: {
     backToCommunity: "戻る",
     readyToJoin: "参加の準備はできましたか？",
@@ -522,6 +546,21 @@ export default {
       syncError: "動画を読み込めませんでした。接続を確認してもう一度お試しください。",
       switchButton: "この動画に切り替え",
       switchLabel: "新しいYouTubeリンクを貼って切り替え",
+      searchLabel: "動画を検索、または YouTube リンクを貼り付け",
+      searchPlaceholder: "キーワード または https://www.youtube.com/watch?v=...",
+      searchButton: "動画を検索",
+      searching: "検索中...",
+      searchResults: "検索結果",
+      loadMoreResults: "さらに結果を読み込む",
+      loadingMore: "読み込み中...",
+      noResults: "一致する動画が見つかりません。別のキーワードをお試しください。",
+      searchQueryLength: "キーワードは2〜100文字で入力してください。",
+      searchNotConfigured:
+        "YouTube 検索が設定されていません。YouTube リンクを直接貼り付けて再生できます。",
+      searchQuotaExceeded:
+        "本日の YouTube 検索の上限に達しました。YouTube リンクを直接貼り付けて再生できます。",
+      searchError:
+        "動画を検索できませんでした。YouTube リンクを直接貼り付けて再生できます。",
       nowPlaying: "再生中",
       captionsOn: "字幕をオン",
       captionsOff: "字幕をオフ",

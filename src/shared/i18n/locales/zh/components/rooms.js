@@ -403,6 +403,29 @@ export default {
     connected: "已连接",
     connectingStatus: "连接中",
   },
+  desktopLauncher: {
+    betaBadge: "BETA",
+    title: "使用 Catspeak Desktop 更顺畅地进入房间",
+    subtitle:
+      "桌面应用让屏幕共享更稳定，支持实时标注，并在整节课中保持更好的连接。",
+    version: "版本 {{version}}",
+    downloadWindows: "下载 Windows 版",
+    downloadMacArm: "下载 macOS 版（Apple Silicon）",
+    downloadMacIntel: "下载 macOS 版（Intel）",
+    downloadGeneric: "下载安装包",
+    betaTitle: "Beta 安装指南",
+    betaNote:
+      "Beta 版本尚未进行代码签名，首次打开时系统可能会提示警告，这是正常现象。",
+    betaWindows: "Windows SmartScreen：点击“更多信息”，然后选择“仍要运行”。",
+    betaMac:
+      "macOS Gatekeeper：右键点击应用并选择“打开”，或在“系统设置 → 隐私与安全性”中允许。",
+    joinInBrowser: "在浏览器中参加",
+    rememberChoice: "记住我的选择",
+    loadingRelease: "正在加载最新版本...",
+    releaseUnavailable:
+      "无法加载最新安装包信息，你仍然可以在浏览器中参加。",
+    openDesktop: "打开 Catspeak Desktop",
+  },
   waitingScreen: {
     backToCommunity: "返回",
     readyToJoin: "准备好加入了吗？",
@@ -518,6 +541,21 @@ export default {
       syncError: "无法加载视频，请检查网络后重试。",
       switchButton: "切换到此视频",
       switchLabel: "粘贴新的 YouTube 链接以切换",
+      searchLabel: "搜索视频或粘贴 YouTube 链接",
+      searchPlaceholder: "关键词或 https://www.youtube.com/watch?v=...",
+      searchButton: "搜索视频",
+      searching: "正在搜索...",
+      searchResults: "搜索结果",
+      loadMoreResults: "加载更多结果",
+      loadingMore: "正在加载...",
+      noResults: "没有找到匹配的视频，请尝试其他关键词。",
+      searchQueryLength: "关键词需为 2 到 100 个字符。",
+      searchNotConfigured:
+        "YouTube 搜索尚未配置。您仍然可以粘贴 YouTube 链接直接播放。",
+      searchQuotaExceeded:
+        "今日的 YouTube 搜索配额已用完。您仍然可以粘贴 YouTube 链接直接播放。",
+      searchError:
+        "无法搜索视频。您仍然可以粘贴 YouTube 链接直接播放。",
       nowPlaying: "正在播放",
       captionsOn: "打开字幕",
       captionsOff: "关闭字幕",

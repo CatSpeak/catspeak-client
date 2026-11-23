@@ -1,4 +1,4 @@
-import { test } from "vitest"
+import test from "node:test" // eslint-disable-line import/no-unresolved
 // eslint-disable-next-line import/no-unresolved
 import assert from "node:assert/strict"
 
@@ -57,5 +57,5 @@ test("compact geometry: bottom pill clears the centered avatar (the clipped-card
 test("full-size avatar and pill stay untouched for grid layouts", () => {
   assert.equal(getVideoTileAvatarSize(), 64)
   assert.ok(getVideoTileAvatarClass().includes("48px"))
-  assert.ok(getVideoTileOverlayPillClass().includes("h-10"))
+  assert.ok(getVideoTileOverlayPillClass().includes("sm:px-3"))
 })

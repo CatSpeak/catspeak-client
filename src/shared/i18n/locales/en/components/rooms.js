@@ -433,6 +433,29 @@ export default {
     connected: "Connected",
     connectingStatus: "Connecting",
   },
+  desktopLauncher: {
+    betaBadge: "BETA",
+    title: "Join rooms better with Catspeak Desktop",
+    subtitle:
+      "The desktop app keeps screen sharing stable, adds live annotations and holds a stronger connection throughout your lesson.",
+    version: "Version {{version}}",
+    downloadWindows: "Download for Windows",
+    downloadMacArm: "Download for macOS (Apple Silicon)",
+    downloadMacIntel: "Download for macOS (Intel)",
+    downloadGeneric: "Download installer",
+    betaTitle: "Beta installation guide",
+    betaNote:
+      "The Beta is not code-signed yet, so your OS may warn you the first time you open it. That is expected.",
+    betaWindows: "Windows SmartScreen: click “More info”, then “Run anyway”.",
+    betaMac:
+      "macOS Gatekeeper: right-click the app and choose “Open”, or allow it in System Settings → Privacy & Security.",
+    joinInBrowser: "Join in browser",
+    rememberChoice: "Remember my choice",
+    loadingRelease: "Loading the latest version...",
+    releaseUnavailable:
+      "Couldn't load the latest installer. You can still join in the browser.",
+    openDesktop: "Open Catspeak Desktop",
+  },
   waitingScreen: {
     backToCommunity: "Back",
     readyToJoin: "Ready to join?",
@@ -556,6 +579,21 @@ export default {
       syncError: "Could not load the video. Check your connection and try again.",
       switchButton: "Switch to this video",
       switchLabel: "Paste a new YouTube link to switch",
+      searchLabel: "Search videos or paste a YouTube link",
+      searchPlaceholder: "Keywords or https://www.youtube.com/watch?v=...",
+      searchButton: "Search videos",
+      searching: "Searching...",
+      searchResults: "Search results",
+      loadMoreResults: "Load more results",
+      loadingMore: "Loading...",
+      noResults: "No matching videos. Try another keyword.",
+      searchQueryLength: "Keywords must be 2–100 characters.",
+      searchNotConfigured:
+        "YouTube search is not configured. You can still paste a YouTube link to play it.",
+      searchQuotaExceeded:
+        "YouTube search quota is exhausted for today. You can still paste a YouTube link to play it.",
+      searchError:
+        "Could not search videos. You can still paste a YouTube link to play it.",
       nowPlaying: "Now playing",
       captionsOn: "Turn on captions",
       captionsOff: "Turn off captions",

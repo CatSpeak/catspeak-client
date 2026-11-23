@@ -116,6 +116,15 @@ export const authApi = baseApi.injectEndpoints({
       providesTags: ["User"],
     }),
 
+    // Anonymous endpoint: the latest Catspeak Desktop installer resolved by the
+    // API from GitHub Releases / a manifest URL / static fallback links.
+    getDesktopLatestRelease: builder.query({
+      query: () => ({
+        url: "/desktop/latest",
+        method: "GET",
+      }),
+    }),
+
     verifyEmail: builder.mutation({
       query: (body) => ({
         url: "/Auth/verify-email",
@@ -181,6 +190,7 @@ export const {
 
   useLogoutMutation,
   useGetProfileQuery,
+  useGetDesktopLatestReleaseQuery,
 
   useVerifyEmailMutation,
   useVerifyEmailOtpMutation,
