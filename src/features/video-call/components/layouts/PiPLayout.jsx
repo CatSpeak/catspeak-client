@@ -147,6 +147,7 @@ const PiPLayout = ({
             "Unknown"
           }
           isLocal={item.data.participant?.isLocal}
+          readOnly
           onClick={() =>
             handleTileClick({ type: "screen", trackRef: item.data })
           }

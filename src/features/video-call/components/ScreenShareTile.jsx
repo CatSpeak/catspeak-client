@@ -1,33 +1,82 @@
 import { useState, useEffect, useRef } from "react"
-import { MonitorUp, Maximize, Minimize, Volume2, VolumeX } from "lucide-react"
+import { MonitorUp, Maximize, Minimize, Volume2, VolumeX, Pencil } from "lucide-react"
 import Slider from "@/shared/components/ui/Slider"
 
 import { Track } from "livekit-client"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { useGetRoomCoHostQuery } from "@/store/api/roomsApi"
+import { normalizeCoHost } from "@/features/co-host/constants"
+import { useScreenAnnotation } from "@/features/video-call/hooks/useScreenAnnotation"
+import {
+  ANNOTATION_COLORS,
+  ANNOTATION_WIDTHS,
+} from "@/features/video-call/utils/annotationProtocol"
+import AnnotationCanvas from "./annotation/AnnotationCanvas"
+import AnnotationToolbar from "./annotation/AnnotationToolbar"
 
 /**
  * Renders a shared screen using LiveKit track.attach().
  * Uses object-contain to preserve the screen's native aspect ratio.
  *
- * @param {{ trackRef: import('@livekit/components-react').TrackReferenceOrPlaceholder, presenterDisplayName: string, isLocal: boolean }} props
+ * `readOnly` is the default so grid/sidebar/PiP copies can show annotations
+ * but never take pointer input; the spotlight pass sets it to false.
+ *
+ * @param {{ trackRef: import('@livekit/components-react').TrackReferenceOrPlaceholder, presenterDisplayName: string, isLocal: boolean, readOnly?: boolean }} props
  */
 const ScreenShareTile = ({
   trackRef,
   presenterDisplayName,
   isLocal,
   onClick,
+  readOnly = true,
 }) => {
   const containerRef = useRef(null)
   const videoRef = useRef(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [isAnnotating, setIsAnnotating] = useState(false)
+  const [annotationTool, setAnnotationTool] = useState("mouse")
+  const [annotationColor, setAnnotationColor] = useState(ANNOTATION_COLORS[0])
+  const [annotationWidth, setAnnotationWidth] = useState(ANNOTATION_WIDTHS[1])
   const idleTimerRef = useRef(null)
 
   const participant = trackRef?.participant
-  const { room, user, isHost: isHostFromContext, isPiP } = useGlobalVideoCall()
+  const {
+    room,
+    lkRoom,
+    user,
+    isHost: isHostFromContext,
+    isPiP,
+    id: roomId,
+  } = useGlobalVideoCall()
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
+
+  const { data: coHostData } = useGetRoomCoHostQuery(roomId, {
+    skip: !roomId || readOnly,
+  })
+  const coHost = normalizeCoHost(coHostData)
+  const screenTrackSid = trackRef?.publication?.trackSid ?? null
+  const isPresenter = Boolean(participant?.isLocal)
+  const allowAnnotation = true // Ticket 04 wires the room policy into this seam.
+  const annotation = useScreenAnnotation({
+    room: lkRoom,
+    screenTrackSid,
+    enabled: !trackRef?.isMockScreen,
+    isPrimary: !readOnly,
+    isHost,
+    isPresenter,
+    coHost,
+    accountId: user?.accountId,
+    authorName:
+      user?.fullName ||
+      user?.username ||
+      user?.nickname ||
+      user?.email ||
+      "Guest",
+    allowAnnotation,
+  })
 
   // Volume state (0 to 1)
   const [volume, setVolume] = useState(1)
@@ -140,8 +189,27 @@ const ScreenShareTile = ({
   const labelText = isLocal
     ? t.rooms.videoCall.screenShareLabelYou?.replace("{{name}}", presenterDisplayName) || `${presenterDisplayName}'s screen (You)`
     : t.rooms.videoCall.screenShareLabel?.replace("{{name}}", presenterDisplayName) || `${presenterDisplayName}'s screen`
+  const annotationCopy = t.rooms?.videoCall?.annotation ?? {}
 
   const isMuted = volume <= 0.001
+
+  const toggleAnnotation = (event) => {
+    event.stopPropagation()
+    const next = !isAnnotating
+    setIsAnnotating(next)
+    setAnnotationTool(next ? "pen" : "mouse")
+  }
+
+  const exitAnnotation = () => {
+    setIsAnnotating(false)
+    setAnnotationTool("mouse")
+  }
+
+  const canShowAnnotationButton =
+    !readOnly &&
+    !isPiP &&
+    !trackRef?.isMockScreen &&
+    annotation.canAnnotate
 
   return (
     <div
@@ -177,9 +245,27 @@ const ScreenShareTile = ({
         />
       )}
 
+      {!trackRef?.isMockScreen && (
+        <AnnotationCanvas
+          containerRef={containerRef}
+          videoRef={videoRef}
+          items={annotation.items}
+          liveStrokes={annotation.liveStrokes}
+          readOnly={readOnly}
+          canAnnotate={annotation.canAnnotate}
+          tool={annotationTool}
+          color={annotationColor}
+          width={annotationWidth}
+          showAuthorPills={!readOnly}
+          onStrokeStart={annotation.beginStroke}
+          onStrokePoint={annotation.extendStroke}
+          onStrokeEnd={annotation.endStroke}
+        />
+      )}
+
       {/* Control Overlay */}
       <div
-        className={`absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 transition-opacity duration-300 pointer-events-none ${
+        className={`absolute bottom-2 left-2 right-2 z-20 flex items-center justify-between gap-1 transition-opacity duration-300 pointer-events-none ${
           isHovered ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -216,16 +302,50 @@ const ScreenShareTile = ({
           )}
         </div>
 
-        {!isPiP && (
-          <button
-            onClick={toggleFullscreen}
-            className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm transition-colors pointer-events-auto"
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-          >
-            {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
-          </button>
-        )}
+        <div className="flex shrink-0 items-center gap-1">
+          {canShowAnnotationButton && (
+            <button
+              type="button"
+              onClick={toggleAnnotation}
+              aria-pressed={isAnnotating}
+              title={annotationCopy.button || "Chú thích"}
+              className={`pointer-events-auto flex h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-white backdrop-blur-sm transition-colors sm:px-3 ${
+                isAnnotating
+                  ? "bg-cath-red-700 hover:bg-cath-red-800"
+                  : "bg-black/40 hover:bg-black/60"
+              }`}
+            >
+              <Pencil size={16} />
+              <span className="hidden sm:inline">
+                {annotationCopy.button || "Chú thích"}
+              </span>
+            </button>
+          )}
+
+          {!isPiP && (
+            <button
+              onClick={toggleFullscreen}
+              className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm transition-colors pointer-events-auto"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+            </button>
+          )}
+        </div>
       </div>
+
+      {isAnnotating && !readOnly && (
+        <AnnotationToolbar
+          tool={annotationTool}
+          color={annotationColor}
+          width={annotationWidth}
+          onToolChange={setAnnotationTool}
+          onColorChange={setAnnotationColor}
+          onWidthChange={setAnnotationWidth}
+          onClearMine={annotation.clearMine}
+          onExit={exitAnnotation}
+        />
+      )}
     </div>
   )
 }

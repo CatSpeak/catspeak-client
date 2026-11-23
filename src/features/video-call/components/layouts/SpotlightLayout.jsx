@@ -102,6 +102,7 @@ const SpotlightLayout = ({
               "Unknown"
             }
             isLocal={item.data.participant?.isLocal}
+            readOnly
             onClick={
               isGameActive
                 ? undefined
@@ -142,6 +143,7 @@ const SpotlightLayout = ({
                 "Unknown"
               }
               isLocal={spotlightItem.trackRef.participant?.isLocal}
+              readOnly={false}
               onClick={() => handleTileClick(spotlightItem)}
             />
           </div>

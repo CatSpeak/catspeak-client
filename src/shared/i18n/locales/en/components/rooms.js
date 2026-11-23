@@ -545,6 +545,17 @@ export default {
       takeoverMessage: "{{name}} is currently sharing their screen. Starting a new screen share will stop {{name}}'s presentation.",
       hostProtected: "Host is currently presenting. Participants cannot overwrite host presentations.",
     },
+    annotation: {
+      button: "Annotate",
+      toolbar: "Annotation tools",
+      mouse: "Mouse",
+      pen: "Pen",
+      highlighter: "Highlighter",
+      color: "Color",
+      width: "Stroke width",
+      clearMine: "Clear mine",
+      exit: "Exit annotation",
+    },
     moreOptions: "More options",
     watchTogether: {
       toggleButton: "Watch together",
