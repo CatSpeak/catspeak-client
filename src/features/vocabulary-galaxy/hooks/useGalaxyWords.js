@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useDispatch } from "react-redux"
-import { flashcardApi, useGetFlashcardDecksQuery } from "../../../api/flashcardApi"
+import { flashcardApi, useGetFlashcardDecksQuery } from "@/features/ai-tutor/api/flashcardApi"
 
 // Bảng màu cho cụm (xoay vòng nếu nhiều deck hơn số màu).
 const PALETTE = [

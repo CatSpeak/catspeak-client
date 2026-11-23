@@ -20,6 +20,7 @@ import { helpTranslations } from "@/features/help/i18n"
 import { interactiveScriptTranslations } from "@/features/interactive-script/i18n"
 import { placementTestTranslations } from "@/features/placement-test/i18n"
 import { aiTutorTranslations } from "@/features/ai-tutor/i18n"
+import { vocabularyGalaxyTranslations } from "@/features/vocabulary-galaxy/i18n"
 
 const isObject = (item) =>
   Boolean(item && typeof item === "object" && !Array.isArray(item))
@@ -64,6 +65,7 @@ export const translations = {
     interactiveScriptTranslations.vi,
     placementTestTranslations.vi,
     { aiTutor: aiTutorTranslations.vi },
+    { vocabularyGalaxy: vocabularyGalaxyTranslations.vi },
   ),
   en: deepMerge(
     en,
@@ -84,6 +86,7 @@ export const translations = {
     interactiveScriptTranslations.en,
     placementTestTranslations.en,
     { aiTutor: aiTutorTranslations.en },
+    { vocabularyGalaxy: vocabularyGalaxyTranslations.en },
   ),
   zh: deepMerge(
     zh,
@@ -104,6 +107,7 @@ export const translations = {
     interactiveScriptTranslations.zh,
     placementTestTranslations.zh,
     { aiTutor: aiTutorTranslations.zh },
+    { vocabularyGalaxy: vocabularyGalaxyTranslations.zh },
   ),
   ja: deepMerge(
     ja,
@@ -124,6 +128,7 @@ export const translations = {
     interactiveScriptTranslations.ja,
     placementTestTranslations.ja,
     { aiTutor: aiTutorTranslations.ja },
+    { vocabularyGalaxy: vocabularyGalaxyTranslations.ja },
   ),
 }
 

@@ -3,12 +3,12 @@ import { Link, useParams, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { notebookPaths } from "../utils/flashcardReview"
-import { useGalaxyWords } from "../components/galaxy/hooks/useGalaxyWords"
-import { useGalaxyWordsMock } from "../components/galaxy/hooks/useGalaxyWordsMock"
+import { notebookPaths } from "@/features/ai-tutor/utils/flashcardReview"
+import { useGalaxyWords } from "../hooks/useGalaxyWords"
+import { useGalaxyWordsMock } from "../hooks/useGalaxyWordsMock"
 
 // Lazy-load: WebGL engine chỉ tải khi vào tab này.
-const GalaxyView = lazy(() => import("../components/galaxy/GalaxyView"))
+const GalaxyView = lazy(() => import("../components/GalaxyView"))
 
 // Chế độ mock dùng khi ai-api staging còn chết (Cloudflare 1033) — xem BAO_CAO_LOI_AI_API_STAGING.md.
 // Bật bằng ?mock=1 trên URL, hoặc đặt VITE_GALAXY_FORCE_MOCK=1 trong .env (áp dụng cho mọi người).
@@ -21,7 +21,7 @@ const VocabularyGalaxyPage = () => {
   const { lang } = useParams()
   const [searchParams] = useSearchParams()
   const useMock = FORCE_MOCK || searchParams.get("mock") === "1"
-  const g = t?.aiTutor?.vocabularyGalaxy || {}
+  const g = t?.vocabularyGalaxy || {}
 
   // Hooks phải được gọi vô điều kiện -> luôn gọi cả hai, chỉ dùng cái nào cần.
   const real = useGalaxyWords({ enabled: !useMock })
@@ -33,7 +33,7 @@ const VocabularyGalaxyPage = () => {
     <div className="flex flex-1 flex-col gap-4">
       <div>
         <PageTitle>{g.title || t?.common?.vocabularyGalaxy || "Ngân hà từ vựng"}</PageTitle>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           {g.subtitle || "Khám phá từ vựng như những vì sao, gom thành từng chòm theo chủ đề."}
         </p>
       </div>

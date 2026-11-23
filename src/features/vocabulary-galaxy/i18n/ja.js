@@ -1,0 +1,23 @@
+export default {
+  title: "語彙ギャラクシー",
+  subtitle: "語彙を星として探索し、トピックごとの星座にまとめます。",
+  hint: "ドラッグで回転 · スクロールまたはピンチでズーム · 右ドラッグまたは2本指で移動",
+  words: "語",
+  topics: "トピック",
+  fallback: "（Canvas 2D モード）",
+  zoomIn: "拡大",
+  zoomOut: "縮小",
+  resetView: "ビューをリセット",
+  canvasLabel: "3D 語彙ギャラクシー",
+  loading: "語彙を読み込み中…",
+  error: "語彙を読み込めませんでした。",
+  retry: "再試行",
+  empty: "ノートはまだ空です。",
+  emptyHint: "単語を追加すると星になります。",
+  addWords: "単語を追加",
+  legend: "状態",
+  clickToLearn: "（クリックで学習）",
+  useMock: "モックデータを使う",
+  mockNotice:
+    "モックデータモード — AI API staging のインフラ障害（Cloudflare 1033）。星をクリックして学習をシミュレートできます。",
+}

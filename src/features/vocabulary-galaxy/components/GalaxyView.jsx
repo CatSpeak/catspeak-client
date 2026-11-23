@@ -1,10 +1,10 @@
 import React, { useMemo, useRef } from "react"
 import { Maximize2, ZoomIn, ZoomOut } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGalaxyEngine } from "./hooks/useGalaxyEngine"
-import { useGalaxyControls } from "./hooks/useGalaxyControls"
-import { GALAXY_STATE_COLORS, GALAXY_STATE_LABELS } from "./core/galaxyState"
-import { GALAXY_CLUSTERS, MOCK_GALAXY_WORDS } from "./mocks/mockGalaxyData"
+import { useGalaxyEngine } from "../hooks/useGalaxyEngine"
+import { useGalaxyControls } from "../hooks/useGalaxyControls"
+import { GALAXY_STATE_COLORS, GALAXY_STATE_LABELS } from "../core/galaxyState"
+import { GALAXY_CLUSTERS, MOCK_GALAXY_WORDS } from "../mocks/mockGalaxyData"
 
 const SHOW_STATS = import.meta.env.DEV
 
@@ -20,7 +20,7 @@ const GalaxyView = ({
   className = "",
 }) => {
   const { t } = useLanguage()
-  const g = t?.aiTutor?.vocabularyGalaxy || {}
+  const g = t?.vocabularyGalaxy || {}
 
   const canvasRef = useRef(null)
   const tooltipRef = useRef(null)
