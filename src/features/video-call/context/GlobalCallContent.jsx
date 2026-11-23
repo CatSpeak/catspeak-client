@@ -42,6 +42,7 @@ import {
 } from "@/features/video-call/hooks/useNavigateRef"
 import { useSpeakingStats } from "@/features/video-call/hooks/useSpeakingStats"
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
+import DesktopScreenPickerModal from "@/features/video-call/components/DesktopScreenPickerModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { roomsApi } from "@/store/api/roomsApi"
 import {
@@ -1411,6 +1412,8 @@ const GlobalCallContent = ({
     handleToggleScreenShare: actions.handleToggleScreenShare,
     isTogglingScreenShare: screenShareState.isTogglingScreenShare,
     canShareScreen: screenShareState.canShareScreen,
+    // Ticket 08/09: selected desktop source, including full-display displayId.
+    screenShareSelection: screenShareState.screenShareSelection,
     // Watch together (YouTube, client-sync over the watch-sync DataChannel)
     mediaActive: watchTogether.isMediaActive,
     mediaVideoId: watchTogether.videoId,
@@ -1490,6 +1493,21 @@ const GlobalCallContent = ({
         }
         confirmVariant="primary"
         isPending={screenShareState.isTogglingScreenShare}
+      />
+      <DesktopScreenPickerModal
+        open={screenShareState.showScreenPicker}
+        onClose={screenShareState.closeScreenPicker}
+        onConfirm={screenShareState.confirmScreenPicker}
+        onRefresh={screenShareState.refreshScreenSources}
+        onOpenPermissionSettings={
+          screenShareState.openScreenPermissionSettings
+        }
+        sources={screenShareState.screenSources}
+        permission={screenShareState.screenPermission}
+        loading={screenShareState.isLoadingScreenSources}
+        error={screenShareState.screenPickerError}
+        isPending={screenShareState.isTogglingScreenShare}
+        t={t}
       />
     </ContextProvider>
   )

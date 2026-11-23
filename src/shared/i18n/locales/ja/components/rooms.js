@@ -547,6 +547,28 @@ export default {
       takeoverMessage:
         "{{name}}さんが画面を共有中です。新しい画面共有を開始すると{{name}}さんのプレゼンを停止します。",
       hostProtected: "ホストがプレゼン中です。参加者はホストのプレゼンを上書きできません。",
+      picker: {
+        title: "共有する画面を選択",
+        description: "画面またはウィンドウを1つ選択してください。",
+        screens: "画面",
+        windows: "ウィンドウ",
+        loading: "画面とウィンドウを読み込み中…",
+        empty: "画面またはウィンドウが見つかりません。",
+        retry: "再試行",
+        cancel: "キャンセル",
+        share: "共有",
+        sharing: "開始中…",
+        screenFallback: "画面 {{id}}",
+        windowFallback: "ウィンドウ",
+        loadFailed: "画面とウィンドウを読み込めませんでした。",
+        selectFailed: "このソースの共有を開始できませんでした。もう一度お試しください。",
+        permissionTitle: "画面収録の許可が必要です",
+        permissionDescription:
+          "システム設定で Catspeak Desktop の画面収録を許可し、戻ってから「再試行」を押してください。アプリの再起動は不要です。",
+        openSettings: "システム設定を開く",
+        fullDisplayHint: "画面全体を共有すると、全画面の注釈を利用できます。",
+        windowHint: "ウィンドウ共有では全画面オーバーレイは表示されません。",
+      },
     },
     annotation: {
       button: "注釈",
