@@ -109,6 +109,30 @@ describe("computeAnnotationPermissions", () => {
         .canAnnotate,
     ).toBe(false)
   })
+
+  test("presenter lock blocks regular members but not moderators", () => {
+    const locked = { ...base, presenterLocked: true }
+
+    expect(computeAnnotationPermissions(locked)).toMatchObject({
+      canAnnotate: false,
+      canModerateAnnotation: false,
+    })
+    expect(
+      computeAnnotationPermissions({ ...locked, isHost: true }).canAnnotate,
+    ).toBe(true)
+    expect(
+      computeAnnotationPermissions({ ...locked, isPresenter: true }).canAnnotate,
+    ).toBe(true)
+    expect(
+      computeAnnotationPermissions({
+        ...locked,
+        coHost: {
+          coHostAccountId: 7,
+          permissions: ["manage_student_share"],
+        },
+      }).canAnnotate,
+    ).toBe(true)
+  })
 })
 
 describe("applyAnnotationPacketToState", () => {
@@ -288,6 +312,46 @@ describe("applyAnnotationPacketToState", () => {
     expect(
       applyAnnotationPacketToState(state, locked).presenterLocked,
     ).toBe(true)
+    expect(
+      applyAnnotationPacketToState(
+        applyAnnotationPacketToState(state, locked),
+        { ...locked, locked: false },
+      ).presenterLocked,
+    ).toBe(false)
+  })
+
+  test("member draw packets are ignored while member drawing is locked", () => {
+    let state = createAnnotationState(TRACK)
+    state = applyAnnotationPacketToState(
+      state,
+      buildStrokeEndPacket({ trackSid: TRACK, item: makeItem("existing") }),
+      { now: 1 },
+    )
+
+    const blocked = applyAnnotationPacketToState(state, startPacket("blocked"), {
+      now: 2,
+      memberDrawAllowed: false,
+      senderCanModerate: false,
+    })
+    expect(blocked).toBe(state)
+    expect(blocked.items.map((item) => item.id)).toEqual(["existing"])
+
+    const blockedShape = applyAnnotationPacketToState(
+      state,
+      buildShapeCommitPacket({
+        trackSid: TRACK,
+        item: makeShape("blocked-shape"),
+      }),
+      { now: 3, memberDrawAllowed: false, senderCanModerate: false },
+    )
+    expect(blockedShape).toBe(state)
+
+    const moderator = applyAnnotationPacketToState(state, startPacket("mod"), {
+      now: 4,
+      memberDrawAllowed: false,
+      senderCanModerate: true,
+    })
+    expect(moderator.liveStrokes.mod).toBeTruthy()
   })
 })
 

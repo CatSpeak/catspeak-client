@@ -15,6 +15,7 @@ import {
   buildClearPacket,
   buildErasePacket,
   buildLaserMovePacket,
+  buildPresenterLockPacket,
   buildRedoPacket,
   buildShapeCommitPacket,
   buildStrokeEndPacket,
@@ -129,6 +130,7 @@ export const computeAnnotationPermissions = ({
   coHost = null,
   accountId = null,
   allowAnnotation = true,
+  presenterLocked = false,
 } = {}) => {
   const isCoHostModerator = hasCoHostPermission(
     coHost,
@@ -138,10 +140,17 @@ export const computeAnnotationPermissions = ({
   const canModerateAnnotation = Boolean(
     enabled && (isHost || isPresenter || isCoHostModerator),
   )
-  const canAnnotate = Boolean(
-    enabled && (canModerateAnnotation || allowAnnotation === true),
+  // The presenter lock only applies to members; moderators keep drawing.
+  const memberDrawAllowed = Boolean(
+    enabled && allowAnnotation === true && presenterLocked !== true,
   )
-  return { canAnnotate, canModerateAnnotation, isCoHostModerator }
+  const canAnnotate = Boolean(canModerateAnnotation || memberDrawAllowed)
+  return {
+    canAnnotate,
+    canModerateAnnotation,
+    isCoHostModerator,
+    memberDrawAllowed,
+  }
 }
 
 export const createAnnotationState = (trackSid = null) => ({
@@ -290,6 +299,20 @@ const canUndoItem = (item, senderAuthorId) => {
 }
 
 /**
+ * Packets that add pixels to the shared screen. While the policy is off or
+ * the presenter locked the share, only moderators may send them; everyone
+ * still renders items committed before the lock.
+ */
+const MEMBER_DRAW_PACKET_TYPES = new Set([
+  "stroke-start",
+  "stroke-point",
+  "stroke-end",
+  "shape-commit",
+  "text-commit",
+  "laser-move",
+])
+
+/**
  * Pure reducer for one decoded packet. Used by the hook and directly by tests;
  * invalid packets and packets for another `trackSid` are safely ignored.
  */
@@ -301,6 +324,7 @@ export const applyAnnotationPacketToState = (
     senderAuthorId = null,
     canModerate = false,
     senderCanModerate = null,
+    memberDrawAllowed = true,
   } = {},
 ) => {
   const packet = validateAnnotationPacket(rawPacket)
@@ -309,6 +333,14 @@ export const applyAnnotationPacketToState = (
   // Receiver-side check: the sender must be allowed to moderate. When the
   // caller cannot resolve the sender's role, keep the ticket-02 fallback.
   const senderModerates = senderCanModerate ?? canModerate
+
+  if (
+    memberDrawAllowed === false &&
+    !senderModerates &&
+    MEMBER_DRAW_PACKET_TYPES.has(packet.t)
+  ) {
+    return state
+  }
 
   switch (packet.t) {
     case "stroke-start": {
@@ -544,6 +576,7 @@ export const useScreenAnnotation = ({
     coHost,
     accountId,
     allowAnnotation,
+    presenterLocked: state.presenterLocked,
   })
 
   useEffect(() => {
@@ -559,6 +592,7 @@ export const useScreenAnnotation = ({
       moderatorAccountIds,
       canAnnotate: permissions.canAnnotate,
       canModerateAnnotation: permissions.canModerateAnnotation,
+      memberDrawAllowed: permissions.memberDrawAllowed,
     }
   })
 
@@ -609,7 +643,10 @@ export const useScreenAnnotation = ({
   const flushStrokePending = useCallback(
     (stroke) => {
       if (!stroke || stroke.pending.length === 0) return
-      if (latestRef.current.trackSid !== stroke.trackSid) {
+      if (
+        latestRef.current.trackSid !== stroke.trackSid ||
+        !latestRef.current.canAnnotate
+      ) {
         stroke.pending = []
         return
       }
@@ -694,6 +731,7 @@ export const useScreenAnnotation = ({
           now: Date.now(),
           senderAuthorId,
           senderCanModerate,
+          memberDrawAllowed: latestRef.current.memberDrawAllowed,
         }),
       )
     }
@@ -814,6 +852,15 @@ export const useScreenAnnotation = ({
         strokeRef.current = null
         return
       }
+      if (!latestRef.current.canAnnotate) {
+        if (stroke.timer) clearTimeout(stroke.timer)
+        strokeRef.current = null
+        setState((prev) => ({
+          ...prev,
+          liveStrokes: omitKey(prev.liveStrokes, stroke.id),
+        }))
+        return
+      }
 
       const point = roundLocalPoint(pt)
       stroke.pts.push(point)
@@ -860,6 +907,16 @@ export const useScreenAnnotation = ({
     // The share stopped/switched while the pointer was down: discard instead
     // of leaking the stroke into the new track.
     if (latestRef.current.trackSid !== stroke.trackSid) {
+      setState((prev) => ({
+        ...prev,
+        liveStrokes: omitKey(prev.liveStrokes, stroke.id),
+      }))
+      return null
+    }
+
+    // The policy/lock flipped while the pointer was down: discard the stroke
+    // instead of publishing a packet after annotation was revoked.
+    if (!latestRef.current.canAnnotate) {
       setState((prev) => ({
         ...prev,
         liveStrokes: omitKey(prev.liveStrokes, stroke.id),
@@ -914,7 +971,10 @@ export const useScreenAnnotation = ({
   const flushLaserPending = useCallback(
     (laser) => {
       if (!laser?.pending) return
-      if (latestRef.current.trackSid !== laser.trackSid) {
+      if (
+        latestRef.current.trackSid !== laser.trackSid ||
+        !latestRef.current.canAnnotate
+      ) {
         laser.pending = null
         return
       }
@@ -1031,6 +1091,11 @@ export const useScreenAnnotation = ({
         setState((prev) => ({ ...prev, draftShape: null }))
         return
       }
+      if (!latestRef.current.canAnnotate) {
+        shapeRef.current = null
+        setState((prev) => ({ ...prev, draftShape: null }))
+        return
+      }
 
       const point = roundLocalPoint(pt)
       shape.x2 = point[0]
@@ -1047,6 +1112,10 @@ export const useScreenAnnotation = ({
     shapeRef.current = null
 
     if (latestRef.current.trackSid !== shape.trackSid) {
+      setState((prev) => ({ ...prev, draftShape: null }))
+      return null
+    }
+    if (!latestRef.current.canAnnotate) {
       setState((prev) => ({ ...prev, draftShape: null }))
       return null
     }
@@ -1222,6 +1291,23 @@ export const useScreenAnnotation = ({
     return true
   }, [bridge, publishPacket, setState])
 
+  const setPresenterLock = useCallback(
+    (locked) => {
+      const current = latestRef.current
+      if (!current.trackSid || !current.isPresenter) return false
+
+      const next = Boolean(locked)
+      setState((prev) => ({ ...prev, presenterLocked: next }))
+      publishPacket(
+        buildPresenterLockPacket({ trackSid: current.trackSid, locked: next }),
+        true,
+      )
+      bridge.emit({ type: "presenter-lock", locked: next })
+      return true
+    },
+    [bridge, publishPacket, setState],
+  )
+
   const clearScope = useCallback(
     (scope) => {
       const current = latestRef.current
@@ -1266,6 +1352,7 @@ export const useScreenAnnotation = ({
     presenterLocked: state.presenterLocked,
     canAnnotate: permissions.canAnnotate,
     canModerateAnnotation: permissions.canModerateAnnotation,
+    canTogglePresenterLock: Boolean(enabled && isPresenter),
     beginStroke,
     extendStroke,
     endStroke,
@@ -1277,6 +1364,7 @@ export const useScreenAnnotation = ({
     eraseAt,
     undo,
     redo,
+    setPresenterLock,
     clearScope,
     clearMine,
     bridge,
