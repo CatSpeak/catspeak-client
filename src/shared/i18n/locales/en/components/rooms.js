@@ -433,6 +433,29 @@ export default {
     connected: "Connected",
     connectingStatus: "Connecting",
   },
+  desktopLauncher: {
+    betaBadge: "BETA",
+    title: "Join rooms better with Catspeak Desktop",
+    subtitle:
+      "The desktop app keeps screen sharing stable, adds live annotations and holds a stronger connection throughout your lesson.",
+    version: "Version {{version}}",
+    downloadWindows: "Download for Windows",
+    downloadMacArm: "Download for macOS (Apple Silicon)",
+    downloadMacIntel: "Download for macOS (Intel)",
+    downloadGeneric: "Download installer",
+    betaTitle: "Beta installation guide",
+    betaNote:
+      "The Beta is not code-signed yet, so your OS may warn you the first time you open it. That is expected.",
+    betaWindows: "Windows SmartScreen: click “More info”, then “Run anyway”.",
+    betaMac:
+      "macOS Gatekeeper: right-click the app and choose “Open”, or allow it in System Settings → Privacy & Security.",
+    joinInBrowser: "Join in browser",
+    rememberChoice: "Remember my choice",
+    loadingRelease: "Loading the latest version...",
+    releaseUnavailable:
+      "Couldn't load the latest installer. You can still join in the browser.",
+    openDesktop: "Open Catspeak Desktop",
+  },
   waitingScreen: {
     backToCommunity: "Back",
     readyToJoin: "Ready to join?",

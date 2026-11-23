@@ -398,6 +398,30 @@ export default {
     connected: "接続済み",
     connectingStatus: "接続中",
   },
+  desktopLauncher: {
+    betaBadge: "BETA",
+    title: "Catspeak Desktop でより快適に参加",
+    subtitle:
+      "デスクトップアプリなら画面共有が安定し、注釈を描きながらレッスン中も接続を保ちやすくなります。",
+    version: "バージョン {{version}}",
+    downloadWindows: "Windows 版をダウンロード",
+    downloadMacArm: "macOS 版（Apple Silicon）をダウンロード",
+    downloadMacIntel: "macOS 版（Intel）をダウンロード",
+    downloadGeneric: "インストーラーをダウンロード",
+    betaTitle: "ベータ版のインストール方法",
+    betaNote:
+      "ベータ版はまだコード署名されていないため、初回起動時に OS の警告が表示される場合があります。",
+    betaWindows:
+      "Windows SmartScreen：「詳細情報」→「実行」をクリックしてください。",
+    betaMac:
+      "macOS Gatekeeper：アプリを右クリックして「開く」を選択するか、システム設定 → プライバシーとセキュリティで許可してください。",
+    joinInBrowser: "ブラウザで参加",
+    rememberChoice: "選択を記憶する",
+    loadingRelease: "最新バージョンを読み込み中...",
+    releaseUnavailable:
+      "最新のインストーラー情報を取得できませんでした。ブラウザから参加できます。",
+    openDesktop: "Catspeak Desktop を開く",
+  },
   waitingScreen: {
     backToCommunity: "戻る",
     readyToJoin: "参加の準備はできましたか？",

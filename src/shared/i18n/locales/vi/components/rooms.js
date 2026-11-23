@@ -409,6 +409,30 @@ export default {
     connected: "Đã kết nối",
     connectingStatus: "Đang kết nối",
   },
+  desktopLauncher: {
+    betaBadge: "BETA",
+    title: "Vào phòng mượt hơn với Catspeak Desktop",
+    subtitle:
+      "Ứng dụng desktop giúp chia sẻ màn hình ổn định, vẽ chú thích và giữ kết nối tốt hơn trong suốt buổi học.",
+    version: "Phiên bản {{version}}",
+    downloadWindows: "Tải cho Windows",
+    downloadMacArm: "Tải cho macOS (Apple Silicon)",
+    downloadMacIntel: "Tải cho macOS (Intel)",
+    downloadGeneric: "Tải bộ cài",
+    betaTitle: "Hướng dẫn cài bản Beta",
+    betaNote:
+      "Bản Beta chưa ký số nên hệ điều hành có thể cảnh báo trong lần mở đầu tiên. Đây là điều bình thường.",
+    betaWindows:
+      "Windows SmartScreen: bấm “Thông tin thêm” rồi chọn “Vẫn chạy”.",
+    betaMac:
+      "macOS Gatekeeper: chuột phải vào ứng dụng và chọn “Mở”, hoặc cấp quyền trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật.",
+    joinInBrowser: "Tham gia trên trình duyệt",
+    rememberChoice: "Ghi nhớ lựa chọn của tôi",
+    loadingRelease: "Đang tải thông tin phiên bản mới nhất...",
+    releaseUnavailable:
+      "Chưa tải được thông tin bộ cài. Bạn vẫn có thể tham gia bằng trình duyệt.",
+    openDesktop: "Mở Catspeak Desktop",
+  },
   waitingScreen: {
     backToCommunity: "Quay lại",
     readyToJoin: "Sẵn sàng tham gia?",
