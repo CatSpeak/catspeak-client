@@ -66,7 +66,6 @@ const LessonItemRow = ({
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
-  onSelectLesson = () => { },
   className = "",
 }) => {
   const { t, language } = useLanguage()

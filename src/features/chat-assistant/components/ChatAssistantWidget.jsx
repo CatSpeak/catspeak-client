@@ -20,7 +20,6 @@ import ContactSupportModal from "./ContactSupportModal"
 import MessageBubble from "./MessageBubble"
 import SourceDrawer from "./SourceDrawer"
 import { BRAND } from "../lib/theme"
-import { usePathname } from "@/shared/hooks/usePathname"
 
 const MAX_CHARS = 500          // FR-rag-chatbot-013
 const WARN_REMAINING = 3       // FR-rag-chatbot-018
@@ -82,7 +81,6 @@ export default function ChatAssistantWidget() {
   // mới mỗi lần render, mà L nằm trong danh sách phụ thuộc của useCallback bên dưới
   // — để trần thì hàm gửi câu hỏi được dựng lại sau mỗi phím gõ.
   const L = useMemo(() => t.chatAssistant || {}, [t])
-  const pathname = usePathname()
 
   const accountId =
     user?.accountId || user?.AccountId || user?.id || (guest ? guestId() : null)

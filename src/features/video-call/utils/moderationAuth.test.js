@@ -9,7 +9,7 @@ describe("isAuthorizedModerationSender", () => {
     permissions: [CO_HOST_PERMISSIONS.MIC_TOGGLE],
   }
 
-  it("rejects spoofed senderId when LiveKit participant metadata belongs to a regular student", () => {
+  it("rejects spoofed senderId when LiveKit participant identity belongs to a regular student", () => {
     const studentParticipant = {
       identity: "user_999",
       metadata: JSON.stringify({ accountId: 999 }),
@@ -23,6 +23,23 @@ describe("isAuthorizedModerationSender", () => {
       isAuthorizedModerationSender({
         participant: studentParticipant,
         data: spoofedPayload,
+        roomData,
+        liveCoHost,
+      }),
+    ).toBe(false)
+  })
+
+  it("ignores spoofed client metadata accountId when participant.identity differs", () => {
+    const spoofingStudent = {
+      identity: "user_999",
+      metadata: JSON.stringify({ accountId: 101 }),
+      attributes: { accountId: "101" },
+    }
+
+    expect(
+      isAuthorizedModerationSender({
+        participant: spoofingStudent,
+        data: { action: "MUTE_ALL" },
         roomData,
         liveCoHost,
       }),

@@ -44,9 +44,6 @@ const GroupInvitePage = lazy(
 import AiTutorLayout from "@/features/ai-tutor/layouts/AiTutorLayout"
 // Nạp sẵn (không lazy): phải hiện được cả khi mất mạng không tải được module khác.
 import AiFlashcardRouteError from "@/features/ai-tutor/components/flashcards/FlashcardRouteError"
-const AiLevelAssessmentPage = lazy(
-  () => import("@/features/ai-tutor/pages/LevelAssessmentPage"),
-)
 const AiSpeakingRoomPage = lazy(
   () => import("@/features/ai-tutor/pages/SpeakingRoomPage"),
 )
@@ -100,10 +97,10 @@ import UserDashboard from "@/features/user/pages/UserDashboard"
 import UserPagesLayout from "@/features/user/layouts/UserPagesLayout"
 // Language routing components
 import LanguageLayout from "./LanguageLayout"
-import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
+import { LazyRoute, RootLayout, RootRoute, AiLevelAssessmentRoute } from "./RouteShells"
 
 import SettingIndexRedirect from "./SettingIndexRedirect"
-import { Navigate, useParams } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 import { AuthGuard, CommunityGuard, RoleGuard } from "@/shared/components"
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary"
 
@@ -136,9 +133,6 @@ const MyCalendarPage = lazy(
 )
 
 import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton"
-const PlacementTestPage = lazy(
-  () => import("@/features/placement-test/pages/PlacementTestPage"),
-)
 const PlacementSessionPage = lazy(
   () => import("@/features/placement-test/pages/PlacementSessionPage"),
 )
@@ -295,26 +289,6 @@ const CreateAssignmentPage = lazy(
 const WorkspaceRoomsPage = lazy(
   () => import("@/features/rooms/pages/WorkspaceRoomsPage"),
 )
-
-const AiLevelAssessmentRoute = () => {
-  const { lang } = useParams()
-
-  if (lang !== "zh") {
-    return (
-      <LazyRoute>
-        <AiLevelAssessmentPage />
-      </LazyRoute>
-    )
-  }
-
-  return (
-    <CommunityGuard>
-      <LazyRoute>
-        <PlacementTestPage />
-      </LazyRoute>
-    </CommunityGuard>
-  )
-}
 
 const CreateExamPage = lazy(
   () => import("@/features/courses/pages/CreateExamPage"),

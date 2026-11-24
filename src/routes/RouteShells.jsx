@@ -1,12 +1,22 @@
-import { Suspense, useEffect } from "react"
-import { Outlet, useLocation, useNavigate } from "react-router-dom"
+import { Suspense, lazy, useEffect } from "react"
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
 import LandingPage from "@/features/landing/pages/LandingPage"
-import { useRegisterNavigate } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import BottomRightStack from "@/shared/components/BottomRightStack"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import NavigationProgress from "@/shared/components/NavigationProgress"
 import { TourGuideProvider, TourGuideManager } from "@/features/tour-guide"
 import NProgress from "nprogress"
+
+const AiLevelAssessmentPage = lazy(
+  () => import("@/features/ai-tutor/pages/LevelAssessmentPage"),
+)
+const PlacementTestPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementTestPage"),
+)
+const CommunityGuard = lazy(() =>
+  import("@/shared/components").then((m) => ({ default: m.CommunityGuard })),
+)
 
 const LazyFallback = ({ fallback }) => {
   useEffect(() => {
@@ -45,4 +55,26 @@ export const RootLayout = () => {
 
 export const RootRoute = () => {
   return <LandingPage />
+}
+
+export const AiLevelAssessmentRoute = () => {
+  const { lang } = useParams()
+
+  if (lang !== "zh") {
+    return (
+      <LazyRoute>
+        <AiLevelAssessmentPage />
+      </LazyRoute>
+    )
+  }
+
+  return (
+    <Suspense fallback={<LazyFallback />}>
+      <CommunityGuard>
+        <LazyRoute>
+          <PlacementTestPage />
+        </LazyRoute>
+      </CommunityGuard>
+    </Suspense>
+  )
 }

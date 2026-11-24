@@ -36,6 +36,10 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
   const roomId = callInfo?.roomId
   const [closingTargetMs, setClosingTargetMs] = useState(null)
   const [closingRemainingSeconds, setClosingRemainingSeconds] = useState(null)
+  const closingRemainingSecondsRef = useRef(closingRemainingSeconds)
+  useEffect(() => {
+    closingRemainingSecondsRef.current = closingRemainingSeconds
+  }, [closingRemainingSeconds])
 
   const handleRoomClosingWarning = useCallback(
     (warnSessionId, remainingSeconds) => {
@@ -230,7 +234,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
             // Breakout is closed, ensure participant returns to main room
             handleReturnToMainRoom(targetSessionId)
           }
-        } catch (err) {
+        } catch {
           // Ignore
         }
       }
@@ -281,7 +285,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
           osc.start(now)
           osc.stop(now + 0.4)
         }
-      } catch (e) {
+      } catch {
         /* ignore audio restriction */
       }
 
@@ -366,7 +370,10 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
     [callInfo, lkRoom, t],
   )
 
-  const signaling = useVideoCallSignaling({
+  const {
+    isConnected: isSignalingConnected,
+    joinSession: joinSignalingSession,
+  } = useVideoCallSignaling({
     RoomClosingWarning: handleRoomClosingWarning,
     JoinBreakoutRoom: handleJoinBreakoutRoom,
     ReturnToMainRoom: handleReturnToMainRoom,
@@ -378,17 +385,17 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
   })
 
   useEffect(() => {
-    if (signaling.isConnected) {
+    if (isSignalingConnected) {
       if (parentSessionId) {
-        signaling.joinSession(parentSessionId).catch(console.error)
+        joinSignalingSession(parentSessionId).catch(console.error)
       }
       if (activeSessionId && activeSessionId !== parentSessionId) {
-        signaling.joinSession(activeSessionId).catch(console.error)
+        joinSignalingSession(activeSessionId).catch(console.error)
       }
     }
   }, [
-    signaling.isConnected,
-    signaling.joinSession,
+    isSignalingConnected,
+    joinSignalingSession,
     activeSessionId,
     parentSessionId,
   ])
@@ -406,8 +413,9 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
       if (locationObj && locationObj.pathname.includes("/meet/")) {
         const createDate = callInfo?.roomData?.createDate
         const duration = callInfo?.roomData?.duration
+        const latestClosingSeconds = closingRemainingSecondsRef.current
         const timeExpired =
-          (closingRemainingSeconds !== null && closingRemainingSeconds <= 0) ||
+          (latestClosingSeconds !== null && latestClosingSeconds <= 0) ||
           (createDate &&
             typeof duration === "number" &&
             Date.now() >=
@@ -441,7 +449,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
     return () => {
       lkRoom.off(RoomEvent.Disconnected, handleDisconnected)
     }
-  }, [lkRoom, dispatch, closingRemainingSeconds, language, t, callInfo])
+  }, [lkRoom, dispatch, language, t, callInfo])
 
   return {
     closingRemainingSeconds,

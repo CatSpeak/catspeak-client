@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   LayoutGrid,
   ChevronDown,
@@ -232,27 +232,27 @@ const TeachingMaterialPage = () => {
   }, [responseData.materials]);
   const materials = useMemo(() => [...folders, ...files], [folders, files]);
 
-  useEffect(() => {
-    if (selectedItem) {
-      const isFolder = !selectedItem.fileName && !selectedItem.fileUrl;
-      const updatedItem = materials.find((m) => {
-        const mIsFolder = !m.fileName && !m.fileUrl;
-        return m.id === selectedItem.id && mIsFolder === isFolder;
-      });
-      if (
-        updatedItem &&
-        (updatedItem.downloadCount !== selectedItem.downloadCount ||
-          updatedItem.viewCount !== selectedItem.viewCount ||
-          updatedItem.isPublic !== selectedItem.isPublic ||
-          updatedItem.allowDownload !== selectedItem.allowDownload)
-      ) {
-        setSelectedItem({
-          ...updatedItem,
-          type: selectedItem.type || updatedItem.type,
-        });
-      }
+  const currentSelectedItem = useMemo(() => {
+    if (!selectedItem) return null;
+    const isFolder = !selectedItem.fileName && !selectedItem.fileUrl;
+    const updatedItem = materials.find((m) => {
+      const mIsFolder = !m.fileName && !m.fileUrl;
+      return m.id === selectedItem.id && mIsFolder === isFolder;
+    });
+    if (
+      updatedItem &&
+      (updatedItem.downloadCount !== selectedItem.downloadCount ||
+        updatedItem.viewCount !== selectedItem.viewCount ||
+        updatedItem.isPublic !== selectedItem.isPublic ||
+        updatedItem.allowDownload !== selectedItem.allowDownload)
+    ) {
+      return {
+        ...updatedItem,
+        type: selectedItem.type || updatedItem.type,
+      };
     }
-  }, [materialsData, selectedItem, materials]);
+    return selectedItem;
+  }, [selectedItem, materials]);
 
   return (
     <div
@@ -661,7 +661,7 @@ const TeachingMaterialPage = () => {
       <ShareMaterialModal
         open={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        item={selectedItem}
+        item={currentSelectedItem}
       />
 
       <DeleteFolderModal
@@ -696,12 +696,12 @@ const TeachingMaterialPage = () => {
       <FileDetailModal
         open={isFileDetailOpen}
         onClose={() => setIsFileDetailOpen(false)}
-        item={selectedItem}
+        item={currentSelectedItem}
         onDelete={() => {
           setIsFileDetailOpen(false);
           setDeletingItem({
-            id: selectedItem.id,
-            name: selectedItem.fileName || selectedItem.name,
+            id: currentSelectedItem.id,
+            name: currentSelectedItem.fileName || currentSelectedItem.name,
             count: 0,
             type: "file",
           });
@@ -718,7 +718,7 @@ const TeachingMaterialPage = () => {
       <FilePreviewModal
         open={isFilePreviewOpen}
         onClose={() => setIsFilePreviewOpen(false)}
-        item={selectedItem}
+        item={currentSelectedItem}
       />
 
       <MoveMaterialModal
@@ -728,13 +728,13 @@ const TeachingMaterialPage = () => {
           setSelectedItem(null);
         }}
         items={
-          selectedItems.length > 0 && !selectedItem
+          selectedItems.length > 0 && !currentSelectedItem
             ? selectedItems
-            : selectedItem
+            : currentSelectedItem
               ? [
                   {
-                    ...selectedItem,
-                    _type: selectedItem.fileName ? "file" : "folder",
+                    ...currentSelectedItem,
+                    _type: currentSelectedItem.fileName ? "file" : "folder",
                   },
                 ]
               : []
@@ -750,7 +750,7 @@ const TeachingMaterialPage = () => {
       <RenameMaterialModal
         open={isRenameModalOpen}
         onClose={() => setIsRenameModalOpen(false)}
-        item={selectedItem}
+        item={currentSelectedItem}
       />
 
       <ContextMenu

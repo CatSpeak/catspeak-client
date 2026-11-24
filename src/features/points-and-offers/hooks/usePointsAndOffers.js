@@ -66,8 +66,8 @@ const EMPTY_ARRAY = []
 
 export const usePointsAndOffers = () => {
   const { t } = useLanguage()
-  const pt = t.pointsAndOffers || {}
-  const ts = pt.toasts || {}
+  const pt = useMemo(() => t.pointsAndOffers || {}, [t])
+  const ts = useMemo(() => pt.toasts || {}, [pt])
   const [searchParams, setSearchParams] = useSearchParams()
   const currentUser = useSelector(selectCurrentUser)
 

@@ -45,7 +45,9 @@ export const createAudioTransport = ({
       try {
         currentAudio.pause()
         currentAudio.currentTime = 0
-      } catch {}
+      } catch {
+        /* ignore audio reset error */
+      }
       currentAudio = null
     }
   }

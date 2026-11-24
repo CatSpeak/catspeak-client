@@ -15,7 +15,7 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           dispatch(setCredentials(data))
-        } catch (err) {
+        } catch {
           // Handled by UI component
         }
       },
@@ -44,7 +44,7 @@ export const authApi = baseApi.injectEndpoints({
               user: data.user || user,
             }),
           )
-        } catch (err) {
+        } catch {
           // Handled by refresh handler / component
         }
       },
@@ -114,7 +114,7 @@ export const authApi = baseApi.injectEndpoints({
           if (data?.auth) {
             dispatch(setCredentials(data.auth))
           }
-        } catch (err) {
+        } catch {
           // Error handled by the component
         }
       },

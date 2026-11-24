@@ -19,7 +19,6 @@ import {
   getClassEnrollmentIssue,
 } from "../utils/courseUtils"
 import { copyShareLink } from "@/shared/utils/shareUtils"
-import { getLocalizedLanguageName } from "../data/courseFormOptions"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { AlertTriangle } from "lucide-react"
 import useRoleOverride from "../components/RoleSwitcher"
@@ -38,9 +37,9 @@ const StudentCourseDetailPage = () => {
     formatScheduleTime,
     formatScheduleDays,
   } = useTimezone()
-  const c = t.courses || {}
-  const scd = c.studentCourseDetail || {}
-  const sc = c.student || {}
+  const c = useMemo(() => t.courses || {}, [t])
+  const scd = useMemo(() => c.studentCourseDetail || {}, [c])
+  const sc = useMemo(() => c.student || {}, [c])
   const ui = c.workspaceUi || {}
   const { isAuthenticated } = useAuth()
   const authModalCtx = useContext(AuthModalContext)
@@ -152,9 +151,13 @@ const StudentCourseDetailPage = () => {
     value !== null && typeof value === "object" && !Array.isArray(value)
   const rawCourse =
     isRecord(courseDetail) && courseDetail.id ? courseDetail : null
-  const classes = Array.isArray(rawCourse?.classes)
-    ? rawCourse.classes.filter((cls) => isRecord(cls) && cls.id)
-    : []
+  const classes = useMemo(
+    () =>
+      Array.isArray(rawCourse?.classes)
+        ? rawCourse.classes.filter((cls) => isRecord(cls) && cls.id)
+        : [],
+    [rawCourse],
+  )
   const teacher = isRecord(rawCourse?.teacher) ? rawCourse.teacher : {}
 
   const upcomingClasses = useMemo(() => {

@@ -134,7 +134,7 @@ export const useCreateReelContext = () => useContext(CreateReelContext);
 export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   const { t } = useLanguage();
   // RTK Query Mutation Hook
-  const [createReel, { isLoading, isSuccess, error: apiError }] =
+  const [createReel, { isSuccess, error: apiError }] =
     useCreateReelMutation();
   const lockedChallengeHashtag = useMemo(
     () => normalizeChallengeHashtag(challenge),

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, lazy, Suspense } from "react"
+import React, { useState, useEffect, useMemo, lazy, Suspense } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
@@ -15,7 +15,11 @@ import {
   setUserPref,
 } from "@/features/video-call/utils/userPreferences"
 import { useVideoCallAuthHeartbeat } from "@/features/video-call/hooks/useVideoCallAuthHeartbeat"
-import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantList"
+import { GlobalVideoCallContext, IDLE_VALUE } from "./videoCallContext"
+
+// Preserve existing import path for legacy consumers outside video-call index
+// eslint-disable-next-line react-refresh/only-export-components
+export { GlobalVideoCallContext as VideoCallContext, useGlobalVideoCall } from "./videoCallContext"
 
 const GlobalCallContent = lazy(() => import("./GlobalCallContent"))
 
@@ -35,171 +39,6 @@ const readPrefs = (accountId) => ({
     defaultValue: false,
   }),
 })
-
-// --- Idle context (no active call) ------------------------------------------
-
-const IDLE_VALUE = {
-  isInCall: false,
-  isPiP: false,
-  enterPiP: () => {},
-  exitPiP: () => {},
-  returnToCall: () => {},
-
-  showLeaveModal: false,
-  promptLeaveCall: () => {},
-  cancelLeaveCall: () => {},
-
-  participants: MOCK_PARTICIPANTS,
-  messages: [],
-  aiMessages: [],
-  addOptimisticAiMessage: () => {},
-  chatPublicAi: async () => {},
-  chatPrivateAi: async () => {},
-  startNewThread: () => {},
-  continueThread: () => {},
-  getConversationThread: () => [],
-  triggerStarterGreeting: () => {},
-  loadMoreMeetingSuggestions: () => {},
-
-  isConnected: false,
-  micOn: false,
-  cameraOn: false,
-  isTogglingMic: false,
-  isTogglingCam: false,
-  isTogglingScreenShare: false,
-
-  activeSidePanel: null,
-  setActiveSidePanel: () => {},
-
-  showChat: false,
-  setShowChat: () => {},
-  showParticipants: false,
-  setShowParticipants: () => {},
-  showVirtualBackground: false,
-  setShowVirtualBackground: () => {},
-  showAvatarPicker: false,
-  setShowAvatarPicker: () => {},
-
-  beautyOptions: {
-    smoothing: 0,
-    brightness: 0,
-    warmth: 0,
-    colorFilter: 0,
-    faceSlim: 0,
-    eyeEnlarge: 0,
-    eyeBrighten: 0,
-    teethWhiten: 0,
-  },
-  setBeautyOptions: () => {},
-  switchBeauty: () => {},
-  processorStatus: "idle",
-
-  isAISession: false,
-  showCC: false,
-  setShowCC: () => {},
-  showRoomSubtitles: false,
-  setShowRoomSubtitles: () => {},
-  subtitleSelectedLanguage: null,
-  setSubtitleSelectedLanguage: () => {},
-  isSubtitleActive: false,
-  isStartingSubtitles: false,
-  isStoppingSubtitles: false,
-  subtitleSupportedLangs: ["en", "vi"],
-  startSubtitles: async () => {},
-  stopSubtitles: async () => {},
-  changeSubtitleLanguage: async () => {},
-
-  lkRoomName: null,
-  speakingStatsMap: {},
-  roomTotalDuration: 0,
-  roomTotalStudentDuration: 0,
-  unreadRoomChat: 0,
-  unreadAiChat: 0,
-  isChatCollapsed: false,
-  isAiCollapsed: true,
-  setUnreadRoomChat: () => {},
-  setUnreadAiChat: () => {},
-  setIsChatCollapsed: () => {},
-  setIsAiCollapsed: () => {},
-  speakingAssistantEnabled: false,
-  setSpeakingAssistantEnabled: () => {},
-  activeChatTab: "room",
-  setActiveChatTab: () => {},
-  layoutMode: "grid",
-  setLayoutMode: () => {},
-  maxTiles: 16,
-  setMaxTiles: () => {},
-  hideEmptyTiles: false,
-  setHideEmptyTiles: () => {},
-
-  showRoomSettings: false,
-  setShowRoomSettings: () => {},
-  activeSettingsTab: "audio-video",
-  setActiveSettingsTab: () => {},
-  deviceSelection: null,
-  joinLeaveSound: false,
-  setJoinLeaveSound: () => {},
-  isRecording: false,
-  isTogglingRecording: false,
-  handleToggleRecording: () => {},
-  showStopModal: false,
-  confirmStopRecording: () => {},
-  cancelStopRecording: () => {},
-  egressId: null,
-  startedByAccountId: null,
-  recordingStatus: {
-    elapsedSeconds: 0,
-    formattedTime: "00:00",
-    totalUsedMb: 0,
-    limitMb: null,
-    usagePercent: 0,
-    isDanger: false,
-    isWarning: false,
-  },
-
-  // Safe fallback properties consumed by VideoCallRoomContent / sub-panels
-  user: null,
-  location: null,
-  sessionId: null,
-  room: null,
-  handleSendMessage: () => {},
-  isHost: false,
-  showSpeakingTimeBalance: false,
-  setShowSpeakingTimeBalance: () => {},
-  showStudentSpeakingWidget: false,
-  setShowStudentSpeakingWidget: () => {},
-  showBreakout: false,
-  setShowBreakout: () => {},
-  showTroubleshoot: false,
-  mediaActive: false,
-  mediaVideoId: null,
-  mediaTitle: "",
-  isMediaHost: false,
-  isStartingMedia: false,
-  isStoppingMedia: false,
-  startMedia: async () => false,
-  stopMedia: async () => false,
-  mediaPlayerRef: { current: null },
-  needsTapToSync: false,
-  syncError: null,
-  tapToSync: () => {},
-  reportSyncError: () => {},
-  showWatchTogether: false,
-  setShowWatchTogether: () => {},
-}
-
-const GlobalVideoCallContext = createContext(IDLE_VALUE)
-
-export const useGlobalVideoCall = () => {
-  const ctx = useContext(GlobalVideoCallContext)
-  return ctx || IDLE_VALUE
-}
-
-// Backward-compat alias (existing components import VideoCallContext)
-export { GlobalVideoCallContext as VideoCallContext }
-
-// Re-export navigate bridge (used by routesConfig RootLayout)
-export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
 // --- Idle Call Content -----------------------------------------------------
 
@@ -365,7 +204,6 @@ export const GlobalVideoCallProvider = ({ children }) => {
     >
       <Suspense fallback={children}>
         <GlobalCallContent
-          ContextProvider={GlobalVideoCallContext.Provider}
           receiveSystemMsgs={receiveSystemMsgs}
           setReceiveSystemMsgs={setReceiveSystemMsgs}
           joinLeaveSound={joinLeaveSound}

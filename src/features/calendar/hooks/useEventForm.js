@@ -43,10 +43,7 @@ export const useEventForm = (
   const { pathname } = useLocation();
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
-  // eslint-disable-next-line no-unused-vars
-  const [updateEventSeries, { isLoading: isUpdatingSeries }] =
-    useUpdateEventSeriesMutation();
-  // eslint-disable-next-line no-unused-vars
+  const [, { isLoading: isUpdatingSeries }] = useUpdateEventSeriesMutation();
   const [updateEventOccurrence, { isLoading: isUpdatingOccurrence }] =
     useUpdateEventOccurrenceMutation();
   const isLoading =

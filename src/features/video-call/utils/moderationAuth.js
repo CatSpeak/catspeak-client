@@ -4,28 +4,31 @@ import { isRoomHost } from "./roomTypeHelpers"
 
 /**
  * Extract the LiveKit-authenticated account ID from the remote/local Participant
- * object provided by LiveKit's DataReceived event (never from untrusted payload fields).
+ * object provided by LiveKit's DataReceived event (never trusting client-mutable
+ * participant metadata before server-signed participant identity).
  *
  * @param {object|null|undefined} participant
  * @returns {string|null}
  */
 export function extractParticipantAccountId(participant) {
   if (!participant) return null
-  const meta = parseParticipantMetadata(participant.metadata)
-  if (meta?.accountId != null && meta.accountId !== "") {
-    return String(meta.accountId)
-  }
-  if (participant.attributes?.accountId != null && participant.attributes.accountId !== "") {
-    return String(participant.attributes.accountId)
+  const identity =
+    participant.identity != null ? String(participant.identity).trim() : ""
+  if (identity) {
+    const match = identity.match(/^(?:user[_-])?(\d+)$/i)
+    return match ? match[1] : identity
   }
   if (participant.accountId != null && participant.accountId !== "") {
     return String(participant.accountId)
   }
-  const identity =
-    participant.identity != null ? String(participant.identity).trim() : ""
-  if (!identity) return null
-  const match = identity.match(/^(?:user[_-])?(\d+)$/i)
-  return match ? match[1] : identity
+  if (participant.attributes?.accountId != null && participant.attributes.accountId !== "") {
+    return String(participant.attributes.accountId)
+  }
+  const meta = parseParticipantMetadata(participant.metadata)
+  if (meta?.accountId != null && meta.accountId !== "") {
+    return String(meta.accountId)
+  }
+  return null
 }
 
 function getRequiredCoHostPermission(action, data = {}) {

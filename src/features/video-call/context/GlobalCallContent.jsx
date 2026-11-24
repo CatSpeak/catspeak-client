@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { selectCurrentToken } from "@/store/slices/authSlice"
 import {
-  useRoomContext,
+  useMaybeRoomContext,
   useParticipants,
   useLocalParticipant,
   useConnectionState,
@@ -12,7 +12,7 @@ import { ConnectionState, RoomEvent, Track, VideoPresets } from "livekit-client"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { leaveCall } from "@/store/slices/videoCallSlice"
-import { useVideoCallSignaling } from "@/features/video-call/hooks/useVideoCallSignaling"
+import { GlobalVideoCallContext } from "./videoCallContext"
 
 import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
@@ -99,7 +99,6 @@ const writeCachedRestriction = (list, restriction) => {
  */
 const GlobalCallContent = ({
   children,
-  ContextProvider,
   receiveSystemMsgs,
   setReceiveSystemMsgs,
   joinLeaveSound,
@@ -227,14 +226,13 @@ const GlobalCallContent = ({
   const [pinnedParticipantId, setPinnedParticipantId] = useState(null)
 
   // ── LiveKit hooks & Device Selection ──
-  let lkRoom = null
-  try {
-    lkRoom = useRoomContext()
-  } catch {
-    lkRoom = null
-  }
+  const lkRoom = useMaybeRoomContext() ?? null
 
   const deviceSelection = useDeviceSelection()
+  const deviceSelectionRef = useRef(deviceSelection)
+  useEffect(() => {
+    deviceSelectionRef.current = deviceSelection
+  }, [deviceSelection])
   const [showRoomSettings, setShowRoomSettings] = useState(false)
   const [activeSettingsTab, setActiveSettingsTab] = useState("audio-video")
 
@@ -320,7 +318,8 @@ const GlobalCallContent = ({
 
     const syncActiveDevices = async () => {
       try {
-        deviceSelection.refreshDevices?.()
+        const currentSelection = deviceSelectionRef.current
+        currentSelection.refreshDevices?.()
 
         const activeMic =
           (await lkRoom.getActiveDevice?.("audioinput")) ||
@@ -336,17 +335,17 @@ const GlobalCallContent = ({
             ?.getTrackPublication?.("camera")
             ?.track?.mediaStreamTrack?.getSettings()?.deviceId
 
-        if (activeMic && activeMic !== deviceSelection.selectedMic) {
-          deviceSelection.setSelectedMic(activeMic)
+        if (activeMic && activeMic !== currentSelection.selectedMic) {
+          currentSelection.setSelectedMic(activeMic)
         }
         if (
           activeSpeaker &&
-          activeSpeaker !== deviceSelection.selectedSpeaker
+          activeSpeaker !== currentSelection.selectedSpeaker
         ) {
-          deviceSelection.setSelectedSpeaker(activeSpeaker)
+          currentSelection.setSelectedSpeaker(activeSpeaker)
         }
-        if (activeCam && activeCam !== deviceSelection.selectedCamera) {
-          deviceSelection.setSelectedCamera(activeCam)
+        if (activeCam && activeCam !== currentSelection.selectedCamera) {
+          currentSelection.setSelectedCamera(activeCam)
         }
       } catch (err) {
         console.warn("[GlobalCallContent] Sync active devices warning:", err)
@@ -1498,7 +1497,7 @@ const GlobalCallContent = ({
   )
 
   return (
-    <ContextProvider value={value}>
+    <GlobalVideoCallContext.Provider value={value}>
       <RoomAudioRenderer />
       {children}
       <RoomClosingWarningModal
@@ -1532,7 +1531,7 @@ const GlobalCallContent = ({
         confirmVariant="primary"
         isPending={screenShareState.isTogglingScreenShare}
       />
-    </ContextProvider>
+    </GlobalVideoCallContext.Provider>
   )
 }
 

@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useEffect, useState } from "react"
+import React, { useRef, useMemo, useEffect, useState, useCallback } from "react"
 import { useDispatch } from "react-redux"
 import { Newspaper, ChevronDown } from "lucide-react"
 import { useParams, useSearchParams } from "react-router-dom"
@@ -145,40 +145,46 @@ const NewsPage = ({ postType = "1" }) => {
   }
 
   // Update URL filters only when actual values have changed
-  const updateUrlFilters = (
-    { searchKeyword, sortBy, topicIds },
-    navOptions,
-  ) => {
-    const nextKeyword =
-      searchKeyword !== undefined ? searchKeyword : filters.searchKeyword
-    const nextSortBy = sortBy !== undefined ? sortBy : filters.sortBy
-    const nextTopicIds = topicIds !== undefined ? topicIds : filters.topicIds
+  const updateUrlFilters = useCallback(
+    ({ searchKeyword, sortBy, topicIds }, navOptions) => {
+      const nextKeyword =
+        searchKeyword !== undefined ? searchKeyword : filters.searchKeyword
+      const nextSortBy = sortBy !== undefined ? sortBy : filters.sortBy
+      const nextTopicIds = topicIds !== undefined ? topicIds : filters.topicIds
 
-    const isSameKeyword = nextKeyword === filters.searchKeyword
-    const isSameSort = nextSortBy === filters.sortBy
-    const isSameTopics =
-      (nextTopicIds || [])
-        .slice()
-        .sort((a, b) => Number(a) - Number(b))
-        .join(",") ===
-      (filters.topicIds || [])
-        .slice()
-        .sort((a, b) => Number(a) - Number(b))
-        .join(",")
+      const isSameKeyword = nextKeyword === filters.searchKeyword
+      const isSameSort = nextSortBy === filters.sortBy
+      const isSameTopics =
+        (nextTopicIds || [])
+          .slice()
+          .sort((a, b) => Number(a) - Number(b))
+          .join(",") ===
+        (filters.topicIds || [])
+          .slice()
+          .sort((a, b) => Number(a) - Number(b))
+          .join(",")
 
-    if (isSameKeyword && isSameSort && isSameTopics) {
-      return
-    }
+      if (isSameKeyword && isSameSort && isSameTopics) {
+        return
+      }
 
-    setSearchParams(
-      applyNewsFilter(searchParams, {
-        searchKeyword: nextKeyword,
-        sortBy: nextSortBy,
-        topicIds: nextTopicIds,
-      }),
-      navOptions,
-    )
-  }
+      setSearchParams(
+        applyNewsFilter(searchParams, {
+          searchKeyword: nextKeyword,
+          sortBy: nextSortBy,
+          topicIds: nextTopicIds,
+        }),
+        navOptions,
+      )
+    },
+    [
+      filters.searchKeyword,
+      filters.sortBy,
+      filters.topicIds,
+      searchParams,
+      setSearchParams,
+    ],
+  )
 
   // Sanitize invalid topic IDs from URL when topics finish loading
   useEffect(() => {
@@ -191,7 +197,7 @@ const NewsPage = ({ postType = "1" }) => {
     if (sanitizedTopicIds.length !== filters.topicIds.length) {
       updateUrlFilters({ topicIds: sanitizedTopicIds }, { replace: true })
     }
-  }, [validTopicIdSet, filters.topicIds])
+  }, [validTopicIdSet, filters.topicIds, updateUrlFilters])
 
   // Commit a keyword to the URL. No-op when the value already matches the current filter.
   const commitSearch = (keyword = searchInput) => {

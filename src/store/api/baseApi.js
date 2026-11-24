@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { setCredentials, logout } from "../slices/authSlice"
+import { decodeJwtPayload, setCredentials, logout } from "../slices/authSlice"
 import { setServerDown, setServerUp } from "../slices/serverStatusSlice"
 import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
 import { isBrowserOffline } from "@/shared/utils/networkStatus"
@@ -17,16 +17,6 @@ import {
 
 // ─── Helpers ────────────────────────────────────────────────────────
 const AUTH_LOG = "[Auth]"
-
-/** Decode JWT payload without a library */
-function decodeJwtPayload(token) {
-  try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")
-    return JSON.parse(atob(base64))
-  } catch {
-    return null
-  }
-}
 
 /** Seconds until the token expires (negative = already expired) */
 export function tokenSecondsRemaining(token) {
@@ -196,156 +186,158 @@ export async function ensureRefresh(
     const MAX_RETRIES = 2
     let attempt = 0
 
-    while (attempt <= MAX_RETRIES) {
-      try {
-        const refreshResult = await baseQuery(
-          {
-            url: "/Auth/refresh-token",
-            method: "POST",
-            body: { token: lsToken, refreshToken: lsRefreshToken },
-          },
-          api,
-          { ...extraOptions, skipAuthHeader: true },
-        )
+    try {
+      while (attempt <= MAX_RETRIES) {
+        try {
+          const refreshResult = await baseQuery(
+            {
+              url: "/Auth/refresh-token",
+              method: "POST",
+              body: { token: lsToken, refreshToken: lsRefreshToken },
+            },
+            api,
+            { ...extraOptions, skipAuthHeader: true },
+          )
 
-        if (refreshResult.error) {
-          const status = refreshResult.error.status
-          const errData = refreshResult.error.data
+          if (refreshResult.error) {
+            const status = refreshResult.error.status
+            const errData = refreshResult.error.data
 
-          const isServerError =
-            status === "FETCH_ERROR" ||
-            (typeof status === "number" && status >= 500)
+            const isServerError =
+              status === "FETCH_ERROR" ||
+              (typeof status === "number" && status >= 500)
 
-          // Mạng của người học đang rớt: không thử lại, không gắn cờ máy chủ lỗi.
-          if (isServerError && isBrowserOffline()) {
-            console.warn(
+            // Mạng của người học đang rớt: không thử lại, không gắn cờ máy chủ lỗi.
+            if (isServerError && isBrowserOffline()) {
+              console.warn(
+                AUTH_LOG,
+                `Refresh failed offline (${status}) — client network down, skipping server-down flag`,
+              )
+              return false
+            }
+
+            if (isServerError && attempt < MAX_RETRIES) {
+              attempt++
+              console.warn(
+                AUTH_LOG,
+                `Refresh attempt ${attempt} failed with ${status}. Retrying in ${attempt * 1000}ms...`,
+              )
+              await new Promise((res) => setTimeout(res, attempt * 1000))
+              continue
+            }
+
+            if (isServerError) {
+              const isHealthy = await checkIsServerHealthy()
+              if (!isHealthy) {
+                console.warn(
+                  AUTH_LOG,
+                  `Refresh failed with server/network error (${status}) — server down, skipping logout`,
+                  { reason },
+                )
+                api.dispatch(setServerDown())
+                return false
+              }
+
+              console.warn(
+                AUTH_LOG,
+                `Refresh failed with server error (${status}) but server is healthy`,
+                { reason, isInCall },
+              )
+              if (isInCall || reason === "call-heartbeat" || reason === "proactive") {
+                return false
+              }
+              api.dispatch(logout())
+              return false
+            }
+
+            // Only keep active call alive for transient errors; force logout on fatal revocation
+            const isFatalRevocation = isFatalTokenRevocationError(errData)
+
+            if (isInCall && !isFatalRevocation) {
+              console.warn(
+                AUTH_LOG,
+                `Refresh returned status ${status} while in active call — suppressing logout to protect call`,
+                { reason, errData },
+              )
+              return false
+            }
+
+            if (isFatalRevocation) {
+              console.error(
+                AUTH_LOG,
+                "Fatal token revocation/reuse detected during refresh — logging out",
+                { reason, errData },
+              )
+              api.dispatch(logout())
+              return false
+            }
+
+            const remaining = tokenSecondsRemaining(lsToken)
+            // If token is still valid or it's a proactive / heartbeat refresh, NEVER logout
+            if (reason === "proactive" || reason === "call-heartbeat" || remaining > 0) {
+              console.warn(
+                AUTH_LOG,
+                `Refresh returned status ${status} during ${reason} check, but access token is still valid (${Math.round(remaining)}s remaining) — skipping premature logout`,
+                { reason },
+              )
+              return false
+            }
+
+            console.error(
               AUTH_LOG,
-              `Refresh failed offline (${status}) — client network down, skipping server-down flag`,
+              `Refresh failed with status ${status} — logging out`,
+              { reason, errData },
             )
+            api.dispatch(logout())
             return false
           }
 
-          if (isServerError && attempt < MAX_RETRIES) {
+          const payload = refreshResult.data?.data || refreshResult.data
+          if (payload?.token) {
+            api.dispatch(setCredentials(payload))
+            console.info(
+              AUTH_LOG,
+              "Token refresh successful — new credentials stored",
+            )
+            return true
+          }
+
+          console.error(AUTH_LOG, "Refresh returned no data", {
+            reason,
+            isInCall,
+          })
+          if (!isInCall) {
+            api.dispatch(logout())
+          }
+          return false
+        } catch (err) {
+          if (attempt < MAX_RETRIES) {
             attempt++
             console.warn(
               AUTH_LOG,
-              `Refresh attempt ${attempt} failed with ${status}. Retrying in ${attempt * 1000}ms...`,
+              `Refresh threw exception on attempt ${attempt}. Retrying in ${attempt * 1000}ms...`,
+              err,
             )
             await new Promise((res) => setTimeout(res, attempt * 1000))
             continue
           }
 
-          if (isServerError) {
-            const isHealthy = await checkIsServerHealthy()
-            if (!isHealthy) {
-              console.warn(
-                AUTH_LOG,
-                `Refresh failed with server/network error (${status}) — server down, skipping logout`,
-                { reason },
-              )
-              api.dispatch(setServerDown())
-              return false
-            }
-
-            console.warn(
-              AUTH_LOG,
-              `Refresh failed with server error (${status}) but server is healthy`,
-              { reason, isInCall },
-            )
-            if (isInCall || reason === "call-heartbeat" || reason === "proactive") {
-              return false
-            }
+          console.error(AUTH_LOG, "Refresh threw an exception — logging out", {
+            reason,
+            err,
+            isInCall,
+          })
+          if (!isInCall && reason !== "proactive" && reason !== "call-heartbeat") {
             api.dispatch(logout())
-            return false
           }
-
-          // Only keep active call alive for transient errors; force logout on fatal revocation
-          const isFatalRevocation = isFatalTokenRevocationError(errData)
-
-          if (isInCall && !isFatalRevocation) {
-            console.warn(
-              AUTH_LOG,
-              `Refresh returned status ${status} while in active call — suppressing logout to protect call`,
-              { reason, errData },
-            )
-            return false
-          }
-
-          if (isFatalRevocation) {
-            console.error(
-              AUTH_LOG,
-              "Fatal token revocation/reuse detected during refresh — logging out",
-              { reason, errData },
-            )
-            api.dispatch(logout())
-            return false
-          }
-
-          const remaining = tokenSecondsRemaining(lsToken)
-          // If token is still valid or it's a proactive / heartbeat refresh, NEVER logout
-          if (reason === "proactive" || reason === "call-heartbeat" || remaining > 0) {
-            console.warn(
-              AUTH_LOG,
-              `Refresh returned status ${status} during ${reason} check, but access token is still valid (${Math.round(remaining)}s remaining) — skipping premature logout`,
-              { reason },
-            )
-            return false
-          }
-
-          console.error(
-            AUTH_LOG,
-            `Refresh failed with status ${status} — logging out`,
-            { reason, errData },
-          )
-          api.dispatch(logout())
           return false
         }
-
-        const payload = refreshResult.data?.data || refreshResult.data
-        if (payload?.token) {
-          api.dispatch(setCredentials(payload))
-          console.info(
-            AUTH_LOG,
-            "Token refresh successful — new credentials stored",
-          )
-          return true
-        }
-
-        console.error(AUTH_LOG, "Refresh returned no data", {
-          reason,
-          isInCall,
-        })
-        if (!isInCall) {
-          api.dispatch(logout())
-        }
-        return false
-      } catch (err) {
-        if (attempt < MAX_RETRIES) {
-          attempt++
-          console.warn(
-            AUTH_LOG,
-            `Refresh threw exception on attempt ${attempt}. Retrying in ${attempt * 1000}ms...`,
-            err,
-          )
-          await new Promise((res) => setTimeout(res, attempt * 1000))
-          continue
-        }
-
-        console.error(AUTH_LOG, "Refresh threw an exception — logging out", {
-          reason,
-          err,
-          isInCall,
-        })
-        if (!isInCall && reason !== "proactive" && reason !== "call-heartbeat") {
-          api.dispatch(logout())
-        }
-        return false
-      } finally {
-        refreshPromise = null
       }
-    }
 
-    return false
+      return false
+    } finally {
+      refreshPromise = null
+    }
   })()
 
   return refreshPromise

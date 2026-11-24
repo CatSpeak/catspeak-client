@@ -21,6 +21,7 @@ function isValidSameOriginPath(rawUrl) {
     const parsed = new URL(trimmed, self.location.origin)
     if (parsed.origin !== self.location.origin) return false
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false
+    if (parsed.pathname === "/api" || parsed.pathname.startsWith("/api/")) return false
     if (trimmed.includes("..")) return false
     return true
   } catch {
@@ -67,7 +68,7 @@ async function cacheUrls(urls = [], shellUrl) {
 }
 
 self.addEventListener("message", (event) => {
-  if (event.origin && event.origin !== self.location.origin) {
+  if (event.origin !== self.location.origin) {
     return
   }
   const data = event.data || {}

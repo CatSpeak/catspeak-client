@@ -1,30 +1,15 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { Bug } from "lucide-react"
 import BugReportModal from "./BugReportModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { usePathname } from "@/shared/hooks/usePathname"
 import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 
 export default function BugReportButton() {
   const [isOpen, setIsOpen] = useState(false)
-  const [pathname, setPathname] = useState(
-    typeof window !== "undefined" ? window.location.pathname : ""
-  )
+  const pathname = usePathname()
   const { t } = useLanguage()
   const lang = t.bugReport || {}
-
-  useEffect(() => {
-    const updatePath = () => {
-      if (typeof window !== "undefined") {
-        setPathname(window.location.pathname)
-      }
-    }
-    window.addEventListener("popstate", updatePath)
-    const interval = setInterval(updatePath, 400)
-    return () => {
-      window.removeEventListener("popstate", updatePath)
-      clearInterval(interval)
-    }
-  }, [])
 
   const isInsideRoom = pathname.includes("/meet") || pathname.includes("/room")
   // Ngoài phòng học có hai nút nổi xếp dọc: nút này ở TRÊN, nút trợ lý CatSpeak ở

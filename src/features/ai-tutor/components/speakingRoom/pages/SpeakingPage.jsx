@@ -72,6 +72,7 @@ const SpeakingPage = ({
   const [networkLost, setNetworkLost] = useState(false)
   const micWasActiveRef = useRef(false)
   const finishFallbackRef = useRef(null)
+  const aiSpeakingTimerRef = useRef(null)
 
   const roomRef = useRef(null)
   const audioRef = useRef(null)
@@ -217,7 +218,13 @@ const SpeakingPage = ({
         if (topic === TOPIC_SUBTITLE) {
           if (data.text && data.role !== "learner") {
             setIsAiSpeaking(true)
-            setTimeout(() => setIsAiSpeaking(false), 3500)
+            if (aiSpeakingTimerRef.current) {
+              clearTimeout(aiSpeakingTimerRef.current)
+            }
+            aiSpeakingTimerRef.current = setTimeout(() => {
+              setIsAiSpeaking(false)
+              aiSpeakingTimerRef.current = null
+            }, 3500)
           }
         } else if (topic === TOPIC_STATE) {
           if (data.turn_index != null) setCurrentRound(data.turn_index)
@@ -305,6 +312,7 @@ const SpeakingPage = ({
 
   useEffect(() => () => {
     if (finishFallbackRef.current) clearTimeout(finishFallbackRef.current)
+    if (aiSpeakingTimerRef.current) clearTimeout(aiSpeakingTimerRef.current)
   }, [])
 
   // Timer effect when connected

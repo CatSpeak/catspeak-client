@@ -26,4 +26,5 @@ export { useBreakoutSpeakingStats } from "./hooks/useBreakoutSpeakingStats"
 export { useSavedParticipantVolumes } from "./hooks/useSavedParticipantVolumes"
 
 // Context
-export { GlobalVideoCallProvider, useGlobalVideoCall } from "./context/GlobalVideoCallProvider"
+export { GlobalVideoCallProvider } from "./context/GlobalVideoCallProvider"
+export { useGlobalVideoCall } from "./context/videoCallContext"

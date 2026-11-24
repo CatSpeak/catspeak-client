@@ -8,13 +8,19 @@ import { store } from "@/store";
 
 export const useGlobalTaskProgress = () => {
   const token = useSelector(selectCurrentToken);
+  const hasToken = Boolean(token);
   const tasks = useSelector((state) => state.globalTask.tasks);
   const dispatch = useDispatch();
   const connectionRef = useRef(null);
+  const tasksRef = useRef(tasks);
+
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
 
   // 1. Fetch active tasks from BE via RTK Query endpoint on startup / token change
   const { data: activeBackendTasks } = useGetActiveUserTasksQuery(undefined, {
-    skip: !token,
+    skip: !hasToken,
   });
 
   // Restore active backend tasks into Redux store (F5 restore)
@@ -50,23 +56,25 @@ export const useGlobalTaskProgress = () => {
     });
   }, [activeBackendTasks, dispatch]);
 
-  // 2. Smooth 60s progress simulation for active tasks in PROCESSING phase
-  useEffect(() => {
-    const activeTasks = tasks.filter(
-      (t) => t.status === "UPLOADING" || t.status === "PROCESSING"
-    );
+  const hasSimulatedActiveTask = tasks.some(
+    (t) =>
+      t.status === "PROCESSING" ||
+      (t.status === "UPLOADING" && !t.isUploadTask)
+  );
 
-    if (activeTasks.length === 0) return;
+  // 2. Smooth 60s progress simulation for active tasks in PROCESSING phase
+  // Read tasks via ref and key effect only on boolean presence so updates do not churn timers.
+  useEffect(() => {
+    if (!hasSimulatedActiveTask) return undefined;
 
     const interval = setInterval(() => {
       const now = Date.now();
-      activeTasks.forEach((t) => {
-        // Skip simulation if task is actively transferring file bytes over XHR
-        if (t.status === "UPLOADING" && t.isUploadTask) return;
+      tasksRef.current.forEach((t) => {
+        const isActive = t.status === "UPLOADING" || t.status === "PROCESSING";
+        if (!isActive || (t.status === "UPLOADING" && t.isUploadTask)) return;
 
         const startTime = t.timestamp || now;
         const elapsed = Math.max(0, now - startTime);
-        // Calculate smooth progress capping out at 99%
         const targetProgress = Math.min(99, Math.floor((elapsed / 60000) * 99));
 
         if (targetProgress > (t.progress || 0)) {
@@ -78,21 +86,21 @@ export const useGlobalTaskProgress = () => {
           );
         }
       });
-    }, 400);
+    }, 1000);
 
     return () => clearInterval(interval);
-  }, [tasks, dispatch]);
+  }, [hasSimulatedActiveTask, dispatch]);
 
   // 3. SignalR Connection & Real-time Task Completion/Failure events
   useEffect(() => {
-    if (!token) return;
+    if (!hasToken) return undefined;
 
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api";
     const hubUrl = `${baseUrl.replace(/\/api\/?$/, "")}/hubs/task-progress`;
 
     const connection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
-        accessTokenFactory: () => token,
+        accessTokenFactory: () => store.getState().auth.token || "",
         transport:
           HttpTransportType.ServerSentEvents | HttpTransportType.LongPolling,
       })
@@ -133,9 +141,10 @@ export const useGlobalTaskProgress = () => {
     connection.start().catch(() => {});
 
     return () => {
-      if (connectionRef.current) {
-        connectionRef.current.stop();
+      connection.stop().catch(() => {});
+      if (connectionRef.current === connection) {
+        connectionRef.current = null;
       }
     };
-  }, [token, dispatch]);
+  }, [hasToken, dispatch]);
 };

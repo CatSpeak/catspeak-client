@@ -1,7 +1,7 @@
 import React from "react"
 import { useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGlobalPresence } from "@/shared/context/GlobalPresenceContext"
+import { useGlobalPresence } from "@/shared/context/presenceContext"
 
 const OnlinePresence = () => {
   const { t } = useLanguage()

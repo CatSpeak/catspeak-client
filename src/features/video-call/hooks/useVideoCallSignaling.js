@@ -15,6 +15,11 @@ export const useVideoCallSignaling = (handlers = {}) => {
   const [connectionId, setConnectionId] = useState(null)
   const connectionRef = useRef(null)
 
+  const tokenRef = useRef(token)
+  useEffect(() => {
+    tokenRef.current = token
+  }, [token])
+
   // Use ref for handlers to avoid effect dependency issues
   const handlersRef = useRef(handlers)
   useEffect(() => {
@@ -24,7 +29,10 @@ export const useVideoCallSignaling = (handlers = {}) => {
   const hasToken = !!token
 
   useEffect(() => {
-    const activeToken = store.getState().auth.token || token || localStorage.getItem("token")
+    const activeToken =
+      store.getState().auth.token ||
+      tokenRef.current ||
+      localStorage.getItem("token")
     if (!activeToken) {
       console.warn("[VideoCallSignalR] No token found, cannot connect.")
       return
@@ -38,7 +46,11 @@ export const useVideoCallSignaling = (handlers = {}) => {
 
     const newConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
-        accessTokenFactory: () => store.getState().auth.token || token || localStorage.getItem("token") || "",
+        accessTokenFactory: () =>
+          store.getState().auth.token ||
+          tokenRef.current ||
+          localStorage.getItem("token") ||
+          "",
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.None)
@@ -92,6 +104,7 @@ export const useVideoCallSignaling = (handlers = {}) => {
 
     newConnection.onreconnecting(() => {
       console.warn("[VideoCallSignalR] Reconnecting...")
+      setIsConnected(false)
     })
 
     newConnection.onreconnected((connectionId) => {

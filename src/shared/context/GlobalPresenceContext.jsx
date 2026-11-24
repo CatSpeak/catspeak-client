@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetProfileQuery, useAuth } from "@/features/auth"
 import { store } from "@/store"
@@ -6,8 +6,7 @@ import {
   useGetPresenceConfigQuery,
   useSendHeartbeatMutation,
 } from "@/store/api/presenceApi"
-
-const GlobalPresenceContext = createContext(undefined)
+import { GlobalPresenceContext } from "./presenceContext"
 
 export const GlobalPresenceProvider = ({ children }) => {
   const { language: contextLanguage } = useLanguage()
@@ -148,14 +147,4 @@ export const GlobalPresenceProvider = ({ children }) => {
       {children}
     </GlobalPresenceContext.Provider>
   )
-}
-
-export const useGlobalPresence = () => {
-  const context = useContext(GlobalPresenceContext)
-  if (context === undefined) {
-    throw new Error(
-      "useGlobalPresence must be used within a GlobalPresenceProvider"
-    )
-  }
-  return context
 }

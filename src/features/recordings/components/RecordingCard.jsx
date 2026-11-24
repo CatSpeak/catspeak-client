@@ -117,7 +117,7 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
       try {
         const match = new URL(fileUrl).pathname.match(/\.([a-z0-9]+)$/i)
         if (match) extension = match[1]
-      } catch (e) {
+      } catch {
         console.warn("[Recording] Could not extract extension from fileUrl")
       }
 

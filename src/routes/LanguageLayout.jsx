@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useParams, Navigate, Outlet } from "react-router-dom"
-import { useGlobalPresence } from "@/shared/context/GlobalPresenceContext"
+import { useGlobalPresence } from "@/shared/context/presenceContext"
 
 const DEFAULT_SUPPORTED_LANGUAGES = ["zh", "en", "ja"]
 

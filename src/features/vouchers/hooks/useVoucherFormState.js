@@ -47,7 +47,6 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
   const classIdParam = searchParams.get("classId")
   const courseIdParam = searchParams.get("courseId")
 
-  const [currentStep, setCurrentStep] = useState(1)
   const [currentVoucherId, setCurrentVoucherId] = useState(voucherId)
   const [form, setForm] = useState(() => {
     const initial = { ...INITIAL_VOUCHER_FORM }
@@ -65,7 +64,6 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     return initial
   })
   const [errors, setErrors] = useState({})
-  const [touched, setTouched] = useState({})
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
   const [isSavingDraft, setIsSavingDraft] = useState(false)
 
@@ -83,7 +81,6 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
 
   // Handle Field Blur - triggers validation for this field (Punish Late)
   const handleBlur = (field) => {
-    setTouched((prev) => ({ ...prev, [field]: true }))
     const { errors: allErrors } = validateInstructorVoucherForm(
       form,
       false,

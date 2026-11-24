@@ -36,7 +36,7 @@ const RoomsPage = () => {
   const { isInCall } = useSelector((s) => s.videoCall)
   const dispatch = useDispatch()
 
-  const [tab, setTab] = useState("communicate")
+  const tab = "communicate"
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { lang } = useParams()

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Sparkles, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -6,7 +6,6 @@ import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import { useCallInterceptor } from "@/features/video-call/hooks/useCallInterceptor"
-import { useAuth } from "@/features/auth"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import { useCreateCustomRoomForm } from "../hooks/useCreateCustomRoomForm"
 import { useCreateRoomForm } from "../hooks/useCreateRoomForm"
@@ -18,7 +17,6 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const { t } = useLanguage()
   const ct = t.rooms?.customRooms || {}
   const cr = t.rooms?.createRoom || {}
-  const { isAuthenticated } = useAuth()
 
   const { isPro, limits } = usePlanFeatures()
   const maxParticipantsLimit = limits.maxParticipantsInCustomRooms || 100
@@ -34,32 +32,38 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const { resetForm: resetGroupForm } = groupForm
   const { resetForm: resetCustomForm } = customForm
 
-  // Reset back to the requested type each time the modal is (re)opened
-  useEffect(() => {
+  // Synchronize mode to initialMode during render when modal opens (React-recommended prop reset)
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (open) {
       setMode(initialMode)
-      resetGroupForm()
-      resetCustomForm()
     }
-  }, [open, initialMode]) // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   // Call interceptor
   const { showSwitchModal, intercept, confirmSwitch, cancelSwitch } =
     useCallInterceptor()
 
+  const handleClose = () => {
+    resetGroupForm()
+    resetCustomForm()
+    onCancel?.()
+  }
+
   const handleCreateCustom = async () => {
-    const proceed = () => customForm.submitCreate(onCancel)
+    const proceed = () => customForm.submitCreate(handleClose)
     if (!(await intercept(proceed))) proceed()
   }
 
   const handleCreateGroup = async () => {
-    const proceed = () => groupForm.submitCreate(onCancel)
+    const proceed = () => groupForm.submitCreate(handleClose)
     if (!(await intercept(proceed))) proceed()
   }
 
   const handleModeChange = (newMode) => {
     if (newMode === "custom" && !isPro) {
-      onCancel()
+      handleClose()
       navigate("/pricing", {
         state: { highlightPlan: "pro", featureName: "Custom Rooms" },
       })
@@ -116,7 +120,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
       <Modal
         id="create-room-modal"
         open={open}
-        onClose={onCancel}
+        onClose={handleClose}
         title={cr.title || "Create Room"}
         showCloseButton={true}
         className="md:max-w-3xl"

@@ -14,15 +14,10 @@ const TimeDropdown = ({
   const dropdownRef = useRef(null)
   const portalRef = useRef(null)
 
-  const [selectedTime, setSelectedTime] = useState(
+  const [internalTime, setInternalTime] = useState(
     value !== undefined && value !== null ? value : ""
   )
-
-  useEffect(() => {
-    if (value !== undefined) {
-      setSelectedTime(value || "")
-    }
-  }, [value])
+  const selectedTime = value !== undefined && value !== null ? value : internalTime
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -81,7 +76,7 @@ const TimeDropdown = ({
   }, [isOpen])
 
   const handleTimeSelect = (time) => {
-    setSelectedTime(time)
+    setInternalTime(time)
     if (onChange) onChange(time)
     setIsOpen(false)
   }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -104,12 +104,6 @@ export const useCreateCustomRoomForm = (open = true) => {
     setNameError("")
     setPasswordError("")
   }, [])
-
-  useEffect(() => {
-    if (!open) {
-      resetForm()
-    }
-  }, [open, resetForm])
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))

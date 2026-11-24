@@ -238,7 +238,7 @@ export const InChatCallProvider = ({ children }) => {
         if (callerId === myId) return
 
         // If currently in an active call, ignore incoming calls
-        if (activeCallSession) return
+        if (activeCallSessionRef.current) return
 
         // Resolve conversation and caller details from cached conversation list
         const matchedConv = conversations.find(
@@ -396,7 +396,9 @@ export const InChatCallProvider = ({ children }) => {
         ) {
           try {
             sessionStorage.removeItem(CALL_SESSION_STORAGE_KEY)
-          } catch {}
+          } catch {
+            /* ignore storage errors */
+          }
           activeCallSessionRef.current = null
           setIsCallModalOpen(false)
           setActiveCallSession(null)
@@ -582,7 +584,9 @@ export const InChatCallProvider = ({ children }) => {
     const isGroup = Boolean(currentSession?.conversation?.isGroup)
     try {
       sessionStorage.removeItem(CALL_SESSION_STORAGE_KEY)
-    } catch {}
+    } catch {
+      /* ignore storage errors */
+    }
     try {
       if (convId) {
         await endCallMutation({
@@ -603,7 +607,9 @@ export const InChatCallProvider = ({ children }) => {
   const closeCallModal = useCallback(() => {
     try {
       sessionStorage.removeItem(CALL_SESSION_STORAGE_KEY)
-    } catch {}
+    } catch {
+      /* ignore storage errors */
+    }
     activeCallSessionRef.current = null
     setIsCallModalOpen(false)
     setActiveCallSession(null)

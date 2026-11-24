@@ -44,10 +44,20 @@ function loadFlashcardServiceWorker() {
 }
 
 describe("flashcard-sw message origin & URL validation", () => {
-  it("ignores postMessage events from untrusted origins", async () => {
+  it("ignores postMessage events from missing or untrusted origins", async () => {
     const { listeners, fetchMock, putMock } = loadFlashcardServiceWorker()
     const onMessage = listeners.get("message")
     const waitUntilMock = vi.fn()
+
+    onMessage({
+      origin: "",
+      data: {
+        type: "flashcard-cache",
+        urls: ["/audio/hello.mp3"],
+        shellUrl: "/flashcards/review",
+      },
+      waitUntil: waitUntilMock,
+    })
 
     onMessage({
       origin: "https://evil.example",
@@ -64,7 +74,7 @@ describe("flashcard-sw message origin & URL validation", () => {
     expect(putMock).not.toHaveBeenCalled()
   })
 
-  it("caches valid same-origin paths while rejecting cross-origin or traversal URLs", async () => {
+  it("caches valid same-origin paths while rejecting cross-origin, /api/, or traversal URLs", async () => {
     const { listeners, fetchMock } = loadFlashcardServiceWorker()
     const onMessage = listeners.get("message")
     let pendingPromise = null
@@ -75,11 +85,12 @@ describe("flashcard-sw message origin & URL validation", () => {
         type: "flashcard-cache",
         urls: [
           "/audio/word1.mp3",
+          "/api/Auth/profile",
           "https://evil.example/steal.mp3",
           "//evil.example/proto.mp3",
           "/audio/../secret.mp3",
         ],
-        shellUrl: "https://evil.example/phish",
+        shellUrl: "/api/private/shell",
       },
       waitUntil: (p) => {
         pendingPromise = p

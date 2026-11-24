@@ -28,15 +28,27 @@ const initialState = {
   status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
 }
 
-/** Decode JWT payload to read expiration */
-function decodeJwtExp(token) {
+/** Decode UTF-8 JSON JWT payload safely */
+export function decodeJwtPayload(token) {
   try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")
-    const payload = JSON.parse(atob(base64))
-    return payload.exp ? new Date(payload.exp * 1000) : null
+    if (typeof token !== "string") return null
+    const base64Url = token.split(".")[1]
+    if (!base64Url) return null
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=")
+    const binary = atob(padded)
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+    const json = new TextDecoder().decode(bytes)
+    return JSON.parse(json)
   } catch {
     return null
   }
+}
+
+/** Decode JWT payload to read expiration */
+function decodeJwtExp(token) {
+  const payload = decodeJwtPayload(token)
+  return payload?.exp ? new Date(payload.exp * 1000) : null
 }
 
 const AUTH_LOG = "[Auth]"

@@ -168,11 +168,6 @@ const CreateClassPage = () => {
     () => (Array.isArray(coursesData?.data) ? coursesData.data : []),
     [coursesData],
   )
-  const today = useMemo(() => {
-    const d = new Date()
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
 
   const handleToastError = useCallback((key) => {
     const courses = t.courses || {}

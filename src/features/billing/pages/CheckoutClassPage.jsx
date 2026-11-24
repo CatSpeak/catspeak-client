@@ -77,7 +77,6 @@ const CheckoutClassPage = () => {
 
   useEffect(() => {
     if (currentUser) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLearners((prev) => {
         if (prev.length === 0 || !prev[0]?.email) {
           const newLearners = [...prev];
@@ -171,7 +170,6 @@ const CheckoutClassPage = () => {
       resolvedVoucherData.availableVouchers.length > 0 ||
       selectedVouchers.length > 0
     ) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedVouchers((prev) => {
         const validSelected = prev.filter((selected) =>
           resolvedVoucherData.availableVouchers.some(

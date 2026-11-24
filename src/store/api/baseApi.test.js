@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { store } from "../index"
-import { logout, setCredentials } from "../slices/authSlice"
+import { decodeJwtPayload, logout, setCredentials } from "../slices/authSlice"
 import { createReauthBaseQuery } from "./baseApi"
 
 vi.mock("@/shared/utils/healthCheck", () => ({
@@ -19,6 +19,7 @@ describe("baseApi auth revocation, rate-limit, and logout reset", () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.restoreAllMocks()
   })
 
@@ -101,5 +102,92 @@ describe("baseApi auth revocation, rate-limit, and logout reset", () => {
       sessionStorage.getItem("catspeak_active_inchat_call_session"),
     ).toBeNull()
     expect(sessionStorage.getItem("catspeak_just_registered")).toBeNull()
+  })
+
+  it("decodes UTF-8 non-ASCII JWT payloads accurately", () => {
+    const jsonPayload = JSON.stringify({
+      sub: "123",
+      name: "Nguyễn Văn A — Tiếng Việt",
+      exp: 9999999999,
+    })
+    const bytes = new TextEncoder().encode(jsonPayload)
+    const base64Url = btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "")
+
+    const decoded = decodeJwtPayload(`hdr.${base64Url}.sig`)
+    expect(decoded?.name).toBe("Nguyễn Văn A — Tiếng Việt")
+    expect(decoded?.exp).toBe(9999999999)
+  })
+
+  it("holds refreshPromise mutex across transient 5xx retries until refresh settles", async () => {
+    vi.useFakeTimers()
+    localStorage.setItem("token", "header.eyJleHAiOjF9.sig")
+    localStorage.setItem("refreshToken", "rt-valid")
+
+    let refreshAttempts = 0
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () => {
+      refreshAttempts += 1
+      if (refreshAttempts === 1) {
+        return new Response(JSON.stringify({ message: "Busy" }), {
+          status: 503,
+          headers: { "Content-Type": "application/json" },
+        })
+      }
+      return new Response(
+        JSON.stringify({
+          token: "header.eyJleHAiOjk5OTk5OTk5OTl9.sig",
+          refreshToken: "rt-new",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      )
+    })
+
+    const queryResolver = vi.fn(async (args, api) => {
+      if (args?.url === "/protected-resource") {
+        const currentTok = api.getState().auth.token
+        if (currentTok === "header.eyJleHAiOjk5OTk5OTk5OTl9.sig") {
+          return { data: { ok: true } }
+        }
+        return { error: { status: 401, data: { message: "Expired" } } }
+      }
+      return { data: { ok: true } }
+    })
+
+    let authState = {
+      token: "header.eyJleHAiOjF9.sig",
+      refreshToken: "rt-valid",
+    }
+    const dispatch = vi.fn((action) => {
+      if (action?.type === "auth/setCredentials") {
+        authState = {
+          token: action.payload.token,
+          refreshToken: action.payload.refreshToken,
+        }
+      }
+    })
+    const makeApi = () => ({
+      dispatch,
+      getState: () => ({
+        auth: authState,
+        videoCall: { isInCall: false },
+        serverStatus: { isServerDown: false },
+      }),
+      signal: new AbortController().signal,
+    })
+
+    const wrappedQuery = createReauthBaseQuery(queryResolver)
+    const p1 = wrappedQuery({ url: "/protected-resource", method: "GET" }, makeApi(), {})
+    await vi.advanceTimersByTimeAsync(10)
+    const p2 = wrappedQuery({ url: "/protected-resource", method: "GET" }, makeApi(), {})
+
+    await vi.advanceTimersByTimeAsync(2000)
+    const [r1, r2] = await Promise.all([p1, p2])
+
+    expect(refreshAttempts).toBe(2)
+    expect(r1.data).toEqual({ ok: true })
+    expect(r2.data).toEqual({ ok: true })
+    expect(authState.token).toBe("header.eyJleHAiOjk5OTk5OTk5OTl9.sig")
   })
 })

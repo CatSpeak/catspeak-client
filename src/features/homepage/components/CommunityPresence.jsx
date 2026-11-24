@@ -1,6 +1,6 @@
 import React from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGlobalPresence } from "@/shared/context/GlobalPresenceContext"
+import { useGlobalPresence } from "@/shared/context/presenceContext"
 
 const CommunityPresence = () => {
   const { t } = useLanguage()

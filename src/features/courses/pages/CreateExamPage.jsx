@@ -241,7 +241,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     usePublishTeacherQuizMutation();
   const [downloadQuizTemplate, { isLoading: isDownloadingTemplate }] =
     useDownloadQuizTemplateMutation();
-  const [importTeacherQuestionsPreview, { isLoading: isImporting }] =
+  const [importTeacherQuestionsPreview] =
     useImportTeacherQuestionsPreviewMutation();
   const [isActionPending, setIsActionPending] = useState(false);
   const isSubmitting =
@@ -397,7 +397,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       try {
         const persistedQuiz = await persistQuiz();
         targetQuizId = persistedQuiz?.quizId;
-      } catch (error) {
+      } catch {
         setIsImportingMode(false);
         toast.error(
           ce.toastAutoCreateFailed ||
@@ -509,14 +509,6 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     if (importFileInputRef.current) {
       importFileInputRef.current.click();
     }
-  };
-
-  const handleRemoveImportedFile = () => {
-    setImportedFileName(null);
-    toast.success(
-      ce.toastFileRemoved ||
-      "Đã xóa file đã tải lên. Bạn có thể chọn file mới.",
-    );
   };
 
   // Question management handlers
