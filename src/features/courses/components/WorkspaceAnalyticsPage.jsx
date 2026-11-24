@@ -105,8 +105,8 @@ const WorkspaceAnalyticsPage = () => {
   const [customEndDate, setCustomEndDate] = useState(() => incomingScope?.customEndDate || "")
 
   // RTK Query hooks for course/class mapping and exports
-  const { data: coursesResponse } = useGetAllCoursesQuery({ pageSize: 500 })
-  const { data: classesResponse } = useGetAllClassesQuery({ pageSize: 500 })
+  const { data: coursesResponse } = useGetAllCoursesQuery({ page: 1, pageSize: 100, fetchAll: true })
+  const { data: classesResponse } = useGetAllClassesQuery({ page: 1, pageSize: 100, fetchAll: true })
 
   const [exportStudents, { isLoading: isExpStudents }] = useExportAnalyticsStudentsMutation()
   const [exportRevenue, { isLoading: isExpRevenue }] = useExportAnalyticsRevenueMutation()

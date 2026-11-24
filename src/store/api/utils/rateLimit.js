@@ -58,9 +58,12 @@ export function buildRateLimitErrorData(retryAfterSeconds, existingData) {
     ? `Too many requests. Please wait ${retryAfterSeconds}s and try again.`
     : "Too many requests. Please slow down and try again shortly."
 
+  const resolvedCode = base.code || base.errorCode || "RATE_LIMIT_EXCEEDED"
+
   return {
     ...base,
-    code: base.code || base.errorCode || "RATE_LIMITED",
+    code: resolvedCode,
+    errorCode: base.errorCode || resolvedCode,
     retryAfterSeconds: retryAfterSeconds ?? null,
     message:
       (typeof base.message === "string" && base.message.trim()) ||

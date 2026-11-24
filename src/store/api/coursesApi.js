@@ -419,6 +419,94 @@ const transformPaginatedResponse = (response, itemTransformer) => {
   }
 }
 
+const MAX_INSTRUCTOR_PAGE_SIZE = 100
+const MAX_INSTRUCTOR_AUTO_PAGES = 20
+
+const clampInstructorPageSize = (value) => {
+  if (value === null || value === undefined || value === "") return undefined
+  const num = Number(value)
+  if (!Number.isFinite(num) || num <= 0) return undefined
+  return Math.min(Math.floor(num), MAX_INSTRUCTOR_PAGE_SIZE)
+}
+
+export async function fetchPaginatedInstructorCollection(
+  { url, params = {}, extraParams = {}, transformer },
+  baseQuery,
+) {
+  const safeParams = params && typeof params === "object" ? params : {}
+  const page = Math.max(1, Number(safeParams.page ?? 1) || 1)
+  const rawPageSize = Number(safeParams.pageSize)
+  const shouldFetchAll =
+    safeParams.fetchAll === true ||
+    (page === 1 && Number.isFinite(rawPageSize) && rawPageSize > MAX_INSTRUCTOR_PAGE_SIZE)
+
+  if (!shouldFetchAll) {
+    const res = await baseQuery({
+      url,
+      method: "GET",
+      params: {
+        ...extraParams,
+        language: safeParams.language,
+        status: safeParams.status,
+        search: safeParams.search,
+        page: safeParams.page,
+        pageSize: clampInstructorPageSize(safeParams.pageSize),
+      },
+    })
+    if (res.error) return { error: res.error }
+    return { data: transformPaginatedResponse(res.data, transformer) }
+  }
+
+  const collected = []
+  const seenIds = new Set()
+  let lastPagination = { page: 1, pageSize: MAX_INSTRUCTOR_PAGE_SIZE, totalItems: 0, totalPages: 1 }
+
+  for (let currentPage = 1; currentPage <= MAX_INSTRUCTOR_AUTO_PAGES; currentPage += 1) {
+    const res = await baseQuery({
+      url,
+      method: "GET",
+      params: {
+        ...extraParams,
+        language: safeParams.language,
+        status: safeParams.status,
+        search: safeParams.search,
+        page: currentPage,
+        pageSize: MAX_INSTRUCTOR_PAGE_SIZE,
+      },
+    })
+    if (res.error) return { error: res.error }
+
+    const parsed = transformPaginatedResponse(res.data, transformer)
+    lastPagination = parsed.pagination
+    for (const item of parsed.data) {
+      if (item?.id == null) {
+        collected.push(item)
+      } else if (!seenIds.has(item.id)) {
+        seenIds.add(item.id)
+        collected.push(item)
+      }
+    }
+
+    const totalPages = Math.min(parsed.pagination?.totalPages ?? 1, MAX_INSTRUCTOR_AUTO_PAGES)
+    if (currentPage >= totalPages || parsed.data.length === 0) {
+      break
+    }
+  }
+
+  return {
+    data: {
+      data: collected,
+      pagination: {
+        ...lastPagination,
+        page: 1,
+        pageSize: MAX_INSTRUCTOR_PAGE_SIZE,
+        totalItems: lastPagination?.totalItems ?? collected.length,
+        totalPages: 1,
+      },
+    },
+  }
+}
+
 const encodePathSegment = (value) => encodeURIComponent(String(value))
 const getQuizListTagId = (classId) => `class:${String(classId)}:list`
 const getQuizTagId = (classId, quizId) =>
@@ -1027,19 +1115,15 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // 2. Get All Courses
     getAllCourses: builder.query({
-      query: (params = {}) => ({
-        url: "/teacher/courses",
-        method: "GET",
-        params: {
-          language: params.language,
-          status: params.status,
-          search: params.search,
-          page: params.page,
-          pageSize: params.pageSize,
-        },
-      }),
-      transformResponse: (response) =>
-        transformPaginatedResponse(response, transformCourse),
+      queryFn: (params = {}, _queryApi, _extraOptions, baseQuery) =>
+        fetchPaginatedInstructorCollection(
+          {
+            url: "/teacher/courses",
+            params,
+            transformer: transformCourse,
+          },
+          baseQuery,
+        ),
       providesTags: ["Courses"],
     }),
 
@@ -1061,20 +1145,18 @@ export const coursesApi = baseApi.injectEndpoints({
     }),
 
     getAllClasses: builder.query({
-      query: (params = {}) => ({
-        url: "/teacher/classes",
-        method: "GET",
-        params: {
-          courseId: params.courseId ? parseInt(params.courseId) : undefined,
-          language: params.language,
-          status: params.status,
-          search: params.search,
-          page: params.page,
-          pageSize: params.pageSize,
-        },
-      }),
-      transformResponse: (response) =>
-        transformPaginatedResponse(response, transformClass),
+      queryFn: (params = {}, _queryApi, _extraOptions, baseQuery) =>
+        fetchPaginatedInstructorCollection(
+          {
+            url: "/teacher/classes",
+            params,
+            extraParams: {
+              courseId: params?.courseId ? parseInt(params.courseId) : undefined,
+            },
+            transformer: transformClass,
+          },
+          baseQuery,
+        ),
       providesTags: ["Classes"],
     }),
 

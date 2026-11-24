@@ -74,7 +74,8 @@ describe("baseApi auth revocation, rate-limit, and logout reset", () => {
     )
 
     expect(result.error.retryAfterSeconds).toBe(42)
-    expect(result.error.data.code).toBe("RATE_LIMITED")
+    expect(result.error.data.code).toBe("RATE_LIMIT_EXCEEDED")
+    expect(result.error.data.errorCode).toBe("RATE_LIMIT_EXCEEDED")
     expect(result.error.data.retryAfterSeconds).toBe(42)
   })
 

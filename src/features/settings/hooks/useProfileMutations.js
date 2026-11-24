@@ -12,7 +12,7 @@ import { buildProfilePayload, validatePhoneInput } from "../utils/profileValidat
  */
 const parseProfileApiError = (err, t, fallbackField) => {
   const apiMessage = err?.data?.message || err?.data?.title || ""
-  const errCode = err?.data?.errorCode || ""
+  const errCode = err?.data?.errorCode || err?.data?.code || ""
   const lowerMsg = apiMessage.toLowerCase()
 
   if (errCode === "RATE_LIMIT_EXCEEDED" || lowerMsg.includes("rate_limit_exceeded")) {

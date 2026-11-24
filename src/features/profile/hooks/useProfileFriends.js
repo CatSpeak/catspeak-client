@@ -197,7 +197,7 @@ export const useProfileFriends = ({
   // Used to compute the follow-back state on the followers tab, which is a
   // different sub-tab from "following" and must not depend on that lazy list.
   const { data: myFollowingRes } = useGetFollowingQuery(
-    { accountId: currentUserId, page: 1, pageSize: 100 },
+    { accountId: currentUserId, fetchAll: true },
     { skip: !currentUserId, refetchOnFocus: true, refetchOnReconnect: true },
   )
 

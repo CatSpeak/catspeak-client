@@ -1,23 +1,37 @@
 import { socialApi } from "./socialApi"
 
 const DEFAULT_PAGE_SIZE = 20
-// Legacy callers (chat modals, invite dropdowns) pass a bare accountId and expect
-// the full list for client-side filtering. Keep them working without pagination UI.
-const LEGACY_PAGE_SIZE = 200
+export const MAX_SOCIAL_PAGE_SIZE = 50
+const MAX_AUTO_PAGES = 20
 
-const normalizeFilterArgs = (params, defaultPageSize = DEFAULT_PAGE_SIZE) => {
+const normalizeFilterArgs = (params, defaultPageSize = DEFAULT_PAGE_SIZE, { defaultFetchAllOnNull = false } = {}) => {
   if (params == null) {
-    return { page: 1, pageSize: defaultPageSize, searchKeyword: "", isTeacher: undefined, level: undefined }
+    return {
+      page: 1,
+      pageSize: defaultFetchAllOnNull ? MAX_SOCIAL_PAGE_SIZE : defaultPageSize,
+      searchKeyword: "",
+      isTeacher: undefined,
+      level: undefined,
+      fetchAll: defaultFetchAllOnNull,
+    }
   }
   if (typeof params === "number" || typeof params === "string") {
-    return { page: 1, pageSize: LEGACY_PAGE_SIZE, searchKeyword: "", isTeacher: undefined, level: undefined, legacyId: params }
+    return {
+      page: 1,
+      pageSize: MAX_SOCIAL_PAGE_SIZE,
+      searchKeyword: "",
+      isTeacher: undefined,
+      level: undefined,
+      legacyId: params,
+      fetchAll: true,
+    }
   }
   if (typeof params === "object") {
-    // Legacy: plain accountId passed as { skip }? No — object form is new paged form.
-    // Support both { accountId, targetAccountId } + filters.
-    const page = params.Page ?? params.page ?? 1
-    const hasExplicitPageSize = params.PageSize != null || params.pageSize != null
-    const pageSize = params.PageSize ?? params.pageSize ?? defaultPageSize
+    const page = Math.max(1, Number(params.Page ?? params.page ?? 1) || 1)
+    const rawPageSize = params.PageSize ?? params.pageSize ?? defaultPageSize
+    const numericPageSize = Math.max(1, Number(rawPageSize) || defaultPageSize)
+    const fetchAll = params.fetchAll === true || (page === 1 && numericPageSize > MAX_SOCIAL_PAGE_SIZE)
+    const pageSize = Math.min(numericPageSize, MAX_SOCIAL_PAGE_SIZE)
     const rawKeyword = params.SearchKeyword ?? params.searchKeyword ?? ""
     const searchKeyword = typeof rawKeyword === "string" ? rawKeyword.trim() : ""
     const isTeacher = params.isTeacher ?? params.IsTeacher ?? undefined
@@ -25,13 +39,21 @@ const normalizeFilterArgs = (params, defaultPageSize = DEFAULT_PAGE_SIZE) => {
       ? (params.level ?? params.Level).trim() || undefined
       : undefined
     const accountId = params.accountId ?? params.targetAccountId ?? params.userId ?? undefined
-    return { page, pageSize: hasExplicitPageSize ? pageSize : pageSize, searchKeyword, isTeacher, level, accountId }
+    return { page, pageSize, searchKeyword, isTeacher, level, accountId, fetchAll }
   }
-  return { page: 1, pageSize: defaultPageSize, searchKeyword: "", isTeacher: undefined, level: undefined }
+  return {
+    page: 1,
+    pageSize: defaultPageSize,
+    searchKeyword: "",
+    isTeacher: undefined,
+    level: undefined,
+    fetchAll: false,
+  }
 }
 
 const toQueryParams = ({ page, pageSize, searchKeyword, isTeacher, level }) => {
-  const qp = { Page: page, PageSize: pageSize }
+  const clampedSize = Math.min(Math.max(1, Number(pageSize) || DEFAULT_PAGE_SIZE), MAX_SOCIAL_PAGE_SIZE)
+  const qp = { Page: Math.max(1, Number(page) || 1), PageSize: clampedSize }
   if (searchKeyword) qp.SearchKeyword = searchKeyword
   if (isTeacher !== undefined && isTeacher !== null && isTeacher !== "") qp.IsTeacher = isTeacher
   if (level) qp.Level = level
@@ -43,22 +65,78 @@ const extractList = (res) => (Array.isArray(res) ? res : res?.data || [])
 const getItemId = (u) =>
   u?.accountId ?? u?.id ?? u?.userId ?? u?.friendshipId ?? u?.Addressee?.accountId ?? u?.Requester?.accountId
 
+export async function executeSocialListQuery(
+  { url, arg, defaultPageSize = DEFAULT_PAGE_SIZE, defaultFetchAllOnNull = false, idOf = getItemId },
+  baseQuery,
+) {
+  const n = normalizeFilterArgs(arg, defaultPageSize, { defaultFetchAllOnNull })
+  if (!n.fetchAll) {
+    return baseQuery({
+      url,
+      method: "GET",
+      params: toQueryParams(n),
+    })
+  }
+
+  const collected = []
+  const seenIds = new Set()
+
+  for (let currentPage = 1; currentPage <= MAX_AUTO_PAGES; currentPage += 1) {
+    const res = await baseQuery({
+      url,
+      method: "GET",
+      params: toQueryParams({ ...n, page: currentPage, pageSize: MAX_SOCIAL_PAGE_SIZE }),
+    })
+    if (res.error) {
+      return { error: res.error }
+    }
+
+    const batch = extractList(res.data)
+    for (const item of batch) {
+      const key = idOf(item)
+      if (key == null) {
+        collected.push(item)
+      } else if (!seenIds.has(key)) {
+        seenIds.add(key)
+        collected.push(item)
+      }
+    }
+
+    if (batch.length < MAX_SOCIAL_PAGE_SIZE) {
+      break
+    }
+  }
+
+  return {
+    data: {
+      data: collected,
+      page: 1,
+      pageSize: collected.length,
+      hasMore: false,
+    },
+  }
+}
+
 const mergePaged = (currentCache, newItems, { arg }, idOf = getItemId) => {
   const { page, pageSize } = normalizeFilterArgs(arg)
+  const effectivePageSize = Math.min(pageSize, MAX_SOCIAL_PAGE_SIZE)
   const incomingData = extractList(newItems)
   if (page === 1) {
     currentCache.data = incomingData
     currentCache.page = newItems?.page ?? 1
-    currentCache.pageSize = newItems?.pageSize ?? pageSize
+    currentCache.pageSize = newItems?.pageSize ?? effectivePageSize
   } else {
     const currentList = Array.isArray(currentCache?.data) ? currentCache.data : []
     const existingIds = new Set(currentList.map((u) => idOf(u)))
     const filtered = incomingData.filter((u) => !existingIds.has(idOf(u)))
     currentCache.data = [...currentList, ...filtered]
     currentCache.page = newItems?.page ?? page
-    currentCache.pageSize = newItems?.pageSize ?? pageSize
+    currentCache.pageSize = newItems?.pageSize ?? effectivePageSize
   }
-  currentCache.hasMore = incomingData.length >= pageSize
+  currentCache.hasMore =
+    newItems?.hasMore !== undefined
+      ? Boolean(newItems.hasMore)
+      : incomingData.length >= effectivePageSize
 }
 
 const forceRefetchFiltered = ({ currentArg, previousArg }) => {
@@ -69,6 +147,7 @@ const forceRefetchFiltered = ({ currentArg, previousArg }) => {
   return (
     c.page !== p.page ||
     c.pageSize !== p.pageSize ||
+    c.fetchAll !== p.fetchAll ||
     c.searchKeyword !== p.searchKeyword ||
     String(c.isTeacher ?? "") !== String(p.isTeacher ?? "") ||
     String(c.level ?? "") !== String(p.level ?? "") ||
@@ -105,16 +184,16 @@ export const friendshipApi = socialApi.injectEndpoints({
         (currentArg ?? null) !== (previousArg ?? null),
     }),
     getFriends: builder.query({
-      query: (arg) => {
+      queryFn: (arg, _queryApi, _extraOptions, baseQuery) => {
         const accountId = resolveAccountId(arg)
-        const n = normalizeFilterArgs(typeof arg === "object" ? arg : { pageSize: LEGACY_PAGE_SIZE })
-        // Legacy number call → pageSize 100 to preserve chat/invite modals.
-        const pageSize = typeof arg === "number" || typeof arg === "string" ? LEGACY_PAGE_SIZE : n.pageSize
-        return {
-          url: `/friendships/user/${accountId}`,
-          method: "GET",
-          params: toQueryParams({ ...n, pageSize }),
-        }
+        return executeSocialListQuery(
+          {
+            url: `/friendships/user/${accountId}`,
+            arg,
+            idOf: (u) => u?.accountId ?? u?.id ?? u?.userId,
+          },
+          baseQuery,
+        )
       },
       providesTags: (result, error, arg) => {
         const accountId = resolveAccountId(arg, "")
@@ -123,21 +202,22 @@ export const friendshipApi = socialApi.injectEndpoints({
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
         const n = normalizeFilterArgs(queryArgs)
         const target = resolveAccountId(queryArgs, "")
-        return `${endpointName}_${target}_${n.searchKeyword}_${n.isTeacher ?? ""}_${n.level ?? ""}_${n.pageSize}`
+        return `${endpointName}_${target}_${n.searchKeyword}_${n.isTeacher ?? ""}_${n.level ?? ""}_${n.fetchAll ? "all" : n.pageSize}`
       },
       merge: (c, n, o) => mergePaged(c, n, o, (u) => u?.accountId ?? u?.id ?? u?.userId),
       forceRefetch: forceRefetchFiltered,
     }),
     getFollowers: builder.query({
-      query: (arg) => {
+      queryFn: (arg, _queryApi, _extraOptions, baseQuery) => {
         const accountId = resolveAccountId(arg)
-        const n = normalizeFilterArgs(typeof arg === "object" ? arg : { pageSize: LEGACY_PAGE_SIZE })
-        const pageSize = typeof arg === "number" || typeof arg === "string" ? LEGACY_PAGE_SIZE : n.pageSize
-        return {
-          url: `/friendships/user/${accountId}/followers`,
-          method: "GET",
-          params: toQueryParams({ ...n, pageSize }),
-        }
+        return executeSocialListQuery(
+          {
+            url: `/friendships/user/${accountId}/followers`,
+            arg,
+            idOf: (u) => u?.accountId ?? u?.id ?? u?.userId,
+          },
+          baseQuery,
+        )
       },
       providesTags: (result, error, arg) => {
         const accountId = resolveAccountId(arg, "")
@@ -146,21 +226,22 @@ export const friendshipApi = socialApi.injectEndpoints({
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
         const n = normalizeFilterArgs(queryArgs)
         const target = resolveAccountId(queryArgs, "")
-        return `${endpointName}_${target}_${n.searchKeyword}_${n.isTeacher ?? ""}_${n.level ?? ""}_${n.pageSize}`
+        return `${endpointName}_${target}_${n.searchKeyword}_${n.isTeacher ?? ""}_${n.level ?? ""}_${n.fetchAll ? "all" : n.pageSize}`
       },
       merge: (c, n, o) => mergePaged(c, n, o, (u) => u?.accountId ?? u?.id ?? u?.userId),
       forceRefetch: forceRefetchFiltered,
     }),
     getFollowing: builder.query({
-      query: (arg) => {
+      queryFn: (arg, _queryApi, _extraOptions, baseQuery) => {
         const accountId = resolveAccountId(arg)
-        const n = normalizeFilterArgs(typeof arg === "object" ? arg : { pageSize: LEGACY_PAGE_SIZE })
-        const pageSize = typeof arg === "number" || typeof arg === "string" ? LEGACY_PAGE_SIZE : n.pageSize
-        return {
-          url: `/friendships/user/${accountId}/following`,
-          method: "GET",
-          params: toQueryParams({ ...n, pageSize }),
-        }
+        return executeSocialListQuery(
+          {
+            url: `/friendships/user/${accountId}/following`,
+            arg,
+            idOf: (u) => u?.accountId ?? u?.id ?? u?.userId,
+          },
+          baseQuery,
+        )
       },
       providesTags: (result, error, arg) => {
         const accountId = resolveAccountId(arg, "")
@@ -169,7 +250,7 @@ export const friendshipApi = socialApi.injectEndpoints({
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
         const n = normalizeFilterArgs(queryArgs)
         const target = resolveAccountId(queryArgs, "")
-        return `${endpointName}_${target}_${n.searchKeyword}_${n.isTeacher ?? ""}_${n.level ?? ""}_${n.pageSize}`
+        return `${endpointName}_${target}_${n.searchKeyword}_${n.isTeacher ?? ""}_${n.level ?? ""}_${n.fetchAll ? "all" : n.pageSize}`
       },
       merge: (c, n, o) => mergePaged(c, n, o, (u) => u?.accountId ?? u?.id ?? u?.userId),
       forceRefetch: forceRefetchFiltered,
@@ -291,20 +372,20 @@ export const friendshipApi = socialApi.injectEndpoints({
       ],
     }),
     getPendingFriendRequests: builder.query({
-      query: (params) => {
-        const n = normalizeFilterArgs(params, params == null ? LEGACY_PAGE_SIZE : DEFAULT_PAGE_SIZE)
-        const pageSize = params == null ? LEGACY_PAGE_SIZE : n.pageSize
-        return {
-          url: "/friendships/requests",
-          method: "GET",
-          params: toQueryParams({ ...n, pageSize }),
-        }
-      },
+      queryFn: (params, _queryApi, _extraOptions, baseQuery) =>
+        executeSocialListQuery(
+          {
+            url: "/friendships/requests",
+            arg: params,
+            defaultFetchAllOnNull: true,
+            idOf: (u) => u?.friendshipId ?? u?.requester?.accountId,
+          },
+          baseQuery,
+        ),
       providesTags: ["FriendRequest"],
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
-        const n = normalizeFilterArgs(queryArgs, queryArgs == null ? LEGACY_PAGE_SIZE : DEFAULT_PAGE_SIZE)
-        const pageSize = queryArgs == null ? LEGACY_PAGE_SIZE : n.pageSize
-        return `${endpointName}_${n.searchKeyword}_${n.isTeacher ?? ""}_${n.level ?? ""}_${pageSize}`
+        const n = normalizeFilterArgs(queryArgs, DEFAULT_PAGE_SIZE, { defaultFetchAllOnNull: true })
+        return `${endpointName}_${n.searchKeyword}_${n.isTeacher ?? ""}_${n.level ?? ""}_${n.fetchAll ? "all" : n.pageSize}`
       },
       merge: (c, n, o) => mergePaged(c, n, o, (u) => u?.friendshipId ?? u?.requester?.accountId),
       forceRefetch: forceRefetchFiltered,

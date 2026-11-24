@@ -28,15 +28,6 @@ const KPI_DEFS = [
   { key: "averageRating", tone: "orange" },
 ]
 
-const daysAgo = (iso) => {
-  if (!iso) return ""
-  const d = new Date(iso)
-  if (isNaN(d.getTime())) return ""
-  const m = String(d.getDate()).padStart(2, "0")
-  const mo = String(d.getMonth() + 1).padStart(2, "0")
-  return `${m}/${mo}/${d.getFullYear()}`
-}
-
 const defaultCustomRange = () => {
   const now = new Date()
   const from = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -132,8 +123,8 @@ const WorkspaceDashboardPage = () => {
     [searchParams, setSearchParams],
   )
 
-  const { data: coursesResponse } = useGetAllCoursesQuery({ pageSize: 500 })
-  const { data: classesResponse } = useGetAllClassesQuery({ pageSize: 500 })
+  const { data: coursesResponse } = useGetAllCoursesQuery({ page: 1, pageSize: 100, fetchAll: true })
+  const { data: classesResponse } = useGetAllClassesQuery({ page: 1, pageSize: 100, fetchAll: true })
   const courses = coursesResponse?.data || []
   const classes = classesResponse?.data || []
 
