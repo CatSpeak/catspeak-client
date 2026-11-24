@@ -71,7 +71,7 @@ const ProfileAvatarNCover = ({
     useUpdateAvatarMutation()
   const [updateCover, { isLoading: isUpdatingCover }] = useUpdateCoverMutation()
 
-  // Optional: khi user Ä‘ang trong call, Ä‘á»“ng bá»™ avatar má»›i xuá»‘ng LiveKit metadata ngay láº­p tá»©c
+  // Optional: khi user đang trong call, đồng bộ avatar mới xuống LiveKit metadata ngay lập tức
   let localParticipant = null
   try {
     const callCtx = useGlobalVideoCall()
@@ -95,11 +95,11 @@ const ProfileAvatarNCover = ({
         validation.reason === "size"
           ? isCover
             ? t.profile?.personalInfo?.coverSizeLimit ||
-                "KÃ­ch thÆ°á»›c áº£nh bÃ¬a khÃ´ng Ä‘Æ°á»£c vÆ°á»£t quÃ¡ 5MB"
+                "Kích thước ảnh bìa không được vượt quá 5MB"
             : t.profile?.personalInfo?.avatarSizeLimit ||
-                "KÃ­ch thÆ°á»›c áº£nh khÃ´ng Ä‘Æ°á»£c vÆ°á»£t quÃ¡ 5MB"
+                "Kích thước ảnh không được vượt quá 5MB"
           : t.profile?.personalInfo?.invalidImageFormat ||
-              "Vui lÃ²ng chá»n tá»‡p hÃ¬nh áº£nh há»£p lá»‡",
+              "Vui lòng chọn tệp hình ảnh hợp lệ",
       )
       return false
     }
@@ -145,7 +145,7 @@ const ProfileAvatarNCover = ({
 
       try {
         toast.loading(
-          t.profile?.personalInfo?.updatingAvatar || "Äang cáº­p nháº­t...",
+          t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật...",
           { id: "avatar-update" },
         )
         const res = await updateAvatar(avatarData).unwrap()
@@ -163,13 +163,13 @@ const ProfileAvatarNCover = ({
 
         toast.success(
           t.profile?.personalInfo?.updateAvatarSuccess ||
-            "Cáº­p nháº­t áº£nh Ä‘áº¡i diá»‡n thÃ nh cÃ´ng",
+            "Cập nhật ảnh đại diện thành công",
           { id: "avatar-update" },
         )
       } catch (error) {
         toast.error(
           t.profile?.personalInfo?.updateAvatarError ||
-            "KhÃ´ng thá»ƒ cáº­p nháº­t áº£nh Ä‘áº¡i diá»‡n",
+            "Không thể cập nhật ảnh đại diện",
           { id: "avatar-update" },
         )
         console.error(error)
@@ -187,20 +187,20 @@ const ProfileAvatarNCover = ({
       try {
         toast.loading(
           t.profile?.personalInfo?.updatingCover ||
-            "Äang cáº­p nháº­t áº£nh bÃ¬a...",
+            "Đang cập nhật ảnh bìa...",
           { id: "cover-update" },
         )
         await updateCover(coverData).unwrap()
 
         toast.success(
           t.profile?.personalInfo?.updateCoverSuccess ||
-            "Cáº­p nháº­t áº£nh bÃ¬a thÃ nh cÃ´ng",
+            "Cập nhật ảnh bìa thành công",
           { id: "cover-update" },
         )
       } catch (error) {
         toast.error(
           t.profile?.personalInfo?.updateCoverError ||
-            "KhÃ´ng thá»ƒ cáº­p nháº­t áº£nh bÃ¬a",
+            "Không thể cập nhật ảnh bìa",
           { id: "cover-update" },
         )
         console.error(error)
@@ -241,7 +241,7 @@ const ProfileAvatarNCover = ({
             className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 text-white text-xs font-medium opacity-0 group-hover/cover:opacity-100 focus:opacity-100 transition-opacity hover:bg-black/75"
           >
             <Camera className="w-4 h-4" />
-            {t.profile?.personalInfo?.editCover || "Sá»­a áº£nh bÃ¬a"}
+            {t.profile?.personalInfo?.editCover || "Sửa ảnh bìa"}
           </button>
           <input
             type="file"
@@ -319,7 +319,7 @@ const ProfileAvatarNCover = ({
           title={
             t.profile?.personalInfo?.cropAvatarTitle ||
             t.imageCrop?.title ||
-            "Cáº¯t áº£nh Ä‘áº¡i diá»‡n"
+            "Cắt ảnh đại diện"
           }
           onClose={() => {
             setIsAvatarCropOpen(false)
@@ -342,7 +342,7 @@ const ProfileAvatarNCover = ({
           title={
             t.profile?.personalInfo?.editCover ||
             t.profile?.personalInfo?.cropCoverTitle ||
-            "Cáº¯t áº£nh bÃ¬a"
+            "Cắt ảnh bìa"
           }
           onClose={() => {
             setIsCoverCropOpen(false)
