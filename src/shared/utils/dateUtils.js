@@ -4,12 +4,16 @@ import {
 } from "@/shared/constants/timezones"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
+import timezone from "dayjs/plugin/timezone"
 import updateLocale from "dayjs/plugin/updateLocale"
+import utc from "dayjs/plugin/utc"
 import "dayjs/locale/vi"
 import "dayjs/locale/zh-cn"
 
 dayjs.extend(relativeTime)
 dayjs.extend(updateLocale)
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 dayjs.updateLocale("vi", {
   relativeTime: {
@@ -244,9 +248,14 @@ export const formatTimeAgo = (timestamp, language = "en") => {
 }
 
 /**
- * Convert HH:mm time string to target TimeZone (e.g. "14:30" -> formatted HH:mm in target TZ)
+ * Convert HH:mm time string from sourceTimeZone (default "UTC") to target TimeZone
+ * (e.g. "14:30" UTC -> "21:30" in "Asia/Ho_Chi_Minh").
  */
-export const convertTimeStrToTz = (timeStr, userTimeZone = null) => {
+export const convertTimeStrToTz = (
+  timeStr,
+  userTimeZone = null,
+  sourceTimeZone = "UTC",
+) => {
   if (!timeStr) return ""
   const str = String(timeStr).trim()
   if (!str) return ""
@@ -266,26 +275,39 @@ export const convertTimeStrToTz = (timeStr, userTimeZone = null) => {
   const match = str.match(/^(\d{1,2}):(\d{2})/)
   if (!match) return str
 
-  if (!userTimeZone) return str.slice(0, 5)
+  const sourceTz = sourceTimeZone || "UTC"
+  const targetTz =
+    userTimeZone || (sourceTz === "UTC" ? null : DEFAULT_TIMEZONE)
+  if (!targetTz) return str.slice(0, 5)
 
   const hours = Number(match[1])
   const minutes = Number(match[2])
   const now = new Date()
-  const utcDate = new Date(
-    Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate(),
-      hours,
-      minutes,
-    ),
-  )
+  let sourceDate
+  if (sourceTz === "UTC") {
+    sourceDate = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        hours,
+        minutes,
+      ),
+    )
+  } else {
+    const todayInSource = dayjs(now).tz(sourceTz).format("YYYY-MM-DD")
+    const hh = String(hours).padStart(2, "0")
+    const mm = String(minutes).padStart(2, "0")
+    const parsed = dayjs.tz(`${todayInSource}T${hh}:${mm}:00`, sourceTz)
+    if (!parsed.isValid()) return str.slice(0, 5)
+    sourceDate = parsed.toDate()
+  }
 
-  return utcDate.toLocaleTimeString("en-GB", {
+  return sourceDate.toLocaleTimeString("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    timeZone: userTimeZone,
+    timeZone: targetTz,
   })
 }
 

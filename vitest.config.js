@@ -27,6 +27,7 @@ export default defineConfig({
       "src/features/navigation/**/*.test.{js,jsx}",
       "src/features/rooms/components/**/*.test.{js,jsx}",
       "src/features/billing/**/*.test.{js,jsx}",
+      "src/features/chat/components/messages/**/*.test.{js,jsx}",
     ],
   },
 })

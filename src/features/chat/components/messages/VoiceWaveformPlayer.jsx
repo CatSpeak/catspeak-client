@@ -8,7 +8,7 @@ const generateWaveformBars = (seedString = "", barCount = 32) => {
   let hash = 0
   for (let i = 0; i < seedString.length; i++) {
     hash = (hash << 5) - hash + seedString.charCodeAt(i)
-    hash |= 0
+    hash = Math.trunc(hash)
   }
 
   const bars = []
