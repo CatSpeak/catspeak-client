@@ -3,6 +3,8 @@ name: "Production Go-Live"
 on:
   workflow_dispatch:
 
+permissions: {}
+
 env:
   DEPLOYED_TAG_MARKER: deployed-production
   # Danh sách người được phép golive (cập nhật khi tuyển/thay đổi)
@@ -17,9 +19,22 @@ jobs:
   check-tag:
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: read
     steps:
+      - name: Validate tag format
+        env:
+          CURRENT_REF: ${{ github.ref }}
+        run: |
+          TAG_REGEX='^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+([-.][A-Za-z0-9.]+)?$'
+          if [[ ! "$CURRENT_REF" =~ $TAG_REGEX ]]; then
+            echo "❌ LỖI: Workflow phải được chạy trên tag hợp lệ (vd: v1.2.3), nhận được '$CURRENT_REF'."
+            exit 1
+          fi
+          echo "✅ OK: Tag ref hợp lệ ($CURRENT_REF)."
+
       - name: Checkout code (full history + tags)
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -30,10 +45,11 @@ jobs:
       # final tag cũng không thể golive nếu không được phép.
       # ============================================================
       - name: Gate - Chỉ người được phép mới golive
+        env:
+          ALLOWED: ${{ env.ALLOWED_GOLIVE_ACTORS }}
+          ACTOR: ${{ github.actor }}
         run: |
-          ALLOWED="${{ env.ALLOWED_GOLIVE_ACTORS }}"
-          ACTOR="${{ github.actor }}"
-          if ! echo "$ALLOWED" | tr ' ' '\n' | grep -qx "$ACTOR"; then
+          if ! printf '%s\n' "$ALLOWED" | tr ' ' '\n' | grep -qxF -- "$ACTOR"; then
             echo "❌ LỖI: '$ACTOR' không nằm trong danh sách được phép golive."
             echo "reason=Không phải người được phép golive" >> "$GITHUB_OUTPUT"
             exit 1
@@ -41,16 +57,16 @@ jobs:
           echo "✅ OK: '$ACTOR' được phép golive."
 
       - name: Verify tag contains last deployed tag
+        env:
+          CURRENT_TAG: ${{ github.ref_name }}
+          MARKER_TAG: ${{ env.DEPLOYED_TAG_MARKER }}
         run: |
-          CURRENT_TAG="${{ github.ref_name }}"
-          MARKER_TAG="${{ env.DEPLOYED_TAG_MARKER }}"
-
           echo "Tag đang golive: $CURRENT_TAG"
 
           if git rev-parse "$MARKER_TAG" >/dev/null 2>&1; then
             echo "Tìm thấy tag đánh dấu lần golive trước: $MARKER_TAG"
 
-            if git merge-base --is-ancestor "$MARKER_TAG" "$CURRENT_TAG"; then
+            if git merge-base --is-ancestor -- "$MARKER_TAG" "refs/tags/$CURRENT_TAG"; then
               echo "✅ OK: $CURRENT_TAG chứa đầy đủ code của $MARKER_TAG."
             else
               echo "❌ LỖI: $CURRENT_TAG KHÔNG chứa code của lần golive trước ($MARKER_TAG)."
@@ -63,27 +79,79 @@ jobs:
 
       - name: Notify - Go-live starting
         if: success()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TAG: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          NOW=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          PAYLOAD=$(jq -n \
+            --arg tag "$TAG" \
+            --arg actor "$ACTOR" \
+            --arg now "$NOW" \
+            --arg run_url "$RUN_URL" \
+            '{embeds:[{
+              "title": "🚀 Go-Live bắt đầu",
+              "color": 3447003,
+              "fields": [
+                {"name": "Tag", "value": $tag, "inline": true},
+                {"name": "Người thực hiện", "value": $actor, "inline": true},
+                {"name": "Thời gian", "value": $now, "inline": false},
+                {"name": "Chi tiết", "value": ("[Xem run trên GitHub Actions](" + $run_url + ")"), "inline": false}
+              ]
+            }]}')
           curl -s -H "Content-Type: application/json" -X POST \
-            -d "{
-              \"embeds\": [{
-                \"title\": \"🚀 Go-Live bắt đầu\",
-                \"color\": 3447003,
-                \"fields\": [
-                  {\"name\": \"Tag\", \"value\": \"${{ github.ref_name }}\", \"inline\": true},
-                  {\"name\": \"Người thực hiện\", \"value\": \"${{ github.actor }}\", \"inline\": true},
-                  {\"name\": \"Thời gian\", \"value\": \"$(date -u '+%Y-%m-%d %H:%M:%S UTC')\", \"inline\": false},
-                  {\"name\": \"Chi tiết\", \"value\": \"[Xem run trên GitHub Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
-                ]
-              }]
-            }" \
-            "${{ secrets.DISCORD_WEBHOOK_URL }}"
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"
 
   # ============================================================
-  # JOB 2: Build & Deploy lên Vercel + cập nhật tag đánh dấu
+  # JOB 2: Build & Deploy lên Vercel
   # ============================================================
   deploy-production:
     needs: check-tag
+    runs-on: ubuntu-latest
+    environment: production
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@66.6.0
+
+      - name: Pull Vercel Environment Info
+        run: vercel pull --yes --environment=production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build Project Artifacts (Production)
+        run: vercel build --prod
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel (Production)
+        run: vercel deploy --prebuilt --prod
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # ============================================================
+  # JOB 3: Cập nhật tag đánh dấu đã golive
+  # ============================================================
+  move-marker:
+    needs: [check-tag, deploy-production]
     runs-on: ubuntu-latest
     environment: production
 
@@ -92,93 +160,104 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel
-
-      - name: Pull Vercel Environment Info
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
-      - name: Build Project Artifacts (Production)
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
-      - name: Deploy to Vercel (Production)
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
       # Di chuyển tag đánh dấu "đã golive" tới tag vừa deploy thành công.
       - name: Move deployed-production marker tag
+        env:
+          MARKER_TAG: ${{ env.DEPLOYED_TAG_MARKER }}
+          CURRENT_TAG: ${{ github.ref_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git tag -f "${{ env.DEPLOYED_TAG_MARKER }}" "${{ github.ref_name }}"
-          git push origin "${{ env.DEPLOYED_TAG_MARKER }}" --force
+          git tag -f "$MARKER_TAG" "refs/tags/$CURRENT_TAG"
+          git push origin "$MARKER_TAG" --force
 
       - name: Notify - Go-live done
         if: success()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TAG: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          NOW=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          PAYLOAD=$(jq -n \
+            --arg tag "$TAG" \
+            --arg actor "$ACTOR" \
+            --arg now "$NOW" \
+            --arg run_url "$RUN_URL" \
+            '{embeds:[{
+              "title": "✅ Go-Live hoàn tất",
+              "color": 3066993,
+              "fields": [
+                {"name": "Tag", "value": $tag, "inline": true},
+                {"name": "Người thực hiện", "value": $actor, "inline": true},
+                {"name": "Thời gian", "value": $now, "inline": false},
+                {"name": "Chi tiết", "value": ("[Xem run trên GitHub Actions](" + $run_url + ")"), "inline": false}
+              ]
+            }]}')
           curl -s -H "Content-Type: application/json" -X POST \
-            -d "{
-              \"embeds\": [{
-                \"title\": \"✅ Go-Live hoàn tất\",
-                \"color\": 3066993,
-                \"fields\": [
-                  {\"name\": \"Tag\", \"value\": \"${{ github.ref_name }}\", \"inline\": true},
-                  {\"name\": \"Người thực hiện\", \"value\": \"${{ github.actor }}\", \"inline\": true},
-                  {\"name\": \"Thời gian\", \"value\": \"$(date -u '+%Y-%m-%d %H:%M:%S UTC')\", \"inline\": false},
-                  {\"name\": \"Chi tiết\", \"value\": \"[Xem run trên GitHub Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
-                ]
-              }]
-            }" \
-            "${{ secrets.DISCORD_WEBHOOK_URL }}"
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"
 
   # ============================================================
-  # JOB 3: Thông báo thất bại - chạy nếu bất kỳ job nào ở trên fail
+  # JOB 4: Thông báo thất bại - chạy nếu bất kỳ job nào ở trên fail
   # ============================================================
   notify-failure:
-    needs: [check-tag, deploy-production]
+    needs: [check-tag, deploy-production, move-marker]
     if: failure()
     runs-on: ubuntu-latest
     environment: production
+    permissions: {}
     steps:
       - name: Determine failed job
         id: fail-info
+        env:
+          CHECK_TAG_RESULT: ${{ needs.check-tag.result }}
+          DEPLOY_RESULT: ${{ needs.deploy-production.result }}
+          MOVE_MARKER_RESULT: ${{ needs.move-marker.result }}
         run: |
-          if [ "${{ needs.check-tag.result }}" == "failure" ]; then
+          if [ "$CHECK_TAG_RESULT" = "failure" ]; then
             echo "job=check-tag (gates: người được phép golive + tag v* + ancestor)" >> "$GITHUB_OUTPUT"
-          elif [ "${{ needs.deploy-production.result }}" == "failure" ]; then
+          elif [ "$DEPLOY_RESULT" = "failure" ]; then
             echo "job=deploy-production (build/deploy Vercel)" >> "$GITHUB_OUTPUT"
+          elif [ "$MOVE_MARKER_RESULT" = "failure" ]; then
+            echo "job=move-marker (cập nhật tag deployed-production)" >> "$GITHUB_OUTPUT"
           else
             echo "job=không xác định" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Notify - Go-live failed
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TAG: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          FAILED_JOB: ${{ steps.fail-info.outputs.job }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          NOW=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          PAYLOAD=$(jq -n \
+            --arg tag "$TAG" \
+            --arg actor "$ACTOR" \
+            --arg failed_job "$FAILED_JOB" \
+            --arg now "$NOW" \
+            --arg run_url "$RUN_URL" \
+            '{embeds:[{
+              "title": "❌ Go-Live thất bại",
+              "color": 15158332,
+              "fields": [
+                {"name": "Tag", "value": $tag, "inline": true},
+                {"name": "Người thực hiện", "value": $actor, "inline": true},
+                {"name": "Bước lỗi", "value": $failed_job, "inline": false},
+                {"name": "Thời gian", "value": $now, "inline": false},
+                {"name": "Chi tiết", "value": ("[Xem log lỗi trên GitHub Actions](" + $run_url + ")"), "inline": false}
+              ]
+            }]}')
           curl -s -H "Content-Type: application/json" -X POST \
-            -d "{
-              \"embeds\": [{
-                \"title\": \"❌ Go-Live thất bại\",
-                \"color\": 15158332,
-                \"fields\": [
-                  {\"name\": \"Tag\", \"value\": \"${{ github.ref_name }}\", \"inline\": true},
-                  {\"name\": \"Người thực hiện\", \"value\": \"${{ github.actor }}\", \"inline\": true},
-                  {\"name\": \"Bước lỗi\", \"value\": \"${{ steps.fail-info.outputs.job }}\", \"inline\": false},
-                  {\"name\": \"Thời gian\", \"value\": \"$(date -u '+%Y-%m-%d %H:%M:%S UTC')\", \"inline\": false},
-                  {\"name\": \"Chi tiết\", \"value\": \"[Xem log lỗi trên GitHub Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
-                ]
-              }]
-            }" \
-            "${{ secrets.DISCORD_WEBHOOK_URL }}"
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"

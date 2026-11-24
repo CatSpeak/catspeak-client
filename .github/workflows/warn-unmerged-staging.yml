@@ -5,6 +5,8 @@ on:
     tags:
       - "v**"
 
+permissions: {}
+
 jobs:
   warn-unmerged:
     runs-on: ubuntu-latest
@@ -15,7 +17,7 @@ jobs:
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
       - name: Checkout code (full history + tags)
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -28,10 +30,10 @@ jobs:
       # --no-merges: bỏ qua merge commit, chỉ list commit thật sự.
       - name: Liệt kê commit chưa có trên staging
         id: list
+        env:
+          TAG: ${{ github.ref_name }}
         run: |
-          TAG="${{ github.ref_name }}"
-
-          git log "$TAG" --no-merges --not origin/staging \
+          git log "refs/tags/$TAG" --no-merges --not origin/staging \
             --pretty="%h %s" > commit-list.txt
 
           COUNT=$(wc -l < commit-list.txt | tr -d ' ')
@@ -45,6 +47,8 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
           COUNT: ${{ steps.list.outputs.count }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # Hiện tối đa 10 commit, phần còn lại gộp thành 1 dòng
           SHOWN=$(head -10 commit-list.txt | sed 's/^/`/; s/$/`/')
@@ -59,9 +63,9 @@ jobs:
           PAYLOAD=$(jq -n \
             --arg tag "$TAG" \
             --arg count "$COUNT" \
-            --arg actor "${{ github.actor }}" \
+            --arg actor "$ACTOR" \
             --arg shown "$SHOWN" \
-            --arg run "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --arg run "$RUN_URL" \
             '{embeds:[{
               "title": ("⚠️ " + $tag + ": " + $count + " commit CHƯA vào staging"),
               "color": 15158332,
@@ -76,7 +80,7 @@ jobs:
 
           curl -s -H "Content-Type: application/json" -X POST \
             -d "$PAYLOAD" \
-            "${{ secrets.DISCORD_WEBHOOK_URL }}"
+            "$DISCORD_WEBHOOK_URL"
 
       # Đánh dấu job là FAILED khi còn commit chưa vào staging để:
       #   - Dễ nhìn thấy trên Actions UI / status của tag.
@@ -84,8 +88,10 @@ jobs:
       # (Lưu ý: đây KHÔNG chặn golive, production.yml mới là nơi quyết định.)
       - name: Đánh dấu job failed khi còn commit chưa vào staging
         if: steps.list.outputs.count != '0'
+        env:
+          TAG: ${{ github.ref_name }}
+          COUNT: ${{ steps.list.outputs.count }}
         run: |
-          COUNT="${{ steps.list.outputs.count }}"
-          echo "❌ Tag ${{ github.ref_name }} có $COUNT commit chưa có trên staging."
+          echo "❌ Tag $TAG có $COUNT commit chưa có trên staging."
           echo "Merge lên staging rồi re-run job này nếu cần."
           exit 1
