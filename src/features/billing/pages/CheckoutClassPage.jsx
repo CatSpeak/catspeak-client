@@ -28,6 +28,7 @@ import {
 import { calculateVoucherDiscount } from "../utils/checkoutUtils";
 import { getLocalizedLanguageName } from "@/features/courses/data/courseFormOptions";
 import { BILLING_ERROR_CODE, VOUCHER_CODE_PREFIX } from "../utils/billingErrorCodes";
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock";
 
 const EMPTY_VOUCHER_DATA = {
   availableVouchers: [],
@@ -256,6 +257,7 @@ const CheckoutClassPage = () => {
   };
 
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
+  const { runLocked } = useSubmitLock();
 
   const getErrorMessage = (code, fallback) => {
     if (!code) return fallback;
@@ -264,88 +266,95 @@ const CheckoutClassPage = () => {
   };
 
   const handleCheckout = async (confirmScheduleConflict = false) => {
-    try {
-      const subtotal = classData.unitPrice * learners.length;
-      const expectedTotalDiscountVnd = selectedVouchers.reduce(
-        (sum, v) => sum + calculateVoucherDiscount(v, subtotal),
-        0,
-      );
-
-      const result = await checkout({
-        paymentType: "ClassEnrollment",
-        classId: Number(classId),
-        voucherIds: selectedVouchers.map((v) => Number(v.voucherId || v.id)),
-        learnerAccountIds: learners
-          .filter((l) => !l.isPayer)
-          .map((l) => Number(l.id)),
-        expectedTotalDiscountVnd,
-        confirmScheduleConflict,
-        pendingClassData: "",
-        returnUrl: `${window.location.origin}/workspace/learning/class/${classId}`,
-        cancelUrl: window.location.origin + window.location.pathname,
-        planId: 0,
-      }).unwrap();
-
-      const resultPayload =
-        result &&
-        typeof result === "object" &&
-        !Array.isArray(result) &&
-        Object.prototype.hasOwnProperty.call(result, "data")
-          ? result.data
-          : result;
-
-      if (resultPayload?.checkoutUrl) {
-        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl);
-        if (!checkoutUrl) throw new Error("Invalid checkout URL");
-        toast.success(
-          tc.redirecting || "Đang chuyển hướng đến trang thanh toán...",
+    await runLocked(async () => {
+      try {
+        const subtotal = classData.unitPrice * learners.length;
+        const expectedTotalDiscountVnd = selectedVouchers.reduce(
+          (sum, v) => sum + calculateVoucherDiscount(v, subtotal),
+          0,
         );
-        window.location.assign(checkoutUrl);
-      } else {
-        toast.success(tc.paymentSuccess);
-        navigate(`/workspace/learning/class/${classId}`);
-      }
-    } catch (error) {
-      const status = error?.status ?? error?.originalStatus;
-      const responseData = error?.data?.data || error?.data || {};
-      const errorCode = responseData.errorCode || responseData.error;
-      const errMsg = responseData.message || error?.error || tc.paymentError;
+        const idempotencyKey =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-      if (
-        status === 409 ||
-        errorCode === BILLING_ERROR_CODE.scheduleConflict
-      ) {
-        const rawNames = responseData.conflictingClassNames;
-        const names = Array.isArray(rawNames)
-          ? rawNames.filter(Boolean)
-          : [];
-        setConflictClasses({ names });
-        return;
-      }
+        const result = await checkout({
+          idempotencyKey,
+          paymentType: "ClassEnrollment",
+          classId: Number(classId),
+          voucherIds: selectedVouchers.map((v) => Number(v.voucherId || v.id)),
+          learnerAccountIds: learners
+            .filter((l) => !l.isPayer)
+            .map((l) => Number(l.id)),
+          expectedTotalDiscountVnd,
+          confirmScheduleConflict,
+          pendingClassData: "",
+          returnUrl: `${window.location.origin}/workspace/learning/class/${classId}`,
+          cancelUrl: window.location.origin + window.location.pathname,
+          planId: 0,
+        }).unwrap();
 
-      if (errorCode === BILLING_ERROR_CODE.voucherUnavailable) {
-        const codeMatch = errMsg.match(new RegExp(`${VOUCHER_CODE_PREFIX}([^|]+)`));
-        const voucherCode = codeMatch ? codeMatch[1] : "";
+        const resultPayload =
+          result &&
+          typeof result === "object" &&
+          !Array.isArray(result) &&
+          Object.prototype.hasOwnProperty.call(result, "data")
+            ? result.data
+            : result;
 
-        if (voucherCode) {
-          setSelectedVouchers((prev) =>
-            prev.filter((v) => v.code !== voucherCode),
+        if (resultPayload?.checkoutUrl) {
+          const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl);
+          if (!checkoutUrl) throw new Error("Invalid checkout URL");
+          toast.success(
+            tc.redirecting || "Đang chuyển hướng đến trang thanh toán...",
           );
-          const localizedMsg = getErrorMessage(
-            errorCode,
-            tc.voucherUnavailable,
-          );
-          toast.error(localizedMsg.replace("{{code}}", voucherCode));
+          window.location.assign(checkoutUrl);
+        } else {
+          toast.success(tc.paymentSuccess);
+          navigate(`/workspace/learning/class/${classId}`);
+        }
+      } catch (error) {
+        const status = error?.status ?? error?.originalStatus;
+        const responseData = error?.data?.data || error?.data || {};
+        const errorCode = responseData.errorCode || responseData.error;
+        const errMsg = responseData.message || error?.error || tc.paymentError;
+
+        if (
+          status === 409 ||
+          errorCode === BILLING_ERROR_CODE.scheduleConflict
+        ) {
+          const rawNames = responseData.conflictingClassNames;
+          const names = Array.isArray(rawNames)
+            ? rawNames.filter(Boolean)
+            : [];
+          setConflictClasses({ names });
+          return;
+        }
+
+        if (errorCode === BILLING_ERROR_CODE.voucherUnavailable) {
+          const codeMatch = errMsg.match(new RegExp(`${VOUCHER_CODE_PREFIX}([^|]+)`));
+          const voucherCode = codeMatch ? codeMatch[1] : "";
+
+          if (voucherCode) {
+            setSelectedVouchers((prev) =>
+              prev.filter((v) => v.code !== voucherCode),
+            );
+            const localizedMsg = getErrorMessage(
+              errorCode,
+              tc.voucherUnavailable,
+            );
+            toast.error(localizedMsg.replace("{{code}}", voucherCode));
+          } else {
+            toast.error(getErrorMessage(errorCode, errMsg));
+          }
+        } else if (errorCode === BILLING_ERROR_CODE.voucherDiscountChanged) {
+          toast.error(getErrorMessage(errorCode, errMsg));
+          refetchVouchers();
         } else {
           toast.error(getErrorMessage(errorCode, errMsg));
         }
-      } else if (errorCode === BILLING_ERROR_CODE.voucherDiscountChanged) {
-        toast.error(getErrorMessage(errorCode, errMsg));
-        refetchVouchers();
-      } else {
-        toast.error(getErrorMessage(errorCode, errMsg));
       }
-    }
+    });
   };
 
   if (isLoadingClass) {

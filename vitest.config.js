@@ -15,6 +15,12 @@ export default defineConfig({
   },
   test: {
     include: [
+      "src/shared/**/*.test.{js,jsx}",
+      "src/store/**/*.test.{js,jsx}",
+      "src/features/auth/pages/**/*.test.{js,jsx}",
+      "src/features/news/components/**/*.test.{js,jsx}",
+      "src/features/video-call/utils/moderationAuth.test.js",
+      "src/features/chat-assistant/**/*.test.{js,jsx}",
       "src/features/placement-test/**/*.test.{js,jsx}",
       "src/features/ai-tutor/**/*.test.{js,jsx}",
       "src/features/learning-path/**/*.test.{js,jsx}",

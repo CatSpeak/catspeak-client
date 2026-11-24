@@ -86,7 +86,7 @@ const CommentInput = ({ onSubmit }) => {
         `}</style>
         <div className="bg-[#F3F4F5] dark:bg-[#222222] w-full rounded-t-[20px]">
           <Editor
-            tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+            tinymceScriptSrc="/tinymce/tinymce.min.js"
             value={value}
             onInit={(_evt, editor) => { editorRef.current = editor }}
             onEditorChange={handleEditorChange}

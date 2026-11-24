@@ -4,6 +4,7 @@ import { useSelector } from "react-redux"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { selectCurrentUser } from "@/store/slices/authSlice"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
 import {
   useGetPointsOverviewQuery,
   useGetPointsHistoryQuery,
@@ -62,7 +63,6 @@ export const formatDateOnly = (isoString) => {
 }
 
 const EMPTY_ARRAY = []
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const usePointsAndOffers = () => {
   const { t } = useLanguage()
@@ -176,6 +176,7 @@ export const usePointsAndOffers = () => {
   }, [inventoryData, vaultSubTab])
 
   const [redeemVoucherMutation] = useRedeemVoucherMutation()
+  const { runLocked: runExchangeLocked } = useSubmitLock()
 
   // ─── Computed Domain States ────────────────────────────────────────
   const userPoints = useMemo(() => {
@@ -382,21 +383,22 @@ export const usePointsAndOffers = () => {
   const handleConfirmExchange = useCallback(async () => {
     if (!selectedVoucher || isProcessingExchange) return
 
-    const templateId = selectedVoucher.templateId || selectedVoucher.id
-    setModalStep(MODAL_STEPS.PROCESSING)
-    setIsProcessingExchange(true)
-    setTechnicalErrorCode(null)
+    await runExchangeLocked(async () => {
+      const templateId = selectedVoucher.templateId || selectedVoucher.id
+      const idempotencyKey =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-    const maxRetries = 3
-    let attempt = 0
-    let isSuccessful = false
-    let lastError = null
+      setModalStep(MODAL_STEPS.PROCESSING)
+      setIsProcessingExchange(true)
+      setTechnicalErrorCode(null)
 
-    while (attempt < maxRetries && !isSuccessful) {
-      attempt += 1
       try {
-        const response = await redeemVoucherMutation(templateId).unwrap()
-        isSuccessful = true
+        const response = await redeemVoucherMutation({
+          templateId,
+          idempotencyKey,
+        }).unwrap()
 
         const newVoucher = {
           id: response?.voucherId || `vault-${Date.now()}`,
@@ -405,7 +407,8 @@ export const usePointsAndOffers = () => {
           title: response?.name || selectedVoucher.title,
           name: response?.name || selectedVoucher.title,
           discountType: response?.discountType || selectedVoucher.discountType,
-          discountValue: response?.discountValue || selectedVoucher.discountValue,
+          discountValue:
+            response?.discountValue || selectedVoucher.discountValue,
           discountTag:
             response?.discountType === "Percentage"
               ? `${response?.discountValue}%`
@@ -413,67 +416,65 @@ export const usePointsAndOffers = () => {
                 ? `${response?.discountValue / 1000}k`
                 : `${response?.discountValue}đ`,
           status: (response?.status || "Unused").toLowerCase(),
-          expiryDate: formatDateOnly(response?.expiresAt) || selectedVoucher.expiryDate,
+          expiryDate:
+            formatDateOnly(response?.expiresAt) || selectedVoucher.expiryDate,
           expiresAt: response?.expiresAt,
           badge: pt.vault?.item?.badgeUnused || "Chưa dùng",
-          description: selectedVoucher.description || selectedVoucher.conditions,
+          description:
+            selectedVoucher.description || selectedVoucher.conditions,
         }
 
         setNewlyRedeemedVoucher(newVoucher)
         setModalStep(MODAL_STEPS.SUCCESS)
-        toast.success(ts.redeemSuccess || "Đổi voucher thành công!", { duration: 2000 })
-        break
+        toast.success(ts.redeemSuccess || "Đổi voucher thành công!", {
+          duration: 2000,
+        })
       } catch (err) {
-        lastError = err
         const status = err?.status || err?.originalStatus
-        const isBusinessError = typeof status === "number" && status >= 400 && status < 500
+        const errorMessage =
+          err?.data?.message || err?.data?.title || err?.message || ""
 
-        // If it's a 4xx business error, don't retry
-        if (isBusinessError) {
-          break
+        // 1. Out of stock
+        if (
+          errorMessage.toLowerCase().includes("out of stock") ||
+          errorMessage.toLowerCase().includes("hết lượt") ||
+          errorMessage.toLowerCase().includes("hết hàng")
+        ) {
+          setModalStep(MODAL_STEPS.ERROR_OUT_OF_STOCK)
+          return
         }
 
-        // If network/5xx error and retries remain, wait 2s
-        if (attempt < maxRetries) {
-          console.warn(`[RedeemVoucher] Attempt ${attempt} failed, retrying in 2s...`, err)
-          await sleep(2000)
+        // 2. Business / duplicate conflict error (4xx)
+        if (typeof status === "number" && status >= 400 && status < 500) {
+          setModalStep(MODAL_STEPS.NONE)
+          setSelectedVoucher(null)
+          toast.error(
+            errorMessage ||
+              ts.cannotRedeemNow ||
+              "Không thể đổi voucher vào lúc này.",
+          )
+          return
         }
+
+        // 3. Network or Server error
+        const userId = currentUser?.id || currentUser?.accountId || "GUEST"
+        const timestamp = Math.floor(Date.now() / 1000)
+        const errCode = `ERR-${timestamp}-${userId}`
+        setTechnicalErrorCode(errCode)
+        setModalStep(MODAL_STEPS.ERROR_NETWORK)
+      } finally {
+        setIsProcessingExchange(false)
       }
-    }
-
-    setIsProcessingExchange(false)
-
-    if (!isSuccessful) {
-      const status = lastError?.status || lastError?.originalStatus
-      const errorMessage =
-        lastError?.data?.message || lastError?.data?.title || lastError?.message || ""
-
-      // 1. Out of stock
-      if (
-        errorMessage.toLowerCase().includes("out of stock") ||
-        errorMessage.toLowerCase().includes("hết lượt") ||
-        errorMessage.toLowerCase().includes("hết hàng")
-      ) {
-        setModalStep(MODAL_STEPS.ERROR_OUT_OF_STOCK)
-        return
-      }
-
-      // 2. Business error (4xx)
-      if (typeof status === "number" && status >= 400 && status < 500) {
-        setModalStep(MODAL_STEPS.NONE)
-        setSelectedVoucher(null)
-        toast.error(errorMessage || ts.cannotRedeemNow || "Không thể đổi voucher vào lúc này.")
-        return
-      }
-
-      // 3. Network or Server error after retries
-      const userId = currentUser?.id || currentUser?.accountId || "GUEST"
-      const timestamp = Math.floor(Date.now() / 1000)
-      const errCode = `ERR-${timestamp}-${userId}`
-      setTechnicalErrorCode(errCode)
-      setModalStep(MODAL_STEPS.ERROR_NETWORK)
-    }
-  }, [selectedVoucher, isProcessingExchange, redeemVoucherMutation, currentUser, ts, pt])
+    })
+  }, [
+    selectedVoucher,
+    isProcessingExchange,
+    runExchangeLocked,
+    redeemVoucherMutation,
+    currentUser,
+    ts,
+    pt,
+  ])
 
   const handleCopyCode = useCallback((code) => {
     if (!code) return

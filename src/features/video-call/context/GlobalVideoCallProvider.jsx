@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react"
+import React, { createContext, useContext, useState, useEffect, useMemo, lazy, Suspense } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
@@ -14,9 +14,10 @@ import {
   getUserPref,
   setUserPref,
 } from "@/features/video-call/utils/userPreferences"
-import GlobalCallContent from "./GlobalCallContent"
 import { useVideoCallAuthHeartbeat } from "@/features/video-call/hooks/useVideoCallAuthHeartbeat"
 import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantList"
+
+const GlobalCallContent = lazy(() => import("./GlobalCallContent"))
 
 const PREF_KEYS = {
   RECEIVE_SYSTEM_MSGS: "receiveSystemMsgs",
@@ -210,9 +211,9 @@ const IdleCallContent = ({
   setSpeakingAssistantEnabled,
   joinLeaveSound,
   setJoinLeaveSound,
-}) => (
-  <GlobalVideoCallContext.Provider
-    value={{
+}) => {
+  const value = useMemo(
+    () => ({
       ...IDLE_VALUE,
       receiveSystemMsgs,
       setReceiveSystemMsgs,
@@ -220,11 +221,23 @@ const IdleCallContent = ({
       setSpeakingAssistantEnabled,
       joinLeaveSound,
       setJoinLeaveSound,
-    }}
-  >
-    {children}
-  </GlobalVideoCallContext.Provider>
-)
+    }),
+    [
+      receiveSystemMsgs,
+      setReceiveSystemMsgs,
+      speakingAssistantEnabled,
+      setSpeakingAssistantEnabled,
+      joinLeaveSound,
+      setJoinLeaveSound,
+    ],
+  )
+
+  return (
+    <GlobalVideoCallContext.Provider value={value}>
+      {children}
+    </GlobalVideoCallContext.Provider>
+  )
+}
 
 // --- Main Provider ----------------------------------------------------------
 
@@ -350,18 +363,20 @@ export const GlobalVideoCallProvider = ({ children }) => {
         })
       }}
     >
-      <GlobalCallContent
-        ContextProvider={GlobalVideoCallContext.Provider}
-        receiveSystemMsgs={receiveSystemMsgs}
-        setReceiveSystemMsgs={setReceiveSystemMsgs}
-        joinLeaveSound={joinLeaveSound}
-        setJoinLeaveSound={setJoinLeaveSound}
-        panelState={panelState}
-        speakingAssistantEnabled={speakingAssistantEnabled}
-        setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
-      >
-        {children}
-      </GlobalCallContent>
+      <Suspense fallback={children}>
+        <GlobalCallContent
+          ContextProvider={GlobalVideoCallContext.Provider}
+          receiveSystemMsgs={receiveSystemMsgs}
+          setReceiveSystemMsgs={setReceiveSystemMsgs}
+          joinLeaveSound={joinLeaveSound}
+          setJoinLeaveSound={setJoinLeaveSound}
+          panelState={panelState}
+          speakingAssistantEnabled={speakingAssistantEnabled}
+          setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
+        >
+          {children}
+        </GlobalCallContent>
+      </Suspense>
     </LiveKitRoom>
   )
 }

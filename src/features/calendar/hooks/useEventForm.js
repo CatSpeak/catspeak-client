@@ -21,6 +21,7 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { TIMEZONE_IDS, getTimezoneOptions } from "@/shared/constants/timezones";
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock";
 
 const DEFAULT_TIMEZONE = {
   id: "Asia/Ho_Chi_Minh",
@@ -50,6 +51,7 @@ export const useEventForm = (
     useUpdateEventOccurrenceMutation();
   const isLoading =
     isCreating || isUpdating || isUpdatingSeries || isUpdatingOccurrence;
+  const { runLocked } = useSubmitLock();
 
   // Evaluate initial values once
   const initialTitle = editEvent?.title || "";
@@ -143,9 +145,11 @@ export const useEventForm = (
     }
 
     const num = Number(val);
-    if (!isNaN(num)) {
-      if (num < 1) setMaxParticipantsState(1);
-      else setMaxParticipantsState(num);
+    if (!Number.isNaN(num) && Number.isFinite(num)) {
+      const normalized = Math.trunc(num);
+      if (normalized < 1) setMaxParticipantsState(1);
+      else if (normalized > 10000) setMaxParticipantsState(10000);
+      else setMaxParticipantsState(normalized);
     }
   };
 
@@ -208,113 +212,127 @@ export const useEventForm = (
   const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e, isDraft = false) => {
-    console.log("Submit clicked");
     e?.preventDefault();
-    console.log({
-      title,
-      description,
-      countryId,
-      cityId,
-      eventLocation,
-      maxParticipants,
-      startTime,
-      endTime,
+    await runLocked(async () => {
+      const newErrors = {};
+
+      if (!isDraft) {
+        if (!title.trim())
+          newErrors.title =
+            t.validation?.calendar?.titleRequired || "Thiếu tiêu đề";
+        if (!isOnline && !countryId)
+          newErrors.countryId =
+            t.validation?.calendar?.countryRequired || "Đất nước là bắt buộc";
+        if (!isOnline && !cityId)
+          newErrors.cityId =
+            t.validation?.calendar?.cityRequired || "Thành phố là bắt buộc";
+        if (!eventLocation.trim())
+          newErrors.eventLocation =
+            t.validation?.calendar?.locationRequired || "Địa điểm là bắt buộc";
+        if (isOnline && !isValidMeetingUrl(eventLocation))
+          newErrors.eventLocation = t.calendar.onlineLinkInvalid;
+        if (
+          !maxParticipants ||
+          !Number.isFinite(Number(maxParticipants)) ||
+          Number(maxParticipants) <= 0
+        ) {
+          newErrors.maxParticipants =
+            t.validation?.calendar?.maxParticipantsRequired ||
+            "Số lượng cần lớn hơn 0";
+        }
+        if (ticketPrice !== null && ticketPrice !== "") {
+          const parsedPrice = Number(ticketPrice);
+          if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+            newErrors.ticketPrice =
+              t.validation?.calendar?.invalidTicketPrice ||
+              "Giá vé không hợp lệ";
+          }
+        }
+        if (recurrenceOption && recurrenceOption !== "NONE") {
+          const parsedInterval = Number(recurrenceInterval);
+          if (!Number.isFinite(parsedInterval) || parsedInterval < 1) {
+            newErrors.recurrenceInterval =
+              t.validation?.calendar?.invalidRecurrenceInterval ||
+              "Chu kỳ lặp phải lớn hơn 0";
+          }
+          if (recurrenceEndType === "COUNT") {
+            const parsedCount = Number(occurrenceCount);
+            if (
+              !Number.isFinite(parsedCount) ||
+              parsedCount < 1 ||
+              parsedCount > 24
+            ) {
+              newErrors.occurrenceCount =
+                t.validation?.calendar?.invalidOccurrenceCount ||
+                "Số lần lặp phải từ 1 đến 24";
+            }
+          }
+        }
+
+        if (!startTime)
+          newErrors.startTime = "Vui lòng chọn thời gian bắt đầu";
+        if (!endTime) newErrors.endTime = "Vui lòng chọn thời gian kết thúc";
+      }
+
+      if (startTime && !editEvent) {
+        if (dayjs(startTime).isBefore(dayjs())) {
+          newErrors.startTime =
+            t.validation?.calendar?.startTimeInPast ||
+            "Thời gian bắt đầu phải sau hiện tại";
+        }
+      }
+
+      if (startTime && endTime) {
+        if (
+          dayjs(endTime).isBefore(dayjs(startTime)) ||
+          dayjs(endTime).isSame(dayjs(startTime))
+        ) {
+          newErrors.endTime =
+            t.calendar?.endTimeBeforeStartTime ||
+            "Thời gian kết thúc phải sau thời gian bắt đầu";
+        }
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        if (onValidationFail) onValidationFail(newErrors);
+        return;
+      }
+      setErrors({});
+      const payload = mapFormToPayload({
+        title,
+        description,
+        eventLocation,
+        countryId,
+        cityId,
+        eventColor,
+        isOnline,
+        maxParticipants,
+        visibility,
+        languageCommunity: community,
+        startTime,
+        endTime,
+        recurrenceOption,
+        recurrenceInterval,
+        selectedDays,
+        recurrenceEndDate,
+        recurrenceEndType,
+        occurrenceCount,
+        selectedTimezone,
+        conditionsInput,
+        ticketPrice,
+        originalStartTime: editEvent?.startTime,
+        originalEndTime: editEvent?.endTime,
+        isDraft,
+      });
+
+      if (onSubmitInterceptor) {
+        onSubmitInterceptor(payload, performSave);
+        return;
+      }
+
+      await performSave(payload, "series");
     });
-    const newErrors = {};
-
-    if (!isDraft) {
-      if (!title.trim())
-        newErrors.title =
-          t.validation?.calendar?.titleRequired || "Thiếu tiêu đề";
-      if (!isOnline && !countryId)
-        newErrors.countryId =
-          t.validation?.calendar?.countryRequired || "Đất nước là bắt buộc";
-      if (!isOnline && !cityId)
-        newErrors.cityId =
-          t.validation?.calendar?.cityRequired || "Thành phố là bắt buộc";
-      if (!eventLocation.trim())
-        newErrors.eventLocation =
-          t.validation?.calendar?.locationRequired || "Địa điểm là bắt buộc";
-      if (isOnline && !isValidMeetingUrl(eventLocation))
-        newErrors.eventLocation = t.calendar.onlineLinkInvalid;
-      // if (!description.trim())
-      //   newErrors.description =
-      //     t.validation?.calendar?.descriptionRequired || "Mô tả là bắt buộc";
-      if (!maxParticipants || Number(maxParticipants) <= 0) {
-        newErrors.maxParticipants =
-          t.validation?.calendar?.maxParticipantsRequired ||
-          "Số lượng cần lớn hơn 0";
-      }
-
-      if (!startTime) newErrors.startTime = "Vui lòng chọn thời gian bắt đầu";
-      if (!endTime) newErrors.endTime = "Vui lòng chọn thời gian kết thúc";
-    }
-
-    if (startTime && !editEvent) {
-      if (dayjs(startTime).isBefore(dayjs())) {
-        newErrors.startTime =
-          t.validation?.calendar?.startTimeInPast ||
-          "Thời gian bắt đầu phải sau hiện tại";
-      }
-    }
-
-    if (startTime && endTime) {
-      if (
-        dayjs(endTime).isBefore(dayjs(startTime)) ||
-        dayjs(endTime).isSame(dayjs(startTime))
-      ) {
-        newErrors.endTime =
-          t.calendar?.endTimeBeforeStartTime ||
-          "Thời gian kết thúc phải sau thời gian bắt đầu";
-      }
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      console.log(newErrors);
-
-      setErrors(newErrors);
-      if (onValidationFail) onValidationFail(newErrors);
-      return;
-    }
-    setErrors({});
-    const payload = mapFormToPayload({
-      title,
-      description,
-      eventLocation,
-      countryId,
-      cityId,
-      eventColor,
-      isOnline,
-      maxParticipants,
-      visibility,
-      languageCommunity: community,
-      startTime,
-      endTime,
-      recurrenceOption,
-      recurrenceInterval,
-      selectedDays,
-      recurrenceEndDate,
-      recurrenceEndType,
-      occurrenceCount,
-      selectedTimezone,
-      conditionsInput,
-      ticketPrice,
-      originalStartTime: editEvent?.startTime,
-      originalEndTime: editEvent?.endTime,
-      isDraft,
-    });
-
-    console.log(
-      "=== CREATING/UPDATING EVENT PAYLOAD ===",
-      JSON.stringify(payload, null, 2),
-    );
-
-    if (onSubmitInterceptor) {
-      onSubmitInterceptor(payload, performSave);
-      return;
-    }
-
-    await performSave(payload, "series");
   };
 
   const performSave = async (payload, choice = "series") => {

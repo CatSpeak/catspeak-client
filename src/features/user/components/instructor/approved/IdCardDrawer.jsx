@@ -4,6 +4,7 @@ import ProfileDrawer from "@/features/user/components/instructor/ProfileDrawer"
 import { useUpdateInstructorIdCardMutation } from "@/store/api/instructorApi"
 import { toast } from "@/shared/utils/toastBridge"
 import { parseApiError } from "@/shared/utils/apiError"
+import { useAuthenticatedMediaUrl } from "@/shared/utils/authenticatedMedia"
 
 const ID_CARD_MAX_BYTES = 5 * 1024 * 1024
 const ID_CARD_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
@@ -68,18 +69,21 @@ const FileThumbnail = ({ file }) => {
   )
 }
 
-const CurrentImage = ({ label, url }) => (
-  <div className="flex min-w-0 flex-1 flex-col gap-1">
-    <span className="text-[11px] text-[#101828]">{label}</span>
-    <div className="flex h-[94px] w-full items-center justify-center overflow-hidden rounded-lg border border-[#D0D5DD] bg-[#F2F4F7]">
-      {url ? (
-        <img src={url} alt={label} className="h-full w-full object-cover" />
-      ) : (
-        <ImageOff size={24} className="text-[#98A2B3]" />
-      )}
+const CurrentImage = ({ label, url }) => {
+  const { url: resolvedUrl } = useAuthenticatedMediaUrl(url)
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <span className="text-[11px] text-[#101828]">{label}</span>
+      <div className="flex h-[94px] w-full items-center justify-center overflow-hidden rounded-lg border border-[#D0D5DD] bg-[#F2F4F7]">
+        {resolvedUrl ? (
+          <img src={resolvedUrl} alt={label} className="h-full w-full object-cover" />
+        ) : (
+          <ImageOff size={24} className="text-[#98A2B3]" />
+        )}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 const IdCardDrawer = ({
   open,

@@ -60,7 +60,7 @@ export const interactiveScriptApi = baseApi.injectEndpoints({
 
     contributeDefinition: builder.mutation({
       query: (body) => ({
-        url: "/student/dictionary/contribute",
+        url: "/interactive-dictionary/contribute",
         method: "POST",
         body,
       }),
@@ -68,7 +68,7 @@ export const interactiveScriptApi = baseApi.injectEndpoints({
 
     reportTranslationError: builder.mutation({
       query: ({ id, ...body }) => ({
-        url: `/student/script/${id}/report`,
+        url: `/interactive-script/${encodeURIComponent(id)}/report`,
         method: "POST",
         body,
       }),

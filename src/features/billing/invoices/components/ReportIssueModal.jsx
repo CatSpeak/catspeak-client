@@ -4,10 +4,19 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { useReportPaymentIssueMutation } from "@/store/api/paymentsApi"
 import { CheckCircle2, UploadCloud } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
+import {
+  SAFE_RASTER_IMAGE_EXTENSIONS,
+  SAFE_RASTER_IMAGE_MIME_TYPES,
+  validateUploadFile,
+} from "@/shared/utils/fileValidation"
+
+const MAX_PROOF_IMAGE_BYTES = 5 * 1024 * 1024
 
 const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
   const { t } = useLanguage()
   const [reportIssue, { isLoading }] = useReportPaymentIssueMutation()
+  const { runLocked } = useSubmitLock()
   const [step, setStep] = useState("form") // form | success
 
   const [explanation, setExplanation] = useState("")
@@ -17,8 +26,19 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0]
     if (!selected) return
-    if (selected.size > 5 * 1024 * 1024) {
-      setError(t.billing?.reportIssueModal?.imageTooLarge || "Ảnh bằng chứng không được vượt quá 5MB.")
+    const validation = validateUploadFile(selected, {
+      allowedExtensions: SAFE_RASTER_IMAGE_EXTENSIONS,
+      allowedMimeTypes: SAFE_RASTER_IMAGE_MIME_TYPES,
+      maxBytes: MAX_PROOF_IMAGE_BYTES,
+    })
+    if (!validation.valid) {
+      setError(
+        validation.reason === "size"
+          ? t.billing?.reportIssueModal?.imageTooLarge ||
+              "Ảnh bằng chứng không được vượt quá 5MB."
+          : t.billing?.reportIssueModal?.invalidImageFormat ||
+              "Chỉ hỗ trợ tệp hình ảnh PNG, JPG hoặc WEBP.",
+      )
       e.target.value = ""
       return
     }
@@ -28,26 +48,28 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!explanation.trim()) {
-      setError(t.billing.reportIssueModal.errorNoExplanation)
-      return
-    }
-
-    try {
-      setError(null)
-      const formData = new FormData()
-      formData.append("PaymentId", paymentId)
-      formData.append("UserExplanation", explanation)
-      if (file) {
-        formData.append("file", file)
+    await runLocked(async () => {
+      if (!explanation.trim()) {
+        setError(t.billing.reportIssueModal.errorNoExplanation)
+        return
       }
 
-      await reportIssue(formData).unwrap()
-      setStep("success")
-    } catch (err) {
-      setError(t.billing.reportIssueModal.errorSubmitFailed)
-      console.error(err)
-    }
+      try {
+        setError(null)
+        const formData = new FormData()
+        formData.append("PaymentId", paymentId)
+        formData.append("UserExplanation", explanation.trim())
+        if (file) {
+          formData.append("file", file)
+        }
+
+        await reportIssue(formData).unwrap()
+        setStep("success")
+      } catch (err) {
+        setError(t.billing.reportIssueModal.errorSubmitFailed)
+        console.error(err)
+      }
+    })
   }
 
   const handleClose = () => {
@@ -145,7 +167,7 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
               <input
                 type="file"
                 className="hidden"
-                accept="image/*"
+                accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
                 onChange={handleFileChange}
                 disabled={isLoading}
               />

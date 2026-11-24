@@ -21,6 +21,7 @@ import MoveMaterialModal from "../components/teaching-material/MoveMaterialModal
 import RenameMaterialModal from "../components/teaching-material/RenameMaterialModal";
 import BulkActionBar from "../components/teaching-material/BulkActionBar";
 import FilePreviewModal from "@/shared/components/ui/FilePreviewModal";
+import { downloadFile } from "../utils/materialUtils";
 import TextInput from "@/shared/components/ui/inputs/TextInput";
 import Dropdown from "@/shared/components/ui/Dropdown";
 import { IconButton, PillButton } from "@/shared/components/ui/buttons";
@@ -635,30 +636,7 @@ const TeachingMaterialPage = () => {
                     }}
                     onBookmark={() => handleBookmark(file, "file")}
                     onDownload={async () => {
-                      if (file.fileUrl) {
-                        recordDownload(file.id);
-                        try {
-                          const response = await fetch(file.fileUrl);
-                          if (!response.ok)
-                            throw new Error("Network response was not ok");
-                          const blob = await response.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const link = document.createElement("a");
-                          link.href = url;
-                          link.download =
-                            file.fileName || file.name || "download";
-                          document.body.appendChild(link);
-                          link.click();
-                          link.remove();
-                          window.URL.revokeObjectURL(url);
-                        } catch (error) {
-                          console.error(
-                            "Download failed, falling back to new tab:",
-                            error,
-                          );
-                          window.open(file.fileUrl, "_blank");
-                        }
-                      }
+                      await downloadFile(file, recordDownload);
                     }}
                   />
                 ))}
@@ -854,24 +832,8 @@ const TeachingMaterialPage = () => {
             return;
           }
 
-          filesToDownload.forEach(async (file) => {
-            recordDownload(file.id);
-            try {
-              const response = await fetch(file.fileUrl);
-              if (!response.ok) throw new Error("Network response was not ok");
-              const blob = await response.blob();
-              const url = window.URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = file.fileName || file.name || "download";
-              document.body.appendChild(link);
-              link.click();
-              link.remove();
-              window.URL.revokeObjectURL(url);
-            } catch (error) {
-              console.error("Download failed, falling back to new tab:", error);
-              window.open(file.fileUrl, "_blank");
-            }
+          filesToDownload.forEach((file) => {
+            downloadFile(file, recordDownload);
           });
 
           toast.success(

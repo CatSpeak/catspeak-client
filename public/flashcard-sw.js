@@ -1,66 +1,63 @@
-/* Bộ đệm offline cho Sổ tay từ vựng (flashcard, CHK-098).
- *
- * Chỉ đăng ký với scope /<lang>/ai-tutor/vocabulary-notebook, nên chỉ điều khiển các
- * trang sổ từ vựng, không đụng phần còn lại của CatSpeak.
- *
- * Luôn ưu tiên mạng (network-first): có mạng thì hành vi y như không có service
- * worker, chỉ lưu thêm một bản sao. Mất mạng thì trả bản đã lưu, để tải lại trang vẫn
- * mở được sổ và báo rõ đang offline thay vì trang trắng. Không bao giờ lưu API.
- */
-const CACHE = "catspeak-flashcard-shell-v1"
+const CACHE_NAME = "catspeak-flashcard-v1"
 const SHELL_KEY = "/__flashcard_shell__"
 
-const OFFLINE_HTML = `<!doctype html><html lang="vi"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Sổ tay từ vựng - offline</title>
-<style>body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#fff;color:#0f172a;
-display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px;text-align:center}
-.b{max-width:380px}h1{font-size:20px;margin:0 0 8px}p{color:#64748b;font-size:14px;line-height:1.5}
-button{margin-top:12px;height:40px;padding:0 24px;border:0;border-radius:999px;background:#990011;color:#fff;
-font-weight:600;font-size:14px;cursor:pointer}</style></head><body><div class="b" role="alert">
-<h1>Bạn đang offline</h1><p>Không tải được Sổ tay từ vựng vì mất kết nối mạng. Kết quả ôn đã lưu trên máy
-vẫn an toàn và sẽ đồng bộ khi có mạng lại.</p><button onclick="location.reload()">Thử lại</button></div></body></html>`
-
-self.addEventListener("install", () => self.skipWaiting())
+self.addEventListener("install", () => {
+  self.skipWaiting()
+})
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    (async () => {
-      const keys = await caches.keys()
-      await Promise.all(keys.filter((k) => k.startsWith("catspeak-flashcard-") && k !== CACHE).map((k) => caches.delete(k)))
-      await self.clients.claim()
-    })(),
+    caches.keys().then((names) =>
+      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n))),
+    ).then(() => self.clients.claim()),
   )
 })
 
-const sameOrigin = (url) => url.origin === self.location.origin
-const isApi = (url) => url.pathname.startsWith("/api")
+function isValidSameOriginPath(rawUrl) {
+  if (typeof rawUrl !== "string") return false
+  const trimmed = rawUrl.trim()
+  if (!trimmed || trimmed.startsWith("//")) return false
+  try {
+    const parsed = new URL(trimmed, self.location.origin)
+    if (parsed.origin !== self.location.origin) return false
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false
+    if (trimmed.includes("..")) return false
+    return true
+  } catch {
+    return false
+  }
+}
 
 async function put(key, response) {
-  if (!response || !response.ok || response.type === "opaque") return
-  const cache = await caches.open(CACHE)
+  const cache = await caches.open(CACHE_NAME)
   await cache.put(key, response)
 }
 
-async function cacheUrls(urls, shellUrl) {
-  const cache = await caches.open(CACHE)
+async function cacheUrls(urls = [], shellUrl) {
+  const safeUrls = Array.isArray(urls)
+    ? urls.filter((url) => isValidSameOriginPath(url))
+    : []
+
   await Promise.all(
-    (urls || []).map(async (u) => {
+    safeUrls.map(async (url) => {
       try {
-        const url = new URL(u, self.location.origin)
-        if (!sameOrigin(url) || isApi(url)) return
-        if (await cache.match(url.href)) return
-        const res = await fetch(url.href, { credentials: "same-origin" })
-        await put(url.href, res)
+        const res = await fetch(url, { mode: "cors", credentials: "omit" })
+        if (res.ok) await put(url, res)
       } catch {
-        // bỏ qua tài nguyên không tải được
+        // mất mạng giữa chừng -> bỏ qua URL này, các URL khác vẫn cache bình thường
       }
     }),
   )
-  if (shellUrl) {
+
+  if (shellUrl && isValidSameOriginPath(shellUrl)) {
     try {
-      const res = await fetch(shellUrl, { credentials: "same-origin", cache: "no-cache" })
+      const targetUrl = new URL(shellUrl, self.location.origin)
+      const res = await fetch(targetUrl.pathname + targetUrl.search, {
+        credentials: "same-origin",
+        cache: "no-cache",
+      })
       if (res.ok) {
-        await put(shellUrl, res.clone())
+        await put(targetUrl.pathname + targetUrl.search, res.clone())
         await put(SHELL_KEY, res)
       }
     } catch {
@@ -70,50 +67,56 @@ async function cacheUrls(urls, shellUrl) {
 }
 
 self.addEventListener("message", (event) => {
+  if (event.origin && event.origin !== self.location.origin) {
+    return
+  }
   const data = event.data || {}
-  if (data.type === "flashcard-cache") event.waitUntil(cacheUrls(data.urls, data.shellUrl))
+  if (data.type === "flashcard-cache") {
+    event.waitUntil(cacheUrls(data.urls, data.shellUrl))
+  }
 })
-
-async function navigate(request) {
-  try {
-    const res = await fetch(request)
-    if (res.ok) {
-      put(request.url, res.clone())
-      put(SHELL_KEY, res.clone())
-    }
-    return res
-  } catch {
-    const cache = await caches.open(CACHE)
-    return (
-      (await cache.match(request.url)) ||
-      (await cache.match(SHELL_KEY)) ||
-      new Response(OFFLINE_HTML, { headers: { "Content-Type": "text/html; charset=utf-8" } })
-    )
-  }
-}
-
-async function asset(request) {
-  try {
-    const res = await fetch(request)
-    if (res.ok) put(request.url, res.clone())
-    return res
-  } catch (err) {
-    const cached = await (await caches.open(CACHE)).match(request.url)
-    if (cached) return cached
-    throw err
-  }
-}
 
 self.addEventListener("fetch", (event) => {
   const { request } = event
   if (request.method !== "GET") return
+
   const url = new URL(request.url)
-  if (!sameOrigin(url) || isApi(url)) return
-  if (request.mode === "navigate") {
-    event.respondWith(navigate(request))
+
+  // Audio hoặc file media cùng/ngoài origin đã được prefetch
+  if (
+    url.pathname.endsWith(".mp3") ||
+    url.pathname.endsWith(".wav") ||
+    url.pathname.endsWith(".ogg") ||
+    url.pathname.endsWith(".m4a")
+  ) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(request.url) || await cache.match(url.pathname)
+        if (cached) return cached
+        const net = await fetch(request)
+        if (net.ok) cache.put(request.url, net.clone())
+        return net
+      }),
+    )
     return
   }
-  if (["script", "style", "font", "image", "worker"].includes(request.destination) || url.pathname.startsWith("/assets/")) {
-    event.respondWith(asset(request))
+
+  // Navigation requests đến flashcard route -> ưu tiên network, rớt mạng thì trả app shell đã cache
+  if (request.mode === "navigate" && url.pathname.includes("/flashcard")) {
+    event.respondWith(
+      fetch(request)
+        .then(async (res) => {
+          if (res.ok) await put(SHELL_KEY, res.clone())
+          return res
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE_NAME)
+          return (
+            (await cache.match(request)) ||
+            (await cache.match(SHELL_KEY)) ||
+            new Response("Offline", { status: 503, statusText: "Offline" })
+          )
+        }),
+    )
   }
 })

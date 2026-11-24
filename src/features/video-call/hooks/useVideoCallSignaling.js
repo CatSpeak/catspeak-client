@@ -128,7 +128,7 @@ export const useVideoCallSignaling = (handlers = {}) => {
       }
     }
     console.warn("[VideoCallSignalR] Cannot invoke, not connected.")
-    return Promise.reject("Not Connected")
+    return Promise.reject(new Error("Not Connected"))
   }, [])
 
   const joinSession = useCallback(

@@ -7,7 +7,9 @@ export const getImageUrl = (url, fallback) => {
     url.startsWith("http://") ||
     url.startsWith("https://") ||
     url.startsWith("data:") ||
-    url.startsWith("blob:")
+    url.startsWith("blob:") ||
+    url.startsWith("/api/") ||
+    url.startsWith("/media/")
   ) {
     return url;
   }

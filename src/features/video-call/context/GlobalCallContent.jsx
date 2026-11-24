@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { selectCurrentToken } from "@/store/slices/authSlice"
 import {
@@ -27,11 +27,6 @@ import {
   parseMetadata,
 } from "@/features/video-call/hooks/useParticipantList"
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
-import {
-  useStartAssistantMutation,
-  useStopAssistantMutation,
-  useGetAssistantStatusQuery,
-} from "@/store/api/assistantApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import { useSavedParticipantVolumes } from "@/features/video-call/hooks/useSavedParticipantVolumes"
@@ -68,6 +63,7 @@ import {
   resolveBlockAllMicsNotice,
   resolveRestrictionNotice,
 } from "@/features/video-call/utils/moderationNotice"
+import { isAuthorizedModerationSender } from "@/features/video-call/utils/moderationAuth"
 import { buildRoomOptions } from "@/features/video-call/utils/roomOptions"
 
 const roomParticipantsList = (draft) =>
@@ -440,77 +436,11 @@ const GlobalCallContent = ({
     callInfo?.sessionId || parseMetadata(localParticipant?.metadata)?.sessionId
   const token = useSelector(selectCurrentToken)
 
-  // ── Speaking Assistant Integration ──
-  const [activeDispatchId, setActiveDispatchId] = useState(null)
-  const [startAssistant] = useStartAssistantMutation()
-  const [stopAssistant] = useStopAssistantMutation()
-
-  const { data: assistantStatus } = useGetAssistantStatusQuery(sessionId, {
-    skip: !sessionId || !isConnected,
-  })
-
+  // Keep speakingAssistantEnabled handler synchronized if toggled in legacy consumers
   useEffect(() => {
-    if (assistantStatus?.dispatchId) {
-      setActiveDispatchId(assistantStatus.dispatchId)
-    }
-  }, [assistantStatus])
-
-  const hasTriggeredInitial = useRef(false)
-  const prevEnabled = useRef(speakingAssistantEnabled)
-
-  useEffect(() => {
-    if (!sessionId || !isConnected) return
-
-    const triggerToggle = async () => {
-      if (speakingAssistantEnabled) {
-        try {
-          const res = await startAssistant({ sessionId }).unwrap()
-          if (res?.dispatchId) {
-            setActiveDispatchId(res.dispatchId)
-          }
-        } catch (err) {
-          console.error("Failed to start speaking assistant:", err)
-          toast.error(
-            err?.data?.message || "Failed to start speaking assistant",
-          )
-          setSpeakingAssistantEnabled(false)
-          prevEnabled.current = false
-        }
-      } else {
-        const dispatchIdToStop = activeDispatchId || assistantStatus?.dispatchId
-        if (dispatchIdToStop) {
-          try {
-            await stopAssistant({
-              sessionId,
-              dispatchId: dispatchIdToStop,
-            }).unwrap()
-            setActiveDispatchId(null)
-          } catch (err) {
-            console.error("Failed to stop speaking assistant:", err)
-            toast.error(
-              err?.data?.message || "Failed to stop speaking assistant",
-            )
-          }
-        }
-      }
-    }
-
-    const isInitialRun = !hasTriggeredInitial.current
-    if (isInitialRun || speakingAssistantEnabled !== prevEnabled.current) {
-      hasTriggeredInitial.current = true
-      prevEnabled.current = speakingAssistantEnabled
-      triggerToggle()
-    }
-  }, [
-    speakingAssistantEnabled,
-    setSpeakingAssistantEnabled,
-    isConnected,
-    sessionId,
-    activeDispatchId,
-    assistantStatus,
-    startAssistant,
-    stopAssistant,
-  ])
+    if (!speakingAssistantEnabled) return
+    setSpeakingAssistantEnabled(false)
+  }, [speakingAssistantEnabled, setSpeakingAssistantEnabled])
 
   const [isRecording, setIsRecording] = useState(false)
   const [egressId, setEgressId] = useState(null)
@@ -923,6 +853,21 @@ const GlobalCallContent = ({
       try {
         const decoded = new TextDecoder().decode(payload)
         const data = JSON.parse(decoded)
+        if (
+          !isAuthorizedModerationSender({
+            participant,
+            data,
+            roomData,
+            liveCoHost,
+          })
+        ) {
+          console.warn("[Moderation] Ignored unauthorized moderation packet", {
+            action: data?.action,
+            senderIdentity: participant?.identity,
+          })
+          return
+        }
+
         const currentAccId =
           user?.accountId != null ? String(user.accountId) : null
         const localIdent =
@@ -1227,7 +1172,19 @@ const GlobalCallContent = ({
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
     }
-  }, [lkRoom, localParticipant, user?.accountId, roomData, actions])
+  }, [
+    lkRoom,
+    localParticipant,
+    user?.accountId,
+    roomData,
+    liveCoHost,
+    actions,
+    currentRoomId,
+    dispatch,
+    isRecording,
+    recordingState,
+    t.rooms?.videoCall?.participantList,
+  ])
 
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
@@ -1273,188 +1230,272 @@ const GlobalCallContent = ({
   })
 
   // ── Context value ──
-  const value = {
-    // Call lifecycle
-    isInCall,
-    isPiP,
-    enterPiP: actions.enterPiP,
-    exitPiP: actions.exitPiP,
-    returnToCall: actions.returnToCall,
-    isPiPSupported: actions.isPiPSupported,
-    showLeaveModal,
-    promptLeaveCall,
-    cancelLeaveCall,
+  const value = useMemo(
+    () => ({
+      // Call lifecycle
+      isInCall,
+      isPiP,
+      enterPiP: actions.enterPiP,
+      exitPiP: actions.exitPiP,
+      returnToCall: actions.returnToCall,
+      isPiPSupported: actions.isPiPSupported,
+      showLeaveModal,
+      promptLeaveCall,
+      cancelLeaveCall,
 
-    // Session
-    id: currentRoomId,
-    sessionId: callInfo?.sessionId || localMetadata?.sessionId,
-    closingRemainingSeconds,
-    navigate: getNavigate(),
-    location: getLocation(),
-    room: roomData,
-    lkRoom,
-    lkRoomName: lkRoom?.name,
-    sessionError: null,
+      // Session
+      id: currentRoomId,
+      sessionId: callInfo?.sessionId || localMetadata?.sessionId,
+      closingRemainingSeconds,
+      navigate: getNavigate(),
+      location: getLocation(),
+      room: roomData,
+      lkRoom,
+      lkRoomName: lkRoom?.name,
+      sessionError: null,
 
-    // Speaking stats
-    speakingStatsMap,
-    speakingParticipantsList,
-    roomTotalDuration,
-    roomTotalStudentDuration,
-    roomTotalDurationMs,
-    roomTotalStudentDurationMs,
-    speakingTeacherDurationMs,
-    speakingTeacherDurationSeconds,
-    speakingTeacherSpeakingPercent,
-    speakingStudentSpeakingPercent,
-    speakingTeacherStatus,
-    speakingStudentCount,
-    speakingExpectedSharePercent,
-    speakingHasAnySpeechData,
-    speakingLowSpeakingCount,
-    speakingHasWarning,
-    speakingStatsLastUpdated,
-    isSpeakingStatsLoading,
-    isSpeakingStatsFetching,
-    isSpeakingStatsError,
-    refetchSpeakingStats,
+      // Speaking stats
+      speakingStatsMap,
+      speakingParticipantsList,
+      roomTotalDuration,
+      roomTotalStudentDuration,
+      roomTotalDurationMs,
+      roomTotalStudentDurationMs,
+      speakingTeacherDurationMs,
+      speakingTeacherDurationSeconds,
+      speakingTeacherSpeakingPercent,
+      speakingStudentSpeakingPercent,
+      speakingTeacherStatus,
+      speakingStudentCount,
+      speakingExpectedSharePercent,
+      speakingHasAnySpeechData,
+      speakingLowSpeakingCount,
+      speakingHasWarning,
+      speakingStatsLastUpdated,
+      isSpeakingStatsLoading,
+      isSpeakingStatsFetching,
+      isSpeakingStatsError,
+      refetchSpeakingStats,
 
-    // User
-    user,
-    currentUserId: user?.accountId,
+      // User
+      user,
+      currentUserId: user?.accountId,
 
-    // Participants
-    localParticipant,
-    participants,
-    isHandRaised,
+      // Participants
+      localParticipant,
+      participants,
+      isHandRaised,
 
-    // Ticket 02: moderation restriction state
-    restrictionByAccountId,
-    isChatRestricted: localRestriction.isChatRestricted,
-    isVoiceRestricted: localRestriction.isVoiceRestricted,
+      // Ticket 02: moderation restriction state
+      restrictionByAccountId,
+      isChatRestricted: localRestriction.isChatRestricted,
+      isVoiceRestricted: localRestriction.isVoiceRestricted,
 
-    // Media state
-    micOn: videoCallState.micOn,
-    cameraOn: videoCallState.cameraOn,
-    isConnected,
-    isTogglingMic: videoCallState.isTogglingMic,
-    isTogglingCam: videoCallState.isTogglingCam,
+      // Media state
+      micOn: videoCallState.micOn,
+      cameraOn: videoCallState.cameraOn,
+      isConnected,
+      isTogglingMic: videoCallState.isTogglingMic,
+      isTogglingCam: videoCallState.isTogglingCam,
 
-    // Beauty
-    beautyOptions,
-    setBeautyOptions,
-    switchBeauty: videoCallState.switchBeauty,
-    processorStatus: videoCallState.processorStatus,
+      // Beauty
+      beautyOptions,
+      setBeautyOptions,
+      switchBeauty: videoCallState.switchBeauty,
+      processorStatus: videoCallState.processorStatus,
 
-    // UI panels
-    ...panelState,
-    showStudentSpeakingWidget,
-    setShowStudentSpeakingWidget,
-    showTroubleshoot: panelState.showTroubleshoot,
-    setShowTroubleshoot: panelState.setShowTroubleshoot,
-    unreadRoomChat,
-    setUnreadRoomChat,
-    unreadAiChat,
-    setUnreadAiChat,
-    showCC,
-    setShowCC,
-    isAISession,
-    isHost: isRoomHost(roomData, user),
+      // UI panels
+      ...panelState,
+      showStudentSpeakingWidget,
+      setShowStudentSpeakingWidget,
+      showTroubleshoot: panelState.showTroubleshoot,
+      setShowTroubleshoot: panelState.setShowTroubleshoot,
+      unreadRoomChat,
+      setUnreadRoomChat,
+      unreadAiChat,
+      setUnreadAiChat,
+      showCC,
+      setShowCC,
+      isAISession,
+      isHost: isRoomHost(roomData, user),
 
-    // Room subtitles
-    showRoomSubtitles,
-    setShowRoomSubtitles,
-    subtitleSelectedLanguage,
-    setSubtitleSelectedLanguage,
-    isSubtitleActive: showRoomSubtitles,
-    isStartingSubtitles: subtitleControls.isStarting,
-    isStoppingSubtitles: subtitleControls.isStopping,
-    subtitleSupportedLangs: subtitleControls.subtitleSupportedLangs,
-    startSubtitles: subtitleControls.startSubtitles,
-    stopSubtitles: subtitleControls.stopSubtitles,
-    changeSubtitleLanguage: subtitleControls.changeSubtitleLanguage,
+      // Room subtitles
+      showRoomSubtitles,
+      setShowRoomSubtitles,
+      subtitleSelectedLanguage,
+      setSubtitleSelectedLanguage,
+      isSubtitleActive: showRoomSubtitles,
+      isStartingSubtitles: subtitleControls.isStarting,
+      isStoppingSubtitles: subtitleControls.isStopping,
+      subtitleSupportedLangs: subtitleControls.subtitleSupportedLangs,
+      startSubtitles: subtitleControls.startSubtitles,
+      stopSubtitles: subtitleControls.stopSubtitles,
+      changeSubtitleLanguage: subtitleControls.changeSubtitleLanguage,
 
-    // Chat
-    messages: chatMessages,
-    aiMessages: combinedAiMessages,
-    addOptimisticAiMessage,
-    chatPublicAi,
-    chatPrivateAi,
-    receiveSystemMsgs,
-    setReceiveSystemMsgs,
-    speakingAssistantEnabled,
-    setSpeakingAssistantEnabled,
-    joinLeaveSound,
-    setJoinLeaveSound,
-    updateAiInteraction,
-    isCurrentUserPrompting,
-    startNewThread,
-    continueThread,
-    getConversationThread,
-    triggerStarterGreeting,
-    loadMoreMeetingSuggestions,
+      // Chat
+      messages: chatMessages,
+      aiMessages: combinedAiMessages,
+      addOptimisticAiMessage,
+      chatPublicAi,
+      chatPrivateAi,
+      receiveSystemMsgs,
+      setReceiveSystemMsgs,
+      speakingAssistantEnabled,
+      setSpeakingAssistantEnabled,
+      joinLeaveSound,
+      setJoinLeaveSound,
+      updateAiInteraction,
+      isCurrentUserPrompting,
+      startNewThread,
+      continueThread,
+      getConversationThread,
+      triggerStarterGreeting,
+      loadMoreMeetingSuggestions,
 
-    // Actions
-    handleToggleMic: actions.handleToggleMic,
-    handleToggleCam: actions.handleToggleCam,
-    handleSendMessage: actions.handleSendMessage,
-    handleLeaveSession: actions.handleLeaveSession,
-    handleCopyLink: actions.handleCopyLink,
+      // Actions
+      handleToggleMic: actions.handleToggleMic,
+      handleToggleCam: actions.handleToggleCam,
+      handleSendMessage: actions.handleSendMessage,
+      handleLeaveSession: actions.handleLeaveSession,
+      handleCopyLink: actions.handleCopyLink,
 
-    // Screen share
-    screenShareOn: screenShareState.screenShareOn,
-    screenShareTrackRef: screenShareState.screenShareTrackRef,
-    screenShareTracks: screenShareState.screenShareTracks,
-    screenSharePresenterId: screenShareState.presenterId,
-    isLocalScreenShare: screenShareState.isLocalScreenShare,
-    presenterDisplayName: screenShareState.presenterDisplayName,
-    handleToggleScreenShare: actions.handleToggleScreenShare,
-    isTogglingScreenShare: screenShareState.isTogglingScreenShare,
-    canShareScreen: screenShareState.canShareScreen,
-    // Watch together (YouTube, client-sync over the watch-sync DataChannel)
-    mediaActive: watchTogether.isMediaActive,
-    mediaVideoId: watchTogether.videoId,
-    mediaTitle: watchTogether.mediaTitle,
-    isMediaHost: watchTogether.isMediaHost,
-    isStartingMedia: watchTogether.isStarting,
-    isStoppingMedia: watchTogether.isStopping,
-    startMedia: watchTogether.startMedia,
-    stopMedia: watchTogether.stopMedia,
-    mediaPlayerRef: watchTogether.playerRef,
-    needsTapToSync: watchTogether.needsTapToSync,
-    syncError: watchTogether.syncError,
-    tapToSync: watchTogether.tapToSync,
-    reportSyncError: watchTogether.reportError,
-    showWatchTogether,
-    setShowWatchTogether,
-    // Recording
-    isRecording: isRecording,
-    isTogglingRecording: recordingState.isTogglingRecording,
-    handleToggleRecording: recordingState.handleToggleRecording,
-    showStopModal: recordingState.showStopModal,
-    confirmStopRecording: recordingState.confirmStopRecording,
-    cancelStopRecording: recordingState.cancelStopRecording,
-    egressId: egressId,
-    startedByAccountId: startedByAccountId,
-    recordingStatus,
-    layoutMode,
-    setLayoutMode,
-    pinnedParticipantId,
-    setPinnedParticipantId,
-    // Ticket 04 (egress): live high-quality room policy
-    roomHighQuality,
-    setRoomHighQuality,
-    maxTiles,
-    setMaxTiles,
-    hideEmptyTiles,
-    setHideEmptyTiles,
+      // Screen share
+      screenShareOn: screenShareState.screenShareOn,
+      screenShareTrackRef: screenShareState.screenShareTrackRef,
+      screenShareTracks: screenShareState.screenShareTracks,
+      screenSharePresenterId: screenShareState.presenterId,
+      isLocalScreenShare: screenShareState.isLocalScreenShare,
+      presenterDisplayName: screenShareState.presenterDisplayName,
+      handleToggleScreenShare: actions.handleToggleScreenShare,
+      isTogglingScreenShare: screenShareState.isTogglingScreenShare,
+      canShareScreen: screenShareState.canShareScreen,
+      // Watch together (YouTube, client-sync over the watch-sync DataChannel)
+      mediaActive: watchTogether.isMediaActive,
+      mediaVideoId: watchTogether.videoId,
+      mediaTitle: watchTogether.mediaTitle,
+      isMediaHost: watchTogether.isMediaHost,
+      isStartingMedia: watchTogether.isStarting,
+      isStoppingMedia: watchTogether.isStopping,
+      startMedia: watchTogether.startMedia,
+      stopMedia: watchTogether.stopMedia,
+      mediaPlayerRef: watchTogether.playerRef,
+      needsTapToSync: watchTogether.needsTapToSync,
+      syncError: watchTogether.syncError,
+      tapToSync: watchTogether.tapToSync,
+      reportSyncError: watchTogether.reportError,
+      showWatchTogether,
+      setShowWatchTogether,
+      // Recording
+      isRecording: isRecording,
+      isTogglingRecording: recordingState.isTogglingRecording,
+      handleToggleRecording: recordingState.handleToggleRecording,
+      showStopModal: recordingState.showStopModal,
+      confirmStopRecording: recordingState.confirmStopRecording,
+      cancelStopRecording: recordingState.cancelStopRecording,
+      egressId: egressId,
+      startedByAccountId: startedByAccountId,
+      recordingStatus,
+      layoutMode,
+      setLayoutMode,
+      pinnedParticipantId,
+      setPinnedParticipantId,
+      // Ticket 04 (egress): live high-quality room policy
+      roomHighQuality,
+      setRoomHighQuality,
+      maxTiles,
+      setMaxTiles,
+      hideEmptyTiles,
+      setHideEmptyTiles,
 
-    deviceSelection,
-    showRoomSettings,
-    setShowRoomSettings,
-    activeSettingsTab,
-    setActiveSettingsTab,
-  }
+      deviceSelection,
+      showRoomSettings,
+      setShowRoomSettings,
+      activeSettingsTab,
+      setActiveSettingsTab,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      isInCall,
+      isPiP,
+      showLeaveModal,
+      currentRoomId,
+      callInfo,
+      localMetadata,
+      closingRemainingSeconds,
+      roomData,
+      lkRoom,
+      speakingStatsMap,
+      speakingParticipantsList,
+      roomTotalDuration,
+      roomTotalStudentDuration,
+      roomTotalDurationMs,
+      roomTotalStudentDurationMs,
+      speakingTeacherDurationMs,
+      speakingTeacherDurationSeconds,
+      speakingTeacherSpeakingPercent,
+      speakingStudentSpeakingPercent,
+      speakingTeacherStatus,
+      speakingStudentCount,
+      speakingExpectedSharePercent,
+      speakingHasAnySpeechData,
+      speakingLowSpeakingCount,
+      speakingHasWarning,
+      speakingStatsLastUpdated,
+      isSpeakingStatsLoading,
+      isSpeakingStatsFetching,
+      isSpeakingStatsError,
+      refetchSpeakingStats,
+      user,
+      localParticipant,
+      participants,
+      isHandRaised,
+      restrictionByAccountId,
+      localRestriction,
+      videoCallState,
+      beautyOptions,
+      panelState,
+      showStudentSpeakingWidget,
+      unreadRoomChat,
+      unreadAiChat,
+      showCC,
+      isAISession,
+      showRoomSubtitles,
+      subtitleSelectedLanguage,
+      subtitleControls,
+      chatMessages,
+      combinedAiMessages,
+      addOptimisticAiMessage,
+      chatPublicAi,
+      chatPrivateAi,
+      receiveSystemMsgs,
+      speakingAssistantEnabled,
+      joinLeaveSound,
+      updateAiInteraction,
+      isCurrentUserPrompting,
+      startNewThread,
+      continueThread,
+      getConversationThread,
+      triggerStarterGreeting,
+      loadMoreMeetingSuggestions,
+      actions,
+      screenShareState,
+      watchTogether,
+      showWatchTogether,
+      isRecording,
+      recordingState,
+      egressId,
+      startedByAccountId,
+      recordingStatus,
+      layoutMode,
+      pinnedParticipantId,
+      roomHighQuality,
+      maxTiles,
+      hideEmptyTiles,
+      deviceSelection,
+      showRoomSettings,
+      activeSettingsTab,
+    ],
+  )
 
   return (
     <ContextProvider value={value}>

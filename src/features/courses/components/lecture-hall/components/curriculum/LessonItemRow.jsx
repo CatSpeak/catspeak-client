@@ -16,6 +16,7 @@ import LessonActionMenu from "./LessonActionMenu"
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { sanitizeHtml } from "@/shared/utils/sanitizeHtml"
 
 // Helper function to resolve icon, background, and left accent border based on item type
 const getItemConfig = (type) => {
@@ -199,7 +200,7 @@ const LessonItemRow = ({
                     )}
                     <div
                       className="line-clamp-1"
-                      dangerouslySetInnerHTML={{ __html: displayData.meta }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayData.meta) }}
                     />
                   </>
                 )}

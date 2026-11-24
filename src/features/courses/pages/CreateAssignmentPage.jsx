@@ -312,7 +312,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <label className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.descriptionLabel || "Yêu cầu bài tập"}</label>
               <div className="assignment-editor overflow-hidden transition-all rounded-xl border border-border dark:border-[#3F3F3F]">
                 <Editor
-                  tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+                  tinymceScriptSrc="/tinymce/tinymce.min.js"
                   value={editorText}
                   onEditorChange={(newVal) => setField("editorText", newVal)}
                   init={{

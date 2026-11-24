@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import { X, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import useScrollLock from "@/shared/hooks/useScrollLock"
+import { useAuthenticatedMediaUrl } from "@/shared/utils/authenticatedMedia"
 
 /**
  * A reusable interactive media lightbox modal supporting single media or playlist browsing,
@@ -34,6 +35,7 @@ const MediaViewerModal = ({ media, mediaList, initialIndex = 0, onClose }) => {
     typeof activeMedia === "string"
       ? activeMedia
       : activeMedia?.mediaUrl || activeMedia?.url || ""
+  const { url: resolvedMediaUrl } = useAuthenticatedMediaUrl(mediaUrl)
   const mediaType =
     typeof activeMedia === "string"
       ? "Image"
@@ -280,8 +282,8 @@ const MediaViewerModal = ({ media, mediaList, initialIndex = 0, onClose }) => {
 
       {mediaType === "Image" ? (
         <img
-          key={mediaUrl}
-          src={mediaUrl}
+          key={resolvedMediaUrl || mediaUrl}
+          src={resolvedMediaUrl || undefined}
           alt={fileName}
           className={`max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-transform ${
             isDragging ? "duration-0" : "duration-100 ease-out"
@@ -293,8 +295,8 @@ const MediaViewerModal = ({ media, mediaList, initialIndex = 0, onClose }) => {
         />
       ) : (
         <video
-          key={mediaUrl}
-          src={mediaUrl}
+          key={resolvedMediaUrl || mediaUrl}
+          src={resolvedMediaUrl || undefined}
           controls
           autoPlay
           className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"

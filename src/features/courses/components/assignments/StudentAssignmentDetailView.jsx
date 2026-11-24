@@ -32,6 +32,10 @@ import {
   getValidAttachmentList,
   getValidDateMs,
 } from "../../utils/submissionUtils"
+import {
+  DEFAULT_ASSIGNMENT_ALLOWED_EXTENSIONS,
+  validateUploadFile,
+} from "@/shared/utils/fileValidation"
 
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
 const EMPTY_ATTACHMENTS = Object.freeze([])
@@ -368,10 +372,18 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
       }
 
       const extension = getFileExtension(file.name)
-      if (allowedFileTypes.length > 0 && !allowedFileTypes.includes(extension)) {
+      const allowedList =
+        allowedFileTypes.length > 0
+          ? allowedFileTypes
+          : DEFAULT_ASSIGNMENT_ALLOWED_EXTENSIONS
+      const check = validateUploadFile(file, {
+        allowedExtensions: allowedList,
+        maxBytes: MAX_FILE_SIZE_BYTES,
+      })
+      if (!check.valid && check.reason === "type") {
         toast.error(interpolate(sa.fileFormatNotAllowed, {
           extension: extension || sa.noFileExtension,
-          formats: allowedFileTypes.join(", "),
+          formats: allowedList.join(", "),
         }))
         return
       }
@@ -775,7 +787,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   <div className="assignment-editor overflow-hidden transition-all">
                     <Editor
                       id="assignment-text-submission"
-                      tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+                      tinymceScriptSrc="/tinymce/tinymce.min.js"
                       value={textContent}
                       disabled={isSubmitting}
                       onEditorChange={(newVal) => setTextDraft(newVal)}
@@ -848,7 +860,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                     multiple={maxFiles > 1}
                     accept={allowedFileTypes.length > 0
                       ? allowedFileTypes.join(",")
-                      : undefined}
+                      : DEFAULT_ASSIGNMENT_ALLOWED_EXTENSIONS.map((ext) => `.${ext}`).join(",")}
                     onChange={handleFileSelect}
                     className="hidden"
                   />

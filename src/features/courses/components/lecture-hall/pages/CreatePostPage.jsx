@@ -20,6 +20,11 @@ import { useCreatePostInBulletinBoardMutation, useUpdatePostInBulletinBoardMutat
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getMaterialValidationError, getFileFingerprint } from "../utils/fileUtils"
+import {
+  SAFE_RASTER_IMAGE_EXTENSIONS,
+  SAFE_RASTER_IMAGE_MIME_TYPES,
+  validateUploadFile,
+} from "@/shared/utils/fileValidation"
 
 const MAX_ATTACHMENTS = 5
 
@@ -82,8 +87,18 @@ const CreatePostPage = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(dict.createPost.fileTooLargeToast || "Kích thước ảnh bìa không được vượt quá 5MB")
+    const check = validateUploadFile(file, {
+      allowedExtensions: SAFE_RASTER_IMAGE_EXTENSIONS,
+      allowedMimeTypes: SAFE_RASTER_IMAGE_MIME_TYPES,
+      maxBytes: 5 * 1024 * 1024,
+    })
+    if (!check.valid) {
+      toast.error(
+        check.reason === "size"
+          ? dict.createPost.fileTooLargeToast || "Kích thước ảnh bìa không được vượt quá 5MB"
+          : dict.createPost.invalidImageFormat || "Chỉ hỗ trợ ảnh PNG, JPEG hoặc WebP",
+      )
+      if (avatarInputRef.current) avatarInputRef.current.value = ""
       return
     }
     const reader = new FileReader()
@@ -260,7 +275,7 @@ const CreatePostPage = () => {
               <input
                 ref={avatarInputRef}
                 type="file"
-                accept="image/png, image/jpeg, image/svg+xml"
+                accept="image/png, image/jpeg, image/webp"
                 className="hidden"
                 onChange={handleAvatarChange}
               />

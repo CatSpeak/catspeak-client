@@ -9,6 +9,12 @@ import {
 } from "@/store/api/userApi"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
+import {
+  SAFE_RASTER_IMAGE_EXTENSIONS,
+  SAFE_RASTER_IMAGE_MIME_TYPES,
+  validateUploadFile,
+} from "@/shared/utils/fileValidation"
 import backgroundAccount from "@/shared/assets/backgrounds/background-account.png"
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
@@ -76,22 +82,24 @@ const ProfileAvatarNCover = ({
 
   const fileInputRef = useRef(null)
   const coverInputRef = useRef(null)
+  const { runLocked } = useSubmitLock()
 
   const validateImageFile = (file, isCover = false) => {
-    if (!file.type.startsWith("image/")) {
+    const validation = validateUploadFile(file, {
+      allowedExtensions: SAFE_RASTER_IMAGE_EXTENSIONS,
+      allowedMimeTypes: SAFE_RASTER_IMAGE_MIME_TYPES,
+      maxBytes: MAX_IMAGE_SIZE,
+    })
+    if (!validation.valid) {
       toast.error(
-        t.profile?.personalInfo?.invalidImageFormat ||
-          "Vui lòng chọn tệp hình ảnh hợp lệ",
-      )
-      return false
-    }
-    if (file.size > MAX_IMAGE_SIZE) {
-      toast.error(
-        isCover
-          ? t.profile?.personalInfo?.coverSizeLimit ||
-              "Kích thước ảnh bìa không được vượt quá 5MB"
-          : t.profile?.personalInfo?.avatarSizeLimit ||
-              "Kích thước ảnh không được vượt quá 5MB",
+        validation.reason === "size"
+          ? isCover
+            ? t.profile?.personalInfo?.coverSizeLimit ||
+                "Kích thước ảnh bìa không được vượt quá 5MB"
+            : t.profile?.personalInfo?.avatarSizeLimit ||
+                "Kích thước ảnh không được vượt quá 5MB"
+          : t.profile?.personalInfo?.invalidImageFormat ||
+              "Vui lòng chọn tệp hình ảnh hợp lệ",
       )
       return false
     }
@@ -131,68 +139,73 @@ const ProfileAvatarNCover = ({
   const handleAvatarCropComplete = async (croppedFile) => {
     if (!isOwnProfile || !croppedFile) return
 
-    const avatarData = new FormData()
-    avatarData.append("file", croppedFile)
+    await runLocked(async () => {
+      const avatarData = new FormData()
+      avatarData.append("file", croppedFile)
 
-    try {
-      toast.loading(
-        t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật...",
-        { id: "avatar-update" },
-      )
-      const res = await updateAvatar(avatarData).unwrap()
+      try {
+        toast.loading(
+          t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật...",
+          { id: "avatar-update" },
+        )
+        const res = await updateAvatar(avatarData).unwrap()
 
-      const newAvatarUrl = extractImageUrl(res)
-      if (
-        localParticipant &&
-        newAvatarUrl &&
-        typeof newAvatarUrl === "string"
-      ) {
-        await safeSetLiveKitMetadata(localParticipant, {
-          avatarImageUrl: newAvatarUrl,
-        })
+        const newAvatarUrl = extractImageUrl(res)
+        if (
+          localParticipant &&
+          newAvatarUrl &&
+          typeof newAvatarUrl === "string"
+        ) {
+          await safeSetLiveKitMetadata(localParticipant, {
+            avatarImageUrl: newAvatarUrl,
+          })
+        }
+
+        toast.success(
+          t.profile?.personalInfo?.updateAvatarSuccess ||
+            "Cập nhật ảnh đại diện thành công",
+          { id: "avatar-update" },
+        )
+      } catch (error) {
+        toast.error(
+          t.profile?.personalInfo?.updateAvatarError ||
+            "Không thể cập nhật ảnh đại diện",
+          { id: "avatar-update" },
+        )
+        console.error(error)
       }
-
-      toast.success(
-        t.profile?.personalInfo?.updateAvatarSuccess ||
-          "Cập nhật ảnh đại diện thành công",
-        { id: "avatar-update" },
-      )
-    } catch (error) {
-      toast.error(
-        t.profile?.personalInfo?.updateAvatarError ||
-          "Không thể cập nhật ảnh đại diện",
-        { id: "avatar-update" },
-      )
-      console.error(error)
-    }
+    })
   }
 
   const handleCoverCropComplete = async (croppedFile) => {
     if (!isOwnProfile || !croppedFile) return
 
-    const coverData = new FormData()
-    coverData.append("file", croppedFile)
+    await runLocked(async () => {
+      const coverData = new FormData()
+      coverData.append("file", croppedFile)
 
-    try {
-      toast.loading(
-        t.profile?.personalInfo?.updatingCover || "Đang cập nhật ảnh bìa...",
-        { id: "cover-update" },
-      )
-      await updateCover(coverData).unwrap()
+      try {
+        toast.loading(
+          t.profile?.personalInfo?.updatingCover ||
+            "Đang cập nhật ảnh bìa...",
+          { id: "cover-update" },
+        )
+        await updateCover(coverData).unwrap()
 
-      toast.success(
-        t.profile?.personalInfo?.updateCoverSuccess ||
-          "Cập nhật ảnh bìa thành công",
-        { id: "cover-update" },
-      )
-    } catch (error) {
-      toast.error(
-        t.profile?.personalInfo?.updateCoverError ||
-          "Không thể cập nhật ảnh bìa",
-        { id: "cover-update" },
-      )
-      console.error(error)
-    }
+        toast.success(
+          t.profile?.personalInfo?.updateCoverSuccess ||
+            "Cập nhật ảnh bìa thành công",
+          { id: "cover-update" },
+        )
+      } catch (error) {
+        toast.error(
+          t.profile?.personalInfo?.updateCoverError ||
+            "Không thể cập nhật ảnh bìa",
+          { id: "cover-update" },
+        )
+        console.error(error)
+      }
+    })
   }
 
   const hasBottomContent = Boolean(children || actions || headerInfo)
@@ -234,7 +247,7 @@ const ProfileAvatarNCover = ({
             type="file"
             ref={coverInputRef}
             className="hidden"
-            accept="image/*"
+            accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
             onChange={handleCoverSelect}
           />
         </>
@@ -288,7 +301,7 @@ const ProfileAvatarNCover = ({
           type="file"
           ref={fileInputRef}
           className="hidden"
-          accept="image/*"
+          accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
           onChange={handleAvatarSelect}
         />
       )}

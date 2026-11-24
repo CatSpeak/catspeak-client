@@ -1718,16 +1718,6 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: ["Schedule"],
     }),
 
-    // ─── Commission ───────────────────────────────────────────────────
-
-    getCommission: builder.query({
-      query: () => ({
-        url: "/teacher/commission",
-        method: "GET",
-      }),
-      providesTags: ["Commission"],
-    }),
-
     // ─── Curriculum / Lecture Hall ─────────────────────────────────────
 
     // Get curriculum by class
@@ -2155,7 +2145,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Get list posts in a bulletin board (Student)
     getStudentListPostsInBulletinBoard: builder.query({
       query: ({ classId, boardId, page = 1, pageSize = 10, search }) => ({
-        url: `/student/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
+        url: `/student/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/${encodePathSegment(boardId)}/posts`,
         method: "GET",
         params: { page, pageSize, search },
       }),
@@ -2169,7 +2159,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Get post detail (Student)
     getStudentPostDetail: builder.query({
       query: ({ classId, postId }) => ({
-        url: `/student/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
+        url: `/student/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/posts/${encodePathSegment(postId)}`,
         method: "GET",
       }),
       providesTags: (result, error, { classId }) => [
@@ -2180,7 +2170,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Create comment in a bulletin board (Student)
     createStudentCommentInBulletinBoard: builder.mutation({
       query: ({ classId, postId, content }) => ({
-        url: `/student/classes/${classId}/curriculum/bulletin-boards/posts/${postId}/replies`,
+        url: `/student/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/posts/${encodePathSegment(postId)}/replies`,
         method: "POST",
         body: { content },
       }),
@@ -2192,7 +2182,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Get list posts in a bulletin board
     getListPostsInBulletinBoard: builder.query({
       query: ({ classId, boardId, page = 1, pageSize = 10, search }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/${encodePathSegment(boardId)}/posts`,
         method: "GET",
         params: { page, pageSize, search },
       }),
@@ -2206,7 +2196,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Create a post in a bulletin board
     createPostInBulletinBoard: builder.mutation({
       query: ({ classId, boardId, formData }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/${encodePathSegment(boardId)}/posts`,
         method: "POST",
         body: formData,
         formData: true,
@@ -2219,7 +2209,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Get post detail
     getPostDetail: builder.query({
       query: ({ classId, postId }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/posts/${encodePathSegment(postId)}`,
         method: "GET",
       }),
       providesTags: (result, error, { classId }) => [
@@ -2230,7 +2220,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Update a post in a bulletin board
     updatePostInBulletinBoard: builder.mutation({
       query: ({ classId, postId, formData }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/posts/${encodePathSegment(postId)}`,
         method: "PUT",
         body: formData,
         formData: true,
@@ -2243,7 +2233,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Delete a post in a bulletin board
     deletePostInBulletinBoard: builder.mutation({
       query: ({ classId, postId }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/posts/${encodePathSegment(postId)}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, { classId }) => [
@@ -2254,62 +2244,10 @@ export const coursesApi = baseApi.injectEndpoints({
     // Create comment in a bulletin board
     createCommentInBulletinBoard: builder.mutation({
       query: ({ classId, postId, content }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}/replies`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/curriculum/bulletin-boards/posts/${encodePathSegment(postId)}/replies`,
         method: "POST",
         body: {
           content,
-        },
-      }),
-      invalidatesTags: (result, error, { classId }) => [
-        { type: "Curriculum", id: classId },
-      ],
-    }),
-
-    // Get comment detail
-    getCommentDetail: builder.query({
-      query: ({ classId, commentId }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}`,
-        method: "GET",
-      }),
-      providesTags: (result, error, { classId }) => [
-        { type: "Curriculum", id: classId },
-      ],
-    }),
-
-    // Update a comment in a bulletin board
-    updateCommentInBulletinBoard: builder.mutation({
-      query: ({ classId, commentId, content, isVisibleToStudents = true }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}`,
-        method: "PUT",
-        body: {
-          content,
-          isVisibleToStudents,
-        },
-      }),
-      invalidatesTags: (result, error, { classId }) => [
-        { type: "Curriculum", id: classId },
-      ],
-    }),
-
-    // Delete a comment in a bulletin board
-    deleteCommentInBulletinBoard: builder.mutation({
-      query: ({ classId, commentId }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: (result, error, { classId }) => [
-        { type: "Curriculum", id: classId },
-      ],
-    }),
-
-    // Create a reply in a comment
-    createReplyInComment: builder.mutation({
-      query: ({ classId, commentId, content, isVisibleToStudents = true }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}/replies`,
-        method: "POST",
-        body: {
-          content,
-          isVisibleToStudents,
         },
       }),
       invalidatesTags: (result, error, { classId }) => [
@@ -2918,7 +2856,6 @@ export const {
   useGetScheduleSessionsQuery,
   useGetTeacherScheduleSessionsLeftQuery,
   useGetStudentScheduleSessionsQuery,
-  useGetCommissionQuery,
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
   useInviteToClassMutation,
@@ -2948,10 +2885,6 @@ export const {
   useUpdatePostInBulletinBoardMutation,
   useDeletePostInBulletinBoardMutation,
   useCreateCommentInBulletinBoardMutation,
-  useGetCommentDetailQuery,
-  useUpdateCommentInBulletinBoardMutation,
-  useDeleteCommentInBulletinBoardMutation,
-  useCreateReplyInCommentMutation,
   useGetStudentListPostsInBulletinBoardQuery,
   useGetStudentPostDetailQuery,
   useCreateStudentCommentInBulletinBoardMutation,

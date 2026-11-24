@@ -1,4 +1,6 @@
 import { useState, useCallback } from "react"
+import toast from "react-hot-toast"
+import { validateUploadFile } from "@/shared/utils/fileValidation"
 import {
   useSendMessageMutation,
   useSendMediaMessageMutation,
@@ -63,9 +65,21 @@ export const useChatMessageActions = (conversationId) => {
 
       if (file) {
         const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
-        if (file.size > MAX_FILE_SIZE) {
+        if (file instanceof File || typeof file.name === "string") {
+          const validation = validateUploadFile(file, {
+            maxBytes: MAX_FILE_SIZE,
+          })
+          if (!validation.valid) {
+            if (validation.reason === "size") {
+              setIsFileSizeModalOpen(true)
+            } else {
+              toast.error("Định dạng tệp không được hỗ trợ vì lý do bảo mật.")
+            }
+            throw new Error("Invalid file")
+          }
+        } else if (file.size > MAX_FILE_SIZE) {
           setIsFileSizeModalOpen(true)
-          return
+          throw new Error("File size exceeds limit")
         }
 
         setPendingUpload({
@@ -159,6 +173,10 @@ export const useChatMessageActions = (conversationId) => {
             err?.data?.message || err?.message || "Tải lên thất bại."
           setPendingUpload((prev) =>
             prev ? { ...prev, status: "error", errorMsg } : null,
+          )
+        } else {
+          toast.error(
+            err?.data?.message || err?.message || "Gửi tin nhắn thất bại.",
           )
         }
         throw err

@@ -8,7 +8,6 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
-  useDeleteRegistrationMutation,
 } from "@/store/api/eventsApi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
@@ -55,10 +54,8 @@ const EventDetailFooter = ({
     useRegisterForEventMutation();
   const [cancelRegistration, { isLoading: isCancelling }] =
     useCancelRegistrationMutation();
-  const [deleteRegistration, { isLoading: isDeletingReg }] =
-    useDeleteRegistrationMutation();
 
-  const isProcessing = isRegistering || isCancelling || isDeletingReg;
+  const isProcessing = isRegistering || isCancelling;
 
   const handleRegister = async () => {
 

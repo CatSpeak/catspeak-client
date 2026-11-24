@@ -17,7 +17,7 @@ import {
 } from '@/store/api/materialApi';
 import { downloadFolderAsZip } from '../../utils/zipDownloader';
 import { useTimezone } from "@/shared/hooks/useTimezone";
-import { formatSize } from "../../utils/materialUtils";
+import { downloadFile, formatSize } from "../../utils/materialUtils";
 
 
 const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove }) => {
@@ -59,23 +59,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
 
   const handleDownload = async () => {
     if (item.fileUrl) {
-      recordDownload(item.id);
-      try {
-        const response = await fetch(item.fileUrl);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = item.fileName || item.name || 'download';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('Download failed, falling back to new tab:', error);
-        window.open(item.fileUrl, '_blank');
-      }
+      await downloadFile(item, recordDownload);
     } else if (isFolder) {
       recordFolderDownload(item.id);
       await downloadFolderAsZip(item, true, item.ownerId || item.owner?.id, t, false);

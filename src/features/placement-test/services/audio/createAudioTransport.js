@@ -100,12 +100,12 @@ export const createAudioTransport = ({
     const result = await capture.start()
     if (!result.ok) {
       setStatus("error")
-      return result
+      return { ok: false, error: result.error }
     }
     capture.subscribeLevel(handleLevel)
     armWatchdog()
     setStatus("listening")
-    return result
+    return { ...result, ok: true }
   }
 
   const startListening = ({ level, onResult, onEnd, onError } = {}) => {

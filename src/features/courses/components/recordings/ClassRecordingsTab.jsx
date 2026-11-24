@@ -28,6 +28,7 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { toLocalDateString } from "@/shared/utils/dateUtils"
 import RecordingPlayerModal from "./RecordingPlayerModal"
 import SaveOrPublishRecordingModal from "./SaveOrPublishRecordingModal"
 
@@ -119,9 +120,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
       }
 
       // Auto-map session dựa vào ngày
-      const dateStr = raw.createdAt
-        ? new Date(raw.createdAt).toISOString().split("T")[0]
-        : null
+      const dateStr = raw.createdAt ? toLocalDateString(raw.createdAt) : null
 
       const matchedSession = dateStr
         ? classSessions.find((s) => {

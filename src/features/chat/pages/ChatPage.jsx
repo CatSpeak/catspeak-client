@@ -206,11 +206,12 @@ const ChatPage = () => {
 
   const handleSend = useCallback(
     async (text, file, extraOptions) => {
+      const result = await sendAction(text, file, extraOptions)
       setInputValue("")
       if (hasMoreAfter || isViewingAroundWindow) {
         resetToLatest()
       }
-      return sendAction(text, file, extraOptions)
+      return result
     },
     [hasMoreAfter, isViewingAroundWindow, resetToLatest, sendAction],
   )

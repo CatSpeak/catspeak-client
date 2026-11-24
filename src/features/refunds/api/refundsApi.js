@@ -7,10 +7,17 @@ export const refundsApi = baseApi.injectEndpoints({
     }),
 
     requestRefund: builder.mutation({
-      query: (data) => ({
+      query: ({ idempotencyKey, ...data }) => ({
         url: "v1/refunds/request",
         method: "POST",
         body: data,
+        headers: {
+          "X-Idempotency-Key":
+            idempotencyKey ||
+            (typeof crypto !== "undefined" && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+        },
       }),
       invalidatesTags: ["RefundHistory", "PaymentHistory"],
     }),

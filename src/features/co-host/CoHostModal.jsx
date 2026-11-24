@@ -148,7 +148,7 @@ const CoHostModal = ({
   // để trạng thái luôn đồng bộ với co-host hiện tại khi mở lại).
   const [prevOpenKey, setPrevOpenKey] = useState(null)
   const openKey = open
-    ? `${initialAccountId ?? "none"}:${[...(initialPermissions || [])].sort().join(",")}`
+    ? `${initialAccountId ?? "none"}:${[...(initialPermissions || [])].sort((a, b) => String(a).localeCompare(String(b))).join(",")}`
     : null
   if (open && prevOpenKey !== openKey) {
     setPrevOpenKey(openKey)
@@ -194,7 +194,9 @@ const CoHostModal = ({
     () =>
       JSON.stringify({
         id: initialAccountId,
-        perms: [...(initialPermissions || [])].sort(),
+        perms: [...(initialPermissions || [])].sort((a, b) =>
+          String(a).localeCompare(String(b)),
+        ),
       }),
     [initialAccountId, initialPermissions],
   )
@@ -202,7 +204,9 @@ const CoHostModal = ({
     () =>
       JSON.stringify({
         id: selectedId,
-        perms: [...permissions].sort(),
+        perms: [...permissions].sort((a, b) =>
+          String(a).localeCompare(String(b)),
+        ),
       }),
     [selectedId, permissions],
   )

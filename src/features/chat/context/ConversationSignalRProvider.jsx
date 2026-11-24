@@ -3,6 +3,7 @@ import React, {
   useRef,
   useState,
   useCallback,
+  useMemo,
 } from "react"
 import * as signalR from "@microsoft/signalr"
 import { useAuth } from "@/features/auth"
@@ -295,19 +296,34 @@ export const ConversationSignalRProvider = ({ children }) => {
     }
   }, [])
 
-  const value = {
-    isConnected,
-    connectionId,
-    sendMessage,
-    joinConversation,
-    leaveConversation,
-    startTyping,
-    stopTyping,
-    invoke,
-    reconnect,
-    on,
-    off,
-  }
+  const value = useMemo(
+    () => ({
+      isConnected,
+      connectionId,
+      sendMessage,
+      joinConversation,
+      leaveConversation,
+      startTyping,
+      stopTyping,
+      invoke,
+      reconnect,
+      on,
+      off,
+    }),
+    [
+      isConnected,
+      connectionId,
+      sendMessage,
+      joinConversation,
+      leaveConversation,
+      startTyping,
+      stopTyping,
+      invoke,
+      reconnect,
+      on,
+      off,
+    ],
+  )
 
   return (
     <ConversationSignalRContext.Provider value={value}>

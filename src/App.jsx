@@ -1,33 +1,65 @@
-import { Provider } from "react-redux"
+import { Suspense, lazy } from "react"
+import { Provider, useSelector } from "react-redux"
 import AppRouter from "@routes"
 import { store } from "@store"
+import { selectCurrentToken } from "@/store/slices/authSlice"
 import "@styles/app.css"
 import AppToaster from "@/shared/components/ui/AppToaster"
 
 import { ConversationSignalRProvider } from "@/features/chat/context/ConversationSignalRProvider"
 import { InChatCallProvider } from "@/features/chat/context/InChatCallProvider"
 import GlobalSignalRHandler from "@/features/chat/components/GlobalSignalRHandler"
-import ServerDownScreen from "@/shared/components/ServerDownScreen"
 import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
-import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
 import { LanguageProvider } from "@/shared/context/LanguageContext"
 import { ThemeProvider } from "@/shared/context/ThemeContext"
-// import { ScrollToTopButton } from "@/shared/components/ui/buttons";
-import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
 import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
-import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
-import RecordingPoller from "@/features/video-call/components/RecordingPoller"
-import CompletionReviewPrompt from "@/features/courses/components/CompletionReviewPrompt"
-import HelpWidget from "@/features/help/components/HelpWidget"
-import { ChatAssistantWidget } from "@/features/chat-assistant"
-import AutoCrashReporterSync from "@/shared/components/AutoCrashReporterSync"
-// import TimezoneBackfill from "@/shared/components/TimezoneBackfill";
-
 import GlobalErrorBoundary from "@/shared/components/GlobalErrorBoundary"
 import WebViewGuard from "@/shared/components/WebViewGuard"
+
+const ServerDownScreen = lazy(() => import("@/shared/components/ServerDownScreen"))
+const PiPWidget = lazy(() => import("@/features/video-call/components/pip/PiPWidget"))
+const GlobalTaskProgressWidget = lazy(
+  () => import("@/shared/components/ui/progress/GlobalTaskProgressWidget"),
+)
+const GlobalTaskSync = lazy(() =>
+  import("@/shared/hooks/useGlobalTask.jsx").then((m) => ({
+    default: m.GlobalTaskSync,
+  })),
+)
+const RecordingPoller = lazy(
+  () => import("@/features/video-call/components/RecordingPoller"),
+)
+const CompletionReviewPrompt = lazy(
+  () => import("@/features/courses/components/CompletionReviewPrompt"),
+)
+const HelpWidget = lazy(() => import("@/features/help/components/HelpWidget"))
+const ChatAssistantWidget = lazy(() =>
+  import("@/features/chat-assistant").then((m) => ({
+    default: m.ChatAssistantWidget,
+  })),
+)
+const AutoCrashReporterSync = lazy(
+  () => import("@/shared/components/AutoCrashReporterSync"),
+)
+
+function AuthenticatedBackgroundFeatures() {
+  const isAuthenticated = Boolean(useSelector(selectCurrentToken))
+  if (!isAuthenticated) return null
+  return (
+    <Suspense fallback={null}>
+      <GlobalSignalRHandler />
+      <CompletionReviewPrompt />
+      <PiPWidget />
+      <GlobalTaskProgressWidget />
+      <RecordingPoller />
+      <GlobalTaskSync />
+      <AutoCrashReporterSync />
+    </Suspense>
+  )
+}
 
 function App() {
   return (
@@ -38,26 +70,20 @@ function App() {
         <GlobalErrorBoundary>
           <WebViewGuard>
             <GlobalVideoCallProvider>
-              <ServerDownScreen />
+              <Suspense fallback={null}>
+                <ServerDownScreen />
+              </Suspense>
               <SidebarProvider>
                 <ConversationSignalRProvider>
                   <InChatCallProvider>
                     <GlobalPresenceProvider>
-                      <GlobalSignalRHandler />
                       <AppToaster />
-                      <CompletionReviewPrompt />
-                      {/* <ScrollToTopButton /> */}
                       <AppRouter />
-                      <PiPWidget />
-                      <GlobalTaskProgressWidget />
-                      <RecordingPoller />
-                      <GlobalTaskSync />
-                      <AutoCrashReporterSync />
-                      <HelpWidget />
-                      {/* TASK-AI-08: nút nổi trợ lý chatbot, hiện trên mọi màn hình
-                          sau khi đăng nhập (FR-rag-chatbot-001). Mount ở đây chứ không
-                          ở từng layout để khỏi lặp lại bốn lần. */}
-                      <ChatAssistantWidget />
+                      <AuthenticatedBackgroundFeatures />
+                      <Suspense fallback={null}>
+                        <HelpWidget />
+                        <ChatAssistantWidget />
+                      </Suspense>
                     </GlobalPresenceProvider>
                   </InChatCallProvider>
                 </ConversationSignalRProvider>

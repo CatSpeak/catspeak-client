@@ -2,6 +2,7 @@ import React from "react"
 import { CreditCard, ImageOff, Landmark, Mail, Phone } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { maskAccountNumber, pick } from "./utils"
+import { useAuthenticatedMediaUrl } from "@/shared/utils/authenticatedMedia"
 
 const Row = ({ icon, label, value, actionLabel, onAction }) => (
   <div className="flex items-center gap-2.5 border-b border-[#E4E7EC] dark:border-[#3F3F3F] py-3 pl-1.5">
@@ -22,22 +23,25 @@ const Row = ({ icon, label, value, actionLabel, onAction }) => (
   </div>
 )
 
-const IdImage = ({ label, url }) => (
-  <div className="flex min-w-0 flex-1 flex-col gap-1">
-    <span className="text-[11px] text-[#101828] dark:text-neutral-300">{label}</span>
-    <div className="flex h-[118px] w-full items-center justify-center overflow-hidden rounded-lg border border-[#E2E2E2] dark:border-[#3F3F3F] bg-[#F2F4F7] dark:bg-[#272727]">
-      {url ? (
-        <img
-          src={url}
-          alt={label}
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <ImageOff size={28} className="text-[#98A2B3] dark:text-neutral-500" />
-      )}
+const IdImage = ({ label, url }) => {
+  const { url: resolvedUrl } = useAuthenticatedMediaUrl(url)
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <span className="text-[11px] text-[#101828] dark:text-neutral-300">{label}</span>
+      <div className="flex h-[118px] w-full items-center justify-center overflow-hidden rounded-lg border border-[#E2E2E2] dark:border-[#3F3F3F] bg-[#F2F4F7] dark:bg-[#272727]">
+        {resolvedUrl ? (
+          <img
+            src={resolvedUrl}
+            alt={label}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <ImageOff size={28} className="text-[#98A2B3] dark:text-neutral-500" />
+        )}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 const VerificationCard = ({
   profile,

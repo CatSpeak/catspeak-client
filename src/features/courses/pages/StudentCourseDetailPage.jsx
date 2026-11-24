@@ -102,7 +102,7 @@ const StudentCourseDetailPage = () => {
 
   const handleClassRegister = (cls) => {
     if (isAuthenticated) {
-      doEnroll(cls.id, cls.courseId || courseDetail?.id)
+      doEnroll(cls.id)
     } else if (authModalCtx?.openAuthModal) {
       authModalCtx.openAuthModal("login", window.location.pathname)
     } else {
@@ -436,7 +436,7 @@ const StudentCourseDetailPage = () => {
                 onClick={() => {
                   const target = conflictClasses
                   setConflictClasses(null)
-                  doEnroll(target.classId, target.courseId, true)
+                  doEnroll(target.classId)
                 }}
                 className="h-10 px-4 rounded-full bg-[#990011] hover:bg-[#80000e] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] text-white text-sm font-black cursor-pointer"
               >

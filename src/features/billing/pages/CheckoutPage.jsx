@@ -4,6 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useCheckoutMutation } from "@/store/api/paymentsApi"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
 import { Loader2 } from "lucide-react"
 
 import CheckoutBreadcrumbs from "../checkout/components/CheckoutBreadcrumbs"
@@ -38,6 +39,7 @@ const CheckoutPage = () => {
   const { data: profileResponse, isLoading: isProfileLoading } =
     useGetUserProfileQuery()
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation()
+  const { runLocked } = useSubmitLock()
 
   const currentUser = profileResponse?.data || authUser
 
@@ -101,19 +103,26 @@ const CheckoutPage = () => {
   if (!plan) return null
 
   const handleCheckoutSubmit = async () => {
-    try {
-      const response = await checkout({
-        planId: plan.id,
-        returnUrl: `${window.location.origin}/billing/result`,
-        cancelUrl: `${window.location.origin}/billing/result`,
-      }).unwrap()
+    await runLocked(async () => {
+      try {
+        const idempotencyKey =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+        const response = await checkout({
+          idempotencyKey,
+          planId: plan.id,
+          returnUrl: `${window.location.origin}/billing/result`,
+          cancelUrl: `${window.location.origin}/billing/result`,
+        }).unwrap()
 
-      if (response.checkoutUrl) {
-        window.location.href = response.checkoutUrl
+        if (response.checkoutUrl) {
+          window.location.href = response.checkoutUrl
+        }
+      } catch (error) {
+        console.error("Failed to checkout", error)
       }
-    } catch (error) {
-      console.error("Failed to checkout", error)
-    }
+    })
   }
 
   if (isProfileLoading) {

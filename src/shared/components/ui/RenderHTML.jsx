@@ -1,5 +1,5 @@
 import React from "react"
-import DOMPurify from "dompurify"
+import { sanitizeHtml } from "@/shared/utils/sanitizeHtml"
 
 /**
  * RenderHTML safely sanitizes and renders rich HTML string content (e.g. from TinyMCE).
@@ -9,8 +9,8 @@ export const RenderHTML = ({ html, className = "", fallback = null }) => {
     return fallback
   }
 
-  const cleanHtml = DOMPurify.sanitize(html, {
-    ADD_ATTR: ["target", "rel", "style", "class"],
+  const cleanHtml = sanitizeHtml(html, {
+    extraAttrs: ["target", "rel", "style", "class"],
   })
 
   return (

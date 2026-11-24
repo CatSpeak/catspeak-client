@@ -77,9 +77,23 @@ const authSlice = createSlice({
       state.status = "idle"
 
       if (typeof localStorage !== "undefined") {
-        localStorage.removeItem("user")
-        localStorage.removeItem("token")
-        localStorage.removeItem("refreshToken")
+        try {
+          localStorage.removeItem("user")
+          localStorage.removeItem("token")
+          localStorage.removeItem("refreshToken")
+          localStorage.removeItem("ai_guest_token")
+          localStorage.removeItem("ai_guest_id")
+        } catch {
+          /* ignore storage errors */
+        }
+      }
+      if (typeof sessionStorage !== "undefined") {
+        try {
+          sessionStorage.removeItem("catspeak_active_inchat_call_session")
+          sessionStorage.removeItem("catspeak_just_registered")
+        } catch {
+          /* ignore storage errors */
+        }
       }
       clearPlacementCache()
     },

@@ -2,25 +2,43 @@ import { lazy } from "react"
 import { MainLayout, VideoCallLayout } from "@layouts"
 
 // Guest Pages
-import PolicyPage from "@/features/auth/pages/PolicyPage"
-import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage"
-import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage"
-import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom"
-import QueuePage from "@/features/queue/pages/QueuePage"
-import RoomsPage from "@/features/rooms/pages/RoomsPage"
-import ContactPage from "@/features/landing/pages/ContactPage"
+const PolicyPage = lazy(() => import("@/features/auth/pages/PolicyPage"))
+const ResetPasswordPage = lazy(
+  () => import("@/features/auth/pages/ResetPasswordPage"),
+)
+const VerifyEmailPage = lazy(
+  () => import("@/features/auth/pages/VerifyEmailPage"),
+)
+const VideoCallRoom = lazy(
+  () => import("@/features/video-call/pages/VideoCallRoom"),
+)
+const QueuePage = lazy(() => import("@/features/queue/pages/QueuePage"))
+const RoomsPage = lazy(() => import("@/features/rooms/pages/RoomsPage"))
+const ContactPage = lazy(() => import("@/features/landing/pages/ContactPage"))
 
 // Cat Speak Feature Pages
 import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
-import NewsPage from "@/features/news/pages/NewsPage"
-import GlobalNewsPage from "@/features/news/pages/GlobalNewsPage"
-import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
-import DiscoverPage from "@/features/discover/DiscoverPage"
-import LettersPage from "@/features/stories/pages/LettersPage.jsx"
-import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
-import CalendarPage from "@/features/calendar/pages/CalendarPage"
-import CreateEventPage from "@/features/calendar/pages/CreateEventPage"
-import GroupInvitePage from "@/features/chat/pages/GroupInvitePage"
+const NewsPage = lazy(() => import("@/features/news/pages/NewsPage"))
+const GlobalNewsPage = lazy(
+  () => import("@/features/news/pages/GlobalNewsPage"),
+)
+const NewsDetailPage = lazy(
+  () => import("@/features/news/pages/NewsDetailPage"),
+)
+const DiscoverPage = lazy(() => import("@/features/discover/DiscoverPage"))
+const LettersPage = lazy(() => import("@/features/stories/pages/LettersPage.jsx"))
+const SharedEventPage = lazy(
+  () => import("@/features/calendar/pages/SharedEventPage"),
+)
+const CalendarPage = lazy(
+  () => import("@/features/calendar/pages/CalendarPage"),
+)
+const CreateEventPage = lazy(
+  () => import("@/features/calendar/pages/CreateEventPage"),
+)
+const GroupInvitePage = lazy(
+  () => import("@/features/chat/pages/GroupInvitePage"),
+)
 
 // AI Tutor Feature Pages
 import AiTutorLayout from "@/features/ai-tutor/layouts/AiTutorLayout"
@@ -91,12 +109,31 @@ import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary"
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect"
 import ClassroomAccessGuard from "@/features/courses/components/ClassroomAccessGuard"
-import { WebsitePage, ResourcesHubPage } from "@/features/websites"
-import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/BulletinBoardPage"
-import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage"
-import CreatePostPage from "@/features/courses/components/lecture-hall/pages/CreatePostPage"
-import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage"
-import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage"
+const WebsitePage = lazy(() =>
+  import("@/features/websites").then((m) => ({ default: m.WebsitePage })),
+)
+const ResourcesHubPage = lazy(() =>
+  import("@/features/websites").then((m) => ({ default: m.ResourcesHubPage })),
+)
+const BulletinBoardPage = lazy(
+  () =>
+    import("@/features/courses/components/lecture-hall/pages/BulletinBoardPage"),
+)
+const PostDetailPage = lazy(
+  () =>
+    import("@/features/courses/components/lecture-hall/pages/PostDetailPage"),
+)
+const CreatePostPage = lazy(
+  () =>
+    import("@/features/courses/components/lecture-hall/pages/CreatePostPage"),
+)
+const LinkYoutubePage = lazy(
+  () =>
+    import("@/features/courses/components/lecture-hall/pages/LinkYoutubePage"),
+)
+const MyCalendarPage = lazy(
+  () => import("@/features/calendar/pages/MyCalendarPage"),
+)
 
 import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton"
 const PlacementTestPage = lazy(
@@ -318,15 +355,27 @@ const routesConfig = [
           },
           {
             path: "reset-password",
-            element: <ResetPasswordPage />,
+            element: (
+              <LazyRoute>
+                <ResetPasswordPage />
+              </LazyRoute>
+            ),
           },
           {
             path: "verify-email",
-            element: <VerifyEmailPage />,
+            element: (
+              <LazyRoute>
+                <VerifyEmailPage />
+              </LazyRoute>
+            ),
           },
           {
             path: "contact",
-            element: <ContactPage />,
+            element: (
+              <LazyRoute>
+                <ContactPage />
+              </LazyRoute>
+            ),
           },
           {
             path: "shared-material/:token",
@@ -454,7 +503,11 @@ const routesConfig = [
             children: [
               {
                 index: true,
-                element: <RoomsPage />,
+                element: (
+                  <LazyRoute>
+                    <RoomsPage />
+                  </LazyRoute>
+                ),
               },
               { path: "*", element: <PageNotFound /> },
             ],
@@ -479,19 +532,35 @@ const routesConfig = [
                   },
                   {
                     path: "news",
-                    element: <NewsPage />,
+                    element: (
+                      <LazyRoute>
+                        <NewsPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "global-news",
-                    element: <GlobalNewsPage />,
+                    element: (
+                      <LazyRoute>
+                        <GlobalNewsPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "news/:slug",
-                    element: <NewsDetailPage />,
+                    element: (
+                      <LazyRoute>
+                        <NewsDetailPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "discover",
-                    element: <DiscoverPage />,
+                    element: (
+                      <LazyRoute>
+                        <DiscoverPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "reels",
@@ -513,15 +582,27 @@ const routesConfig = [
                   },
                   {
                     path: "letters",
-                    element: <LettersPage />,
+                    element: (
+                      <LazyRoute>
+                        <LettersPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "calendar",
-                    element: <CalendarPage />,
+                    element: (
+                      <LazyRoute>
+                        <CalendarPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "calendar/create",
-                    element: <CreateEventPage />,
+                    element: (
+                      <LazyRoute>
+                        <CreateEventPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "learning-path",
@@ -799,7 +880,9 @@ const routesConfig = [
                 path: ":id",
                 element: (
                   <AuthGuard>
-                    <VideoCallRoom />
+                    <LazyRoute>
+                      <VideoCallRoom />
+                    </LazyRoute>
                   </AuthGuard>
                 ),
               },
@@ -811,7 +894,11 @@ const routesConfig = [
 
       {
         path: "/policy",
-        element: <PolicyPage />,
+        element: (
+          <LazyRoute>
+            <PolicyPage />
+          </LazyRoute>
+        ),
       },
       {
         element: (
@@ -1408,7 +1495,11 @@ const routesConfig = [
               },
               {
                 path: "events/create",
-                element: <CreateEventPage />,
+                element: (
+                  <LazyRoute>
+                    <CreateEventPage />
+                  </LazyRoute>
+                ),
               },
               {
                 path: "rooms",
@@ -1565,7 +1656,9 @@ const routesConfig = [
         path: "/queue",
         element: (
           <AuthGuard>
-            <QueuePage />
+            <LazyRoute>
+              <QueuePage />
+            </LazyRoute>
           </AuthGuard>
         ),
       },
@@ -1608,11 +1701,19 @@ const routesConfig = [
       },
       {
         path: "/invite/:code",
-        element: <GroupInvitePage />,
+        element: (
+          <LazyRoute>
+            <GroupInvitePage />
+          </LazyRoute>
+        ),
       },
       {
         path: "/chat/invite/:code",
-        element: <GroupInvitePage />,
+        element: (
+          <LazyRoute>
+            <GroupInvitePage />
+          </LazyRoute>
+        ),
       },
       {
         path: "/connect",
@@ -1630,7 +1731,11 @@ const routesConfig = [
         children: [
           {
             path: "shared/:token",
-            element: <SharedEventPage />,
+            element: (
+              <LazyRoute>
+                <SharedEventPage />
+              </LazyRoute>
+            ),
           },
         ],
       },

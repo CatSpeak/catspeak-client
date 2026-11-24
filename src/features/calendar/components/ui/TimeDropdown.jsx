@@ -101,7 +101,7 @@ const TimeDropdown = ({
   const displayTimes = [...times]
   if (trimmedSelectedTime && !displayTimes.includes(trimmedSelectedTime)) {
     displayTimes.push(trimmedSelectedTime)
-    displayTimes.sort()
+    displayTimes.sort((a, b) => a.localeCompare(b))
   }
 
   // Ensure no empty options are ever displayed

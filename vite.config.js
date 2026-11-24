@@ -1,12 +1,60 @@
 /* global process */
 import { defineConfig, loadEnv } from "vite"
 import react from "@vitejs/plugin-react"
+import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 import livekitDevToken from "./plugins/livekitDevToken.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+const MIME_BY_EXT = {
+  ".js": "application/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+}
+
+function selfHostTinyMcePlugin() {
+  const tinySrcDir = path.resolve(__dirname, "node_modules/tinymce")
+  const tinyDistDir = path.resolve(__dirname, "dist/tinymce")
+
+  const serveMiddleware = (req, res, next) => {
+    const reqUrl = (req.url || "").split("?")[0]
+    if (!reqUrl.startsWith("/tinymce/")) return next()
+    const relPath = reqUrl.slice("/tinymce/".length)
+    const filePath = path.resolve(tinySrcDir, relPath)
+    if (!filePath.startsWith(tinySrcDir + path.sep) || !fs.existsSync(filePath)) {
+      return next()
+    }
+    const stat = fs.statSync(filePath)
+    if (!stat.isFile()) return next()
+    const ext = path.extname(filePath).toLowerCase()
+    res.setHeader("Content-Type", MIME_BY_EXT[ext] || "application/octet-stream")
+    fs.createReadStream(filePath).pipe(res)
+  }
+
+  return {
+    name: "self-host-tinymce",
+    configureServer(server) {
+      server.middlewares.use(serveMiddleware)
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(serveMiddleware)
+    },
+    closeBundle() {
+      if (fs.existsSync(tinySrcDir)) {
+        fs.mkdirSync(tinyDistDir, { recursive: true })
+        fs.cpSync(tinySrcDir, tinyDistDir, { recursive: true })
+      }
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -15,7 +63,7 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, env)
 
   return {
-    plugins: [react()],
+    plugins: [react(), selfHostTinyMcePlugin()],
     optimizeDeps: {
       // mediapipe wasm uses Emscripten Module['arguments'] which esbuild
       // incorrectly minifies to plain `arguments_` causing
@@ -27,7 +75,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     esbuild: {
-      keepNames: true,
+      drop: mode === "production" ? ["console", "debugger"] : [],
     },
     worker: {
       format: "es",
@@ -43,6 +91,11 @@ export default defineConfig(({ mode }) => {
           secure: true,
         },
         "/api/v1/instructor": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
+        "/api/media": {
           target: "https://instructor-staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
@@ -97,7 +150,6 @@ export default defineConfig(({ mode }) => {
         "/hubs": {
           target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
-          // secure: true,
           secure: false,
           ws: true,
         },
@@ -155,8 +207,5 @@ export default defineConfig(({ mode }) => {
         "@context": path.resolve(__dirname, "./src/shared/context"),
       },
     },
-    // esbuild: {
-    //   drop: mode === "production" ? ["console", "debugger"] : [],
-    // },
   }
 })

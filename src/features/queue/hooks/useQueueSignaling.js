@@ -129,7 +129,7 @@ export const useQueueSignaling = (handlers = {}) => {
       }
     }
     console.warn("[QueueSignalR] Cannot invoke, not connected.")
-    return Promise.reject("Not Connected")
+    return Promise.reject(new Error("Not Connected"))
   }, [])
 
   const joinQueue = useCallback(

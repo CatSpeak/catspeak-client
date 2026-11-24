@@ -84,6 +84,29 @@ export const InChatCallProvider = ({ children }) => {
   const activeCallSessionRef = useRef(activeCallSession)
   activeCallSessionRef.current = activeCallSession
 
+  // Clear call recovery state whenever the user logs out
+  useEffect(() => {
+    if (!authUser) {
+      activeCallSessionRef.current = null
+      setIncomingCallData(null)
+      setIsCallModalOpen(false)
+      setActiveCallSession(null)
+      try {
+        sessionStorage.removeItem(CALL_SESSION_STORAGE_KEY)
+      } catch {
+        /* ignore storage errors */
+      }
+    }
+  }, [authUser])
+
+  useEffect(() => {
+    return () => {
+      if (incomingTimerRef.current) {
+        clearTimeout(incomingTimerRef.current)
+      }
+    }
+  }, [])
+
   // Synchronize active call session to sessionStorage for recovery on F5 / reload
   useEffect(() => {
     try {

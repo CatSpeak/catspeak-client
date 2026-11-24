@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { toLocalDateString } from "@/shared/utils/dateUtils"
 import {
   useCreateVoucherMutation,
   useUpdateVoucherMutation,
@@ -26,7 +27,7 @@ export const INITIAL_VOUCHER_FORM = {
   courseClassMode: "all_classes",
   courseIds: [],
   classIds: [],
-  validFrom: new Date().toISOString().split("T")[0],
+  validFrom: toLocalDateString(),
   validTo: "",
   isNeverExpired: false,
   totalUsageLimit: "",
@@ -131,7 +132,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
         classIds: isCourse ? [] : classList,
         validFrom: initialData.validFrom
           ? initialData.validFrom.split("T")[0]
-          : new Date().toISOString().split("T")[0],
+          : toLocalDateString(),
         validTo: initialData.validTo ? initialData.validTo.split("T")[0] : "",
         isNeverExpired: Boolean(initialData.isNeverExpired),
         totalUsageLimit: initialData.totalUsageLimit || "",

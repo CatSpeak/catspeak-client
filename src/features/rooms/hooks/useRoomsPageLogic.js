@@ -2,10 +2,8 @@ import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useAuth } from "@/features/auth"
 import { useState } from "react"
 
-const AI_ALLOWED_ACCOUNT_IDS = [39]
-
 export const useRoomsPageLogic = () => {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { openAuthModal } = useAuthModal()
 
   // Business loading states
@@ -17,7 +15,7 @@ export const useRoomsPageLogic = () => {
   const [isJoinRoomModalOpen, setJoinRoomModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
 
-  const canUseAI = AI_ALLOWED_ACCOUNT_IDS.includes(user?.accountId)
+  const canUseAI = false
 
   const handleCreateOneOnOneSession = (onSuccess) => {
     if (!isAuthenticated) {

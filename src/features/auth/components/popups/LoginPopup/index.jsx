@@ -11,6 +11,7 @@ import Modal from "@/shared/components/ui/Modal"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Checkbox from "@/shared/components/ui/inputs/Checkbox"
 import { parseApiError } from "@/shared/utils/apiError"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
 
 const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const { t } = useLanguage()
@@ -29,6 +30,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const [login, { isLoading }] = useLoginMutation()
   const [resendEmailOtp, { isLoading: isResendingOtp }] =
     useResendEmailOtpMutation()
+  const { runLocked } = useSubmitLock()
 
   const handleClose = () => {
     setEmail("")
@@ -42,69 +44,73 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   }
 
   const validateEmail = (value) => {
-    if (!value) return authText.validationEmailRequired
+    const trimmed = value.trim()
+    if (!trimmed) return authText.validationEmailRequired
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(value)) return authText.validationEmailInvalid
+    if (!emailRegex.test(trimmed)) return authText.validationEmailInvalid
     return ""
   }
 
   const validatePassword = (value) =>
-    !value ? authText.validationPasswordRequired : ""
+    !value || !value.trim() ? authText.validationPasswordRequired : ""
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setApiError(null)
-    setIsNotActivatedError(false)
+    await runLocked(async () => {
+      setApiError(null)
+      setIsNotActivatedError(false)
 
-    const emailErr = validateEmail(email)
-    const passwordErr = validatePassword(password)
-    setEmailError(emailErr)
-    setPasswordError(passwordErr)
+      const trimmedEmail = email.trim()
+      const emailErr = validateEmail(trimmedEmail)
+      const passwordErr = validatePassword(password)
+      setEmailError(emailErr)
+      setPasswordError(passwordErr)
 
-    if (emailErr || passwordErr) return
+      if (emailErr || passwordErr) return
 
-    try {
-      await login({ email, password }).unwrap()
+      try {
+        await login({ email: trimmedEmail, password }).unwrap()
 
-      handleClose()
-      if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
-    } catch (err) {
-      console.error("Login error:", err)
-      const { statusCode, errorCode, message } = parseApiError(err)
+        handleClose()
+        if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
+      } catch (err) {
+        console.error("Login error:", err)
+        const { statusCode, errorCode, message } = parseApiError(err)
 
-      const isNotActivated =
-        statusCode === 401 && errorCode === "AUTH_ACCOUNT_NOT_ACTIVATED"
+        const isNotActivated =
+          statusCode === 401 && errorCode === "AUTH_ACCOUNT_NOT_ACTIVATED"
 
-      if (isNotActivated) {
-        setIsNotActivatedError(true)
-        setApiError(authText.accountNotActivated)
-        return
-      }
+        if (isNotActivated) {
+          setIsNotActivatedError(true)
+          setApiError(authText.accountNotActivated)
+          return
+        }
 
-      if (
-        errorCode === "AUTH_ACCOUNT_LOCKED_ATTEMPTS" ||
-        errorCode === "AUTH_ACCOUNT_LOCKED"
-      ) {
-        setApiError(authText.accountLocked || message)
-        return
-      }
+        if (
+          errorCode === "AUTH_ACCOUNT_LOCKED_ATTEMPTS" ||
+          errorCode === "AUTH_ACCOUNT_LOCKED"
+        ) {
+          setApiError(authText.accountLocked || message)
+          return
+        }
 
-      if (statusCode === 429 || errorCode === "AUTH_TOO_MANY_REQUESTS") {
+        if (statusCode === 429 || errorCode === "AUTH_TOO_MANY_REQUESTS") {
+          setApiError(
+            authText.tooManyOtpRequests ||
+              "Too many requests. Please try again later.",
+          )
+          return
+        }
+
+        const isInvalidCredentials = errorCode === "AUTH_INVALID_CREDENTIALS"
+
         setApiError(
-          authText.tooManyOtpRequests ||
-            "Too many requests. Please try again later.",
+          isInvalidCredentials
+            ? authText.invalidCredentials
+            : message || authText.loginFailed,
         )
-        return
       }
-
-      const isInvalidCredentials = errorCode === "AUTH_INVALID_CREDENTIALS"
-
-      setApiError(
-        isInvalidCredentials
-          ? authText.invalidCredentials
-          : message || authText.loginFailed,
-      )
-    }
+    })
   }
 
   return (

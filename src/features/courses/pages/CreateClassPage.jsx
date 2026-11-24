@@ -1377,7 +1377,7 @@ const CreateClassPage = () => {
             <div className="flex flex-col gap-2">
               <label className="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{cc.classDescription || "Mô tả lớp học"}</label>
               <Editor
-                tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+                tinymceScriptSrc="/tinymce/tinymce.min.js"
                 value={description}
                 disabled={isRecoverMode}
                 onEditorChange={(newContent) => {

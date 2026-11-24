@@ -166,7 +166,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
           </label>
           <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
             <Editor
-            tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+            tinymceScriptSrc="/tinymce/tinymce.min.js"
             value={formData.content}
             onEditorChange={handleEditorChange}
             init={{

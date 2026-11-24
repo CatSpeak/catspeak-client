@@ -3,6 +3,10 @@ import { FileIcon, Play } from "lucide-react"
 import ListItem from "@/shared/components/ui/ListItem"
 import VoiceWaveformPlayer from "./VoiceWaveformPlayer"
 import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
+import {
+  downloadAuthenticatedFile,
+  useAuthenticatedMediaUrl,
+} from "@/shared/utils/authenticatedMedia"
 
 /**
  * MediaAttachment — renders image previews, inline video players, voice audio players, or document file attachment cards.
@@ -25,6 +29,7 @@ const MediaAttachment = ({
   hasHeader = false,
 }) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const { url: resolvedMediaUrl } = useAuthenticatedMediaUrl(mediaUrl)
 
   if (!mediaUrl) return null
 
@@ -71,19 +76,9 @@ const MediaAttachment = ({
     e?.preventDefault()
     e?.stopPropagation()
     try {
-      const response = await fetch(mediaUrl)
-      if (!response.ok) throw new Error("Fetch failed")
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = displayName || "attachment"
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      await downloadAuthenticatedFile(mediaUrl, displayName || "attachment")
     } catch {
-      window.open(mediaUrl, "_blank")
+      /* error ignored/handled cleanly without leaking protected endpoint URL */
     }
   }
 
@@ -125,7 +120,7 @@ const MediaAttachment = ({
             }}
           >
             <img
-              src={mediaUrl}
+              src={resolvedMediaUrl || undefined}
               alt={displayName}
               className="max-h-60 object-cover w-full cursor-pointer block hover:opacity-95 transition-opacity"
               loading="lazy"
@@ -135,7 +130,7 @@ const MediaAttachment = ({
           {isViewerOpen && (
             <MediaViewerModal
               media={{
-                mediaUrl,
+                mediaUrl: resolvedMediaUrl || mediaUrl,
                 fileName: displayName,
                 mediaType: "Image",
               }}
@@ -158,7 +153,7 @@ const MediaAttachment = ({
             }}
           >
             <video
-              src={mediaUrl}
+              src={resolvedMediaUrl || undefined}
               preload="metadata"
               muted
               playsInline
@@ -175,7 +170,7 @@ const MediaAttachment = ({
           {isViewerOpen && (
             <MediaViewerModal
               media={{
-                mediaUrl,
+                mediaUrl: resolvedMediaUrl || mediaUrl,
                 fileName: displayName,
                 mediaType: "Video",
               }}
@@ -185,13 +180,10 @@ const MediaAttachment = ({
         </>
       ) : (
         /* Document / file attachment card */
-        <a
-          href={mediaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          download={displayName}
+        <button
+          type="button"
           onClick={handleDownload}
-          className="block no-underline w-full cursor-pointer"
+          className="block no-underline w-full cursor-pointer text-left bg-transparent border-0 p-0"
         >
           <ListItem
             lines={2}
@@ -213,7 +205,7 @@ const MediaAttachment = ({
               )
             )}
           </ListItem>
-        </a>
+        </button>
       )}
     </div>
   )

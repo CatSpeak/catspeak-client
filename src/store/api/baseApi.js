@@ -6,6 +6,11 @@ import { isBrowserOffline } from "@/shared/utils/networkStatus"
 import { getBrowserTimeZone } from "@/shared/constants/timezones"
 import { defaultParamsSerializer } from "./utils/paramsSerializer"
 import {
+  buildRateLimitErrorData,
+  isFatalTokenRevocationError,
+  parseRetryAfterSeconds,
+} from "./utils/rateLimit"
+import {
   savePendingAutoCrashReport,
   flushPendingAutoCrashReport,
 } from "@/shared/utils/telemetry/autoCrashSync"
@@ -254,6 +259,28 @@ export async function ensureRefresh(
             return false
           }
 
+          // Only keep active call alive for transient errors; force logout on fatal revocation
+          const isFatalRevocation = isFatalTokenRevocationError(errData)
+
+          if (isInCall && !isFatalRevocation) {
+            console.warn(
+              AUTH_LOG,
+              `Refresh returned status ${status} while in active call — suppressing logout to protect call`,
+              { reason, errData },
+            )
+            return false
+          }
+
+          if (isFatalRevocation) {
+            console.error(
+              AUTH_LOG,
+              "Fatal token revocation/reuse detected during refresh — logging out",
+              { reason, errData },
+            )
+            api.dispatch(logout())
+            return false
+          }
+
           const remaining = tokenSecondsRemaining(lsToken)
           // If token is still valid or it's a proactive / heartbeat refresh, NEVER logout
           if (reason === "proactive" || reason === "call-heartbeat" || remaining > 0) {
@@ -261,23 +288,6 @@ export async function ensureRefresh(
               AUTH_LOG,
               `Refresh returned status ${status} during ${reason} check, but access token is still valid (${Math.round(remaining)}s remaining) — skipping premature logout`,
               { reason },
-            )
-            return false
-          }
-
-          // If in an active call, protect the call: do NOT logout unless fatal security reuse detected
-          const isFatalRevocation =
-            errData?.code === "TokenReuseDetected" ||
-            errData?.errorCode === "TokenReuseDetected" ||
-            errData?.code === "AccountNotFound" ||
-            errData?.errorCode === "AccountNotFound" ||
-            (typeof errData?.message === "string" && errData.message.includes("TokenReuseDetected"))
-
-          if (isInCall && !isFatalRevocation) {
-            console.warn(
-              AUTH_LOG,
-              `Refresh returned status ${status} while in active call — suppressing logout to protect call`,
-              { reason, errData },
             )
             return false
           }
@@ -381,6 +391,13 @@ export function createReauthBaseQuery(queryResolver) {
     if (result.error?.status === 401) {
       console.warn(AUTH_LOG, `401 on ${url}`)
 
+      // Immediate logout on explicit revocation/reuse even during active calls
+      if (isFatalTokenRevocationError(result.error.data)) {
+        console.error(AUTH_LOG, `Fatal token revocation on ${url} — logging out`)
+        api.dispatch(logout())
+        return result
+      }
+
       // Never retry auth endpoints to avoid infinite loops
       if (isAuthEndpoint) {
         return result
@@ -402,6 +419,19 @@ export function createReauthBaseQuery(queryResolver) {
             `Retry of ${url} still failed with status ${result.error.status}`,
           )
         }
+      }
+    }
+
+    // ── Handle HTTP 429 + Retry-After globally ────────────────────────
+    if (result.error?.status === 429) {
+      const retryAfterSeconds = parseRetryAfterSeconds({
+        headers: result.meta?.response?.headers,
+        data: result.error.data,
+      })
+      result.error = {
+        ...result.error,
+        retryAfterSeconds,
+        data: buildRateLimitErrorData(retryAfterSeconds, result.error.data),
       }
     }
 
@@ -519,6 +549,8 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("explore/") ||
         lowerUrl.startsWith("/personal-materials") ||
         lowerUrl.startsWith("personal-materials") ||
+        lowerUrl.startsWith("/media/") ||
+        lowerUrl.startsWith("media/") ||
         lowerUrl.startsWith("/vouchers") ||
         lowerUrl.startsWith("vouchers"))
 

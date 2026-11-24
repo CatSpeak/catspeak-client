@@ -57,7 +57,11 @@ const TopicFilter = ({
 
   // 2. Local selection state for instant snappy UI feedback
   const selectedKey = useMemo(
-    () => (selectedTopicIds || []).slice().sort().join(","),
+    () =>
+      (selectedTopicIds || [])
+        .slice()
+        .sort((a, b) => Number(a) - Number(b))
+        .join(","),
     [selectedTopicIds],
   );
 

@@ -20,6 +20,7 @@ import { useTimezone } from "@/shared/hooks/useTimezone"
 import { PillButton } from "@/shared/components/ui/buttons"
 import AssignmentStatusBadge from "./AssignmentStatusBadge"
 import QuizStatusBadge from "./QuizStatusBadge"
+import { sanitizeHtml } from "@/shared/utils/sanitizeHtml"
 
 // Helper function to resolve icon and background based on item type
 const getItemConfig = (type) => {
@@ -273,7 +274,7 @@ const StudentLessonRow = ({
               <div className="flex items-center gap-1.5 text-[13px] text-[#6B7280] dark:text-gray-400 font-normal">
                 <div
                   className="line-clamp-1 truncate"
-                  dangerouslySetInnerHTML={{ __html: displayData.meta }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(displayData.meta) }}
                 />
               </div>
             )}

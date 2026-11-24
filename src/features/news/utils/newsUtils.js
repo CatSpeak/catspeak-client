@@ -1,3 +1,5 @@
+import { stripHtmlToText } from "@/shared/utils/sanitizeHtml"
+
 export const getTranslatedTimeAgo = (dateString, timeAgo) => {
   if (!timeAgo || !dateString) return ""
   const normalizedStr = typeof dateString === "string" && dateString.includes("T") && !dateString.endsWith("Z") && !dateString.includes("+")
@@ -51,10 +53,7 @@ export const getTranslatedTimeAgo = (dateString, timeAgo) => {
 }
 
 export const getPreviewText = (html) => {
-  if (!html) return ""
-  const div = document.createElement("div")
-  div.innerHTML = html
-  return div.textContent?.replace(/\s+/g, " ").trim() || ""
+  return stripHtmlToText(html)
 }
 
 export const getCommunityName = (code) => {

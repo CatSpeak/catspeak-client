@@ -2,6 +2,7 @@ import React from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { sanitizeHtml } from "@/shared/utils/sanitizeHtml"
 
 const StopRecordingModal = ({ open, onClose, onConfirm }) => {
   const { t } = useLanguage()
@@ -32,7 +33,7 @@ const StopRecordingModal = ({ open, onClose, onConfirm }) => {
         {t.rooms?.videoCall?.recording?.stopDescription ? (
           <span
             dangerouslySetInnerHTML={{
-              __html: t.rooms.videoCall.recording.stopDescription,
+              __html: sanitizeHtml(t.rooms.videoCall.recording.stopDescription),
             }}
           />
         ) : (

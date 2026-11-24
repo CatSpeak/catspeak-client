@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from "react"
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetProfileQuery, useAuth } from "@/features/auth"
+import { store } from "@/store"
 import {
   useGetPresenceConfigQuery,
   useSendHeartbeatMutation,
@@ -14,7 +15,9 @@ export const GlobalPresenceProvider = ({ children }) => {
   const { data: userData } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
   const user = userData?.data ?? userData ?? null
 
-  const { data: config } = useGetPresenceConfigQuery()
+  const { data: config } = useGetPresenceConfigQuery(undefined, {
+    skip: !isAuthenticated,
+  })
   const [sendHeartbeat] = useSendHeartbeatMutation()
 
   const [onlineCounts, setOnlineCounts] = useState({})
@@ -111,46 +114,37 @@ export const GlobalPresenceProvider = ({ children }) => {
     // Setup interval
     const intervalId = setInterval(performHeartbeat, heartbeatInterval)
 
-    // Handle full unmount (unload/close tab)
-    const handleUnload = () => {
-      const token = localStorage.getItem("token")
-      if (token) {
-        // Send a synchronous beacon or fetch with keepalive on unload
-        navigator.sendBeacon(`${baseUrl}/v1/Presence/leave`, JSON.stringify({}))
-        // fetch is also a fallback
-        fetch(`${baseUrl}/v1/Presence/leave`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          keepalive: true,
-        }).catch(() => {})
-      }
+    // Handle full unmount (unload/close tab) with authenticated keepalive request
+    const sendAuthenticatedLeave = () => {
+      const token =
+        store.getState()?.auth?.token ||
+        (typeof localStorage !== "undefined" ? localStorage.getItem("token") : null)
+      if (!token) return
+      fetch(`${baseUrl}/v1/Presence/leave`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        keepalive: true,
+      }).catch(() => {})
     }
 
-    window.addEventListener("beforeunload", handleUnload)
+    window.addEventListener("beforeunload", sendAuthenticatedLeave)
 
     return () => {
       clearInterval(intervalId)
-      window.removeEventListener("beforeunload", handleUnload)
-
-      const token = localStorage.getItem("token")
-      if (token) {
-        fetch(`${baseUrl}/v1/Presence/leave`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          keepalive: true,
-        }).catch((e) => console.error("[GlobalPresence] Leave request failed", e))
-      }
+      window.removeEventListener("beforeunload", sendAuthenticatedLeave)
+      sendAuthenticatedLeave()
     }
   }, [config, user, currentLanguageString, sendHeartbeat, baseUrl])
 
+  const contextValue = useMemo(
+    () => ({ onlineCounts, setPresenceLanguage, activeLanguageCode }),
+    [onlineCounts, activeLanguageCode],
+  )
+
   return (
-    <GlobalPresenceContext.Provider
-      value={{ onlineCounts, setPresenceLanguage, activeLanguageCode }}
-    >
+    <GlobalPresenceContext.Provider value={contextValue}>
       {children}
     </GlobalPresenceContext.Provider>
   )

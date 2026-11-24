@@ -20,6 +20,12 @@ import {
   useLazyCheckUploadEligibilityQuery,
 } from "@/store/api/reelsApi";
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock";
+import {
+  SAFE_RASTER_IMAGE_EXTENSIONS,
+  SAFE_RASTER_IMAGE_MIME_TYPES,
+  validateUploadFile,
+} from "@/shared/utils/fileValidation";
 
 export const DESCRIPTION_TRIGGER_REGEX =
   /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u;
@@ -230,6 +236,7 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
     });
 
   const [checkUploadEligibility] = useLazyCheckUploadEligibilityQuery();
+  const { runLocked: runSubmitLocked } = useSubmitLock();
 
   const hashtagSuggestions = useMemo(
     () => hashtagResults.filter((item) => getHashtagName(item)),
@@ -425,8 +432,9 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   const handleVideoSelect = (file) => {
     if (!file) return;
 
-    // Verify file type
-    if (!file.type.startsWith("video/")) {
+    const maxSize = 100 * 1024 * 1024;
+    const videoCheck = validateUploadFile(file, { maxBytes: maxSize });
+    if (!file.type.startsWith("video/") || (!videoCheck.valid && videoCheck.reason === "type")) {
       setValidationErrors((prev) => ({
         ...prev,
         video:
@@ -436,9 +444,7 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
       return;
     }
 
-    // Verify size limit (100MB)
-    const maxSize = 100 * 1024 * 1024;
-    if (file.size > maxSize) {
+    if (!videoCheck.valid && videoCheck.reason === "size") {
       setValidationErrors((prev) => ({
         ...prev,
         video:
@@ -475,25 +481,21 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   const handleCoverSelect = (file) => {
     if (!file) return;
 
-    // Verify file type
-    if (!file.type.startsWith("image/")) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        cover:
-          t.catSpeak?.reels?.coverFormatError ||
-          "Please upload a valid image file.",
-      }));
-      return;
-    }
-
-    // Verify size limit (e.g. 5MB)
     const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
+    const coverCheck = validateUploadFile(file, {
+      allowedExtensions: SAFE_RASTER_IMAGE_EXTENSIONS,
+      allowedMimeTypes: SAFE_RASTER_IMAGE_MIME_TYPES,
+      maxBytes: maxSize,
+    });
+    if (!coverCheck.valid) {
       setValidationErrors((prev) => ({
         ...prev,
         cover:
-          t.catSpeak?.reels?.coverSizeError ||
-          "Image file size exceeds 5MB limit.",
+          coverCheck.reason === "size"
+            ? t.catSpeak?.reels?.coverSizeError ||
+              "Image file size exceeds 5MB limit."
+            : t.catSpeak?.reels?.coverFormatError ||
+              "Please upload a valid image file.",
       }));
       return;
     }
@@ -1026,107 +1028,109 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
 
-    // Reset errors
-    setValidationErrors({});
-    setGeneralError("");
+    await runSubmitLocked(async () => {
+      // Reset errors
+      setValidationErrors({});
+      setGeneralError("");
 
-    // Validate requirements
-    const errors = {};
-    if (!videoFile) {
-      errors.video =
-        t?.catSpeak?.reels?.videoRequiredError || "A video file is required.";
-    }
-    if (!title.trim()) {
-      errors.title =
-        t?.catSpeak?.reels?.titleRequiredError || "A title is required.";
-    }
+      // Validate requirements
+      const errors = {};
+      if (!videoFile) {
+        errors.video =
+          t?.catSpeak?.reels?.videoRequiredError || "A video file is required.";
+      }
+      if (!title.trim()) {
+        errors.title =
+          t?.catSpeak?.reels?.titleRequiredError || "A title is required.";
+      }
 
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        return;
+      }
 
-    try {
-      setIsUploading(true);
-
-      // 1. Check upload eligibility with BE before closing modal and starting upload
       try {
-        await checkUploadEligibility().unwrap();
-      } catch (checkErr) {
-        const fallbackMsg =
-          t?.catSpeak?.reels?.monthlyQuotaExceeded ||
-          "Bạn đã đạt giới hạn tải lên tối đa 5 Reels trong tháng này. Vui lòng nâng cấp lên gói Pro để đăng thêm Reels!";
-        const errMsg =
-          checkErr?.data?.message || checkErr?.message || fallbackMsg;
-        setGeneralError(errMsg);
-        setIsUploading(false);
-        return; // BLOCK SUBMISSION: Keep modal open and display Alert box at top!
-      }
+        setIsUploading(true);
 
-      const formData = new FormData();
-      formData.append("Title", title.trim());
-      formData.append("Description", description.trim());
-      formData.append("Privacy", privacy);
-      formData.append("VideoFile", videoFile);
-
-      if (challenge?.challengeId) {
-        formData.append("ChallengeId", String(challenge.challengeId));
-      }
-
-      if (coverFile) {
-        formData.append("CoverFile", coverFile);
-      }
-
-      const taskTitle = t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới";
-      formData.append("TaskTitle", taskTitle);
-
-      const createdTaskId = startTask({
-        title: taskTitle,
-        taskType: "ReelUpload",
-        isUploadTask: true,
-        url: "/Reels",
-        method: "POST",
-        data: formData,
-        isHidden: false,
-        onSuccess: () => {
-          toast.success(
-            t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!",
-          );
-          const tags = [
-            { type: "Reels", id: "FEED" },
-            { type: "Reels", id: "USER_REELS" },
-          ];
-          if (challenge?.challengeId) {
-            tags.push({
-              type: "Reels",
-              id: `CHALLENGE_${challenge.challengeId}`,
-            });
-          }
-          store.dispatch(reelsApi.util.invalidateTags(tags));
-        },
-        onError: (err) => {
+        // 1. Check upload eligibility with BE before closing modal and starting upload
+        try {
+          await checkUploadEligibility().unwrap();
+        } catch (checkErr) {
+          const fallbackMsg =
+            t?.catSpeak?.reels?.monthlyQuotaExceeded ||
+            "Bạn đã đạt giới hạn tải lên tối đa 5 Reels trong tháng này. Vui lòng nâng cấp lên gói Pro để đăng thêm Reels!";
           const errMsg =
-            err?.message ||
-            t?.catSpeak?.reels?.uploadFailed ||
-            "Failed to upload Reel. Please try again.";
-          toast.error(errMsg);
-        },
-      });
-      setCurrentUploadId(createdTaskId);
+            checkErr?.data?.message || checkErr?.message || fallbackMsg;
+          setGeneralError(errMsg);
+          setIsUploading(false);
+          return; // BLOCK SUBMISSION: Keep modal open and display Alert box at top!
+        }
 
-      setIsUploading(false);
+        const formData = new FormData();
+        formData.append("Title", title.trim());
+        formData.append("Description", description.trim());
+        formData.append("Privacy", privacy);
+        formData.append("VideoFile", videoFile);
 
-      // Close modal immediately after eligibility check passes
-      if (onClose) onClose();
-    } catch (err) {
-      setIsUploading(false);
-      const errMsg =
-        err?.data?.message ||
-        err?.message ||
-        t?.catSpeak?.reels?.uploadFailed ||
-        "Failed to upload Reel. Please try again.";
-      setGeneralError(errMsg);
-    }
+        if (challenge?.challengeId) {
+          formData.append("ChallengeId", String(challenge.challengeId));
+        }
+
+        if (coverFile) {
+          formData.append("CoverFile", coverFile);
+        }
+
+        const taskTitle = t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới";
+        formData.append("TaskTitle", taskTitle);
+
+        const createdTaskId = startTask({
+          title: taskTitle,
+          taskType: "ReelUpload",
+          isUploadTask: true,
+          url: "/Reels",
+          method: "POST",
+          data: formData,
+          isHidden: false,
+          onSuccess: () => {
+            toast.success(
+              t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!",
+            );
+            const tags = [
+              { type: "Reels", id: "FEED" },
+              { type: "Reels", id: "USER_REELS" },
+            ];
+            if (challenge?.challengeId) {
+              tags.push({
+                type: "Reels",
+                id: `CHALLENGE_${challenge.challengeId}`,
+              });
+            }
+            store.dispatch(reelsApi.util.invalidateTags(tags));
+          },
+          onError: (err) => {
+            const errMsg =
+              err?.message ||
+              t?.catSpeak?.reels?.uploadFailed ||
+              "Failed to upload Reel. Please try again.";
+            toast.error(errMsg);
+          },
+        });
+        setCurrentUploadId(createdTaskId);
+
+        setIsUploading(false);
+
+        // Close modal immediately after eligibility check passes
+        if (onClose) onClose();
+      } catch (err) {
+        setIsUploading(false);
+        const errMsg =
+          err?.data?.message ||
+          err?.message ||
+          t?.catSpeak?.reels?.uploadFailed ||
+          "Failed to upload Reel. Please try again.";
+        setGeneralError(errMsg);
+      }
+    });
   };
 
   const value = {

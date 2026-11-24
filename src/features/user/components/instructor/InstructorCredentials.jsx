@@ -5,6 +5,11 @@ import { FileText } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import Modal from "@/shared/components/ui/Modal"
 import FilePreview from "@/shared/components/ui/FilePreview"
+import {
+  downloadAuthenticatedFile,
+  openAuthenticatedMediaInNewTab,
+  useAuthenticatedMediaUrl,
+} from "@/shared/utils/authenticatedMedia"
 
 /**
  * Extract the original filename from a stored credential URL.
@@ -54,11 +59,19 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
     return parsed || `${ins.document || "Tài liệu"} ${idx + 1}`
   }
 
-  const previewUrl = previewCred instanceof File ? fileObjectUrl : previewCred
+  const previewSourceUrl = typeof previewCred === "string" ? previewCred : null
+  const { url: authPreviewUrl } = useAuthenticatedMediaUrl(previewSourceUrl)
+  const previewUrl = previewCred instanceof File ? fileObjectUrl : authPreviewUrl
   const previewName = previewCred != null ? displayName(previewCred, safePreviewIndex) : ""
 
   const handleOpenNewTab = () => {
-    if (previewUrl) window.open(previewUrl, "_blank", "noopener,noreferrer")
+    if (previewCred instanceof File && fileObjectUrl) {
+      window.open(fileObjectUrl, "_blank", "noopener,noreferrer")
+      return
+    }
+    if (previewSourceUrl) {
+      openAuthenticatedMediaInNewTab(previewSourceUrl)
+    }
   }
 
   return (
@@ -154,16 +167,27 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
         footerClassName="p-3 sm:p-4 border-t border-border dark:border-[#2E2E2E] bg-white dark:bg-[#1A1A1A]"
         footer={
           <div className="flex flex-wrap justify-end gap-2">
-            {previewUrl && (
-              <a
-                href={previewUrl}
-                download={previewName || true}
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 dark:text-neutral-200 bg-white dark:bg-[#242424] hover:bg-gray-100 dark:hover:bg-[#2C2C2C] border border-border dark:border-[#3F3F3F] rounded-lg transition"
-              >
-                <Download size={15} />
-                <span>{ins.download || "Tải xuống"}</span>
-              </a>
+            {(previewUrl || previewSourceUrl) && (
+              previewCred instanceof File ? (
+                <a
+                  href={previewUrl}
+                  download={previewName || true}
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 dark:text-neutral-200 bg-white dark:bg-[#242424] hover:bg-gray-100 dark:hover:bg-[#2C2C2C] border border-border dark:border-[#3F3F3F] rounded-lg transition"
+                >
+                  <Download size={15} />
+                  <span>{ins.download || "Tải xuống"}</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => downloadAuthenticatedFile(previewSourceUrl, previewName || "credential")}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 dark:text-neutral-200 bg-white dark:bg-[#242424] hover:bg-gray-100 dark:hover:bg-[#2C2C2C] border border-border dark:border-[#3F3F3F] rounded-lg transition cursor-pointer"
+                >
+                  <Download size={15} />
+                  <span>{ins.download || "Tải xuống"}</span>
+                </button>
+              )
             )}
             <button
               type="button"

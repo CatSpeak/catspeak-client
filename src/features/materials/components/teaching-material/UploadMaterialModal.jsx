@@ -170,13 +170,12 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
   };
 
   const handleUpload = async () => {
+    if (isBusy) return;
     const pendingFiles = uploadFiles.filter(f => f.status === 'ready' || f.status === 'error');
     if (pendingFiles.length === 0) {
       toast.error(t.materials.noValidFilesToUpload);
       return;
     }
-
-    setIsBusy(true);
 
     setIsBusy(true);
 

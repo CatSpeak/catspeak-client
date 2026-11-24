@@ -15,7 +15,11 @@ import useMentionAutocomplete from "../hooks/useMentionAutocomplete"
 import useTypingDebounce from "../hooks/useTypingDebounce"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getMessagePreview } from "../utils/messagePreviewUtils"
+import { validateUploadFile } from "@/shared/utils/fileValidation"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
 import toast from "react-hot-toast"
+
+const MAX_CHAT_FILE_BYTES = 25 * 1024 * 1024
 
 /**
  * ChatInput — message input bar with auto-resizing textarea, file attachments,
@@ -91,6 +95,7 @@ const ChatInput = ({
     onStartTyping,
     onStopTyping,
   })
+  const { runLocked } = useSubmitLock()
 
   const hasContent = value.trim().length > 0 || selectedFile !== null
 
@@ -103,22 +108,6 @@ const ChatInput = ({
   }
 
   // ── File Management ────────────────────────────────────
-  const handleSelectedFile = useCallback((file) => {
-    if (!file) return
-    setSelectedFile(file)
-    if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
-      const url = URL.createObjectURL(file)
-      setFilePreviewUrl(url)
-    } else {
-      setFilePreviewUrl(null)
-    }
-  }, [])
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0]
-    handleSelectedFile(file)
-  }
-
   const clearSelectedFile = useCallback(() => {
     setSelectedFile(null)
     if (filePreviewUrl) {
@@ -129,6 +118,48 @@ const ChatInput = ({
       fileInputRef.current.value = ""
     }
   }, [filePreviewUrl])
+
+  const handleSelectedFile = useCallback(
+    (file) => {
+      if (!file) return false
+      const validation = validateUploadFile(file, {
+        maxBytes: MAX_CHAT_FILE_BYTES,
+      })
+      if (!validation.valid) {
+        if (validation.reason === "size") {
+          toast.error(
+            t?.chat?.fileTooLarge || "File size exceeds 25MB limit.",
+          )
+        } else {
+          toast.error(
+            t?.chat?.unsupportedFileType ||
+              "This file type is not allowed for security reasons.",
+          )
+        }
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
+        return false
+      }
+      if (filePreviewUrl) {
+        URL.revokeObjectURL(filePreviewUrl)
+      }
+      setSelectedFile(file)
+      if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
+        const url = URL.createObjectURL(file)
+        setFilePreviewUrl(url)
+      } else {
+        setFilePreviewUrl(null)
+      }
+      return true
+    },
+    [filePreviewUrl, t],
+  )
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    handleSelectedFile(file)
+  }
 
   // ── Clipboard Paste (Ctrl + V) ─────────────────────────
   const handlePaste = useCallback(
@@ -145,8 +176,9 @@ const ChatInput = ({
           const file = item.getAsFile()
           if (file) {
             e.preventDefault()
-            handleSelectedFile(file)
-            toast.success(t?.chat?.imagePasted || "Image pasted from clipboard")
+            if (handleSelectedFile(file)) {
+              toast.success(t?.chat?.imagePasted || "Image pasted from clipboard")
+            }
             return
           }
         }
@@ -185,14 +217,22 @@ const ChatInput = ({
   )
 
   // ── Standard Send ──────────────────────────────────────
-  const handleSend = useCallback(() => {
-    if (!hasContent) return
-    stopTypingImmediately()
-    onSend(value.trim(), selectedFile, { mentionedAccountIds })
-    resetMentions()
-    clearSelectedFile()
+  const handleSend = useCallback(async () => {
+    if (!hasContent || disabled) return
+    await runLocked(async () => {
+      stopTypingImmediately()
+      try {
+        await onSend(value.trim(), selectedFile, { mentionedAccountIds })
+        resetMentions()
+        clearSelectedFile()
+      } catch {
+        // Error feedback & retry handled by caller; keep draft intact
+      }
+    })
   }, [
     hasContent,
+    disabled,
+    runLocked,
     value,
     selectedFile,
     onSend,

@@ -183,8 +183,8 @@ const RoomsPage = () => {
     isFetching,
   } = useGetRoomsQuery(
     {
-      page: 1,
-      pageSize: 1000,
+      page: hasOtherCategory ? 1 : page,
+      pageSize: hasOtherCategory ? 100 : pageSize,
       languageType,
       requiredLevels: requiredLevelsArg,
       categories: apiCategories,
@@ -206,9 +206,7 @@ const RoomsPage = () => {
         r.categories === "[]" ||
         r.categories.length === 0 ||
         r.categories.includes("Other") ||
-        (Array.isArray(r.categories)
-          ? !known.some((c) => r.categories.includes(c))
-          : !known.some((c) => r.categories.includes(c)))
+        !known.some((c) => r.categories.includes(c))
 
       if (isOtherRoom && categories.includes("Other")) return true
       if (r.categories && r.categories.length > 0) {
@@ -220,12 +218,18 @@ const RoomsPage = () => {
     })
   }
 
-  // Local pagination
-  const totalFilteredCount = rooms.length
-  const totalPages = Math.max(1, Math.ceil(totalFilteredCount / pageSize))
+  // Use server pagination when querying exact categories, local pagination only for client-filtered "Other"
+  const totalPages = hasOtherCategory
+    ? Math.max(1, Math.ceil(rooms.length / pageSize))
+    : Math.max(
+        1,
+        responseData?.totalPages ??
+          Math.ceil((responseData?.totalCount ?? rooms.length) / pageSize),
+      )
 
-  // Slice rooms for current page
-  rooms = rooms.slice((page - 1) * pageSize, page * pageSize)
+  if (hasOtherCategory) {
+    rooms = rooms.slice((page - 1) * pageSize, page * pageSize)
+  }
 
   return (
     <>

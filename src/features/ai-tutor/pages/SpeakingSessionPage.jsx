@@ -10,6 +10,7 @@ import {
 } from "../api/speakingApi"
 
 const TERMINAL = new Set(["completed", "abandoned"])
+const FINISHING_STATUSES = new Set(["closing", "completing", "wrapping_up"])
 
 const AI_API_BASE = (import.meta.env.VITE_AI_API_BASE_URL || "/api/ai").replace(/\/$/, "")
 
@@ -77,7 +78,7 @@ const SpeakingSessionPage = () => {
       while (mounted.current && Date.now() < deadline) {
         const latest = await loadSession(sessionId, false).unwrap()
         if (!mounted.current) return
-        if (TERMINAL.has(latest.status) || latest.status === "closing" || latest.status === "completing") {
+        if (TERMINAL.has(latest.status) || FINISHING_STATUSES.has(latest.status)) {
           navigate(`result`, { replace: true })
           return
         }
@@ -115,7 +116,7 @@ const SpeakingSessionPage = () => {
 
   useEffect(() => {
     if (!session || credentials || isError) return
-    if (TERMINAL.has(session.status) || session.status === "closing" || session.status === "completing") {
+    if (TERMINAL.has(session.status) || FINISHING_STATUSES.has(session.status)) {
       navigate("result", { replace: true })
       return
     }

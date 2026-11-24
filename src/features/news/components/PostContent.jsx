@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
-import DOMPurify from "dompurify"
+import { sanitizeHtml } from "@/shared/utils/sanitizeHtml"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import { CmsCarousel } from "./CmsCarousel"
 import { parseContentSegments } from "../utils/parseContentSegments"
@@ -48,8 +48,8 @@ const PostContent = ({ html, contentUrl, className = "", fallback = null }) => {
   const segments = useMemo(() => {
     if (!displayHtml) return []
     const normalizedHtml = normalizeContent(displayHtml)
-    const sanitized = DOMPurify.sanitize(normalizedHtml, {
-      ADD_TAGS: [
+    const sanitized = sanitizeHtml(normalizedHtml, {
+      extraTags: [
         "mark",
         "sub",
         "sup",
@@ -58,9 +58,8 @@ const PostContent = ({ html, contentUrl, className = "", fallback = null }) => {
         "s",
         "u",
         "strike",
-        "iframe",
       ],
-      ADD_ATTR: [
+      extraAttrs: [
         "style",
         "width",
         "height",

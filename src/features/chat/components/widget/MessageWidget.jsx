@@ -265,9 +265,9 @@ const MessageWidget = () => {
   )
 
   // Handle send message
-  const handleSendMessage = async (text, file) => {
+  const handleSendMessage = async (text, file, extraOptions) => {
     if (stopTyping) stopTyping()
-    await sendAction(text, file)
+    await sendAction(text, file, extraOptions)
     setInput("")
   }
 

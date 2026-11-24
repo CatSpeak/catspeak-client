@@ -77,7 +77,10 @@ const NewsPage = ({ postType = "1" }) => {
   }, [topicsData, currentCommunityId])
 
   const filterKey = useMemo(() => {
-    const topicsKey = (filters.topicIds || []).slice().sort().join(",")
+    const topicsKey = (filters.topicIds || [])
+      .slice()
+      .sort((a, b) => Number(a) - Number(b))
+      .join(",")
     return `${postType}_${currentCommunityId}_${filters.searchKeyword}_${filters.sortBy}_${topicsKey}`
   }, [
     postType,
@@ -154,8 +157,14 @@ const NewsPage = ({ postType = "1" }) => {
     const isSameKeyword = nextKeyword === filters.searchKeyword
     const isSameSort = nextSortBy === filters.sortBy
     const isSameTopics =
-      (nextTopicIds || []).slice().sort().join(",") ===
-      (filters.topicIds || []).slice().sort().join(",")
+      (nextTopicIds || [])
+        .slice()
+        .sort((a, b) => Number(a) - Number(b))
+        .join(",") ===
+      (filters.topicIds || [])
+        .slice()
+        .sort((a, b) => Number(a) - Number(b))
+        .join(",")
 
     if (isSameKeyword && isSameSort && isSameTopics) {
       return

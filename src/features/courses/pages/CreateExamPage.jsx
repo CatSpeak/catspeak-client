@@ -1855,7 +1855,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               </label>
 
               <Editor
-                tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+                tinymceScriptSrc="/tinymce/tinymce.min.js"
                 value={editorText}
                 onEditorChange={(newVal) => setFormField("editorText", newVal)}
                 init={{

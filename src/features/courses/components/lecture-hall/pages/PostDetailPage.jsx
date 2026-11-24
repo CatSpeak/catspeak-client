@@ -1,6 +1,5 @@
 import React, { useState } from "react"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import PostContent from "../components/bulletin-board/PostContent"
 import CommentList from "../components/bulletin-board/CommentList"
@@ -11,7 +10,6 @@ import {
   useGetStudentPostDetailQuery,
   useCreateCommentInBulletinBoardMutation,
   useCreateStudentCommentInBulletinBoardMutation,
-  useCreateReplyInCommentMutation,
   useGetStudentClassDetailQuery,
 } from "@/store/api/coursesApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
@@ -19,6 +17,21 @@ import { useSelector } from "react-redux"
 import { formatFileSize } from "../utils/fileUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+
+const parseAttachmentsJson = (rawJson) => {
+  if (!rawJson || typeof rawJson !== "string") return []
+  try {
+    const parsed = JSON.parse(rawJson)
+    if (!Array.isArray(parsed)) return []
+    return parsed.map((a) => ({
+      name: a.FileName,
+      url: a.FileUrl,
+      size: formatFileSize(a.FileSize),
+    }))
+  } catch {
+    return []
+  }
+}
 
 const PostDetailPage = () => {
   const navigate = useNavigate()
@@ -45,7 +58,6 @@ const PostDetailPage = () => {
   const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}`
 
   const [showAll, setShowAll] = useState(false)
-  const [replyingTo, setReplyingTo] = useState(null)
 
   const { user } = useSelector((state) => state.auth)
 
@@ -64,8 +76,6 @@ const PostDetailPage = () => {
   const [createStudentComment] = useCreateStudentCommentInBulletinBoardMutation()
   const createComment = isStudent ? createStudentComment : createTeacherComment
 
-  const [createReply] = useCreateReplyInCommentMutation()
-
   const formattedPost = {
     tag: "",
     title: postDetail?.title || dict.noTitle,
@@ -74,13 +84,7 @@ const PostDetailPage = () => {
     date: postDetail?.createdAt ? formatDate(postDetail.createdAt) : "",
     thumbnailUrl: postDetail?.thumbnailUrl || "",
     content: postDetail?.content || "",
-    attachments: postDetail?.attachmentsJson
-      ? JSON.parse(postDetail.attachmentsJson).map(a => ({
-        name: a.FileName,
-        url: a.FileUrl,
-        size: formatFileSize(a.FileSize)
-      }))
-      : [],
+    attachments: parseAttachmentsJson(postDetail?.attachmentsJson),
   }
 
   const comments = postDetail?.replies?.map((comment) => ({
@@ -95,22 +99,12 @@ const PostDetailPage = () => {
 
   const handleSubmit = async (text) => {
     try {
-      if (replyingTo) {
-        await createReply({
-          classId,
-          commentId: replyingTo.id,
-          content: text,
-        }).unwrap()
-        toast.success(dict.toastReplySuccess)
-        setReplyingTo(null)
-      } else {
-        await createComment({
-          classId,
-          postId,
-          content: text,
-        }).unwrap()
-        toast.success(dict.toastCommentSuccess)
-      }
+      await createComment({
+        classId,
+        postId,
+        content: text,
+      }).unwrap()
+      toast.success(dict.toastCommentSuccess)
     } catch {
       toast.error(dict.toastError)
     }
@@ -146,15 +140,6 @@ const PostDetailPage = () => {
         <h1 className="text-[24px] sm:text-[32px] md:text-[40px] font-semibold text-[#191C1D] dark:text-white">
           Chi tiết bài viết
         </h1>
-        <div className="flex gap-2">
-          {/* Header Action Buttons from image */}
-          <button className="p-2 rounded-lg bg-white dark:bg-[#1A1A1A] border border-[#E2E2E2] dark:border-[#3F3F3F] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors flex items-center justify-center h-10 w-10 shadow-sm text-gray-600 dark:text-gray-300">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-300"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-          </button>
-          <button className="p-2 rounded-lg bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-gray-950 hover:bg-[#80000e] dark:hover:bg-[#ff8080] transition-colors flex items-center justify-center h-10 w-10 shadow-sm">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -172,8 +157,6 @@ const PostDetailPage = () => {
           currentUserAvatar={user?.avatarImageUrl || ""}
           currentUserName={user?.fullName || dict.you}
           onSubmit={handleSubmit}
-          onReply={(c) => setReplyingTo(c)}
-          onViewReplies={(c) => console.log("view replies of", c)}
           onShowAll={() => setShowAll(true)}
         />
         </div>

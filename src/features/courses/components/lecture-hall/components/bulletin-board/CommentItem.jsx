@@ -86,10 +86,11 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
 
         {/* Action Links */}
         <div className="flex items-center gap-2 mt-2">
-          {replyCount > 0 && (
+          {replyCount > 0 && typeof onViewReplies === "function" && (
             <>
               <button
-                onClick={() => onViewReplies && onViewReplies(comment)}
+                type="button"
+                onClick={() => onViewReplies(comment)}
                 className="text-[13px] font-semibold text-[#990011] dark:text-[#FF6B6B] hover:underline"
               >
                 {dict.viewMoreReplies ? dict.viewMoreReplies.replace("{{count}}", replyCount) : `Xem ${replyCount} phản hồi`}
@@ -97,12 +98,15 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
               <span className="text-[#990011] dark:text-[#FF6B6B] text-[13px]">.</span>
             </>
           )}
-          <button
-            onClick={() => onReply && onReply(comment)}
-            className="text-[13px] font-semibold text-[#990011] dark:text-[#FF6B6B] hover:underline"
-          >
-            {dict.reply || "Phản hồi"}
-          </button>
+          {typeof onReply === "function" && (
+            <button
+              type="button"
+              onClick={() => onReply(comment)}
+              className="text-[13px] font-semibold text-[#990011] dark:text-[#FF6B6B] hover:underline"
+            >
+              {dict.reply || "Phản hồi"}
+            </button>
+          )}
         </div>
       </div>
     </div>

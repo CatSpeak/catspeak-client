@@ -37,7 +37,7 @@ const useReels = (searchQuery = "") => {
   const tags = useMemo(() => {
     const tagSet = new Set()
     reels.forEach((v) => v.tags.forEach((t) => tagSet.add(t)))
-    return Array.from(tagSet).sort()
+    return Array.from(tagSet).sort((a, b) => String(a).localeCompare(String(b)))
   }, [reels])
 
   const filteredReels = useMemo(

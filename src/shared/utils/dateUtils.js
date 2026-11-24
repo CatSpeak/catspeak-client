@@ -527,3 +527,15 @@ export const formatWeeklyScheduleText = (
 
   return timeText ? `${formattedDays} (${timeText})` : formattedDays
 }
+
+/**
+ * Format a Date (or current date) as YYYY-MM-DD in the user's local timezone.
+ */
+export const toLocalDateString = (date = new Date()) => {
+  const d = date instanceof Date ? date : ensureDate(date)
+  if (!d) return ""
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, "0")
+  const dd = String(d.getDate()).padStart(2, "0")
+  return `${yyyy}-${mm}-${dd}`
+}

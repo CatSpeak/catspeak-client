@@ -13,6 +13,11 @@ import dayjs from "dayjs";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
+import {
+  SAFE_RASTER_IMAGE_EXTENSIONS,
+  SAFE_RASTER_IMAGE_MIME_TYPES,
+  validateUploadFile,
+} from "@/shared/utils/fileValidation";
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
 import { useEventForm } from "../hooks/useEventForm";
 import { communityCodeFromValue } from "../utils/community";
@@ -216,7 +221,6 @@ const CreateEventPage = () => {
     handleError,
     () => setSubmitStatus("validation_error"),
   );
-  console.log("form.eventColor =", form.eventColor);
 
   const handleDeleteConfirmed = async () => {
     try {
@@ -232,8 +236,17 @@ const CreateEventPage = () => {
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(cal.imageTooLarge || "Ảnh sự kiện không được vượt quá 10MB");
+      const check = validateUploadFile(file, {
+        allowedExtensions: SAFE_RASTER_IMAGE_EXTENSIONS,
+        allowedMimeTypes: SAFE_RASTER_IMAGE_MIME_TYPES,
+        maxBytes: 10 * 1024 * 1024,
+      });
+      if (!check.valid) {
+        toast.error(
+          check.reason === "size"
+            ? cal.imageTooLarge || "Ảnh sự kiện không được vượt quá 10MB"
+            : cal.imageInvalidFormat || "Chỉ hỗ trợ ảnh định dạng PNG, JPEG hoặc WebP",
+        );
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
@@ -465,7 +478,7 @@ const CreateEventPage = () => {
                     </div>
                     <p className="text-sm text-gray-400 text-center px-4">
                       {cal.imageUploadHint ||
-                        "Hỗ trợ định dạng png, jpeg và svg."}
+                        "Hỗ trợ định dạng png, jpeg và webp."}
                       <br />
                       <span className="text-xs">
                         {cal.imageUploadSize || "Kích cỡ dưới 10MB"}
@@ -476,7 +489,7 @@ const CreateEventPage = () => {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/png,image/jpeg,image/svg+xml"
+                  accept="image/png,image/jpeg,image/webp"
                   className="hidden"
                   onChange={handleImageChange}
                 />

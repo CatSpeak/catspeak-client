@@ -166,23 +166,37 @@ const OrderSummary = ({
       >
         <div className="flex flex-col gap-4 mt-2 text-sm text-gray-600 dark:text-neutral-300 leading-relaxed">
           {voucherToRemove && (
-            <p dangerouslySetInnerHTML={{
-              __html: tc.removeVoucherDesc
-                ?.replace("{{code}}", `<strong class="text-gray-900 dark:text-white font-bold">${voucherToRemove.code}</strong>`)
-                ?.replace(
-                  "{{totalAmount}}",
-                  `<strong class="text-gray-900 dark:text-white font-bold">${formatCurrency(
-                    totalPayment +
-                      calculateVoucherDiscount(voucherToRemove, subtotal),
-                  )}</strong>`
-                )
-                ?.replace(
-                  "{{discountAmount}}",
-                  `<strong class="text-gray-900 dark:text-white font-bold">${formatCurrency(
-                    calculateVoucherDiscount(voucherToRemove, subtotal),
-                  )}</strong>`
-                )
-            }} />
+            <p>
+              {(() => {
+                const discountAmount = calculateVoucherDiscount(voucherToRemove, subtotal);
+                const template = tc.removeVoucherDesc || "Remove voucher {{code}}?";
+                const parts = template.split(/({{code}}|{{totalAmount}}|{{discountAmount}})/g);
+                return parts.map((part, idx) => {
+                  if (part === "{{code}}") {
+                    return (
+                      <strong key={idx} className="text-gray-900 dark:text-white font-bold">
+                        {voucherToRemove.code}
+                      </strong>
+                    );
+                  }
+                  if (part === "{{totalAmount}}") {
+                    return (
+                      <strong key={idx} className="text-gray-900 dark:text-white font-bold">
+                        {formatCurrency(totalPayment + discountAmount)}
+                      </strong>
+                    );
+                  }
+                  if (part === "{{discountAmount}}") {
+                    return (
+                      <strong key={idx} className="text-gray-900 dark:text-white font-bold">
+                        {formatCurrency(discountAmount)}
+                      </strong>
+                    );
+                  }
+                  return <React.Fragment key={idx}>{part}</React.Fragment>;
+                });
+              })()}
+            </p>
           )}
         </div>
       </ConfirmationModal>

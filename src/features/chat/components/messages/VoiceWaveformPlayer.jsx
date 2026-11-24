@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { Play, Pause } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuthenticatedMediaUrl } from "@/shared/utils/authenticatedMedia"
 
 // Simple seeded pseudo-random heights generator for visually pleasant waveforms
 const generateWaveformBars = (seedString = "", barCount = 32) => {
@@ -41,6 +42,7 @@ const VoiceWaveformPlayer = ({
   className = "",
 }) => {
   const { t } = useLanguage()
+  const { url: resolvedAudioUrl } = useAuthenticatedMediaUrl(audioUrl)
   const audioRef = useRef(null)
   const waveformRef = useRef(null)
 
@@ -151,7 +153,7 @@ const VoiceWaveformPlayer = ({
     >
       <audio
         ref={audioRef}
-        src={audioUrl}
+        src={resolvedAudioUrl || undefined}
         preload="metadata"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}

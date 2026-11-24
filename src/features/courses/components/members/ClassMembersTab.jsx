@@ -72,8 +72,7 @@ const getAvatarPalette = (key) => {
   let hash = 0
   const str = String(key)
   for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i)
-    hash |= 0
+    hash = Math.trunc((hash << 5) - hash + str.charCodeAt(i))
   }
   return AVATAR_PALETTES[Math.abs(hash) % AVATAR_PALETTES.length]
 }

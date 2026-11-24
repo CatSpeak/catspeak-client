@@ -20,6 +20,7 @@ import ContactSupportModal from "./ContactSupportModal"
 import MessageBubble from "./MessageBubble"
 import SourceDrawer from "./SourceDrawer"
 import { BRAND } from "../lib/theme"
+import { usePathname } from "@/shared/hooks/usePathname"
 
 const MAX_CHARS = 500          // FR-rag-chatbot-013
 const WARN_REMAINING = 3       // FR-rag-chatbot-018
@@ -41,30 +42,6 @@ function errorMessage(e, L) {
   if (e?.status === 401 || e?.status === 403) return m.session
   if (e?.status === 429) return m.busy
   return m.generic
-}
-
-
-/**
- * Đường dẫn hiện tại, đọc bằng window.location chứ không bằng useLocation().
- *
- * Widget mount ở App.jsx, NGOÀI <AppRouter />, nên không có context của Router —
- * useLocation() ném lỗi ngay lúc render. Cùng cách BugReportButton đang làm, và cố
- * ý giống nó: hai nút này nằm cạnh nhau và phải ẩn/hiện theo cùng một luật.
- */
-function usePathname() {
-  const [pathname, setPathname] = useState(
-    typeof window !== "undefined" ? window.location.pathname : "",
-  )
-  useEffect(() => {
-    const doc = () => setPathname(window.location.pathname)
-    window.addEventListener("popstate", doc)
-    const id = setInterval(doc, 400)
-    return () => {
-      window.removeEventListener("popstate", doc)
-      clearInterval(id)
-    }
-  }, [])
-  return pathname
 }
 
 /**

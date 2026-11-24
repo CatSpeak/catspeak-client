@@ -46,10 +46,22 @@ export const pointApi = baseApi.injectEndpoints({
 
     // 4. POST /api/vouchers/redeem/{templateId} - Thực hiện đổi Voucher bằng điểm
     redeemVoucher: builder.mutation({
-      query: (templateId) => ({
-        url: `/vouchers/redeem/${templateId}`,
-        method: "POST",
-      }),
+      query: (arg) => {
+        const isObj = arg && typeof arg === "object"
+        const templateId = isObj ? arg.templateId : arg
+        const idempotencyKey =
+          (isObj && arg.idempotencyKey) ||
+          (typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`)
+        return {
+          url: `/vouchers/redeem/${encodeURIComponent(String(templateId))}`,
+          method: "POST",
+          headers: {
+            "X-Idempotency-Key": idempotencyKey,
+          },
+        }
+      },
       invalidatesTags: [
         "PointsOverview",
         "PointsHistory",
@@ -71,55 +83,6 @@ export const pointApi = baseApi.injectEndpoints({
       },
       providesTags: ["VoucherInventory"],
     }),
-
-    // 6. POST /api/points/earn - Cộng điểm cho học viên (Admin/Trigger)
-    earnPoints: builder.mutation({
-      query: ({
-        accountId,
-        amount,
-        description,
-        validityMonths = 12,
-        validityDays = 0,
-      }) => ({
-        url: "/points/earn",
-        method: "POST",
-        params: {
-          accountId,
-          amount,
-          description,
-          validityMonths,
-          validityDays,
-        },
-      }),
-      invalidatesTags: ["PointsOverview", "PointsHistory"],
-    }),
-
-    // 7. POST /api/internal/jobs/points/expire - Cron job: Xử lý lô điểm hết hạn (Admin)
-    triggerExpirePointsJob: builder.mutation({
-      query: () => ({
-        url: "/internal/jobs/points/expire",
-        method: "POST",
-      }),
-      invalidatesTags: ["PointsOverview", "PointsHistory"],
-    }),
-
-    // 8. POST /api/internal/jobs/points/birthday - Cron job: Tặng điểm sinh nhật (Admin)
-    triggerBirthdayPointsJob: builder.mutation({
-      query: () => ({
-        url: "/internal/jobs/points/birthday",
-        method: "POST",
-      }),
-      invalidatesTags: ["PointsOverview", "PointsHistory"],
-    }),
-
-    // 9. POST /api/internal/jobs/vouchers/expire - Cron job: Xử lý Voucher hết hạn (Admin)
-    triggerExpireVouchersJob: builder.mutation({
-      query: () => ({
-        url: "/internal/jobs/vouchers/expire",
-        method: "POST",
-      }),
-      invalidatesTags: ["VoucherInventory", "VoucherTemplates"],
-    }),
   }),
   overrideExisting: false,
 })
@@ -134,8 +97,4 @@ export const {
   useRedeemVoucherMutation,
   useGetVoucherInventoryQuery,
   useLazyGetVoucherInventoryQuery,
-  useEarnPointsMutation,
-  useTriggerExpirePointsJobMutation,
-  useTriggerBirthdayPointsJobMutation,
-  useTriggerExpireVouchersJobMutation,
 } = pointApi

@@ -14,6 +14,32 @@ import {
   getDomain,
 } from "../../utils/galleryUtils"
 import DockedAudioPlayer from "./DockedAudioPlayer"
+import {
+  downloadAuthenticatedFile,
+  useAuthenticatedMediaUrl,
+} from "@/shared/utils/authenticatedMedia"
+
+const GalleryMediaThumb = ({ item, isVid }) => {
+  const { url: resolvedUrl } = useAuthenticatedMediaUrl(item.mediaUrl)
+  if (isVid) {
+    return (
+      <video
+        src={resolvedUrl || undefined}
+        className="w-full h-full object-cover"
+        muted
+        preload="metadata"
+      />
+    )
+  }
+  return (
+    <img
+      src={resolvedUrl || undefined}
+      alt={item.fileName || "Shared photo"}
+      className="w-full h-full object-cover"
+      loading="lazy"
+    />
+  )
+}
 
 /**
  * SharedMediaGallery — Tabbed gallery panel in ChatUserPanel showing
@@ -177,21 +203,7 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                   onClick={() => setSelectedMediaIndex(idx)}
                   className="group relative aspect-square rounded-lg overflow-hidden bg-neutral-100 dark:bg-[#272727] border border-border/40 dark:border-[#3F3F3F]/40 hover:opacity-95 transition-all text-left p-0 cursor-pointer focus:outline-hidden"
                 >
-                  {isVid ? (
-                    <video
-                      src={item.mediaUrl}
-                      className="w-full h-full object-cover"
-                      muted
-                      preload="metadata"
-                    />
-                  ) : (
-                    <img
-                      src={item.mediaUrl}
-                      alt={item.fileName || t?.chat?.sharedPhoto || "Shared photo"}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  )}
+                  <GalleryMediaThumb item={item} isVid={isVid} />
                   {isVid && (
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                       <Play className="text-white fill-white" />
@@ -205,13 +217,16 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
           /* Files List */
           <div className="flex flex-col">
             {allItems.map((item, idx) => (
-              <a
+              <button
+                type="button"
                 key={item.messageId || idx}
-                href={item.mediaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                download={item.fileName}
-                className="h-[72px] flex items-center gap-4 px-4 hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D] transition-colors"
+                onClick={() =>
+                  downloadAuthenticatedFile(
+                    item.mediaUrl,
+                    item.fileName || "attachment",
+                  ).catch(() => {})
+                }
+                className="w-full text-left h-[72px] flex items-center gap-4 px-4 hover:bg-itemHover dark:hover:bg-[#272727] active:bg-itemActiveHover dark:active:bg-[#3D3D3D] transition-colors cursor-pointer"
               >
                 <Download className="shrink-0" />
                 <div className="min-w-0">
@@ -224,7 +239,7 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                     </p>
                   ) : null}
                 </div>
-              </a>
+              </button>
             ))}
           </div>
         ) : activeTab === "audio" ? (

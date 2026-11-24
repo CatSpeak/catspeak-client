@@ -27,14 +27,6 @@ export const authApi = baseApi.injectEndpoints({
         body: userData,
       }),
     }),
-    registerAdmin: builder.mutation({
-      query: (userData) => ({
-        url: "/Auth/register-admin",
-        method: "POST",
-        body: userData,
-      }),
-      invalidatesTags: ["Auth"],
-    }),
     refreshToken: builder.mutation({
       query: (tokenData) => ({
         url: "/Auth/refresh-token",
@@ -82,13 +74,6 @@ export const authApi = baseApi.injectEndpoints({
         }
       },
     }),
-    revoke: builder.mutation({
-      query: (username) => ({
-        url: `/Auth/revoke/${username}`,
-        method: "POST",
-      }),
-      invalidatesTags: ["Auth"],
-    }),
 
     logout: builder.mutation({
       query: () => ({
@@ -106,6 +91,7 @@ export const authApi = baseApi.injectEndpoints({
           console.error("Logout API call failed:", err)
         }
         dispatch(baseApi.util.resetApiState())
+        dispatch(socialApi.util.resetApiState())
       },
     }),
     getProfile: builder.query({
@@ -116,13 +102,6 @@ export const authApi = baseApi.injectEndpoints({
       providesTags: ["User"],
     }),
 
-    verifyEmail: builder.mutation({
-      query: (body) => ({
-        url: "/Auth/verify-email",
-        method: "POST",
-        body,
-      }),
-    }),
     verifyEmailOtp: builder.mutation({
       query: (body) => ({
         url: "/Auth/verify-email-otp",
@@ -174,15 +153,12 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useLoginMutation,
   useRegisterMutation,
-  useRegisterAdminMutation,
   useRefreshTokenMutation,
   useSwitchAccountTypeMutation,
-  useRevokeMutation,
 
   useLogoutMutation,
   useGetProfileQuery,
 
-  useVerifyEmailMutation,
   useVerifyEmailOtpMutation,
   useResendEmailOtpMutation,
   useForgotPasswordMutation,

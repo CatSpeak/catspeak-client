@@ -18,7 +18,11 @@ const PaymentResultPage = () => {
   const searchParams = new URLSearchParams(location.search)
   const isCancelled = searchParams.get("cancel") === "true"
   const orderCodeStr = searchParams.get("orderCode")
-  const orderCode = orderCodeStr ? parseInt(orderCodeStr, 10) : null
+  const parsedOrderCode = orderCodeStr ? parseInt(orderCodeStr, 10) : null
+  const orderCode =
+    parsedOrderCode !== null && !Number.isNaN(parsedOrderCode)
+      ? parsedOrderCode
+      : null
 
   const dispatch = useDispatch()
   const { data: invoices = [], isLoading: isHistoryLoading } =
@@ -32,20 +36,25 @@ const PaymentResultPage = () => {
   }, [isCancelled, dispatch])
 
   useEffect(() => {
-    if (isCancelled && orderCode && invoices.length > 0) {
-      const payment = invoices.find((inv) => inv.orderCode === orderCode)
-      if (payment && payment.status === 3) {
-        cancelPayment(payment.paymentId)
-          .unwrap()
-          .catch((error) => console.error("Failed to cancel payment", error))
-          .finally(() => {
-            navigate("/billing", { replace: true })
-          })
-      } else {
-        navigate("/billing", { replace: true })
-      }
+    if (!isCancelled || isHistoryLoading) return
+    if (!orderCode) {
+      navigate("/billing", { replace: true })
+      return
     }
-  }, [isCancelled, orderCode, invoices, cancelPayment, navigate])
+    const payment = invoices.find(
+      (inv) => String(inv.orderCode) === String(orderCode),
+    )
+    if (payment && payment.status === 3) {
+      cancelPayment(payment.paymentId)
+        .unwrap()
+        .catch((error) => console.error("Failed to cancel payment", error))
+        .finally(() => {
+          navigate("/billing", { replace: true })
+        })
+    } else {
+      navigate("/billing", { replace: true })
+    }
+  }, [isCancelled, isHistoryLoading, orderCode, invoices, cancelPayment, navigate])
 
   const handleReturn = () => {
     navigate("/billing")

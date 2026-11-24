@@ -43,11 +43,10 @@ export {
   useRegisterMutation,
   useLogoutMutation,
   useGetProfileQuery,
-  useVerifyEmailMutation,
+  useVerifyEmailOtpMutation,
+  useResendEmailOtpMutation,
   useForgotPasswordMutation,
   useVerifyResetOtpMutation,
   useResetPasswordMutation,
-  useRegisterAdminMutation,
   useRefreshTokenMutation,
-  useRevokeMutation,
 } from "@/store/api/authApi"

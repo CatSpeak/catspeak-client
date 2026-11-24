@@ -16,7 +16,7 @@ export function seededRandom(seed) {
  */
 export function hashStr(s) {
   let h = 0
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0
+  for (let i = 0; i < s.length; i++) h = Math.trunc(h * 31 + s.charCodeAt(i))
   return Math.abs(h)
 }
 

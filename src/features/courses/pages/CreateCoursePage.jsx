@@ -500,7 +500,7 @@ const CreateCoursePage = () => {
                 </span>
               </div>
               <Editor
-                tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+                tinymceScriptSrc="/tinymce/tinymce.min.js"
                 value={description}
                 onEditorChange={(newContent) => {
                   setDescription(newContent)

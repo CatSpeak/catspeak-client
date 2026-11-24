@@ -3,17 +3,31 @@ import { baseApi } from "./baseApi"
 export const paymentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     checkout: builder.mutation({
-      query: (body) => ({
+      query: ({ idempotencyKey, ...body }) => ({
         url: "v1/Payments/checkout",
         method: "POST",
         body,
+        headers: {
+          "X-Idempotency-Key":
+            idempotencyKey ||
+            (typeof crypto !== "undefined" && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+        },
       }),
     }),
     repay: builder.mutation({
-      query: ({ paymentId, ...body }) => ({
+      query: ({ paymentId, idempotencyKey, ...body }) => ({
         url: `v1/Payments/repay/${paymentId}`,
         method: "POST",
         body,
+        headers: {
+          "X-Idempotency-Key":
+            idempotencyKey ||
+            (typeof crypto !== "undefined" && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+        },
       }),
     }),
     cancelPayment: builder.mutation({

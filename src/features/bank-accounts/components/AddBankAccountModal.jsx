@@ -21,6 +21,7 @@ import { EmptyState } from "@/shared/components/ui/indicators"
 import BankListSkeleton from "./BankListSkeleton"
 import useDebounce from "@/shared/hooks/useDebounce"
 import useBankVerification from "../hooks/useBankVerification"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
 import {
   sanitizeAccountNumber,
   isValidAccountNumber,
@@ -90,6 +91,7 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
 
   const [addBankAccount, { isLoading: isAdding }] =
     useAddInstructorBankAccountMutation()
+  const { runLocked } = useSubmitLock()
 
   const resetForm = () => {
     setStep(1)
@@ -102,12 +104,14 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
   }
 
   const handleCloseModal = () => {
+    if (isAdding) return
     resetForm()
     onClose()
   }
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault()
+    if (isAdding) return
     if (!selectedBank) {
       toast.error(t?.bankAccounts?.modal?.errorSelectBank || "Vui lòng chọn ngân hàng")
       return
@@ -123,18 +127,21 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
       toast.error(t?.bankAccounts?.modal?.errorAccountHolder || "Vui lòng nhập tên chủ tài khoản (2 đến 70 ký tự)")
       return
     }
-    try {
-      await addBankAccount({
-        bankBin: selectedBank.bin,
-        accountNumber: cleanedAccount,
-        accountHolderName: normalizedHolderName,
-        isDefault,
-      }).unwrap()
+    await runLocked(async () => {
+      try {
+        await addBankAccount({
+          bankBin: selectedBank.bin,
+          accountNumber: cleanedAccount,
+          accountHolderName: normalizedHolderName,
+          isDefault,
+        }).unwrap()
 
-      handleCloseModal()
-    } catch (err) {
-      toast.error(err?.data?.message || t?.bankAccounts?.modal?.errorAdd || "Không thể thêm tài khoản ngân hàng")
-    }
+        resetForm()
+        onClose()
+      } catch (err) {
+        toast.error(err?.data?.message || t?.bankAccounts?.modal?.errorAdd || "Không thể thêm tài khoản ngân hàng")
+      }
+    })
   }
 
   const handleSelectBank = (bank) => {

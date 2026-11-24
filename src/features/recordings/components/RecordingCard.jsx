@@ -99,37 +99,14 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
 
     const fetchUrl = proxyR2Url(fileUrl)
 
-    // ── Debug: parse the pre-signed URL ──────────────────────────────
-    try {
-      const parsed = new URL(fileUrl)
-      console.group("[Recording Debug] Download attempt")
-      console.log("Original URL:", fileUrl)
-      console.log("Fetch URL:", fetchUrl)
-      console.log("Host:", parsed.host)
-      console.log("Object key (pathname):", parsed.pathname)
-      console.log("Recording metadata:", {
-        recordingId,
-        meetingId,
-        status,
-        fileSizeBytes,
-        durationSeconds,
-        createdAt,
-      })
-      console.groupEnd()
-    } catch {
-      console.warn("[Recording Debug] Could not parse fileUrl:", fileUrl)
-    }
-
     try {
       const response = await fetch(fetchUrl)
 
       if (!response.ok) {
-        const errorBody = await response.text()
         console.error(
-          `[Recording Debug] Fetch failed: ${response.status} ${response.statusText}`,
+          `[Recording] Download failed: ${response.status} ${response.statusText}`,
         )
-        console.error("[Recording Debug] Response body:", errorBody)
-        window.open(fileUrl, "_blank")
+        window.open(fileUrl, "_blank", "noopener,noreferrer")
         return
       }
 

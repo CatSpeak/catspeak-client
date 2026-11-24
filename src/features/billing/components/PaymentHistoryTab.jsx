@@ -12,6 +12,7 @@ import RequestRefundModal from "@/features/refunds/components/RequestRefundModal
 
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import PaymentHistorySkeleton from "./PaymentHistorySkeleton"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
 
 const ITEMS_PER_PAGE = 5
 
@@ -115,24 +116,28 @@ export default function PaymentHistoryTab() {
     setRefundTargetInvoice(invoice)
   }
 
-  const handleRepay = async (invoice) => {
-    try {
-      setRepayingId(invoice.paymentId)
-      const res = await repay({
-        paymentId: invoice.paymentId,
-        returnUrl: `${window.location.origin}/billing/result`,
-        cancelUrl: `${window.location.origin}/billing/result`,
-      }).unwrap()
+  const { runLocked } = useSubmitLock()
 
-      const checkoutUrl = res?.checkoutUrl || res?.data?.checkoutUrl
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl
+  const handleRepay = async (invoice) => {
+    await runLocked(async () => {
+      try {
+        setRepayingId(invoice.paymentId)
+        const res = await repay({
+          paymentId: invoice.paymentId,
+          returnUrl: `${window.location.origin}/billing/result`,
+          cancelUrl: `${window.location.origin}/billing/result`,
+        }).unwrap()
+
+        const checkoutUrl = res?.checkoutUrl || res?.data?.checkoutUrl
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl
+        }
+      } catch (err) {
+        console.error("Failed to repay order:", err)
+      } finally {
+        setRepayingId(null)
       }
-    } catch (err) {
-      console.error("Failed to repay order:", err)
-    } finally {
-      setRepayingId(null)
-    }
+    })
   }
 
   if (isLoading) {

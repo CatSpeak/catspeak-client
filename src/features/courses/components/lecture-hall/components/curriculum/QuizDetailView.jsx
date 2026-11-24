@@ -6,6 +6,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import FluentCard from '@/shared/components/ui/FluentCard'
 import QuizStatusBadge from './QuizStatusBadge'
+import { sanitizeHtml } from '@/shared/utils/sanitizeHtml'
 
 const QuizDetailView = ({ itemData, onBack, sectionData }) => {
   const { classId: routeClassId, id: routeId } = useParams()
@@ -150,7 +151,7 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
           {description && (
             <div
               className="text-[#5B403C] dark:text-gray-300 text-sm mb-6 whitespace-pre-wrap assignment-description-html"
-              dangerouslySetInnerHTML={{ __html: description }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(description) }}
             />
           )}
         </FluentCard>

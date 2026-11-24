@@ -4,6 +4,7 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useSubmitLock } from "@/shared/hooks/useSubmitLock"
 import { useGetBanksQuery } from "@/features/bank-accounts/api/instructorBankAccountsApi"
 import RefundIneligibleModal from "./RefundIneligibleModal"
 import RefundEligibleModal from "./RefundEligibleModal"
@@ -61,6 +62,7 @@ export default function RequestRefundModal({
   // Mutation
   const [requestRefund, { isLoading: isSubmitting }] =
     useRequestRefundMutation()
+  const { runLocked } = useSubmitLock()
 
   // Format currency
   const formatAmount = (val) =>
@@ -88,6 +90,7 @@ export default function RequestRefundModal({
   // Handle submit refund request
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (isSubmitting) return
     setFormError(null)
 
     const bankBin = selectedBank?.bin || selectedBank?.bankBin
@@ -95,38 +98,43 @@ export default function RequestRefundModal({
       setFormError(refundT.errorNoBank || "Vui lòng chọn ngân hàng.")
       return
     }
-    if (!accountNumber.trim()) {
-      setFormError(refundT.errorNoAccount || "Vui lòng nhập số tài khoản.")
+    const cleanedAccount = accountNumber.trim()
+    if (!/^\d{6,34}$/.test(cleanedAccount)) {
+      setFormError(refundT.errorNoAccount || "Vui lòng nhập số tài khoản hợp lệ (6-34 chữ số).")
       return
     }
-    if (!accountHolderName.trim()) {
+    const cleanedHolder = accountHolderName.trim().toUpperCase()
+    if (cleanedHolder.length < 2 || cleanedHolder.length > 70) {
       setFormError(refundT.errorNoHolder || "Vui lòng nhập tên chủ tài khoản.")
       return
     }
-    if (!reason.trim()) {
-      setFormError(refundT.errorNoReason || "Vui lòng nhập lý do hoàn tiền.")
+    const cleanedReason = reason.trim()
+    if (cleanedReason.length < 3) {
+      setFormError(refundT.errorNoReason || "Vui lòng nhập lý do hoàn tiền (tối thiểu 3 ký tự).")
       return
     }
 
-    try {
-      await requestRefund({
-        paymentId: Number(paymentId),
-        bankBin: String(bankBin),
-        accountNumber: accountNumber.trim(),
-        accountHolderName: accountHolderName.trim().toUpperCase(),
-        reason: reason.trim(),
-      }).unwrap()
+    await runLocked(async () => {
+      try {
+        await requestRefund({
+          paymentId: Number(paymentId),
+          bankBin: String(bankBin),
+          accountNumber: cleanedAccount,
+          accountHolderName: cleanedHolder,
+          reason: cleanedReason,
+        }).unwrap()
 
-      setStep("success")
-    } catch (err) {
-      console.error("Refund request failed:", err)
-      const msg =
-        err?.data?.message ||
-        err?.data?.data?.message ||
-        refundT.errorSubmitFailed ||
-        "Gửi yêu cầu hoàn tiền thất bại. Vui lòng thử lại."
-      setFormError(msg)
-    }
+        setStep("success")
+      } catch (err) {
+        console.error("Refund request failed:", err)
+        const msg =
+          err?.data?.message ||
+          err?.data?.data?.message ||
+          refundT.errorSubmitFailed ||
+          "Gửi yêu cầu hoàn tiền thất bại. Vui lòng thử lại."
+        setFormError(msg)
+      }
+    })
   }
 
   const isEligible = eligibility?.isEligible === true
@@ -406,7 +414,12 @@ export default function RequestRefundModal({
             >
               {refundT.btnCancel || "Hủy"}
             </PillButton>
-            <PillButton type="submit" className="flex-1" loading={isSubmitting}>
+            <PillButton
+              type="submit"
+              className="flex-1"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
               {refundT.btnSubmitRequest || "Gửi yêu cầu"}
             </PillButton>
           </div>

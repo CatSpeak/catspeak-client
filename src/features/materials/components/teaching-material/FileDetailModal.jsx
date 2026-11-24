@@ -10,7 +10,7 @@ import { useLanguage } from '@/shared/context/LanguageContext';
 
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import toast from 'react-hot-toast';
-import { formatSize } from "../../utils/materialUtils";
+import { downloadFile, formatSize } from "../../utils/materialUtils";
 
 
 const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
@@ -86,23 +86,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
 
   const handleDownload = async () => {
     if (item.fileUrl) {
-      recordDownload(item.id);
-      try {
-        const response = await fetch(item.fileUrl);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = item.fileName || item.name || 'download';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('Download failed, falling back to new tab:', error);
-        window.open(item.fileUrl, '_blank');
-      }
+      await downloadFile(item, recordDownload);
     }
   };
 

@@ -4,6 +4,7 @@ import { store } from '@/store';
 import { materialApi } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
 import { flattenFolders } from './materialUtils';
+import { fetchAuthenticatedBlob } from '@/shared/utils/authenticatedMedia';
 
 export const downloadFolderAsZip = async (folder, isPublicProfile = false, targetAccountId = null, t, silent = false) => {
   const toastId = !silent ? toast.loading(t?.materials?.downloadingFolder || 'Đang chuẩn bị tải xuống...') : null;
@@ -288,9 +289,7 @@ export const downloadMultipleItemsAsZip = async (items, isPublicProfile = false,
     standaloneFiles.forEach(file => {
       downloadTasks.push(async () => {
         try {
-          const response = await fetch(file.fileUrl);
-          if (!response.ok) throw new Error('Network error');
-          const blob = await response.blob();
+          const blob = await fetchAuthenticatedBlob(file.fileUrl);
           zip.file(file.fileName || file.name, blob);
           store.dispatch(materialApi.endpoints.recordMaterialDownload.initiate(file.materialId || file.id));
         } catch (e) {
@@ -339,9 +338,7 @@ export const downloadMultipleItemsAsZip = async (items, isPublicProfile = false,
         if (!file.fileUrl) return;
         downloadTasks.push(async () => {
           try {
-            const response = await fetch(file.fileUrl);
-            if (!response.ok) throw new Error('Network error');
-            const blob = await response.blob();
+            const blob = await fetchAuthenticatedBlob(file.fileUrl);
             
             const relativePath = getRelativePathForFolder(file.folderId, targetId, targetName);
             const fullPath = relativePath ? `${relativePath}/${file.fileName || file.name}` : (file.fileName || file.name);

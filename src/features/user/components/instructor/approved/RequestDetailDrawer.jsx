@@ -9,6 +9,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { toast } from "@/shared/utils/toastBridge"
 import { parseApiError } from "@/shared/utils/apiError"
 import { fileNameFromUrl, formatUtcDate, pick, requestStatus } from "./utils"
+import { openAuthenticatedMediaInNewTab } from "@/shared/utils/authenticatedMedia"
 
 const STATUS_STYLES = {
   Approved: {
@@ -41,15 +42,14 @@ const FileRow = ({ url, downloadLabel }) =>
       >
         {fileNameFromUrl(url)}
       </span>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
+        onClick={() => openAuthenticatedMediaInNewTab(url)}
         aria-label={downloadLabel}
-        className="shrink-0 text-[#101828] transition-colors hover:text-[#F52235]"
+        className="shrink-0 text-[#101828] transition-colors hover:text-[#F52235] cursor-pointer"
       >
         <Download size={18} />
-      </a>
+      </button>
     </div>
   ) : (
     <span className="text-xs text-[#98A2B3]">—</span>

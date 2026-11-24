@@ -10,6 +10,11 @@ import FluentCard from '@/shared/components/ui/FluentCard'
 import HorizontalCard from '@/shared/components/ui/HorizontalCard'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import AssignmentStatusBadge from './AssignmentStatusBadge'
+import { sanitizeHtml } from '@/shared/utils/sanitizeHtml'
+import {
+  DEFAULT_ASSIGNMENT_ALLOWED_EXTENSIONS,
+  validateUploadFile,
+} from '@/shared/utils/fileValidation'
 
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 
@@ -122,17 +127,24 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
 
       for (const file of newFiles) {
         if (!file || typeof file.name !== "string") continue;
-        const extension = getFileExtension(file.name);
-        if (allowedFileTypes.length > 0 && !allowedFileTypes.includes(extension)) {
-          const msg = sa.fileFormatNotAllowed 
-            ? sa.fileFormatNotAllowed.replace("{{formats}}", allowedFileTypes.join(", ")).replace("{{extension}}", extension) 
-            : `Định dạng tệp ${extension} không được cho phép (${allowedFileTypes.join(", ")})`;
-          toast.error(msg);
-          return;
-        }
-
-        if (file.size > MAX_FILE_SIZE_BYTES) {
-          toast.error((sa.fileExceedsLimit || "Tệp {{fileName}} vượt quá giới hạn 50MB").replace("{{fileName}}", file.name));
+        const allowedList =
+          allowedFileTypes.length > 0
+            ? allowedFileTypes
+            : DEFAULT_ASSIGNMENT_ALLOWED_EXTENSIONS;
+        const check = validateUploadFile(file, {
+          allowedExtensions: allowedList,
+          maxBytes: MAX_FILE_SIZE_BYTES,
+        });
+        if (!check.valid) {
+          if (check.reason === "size") {
+            toast.error((sa.fileExceedsLimit || "Tệp {{fileName}} vượt quá giới hạn 50MB").replace("{{fileName}}", file.name));
+          } else {
+            const extension = getFileExtension(file.name);
+            const msg = sa.fileFormatNotAllowed
+              ? sa.fileFormatNotAllowed.replace("{{formats}}", allowedList.join(", ")).replace("{{extension}}", extension)
+              : `Định dạng tệp ${extension} không được cho phép (${allowedList.join(", ")})`;
+            toast.error(msg);
+          }
           return;
         }
       }
@@ -254,7 +266,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
           {description && (
             <div
               className="text-[#5B403C] dark:text-gray-300 text-sm mb-6 whitespace-pre-wrap assignment-description-html"
-              dangerouslySetInnerHTML={{ __html: description }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(description) }}
             />
           )}
 
@@ -389,7 +401,11 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
               type="file"
               ref={fileInputRef}
               className="hidden"
-              accept={allowedFileTypes.length > 0 ? allowedFileTypes.join(",") : undefined}
+              accept={
+                allowedFileTypes.length > 0
+                  ? allowedFileTypes.join(",")
+                  : DEFAULT_ASSIGNMENT_ALLOWED_EXTENSIONS.map((ext) => `.${ext}`).join(",")
+              }
               multiple={maxFiles > 1}
               onChange={handleFileChange}
             />

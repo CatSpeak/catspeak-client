@@ -1,7 +1,8 @@
 {
+  "version": 2,
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|api/|tinymce/|images/|sounds/|website-icons/|flags/|flashcard-sw\\.js|favicon-48x48\\.png|icon\\.svg|catspeak_icon\\.svg).*)",
       "destination": "/index.html"
     }
   ],
@@ -9,6 +10,10 @@
     {
       "source": "/(.*)",
       "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
@@ -20,6 +25,28 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/tinymce/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
         }
       ]
     }

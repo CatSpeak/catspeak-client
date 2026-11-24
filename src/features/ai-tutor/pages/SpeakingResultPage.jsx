@@ -1,16 +1,29 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useOutletContext, useParams } from "react-router-dom"
 import { speakingApi, useGetSpeakingSessionQuery } from "../api/speakingApi"
 import { SpeakingReportContainer } from "../components/speakingRoom"
 import { flashcardReviewPath } from "../utils/flashcardReview"
 
 const TERMINAL = new Set(["completed", "abandoned"])
+const MAX_POLL_DURATION_MS = 60000
 
 const SpeakingResultPage = () => {
   const { sessionId, lang = "vi" } = useParams()
   const navigate = useNavigate()
   const { setSessionCredentials } = useOutletContext()
+  const [pollTimedOut, setPollTimedOut] = useState(false)
+  const [prevSessionId, setPrevSessionId] = useState(sessionId)
+  if (sessionId !== prevSessionId) {
+    setPrevSessionId(sessionId)
+    setPollTimedOut(false)
+  }
+
   const cachedSession = speakingApi.endpoints.getSpeakingSession.useQueryState(sessionId)
+  const shouldPoll =
+    !pollTimedOut &&
+    !cachedSession.isError &&
+    !TERMINAL.has(cachedSession.data?.status)
+
   const {
     data: session,
     isLoading: loadingSession,
@@ -18,9 +31,20 @@ const SpeakingResultPage = () => {
     error: sessionError,
     refetch: refetchSession,
   } = useGetSpeakingSessionQuery(sessionId, {
-    pollingInterval: cachedSession.isError || TERMINAL.has(cachedSession.data?.status) ? 0 : 1000,
+    pollingInterval: shouldPoll ? 1000 : 0,
   })
   const terminal = TERMINAL.has(session?.status)
+
+  useEffect(() => {
+    if (terminal || sessionFailed || pollTimedOut) return undefined
+    const timerId = setTimeout(() => setPollTimedOut(true), MAX_POLL_DURATION_MS)
+    return () => clearTimeout(timerId)
+  }, [terminal, sessionFailed, pollTimedOut])
+
+  const handleManualRefresh = () => {
+    setPollTimedOut(false)
+    refetchSession()
+  }
 
   useEffect(() => {
     if (terminal) {
@@ -34,7 +58,7 @@ const SpeakingResultPage = () => {
     return (
       <div className="mx-auto max-w-xl py-20 text-center">
         <p className="text-sm text-rose-800 dark:text-red-400">{sessionError?.message || "Không thể tải trạng thái phiên."}</p>
-        <button className="mt-4 px-4 py-2 font-bold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80" onClick={refetchSession}>
+        <button className="mt-4 px-4 py-2 font-bold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80" onClick={handleManualRefresh}>
           Thử lại
         </button>
         <button className="mt-4 ml-4 px-4 py-2 font-bold text-slate-600 dark:text-neutral-300 underline cursor-pointer hover:opacity-80" onClick={backToCatalog}>
@@ -47,12 +71,27 @@ const SpeakingResultPage = () => {
   if (loadingSession || !terminal) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center gap-4 text-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-950 border-t-[#990011] dark:border-t-red-500" />
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Đang hoàn tất buổi luyện nói</h1>
-        <p className="text-sm text-slate-600 dark:text-neutral-400">Báo cáo sẽ xuất hiện khi máy chủ lưu xong dữ liệu phiên.</p>
-        <button className="text-sm font-semibold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80" onClick={refetchSession}>
-          Kiểm tra lại
-        </button>
+        {!pollTimedOut && (
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-950 border-t-[#990011] dark:border-t-red-500" />
+        )}
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+          {pollTimedOut ? "Xử lý mất nhiều thời gian hơn dự kiến" : "Đang hoàn tất buổi luyện nói"}
+        </h1>
+        <p className="text-sm text-slate-600 dark:text-neutral-400">
+          {pollTimedOut
+            ? "Bạn có thể nhấn kiểm tra lại để cập nhật báo cáo mới nhất."
+            : "Báo cáo sẽ xuất hiện khi máy chủ lưu xong dữ liệu phiên."}
+        </p>
+        <div className="flex items-center gap-4">
+          <button className="text-sm font-semibold text-[#990011] dark:text-red-400 underline cursor-pointer hover:opacity-80" onClick={handleManualRefresh}>
+            Kiểm tra lại
+          </button>
+          {pollTimedOut && (
+            <button className="text-sm font-semibold text-slate-600 dark:text-neutral-300 underline cursor-pointer hover:opacity-80" onClick={backToCatalog}>
+              Về danh mục
+            </button>
+          )}
+        </div>
       </div>
     )
   }

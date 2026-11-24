@@ -3,26 +3,7 @@ import HelpButton from "./HelpButton"
 import HelpChatBox from "./HelpChatBox"
 import BugReportModal from "@/features/bug-report/components/BugReportModal"
 import { isHelpHidden } from "../utils/helpVisibility"
-
-function usePathname() {
-  const [pathname, setPathname] = useState(
-    typeof window !== "undefined" ? window.location.pathname : "",
-  )
-  useEffect(() => {
-    const update = () => {
-      if (typeof window !== "undefined") {
-        setPathname(window.location.pathname)
-      }
-    }
-    window.addEventListener("popstate", update)
-    const id = setInterval(update, 400)
-    return () => {
-      window.removeEventListener("popstate", update)
-      clearInterval(id)
-    }
-  }, [])
-  return pathname
-}
+import { usePathname } from "@/shared/hooks/usePathname"
 
 export default function HelpWidget() {
   const [isBoxOpen, setIsBoxOpen] = useState(false)
