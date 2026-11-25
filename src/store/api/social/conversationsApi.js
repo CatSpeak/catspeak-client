@@ -6,14 +6,14 @@ export const conversationsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all conversations for current user
     getConversations: builder.query({
-      query: () => "/conversations",
+      query: () => "/chat/conversations",
       providesTags: ["Conversations"],
     }),
 
     // Create a private conversation
     createPrivateConversation: builder.mutation({
       query: (targetAccountId) => ({
-        url: "/conversations/private",
+        url: "/chat/conversations/private",
         method: "POST",
         params: { targetAccountId },
       }),
@@ -23,7 +23,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Create a group conversation
     createGroupConversation: builder.mutation({
       query: (groupData) => ({
-        url: "/conversations/group",
+        url: "/chat/conversations/group",
         method: "POST",
         body: groupData,
       }),
@@ -57,7 +57,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         if (pageSize !== undefined) params.pageSize = pageSize
 
         return {
-          url: `/conversations/${conversationId}/messages`,
+          url: `/chat/conversations/${conversationId}/messages`,
           params,
         }
       },
@@ -102,7 +102,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         baseQuery,
       ) =>
         baseQuery({
-          url: `/conversations/${conversationId}/messages`,
+          url: `/chat/conversations/${conversationId}/messages`,
           method: "POST",
           body: await maskBody(api, messageData),
         }),
@@ -123,7 +123,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         baseQuery,
       ) =>
         baseQuery({
-          url: `/conversations/${conversationId}/messages/media`,
+          url: `/chat/conversations/${conversationId}/messages/media`,
           method: "POST",
           body: await maskBody(api, formData),
         }),
@@ -137,7 +137,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Soft delete a message for current user only
     deleteMessageForMe: builder.mutation({
       query: ({ conversationId, messageId }) => ({
-        url: `/conversations/${conversationId}/messages/${messageId}/delete-for-me`,
+        url: `/chat/conversations/${conversationId}/messages/${messageId}/delete-for-me`,
         method: "PUT",
       }),
       invalidatesTags: (result, error, { conversationId }) => [
@@ -149,7 +149,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Recall / hard delete message for everyone (Strictly restricted to message owner)
     recallMessage: builder.mutation({
       query: ({ conversationId, messageId }) => ({
-        url: `/conversations/${conversationId}/messages/${messageId}/recall`,
+        url: `/chat/conversations/${conversationId}/messages/${messageId}/recall`,
         method: "PUT",
       }),
       invalidatesTags: (result, error, { conversationId }) => [
@@ -162,7 +162,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Mark a conversation as read
     markConversationAsRead: builder.mutation({
       query: (conversationId) => ({
-        url: `/conversations/${conversationId}/read`,
+        url: `/chat/conversations/${conversationId}/read`,
         method: "PUT",
       }),
       invalidatesTags: (result, error, conversationId) => [
@@ -175,7 +175,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Add new participants to a group conversation
     addParticipants: builder.mutation({
       query: ({ conversationId, accountIds }) => ({
-        url: `/conversations/${conversationId}/participants`,
+        url: `/chat/conversations/${conversationId}/participants`,
         method: "POST",
         body: accountIds,
       }),
@@ -189,7 +189,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Remove a participant from a group conversation or leave the group
     removeParticipant: builder.mutation({
       query: ({ conversationId, accountId }) => ({
-        url: `/conversations/${conversationId}/participants/${accountId}`,
+        url: `/chat/conversations/${conversationId}/participants/${accountId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, { conversationId }) => [
@@ -203,7 +203,7 @@ export const conversationsApi = socialApi.injectEndpoints({
 
     // Get list of available support staff members
     getSupportStaff: builder.query({
-      query: () => "/conversations/staff",
+      query: () => "/chat/conversations/staff",
       providesTags: ["Conversations"],
     }),
 
@@ -216,7 +216,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         baseQuery,
       ) =>
         baseQuery({
-          url: `/conversations/${conversationId}/messages/${messageId}`,
+          url: `/chat/conversations/${conversationId}/messages/${messageId}`,
           method: "PUT",
           body: await maskBody(api, { messageContent }),
         }),
@@ -229,7 +229,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Toggle reaction on a message
     toggleReaction: builder.mutation({
       query: ({ conversationId, messageId, emoji }) => ({
-        url: `/conversations/${conversationId}/messages/${messageId}/reactions`,
+        url: `/chat/conversations/${conversationId}/messages/${messageId}/reactions`,
         method: "POST",
         body: { emoji },
       }),
@@ -238,12 +238,12 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Get reactions detail for a message
     getMessageReactions: builder.query({
       query: ({ conversationId, messageId }) =>
-        `/conversations/${conversationId}/messages/${messageId}/reactions`,
+        `/chat/conversations/${conversationId}/messages/${messageId}/reactions`,
     }),
 
     // Get pinned messages of a conversation
     getPinnedMessages: builder.query({
-      query: (conversationId) => `/conversations/${conversationId}/pins`,
+      query: (conversationId) => `/chat/conversations/${conversationId}/pins`,
       providesTags: (result, error, conversationId) => [
         { type: "PinnedMessages", id: Number(conversationId) },
         { type: "PinnedMessages", id: String(conversationId) },
@@ -253,7 +253,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Pin a message
     pinMessage: builder.mutation({
       query: ({ conversationId, messageId }) => ({
-        url: `/conversations/${conversationId}/messages/${messageId}/pin`,
+        url: `/chat/conversations/${conversationId}/messages/${messageId}/pin`,
         method: "POST",
       }),
       invalidatesTags: (result, error, { conversationId }) => [
@@ -265,7 +265,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Unpin a message
     unpinMessage: builder.mutation({
       query: ({ conversationId, messageId }) => ({
-        url: `/conversations/${conversationId}/messages/${messageId}/pin`,
+        url: `/chat/conversations/${conversationId}/messages/${messageId}/pin`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, { conversationId }) => [
@@ -277,7 +277,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Forward a message to multiple target conversations
     forwardMessages: builder.mutation({
       query: ({ sourceMessageId, targetConversationIds, comment }) => ({
-        url: "/conversations/messages/forward",
+        url: "/chat/conversations/messages/forward",
         method: "POST",
         body: {
           sourceMessageId,
@@ -297,7 +297,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Route-specific forward for a message
     forwardMessageById: builder.mutation({
       query: ({ conversationId, messageId, targetConversationIds }) => ({
-        url: `/conversations/${conversationId}/messages/${messageId}/forward`,
+        url: `/chat/conversations/${conversationId}/messages/${messageId}/forward`,
         method: "POST",
         body: { targetConversationIds },
       }),
@@ -316,7 +316,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         const params = { type, limit }
         if (beforeId !== undefined && beforeId !== null) params.beforeId = beforeId
         return {
-          url: `/conversations/${conversationId}/media`,
+          url: `/chat/conversations/${conversationId}/media`,
           params,
         }
       },
@@ -332,7 +332,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         const params = { query, limit }
         if (beforeId !== undefined && beforeId !== null) params.beforeId = beforeId
         return {
-          url: `/conversations/${conversationId}/messages/search`,
+          url: `/chat/conversations/${conversationId}/messages/search`,
           params,
         }
       },
@@ -348,7 +348,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         const query =
           typeof arg === "object" && arg !== null ? arg.query : undefined
         return {
-          url: `/conversations/${conversationId}/members`,
+          url: `/chat/conversations/${conversationId}/members`,
           params: query ? { query } : undefined,
         }
       },
@@ -366,7 +366,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Update group info (Name & Avatar, Owner/Admin)
     updateGroupInfo: builder.mutation({
       query: ({ conversationId, groupName, groupAvatar }) => ({
-        url: `/conversations/${conversationId}/group-info`,
+        url: `/chat/conversations/${conversationId}/group-info`,
         method: "PUT",
         body: { groupName, groupAvatar },
       }),
@@ -376,7 +376,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Promote participant to Admin (Owner only)
     promoteParticipant: builder.mutation({
       query: ({ conversationId, accountId }) => ({
-        url: `/conversations/${conversationId}/participants/${accountId}/promote`,
+        url: `/chat/conversations/${conversationId}/participants/${accountId}/promote`,
         method: "PUT",
       }),
       invalidatesTags: (result, error, { conversationId }) => [
@@ -389,7 +389,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Demote Admin to Member (Owner only)
     demoteParticipant: builder.mutation({
       query: ({ conversationId, accountId }) => ({
-        url: `/conversations/${conversationId}/participants/${accountId}/demote`,
+        url: `/chat/conversations/${conversationId}/participants/${accountId}/demote`,
         method: "PUT",
       }),
       invalidatesTags: (result, error, { conversationId }) => [
@@ -402,7 +402,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Transfer group ownership to another member (Owner only)
     transferOwnership: builder.mutation({
       query: ({ conversationId, newOwnerAccountId }) => ({
-        url: `/conversations/${conversationId}/transfer-ownership`,
+        url: `/chat/conversations/${conversationId}/transfer-ownership`,
         method: "PUT",
         body: { newOwnerAccountId },
       }),
@@ -416,7 +416,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Leave group (Owner must transfer ownership first)
     leaveGroup: builder.mutation({
       query: (conversationId) => ({
-        url: `/conversations/${conversationId}/leave`,
+        url: `/chat/conversations/${conversationId}/leave`,
         method: "POST",
       }),
       invalidatesTags: (result, error, conversationId) => [
@@ -431,7 +431,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Initiate voice or video call
     initiateCall: builder.mutation({
       query: ({ conversationId, callType = "video" }) => ({
-        url: `/conversations/${conversationId}/calls/initiate`,
+        url: `/chat/conversations/${conversationId}/calls/initiate`,
         method: "POST",
         body: { callType },
       }),
@@ -440,7 +440,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Join active call
     joinCall: builder.mutation({
       query: (conversationId) => ({
-        url: `/conversations/${conversationId}/calls/join`,
+        url: `/chat/conversations/${conversationId}/calls/join`,
         method: "POST",
       }),
     }),
@@ -448,7 +448,7 @@ export const conversationsApi = socialApi.injectEndpoints({
     // End or leave active call
     endCall: builder.mutation({
       query: ({ conversationId, forceEnd = false }) => ({
-        url: `/conversations/${conversationId}/calls/end`,
+        url: `/chat/conversations/${conversationId}/calls/end`,
         method: "POST",
         params: { forceEnd },
       }),
@@ -457,41 +457,41 @@ export const conversationsApi = socialApi.injectEndpoints({
     // Get active call status for conversation
     getActiveCall: builder.query({
       query: (conversationId) => ({
-        url: `/conversations/${conversationId}/calls/active`,
+        url: `/chat/conversations/${conversationId}/calls/active`,
       }),
     }),
 
     // ── Phase 4: Chat Enhancement ────────────────────────
 
-    // GET /api/conversations/calls/active-incoming — Recover incoming call state on reload/F5
+    // GET /api/chat/conversations/calls/active-incoming — Recover incoming call state on reload/F5
     getActiveIncomingCall: builder.query({
       query: () => ({
-        url: "/conversations/calls/active-incoming",
+        url: "/chat/conversations/calls/active-incoming",
       }),
     }),
 
-    // POST /api/conversations/{conversationId}/calls/reject — Reject incoming call
+    // POST /api/chat/conversations/{conversationId}/calls/reject — Reject incoming call
     rejectCall: builder.mutation({
       query: ({ conversationId, callId, reason = "rejected" }) => ({
-        url: `/conversations/${conversationId}/calls/reject`,
+        url: `/chat/conversations/${conversationId}/calls/reject`,
         method: "POST",
         body: { callId, reason },
       }),
     }),
 
-    // GET /api/conversations/{conversationId}/invite-link — Get or create group invite link
+    // GET /api/chat/conversations/{conversationId}/invite-link — Get or create group invite link
     getGroupInviteLink: builder.query({
-      query: (conversationId) => `/conversations/${conversationId}/invite-link`,
+      query: (conversationId) => `/chat/conversations/${conversationId}/invite-link`,
       providesTags: (result, error, conversationId) => [
         { type: "GroupInviteLink", id: Number(conversationId) },
         { type: "GroupInviteLink", id: String(conversationId) },
       ],
     }),
 
-    // POST /api/conversations/{conversationId}/invite-link/reset — Revoke old link & generate new one (Admin/Owner)
+    // POST /api/chat/conversations/{conversationId}/invite-link/reset — Revoke old link & generate new one (Admin/Owner)
     resetGroupInviteLink: builder.mutation({
       query: (conversationId) => ({
-        url: `/conversations/${conversationId}/invite-link/reset`,
+        url: `/chat/conversations/${conversationId}/invite-link/reset`,
         method: "POST",
       }),
       invalidatesTags: (result, error, conversationId) => [
@@ -500,10 +500,10 @@ export const conversationsApi = socialApi.injectEndpoints({
       ],
     }),
 
-    // PATCH /api/conversations/{conversationId}/invite-link/status — Toggle link invite status (Admin/Owner)
+    // PATCH /api/chat/conversations/{conversationId}/invite-link/status — Toggle link invite status (Admin/Owner)
     updateGroupInviteLinkStatus: builder.mutation({
       query: ({ conversationId, isEnabled }) => ({
-        url: `/conversations/${conversationId}/invite-link/status`,
+        url: `/chat/conversations/${conversationId}/invite-link/status`,
         method: "PATCH",
         body: { isEnabled },
       }),
@@ -513,16 +513,16 @@ export const conversationsApi = socialApi.injectEndpoints({
       ],
     }),
 
-    // GET /api/conversations/invite/{code}/preview — Public preview of group chat before joining
+    // GET /api/chat/conversations/invite/{code}/preview — Public preview of group chat before joining
     previewGroupInvite: builder.query({
-      query: (code) => `/conversations/invite/${code}/preview`,
+      query: (code) => `/chat/conversations/invite/${code}/preview`,
       keepUnusedDataFor: 0,
     }),
 
-    // POST /api/conversations/invite/{code}/join — Join group via invite code
+    // POST /api/chat/conversations/invite/{code}/join — Join group via invite code
     joinGroupViaInvite: builder.mutation({
       query: (code) => ({
-        url: `/conversations/invite/${code}/join`,
+        url: `/chat/conversations/invite/${code}/join`,
         method: "POST",
       }),
       invalidatesTags: ["Conversations"],
@@ -580,6 +580,3 @@ export const {
   useLazyPreviewGroupInviteQuery,
   useJoinGroupViaInviteMutation,
 } = conversationsApi
-
-
-
