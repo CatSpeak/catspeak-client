@@ -9,6 +9,9 @@ const ResetPasswordPage = lazy(
 const VerifyEmailPage = lazy(
   () => import("@/features/auth/pages/VerifyEmailPage"),
 )
+const UnsubscribePage = lazy(
+  () => import("@/features/settings/pages/UnsubscribePage"),
+)
 const VideoCallRoom = lazy(
   () => import("@/features/video-call/pages/VideoCallRoom"),
 )
@@ -340,6 +343,14 @@ const routesConfig = [
             element: (
               <LazyRoute>
                 <VerifyEmailPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "unsubscribe",
+            element: (
+              <LazyRoute>
+                <UnsubscribePage />
               </LazyRoute>
             ),
           },

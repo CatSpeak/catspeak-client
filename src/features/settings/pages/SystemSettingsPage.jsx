@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { Sun, Moon, SunMoon } from "lucide-react"
@@ -23,6 +23,10 @@ import { useProfileMutations } from "@/features/settings/hooks/useProfileMutatio
 import AccountCredentialsForm from "@/features/settings/components/AccountCredentialsForm"
 import ChangePasswordSection from "@/features/settings/components/ChangePasswordSection"
 import { setCredentials } from "@/store/slices/authSlice"
+import {
+  resolveCoreApiBase,
+  unsubscribeEmailNotifications,
+} from "@/features/settings/utils/unsubscribeApi"
 import { toast } from "react-hot-toast"
 
 const LANGUAGES = [
@@ -34,7 +38,7 @@ const LANGUAGES = [
 
 const SystemSettingsPage = () => {
   const { t, language, setLanguage } = useLanguage()
-  const { theme, setTheme, isDark, toggleTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
   const timezoneOptions = useMemo(
     () => getTimezoneOptions(language),
     [language],
@@ -130,47 +134,70 @@ const SystemSettingsPage = () => {
     return saved !== null ? JSON.parse(saved) : true
   })
 
+  const unsubHandledRef = useRef(null)
+
   useEffect(() => {
     // Handle ?unsubscribe=true URL query parameter from email footer
     const unsub = searchParams.get("unsubscribe") === "true"
-    const emailParam = searchParams.get("email")
+    const emailParam = (searchParams.get("email") || "").trim()
+    const hmacToken = (searchParams.get("token") || "").trim()
 
-    if (unsub) {
-      setEmailNotifyEnabled(false)
-      localStorage.setItem("catspeak_email_notification_enabled", "false")
+    if (!unsub) return
 
-      if (emailParam) {
-        const apiUrl =
-          import.meta.env.VITE_API_URL ||
-          "https://stagingapi.catspeak.com.vn/api"
-        fetch(
-          `${apiUrl}/auth/unsubscribe?email=${encodeURIComponent(emailParam)}`,
-          { method: "POST" },
-        ).catch((err) => console.error("Unsubscribe API error:", err))
-      }
-
-      toast.success(
-        "Bạn đã hủy nhận email thông báo & tin tức từ CatSpeak thành công.",
-      )
+    if (!emailParam) {
+      toast.error("Liên kết hủy nhận email thiếu địa chỉ email.")
+      return
     }
-  }, [searchParams])
+
+    const requestKey = `${emailParam}::${hmacToken}`
+    if (unsubHandledRef.current === requestKey) return
+    unsubHandledRef.current = requestKey
+
+    const authToken = token || localStorage.getItem("token") || ""
+    unsubscribeEmailNotifications({
+      email: emailParam,
+      token: hmacToken,
+      authToken,
+    })
+      .then(() => {
+        setEmailNotifyEnabled(false)
+        try {
+          localStorage.setItem("catspeak_email_notification_enabled", "false")
+        } catch {
+          /* ignore storage error */
+        }
+        toast.success(
+          "Bạn đã hủy nhận email thông báo & tin tức từ CatSpeak thành công.",
+        )
+      })
+      .catch((err) => {
+        console.error("Unsubscribe API error:", err)
+        toast.error(
+          err?.message ||
+            "Không thể hủy nhận email thông báo. Vui lòng thử lại hoặc tắt trực tiếp trong cài đặt.",
+        )
+      })
+  }, [searchParams, token])
 
   const handleToggleEmailNotification = (checked) => {
     setEmailNotifyEnabled(checked)
-    localStorage.setItem(
-      "catspeak_email_notification_enabled",
-      JSON.stringify(checked),
-    )
+    try {
+      localStorage.setItem(
+        "catspeak_email_notification_enabled",
+        JSON.stringify(checked),
+      )
+    } catch {
+      /* ignore storage error */
+    }
 
-    const apiUrl =
-      import.meta.env.VITE_API_URL || "https://stagingapi.catspeak.com.vn/api"
-    const token = localStorage.getItem("token")
-    if (token) {
+    const apiUrl = resolveCoreApiBase()
+    const authToken = token || localStorage.getItem("token")
+    if (authToken) {
       fetch(`${apiUrl}/user-profile/email-notifications`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ isEmailNotificationEnabled: checked }),
       }).catch((err) =>

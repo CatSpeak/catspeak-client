@@ -18,6 +18,7 @@ export default defineConfig({
       "src/shared/**/*.test.{js,jsx}",
       "src/store/**/*.test.{js,jsx}",
       "src/features/auth/pages/**/*.test.{js,jsx}",
+      "src/features/settings/**/*.test.{js,jsx}",
       "src/features/news/components/**/*.test.{js,jsx}",
       "src/features/video-call/utils/moderationAuth.test.js",
       "src/features/chat-assistant/**/*.test.{js,jsx}",
