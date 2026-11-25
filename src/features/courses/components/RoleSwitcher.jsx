@@ -20,7 +20,7 @@ export const useRoleOverride = () => {
     isFetching: isProfileFetching,
     error: profileError,
     refetch: refetchProfile,
-  } = useGetUserProfileQuery()
+  } = useGetUserProfileQuery(undefined, { skip: !user })
 
   const profile = profileResponse?.data ?? profileResponse
   const isRoleResolved = !!user

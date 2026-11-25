@@ -135,6 +135,7 @@ const CategoryRoomSection = ({
   }, [currentRooms, page])
 
   const roomsToDisplay = isMobile ? accumulatedRooms : currentRooms
+  const desktopRooms = displayRooms.length > 0 ? displayRooms : currentRooms
 
   // Report totalCount to parent for sorting
   const lastReportedCount = useRef(null)
@@ -323,14 +324,14 @@ const CategoryRoomSection = ({
             transition={M3_MOTION.standard.spatial.default}
             className={`grid ${gridCols} gap-2 w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
           >
-            {isLoading || (displayRooms.length === 0 && isFetching)
+            {desktopRooms.length === 0 && (isLoading || isFetching)
               ? Array.from({ length: itemsPerPage }).map((_, idx) => (
                   <div
                     key={`desktop-loading-${idx}`}
                     className="h-[280px] w-full animate-pulse rounded-xl bg-gray-200 dark:bg-[#272727]"
                   />
                 ))
-              : displayRooms
+              : desktopRooms
                   .slice(0, itemsPerPage)
                   .map((room) => (
                     <CommunityRoomCard key={room.roomId} room={room} />
