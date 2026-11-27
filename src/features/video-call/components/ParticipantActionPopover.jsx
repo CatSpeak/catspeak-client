@@ -487,7 +487,11 @@ export const ParticipantActionPopover = ({
         <MenuItem
           onClick={() => {
             setPopoverOpen(false)
-            window.open(`/workspace/profile/${targetAccountId}`, "_blank")
+            window.open(
+              `/workspace/profile/${targetAccountId}`,
+              "_blank",
+              "noopener,noreferrer",
+            )
           }}
           icon={<User size={20} />}
           label={pl.viewProfile || "Xem hồ sơ"}
@@ -500,7 +504,11 @@ export const ParticipantActionPopover = ({
         <MenuItem
           onClick={() => {
             setPopoverOpen(false)
-            window.open(`/workspace/profile/${targetAccountId}`, "_blank")
+            window.open(
+              `/workspace/profile/${targetAccountId}`,
+              "_blank",
+              "noopener,noreferrer",
+            )
           }}
           icon={<User size={20} />}
           label={pl.viewProfile || "Xem hồ sơ"}

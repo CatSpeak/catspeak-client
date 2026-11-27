@@ -3,20 +3,16 @@ import { socialApi } from "./social/socialApi"
 import { setCredentials, logout } from "../slices/authSlice"
 import {
   clearRegistrationCorrectionToken,
+  extractRegistrationCorrectionToken,
   setRegistrationCorrectionToken,
 } from "@/features/auth/utils/registrationCorrectionToken"
 
 /**
- * CS-10: extract the short-lived `registrationCorrectionToken` returned by the
- * Core API (register success, or login of an unactivated account) and keep it
- * in memory only.
+ * CS-10: keep the short-lived `registrationCorrectionToken` returned by the
+ * Core API (register success, or login of an unactivated account) in memory.
  */
 function rememberRegistrationCorrectionToken(payload) {
-  const token =
-    payload?.registrationCorrectionToken ??
-    payload?.RegistrationCorrectionToken ??
-    payload?.data?.registrationCorrectionToken ??
-    payload?.data?.RegistrationCorrectionToken
+  const token = extractRegistrationCorrectionToken(payload)
   if (token) setRegistrationCorrectionToken(token)
 }
 
@@ -34,8 +30,11 @@ export const authApi = baseApi.injectEndpoints({
           const { data } = await queryFulfilled
           dispatch(setCredentials(data))
         } catch (error) {
-          // CS-10: login of an unactivated account may carry a correction token.
-          rememberRegistrationCorrectionToken(error?.data)
+          // CS-10: RTK Query rejects with `{ error: FetchBaseQueryError }`;
+          // Track 1 nests the token in `body.data.registrationCorrectionToken`.
+          rememberRegistrationCorrectionToken(
+            error?.error?.data ?? error?.data,
+          )
           // Handled by UI component
         }
       },

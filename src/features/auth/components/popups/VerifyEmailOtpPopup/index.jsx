@@ -14,9 +14,11 @@ import { parseApiError, resolveLocalizedError } from "@/shared/utils/apiError"
 import { resolveGeneralErrorMessage } from "@/features/auth/utils/registerErrors"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import {
+  clearRegistrationCorrectionToken,
   getRegistrationCorrectionToken,
   setRegistrationCorrectionToken,
 } from "@/features/auth/utils/registrationCorrectionToken"
+import { buildEmailCorrectionPayload } from "@/features/auth/utils/emailCorrection"
 
 const VerifyEmailOtpPopup = ({
   open,
@@ -116,7 +118,8 @@ const VerifyEmailOtpPopup = ({
     }
 
     const correctionToken = getRegistrationCorrectionToken()
-    if (!correctionToken && !password.trim()) {
+    const usePasswordFallback = requiresPassword && Boolean(password.trim())
+    if (!usePasswordFallback && !correctionToken) {
       setRequiresPassword(true)
       setApiError(
         authText.correctionPasswordRequired ||
@@ -126,19 +129,20 @@ const VerifyEmailOtpPopup = ({
     }
 
     try {
-      const payload = { email: currentEmail, newEmail }
-      if (correctionToken) {
-        payload.registrationCorrectionToken = correctionToken
-      } else {
-        payload.password = password
-      }
+      const payload = buildEmailCorrectionPayload({
+        email: currentEmail,
+        newEmail,
+        correctionToken,
+        requiresPassword,
+        password,
+      })
 
       const result = await resendEmailOtp(payload).unwrap()
-      // CS-10: keep the refreshed correction token in memory for further edits.
-      setRegistrationCorrectionToken(
+      // CS-10: only replace the in-memory token when the server rotates it.
+      const nextToken =
         result?.registrationCorrectionToken ??
-          result?.data?.registrationCorrectionToken,
-      )
+        result?.data?.registrationCorrectionToken
+      if (nextToken) setRegistrationCorrectionToken(nextToken)
       setEmail(newEmail)
       setIsEditingEmail(false)
       setPassword("")
@@ -152,11 +156,13 @@ const VerifyEmailOtpPopup = ({
         setApiError(authText.emailExists || message)
         return
       }
-      // Token missing/expired -> fall back to password confirmation.
+      // Token rejected/expired -> drop it and require the password instead.
       if (
         correctionToken &&
+        !usePasswordFallback &&
         (statusCode === 400 || statusCode === 401 || statusCode === 403)
       ) {
+        clearRegistrationCorrectionToken()
         setRequiresPassword(true)
         setPassword("")
         setApiError(

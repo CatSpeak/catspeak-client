@@ -110,6 +110,7 @@ export function isProtectedMediaUrl(rawUrl) {
   if (!trimmed || trimmed.startsWith("blob:") || trimmed.startsWith("data:")) {
     return false
   }
+  if (trimmed.startsWith("//")) return false
   if (trimmed.startsWith("/")) {
     return matchesProtectedPath(trimmed) || trimmed.startsWith("/api/")
   }
@@ -141,6 +142,11 @@ export function resolveProtectedMediaFetchUrl(rawUrl) {
     return `${SOCIAL_API_BASE}${subPath}`
   }
   if (trimmed.startsWith("/api/chat/")) {
+    const subPath = trimmed.slice("/api".length)
+    return `${SOCIAL_API_BASE}${subPath}`
+  }
+  // CS-07: Post media gateway lives on the Social API.
+  if (trimmed.toLowerCase().startsWith("/api/post/")) {
     const subPath = trimmed.slice("/api".length)
     return `${SOCIAL_API_BASE}${subPath}`
   }

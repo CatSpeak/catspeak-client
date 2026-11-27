@@ -17,6 +17,7 @@ import { useUploadRecordingToDriveMutation } from "@/store/api/recordingsApi"
 import toast from "react-hot-toast"
 import { RECORDING_STATUS } from "../constants/recordingStatus"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
+import { getSafeExternalHttpUrl } from "@/shared/utils/safeUrl"
 
 /**
  * RecordingCard — displays a single recording with metadata and action buttons.
@@ -106,7 +107,10 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
         console.error(
           `[Recording] Download failed: ${response.status} ${response.statusText}`,
         )
-        window.open(fileUrl, "_blank", "noopener,noreferrer")
+        const safeUrl = getSafeExternalHttpUrl(fileUrl)
+        if (safeUrl) {
+          window.open(safeUrl, "_blank", "noopener,noreferrer")
+        }
         return
       }
 
@@ -130,8 +134,11 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
       window.URL.revokeObjectURL(url)
     } catch (err) {
       console.error("[Recording Debug] Network error:", err.message)
-      // Fallback: open in new tab
-      window.open(fileUrl, "_blank")
+      // Fallback: open in new tab (only for absolute http(s) URLs)
+      const safeUrl = getSafeExternalHttpUrl(fileUrl)
+      if (safeUrl) {
+        window.open(safeUrl, "_blank", "noopener,noreferrer")
+      }
     }
   }
 

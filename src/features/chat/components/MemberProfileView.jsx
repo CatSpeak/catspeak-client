@@ -33,7 +33,13 @@ const MemberProfileView = ({ member }) => {
 
       <div className="w-full mt-4">
         <PillButton
-          onClick={() => window.open(`/workspace/profile/${member.accountId}`, "_blank")}
+          onClick={() =>
+            window.open(
+              `/workspace/profile/${member.accountId}`,
+              "_blank",
+              "noopener,noreferrer",
+            )
+          }
           variant="primary"
           className="w-full"
         >

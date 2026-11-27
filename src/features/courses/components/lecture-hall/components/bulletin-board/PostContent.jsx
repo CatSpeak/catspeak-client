@@ -4,6 +4,11 @@ import Avatar from "@/shared/components/ui/Avatar"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import { getFileIcon } from "../../utils/fileUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import {
+  isProtectedMediaUrl,
+  openAuthenticatedMediaInNewTab,
+} from "@/shared/utils/authenticatedMedia"
+import { getSafeExternalHttpUrl } from "@/shared/utils/safeUrl"
 
 /**
  * Hiển thị nội dung chi tiết của một bài đăng bảng tin.
@@ -30,6 +35,23 @@ const PostContent = ({ post = {} }) => {
     content,
     attachments = [],
   } = post
+
+  const openAttachment = async (url) => {
+    if (!url) return
+    try {
+      if (isProtectedMediaUrl(url)) {
+        await openAuthenticatedMediaInNewTab(url)
+        return
+      }
+    } catch (error) {
+      console.error("Không thể mở tệp đính kèm:", error)
+      return
+    }
+    const safeUrl = getSafeExternalHttpUrl(url)
+    if (safeUrl) {
+      window.open(safeUrl, "_blank", "noopener,noreferrer")
+    }
+  }
 
   return (
     <div className="bg-white dark:bg-[#1A1A1A] border border-transparent dark:border-[#3F3F3F] rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm space-y-4 md:space-y-6">
@@ -84,11 +106,11 @@ const PostContent = ({ post = {} }) => {
           {attachments.map((file, idx) => (
             <div
               key={idx}
-              onClick={() => file.url && window.open(file.url, "_blank")}
+              onClick={() => openAttachment(file.url)}
               onKeyDown={(event) => {
                 if (file.url && (event.key === "Enter" || event.key === " ")) {
                   event.preventDefault()
-                  window.open(file.url, "_blank")
+                  openAttachment(file.url)
                 }
               }}
               role={file.url ? "button" : undefined}

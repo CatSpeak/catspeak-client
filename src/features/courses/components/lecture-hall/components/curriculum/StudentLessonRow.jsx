@@ -20,6 +20,11 @@ import { useTimezone } from "@/shared/hooks/useTimezone"
 import { PillButton } from "@/shared/components/ui/buttons"
 import AssignmentStatusBadge from "./AssignmentStatusBadge"
 import QuizStatusBadge from "./QuizStatusBadge"
+import {
+  isProtectedMediaUrl,
+  openAuthenticatedMediaInNewTab,
+} from "@/shared/utils/authenticatedMedia"
+import { getSafeExternalHttpUrl } from "@/shared/utils/safeUrl"
 import { sanitizeHtml } from "@/shared/utils/sanitizeHtml"
 
 // Helper function to resolve icon and background based on item type
@@ -174,7 +179,18 @@ const StudentLessonRow = ({
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Lỗi khi tải file:", error);
-      window.open(fileUrl, "_blank");
+      try {
+        if (isProtectedMediaUrl(fileUrl)) {
+          await openAuthenticatedMediaInNewTab(fileUrl)
+        } else {
+          const safeUrl = getSafeExternalHttpUrl(fileUrl)
+          if (safeUrl) {
+            window.open(safeUrl, "_blank", "noopener,noreferrer")
+          }
+        }
+      } catch (openError) {
+        console.error("Không thể mở tệp đính kèm:", openError)
+      }
     } finally {
       setIsDownloading(false);
     }

@@ -6,6 +6,11 @@ import FileAttachmentItem from "@/shared/components/ui/FileAttachmentItem"
 import FilePreviewModal from "@/shared/components/ui/FilePreviewModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getImageUrl } from "@/shared/utils/imageUtils"
+import {
+  downloadAuthenticatedFile,
+  isProtectedMediaUrl,
+  useAuthenticatedMediaUrl,
+} from "@/shared/utils/authenticatedMedia"
 
 /**
  * Unified tile component for both Images and Videos
@@ -20,6 +25,9 @@ const VisualMediaItem = ({
 }) => {
   const [hasError, setHasError] = useState(false)
   const isVideo = media.mediaType === "Video"
+  const needsAuth = isProtectedMediaUrl(media.mediaUrl)
+  const { url: authenticatedUrl } = useAuthenticatedMediaUrl(media.mediaUrl)
+  const resolvedUrl = needsAuth ? authenticatedUrl : getImageUrl(media.mediaUrl)
 
   // Single video player with inline controls
   if (isVideo && isSingle) {
@@ -28,7 +36,7 @@ const VisualMediaItem = ({
         className={`relative w-full rounded-xl overflow-hidden bg-black border border-border flex items-center justify-center ${className}`}
       >
         <video
-          src={media.mediaUrl}
+          src={resolvedUrl || undefined}
           controls
           preload="metadata"
           className="w-full h-full object-contain bg-black"
@@ -46,7 +54,7 @@ const VisualMediaItem = ({
       {isVideo ? (
         <div className="relative w-full h-full flex items-center justify-center bg-black">
           <video
-            src={media.mediaUrl}
+            src={resolvedUrl || undefined}
             preload="metadata"
             className="w-full h-full object-contain bg-black"
             onClick={(e) => {
@@ -60,7 +68,7 @@ const VisualMediaItem = ({
             </div>
           </div>
         </div>
-      ) : hasError || !media.mediaUrl ? (
+      ) : hasError || !resolvedUrl ? (
         <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 text-gray-400 p-2">
           <ImageIcon className="w-8 h-8 opacity-40 mb-1" />
           <span className="text-[11px] text-gray-400 text-center truncate w-full px-1">
@@ -69,7 +77,7 @@ const VisualMediaItem = ({
         </div>
       ) : (
         <img
-          src={media.mediaUrl}
+          src={resolvedUrl}
           alt={media.fileName || "Post media"}
           loading="lazy"
           onError={() => setHasError(true)}
@@ -101,7 +109,9 @@ const SingleVisualMediaItem = ({ media, onClick }) => {
   const isVideo = media.mediaType === "Video"
 
   const rawUrl = media?.mediaUrl || media?.url
-  const resolvedUrl = getImageUrl(rawUrl)
+  const needsAuth = isProtectedMediaUrl(rawUrl)
+  const { url: authenticatedUrl, isLoading } = useAuthenticatedMediaUrl(rawUrl)
+  const resolvedUrl = needsAuth ? authenticatedUrl : getImageUrl(rawUrl)
 
   useEffect(() => {
     if (!resolvedUrl || isVideo) return
@@ -143,6 +153,14 @@ const SingleVisualMediaItem = ({ media, onClick }) => {
           className="w-full h-full object-contain bg-black"
           onClick={(e) => e.stopPropagation()}
         />
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full aspect-video max-h-[500px] flex items-center justify-center bg-gray-100 rounded-xl border border-border">
+        <ImageIcon className="w-8 h-8 opacity-40 text-gray-400" />
       </div>
     )
   }
@@ -383,11 +401,26 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
               className="cursor-pointer hover:bg-gray-50 dark:hover:bg-[#272727] transition-colors"
               rightAction={
                 <IconButton
-                  as="a"
-                  href={doc.mediaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
+                  as="button"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (!doc.mediaUrl) return
+                    if (isProtectedMediaUrl(doc.mediaUrl)) {
+                      downloadAuthenticatedFile(
+                        doc.mediaUrl,
+                        doc.fileName || "download",
+                      ).catch((error) => {
+                        console.error("Failed to download document", error)
+                      })
+                      return
+                    }
+                    window.open(
+                      doc.mediaUrl,
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }}
                   variant="ghost"
                   size="sm"
                   className="shrink-0"

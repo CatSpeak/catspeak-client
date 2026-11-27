@@ -33,4 +33,15 @@ describe("getSafeExternalHttpUrl (CS-21)", () => {
     expect(getSafeExternalHttpUrl("   ")).toBeNull()
     expect(getSafeExternalHttpUrl(null)).toBeNull()
   })
+
+  it("rejects relative paths instead of turning them into fake hosts", () => {
+    expect(getSafeExternalHttpUrl("/api/media/123")).toBeNull()
+    expect(getSafeExternalHttpUrl("/workspace/profile/1")).toBeNull()
+  })
+
+  it("rejects control characters", () => {
+    expect(getSafeExternalHttpUrl("https://example.com/\u0000evil")).toBeNull()
+    expect(getSafeExternalHttpUrl("https://example.com/\r\nSet-Cookie: x")).toBeNull()
+    expect(getSafeExternalHttpUrl("https://example.com/\u001f")).toBeNull()
+  })
 })

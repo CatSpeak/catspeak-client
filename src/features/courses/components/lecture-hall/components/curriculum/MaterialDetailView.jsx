@@ -4,6 +4,11 @@ import { IconButton, PillButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import {
+  isProtectedMediaUrl,
+  openAuthenticatedMediaInNewTab,
+} from "@/shared/utils/authenticatedMedia"
+import { getSafeExternalHttpUrl } from "@/shared/utils/safeUrl"
 
 const MaterialDetailView = ({ itemData, onBack }) => {
   const { t, language } = useLanguage()
@@ -38,8 +43,19 @@ const MaterialDetailView = ({ itemData, onBack }) => {
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Lỗi khi tải file, chuyển sang mở tab mới:", error);
-      // Fallback if fetch fails (e.g. CORS)
-      window.open(fileUrl, "_blank");
+      // Fallback if fetch fails (e.g. CORS / protected media needs bearer).
+      try {
+        if (isProtectedMediaUrl(fileUrl)) {
+          await openAuthenticatedMediaInNewTab(fileUrl)
+        } else {
+          const safeUrl = getSafeExternalHttpUrl(fileUrl)
+          if (safeUrl) {
+            window.open(safeUrl, "_blank", "noopener,noreferrer")
+          }
+        }
+      } catch (openError) {
+        console.error("Không thể mở tệp đính kèm:", openError)
+      }
     } finally {
       setIsDownloading(false);
     }

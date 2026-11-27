@@ -20,6 +20,7 @@ import ContactSupportModal from "./ContactSupportModal"
 import MessageBubble from "./MessageBubble"
 import SourceDrawer from "./SourceDrawer"
 import { BRAND } from "../lib/theme"
+import { getSafeExternalHttpUrl } from "@/shared/utils/safeUrl"
 
 const MAX_CHARS = 500          // FR-rag-chatbot-013
 const WARN_REMAINING = 3       // FR-rag-chatbot-018
@@ -325,9 +326,18 @@ export default function ChatAssistantWidget() {
                 <MessageBubble
                   key={`${m.at}-${i}`}
                   message={m}
-                  onOpenSource={(s) =>
-                    s.url ? window.open(s.url, "_blank", "noreferrer") : setDrawerSource(s)
-                  }
+                  onOpenSource={(s) => {
+                    const safeSourceUrl = getSafeExternalHttpUrl(s?.url)
+                    if (safeSourceUrl) {
+                      window.open(
+                        safeSourceUrl,
+                        "_blank",
+                        "noopener,noreferrer",
+                      )
+                    } else {
+                      setDrawerSource(s)
+                    }
+                  }}
                   onContactSupport={(q) => setSupportFor(q || "")}
                   onUpgrade={() => goTo("/pricing")}
                 />

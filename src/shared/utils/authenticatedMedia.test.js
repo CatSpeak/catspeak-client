@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   isProtectedMediaUrl,
   isTrustedApiOrigin,
+  resolveProtectedMediaFetchUrl,
 } from "./authenticatedMedia"
 
 describe("authenticatedMedia origin hardening (CS-15 / CS-07)", () => {
@@ -46,6 +47,22 @@ describe("authenticatedMedia origin hardening (CS-15 / CS-07)", () => {
     ).toBe(false)
     expect(isProtectedMediaUrl("https://s3-minio.catspeak.com.vn/a.png")).toBe(
       false,
+    )
+  })
+
+  it("rejects protocol-relative URLs (CS-21 / R6-3)", () => {
+    expect(isProtectedMediaUrl("//evil.example/api/Post/1/media/2")).toBe(false)
+    expect(isProtectedMediaUrl("//evil.example/api/admin/bug-reports/1")).toBe(
+      false,
+    )
+  })
+
+  it("routes the post media gateway to the Social API base (R6-1)", () => {
+    expect(resolveProtectedMediaFetchUrl("/api/Post/10/media/20")).toBe(
+      "/api/social/Post/10/media/20",
+    )
+    expect(resolveProtectedMediaFetchUrl("/api/post/10/media/20")).toBe(
+      "/api/social/post/10/media/20",
     )
   })
 })

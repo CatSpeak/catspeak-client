@@ -23,3 +23,19 @@ export function setRegistrationCorrectionToken(token) {
 export function clearRegistrationCorrectionToken() {
   registrationCorrectionToken = null
 }
+
+/**
+ * CS-10: pull the token out of any of the response/error envelopes used by the
+ * Core API (direct body, `{ data: ... }` or RTK Query's `{ error: { data } }`).
+ */
+export function extractRegistrationCorrectionToken(payload) {
+  return (
+    payload?.registrationCorrectionToken ??
+    payload?.RegistrationCorrectionToken ??
+    payload?.data?.registrationCorrectionToken ??
+    payload?.data?.RegistrationCorrectionToken ??
+    payload?.data?.data?.registrationCorrectionToken ??
+    payload?.data?.data?.RegistrationCorrectionToken ??
+    null
+  )
+}
