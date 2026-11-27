@@ -108,6 +108,7 @@ export default function LettersPage() {
 
   const handleConnect = (story) => {
     if (!isAuthenticated) {
+      setSelectedStory(null)
       openAuthModal("login")
       return
     }
@@ -116,6 +117,7 @@ export default function LettersPage() {
 
   const handleReportAction = async (story) => {
     if (!isAuthenticated) {
+      setSelectedStory(null)
       openAuthModal("login")
       return
     }

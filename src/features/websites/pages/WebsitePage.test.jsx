@@ -57,6 +57,8 @@ describe("ISS-03: WebsitePage iframe hardening", () => {
     expect(html).not.toContain("payment")
     expect(html).not.toContain("geolocation")
     expect(html).not.toContain("camera")
+    // R1-4: full navigation back to /resources so Vercel re-applies the strict CSP.
+    expect(html).toContain('href="/resources"')
   })
 
   it("never renders an iframe for embeddable:false and offers a new-window link", () => {

@@ -156,37 +156,37 @@ export const useProfileFriends = ({
     [serverKeyword, serverIsTeacher, serverLevel, pagesByTab.find],
   )
 
-  const { data: friendsRes, isLoading: loadingFriends, isFetching: fetchingFriends } = useGetFriendsQuery(friendsArgs, {
+  const { data: friendsRes, isLoading: loadingFriends, isFetching: fetchingFriends, isError: friendsError, refetch: refetchFriends } = useGetFriendsQuery(friendsArgs, {
     skip: !targetAccountId || activeSubTab !== "all",
     refetchOnFocus: true,
     refetchOnReconnect: true,
     refetchOnMountOrArgChange: true,
   })
-  const { data: followingRes, isLoading: loadingFollowing, isFetching: fetchingFollowing } = useGetFollowingQuery(followingArgs, {
+  const { data: followingRes, isLoading: loadingFollowing, isFetching: fetchingFollowing, isError: followingError, refetch: refetchFollowing } = useGetFollowingQuery(followingArgs, {
     skip: !targetAccountId || activeSubTab !== "following",
     refetchOnFocus: true,
     refetchOnReconnect: true,
     refetchOnMountOrArgChange: true,
   })
-  const { data: followersRes, isLoading: loadingFollowers, isFetching: fetchingFollowers } = useGetFollowersQuery(followersArgs, {
+  const { data: followersRes, isLoading: loadingFollowers, isFetching: fetchingFollowers, isError: followersError, refetch: refetchFollowers } = useGetFollowersQuery(followersArgs, {
     skip: !targetAccountId || activeSubTab !== "followers",
     refetchOnFocus: true,
     refetchOnReconnect: true,
     refetchOnMountOrArgChange: true,
   })
-  const { data: pendingRes, isLoading: loadingPending, isFetching: fetchingPending, refetch: refetchPending } = useGetPendingFriendRequestsQuery(pendingArgs, {
+  const { data: pendingRes, isLoading: loadingPending, isFetching: fetchingPending, isError: pendingError, refetch: refetchPending } = useGetPendingFriendRequestsQuery(pendingArgs, {
     skip: !isOwnProfile || activeSubTab !== "pending",
     refetchOnFocus: true,
     refetchOnReconnect: true,
     refetchOnMountOrArgChange: true,
   })
-  const { data: sentRes, isLoading: loadingSent, isFetching: fetchingSent, refetch: refetchSent } = useGetSentFriendRequestsQuery(pendingArgs, {
+  const { data: sentRes, isLoading: loadingSent, isFetching: fetchingSent, isError: sentError, refetch: refetchSent } = useGetSentFriendRequestsQuery(pendingArgs, {
     skip: !isOwnProfile || (activeSubTab !== "pending" && activeSubTab !== "find"),
     refetchOnFocus: true,
     refetchOnReconnect: true,
     refetchOnMountOrArgChange: true,
   })
-  const { data: recRes, isLoading: loadingRecs, isFetching: fetchingRecs } = useGetFriendRecommendationsQuery(recArgs, {
+  const { data: recRes, isLoading: loadingRecs, isFetching: fetchingRecs, isError: recError, refetch: refetchRecs } = useGetFriendRecommendationsQuery(recArgs, {
     skip: !isOwnProfile || activeSubTab !== "find",
     refetchOnFocus: true,
     refetchOnReconnect: true,
@@ -389,6 +389,38 @@ export const useProfileFriends = ({
     return () => observer.disconnect()
   }, [hasMore, isFetchingMore, isLoading, activeSubTab, list.length])
 
+  // R1-3: surface the error/refetch of the sub-tab currently displayed so the
+  // UI can show a retry state instead of an empty list.
+  const { isError, refetch } = useMemo(() => {
+    switch (activeSubTab) {
+      case "following":
+        return { isError: Boolean(followingError), refetch: refetchFollowing }
+      case "followers":
+        return { isError: Boolean(followersError), refetch: refetchFollowers }
+      case "pending":
+        return {
+          isError: Boolean(pendingError || sentError),
+          refetch: () => {
+            refetchPending?.()
+            refetchSent?.()
+          },
+        }
+      case "find":
+        return { isError: Boolean(recError), refetch: refetchRecs }
+      case "all":
+      default:
+        return { isError: Boolean(friendsError), refetch: refetchFriends }
+    }
+  }, [
+    activeSubTab,
+    friendsError, refetchFriends,
+    followingError, refetchFollowing,
+    followersError, refetchFollowers,
+    pendingError, refetchPending,
+    sentError, refetchSent,
+    recError, refetchRecs,
+  ])
+
   return {
     activeSubTab,
     setActiveSubTab: handleSubTabChange,
@@ -405,6 +437,8 @@ export const useProfileFriends = ({
     pendingIncomingList,
     pendingOutgoingList,
     isLoading,
+    isError,
+    refetch,
     emptyMessage,
     hasMore,
     fetchingRecs: isFetchingMore,

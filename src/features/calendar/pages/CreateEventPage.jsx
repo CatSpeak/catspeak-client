@@ -169,6 +169,13 @@ const CreateEventPage = () => {
   // the return path should go back to workspace events or wherever it came from
   const returnPath = location.state?.from || workspaceEventsPath;
 
+  // R1-2: never build a URL with an empty lang segment ("//cat-speak").
+  const langFromState =
+    typeof location.state?.from === "string"
+      ? location.state.from.match(/^\/([a-z]{2})(?:\/|$)/i)?.[1]
+      : undefined;
+  const communityLang = lang || langFromState || "zh";
+
   const breadcrumbItems = location.state?.fromCommunityCalendar || location.pathname.includes("/cat-speak/calendar/create")
     ? [
         {
@@ -177,11 +184,11 @@ const CreateEventPage = () => {
         },
         {
           label: "Cat Speak",
-          onClick: () => navigate(`/${lang || ""}/cat-speak`),
+          onClick: () => navigate(`/${communityLang}/cat-speak`),
         },
         {
           label: cal.schedule || "Thời gian biểu",
-          onClick: () => navigate(`/${lang || ""}/cat-speak/calendar`),
+          onClick: () => navigate(`/${communityLang}/cat-speak/calendar`),
         },
         {
           label: isEditing

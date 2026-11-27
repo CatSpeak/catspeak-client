@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { ArrowLeft, ExternalLink, ShieldAlert } from "lucide-react"
 import { useGetWebsiteByIdQuery } from "@/features/websites/api/websiteApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -78,13 +78,13 @@ const WebsitePage = () => {
     <div className="relative h-[calc(100dvh-64px)] w-full px-4 lg:h-full flex flex-col gap-2 pb-4">
       {/* Top Header Bar with Back Button */}
       <div className="flex items-center justify-between bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-xl border border-border dark:border-[#3F3F3F] shadow-sm shrink-0">
-        <Link
-          to={resolvePath("/resources")}
+        <a
+          href={resolvePath("/resources")}
           className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-neutral-200 hover:text-cath-red-700 dark:hover:text-red-400 transition-colors"
         >
           <ArrowLeft size={16} />
           <span>{t.websites?.detail?.backToHub || "Back to Resource Hub"}</span>
-        </Link>
+        </a>
 
         {safeUrl && (
           <a

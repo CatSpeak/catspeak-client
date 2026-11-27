@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react"
-import { User, Search, ListFilter } from "lucide-react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { User, Search, ListFilter, AlertCircle } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -21,7 +21,6 @@ const ProfileFriendsTab = ({
   defaultSubTab,
 }) => {
   const navigate = useNavigate()
-  const location = useLocation()
   const { t } = useLanguage()
   const { user: authUser } = useAuth()
   const currentUserId = authUser?.accountId ?? authUser?.id ?? authUser?.userId
@@ -33,11 +32,12 @@ const ProfileFriendsTab = ({
     activeFilter,
     setActiveFilter,
     clearActiveFilter,
-    filterActiveCount,
     list,
     pendingIncomingList,
     pendingOutgoingList,
     isLoading,
+    isError,
+    refetch,
     emptyMessage,
     hasMore,
     fetchingRecs,
@@ -189,6 +189,29 @@ const ProfileFriendsTab = ({
               </div>
             ))}
           </div>
+        ) : isError ? (
+          <FluentCard>
+            <div
+              role="alert"
+              data-testid="profile-friends-error"
+              className="flex flex-col items-center gap-3 px-6 py-10 text-center"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+                <AlertCircle className="h-6 w-6" />
+              </div>
+              <p className="text-base font-semibold text-gray-900 dark:text-white">
+                {t.profile?.friends?.loadError ||
+                  "Không thể tải danh sách bạn bè."}
+              </p>
+              <button
+                type="button"
+                onClick={() => refetch?.()}
+                className="rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 py-2 text-sm font-semibold text-white hover:brightness-95"
+              >
+                {t.profile?.friends?.retry || "Thử lại"}
+              </button>
+            </div>
+          </FluentCard>
         ) : isPendingTab ? (
           <div className="flex flex-col gap-4">
             <section>

@@ -35,6 +35,8 @@ export default defineConfig({
       "src/features/courses/pages/SessionAnalyticsDetailPage.test.jsx",
       "src/features/stories/hooks/**/*.test.{js,jsx}",
       "src/features/calendar/components/**/*.test.{js,jsx}",
+      "src/features/calendar/pages/MyCalendarPage.test.jsx",
+      "src/features/profile/components/ProfileFriendsTab.test.jsx",
     ],
   },
 })

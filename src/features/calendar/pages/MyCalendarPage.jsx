@@ -19,6 +19,7 @@ import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { DEFAULT_FILTERS } from "@/features/calendar/data/calendarConstants"
 import useCalendarEvents from "@/features/calendar/hooks/useCalendarEvents"
+import { resolveEffectiveTab } from "@/features/calendar/utils/tabGuard"
 import PageTitle from "@/shared/components/ui/PageTitle"
 
 const MyCalendarPage = () => {
@@ -104,10 +105,8 @@ const MyCalendarPage = () => {
       : []),
   ]
 
-  // Non-teachers must never land on the teacher-only event management tab.
-  if (!isTeacher && activeTab === "event") {
-    setActiveTab("calendar")
-  }
+  // R1-1: derive instead of setState during render (isTeacher may still be null).
+  const effectiveTab = resolveEffectiveTab(isTeacher, activeTab)
 
   if (isLoading) {
     return (
@@ -144,19 +143,19 @@ const MyCalendarPage = () => {
 
       <Tabs
         tabs={tabOptions}
-        activeTab={activeTab}
+        activeTab={effectiveTab}
         onChange={handleTabChange}
         fullWidth={false}
       />
 
       <div className="px-4 pb-4">
         <TabContent
-          activeTab={activeTab}
+          activeTab={effectiveTab}
           tabs={tabOptions}
           className="w-full"
         >
           {/* Content with 3 tab: Calendar, Event, Teaching Schedule */}
-          {activeTab === "calendar" && (
+          {effectiveTab === "calendar" && (
             <div className="flex flex-col lg:flex-row items-stretch gap-4 h-auto xl:h-[calc(100vh-200px)]">
               <div className="flex-1 w-full min-h-0 flex flex-col">
                 <CalendarTab
@@ -190,7 +189,7 @@ const MyCalendarPage = () => {
             </div>
           )}
 
-          {activeTab === "event" && <EventTab />}
+          {isTeacher && effectiveTab === "event" && <EventTab />}
 
           {isTeacher && activeTab === "teaching-schedule" && (
             <TeachingScheduleTab
