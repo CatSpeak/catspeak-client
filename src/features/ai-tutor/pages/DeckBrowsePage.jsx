@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, ArrowRight, Layers, Lock, Mic, Search, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { isBrowserOffline } from "@/shared/utils/networkStatus"
 import {
   isNetworkError,
   useGetDeckCardsQuery,
@@ -235,7 +236,7 @@ const DeckBrowsePage = () => {
       </div>
 
       {hasError ? (
-        <FlashcardLoadError offline={isNetworkError(error)} onRetry={refetch} what="bộ thẻ" />
+        <FlashcardLoadError offline={isNetworkError(error) && isBrowserOffline()} onRetry={refetch} what="bộ thẻ" />
       ) : deckEmpty ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-6 py-14 text-center shadow-sm" data-testid="deck-empty">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-950/40 text-[#680411] dark:text-red-400">
@@ -315,7 +316,7 @@ const DeckBrowsePage = () => {
               ))}
             </div>
           ) : isError && !cardsQuery.data ? (
-            <FlashcardLoadError offline={isNetworkError(error)} onRetry={refetch} what="bộ thẻ" />
+            <FlashcardLoadError offline={isNetworkError(error) && isBrowserOffline()} onRetry={refetch} what="bộ thẻ" />
           ) : data.items.length === 0 ? (
             <div className="rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-8 text-center text-sm text-slate-500 dark:text-neutral-400">
               Không có thẻ nào khớp bộ lọc này.

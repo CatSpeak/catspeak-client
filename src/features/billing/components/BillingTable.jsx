@@ -6,6 +6,7 @@ import MenuList from "@/shared/components/ui/MenuList"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import BillingMobileCard from "./BillingMobileCard"
+import { formatOrderCode } from "../utils/formatOrderCode"
 import {
   RotateCcw,
   AlertCircle,
@@ -47,7 +48,7 @@ const BillingTable = ({
       label: cols.orderCode || "Order Code",
       headerClassName: "!py-2.5 !px-4 w-[16%]",
       className: "!py-2.5 !px-4 w-[16%] font-medium text-gray-800 dark:text-neutral-200",
-      render: (row) => `#${row.orderCode}`,
+      render: (row) => formatOrderCode(row),
     },
     {
       key: "method",

@@ -77,6 +77,9 @@ export default function useChatConversations(selectedId) {
   const {
     data: conversationsResponse = [],
     isLoading: isLoadingConversations,
+    isError: isConversationsError,
+    error: conversationsError,
+    refetch: refetchConversations,
   } = useGetConversationsQuery()
 
   const [markConversationAsRead] = useMarkConversationAsReadMutation()
@@ -187,6 +190,9 @@ export default function useChatConversations(selectedId) {
     conversations,
     activeConversation,
     isLoadingConversations,
+    isConversationsError,
+    conversationsError,
+    refetchConversations,
     conversationsResponse,
   }
 }

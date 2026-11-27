@@ -5,6 +5,7 @@ import { Calendar, Plus } from "lucide-react"
 
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import Modal from "@/shared/components/ui/Modal"
 
 import {
@@ -26,6 +27,7 @@ const EventTab = () => {
   const cal = useMemo(() => t.calendar || {}, [t])
 
   const { user } = useAuth()
+  const { isTeacher } = useRoleOverride()
   const userId = user?.accountId
 
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -35,7 +37,7 @@ const EventTab = () => {
   const pageSize = 10
 
   const { data, isLoading, error } = useGetMyEventsQuery(undefined, {
-    skip: !userId,
+    skip: !userId || !isTeacher,
   })
   const [deleteEvent, { isLoading: isDeleting }] = useDeleteEventMutation()
 

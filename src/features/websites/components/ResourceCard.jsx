@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { Link } from "react-router-dom"
 import { Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -30,8 +29,8 @@ const ResourceCard = ({ item, resolvePath }) => {
   }
 
   return (
-    <Link
-      to={resolvePath(item.path)}
+    <a
+      href={resolvePath(item.path)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className="group block focus:outline-none focus:ring-2 focus:ring-rose-500/30 rounded-xl h-full"
@@ -102,7 +101,7 @@ const ResourceCard = ({ item, resolvePath }) => {
           </p>
         </div>
       </FluentCard>
-    </Link>
+    </a>
   )
 }
 

@@ -29,6 +29,12 @@ export default defineConfig({
       "src/features/rooms/components/**/*.test.{js,jsx}",
       "src/features/billing/**/*.test.{js,jsx}",
       "src/features/chat/components/messages/**/*.test.{js,jsx}",
+      "src/features/chat/components/ChatSidebar.test.jsx",
+      "src/features/websites/**/*.test.{js,jsx}",
+      "src/features/courses/components/analytics/**/*.test.{js,jsx}",
+      "src/features/courses/pages/SessionAnalyticsDetailPage.test.jsx",
+      "src/features/stories/hooks/**/*.test.{js,jsx}",
+      "src/features/calendar/components/**/*.test.{js,jsx}",
     ],
   },
 })

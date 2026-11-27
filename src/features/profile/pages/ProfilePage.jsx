@@ -51,7 +51,11 @@ const ProfilePage = () => {
   const profile = publicProfileResponse?.data ?? publicProfileResponse ?? null
 
   // Lightweight counts for header badges. Lists are lazy-loaded inside ProfileFriendsTab.
-  const { data: countsResponse } = useGetFriendshipCountsQuery(
+  const {
+    data: countsResponse,
+    isError: isCountsError,
+    refetch: refetchCounts,
+  } = useGetFriendshipCountsQuery(
     targetAccountId,
     {
       skip: !targetAccountId,
@@ -62,9 +66,9 @@ const ProfilePage = () => {
   )
 
   const counts = countsResponse?.data ?? countsResponse ?? null
-  const friendsCount = counts?.friends ?? counts?.Friends ?? 0
-  const followersCount = counts?.followers ?? counts?.Followers ?? 0
-  const friendsBadge = friendsCount > 0 ? friendsCount.toString() : null
+  const friendsCount = isCountsError ? "—" : counts?.friends ?? counts?.Friends ?? 0
+  const followersCount = isCountsError ? "—" : counts?.followers ?? counts?.Followers ?? 0
+  const friendsBadge = !isCountsError && friendsCount > 0 ? friendsCount.toString() : null
 
   const [searchParams] = useSearchParams()
   const currentToken = searchParams.get("sharedMaterialToken")
@@ -120,6 +124,22 @@ const ProfilePage = () => {
           friendsCount={friendsCount}
           followersCount={followersCount}
         />
+
+        {isCountsError && (
+          <div
+            role="alert"
+            className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30 px-4 py-2.5 text-sm text-amber-800 dark:text-amber-300"
+          >
+            <span>Không thể tải số liệu bạn bè.</span>
+            <button
+              type="button"
+              onClick={() => refetchCounts()}
+              className="rounded-full border border-amber-300 dark:border-amber-800 px-3 py-1 text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/40"
+            >
+              Thử lại
+            </button>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <Tabs

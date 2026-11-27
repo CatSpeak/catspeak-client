@@ -34,6 +34,7 @@ import { useCreateAISessionMutation } from "@/store/api/roomsApi"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import { selectIsAuthenticated } from "@/store/slices/authSlice"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import {
   pingActiveCall,
@@ -52,6 +53,7 @@ const CalendarPage = () => {
   const cal = t.calendar || {}
   const dispatch = useDispatch()
   const isAuthenticated = useSelector(selectIsAuthenticated)
+  const { isTeacher } = useRoleOverride()
   const { openAuthModal } = useAuthModal()
   const { isInCall } = useSelector((s) => s.videoCall)
   const { state, actions } = useRoomsPageLogic()
@@ -145,12 +147,6 @@ const CalendarPage = () => {
   }, [])
 
   const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar"
-
-  const breadcrumbItems = [
-    { label: t.navigation?.home || "Trang chủ", onClick: () => navigate("/") },
-    { label: "Cat Speak", onClick: () => navigate(basePath) },
-    { label: cal.schedule || "Thời gian biểu" },
-  ]
 
   const handleNextMonth = () => {
     setCurrentDate((d) => d.add(1, "month"))
@@ -328,9 +324,11 @@ const CalendarPage = () => {
               {cal.filterTitle || "Bộ lọc"}
             </PillButton>
 
-            <PillButton onClick={handleCreateEvent} startIcon={<Plus />}>
-              {cal.createEvent || "Tạo sự kiện"}
-            </PillButton>
+            {isAuthenticated && isTeacher && (
+              <PillButton onClick={handleCreateEvent} startIcon={<Plus />}>
+                {cal.createEvent || "Tạo sự kiện"}
+              </PillButton>
+            )}
           </div>
 
           {/* Active filter chips */}

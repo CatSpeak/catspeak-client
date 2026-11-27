@@ -1,4 +1,5 @@
 import React from "react"
+import { formatOrderCode } from "../utils/formatOrderCode"
 
 const BillingTableRow = ({
   invoice,
@@ -12,7 +13,7 @@ const BillingTableRow = ({
         {formatDate(invoice.createDate)}
       </td>
       <td className="py-4 px-6 text-sm font-medium text-gray-800">
-        #{invoice.orderCode}
+        {formatOrderCode(invoice)}
       </td>
       <td className="py-4 px-6 text-sm text-gray-600">
         {invoice.method}

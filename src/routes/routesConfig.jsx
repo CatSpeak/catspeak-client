@@ -584,9 +584,13 @@ const routesConfig = [
                   {
                     path: "calendar/create",
                     element: (
-                      <LazyRoute>
-                        <CreateEventPage />
-                      </LazyRoute>
+                      <AuthGuard>
+                        <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
+                          <LazyRoute>
+                            <CreateEventPage />
+                          </LazyRoute>
+                        </RoleGuard>
+                      </AuthGuard>
                     ),
                   },
                   {
@@ -1057,7 +1061,7 @@ const routesConfig = [
               {
                 path: "materials",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <TeachingMaterialPage />
                     </LazyRoute>
@@ -1067,7 +1071,7 @@ const routesConfig = [
               {
                 path: "materials/:folderId",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <TeachingMaterialPage />
                     </LazyRoute>
@@ -1473,17 +1477,21 @@ const routesConfig = [
               {
                 path: "events",
                 element: (
-                  <LazyRoute>
-                    <WorkspaceEventsPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
+                    <LazyRoute>
+                      <WorkspaceEventsPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "events/create",
                 element: (
-                  <LazyRoute>
-                    <CreateEventPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
+                    <LazyRoute>
+                      <CreateEventPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {

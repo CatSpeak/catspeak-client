@@ -1,7 +1,11 @@
 import React, { useCallback, useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useSelector } from "react-redux"
 import { ArrowLeft, ChevronRight, Folder, FolderPlus, Lock, Pencil, Plus, Search, Trash2, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
+import { selectIsAuthenticated } from "@/store/slices/authSlice"
+import { isBrowserOffline } from "@/shared/utils/networkStatus"
 import { toast } from "@/components/ui/toast"
 import {
   isNetworkError,
@@ -61,10 +65,12 @@ const DeckListPage = () => {
   const paths = notebookPaths(lang)
   const [params, setParams] = useSearchParams()
   const term = (params.get("search") || "").trim()
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  const { openAuthModal } = useAuthModal()
 
-  const decksQuery = useGetFlashcardDecksQuery()
+  const decksQuery = useGetFlashcardDecksQuery(undefined, { skip: !isAuthenticated })
   const { data: decks = [], isLoading, isError, error, refetch } = decksQuery
-  const { data: folders } = useGetFlashcardFoldersQuery()
+  const { data: folders } = useGetFlashcardFoldersQuery(undefined, { skip: !isAuthenticated })
   useReportQueryNetwork(decksQuery)
   const [createFolder, { isLoading: creating }] = useCreateFlashcardFolderMutation()
   const [renameFolder] = useRenameFlashcardFolderMutation()
@@ -122,6 +128,40 @@ const DeckListPage = () => {
     e.preventDefault()
     const q = String(new FormData(e.currentTarget).get("q") || "").trim()
     setParams(q ? { search: q } : {})
+  }
+
+  // Guests have no notebook; ask them to sign in instead of firing unauthorised
+  // queries and showing a fake "Bạn đang offline" error.
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 pb-12">
+        <button
+          type="button"
+          onClick={() => navigate(paths.home)}
+          className="inline-flex w-fit items-center gap-2 text-sm font-bold text-slate-600 dark:text-neutral-300 hover:text-[#680411] dark:hover:text-red-400"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Quay lại Sổ tay từ vựng
+        </button>
+
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-6 py-14 text-center shadow-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-950/40 text-[#680411] dark:text-red-400">
+            <Lock className="h-7 w-7" />
+          </div>
+          <h1 className="text-xl font-black text-slate-900 dark:text-white">Danh mục bộ thẻ</h1>
+          <p className="max-w-sm text-sm text-slate-500 dark:text-neutral-400">
+            Đăng nhập để xem bộ thẻ, thư mục và tiến độ học từ vựng của bạn.
+          </p>
+          <button
+            type="button"
+            onClick={() => openAuthModal("login")}
+            className="mt-1 h-10 rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 text-sm font-semibold text-white hover:brightness-95"
+          >
+            Đăng nhập
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -256,7 +296,7 @@ const DeckListPage = () => {
           ))}
         </div>
       ) : isError && !decksQuery.data ? (
-        <FlashcardLoadError offline={isNetworkError(error)} onRetry={refetch} what="danh mục bộ thẻ" />
+        <FlashcardLoadError offline={isNetworkError(error) && isBrowserOffline()} onRetry={refetch} what="danh mục bộ thẻ" />
       ) : (
         <SystemDecksSection decks={decks} onSelectDeck={(id) => navigate(paths.deck(id))} />
       )}

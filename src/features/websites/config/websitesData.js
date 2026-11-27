@@ -90,7 +90,7 @@ export const websites = [
         key: "ef-set",
         label: "EF SET",
         path: "/resources/ef-set",
-        img: "https://www.efset.org/favicon.ico",
+        img: "/website-icons/ef-set.ico",
         color: "#db008f",
         description:
           "Free standardized English test with instant score report aligned to CEFR levels.",
@@ -107,7 +107,6 @@ export const websites = [
         key: "fluentez",
         label: "Fluentez",
         path: "/resources/fluentez",
-        img: "https://fluentez.com/vitefavicon.svg",
         color: "#00b6e3",
         description:
           "Comprehensive video-based platform to learn English online for free.",
@@ -116,7 +115,7 @@ export const websites = [
         key: "questsme",
         label: "Questsme",
         path: "/resources/questsme",
-        img: "https://play.questsme.com/favicon.png",
+        img: "/website-icons/questsme.png",
         color: "#f7ca14",
         description:
           "A journey to enhance knowledge about your favorite brands.",
@@ -148,7 +147,6 @@ export const websites = [
         label: "ESL Tests",
         path: "/resources/esl-tests",
         color: "#3aafba",
-        img: "https://www.esl-tests.com/logotip.svg",
         description:
           "Free English practice tests for every CEFR level — A1 to C2. Grammar, reading, listening and vocabulary. Find your exact level and start improving today. No sign-up.",
       },
@@ -165,7 +163,7 @@ export const websites = [
         label: "TalkDrill",
         path: "/resources/talkdrill",
         color: "#4d40e3",
-        img: "https://www.talkdrill.com/favicon.ico",
+        img: "/website-icons/talkdrill.ico",
         description: "Master English conversations Anytime, Anywhere.",
       },
       {
@@ -173,7 +171,6 @@ export const websites = [
         label: "Englishpage",
         path: "/resources/englishpage",
         color: "#326699",
-        img: "https://www.englishpage.com/image/englishpage-logo.gif",
         description: "Quality Resources for English Learners.",
       },
       {
@@ -181,7 +178,7 @@ export const websites = [
         label: "Learn English Feel Good",
         path: "/resources/learnenglishfeelgood",
         color: "#006699",
-        img: "https://www.learnenglishfeelgood.com/favicon.png",
+        img: "/website-icons/learnenglishfeelgood.png",
         description: "Free ESL Grammar, Vocabulary & Listening Exercises.",
       },
     ],
@@ -196,7 +193,7 @@ export const websites = [
         key: "elllo",
         label: "ELLLO",
         path: "/resources/elllo",
-        img: "https://elllo.org/elllo_new.ico",
+        img: "/website-icons/elllo.ico",
         color: "#003366",
         description:
           "Over 3,000 free listening activities with transcripts and quizzes for all levels.",
@@ -222,7 +219,7 @@ export const websites = [
         key: "esl-podcast",
         label: "ESL Podcast (ESLPod)",
         path: "/resources/esl-podcast",
-        img: "https://www.eslpod.com/wp-content/uploads/2016/06/cropped-ESLPodcastLogoRecWeb300.jpg",
+        img: "/website-icons/esl-podcast.jpg",
         color: "#8bc73e",
         description:
           "Slow, clear English podcasts explaining cultural context and idioms.",
@@ -231,7 +228,7 @@ export const websites = [
         key: "listeninenglish",
         label: "Listen in English",
         path: "/resources/listeninenglish",
-        img: "https://www.listeninenglish.com/android-chrome-512x512.png?v=20251120",
+        img: "/website-icons/listeninenglish.png",
         description:
           "Free ESL listening practice with BBC news, TV and movie clips, and podcasts. Improve comprehension, vocabulary, and pronunciation.",
       },
@@ -239,7 +236,6 @@ export const websites = [
         key: "dailydictation",
         label: "DailyDictation",
         path: "/resources/dailydictation",
-        img: "https://dailydictation.com/dailydictation.svg",
         color: "#1d73bf",
         description:
           "Online dictation exercises for learners to improve English listening skills quickly. All levels from basic, intermediate to advanced. 100% Free.",
@@ -249,7 +245,6 @@ export const websites = [
         label: "LevelUpESL",
         path: "/resources/levelupesl",
         color: "#4f47e6",
-        img: "https://www.levelupesl.com/favicon.svg",
         description: "Master English by Playing.",
       },
     ],
@@ -264,7 +259,7 @@ export const websites = [
         key: "perfect-english-grammar",
         label: "Perfect English Grammar",
         path: "/resources/perfect-english-grammar",
-        img: "https://www.perfect-english-grammar.com/xfavicon-144x144.png.pagespeed.ic.AiUH3K-8ok.webp",
+        img: "/website-icons/perfect-english-grammar.webp",
         color: "#00918a",
         description:
           "Clear explanations and interactive exercises for English verb tenses & grammar rules.",
@@ -273,7 +268,7 @@ export const websites = [
         key: "english-grammar-online",
         label: "English Grammar Online",
         path: "/resources/english-grammar-online",
-        img: "https://www.english-grammar.at/img/favicon.png",
+        img: "/website-icons/english-grammar-online.png",
         description:
           "Free online grammar, vocabulary, reading, and listening exercises.",
       },
@@ -281,7 +276,7 @@ export const websites = [
         key: "learngrammar",
         label: "LearnGrammar.net",
         path: "/resources/learngrammar",
-        img: "https://www.learngrammar.net/public/images/logo.png",
+        img: "/website-icons/learngrammar.png",
         color: "#657e80",
         description: "Structured grammar reference guide and practice quizzes.",
       },
@@ -306,7 +301,7 @@ export const websites = [
         key: "gamestolearnenglish",
         label: "Games to Learn English",
         path: "/resources/gamestolearnenglish",
-        img: "https://www.gamestolearnenglish.com/favicon.png",
+        img: "/website-icons/gamestolearnenglish.png",
         color: "#000066",
         description:
           "Free online ESL games to help students learn English in a fun and interactive way.",
@@ -323,7 +318,7 @@ export const websites = [
         key: "eztalking-ai",
         label: "EZTalking AI",
         path: "/resources/eztalking-ai",
-        img: "https://app.eztalking.vn/eztalking-logo.png",
+        img: "/website-icons/eztalking-ai.png",
         color: "#edba1f",
         description:
           "AI-powered pronunciation scoring and speaking practice assistant.",
@@ -332,7 +327,7 @@ export const websites = [
         key: "howtopronounce",
         label: "HowToPronounce.com",
         path: "/resources/howtopronounce",
-        img: "https://www.howtopronounce.com/android-icon-192x192.png",
+        img: "/website-icons/howtopronounce.png",
         color: "#a4cc37",
         description:
           "Audio pronunciation dictionary featuring global accents and audio recordings.",
@@ -341,7 +336,6 @@ export const websites = [
         key: "shadola",
         label: "Shadola",
         path: "/resources/shadola",
-        img: "https://shadola.com/icon.svg",
         color: "#6d5ef7",
         description: "Master spoken English with the Shadowing technique.",
       },
@@ -357,7 +351,6 @@ export const websites = [
         key: "english-news-in-levels",
         label: "English News in Levels",
         path: "/resources/english-news-in-levels",
-        img: "https://levelread.com/logo.svg",
         description:
           "World news articles written in 3 different English difficulty levels with audio.",
       },
@@ -372,7 +365,7 @@ export const websites = [
         key: "read-in-levels",
         label: "Read in Levels",
         path: "/resources/read-in-levels",
-        img: "https://readinlevels.com/favicon.ico?favicon.16c-1ygoukkmw.ico",
+        img: "/website-icons/read-in-levels.ico",
         color: "#ffb833",
         description: "One story a day, hand-adapted from A1 to C1.",
       },
@@ -380,7 +373,7 @@ export const websites = [
         key: "newslish",
         label: "Newslish",
         path: "/resources/newslish",
-        img: "https://www.newslish.com/favicon.ico",
+        img: "/website-icons/newslish.ico",
         color: "#f7f5f0",
         description: "Learn English with real news. 10 minutes a day.",
       },
@@ -396,7 +389,7 @@ export const websites = [
         key: "mini-ielts",
         label: "Mini IELTS",
         path: "/resources/mini-ielts",
-        img: "https://mini-ielts.com/favicon.ico",
+        img: "/website-icons/mini-ielts.ico",
         description:
           "Short 10-minute IELTS Reading and Listening practice tests with answers.",
       },
@@ -404,7 +397,6 @@ export const websites = [
         key: "ielts-free-tests",
         label: "IELTS Free Tests",
         path: "/resources/ielts-free-tests",
-        img: "https://www.ieltsfreetests.com/favicon.ico",
         description:
           "Full mock exams and practice exercises for Academic and General IELTS.",
       },
@@ -412,7 +404,6 @@ export const websites = [
         key: "alfa-ielts",
         label: "Alfa IELTS",
         path: "/resources/alfa-ielts",
-        img: "https://alfaielts.com/assets/svgs/header/header_logo.svg",
         description:
           "AI-evaluated IELTS practice platform for speaking and writing modules.",
       },
@@ -458,7 +449,7 @@ export const websites = [
         key: "english-e-reader",
         label: "English e-Reader",
         path: "/resources/english-e-reader",
-        img: "https://english-e-reader.net/images/eyeglasses_mini_logo_png8.png",
+        img: "/website-icons/english-e-reader.png",
         description:
           "Extensive online library of graded readers in EPUB, MOBI, and FB2 formats.",
       },
@@ -466,7 +457,7 @@ export const websites = [
         key: "extensive-reading-foundation",
         label: "Extensive Reading Foundation",
         path: "/resources/extensive-reading-foundation",
-        img: "https://erfoundation.org/wordpress/wp-content/uploads/2017/02/cropped-wc-icon-redman-192x192.jpg",
+        img: "/website-icons/extensive-reading-foundation.jpg",
         description:
           "Resources and reading lists to promote pleasure reading in foreign languages.",
       },
@@ -482,7 +473,6 @@ export const websites = [
         key: "merriam-webster-learners-dictionary",
         label: "Merriam-Webster Learner's Dictionary",
         path: "/resources/merriam-webster-learners-dictionary",
-        img: "https://www.britannica.com/dictionary/dist/images/logos/LearnersLogo.png",
         color: "#398596",
         description:
           "Clear definitions, example sentences, and audio pronunciations for English learners.",
@@ -499,7 +489,7 @@ export const websites = [
         key: "language-transfer",
         label: "Language Transfer",
         path: "/resources/language-transfer",
-        img: "https://images.squarespace-cdn.com/content/v1/5c69bfa4f4e531370e74fa44/1552332444504-XTB4M4HKJW5ENFL593QI/favicon.ico",
+        img: "/website-icons/language-transfer.png",
         description:
           "Free audio courses using Thinking Method to master language structures quickly.",
       },
@@ -525,7 +515,7 @@ export const websites = [
         key: "hoc10",
         label: "Hoc10",
         path: "/resources/hoc10",
-        img: "https://www.hoc10.vn/faviconlogo2.ico",
+        img: "/website-icons/hoc10.ico",
         color: "#304a59",
         description:
           "Nền tảng sách giáo khoa điện tử Cánh Diều và bài tập tương tác.",
@@ -542,14 +532,13 @@ export const websites = [
         key: "mandarin-bean-hsk-test",
         label: "HSK Test - MandarinBean",
         path: "/resources/mandarin-bean-hsk-test",
-        img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
+        img: "/website-icons/mandarin-bean-hsk-test.png",
         description: "Free online HSK level mock tests and vocabulary lists.",
       },
       {
         key: "hsk-mock-test",
         label: "HSKMockTest.com",
         path: "/resources/hsk-mock-test",
-        img: "https://hskmocktest.com/img/favicon.png",
         description:
           "Simulated HSK exam environment to practice timing and scoring.",
       },
@@ -565,7 +554,7 @@ export const websites = [
         key: "little-fox",
         label: "Little Fox",
         path: "/resources/little-fox",
-        img: "https://img-chinese.littlefox.com/static/layout/en/img/common/header/logo.png",
+        img: "/website-icons/little-fox.png",
         color: "#2E3192",
         description:
           "Enjoy learning Chinese and gain real skills! Little Fox Chinese uses animation for fun Chinese language education.",
@@ -574,7 +563,7 @@ export const websites = [
         key: "mandarin-bean",
         label: "MandarinBean",
         path: "/resources/mandarin-bean",
-        img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
+        img: "/website-icons/mandarin-bean.png",
         description:
           "Comprehensive Chinese learning portal covering grammar, reading, and listening.",
       },
@@ -590,7 +579,7 @@ export const websites = [
         key: "mandarin-bean-all-lessons",
         label: "All Lessons - MandarinBean",
         path: "/resources/mandarin-bean-all-lessons",
-        img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
+        img: "/website-icons/mandarin-bean-all-lessons.png",
         description:
           "Graded listening audio lessons with pinyin and English translations.",
       },
@@ -598,7 +587,6 @@ export const websites = [
         key: "chinese-extensive-listening",
         label: "Chinese Extensive Listening (汉语泛听)",
         path: "/resources/chinese-extensive-listening",
-        img: "https://hanyufanting.com/wp-content/uploads/2017/06/profile-picture-2.jpg?w=192",
         description:
           "Authentic audio practice for upper-intermediate Chinese learners.",
       },
@@ -614,7 +602,7 @@ export const websites = [
         key: "chinese-grammar-wiki",
         label: "Chinese Grammar Wiki",
         path: "/resources/chinese-grammar-wiki",
-        img: "https://resources.allsetlearning.com/favicon.ico",
+        img: "/website-icons/chinese-grammar-wiki.ico",
         description:
           "The premier free reference guide for Mandarin grammar rules and sentence structures.",
       },
@@ -622,7 +610,7 @@ export const websites = [
         key: "mandarin-bean-grammar-points",
         label: "Grammar Points - MandarinBean",
         path: "/resources/mandarin-bean-grammar-points",
-        img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
+        img: "/website-icons/mandarin-bean-grammar-points.png",
         description:
           "Grammar points categorized by HSK levels with practical examples.",
       },
@@ -630,7 +618,7 @@ export const websites = [
         key: "mandarin-bean-grammar-test",
         label: "Grammar Test - MandarinBean",
         path: "/resources/mandarin-bean-grammar-test",
-        img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
+        img: "/website-icons/mandarin-bean-grammar-test.png",
         description:
           "Test your Mandarin grammar accuracy across different difficulty levels.",
       },
@@ -638,7 +626,7 @@ export const websites = [
         key: "dig-mandarin-free-grammar-lessons",
         label: "DigMandarin Grammar Lessons",
         path: "/resources/dig-mandarin-free-grammar-lessons",
-        img: "https://www.digmandarin.com/wp-content/uploads/2018/06/Panda_favicon.png",
+        img: "/website-icons/dig-mandarin-free-grammar-lessons.png",
         description:
           "Easy-to-understand explanations of complex Mandarin sentence patterns.",
       },
@@ -669,7 +657,7 @@ export const websites = [
         key: "stroke-order",
         label: "StrokeOrder.com",
         path: "/resources/stroke-order",
-        img: "https://www.strokeorder.com/assets/favicons/favicon-96x96.png",
+        img: "/website-icons/stroke-order.png",
         description:
           "Animated Chinese character stroke order diagrams and stroke count.",
       },
@@ -677,7 +665,7 @@ export const websites = [
         key: "arch-chinese",
         label: "ArchChinese",
         path: "/resources/arch-chinese",
-        img: "https://www.archchinese.com/favicon.ico",
+        img: "/website-icons/arch-chinese.ico",
         description:
           "Premier learning system for Chinese character handwriting and stroke animation.",
       },
@@ -685,7 +673,7 @@ export const websites = [
         key: "hanzi-guide",
         label: "Hanzi Guide",
         path: "/resources/hanzi-guide",
-        img: "https://www.hanzi.guide/favicon.ico",
+        img: "/website-icons/hanzi-guide.ico",
         description:
           "Etymology and component breakdown of Chinese Hanzi characters.",
       },
@@ -693,7 +681,7 @@ export const websites = [
         key: "hanzi-stroke",
         label: "HanziStroke.com",
         path: "/resources/hanzi-stroke",
-        img: "https://www.hanzistroke.com/website-icon-56.webp",
+        img: "/website-icons/hanzi-stroke.webp",
         description:
           "Step-by-step character writing guides and printable practice sheets.",
       },
@@ -718,7 +706,7 @@ export const websites = [
         label: "Hanzii",
         path: "/resources/hanzii",
         color: "#47619e",
-        img: "https://hanzii.net/assets/images/ic_logo.ico",
+        img: "/website-icons/hanzii.png",
         description:
           "Online Chinese dictionary for words, meanings, examples, writing, grammar, and free HSK & TOCFL practice tests.",
       },
@@ -734,14 +722,14 @@ export const websites = [
         key: "mandarin-bean-graded-reading",
         label: "MandarinBean Graded Reading",
         path: "/resources/mandarin-bean-graded-reading",
-        img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
+        img: "/website-icons/mandarin-bean-graded-reading.png",
         description: "Short Chinese stories categorized from HSK 1 to HSK 6.",
       },
       {
         key: "pandaist",
         label: "Pandaist",
         path: "/resources/pandaist",
-        img: "https://pandaist.com/favicon.ico",
+        img: "/website-icons/pandaist.png",
         color: "#e381a2",
         description: "Master Chinese through immersive reading.",
       },
@@ -749,7 +737,6 @@ export const websites = [
         key: "hskatlas",
         label: "HSK Atlas",
         path: "/resources/hskatlas",
-        img: "https://hskatlas.com/favicon.svg",
         color: "#18403b",
         description: "Learn Chinese through the HSK 3.0 level system.",
       },
@@ -757,7 +744,7 @@ export const websites = [
         key: "hskheadlines",
         label: "HSK Headlines",
         path: "/resources/hskheadlines",
-        img: "https://hskheadlines.com/favicons/favicon-32x32.png",
+        img: "/website-icons/hskheadlines.png",
         color: "#0c9bab",
         description: "Learn Mandarin through live news.",
       },
@@ -765,7 +752,7 @@ export const websites = [
         key: "readchinese",
         label: "Read Chinese",
         path: "/resources/readchinese",
-        img: "https://www.readchinese.org/logo-trans-56.webp",
+        img: "/website-icons/readchinese.webp",
         color: "#e68483",
         description:
           "Daily Mandarin reading challenges, audio, and quizzes that keep beginners and intermediate learners progressing through stories curated for every HSK level.",
@@ -805,7 +792,7 @@ export const websites = [
         label: "Trung tâm tiếng Trung Thượng Hải",
         path: "/resources/tiengtrungthuonghai",
         color: "#4aba7f",
-        img: "https://tiengtrungthuonghai.vn/wp-content/themes/tiengtrungthuonghai/favicon.ico",
+        img: "/website-icons/tiengtrungthuonghai.ico",
         description:
           "Trung tâm tiếng Trung uy tín và chất lượng tại Mỹ Đình, Hà Nội. Chúng tôi tự hào đã giúp hàng nghìn học viên giao tiếp tiếng Trung thành thạo và thi đỗ HSK điểm cao",
       },
@@ -813,7 +800,7 @@ export const websites = [
         key: "tiengtrungpanda",
         label: "Tiếng Trung Panda",
         path: "/resources/tiengtrungpanda",
-        img: "https://tiengtrungpanda.vn/_astro/ch005-tiengtrung-panda.C_gRx6SK_Z1yMxzW.webp",
+        img: "/website-icons/tiengtrungpanda.webp",
         color: "#D1FAE5",
         description:
           "Học tiếng Trung theo HSK miễn phí, không cần cài app.",
@@ -832,7 +819,7 @@ export const websites = [
         path: "/resources/on-jlpt",
         description: "Đủ kiến thức tổng hợp các trình độ từ N5 tới N1.",
         color: "#145efc",
-        img: "https://onjlpt.com/favicon.ico",
+        img: "/website-icons/on-jlpt.ico",
       },
     ],
   },
@@ -854,7 +841,7 @@ export const websites = [
         path: "/resources/corodomo",
         description: "Biến mọi Video yêu thích thành bài học",
         color: "#00c972",
-        img: "https://corodomo.com/favicon.ico",
+        img: "/website-icons/corodomo.ico",
       },
     ],
   },
@@ -893,7 +880,7 @@ export const websites = [
         path: "/resources/nhk-world-japan",
         description:
           "Web của NHK. Bạn sẽ được hướng dẫn về nội dung đoạn video, sau đó luyện tập các mẫu câu quan trọng. Học xong 1 video là vận dụng được luôn mẫu câu đó vào đời sống.",
-        img: "https://www3.nhk.or.jp/nhkworld/common/site_images/nw_webapp_152x152.png",
+        img: "/website-icons/nhk-world-japan.png",
       },
     ],
   },
@@ -931,7 +918,6 @@ export const websites = [
         label: "KanjiEasy",
         path: "/resources/kanjieasy",
         description: "Mindmap Kanji N5 - N3.",
-        img: "https://kanjieasy.vercel.app/favicon.svg",
         color: "#152238",
       },
     ],
@@ -947,7 +933,7 @@ export const websites = [
         label: "TAKOBOTO",
         path: "/resources/takoboto",
         description: "Tra cứu từ điển tiếng Nhật.",
-        img: "https://takoboto.jp/takoboto_48x48.png",
+        img: "/website-icons/takoboto.png",
         color: "#fa0000",
       },
       {
@@ -970,7 +956,6 @@ export const websites = [
         path: "/resources/xe-tang-hoc-kanji",
         description:
           "Học tiếng Nhật qua game nhỏ vài phút, có tài liệu từ vựng theo chủ đề, thi đấu cùng đồng nghiệp và leo bảng xếp hạng.",
-        img: "https://gametiengnhat.onhat.vn/favicon.svg",
         color: "#c73e3a",
       },
       {
@@ -979,7 +964,6 @@ export const websites = [
         path: "/resources/hansha-dojo",
         description:
           "Đề là câu tiếng Việt. Bạn nói thành tiếng câu tiếng Nhật tương ứng — không gõ gì cả — rồi mở đáp án và tự chấm. 253 mẫu ngữ pháp thông dụng nhất, luyện bằng 256 câu, từ N5 lên N1 — 十級 tới 名人.",
-        img: "https://gametiengnhat.onhat.vn/favicon.svg",
         color: "#c73e3a",
       },
       {
@@ -988,7 +972,6 @@ export const websites = [
         path: "/resources/wakamono",
         description:
           "それな, 草, 推し, ワンチャン — thứ tiếng Nhật phủ kín YouTube, X và LINE mà giáo trình không bao giờ nhắc. 50 từ, kèm cảnh báo từ nào tuyệt đối đừng dùng với sếp.",
-        img: "https://gametiengnhat.onhat.vn/favicon.svg",
         color: "#c73e3a",
       },
     ],

@@ -1,7 +1,9 @@
 import { useState } from "react"
 import dayjs from "dayjs"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { setActiveConversation } from "@/store/slices/messageWidgetSlice"
+import { selectIsAuthenticated } from "@/store/slices/authSlice"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 import {
   useGetStoriesQuery,
   useGetMyStoriesQuery,
@@ -15,13 +17,15 @@ import { useConversationSignalRContext } from "@/features/chat/context/useConver
 const useStories = (languageCommunity) => {
   const dispatch = useDispatch()
   const signalR = useConversationSignalRContext()
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  const { openAuthModal } = useAuthModal()
   const [inputValue, setInputValue] = useState("")
 
   // API Hooks
   const { data: storiesData, isLoading: loadingStories } =
     useGetStoriesQuery(languageCommunity)
   const { data: myStoriesData, isLoading: loadingMyStories } =
-    useGetMyStoriesQuery(languageCommunity)
+    useGetMyStoriesQuery(languageCommunity, { skip: !isAuthenticated })
   const [createStory, { isLoading: isCreating }] = useCreateStoryMutation()
   const [interactWithStory] = useInteractWithStoryMutation()
   const [deleteStory] = useDeleteStoryMutation()
@@ -42,6 +46,10 @@ const useStories = (languageCommunity) => {
 
   // Handlers
   const handleCreate = async (content) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
     if (!content.trim()) return
 
     if (!canCreate) {
@@ -60,6 +68,10 @@ const useStories = (languageCommunity) => {
   }
 
   const handleInteract = async (storyId, actionType) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
     // actionType: 1 = Accept/Interest, 0 = Decline/Ignore, 2 = Decline?
     // Based on user request info: 1 = Accept, 2 = Decline
     try {
@@ -98,6 +110,10 @@ const useStories = (languageCommunity) => {
   }
 
   const handleDelete = async (storyId) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
     try {
       await deleteStory(storyId).unwrap()
     } catch (error) {
@@ -106,6 +122,10 @@ const useStories = (languageCommunity) => {
   }
 
   const handleReport = async (storyId) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
     try {
       await reportStory(storyId).unwrap()
     } catch (error) {

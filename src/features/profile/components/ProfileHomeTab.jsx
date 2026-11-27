@@ -32,7 +32,12 @@ const ProfileHomeTab = ({
   const triggerVideoRef = useRef(null)
   const triggerFileRef = useRef(null)
 
-  const { data: postsData, isLoading: isLoadingPosts } =
+  const {
+    data: postsData,
+    isLoading: isLoadingPosts,
+    isError: isPostsError,
+    refetch: refetchPosts,
+  } =
     useGetUserTimelinePostsQuery(
       { accountId: targetAccountId },
       { skip: !targetAccountId },
@@ -166,15 +171,33 @@ const ProfileHomeTab = ({
         )}
 
         {/* News Block */}
-        <PostFeedList
-          posts={timelinePosts}
-          isLoading={isLoadingPosts}
-          isOwnProfile={isOwnProfile}
-          emptyMessage={t.profile?.home?.noPosts || "Chưa có bài viết nào."}
-          emptyIcon={Newspaper}
-          emptyVariant="card"
-          className="flex flex-col gap-2"
-        />
+        {isPostsError ? (
+          <div
+            role="alert"
+            className="flex flex-col items-center gap-3 rounded-xl border border-slate-100 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-6 py-10 text-center"
+          >
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+              {t.profile?.home?.postsError || "Không thể tải bài viết"}
+            </p>
+            <button
+              type="button"
+              onClick={() => refetchPosts()}
+              className="rounded-full bg-[#990011] dark:bg-cath-red-700 px-5 py-2 text-sm font-semibold text-white hover:brightness-95"
+            >
+              {t.profile?.home?.retry || "Thử lại"}
+            </button>
+          </div>
+        ) : (
+          <PostFeedList
+            posts={timelinePosts}
+            isLoading={isLoadingPosts}
+            isOwnProfile={isOwnProfile}
+            emptyMessage={t.profile?.home?.noPosts || "Chưa có bài viết nào."}
+            emptyIcon={Newspaper}
+            emptyVariant="card"
+            className="flex flex-col gap-2"
+          />
+        )}
       </div>
 
       {/* Right Column - Sidebar */}

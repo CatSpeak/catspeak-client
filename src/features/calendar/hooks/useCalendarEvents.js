@@ -36,7 +36,7 @@ const useCalendarEvents = ({ currentDate, selectedDate, activeFilters }) => {
   const { data: registeredEvents, isLoading: isLoadingRegis } = useGetRegisteredEventsQuery({
     startDate: fromDate,
     endDate: toDate
-  })
+  }, { skip: !isTeacher })
   const { data: studentRegisteredEvents, isLoading: isLoadingStuRegis } = useGetStudentRegisteredEventsQuery({
     startDate: fromDate,
     endDate: toDate

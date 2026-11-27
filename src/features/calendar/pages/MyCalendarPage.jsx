@@ -92,9 +92,9 @@ const MyCalendarPage = () => {
       label: t.calendar?.generalCalendar || "Lịch tổng hợp",
       icon: CalendarDays,
     },
-    { id: "event", label: t.nav?.events || "Sự kiện", icon: Ticket },
     ...(isTeacher
       ? [
+          { id: "event", label: t.nav?.events || "Sự kiện", icon: Ticket },
           {
             id: "teaching-schedule",
             label: t.nav?.schedule || "Lịch giảng dạy",
@@ -103,6 +103,11 @@ const MyCalendarPage = () => {
         ]
       : []),
   ]
+
+  // Non-teachers must never land on the teacher-only event management tab.
+  if (!isTeacher && activeTab === "event") {
+    setActiveTab("calendar")
+  }
 
   if (isLoading) {
     return (
@@ -126,13 +131,15 @@ const MyCalendarPage = () => {
             {t.calendar?.changeTeachingSchedule || "Thay đổi lịch dạy"}
           </PillButton>
         )}
-        <PillButton
-          variant="outline"
-          endIcon={<Plus className="w-4 h-4" />}
-          onClick={() => navigate("/workspace/events/create")}
-        >
-          {t.calendar?.createEvent || "Tạo sự kiện"}
-        </PillButton>
+        {isTeacher && (
+          <PillButton
+            variant="outline"
+            endIcon={<Plus className="w-4 h-4" />}
+            onClick={() => navigate("/workspace/events/create")}
+          >
+            {t.calendar?.createEvent || "Tạo sự kiện"}
+          </PillButton>
+        )}
       </div>
 
       <Tabs

@@ -21,6 +21,8 @@ const ChatSidebar = ({
   onSearchChange,
   onNewChatClick,
   isLoading,
+  isError = false,
+  onRetry,
 }) => {
   const { t } = useLanguage()
   const [filter] = useState("all")
@@ -106,6 +108,28 @@ const ChatSidebar = ({
               </div>
             </ListItem>
           ))
+        ) : isError && !conversations?.length ? (
+          <div
+            role="alert"
+            data-testid="chat-sidebar-error"
+            className="flex flex-col items-center gap-3 px-6 py-10 text-center"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+              <BellOff className="h-6 w-6" />
+            </div>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+              {t?.chat?.sidebar?.loadError || "Không thể tải danh sách cuộc trò chuyện"}
+            </p>
+            {onRetry && (
+              <button
+                type="button"
+                onClick={() => onRetry()}
+                className="rounded-full bg-[#990011] dark:bg-cath-red-700 px-5 py-2 text-sm font-semibold text-white hover:brightness-95"
+              >
+                {t?.chat?.sidebar?.retry || "Thử lại"}
+              </button>
+            )}
+          </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             variant="component"

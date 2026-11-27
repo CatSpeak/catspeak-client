@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
+import { selectIsAuthenticated } from "@/store/slices/authSlice";
 import {
   useGetEventsByDateQuery,
   useGetRegisteredEventsQuery,
@@ -52,12 +55,13 @@ const DaySchedule = ({
   onEventsUpdate,
   eventCountsByDay,
   totalUniqueEvents,
-  totalUniqueRegisteredEvents,
   onSelectDate,
 }) => {
   const { t, language } = useLanguage();
   const { lang } = useParams();
   const { formatCustom } = useTimezone();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { isTeacher } = useRoleOverride();
   const cal = t.calendar || {};
 
   const [tab, setTab] = useState("unregistered"); // day view tab
@@ -103,13 +107,13 @@ const DaySchedule = ({
   // consistent with the day/week registered state.
   const { data: registeredMonthData, isLoading: isLoadingRegisteredMonth } =
     useGetRegisteredEventsQuery(undefined, {
-      skip: !isMonthView,
+      skip: !isMonthView || !isAuthenticated || !isTeacher,
     });
   const {
     data: studentRegisteredMonthData,
     isLoading: isLoadingStudentMonth,
   } = useGetStudentRegisteredEventsQuery(undefined, {
-    skip: !isMonthView,
+    skip: !isMonthView || !isAuthenticated,
   });
   const mergedRegisteredMonthData = (() => {
     const teacherOccs =
@@ -166,11 +170,11 @@ const DaySchedule = ({
   // Registered events for selected day (day view tab)
   const { data: registeredDayData } = useGetRegisteredEventsQuery(
     { startDate: localStart.toISOString(), endDate: localEnd.toISOString() },
-    { skip: selectedDate == null },
+    { skip: selectedDate == null || !isAuthenticated || !isTeacher },
   );
   const { data: studentRegisteredDayData } = useGetStudentRegisteredEventsQuery(
     { startDate: localStart.toISOString(), endDate: localEnd.toISOString() },
-    { skip: selectedDate == null },
+    { skip: selectedDate == null || !isAuthenticated },
   );
   const allRegisteredDayOccurrences = (() => {
     const teacherOccs =

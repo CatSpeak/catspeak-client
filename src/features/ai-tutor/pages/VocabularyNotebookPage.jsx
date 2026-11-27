@@ -4,6 +4,7 @@ import { ChevronRight, Layers, Plus } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
+import { isBrowserOffline } from "@/shared/utils/networkStatus"
 import {
   isNetworkError,
   useGetDeckCardsQuery,
@@ -88,7 +89,7 @@ const VocabularyNotebookPage = () => {
     return (
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 pb-12">
         {title}
-        <FlashcardLoadError offline={isNetworkError(error)} onRetry={refetch} />
+        <FlashcardLoadError offline={isNetworkError(error) && isBrowserOffline()} onRetry={refetch} />
       </div>
     )
   }

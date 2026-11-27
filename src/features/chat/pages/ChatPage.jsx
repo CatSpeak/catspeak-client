@@ -70,8 +70,13 @@ const ChatPage = () => {
     optimisticToggleReaction,
   } = useChatMessages(selectedId)
 
-  const { conversations, activeConversation, isLoadingConversations } =
-    useChatConversations(selectedId, accumulatedMessagesCount)
+  const {
+    conversations,
+    activeConversation,
+    isLoadingConversations,
+    isConversationsError,
+    refetchConversations,
+  } = useChatConversations(selectedId, accumulatedMessagesCount)
 
   const {
     replyingTo,
@@ -242,6 +247,8 @@ const ChatPage = () => {
           onSearchChange={setSearchQuery}
           onNewChatClick={() => setIsNewChatOpen(true)}
           isLoading={isLoadingConversations}
+          isError={isConversationsError}
+          onRetry={refetchConversations}
         />
       </div>
 

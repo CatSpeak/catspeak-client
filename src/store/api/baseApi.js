@@ -96,18 +96,8 @@ const aiBaseQuery = fetchBaseQuery({
       headers.set("authorization", `Bearer ${token}`)
     }
 
-    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)
-    if (match) {
-      headers.set("X-Community-Lang", match[1])
-    }
-
     const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
     headers.set("X-Time-Zone", userTz)
-
-    headers.set(
-      "X-Timezone-Offset",
-      (-new Date().getTimezoneOffset()).toString(),
-    )
 
     return headers
   },

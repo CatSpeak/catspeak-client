@@ -4,6 +4,7 @@ import Popover from "@/shared/components/ui/Popover"
 import MenuItem from "@/shared/components/ui/MenuItem"
 import MenuList from "@/shared/components/ui/MenuList"
 import { IconButton } from "@/shared/components/ui/buttons"
+import { formatOrderCode } from "../utils/formatOrderCode"
 import {
   RotateCcw,
   AlertCircle,
@@ -39,7 +40,7 @@ const BillingMobileCard = ({
       {/* Top row: order code + status */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-semibold text-gray-800 dark:text-white">
-          #{invoice.orderCode}
+          {formatOrderCode(invoice)}
         </span>
         <span
           className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusInfo.styles}`}

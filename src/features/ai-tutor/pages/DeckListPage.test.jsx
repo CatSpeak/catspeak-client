@@ -14,6 +14,18 @@ let mockDecksQuery = {
   isLoading: false,
 }
 
+let mockIsAuthenticated = true
+let mockBrowserOffline = false
+
+vi.mock("@/shared/utils/networkStatus", () => ({
+  isBrowserOffline: () => mockBrowserOffline,
+}))
+
+vi.mock("react-redux", async (importOriginal) => ({
+  ...(await importOriginal()),
+  useSelector: () => mockIsAuthenticated,
+}))
+
 vi.mock("react-router-dom", async (importOriginal) => ({
   ...(await importOriginal()),
   useNavigate: () => vi.fn(),
@@ -26,6 +38,7 @@ vi.mock("@/shared/context/LanguageContext", () => ({
 }))
 
 vi.mock("../api/flashcardApi", () => ({
+  isNetworkError: (error) => error?.status === "FETCH_ERROR",
   useGetFlashcardDecksQuery: () => mockDecksQuery,
   useGetFlashcardFoldersQuery: () => mockFoldersQuery,
   useCreateFlashcardFolderMutation: () => [vi.fn(), { isLoading: false }],
@@ -34,6 +47,49 @@ vi.mock("../api/flashcardApi", () => ({
 }))
 
 describe("DeckListPage: folder limits and plan badge honesty (TC-FC-131, TC-FC-132)", () => {
+  beforeEach(() => {
+    mockIsAuthenticated = true
+    mockBrowserOffline = false
+    mockDecksQuery = { data: [], isLoading: false }
+  })
+
+  it("shows a sign-in invitation for guests instead of a fake offline error (ISS-01)", () => {
+    mockIsAuthenticated = false
+
+    const html = renderToStaticMarkup(<DeckListPage />)
+
+    expect(html).toContain("Đăng nhập để xem bộ thẻ")
+    expect(html).not.toContain("Bạn đang offline")
+  })
+
+  it("reports a server/CORS error, not 'offline', when the browser is online (ISS-01)", () => {
+    mockDecksQuery = {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: { status: "FETCH_ERROR" },
+    }
+
+    const html = renderToStaticMarkup(<DeckListPage />)
+
+    expect(html).toContain("Chưa tải được danh mục bộ thẻ")
+    expect(html).not.toContain("Bạn đang offline")
+  })
+
+  it("only says offline when the browser really has no connection", () => {
+    mockBrowserOffline = true
+    mockDecksQuery = {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: { status: "FETCH_ERROR" },
+    }
+
+    const html = renderToStaticMarkup(<DeckListPage />)
+
+    expect(html).toContain("Bạn đang offline")
+  })
+
   it("does not render '(3/3 - gói Free)' badge when user has Pro plan (max_folders is null)", () => {
     mockFoldersQuery = {
       data: {

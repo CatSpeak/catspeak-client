@@ -11,6 +11,8 @@ const TEACHER_ONLY_PREFIXES = [
   "/workspace/teaching-tasks",
   "/workspace/schedule",
   "/workspace/vouchers",
+  "/workspace/materials",
+  "/workspace/events",
 ]
 
 const WorkspaceLayout = () => {

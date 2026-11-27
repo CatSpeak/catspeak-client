@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import {
   Trash2,
   Clock,
@@ -53,6 +53,7 @@ const eventTypeOptions = [
 const CreateEventPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { lang } = useParams();
   const { t } = useLanguage();
   const { formatTime } = useTimezone();
   const cal = t.calendar || {};
@@ -168,25 +169,45 @@ const CreateEventPage = () => {
   // the return path should go back to workspace events or wherever it came from
   const returnPath = location.state?.from || workspaceEventsPath;
 
-  const breadcrumbItems = [
-    {
-      label: t.nav?.home || "Trang chủ",
-      onClick: () => navigate("/"),
-    },
-    {
-      label: t.nav?.workspace || "Không gian làm việc",
-      onClick: () => navigate("/workspace"),
-    },
-    {
-      label: cal.workspaceEventsTitle || "Sự kiện",
-      onClick: () => navigate("/workspace/my-calendar", { state: { activeTab: 'event' } }),
-    },
-    {
-      label: isEditing
-        ? cal.editEvent || "Chỉnh sửa sự kiện"
-        : cal.createEvent || "Tạo sự kiện",
-    },
-  ];
+  const breadcrumbItems = location.state?.fromCommunityCalendar || location.pathname.includes("/cat-speak/calendar/create")
+    ? [
+        {
+          label: t.nav?.home || "Trang chủ",
+          onClick: () => navigate("/"),
+        },
+        {
+          label: "Cat Speak",
+          onClick: () => navigate(`/${lang || ""}/cat-speak`),
+        },
+        {
+          label: cal.schedule || "Thời gian biểu",
+          onClick: () => navigate(`/${lang || ""}/cat-speak/calendar`),
+        },
+        {
+          label: isEditing
+            ? cal.editEvent || "Chỉnh sửa sự kiện"
+            : cal.createEvent || "Tạo sự kiện",
+        },
+      ]
+    : [
+        {
+          label: t.nav?.home || "Trang chủ",
+          onClick: () => navigate("/"),
+        },
+        {
+          label: t.nav?.workspace || "Không gian làm việc",
+          onClick: () => navigate("/workspace"),
+        },
+        {
+          label: cal.workspaceEventsTitle || "Sự kiện",
+          onClick: () => navigate("/workspace/my-calendar", { state: { activeTab: 'event' } }),
+        },
+        {
+          label: isEditing
+            ? cal.editEvent || "Chỉnh sửa sự kiện"
+            : cal.createEvent || "Tạo sự kiện",
+        },
+      ];
 
   const handleClose = () => {
     if (returnPath === workspaceEventsPath) {

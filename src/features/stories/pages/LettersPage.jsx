@@ -1,8 +1,11 @@
 import React, { useState, useMemo } from "react"
 import { useParams } from "react-router-dom"
+import { useSelector } from "react-redux"
 import { MessageSquare } from "lucide-react"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
+import { selectIsAuthenticated } from "@/store/slices/authSlice"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
@@ -50,6 +53,8 @@ export default function LettersPage() {
   } = useStories(languageCommunity)
 
   const { t } = useLanguage()
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  const { openAuthModal } = useAuthModal()
   const [selectedStory, setSelectedStory] = useState(null)
   const [selectedMyStory, setSelectedMyStory] = useState(null)
 
@@ -75,6 +80,10 @@ export default function LettersPage() {
   const totalCount = stories.length + myStories.length
 
   const handleSend = () => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
     if (!inputValue || !inputValue.trim()) {
       toast.error(
         t.catSpeak?.mail?.emptyInputError ||
@@ -98,14 +107,18 @@ export default function LettersPage() {
   }
 
   const handleConnect = (story) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
     handleInteract(story.storyId, 1)
   }
 
-  const handlePass = (story) => {
-    handleInteract(story.storyId, 2)
-  }
-
   const handleReportAction = async (story) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
     try {
       await handleReport(story.storyId)
       toast.success(t.catSpeak?.reportSuccess || "Story reported successfully.")

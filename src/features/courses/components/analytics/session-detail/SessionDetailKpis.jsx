@@ -18,13 +18,14 @@ const formatDuration = (seconds) => {
   return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
 }
 
-const SessionDetailKpis = ({ sessionData, teacherName = "Giảng viên" }) => {
+const SessionDetailKpis = ({ sessionData }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const sessT = c.analytics?.sessionDetail || {}
 
-  const teacherPercent = sessionData?.teacherSpeechPercent ?? 0
-  const studentPercent = sessionData?.studentSpeechPercent ?? 0
+  const teacherPercent = sessionData?.teacherSpeechPercent ?? null
+  const studentPercent = sessionData?.studentSpeechPercent ?? null
+  const hasSpeechRatio = teacherPercent != null && studentPercent != null
   const durationSeconds =
     sessionData?.totalStudentDurationSeconds ??
     sessionData?.durationSeconds ??
@@ -35,6 +36,9 @@ const SessionDetailKpis = ({ sessionData, teacherName = "Giảng viên" }) => {
 
   const getTeacherStatusText = (status) => {
     switch (status) {
+      case null:
+      case undefined:
+        return sessT.statusNoData || "Chưa có dữ liệu"
       case "ideal":
         return sessT.statusIdeal || "Trạng thái: Lý tưởng"
       case "talked_too_much":
@@ -59,18 +63,20 @@ const SessionDetailKpis = ({ sessionData, teacherName = "Giảng viên" }) => {
         </div>
         <div className="min-w-0 flex-1">
           <p className="m-0 text-[#667085] dark:text-gray-400 text-xs font-normal truncate">{sessT.kpiSpeechRatio || "Tỷ lệ phát biểu (GV / HV)"}</p>
-          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] dark:text-white truncate tracking-tight my-0.5" title={`${sessT.teacherTag || "GV"} ${teacherPercent}% · ${sessT.studentTag || "HV"} ${studentPercent}%`}>
-            {sessT.teacherTag || "GV"} {teacherPercent}% · {sessT.studentTag || "HV"} {studentPercent}%
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] dark:text-white truncate tracking-tight my-0.5" title={hasSpeechRatio ? `${sessT.teacherTag || "GV"} ${teacherPercent}% · ${sessT.studentTag || "HV"} ${studentPercent}%` : undefined}>
+            {hasSpeechRatio
+              ? `${sessT.teacherTag || "GV"} ${teacherPercent}% · ${sessT.studentTag || "HV"} ${studentPercent}%`
+              : "—"}
           </strong>
           {/* Split progress mini bar + status */}
           <div className="flex items-center gap-2 mt-1">
             <div className="w-16 h-1.5 bg-gray-200 dark:bg-[#2A2A2A] rounded-full overflow-hidden flex shrink-0">
               <div
-                style={{ width: `${Math.min(100, Math.max(0, teacherPercent))}%` }}
+                style={{ width: `${hasSpeechRatio ? Math.min(100, Math.max(0, teacherPercent)) : 0}%` }}
                 className="bg-sky-500 h-full"
               />
               <div
-                style={{ width: `${Math.min(100, Math.max(0, studentPercent))}%` }}
+                style={{ width: `${hasSpeechRatio ? Math.min(100, Math.max(0, studentPercent)) : 0}%` }}
                 className="bg-emerald-500 h-full"
               />
             </div>

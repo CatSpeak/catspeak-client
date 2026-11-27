@@ -25,6 +25,8 @@ const SessionAnalyticsDetailPage = () => {
   const {
     data: sessionStatsData,
     isLoading: isSessionLoading,
+    isError: isSessionError,
+    refetch: refetchSession,
   } = useGetSessionSpeakingStatsQuery(
     { classId: classId || "", sessionId: sessionId || "" },
     { skip: !sessionId }
@@ -86,11 +88,11 @@ const SessionAnalyticsDetailPage = () => {
     createdAt: sessionStatsData?.createdAt || sessionStatsData?.created_at || null,
     updatedAt: sessionStatsData?.updatedAt || sessionStatsData?.updated_at || null,
     teacherSpeechPercent:
-      sessionStatsData?.teacherTalkRatio?.teacherPercent ?? 45,
+      sessionStatsData?.teacherTalkRatio?.teacherPercent ?? null,
     studentSpeechPercent:
-      sessionStatsData?.teacherTalkRatio?.studentPercent ?? 55,
+      sessionStatsData?.teacherTalkRatio?.studentPercent ?? null,
     teacherStatus:
-      sessionStatsData?.teacherTalkRatio?.status ?? "ideal",
+      sessionStatsData?.teacherTalkRatio?.status ?? null,
     durationSeconds:
       sessionStatsData?.overview?.totalStudentDurationSeconds ??
       participants.reduce((acc, p) => acc + (p.durationSeconds || 0), 0) ??
@@ -153,6 +155,39 @@ const SessionAnalyticsDetailPage = () => {
       <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3">
         <div className="w-8 h-8 border-3 border-gray-200 dark:border-[#3F3F3F] border-t-[#16a34a] rounded-full animate-spin" />
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{sessT.loading || "Đang tải dữ liệu phân tích buổi học..."}</p>
+      </div>
+    )
+  }
+
+  if (isSessionError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3 text-center">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          {sessT.loadErrorTitle || "Không thể tải dữ liệu phân tích buổi học"}
+        </h2>
+        <p className="max-w-md text-sm text-gray-500 dark:text-gray-400">
+          {sessT.loadErrorDesc || "Đã xảy ra lỗi khi kết nối máy chủ. Vui lòng thử lại."}
+        </p>
+        <button
+          type="button"
+          onClick={() => refetchSession()}
+          className="mt-1 rounded-full bg-[#990011] dark:bg-cath-red-700 px-6 py-2.5 text-sm font-semibold text-white hover:brightness-95"
+        >
+          {sessT.retry || "Thử lại"}
+        </button>
+      </div>
+    )
+  }
+
+  if (!sessionStatsData) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] w-full text-center">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          {sessT.emptyTitle || "Chưa có dữ liệu phân tích buổi học"}
+        </h2>
+        <p className="mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400">
+          {sessT.emptyDesc || "Buổi học này chưa có dữ liệu phát biểu để phân tích."}
+        </p>
       </div>
     )
   }
