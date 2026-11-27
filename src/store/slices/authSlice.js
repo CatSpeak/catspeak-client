@@ -66,6 +66,10 @@ const authSlice = createSlice({
       state.status = "succeeded"
 
       if (typeof localStorage !== "undefined") {
+        // TODO(security) — Phase 2B (D2-01 / CS-21): migrate refreshToken (and
+        // ideally the access token) to HttpOnly; Secure; SameSite cookies and
+        // keep only a short-lived access token in memory. localStorage is kept
+        // in Phase 2A on purpose; the XSS sinks on this origin are closed.
         if (state.user) localStorage.setItem("user", JSON.stringify(state.user))
         if (state.token) localStorage.setItem("token", state.token)
         if (state.refreshToken)

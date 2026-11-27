@@ -1,6 +1,24 @@
 import { baseApi } from "./baseApi"
 import { socialApi } from "./social/socialApi"
 import { setCredentials, logout } from "../slices/authSlice"
+import {
+  clearRegistrationCorrectionToken,
+  setRegistrationCorrectionToken,
+} from "@/features/auth/utils/registrationCorrectionToken"
+
+/**
+ * CS-10: extract the short-lived `registrationCorrectionToken` returned by the
+ * Core API (register success, or login of an unactivated account) and keep it
+ * in memory only.
+ */
+function rememberRegistrationCorrectionToken(payload) {
+  const token =
+    payload?.registrationCorrectionToken ??
+    payload?.RegistrationCorrectionToken ??
+    payload?.data?.registrationCorrectionToken ??
+    payload?.data?.RegistrationCorrectionToken
+  if (token) setRegistrationCorrectionToken(token)
+}
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -15,7 +33,9 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           dispatch(setCredentials(data))
-        } catch {
+        } catch (error) {
+          // CS-10: login of an unactivated account may carry a correction token.
+          rememberRegistrationCorrectionToken(error?.data)
           // Handled by UI component
         }
       },
@@ -26,6 +46,14 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled
+          rememberRegistrationCorrectionToken(data)
+        } catch {
+          // Handled by UI component
+        }
+      },
     }),
     refreshToken: builder.mutation({
       query: (tokenData) => ({
@@ -85,6 +113,7 @@ export const authApi = baseApi.injectEndpoints({
         // Clear local auth state immediately so localStorage is always cleaned up,
         // even if the API call fails. This ensures other tabs see the logout on refresh.
         dispatch(logout())
+        clearRegistrationCorrectionToken()
         try {
           await queryFulfilled
         } catch (err) {
@@ -111,6 +140,8 @@ export const authApi = baseApi.injectEndpoints({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled
+          // Account is now activated: the correction token is no longer needed.
+          clearRegistrationCorrectionToken()
           if (data?.auth) {
             dispatch(setCredentials(data.auth))
           }

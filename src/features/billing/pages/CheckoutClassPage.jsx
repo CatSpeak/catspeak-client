@@ -213,9 +213,11 @@ const CheckoutClassPage = () => {
       if (response.accountId) {
         const newLearner = {
           id: response.accountId,
-          name: response.username,
+          // CS-14: the API masks PII and returns `displayName` / `maskedEmail`;
+          // fall back to legacy fields for older API versions.
+          name: response.displayName || response.username,
           avatarImageUrl: response.avatarImageUrl,
-          email: response.email,
+          email: response.maskedEmail || response.email,
           isPayer: false,
         };
 
@@ -229,11 +231,29 @@ const CheckoutClassPage = () => {
       };
     } catch (error) {
       const responseData = error?.data?.data || error?.data || {};
+      const status = error?.status ?? error?.originalStatus;
+      const errorCode =
+        responseData.errorCode || responseData.code || responseData.error;
+
+      // CS-14: `lookup-learner` is rate limited to 5 requests/minute/user.
+      if (
+        status === 429 ||
+        errorCode === "COMMON_RATE_LIMIT_EXCEEDED" ||
+        errorCode === "RATE_LIMIT_EXCEEDED"
+      ) {
+        return {
+          success: false,
+          message: getErrorMessage(
+            "COMMON_RATE_LIMIT_EXCEEDED",
+            tc.addLearnerError,
+          ),
+        };
+      }
 
       return {
         success: false,
         message: getErrorMessage(
-          responseData.errorCode || responseData.error,
+          errorCode,
           responseData.message || error?.error || tc.addLearnerError,
         ),
       };

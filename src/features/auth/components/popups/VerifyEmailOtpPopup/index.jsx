@@ -13,6 +13,10 @@ import {
 import { parseApiError, resolveLocalizedError } from "@/shared/utils/apiError"
 import { resolveGeneralErrorMessage } from "@/features/auth/utils/registerErrors"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
+import {
+  getRegistrationCorrectionToken,
+  setRegistrationCorrectionToken,
+} from "@/features/auth/utils/registrationCorrectionToken"
 
 const VerifyEmailOtpPopup = ({
   open,
@@ -30,6 +34,8 @@ const VerifyEmailOtpPopup = ({
   const [email, setEmail] = useState(initialEmail || "")
   const [isEditingEmail, setIsEditingEmail] = useState(false)
   const [newEmail, setNewEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [requiresPassword, setRequiresPassword] = useState(false)
   const [apiError, setApiError] = useState("")
   const [successMsg, setSuccessMsg] = useState("")
   const [validationError, setValidationError] = useState("")
@@ -103,31 +109,69 @@ const VerifyEmailOtpPopup = ({
   const handleUpdateEmail = async () => {
     setApiError("")
     setSuccessMsg("")
+    setValidationError("")
     if (!newEmail || newEmail === currentEmail) {
       setIsEditingEmail(false)
       return
     }
 
+    const correctionToken = getRegistrationCorrectionToken()
+    if (!correctionToken && !password.trim()) {
+      setRequiresPassword(true)
+      setApiError(
+        authText.correctionPasswordRequired ||
+          "Vui lòng nhập mật khẩu để xác nhận đổi email.",
+      )
+      return
+    }
+
     try {
-      await resendEmailOtp({ email: currentEmail, newEmail }).unwrap()
+      const payload = { email: currentEmail, newEmail }
+      if (correctionToken) {
+        payload.registrationCorrectionToken = correctionToken
+      } else {
+        payload.password = password
+      }
+
+      const result = await resendEmailOtp(payload).unwrap()
+      // CS-10: keep the refreshed correction token in memory for further edits.
+      setRegistrationCorrectionToken(
+        result?.registrationCorrectionToken ??
+          result?.data?.registrationCorrectionToken,
+      )
       setEmail(newEmail)
       setIsEditingEmail(false)
+      setPassword("")
+      setRequiresPassword(false)
       setSuccessMsg(
         authText.emailUpdatedOtpSent || "Email updated and new OTP sent",
       )
     } catch (err) {
-      const { errorCode, message } = parseApiError(err)
+      const { statusCode, errorCode, message } = parseApiError(err)
       if (errorCode === "AUTH_EMAIL_EXISTS") {
         setApiError(authText.emailExists || message)
-      } else {
-        setApiError(
-          resolveLocalizedError(
-            err,
-            (e) => resolveGeneralErrorMessage(e, authText),
-            authText.updateEmailFailed || message || "Failed to update email.",
-          ),
-        )
+        return
       }
+      // Token missing/expired -> fall back to password confirmation.
+      if (
+        correctionToken &&
+        (statusCode === 400 || statusCode === 401 || statusCode === 403)
+      ) {
+        setRequiresPassword(true)
+        setPassword("")
+        setApiError(
+          authText.correctionTokenExpired ||
+            "Phiên đổi email đã hết hạn. Vui lòng nhập mật khẩu để xác nhận.",
+        )
+        return
+      }
+      setApiError(
+        resolveLocalizedError(
+          err,
+          (e) => resolveGeneralErrorMessage(e, authText),
+          authText.updateEmailFailed || message || "Failed to update email.",
+        ),
+      )
     }
   }
 
@@ -207,6 +251,8 @@ const VerifyEmailOtpPopup = ({
                 onClick={() => {
                   setNewEmail(currentEmail)
                   setIsEditingEmail(true)
+                  setRequiresPassword(!getRegistrationCorrectionToken())
+                  setPassword("")
                   setApiError("")
                   setSuccessMsg("")
                 }}
@@ -244,13 +290,40 @@ const VerifyEmailOtpPopup = ({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsEditingEmail(false)}
+                onClick={() => {
+                  setIsEditingEmail(false)
+                  setRequiresPassword(false)
+                  setPassword("")
+                }}
                 title={authText.cancel || "Cancel"}
                 className="shrink-0"
               >
                 <X size={16} />
               </IconButton>
             </div>
+            {requiresPassword && (
+              <div className="mt-2">
+                <label className="block text-xs mb-1 text-secondary">
+                  {authText.confirmPasswordLabel || "Mật khẩu xác nhận"}
+                </label>
+                <TextInput
+                  type="password"
+                  variant="square"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={
+                    authText.confirmPasswordPlaceholder ||
+                    "Nhập mật khẩu tài khoản"
+                  }
+                  className="w-full"
+                />
+                <p className="mt-1 text-xs text-secondary">
+                  {authText.correctionPasswordHint ||
+                    "Mã đổi email đã hết hạn, vui lòng xác nhận bằng mật khẩu."}
+                </p>
+              </div>
+            )}
           </div>
         )}
 

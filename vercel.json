@@ -2,7 +2,7 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/((?!assets/|api/|tinymce/|images/|sounds/|website-icons/|flags/|flashcard-sw\\.js|favicon-48x48\\.png|icon\\.svg|catspeak_icon\\.svg).*)",
+      "source": "/((?!assets/|api/|tinymce/|images/|sounds/|website-icons/|flags/|theme-init\\.js|flashcard-sw\\.js|favicon-48x48\\.png|icon\\.svg|catspeak_icon\\.svg).*)",
       "destination": "/index.html"
     }
   ],
@@ -29,6 +29,18 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(self), microphone=(self), geolocation=(), payment=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'wasm-unsafe-eval' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://s3-minio.catspeak.com.vn https://*.catspeak.com.vn https://img.vietqr.io https://api.qrserver.com https://lh3.googleusercontent.com https://flagcdn.com https://api.dicebear.com https://www.gstatic.com https://firebasestorage.googleapis.com; media-src 'self' blob: https://s3-minio.catspeak.com.vn https://*.catspeak.com.vn; connect-src 'self' https://*.catspeak.com.vn wss://*.catspeak.com.vn wss://livekit2.catspeak.com.vn https://livekit2.catspeak.com.vn https://accounts.google.com https://oauth2.googleapis.com https://api.geoapify.com https://*.googleapis.com wss://*.firebaseio.com https://*.firebaseio.com; frame-src 'self' https://accounts.google.com https://www.youtube.com https://www.youtube-nocookie.com; worker-src 'self' blob:; manifest-src 'self'"
         }
       ]
     },

@@ -4,6 +4,7 @@ import { IconButton, PillButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { getSafeExternalHttpUrl } from "@/shared/utils/safeUrl"
 
 const LinkDetailView = ({ itemData, onBack }) => {
   const { t, language } = useLanguage()
@@ -11,6 +12,11 @@ const LinkDetailView = ({ itemData, onBack }) => {
   const dict = t.courses.lectureHall
 
   const linkItem = itemData?.meta
+  // CS-21: never render `javascript:`/`data:` URLs into `href`.
+  const safeLinkUrl = useMemo(
+    () => getSafeExternalHttpUrl(linkItem),
+    [linkItem],
+  )
 
   const youtubeId = useMemo(() => {
     if (!linkItem) return null
@@ -76,7 +82,7 @@ const LinkDetailView = ({ itemData, onBack }) => {
                 {displayData?.title || itemData.title}
               </h2>
               <a
-                href={linkItem}
+                href={safeLinkUrl || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-lg text-[#0e6eec] dark:text-blue-400 hover:underline break-all"
@@ -92,11 +98,8 @@ const LinkDetailView = ({ itemData, onBack }) => {
 
           <PillButton
             onClick={() => {
-              let urlToOpen = linkItem;
-              if (urlToOpen && !/^https?:\/\//i.test(urlToOpen)) {
-                urlToOpen = 'https://' + urlToOpen;
-              }
-              window.open(urlToOpen, "_blank");
+              if (!safeLinkUrl) return
+              window.open(safeLinkUrl, "_blank", "noopener,noreferrer");
             }}
             startIcon={<ExternalLink size={18} />}
             className="w-fit"

@@ -17,6 +17,7 @@ import { getDisplayData } from "../../utils/curriculumUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { sanitizeHtml } from "@/shared/utils/sanitizeHtml"
+import { getSafeExternalHttpUrl } from "@/shared/utils/safeUrl"
 
 // Helper function to resolve icon, background, and left accent border based on item type
 const getItemConfig = (type) => {
@@ -128,6 +129,9 @@ const LessonItemRow = ({
 
   const isHidden = item.isVisibleToStudents === false
 
+  // CS-21: sanitize every external link sink (never allow `javascript:` etc.).
+  const safeMetaUrl = getSafeExternalHttpUrl(displayData.meta)
+
   return (
     <div
       className={`rounded-xl md:rounded-2xl p-3 md:p-5 mb-3 md:mb-4 flex flex-col relative transition-all shadow-sm ${isHidden
@@ -157,11 +161,10 @@ const LessonItemRow = ({
                   } else if (isYoutubeLink) {
                     navigate(`${basePath}/links/${displayData.itemId}`)
                   } else if (displayData.type === "link") {
-                    let urlToOpen = displayData.meta
-                    if (urlToOpen && !/^https?:\/\//i.test(urlToOpen)) {
-                      urlToOpen = 'https://' + urlToOpen
+                    const safeUrl = getSafeExternalHttpUrl(displayData.meta)
+                    if (safeUrl) {
+                      window.open(safeUrl, "_blank", "noopener,noreferrer")
                     }
-                    window.open(urlToOpen, "_blank")
                   } else if (displayData.type === "assignment") {
                     navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
                   } else if (displayData.type === "quiz") {
@@ -172,8 +175,9 @@ const LessonItemRow = ({
                     }
                   } else if (displayData.type === "material") {
                     const fileUrl = item.material?.fileUrl || item.material?.url || item.material?.FileUrl || item.fileUrl;
-                    if (fileUrl) {
-                      window.open(fileUrl, "_blank")
+                    const safeUrl = getSafeExternalHttpUrl(fileUrl)
+                    if (safeUrl) {
+                      window.open(safeUrl, "_blank", "noopener,noreferrer")
                     }
                   }
                 }}
@@ -252,7 +256,7 @@ const LessonItemRow = ({
               </div>
               <p className="mt-3 text-sm text-[#6B7280] dark:text-gray-400">
                 {t.courses.lectureHall.linkPage?.videoNotLoading || "Video không hiển thị?"}{" "}
-                <a href={displayData.meta} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline font-medium">
+                <a href={safeMetaUrl || undefined} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline font-medium">
                   {t.courses.lectureHall.linkPage?.openInNewTab || "Mở trong tab mới"}
                 </a>
               </p>
@@ -261,7 +265,7 @@ const LessonItemRow = ({
             <div className="flex flex-col items-center justify-center py-8 text-sm text-[#5B403C] dark:text-gray-300 w-full border border-dashed border-[#E2E2E2] dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#222222]">
               <VideoOff size={32} className="mb-3 text-[#9CA3AF] dark:text-gray-500 opacity-80" />
               <p>{t.courses.lectureHall.linkPage?.invalidYoutube || "Invalid YouTube URL"}</p>
-              <a href={displayData.meta} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline mt-2 inline-block font-medium">
+              <a href={safeMetaUrl || undefined} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] dark:text-[#FF6B6B] hover:underline mt-2 inline-block font-medium">
                 {t.courses.lectureHall.linkPage?.openInNewTab || "Open in new tab"}
               </a>
             </div>
