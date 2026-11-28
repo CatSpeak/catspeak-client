@@ -64,6 +64,30 @@ const ControlBarMoreMenu = ({
     }
   }, [showMoreMenu])
 
+  // ISS-86: Escape closes the innermost open view, then the menu itself
+  useEffect(() => {
+    if (!showMoreMenu) return undefined
+    const handleKeyDown = (event) => {
+      if (event.key !== "Escape") return
+      if (showSubtitlePicker) {
+        setShowSubtitlePicker(false)
+        return
+      }
+      if (showMobileSettings) {
+        setShowMobileSettings(false)
+        return
+      }
+      setShowMoreMenu(false)
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [
+    showMoreMenu,
+    showSubtitlePicker,
+    showMobileSettings,
+    setShowMoreMenu,
+  ])
+
   return (
     <>
       <AnimatePresence>
@@ -84,7 +108,7 @@ const ControlBarMoreMenu = ({
               exit="exit"
               className="fixed inset-x-0 bottom-0 md:absolute md:inset-x-auto md:bottom-[110%] md:right-0 z-50 md:mb-2 md:min-w-64 md:max-w-80 w-full origin-bottom"
             >
-              <div className="w-full overflow-hidden rounded-t-3xl md:rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-lg pb-safe md:pb-0">
+              <div className="w-full max-h-[82dvh] overflow-y-auto overflow-x-hidden md:max-h-[calc(100dvh-140px)] rounded-t-3xl md:rounded-xl border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-lg pb-safe md:pb-0">
                 <AnimatePresence mode="wait" initial={false}>
                   {!showSubtitlePicker ? (
                     <FluentAnimation

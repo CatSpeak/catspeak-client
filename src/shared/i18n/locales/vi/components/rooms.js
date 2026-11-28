@@ -62,6 +62,8 @@ export default {
   noSearchResultsDesc: "Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc của bạn.",
   loadError: "Không thể tải danh sách phòng. Vui lòng thử lại.",
   retry: "Thử lại",
+  bookmark: "Lưu phòng",
+  unbookmark: "Bỏ lưu phòng",
   bookmarkUpdated: "Đã cập nhật danh sách phòng đã lưu",
   bookmarkUpdateError: "Không thể thay đổi lưu phòng",
   pagination: {
@@ -250,6 +252,9 @@ export default {
   },
   chatBox: {
     title: "Tin nhắn phòng",
+    sendMessage: "Gửi tin nhắn",
+    emoji: "Biểu cảm",
+    characters: "ký tự",
     empty: "Chưa có tin nhắn nào",
     you: "Bạn",
     inputPlaceholder: "Nhập gì đó...",
@@ -308,6 +313,9 @@ export default {
     expiredWarning: "Đã hết hạn — sẽ được xóa",
     assignedCoHost: "Đã phân công Co-host",
     noCoHost: "Chưa có Co-host",
+    proFeatureName: "Phòng tùy chỉnh",
+    noRoomsSubtextFree:
+      "Tạo phòng Nhóm miễn phí ngay, hoặc nâng cấp Pro để tạo phòng tùy chỉnh vĩnh viễn tối đa 100 người!",
     title: "Phòng Tùy Chỉnh Pro",
     myRoomsTitle: "Phòng Của Tôi",
     createTitle: "Tạo Phòng Tùy Chỉnh",
@@ -395,6 +403,10 @@ export default {
   },
   queue: {
     title: "Tìm đối tác",
+    missingParamsTitle: "Bạn chưa chọn tiêu chí ghép cặp",
+    missingParamsDesc:
+      "Bạn cần chọn ngôn ngữ và chủ đề từ trang Cộng đồng để bắt đầu ghép cặp.",
+    chooseInCommunity: "Chọn phòng ở Cộng đồng",
     findMatch: "Tìm ngay",
     cancel: "Hủy",
     connectingToQueue: "Đang kết nối vào hàng chờ...",
@@ -475,6 +487,7 @@ export default {
     unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
+    roomCoverAlt: "Ảnh bìa phòng",
     inviteParticipant: "Mời tham gia phòng",
     sendInvite: "Gửi lời mời",
     inviteDescription: "Nhập địa chỉ email của người bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",
@@ -571,6 +584,8 @@ export default {
       "Đang có các phòng thảo luận nhóm hoạt động. Với tư cách là Host, bạn cần đóng tất cả phòng nhỏ (Stop Breakout) trước khi rời họp.",
     pictureInPicture: "Hình trong Hình (PiP)",
     controls: {
+      raiseHand: "Giơ tay",
+      lowerHand: "Hạ tay",
       micOn: "Bật micro",
       micOff: "Tắt micro",
       camOn: "Bật camera",
@@ -1002,6 +1017,7 @@ export default {
   },
   virtualBackground: {
     title: "Phông nền",
+    imageUnavailable: "Không tải được ảnh",
     none: "Không có",
     upload: "Tải lên",
     fileTooLarge: "Tệp quá lớn. Kích thước tối đa là 5MB.",
@@ -1180,6 +1196,9 @@ export default {
     endedToast: "Buổi live đã kết thúc",
   },
   breakoutRooms: {
+    panelTitleActive: "Phòng thảo luận",
+    panelTitleSetup: "Phòng họp nhóm",
+    loadingConfig: "Đang tải cấu hình chia phòng...",
     mainRoom: "Phòng chính",
     youAreHere: "Bạn ở đây",
     emptyRoom: "Phòng trống",

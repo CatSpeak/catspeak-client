@@ -16,6 +16,7 @@ const ModalContent = ({
   description,
   ariaLabel = "Dialog",
   showCloseButton = true,
+  closeLabel = "Close dialog",
   subHeader,
   subHeaderClassName = "px-4 pb-4 shrink-0",
   footer,
@@ -167,7 +168,7 @@ const ModalContent = ({
             {showCloseButton && (
               <IconButton
                 type="button"
-                aria-label="Close dialog"
+                aria-label={closeLabel}
                 onClick={onClose}
                 variant="ghost"
                 className="shrink-0"

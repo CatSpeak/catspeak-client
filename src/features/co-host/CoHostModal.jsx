@@ -463,7 +463,7 @@ const CoHostModal = ({
                   type="button"
                   onClick={() => setConfirmClear(true)}
                   aria-label={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
-                  className="p-1.5 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+                  className="p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[#3D3D3D] text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors shrink-0"
                   title={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
                 >
                   <X size={16} />
@@ -484,8 +484,8 @@ const CoHostModal = ({
           /* TRẠNG THÁI B: CHƯA CHỌN NGƯỜI DÙNG -> SEARCH & CANDIDATE PICKER */
           <div className="relative">
             {candidates.length === 0 ? (
-              <div className="p-3.5 rounded-2xl border border-dashed border-gray-200 bg-gray-50/60 text-center flex flex-col items-center justify-center gap-1.5">
-                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-0.5">
+              <div className="p-3.5 rounded-2xl border border-dashed border-gray-200 dark:border-[#3F3F3F] bg-gray-50/60 dark:bg-[#242424] text-center flex flex-col items-center justify-center gap-1.5">
+                <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-[#272727] flex items-center justify-center text-gray-400 dark:text-[#AAAAAA] mb-0.5">
                   <Users size={16} />
                 </div>
                 <p className="text-xs font-semibold text-gray-700">

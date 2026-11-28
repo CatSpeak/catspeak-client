@@ -209,7 +209,9 @@ const CommunityRoomCard = ({ room }) => {
       setIsBookmarked(prev)
       toast.error(
         err?.data?.message ||
-          (prev ? "Khong the bo luu phong" : "Khong the luu phong"),
+          (prev
+            ? t?.rooms?.unbookmark || "Không thể bỏ lưu phòng"
+            : t?.rooms?.bookmark || "Không thể lưu phòng"),
       )
     }
   }
@@ -254,7 +256,7 @@ const CommunityRoomCard = ({ room }) => {
           <img
             src={displayThumbnail}
             onError={() => setImageError(true)}
-            alt="Room Cover"
+            alt={t?.rooms?.videoCall?.roomCoverAlt || "Room Cover"}
             className={`relative z-10 h-full w-full ${!imageError && room.thumbnailUrl ? "object-contain" : "object-cover"}`}
           />
 

@@ -2,6 +2,7 @@ import { useCallback, useRef } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { unwrapAiAnswerPayload } from "@/features/video-call/utils/aiAnswerPayload"
 import { parseApiError } from "@/shared/utils/apiError"
 import { toast } from "react-hot-toast"
 import {
@@ -204,10 +205,14 @@ export const useAiSend = () => {
         }
 
         if (res && res.answer) {
+          const { answer: aiAnswer, followUps } = unwrapAiAnswerPayload(
+            res.answer,
+            res.follow_up_questions,
+          )
           updateAiInteraction(interactionId, {
             status: "done",
-            response: res.answer,
-            followUpSuggestions: res.follow_up_questions || [],
+            response: aiAnswer,
+            followUpSuggestions: followUps,
   
   
             prompt: formattedPrompt,

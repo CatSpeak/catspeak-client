@@ -216,6 +216,9 @@ const RoomsPage = () => {
   }
 
   // Use server pagination when querying exact categories, local pagination only for client-filtered "Other"
+  const totalFilteredCount = hasOtherCategory
+    ? rooms.length
+    : (responseData?.totalCount ?? rooms.length)
   const totalPages = hasOtherCategory
     ? Math.max(1, Math.ceil(rooms.length / pageSize))
     : Math.max(
@@ -299,6 +302,7 @@ const RoomsPage = () => {
                         selectedCategories={categories}
                         page={page}
                         totalPages={totalPages}
+                        totalCount={totalFilteredCount}
                         setPage={handleSetPage}
                         languageType={languageType}
                         requiredLevels={requiredLevelsArg}

@@ -745,6 +745,7 @@ const GlobalCallContent = ({
     setStartedByAccountId,
     sessionId,
     roomId: currentRoomId,
+    room: roomData,
     isHost: isRoomHost(roomData, user?.accountId),
     accountId: user?.accountId,
     coHost: liveCoHost,
@@ -1388,6 +1389,7 @@ const GlobalCallContent = ({
       // Recording
       isRecording: isRecording,
       isTogglingRecording: recordingState.isTogglingRecording,
+      hasPersonalRecordPrivilege: recordingState.hasPersonalRecordPrivilege,
       handleToggleRecording: recordingState.handleToggleRecording,
       showStopModal: recordingState.showStopModal,
       confirmStopRecording: recordingState.confirmStopRecording,

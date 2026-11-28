@@ -61,6 +61,8 @@ export default {
   noSearchResultsDesc: "Try adjusting your search terms or filters.",
   loadError: "Unable to load rooms. Please try again.",
   retry: "Try again",
+  bookmark: "Save room",
+  unbookmark: "Remove saved room",
   bookmarkUpdated: "Updated saved rooms list",
   bookmarkUpdateError: "Could not update saved rooms",
   pagination: {
@@ -275,6 +277,9 @@ export default {
   },
   chatBox: {
     title: "Room Message",
+    sendMessage: "Send message",
+    emoji: "Emoji",
+    characters: "characters",
     empty: "No messages yet",
     you: "You",
     inputPlaceholder: "Type Something...",
@@ -333,6 +338,9 @@ export default {
     expiredWarning: "Expired — will be deleted",
     assignedCoHost: "Co-host assigned",
     noCoHost: "No Co-host",
+    proFeatureName: "Custom Rooms",
+    noRoomsSubtextFree:
+      "Create a free Group room now, or upgrade to Pro to create persistent custom rooms for up to 100 people!",
     title: "Pro Custom Room",
     myRoomsTitle: "My Custom Rooms",
     createTitle: "Create Custom Room",
@@ -420,6 +428,10 @@ export default {
   },
   queue: {
     title: "Find a Match",
+    missingParamsTitle: "No pairing criteria selected",
+    missingParamsDesc:
+      "Choose a language and topic on the Community page to start matching.",
+    chooseInCommunity: "Choose a room in Community",
     findMatch: "Find Match",
     cancel: "Cancel",
     connectingToQueue: "Connecting to queue...",
@@ -497,6 +509,7 @@ export default {
     unknownDevice: "Unknown Device",
   },
   videoCall: {
+    roomCoverAlt: "Room cover",
     inviteParticipant: "Invite participant",
     sendInvite: "Send invite",
     inviteDescription: "Enter the email address of the person you want to invite to this room. They will receive a notification with a link to join.",
@@ -593,6 +606,8 @@ export default {
       "Breakout rooms are currently active. As the Host, you must close all breakout rooms (Stop Breakout) before leaving.",
     pictureInPicture: "Picture-in-Picture",
     controls: {
+      raiseHand: "Raise hand",
+      lowerHand: "Lower hand",
       micOn: "Turn microphone on",
       micOff: "Turn microphone off",
       camOn: "Turn camera on",
@@ -1025,6 +1040,7 @@ export default {
   },
   virtualBackground: {
     title: "Backgrounds",
+    imageUnavailable: "Image unavailable",
     none: "None",
     upload: "Upload",
     fileTooLarge: "File is too large. Maximum size is 5MB.",
@@ -1200,6 +1216,9 @@ export default {
     endedToast: "Live session ended",
   },
   breakoutRooms: {
+    panelTitleActive: "Breakout Rooms",
+    panelTitleSetup: "Group Rooms",
+    loadingConfig: "Loading breakout rooms configuration...",
     mainRoom: "Main Room",
     youAreHere: "You are here",
     emptyRoom: "Empty room",

@@ -5,21 +5,30 @@ import { FluentAnimation } from "@/shared/components/ui/animations"
 import { Crown } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import PageTitle from "@/shared/components/ui/PageTitle"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import EmptyState from "./EmptyState"
 
 const PlanRequiredState = ({
   pageTitle,
-  title = "Pro Plan Required",
+  title,
   subtext,
-  featureName = "Pro Features",
+  featureName,
   highlightPlan = "pro",
   animationKey = "plan-required-page",
 }) => {
   const navigate = useNavigate()
+  const { t } = useLanguage()
+
+  const resolvedTitle =
+    title || t?.recordings?.planRequiredTitle || "Pro Plan Required"
+  const resolvedSubtext = subtext || t?.recordings?.planRequired
+  const resolvedFeatureName = featureName || t?.recordings?.title || "Pro Features"
+  const upgradeLabel =
+    t?.billing?.pricing?.upgradeToPro || t?.recordings?.upgradeToPro || "Upgrade to Pro"
 
   const handleUpgradeNavigation = () => {
     navigate("/pricing", {
-      state: { highlightPlan, featureName },
+      state: { highlightPlan, featureName: resolvedFeatureName },
     })
   }
 
@@ -39,12 +48,12 @@ const PlanRequiredState = ({
         <EmptyState
           icon={Crown}
           iconClassName="w-12 h-12 mb-4 text-amber-500"
-          title={title}
-          subtext={subtext}
+          title={resolvedTitle}
+          subtext={resolvedSubtext}
           action={
             <div className="mt-4">
               <PillButton onClick={handleUpgradeNavigation}>
-                Upgrade to Pro
+                {upgradeLabel}
               </PillButton>
             </div>
           }

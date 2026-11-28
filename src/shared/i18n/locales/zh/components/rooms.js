@@ -60,6 +60,8 @@ export default {
   noSearchResultsDesc: "请尝试更改搜索关键词或调整筛选条件。",
   loadError: "无法加载房间列表，请重试。",
   retry: "重试",
+  bookmark: "收藏房间",
+  unbookmark: "取消收藏",
   bookmarkUpdated: "已更新已保存房间列表",
   bookmarkUpdateError: "无法更新已保存房间",
   pagination: {
@@ -247,6 +249,9 @@ export default {
   },
   chatBox: {
     title: "房间消息",
+    sendMessage: "发送消息",
+    emoji: "表情",
+    characters: "字符",
     empty: "还没有消息",
     you: "你",
     inputPlaceholder: "输入内容...",
@@ -304,6 +309,8 @@ export default {
     expiredWarning: "已过期 — 将被删除",
     assignedCoHost: "已分配联合主持人",
     noCoHost: "没有联合主持人",
+    proFeatureName: "自定义房间",
+    noRoomsSubtextFree: "立即创建免费的群组房间，或升级 Pro 以创建最多 100 人的永久自定义房间！",
     title: "Pro 自定义房间",
     myRoomsTitle: "我的房间",
     createTitle: "创建自定义房间",
@@ -390,6 +397,9 @@ export default {
   },
   queue: {
     title: "寻找匹配",
+    missingParamsTitle: "尚未选择配对条件",
+    missingParamsDesc: "请先在社区页面选择语言和主题，然后开始匹配。",
+    chooseInCommunity: "在社区选择房间",
     findMatch: "开始匹配",
     cancel: "取消",
     connectingToQueue: "正在连接队列...",
@@ -461,6 +471,7 @@ export default {
     unknownDevice: "未知设备",
   },
   videoCall: {
+    roomCoverAlt: "房间封面",
     inviteParticipant: "邀请参加房间",
     sendInvite: "发送邀请",
     inviteDescription: "输入您想邀请参加此房间的人的电子邮件地址。他们将收到带有链接的通知以加入。",
@@ -555,6 +566,8 @@ export default {
       "分组讨论室正在进行中。作为主持人，您必须在离开前关闭所有分组讨论室（停止分组）。",
     pictureInPicture: "画中画 (PiP)",
     controls: {
+      raiseHand: "举手",
+      lowerHand: "放下手",
       micOn: "开启麦克风",
       micOff: "关闭麦克风",
       camOn: "开启摄像头",
@@ -685,6 +698,13 @@ export default {
       you: "你",
       guest: "访客",
       youSuffix: "（你）",
+      roomPoliciesTitle: "房间权限与设置",
+      back: "返回",
+      searchPlaceholder: "按姓名搜索...",
+      noSearchResults: "未找到参与者。",
+      words: "词",
+      wpm: "WPM",
+      speakingTime: "发言时间",
       micOn: "麦克风已开启",
       micOff: "麦克风已关闭",
       camOn: "摄像头已开启",
@@ -970,6 +990,7 @@ export default {
   },
   virtualBackground: {
     title: "背景",
+    imageUnavailable: "图片无法加载",
     none: "无",
     upload: "上传",
     fileTooLarge: "文件太大。最大为 5MB。",
@@ -1017,6 +1038,9 @@ export default {
     endedToast: "直播已结束",
   },
   breakoutRooms: {
+    panelTitleActive: "分组讨论室",
+    panelTitleSetup: "小组房间",
+    loadingConfig: "正在加载分组配置...",
     mainRoom: "主房间",
     youAreHere: "你在这里",
     emptyRoom: "空房间",
@@ -1220,6 +1244,11 @@ export default {
   },
 
   coHost: {
+    noCandidatesRoomTitle: "还没有可选择的人",
+    noCandidatesRoomDesc: "目前没有可选择的朋友或成员。请先添加好友或邀请他们进入房间。",
+    inRoomBadge: "在房间内",
+    absentStatus: "不在房间内",
+    notInRoomHint: "此人不在房间内。联合主持人权限将在其加入房间后生效。",
     manage: "管理联合主持人",
     add: "添加联合主持人",
     manageShort: "管理",

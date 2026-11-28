@@ -38,6 +38,8 @@ export const zh = {
     closeConfirmDesc: "您已输入内容，关闭后将丢失已输入的数据。",
     closeConfirmKeep: "继续编辑",
     closeConfirmDiscard: "放弃更改",
+  close: "关闭",
+  closePreview: "关闭预览",
     diagnosticsTitle: "自动附加技术诊断信息",
     diagnosticsInfo: "系统已自动捕获以下环境和网络诊断信息，以协助技术人员快速排查问题：",
     failedRequestsCount: "异常 / 超时 API",

@@ -17,13 +17,24 @@ const PolicyRow = ({
   colorClass = "peer-checked:bg-cath-red-700",
   description,
 }) => {
-  const handleToggle = () => {
+  const handleToggle = (event) => {
+    // Ignore clicks that originate from form controls inside the row (Switch,
+    // links, popover trigger) so a policy row never toggles twice / closes the panel.
+    const target = event?.target
+    if (
+      target &&
+      typeof target.closest === "function" &&
+      target.closest('input, button, a, [data-policy-action="true"]')
+    ) {
+      return
+    }
     if (!disabled && onChange) {
       onChange({ target: { checked: !checked } })
     }
   }
 
   const handleKeyDown = (e) => {
+    if (e.target !== e.currentTarget) return
     if ((e.key === "Enter" || e.key === " ") && !disabled) {
       e.preventDefault()
       handleToggle()
@@ -54,13 +65,21 @@ const PolicyRow = ({
           {label}
         </span>
         {description && (
-          <span onClick={(e) => e.stopPropagation()} className="shrink-0">
+          <span
+            data-policy-action="true"
+            onClick={(e) => e.stopPropagation()}
+            className="shrink-0"
+          >
             <InfoPopover text={description} label={label} />
           </span>
         )}
       </div>
 
-      <div onClick={(e) => e.stopPropagation()} className="shrink-0 ml-1">
+      <div
+        data-policy-action="true"
+        onClick={(e) => e.stopPropagation()}
+        className="shrink-0 ml-1"
+      >
         <Switch
           size="sm"
           checked={checked}

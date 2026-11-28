@@ -38,6 +38,8 @@ export default {
   noPermissionTeacher: "You do not have permission to switch to the Teacher role!",
   switchRoleSuccess: "Switched role successfully!",
   switchRoleFail: "Failed to switch role!",
+  sessionExpired:
+    "Your session has expired. Please sign in again to switch roles!",
   logoutWarning: {
     title: "End Call & Log Out",
     message: "You are currently in a call. Logging out will disconnect you. Are you sure you want to log out?",

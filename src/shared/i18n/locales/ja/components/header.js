@@ -38,6 +38,8 @@ export default {
     "講師役割に切り替える権限がありません！",
   switchRoleSuccess: "役割を切り替えました！",
   switchRoleFail: "役割の切り替えに失敗しました！",
+  sessionExpired:
+    "ログインセッションの有効期限が切れました。役割を切り替えるには再度ログインしてください！",
   logoutWarning: {
     title: "通話を終了してログアウト",
     message:

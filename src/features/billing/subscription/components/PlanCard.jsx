@@ -133,7 +133,10 @@ const PlanCard = ({
   const badge = isHighlighted
     ? {
         icon: Sparkles,
-        label: highlightBadge || "Required",
+        label:
+          highlightBadge ||
+          t.billing.pricing.requiredBadge ||
+          "Required",
       }
     : isActive
       ? {

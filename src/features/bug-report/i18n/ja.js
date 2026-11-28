@@ -38,6 +38,8 @@ export const ja = {
     closeConfirmDesc: "入力内容があります。閉じると入力内容は失われます。",
     closeConfirmKeep: "編集を続ける",
     closeConfirmDiscard: "変更を破棄",
+  close: "閉じる",
+  closePreview: "プレビューを閉じる",
     diagnosticsTitle: "自動添付される診断情報",
     diagnosticsInfo: "エンジニアが迅速に問題を再現・調査できるよう、以下の環境およびネットワーク診断情報が自動的に添付されます：",
     failedRequestsCount: "エラー・タイムアウトAPI",

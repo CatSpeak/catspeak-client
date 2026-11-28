@@ -3,11 +3,13 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import CreateRoomFormFields from "./ui/CreateRoomFormFields"
+import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { useEditCustomRoomForm } from "../hooks/useEditCustomRoomForm"
 
 const EditRoomModal = ({ open, room, onClose }) => {
   const { t } = useLanguage()
   const ct = t.rooms?.customRooms || {}
+  const roomMode = isCustomRoom(room?.roomType) ? "custom" : "group"
 
   const {
     formData,
@@ -49,7 +51,7 @@ const EditRoomModal = ({ open, room, onClose }) => {
       }
     >
       <CreateRoomFormFields
-        mode="custom"
+        mode={roomMode}
         formData={formData}
         thumbnailFile={thumbnailFile}
         setThumbnailFile={setThumbnailFile}

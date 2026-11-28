@@ -241,7 +241,12 @@ const VideoCallControlBar = () => {
             <IconButton
               variant={showBreakout ? "controlActive" : "control"}
               onClick={() => setShowBreakout(!showBreakout)}
-              title="Breakout Rooms"
+              title={
+                t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"
+              }
+              aria-label={
+                t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"
+              }
               className="hidden lg:flex"
             >
               <Split />
@@ -252,7 +257,16 @@ const VideoCallControlBar = () => {
           variant={isHandRaised ? "controlActive" : "control"}
           disabled={isTogglingHand}
           onClick={handleToggleHand}
-          title={isHandRaised ? "Lower hand" : "Raise hand"}
+          title={
+            isHandRaised
+              ? t?.rooms?.videoCall?.controls?.lowerHand || "Lower hand"
+              : t?.rooms?.videoCall?.controls?.raiseHand || "Raise hand"
+          }
+          aria-label={
+            isHandRaised
+              ? t?.rooms?.videoCall?.controls?.lowerHand || "Lower hand"
+              : t?.rooms?.videoCall?.controls?.raiseHand || "Raise hand"
+          }
         >
           <Hand />
         </IconButton>

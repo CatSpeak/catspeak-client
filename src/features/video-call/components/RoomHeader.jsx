@@ -53,8 +53,8 @@ const RoomHeader = () => {
     hostParticipant.identity === localParticipant.identity
 
   return (
-    <div className="flex items-center justify-between bg-white dark:bg-[#1A1A1A] px-4 h-14 shrink-0 border-b border-border dark:border-darkBorder">
-      <div className="flex items-center gap-4">
+    <div className="flex items-center justify-between bg-white dark:bg-[#1A1A1A] px-4 min-h-14 py-1.5 shrink-0 border-b border-border dark:border-darkBorder">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">
             <Link
@@ -76,8 +76,11 @@ const RoomHeader = () => {
           </div>
         </div>
 
-        <div className="flex gap-2 items-center flex-wrap">
-          <div className="font-bold text-foreground dark:text-white">
+        <div className="flex gap-1.5 sm:gap-2 items-center min-w-0 flex-1">
+          <div
+            className="font-bold text-foreground dark:text-white truncate min-w-0 max-w-[160px] sm:max-w-xs"
+            title={rawRoomName}
+          >
             {rawRoomName}
           </div>
           <IconButton
@@ -85,14 +88,17 @@ const RoomHeader = () => {
             title={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
             aria-label={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
             onClick={handleCopyLink}
+            className="shrink-0"
           >
             <Copy />
           </IconButton>
-          <RoomBadges room={room} />
+          <div className="hidden sm:flex shrink-0 max-w-full overflow-hidden">
+            <RoomBadges room={room} />
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         {hasDuration && (
           <div
             className={`hidden md:flex items-center justify-center text-xs md:text-sm font-semibold rounded-full py-1.5 px-3.5 h-9 transition-all select-none ${

@@ -1,5 +1,10 @@
 /* eslint-disable no-dupe-keys -- pre-existing duplicate room keys kept for backward-compatible last-wins values */
 export default {
+  language: {
+    vi: "ベトナム語",
+    en: "英語",
+    zh: "中国語",
+  },
   welcome: {
     greeting: "こんにちは、{{name}}さん、",
     friend: "友達",
@@ -56,6 +61,8 @@ export default {
   noSearchResultsDesc: "検索キーワードを変更するか、フィルターを調整してください。",
   loadError: "ルームリストを読み込めませんでした。もう一度お試しください。",
   retry: "再試行",
+  bookmark: "ルームを保存",
+  unbookmark: "保存を解除",
   bookmarkUpdated: "保存したルーム一覧を更新しました",
   bookmarkUpdateError: "ルームの保存状態を更新できませんでした",
   pagination: {
@@ -244,7 +251,14 @@ export default {
   },
   chatBox: {
     title: "ルームメッセージ",
+    sendMessage: "メッセージを送信",
+    emoji: "絵文字",
+    characters: "文字",
     empty: "メッセージはまだありません",
+    privateAiSubtext: "あなただけに表示",
+    publicAiSubtext: "ルーム全体に共有",
+    privateAiTooltip: "AIの回答はあなただけに表示されます",
+    publicAiTooltip: "ルーム内の全員がAIの回答を表示できます",
     you: "あなた",
     inputPlaceholder: "なにか入力...",
     connectingPlaceholder: "接続中...",
@@ -297,6 +311,9 @@ export default {
     expiredWarning: "期限切れ — 削除されます",
     assignedCoHost: "共同ホストが割り当てられました",
     noCoHost: "共同ホストなし",
+    proFeatureName: "カスタムルーム",
+    noRoomsSubtextFree:
+      "今すぐ無料のグループルームを作成するか、Proにアップグレードして最大100人の常設カスタムルームを作成しましょう！",
     title: "Proカスタムルーム",
     myRoomsTitle: "マイカスタムルーム",
     createTitle: "カスタムルームを作成",
@@ -385,6 +402,10 @@ export default {
   },
   queue: {
     title: "マッチを見つける",
+    missingParamsTitle: "マッチング条件が選択されていません",
+    missingParamsDesc:
+      "マッチングを始めるには、コミュニティページで言語とトピックを選択してください。",
+    chooseInCommunity: "コミュニティでルームを選ぶ",
     findMatch: "マッチを探す",
     cancel: "キャンセル",
     connectingToQueue: "キューに接続中...",
@@ -462,6 +483,7 @@ export default {
     unknownDevice: "不明なデバイス",
   },
   videoCall: {
+    roomCoverAlt: "ルームのカバー画像",
     inviteParticipant: "参加者を招待",
     sendInvite: "招待を送信",
     inviteDescription: "このルームに招待したい人のメールアドレスを入力してください。参加リンクのある通知が届きます。",
@@ -559,6 +581,8 @@ export default {
       "ブレイクアウトルームが現在進行中です。ホストとして退出する前に、すべてのブレイクアウトルームを終了（Stop Breakout）してください。",
     pictureInPicture: "ピクチャーインピクチャー",
     controls: {
+      raiseHand: "手を挙げる",
+      lowerHand: "手を下げる",
       micOn: "マイクをオンにする",
       micOff: "マイクをオフにする",
       camOn: "カメラをオンにする",
@@ -690,6 +714,13 @@ export default {
       you: "あなた",
       guest: "ゲスト",
       youSuffix: "（あなた）",
+      roomPoliciesTitle: "ルームの権限と設定",
+      back: "戻る",
+      searchPlaceholder: "名前で検索...",
+      noSearchResults: "参加者が見つかりません。",
+      words: "語",
+      wpm: "WPM",
+      speakingTime: "発言時間",
       micOn: "マイクオン",
       micOff: "マイクオフ",
       camOn: "カメラオン",
@@ -982,6 +1013,7 @@ export default {
   },
   virtualBackground: {
     title: "背景",
+    imageUnavailable: "画像を読み込めません",
     none: "なし",
     upload: "アップロード",
     fileTooLarge: "ファイルが大きすぎます。最大サイズは5MBです。",
@@ -1032,6 +1064,11 @@ export default {
     endedToast: "ライブが終了しました",
   },
   breakoutRooms: {
+    panelTitleActive: "ブレイクアウトルーム",
+    panelTitleSetup: "グループルーム",
+    loadingConfig: "ブレイクアウト設定を読み込み中...",
+    lowSpeakingNotice: "⚠️ {count}名の生徒が発言目標に達していません",
+    lowSpeakingBadge: "⚠️ {count}名が目標未達",
     mainRoom: "メインルーム",
     youAreHere: "あなたはここ",
     emptyRoom: "空のルーム",
@@ -1240,6 +1277,13 @@ export default {
   },
 
   coHost: {
+    noCandidatesRoomTitle: "選択できる人がまだいません",
+    noCandidatesRoomDesc:
+      "選択できる友達やメンバーがまだいません。先に友達を追加するか、ルームに招待してください。",
+    inRoomBadge: "ルーム内",
+    absentStatus: "ルームにいません",
+    notInRoomHint:
+      "この人はルームにいません。共同ホストの権限は参加後に適用されます。",
     manage: "共同ホストの管理",
     add: "共同ホストを追加",
     manageShort: "管理",

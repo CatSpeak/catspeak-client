@@ -65,7 +65,10 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
     if (newMode === "custom" && !isPro) {
       handleClose()
       navigate("/pricing", {
-        state: { highlightPlan: "pro", featureName: "Custom Rooms" },
+        state: {
+          highlightPlan: "pro",
+          featureName: ct.proFeatureName || "Phòng tùy chỉnh",
+        },
       })
       return
     }

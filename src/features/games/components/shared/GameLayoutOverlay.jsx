@@ -15,8 +15,8 @@ const GameLayoutOverlay = ({
   const [showMobileLeaderboard, setShowMobileLeaderboard] = useState(false)
 
   const containerClass = embedded
-    ? "relative w-full h-full flex flex-col bg-white text-slate-900 overflow-hidden"
-    : "fixed inset-0 w-full h-[100dvh] z-[100] flex flex-col bg-gray-50/95 text-slate-900 overflow-hidden"
+    ? "relative w-full h-full flex flex-col bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white overflow-hidden"
+    : "fixed inset-0 w-full h-[100dvh] z-[100] flex flex-col bg-gray-50/95 dark:bg-[#0F0F0F]/95 text-slate-900 dark:text-white overflow-hidden"
 
   return (
     <div className={containerClass}>
@@ -70,7 +70,7 @@ const GameLayoutOverlay = ({
               showMobileLeaderboard ? "translate-x-0" : "translate-x-full"
             }`}
           >
-            <div className="h-full w-full relative bg-white flex flex-col shadow-2xl">
+            <div className="h-full w-full relative bg-white dark:bg-[#1A1A1A] flex flex-col shadow-2xl">
               {/* BXH đầy đủ — title + nút X nằm cùng dòng trong GameSidebar */}
               <div className="flex-1 min-h-0 overflow-hidden">
                 <GameSidebar onClose={() => setShowMobileLeaderboard(false)} />

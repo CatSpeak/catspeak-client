@@ -6,9 +6,9 @@ import React from "react"
  */
 const SpeakingTimeBalanceLegend = ({ labels = {} }) => {
   return (
-    <div className="border-t border-[#EFEFEF] bg-white px-4 py-2.5 text-xs flex flex-col gap-1 shrink-0">
-      <div className="flex items-center gap-1.5 text-gray-600">
-        <span className="inline-block w-2.5 h-2.5 bg-gray-800 rounded-sm shrink-0" />
+    <div className="border-t border-[#EFEFEF] dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] px-4 py-2.5 text-xs flex flex-col gap-1 shrink-0">
+      <div className="flex items-center gap-1.5 text-gray-600 dark:text-[#AAAAAA]">
+        <span className="inline-block w-2.5 h-2.5 bg-gray-800 dark:bg-neutral-300 rounded-sm shrink-0" />
         <span>≥60% · {labels.normal || "Bình thường"}</span>
       </div>
       <div className="flex items-center gap-1.5 text-amber-600 font-medium">

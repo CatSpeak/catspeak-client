@@ -37,6 +37,7 @@ export default {
   noPermissionTeacher: "您没有权限切换到教师角色！",
   switchRoleSuccess: "角色切换成功！",
   switchRoleFail: "角色切换失败！",
+  sessionExpired: "登录会话已过期。请重新登录后再切换角色！",
   logoutWarning: {
     title: "结束通话并登出",
     message: "您当前正在通话中。登出将断开您的连接。确定要登出吗？",

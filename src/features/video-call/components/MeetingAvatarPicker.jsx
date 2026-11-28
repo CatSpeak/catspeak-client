@@ -27,6 +27,7 @@ const MeetingAvatarPicker = ({ className = "p-4" }) => {
 
   const [fileToCrop, setFileToCrop] = useState(null)
   const [isCropModalOpen, setIsCropModalOpen] = useState(false)
+  const [inputKey, setInputKey] = useState(0)
   const fileInputRef = useRef(null)
 
   const [uploadMeetingAvatar, { isLoading: isUploading }] =
@@ -45,22 +46,30 @@ const MeetingAvatarPicker = ({ className = "p-4" }) => {
     }
   }
 
+  // Remounting the file input (fresh key) is the only safe way to clear it on
+  // Chromium: assigning `.value = ""` while the FileList is live throws
+  // InvalidStateError.
+  const resetFileInput = () => setInputKey((key) => key + 1)
+
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file) {
+      resetFileInput()
+      return
+    }
 
     if (!file.type.startsWith("image/")) {
       toast.error(
         t?.rooms?.avatarPicker?.invalidFile ||
           "Please choose a valid image file",
       )
-      if (fileInputRef.current) fileInputRef.current.value = ""
+      resetFileInput()
       return
     }
 
     setFileToCrop(file)
     setIsCropModalOpen(true)
-    if (fileInputRef.current) fileInputRef.current.value = ""
+    resetFileInput()
   }
 
   const handleCropComplete = async (croppedFile) => {
@@ -128,6 +137,7 @@ const MeetingAvatarPicker = ({ className = "p-4" }) => {
 
       <div className="flex flex-col gap-2 mt-auto pt-4">
         <input
+          key={inputKey}
           type="file"
           ref={fileInputRef}
           className="hidden"

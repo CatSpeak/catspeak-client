@@ -48,7 +48,7 @@ const parseMetadata = (metadata) => {
  * 3. Banned (Banned participant list & unban actions)
  * 4. Settings (Room policies, toggles & danger zone)
  */
-const ParticipantList = ({ hideTitle, externalPending }) => {
+const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
   const { t } = useLanguage()
   const {
     participants,
@@ -195,134 +195,151 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   return (
     <div className="flex flex-col h-full w-full bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white overflow-hidden">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between pl-4 pr-1 py-1 min-h-[56px] bg-white dark:bg-[#1A1A1A] shrink-0 gap-2">
-        {canViewWaiting || canViewBanned || canManagePolicies ? (
-          <div
-            className="flex items-center gap-1.5 overflow-x-auto scrollbar-hidden flex-1 min-w-0"
-            role="tablist"
-            aria-label={pl.membersTab || pl.title}
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === "members"}
-              onClick={() => setActiveTab("members")}
-              className={`shrink-0 rounded-lg px-2.5 py-1 text-sm font-semibold transition-all ${
-                activeTab === "members"
-                  ? "bg-cath-red-700 text-white shadow-xs"
-                  : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
-              }`}
-            >
+      {/* Header — row 1: title + actions, row 2: tabs (ISS-82) */}
+      <div className="shrink-0 bg-white dark:bg-[#1A1A1A]">
+        <div className="flex items-center justify-between pl-4 pr-1 min-h-[52px] gap-2">
+          {!hideTitle ? (
+            <span className="text-xl font-bold text-neutral-800 dark:text-white truncate flex-1 min-w-0">
               {pl.membersTab || pl.title} ({participants.length})
-            </button>
+            </span>
+          ) : (
+            <div className="flex-1" />
+          )}
 
-            {canViewWaiting && (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "waiting"}
-                onClick={() => setActiveTab("waiting")}
-                className={`shrink-0 rounded-lg px-2.5 py-1 text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                  activeTab === "waiting"
-                    ? "bg-cath-red-700 text-white shadow-xs"
-                    : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
-                }`}
-              >
-                <span>{t?.rooms?.videoCall?.waitingQueue?.tab || "Chờ"}</span>
-                {pendingCount > 0 && (
-                  <span
-                    className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-bold ${
-                      activeTab === "waiting"
-                        ? "bg-white text-cath-red-700"
-                        : "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300"
-                    }`}
-                  >
-                    {pendingCount}
-                  </span>
-                )}
-              </button>
-            )}
+          {/* Action buttons: Search, Invite & Close */}
+          <div className="flex items-center shrink-0">
+            <IconButton
+              variant="ghost"
+              onClick={() => {
+                setIsSearchOpen((prev) => !prev)
+                if (isSearchOpen && searchQuery) {
+                  setSearchQuery("")
+                }
+              }}
+              title={pl.searchPlaceholder || "Tìm kiếm"}
+              aria-label={pl.searchPlaceholder || "Tìm kiếm"}
+            >
+              <Search />
+            </IconButton>
 
-            {canViewBanned && (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "banned"}
-                onClick={() => setActiveTab("banned")}
-                className={`shrink-0 rounded-lg px-2.5 py-1 text-sm font-semibold transition-all ${
-                  activeTab === "banned"
-                    ? "bg-cath-red-700 text-white shadow-xs"
-                    : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
-                }`}
-              >
-                {pl.bannedTabShort || "Bị cấm"}
-              </button>
-            )}
+            <IconButton
+              variant="ghost"
+              onClick={() => setIsInviteModalOpen(true)}
+              title={
+                t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"
+              }
+              aria-label={
+                t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"
+              }
+            >
+              <UserPlus />
+            </IconButton>
 
-            {canManagePolicies && (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "settings"}
-                onClick={() => setActiveTab("settings")}
-                className={`shrink-0 rounded-lg px-2.5 py-1 text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                  activeTab === "settings"
-                    ? "bg-cath-red-700 text-white shadow-xs"
-                    : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
-                }`}
+            {onClose && !hideTitle && (
+              <IconButton
+                variant="ghost"
+                onClick={onClose}
+                title={t?.common?.close || "Đóng"}
+                aria-label={t?.common?.close || "Đóng"}
               >
-                <Settings2 size={15} className="shrink-0" />
-                <span>{pl.settingsTab || "Cài đặt"}</span>
-                {isLocked && (
-                  <span
-                    className={`flex h-2 w-2 rounded-full shrink-0 ${
-                      activeTab === "settings"
-                        ? "bg-white"
-                        : "bg-cath-red-700 dark:bg-red-500"
-                    }`}
-                  />
-                )}
-              </button>
+                <X />
+              </IconButton>
             )}
           </div>
-        ) : !hideTitle ? (
-          <span className="text-xl font-bold text-neutral-800 dark:text-white truncate flex-1">
-            {pl.membersTab || pl.title} ({participants.length})
-          </span>
-        ) : (
-          <div className="flex-1" />
-        )}
-
-        {/* Action buttons: Search & Invite */}
-        <div className="flex items-center shrink-0">
-          <IconButton
-            variant="ghost"
-            onClick={() => {
-              setIsSearchOpen((prev) => !prev)
-              if (isSearchOpen && searchQuery) {
-                setSearchQuery("")
-              }
-            }}
-            title={pl.searchPlaceholder || "Tìm kiếm"}
-            aria-label={pl.searchPlaceholder || "Tìm kiếm"}
-          >
-            <Search />
-          </IconButton>
-
-          <IconButton
-            variant="ghost"
-            onClick={() => setIsInviteModalOpen(true)}
-            title={
-              t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"
-            }
-            aria-label={
-              t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"
-            }
-          >
-            <UserPlus />
-          </IconButton>
         </div>
+
+        {(canViewWaiting || canViewBanned || canManagePolicies) && (
+          <div className="px-3 pb-2 border-b border-border dark:border-[#3F3F3F]">
+            <div
+              className="flex flex-wrap items-center gap-1.5"
+              role="tablist"
+              aria-label={pl.membersTab || pl.title}
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "members"}
+                onClick={() => setActiveTab("members")}
+                className={`flex-1 basis-[calc(50%_-_0.375rem)] justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all ${
+                  activeTab === "members"
+                    ? "bg-cath-red-700 text-white shadow-xs"
+                    : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
+                }`}
+              >
+                {pl.membersTab || pl.title} ({participants.length})
+              </button>
+
+              {canViewWaiting && (
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === "waiting"}
+                  onClick={() => setActiveTab("waiting")}
+                  className={`flex-1 basis-[calc(50%_-_0.375rem)] justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                    activeTab === "waiting"
+                      ? "bg-cath-red-700 text-white shadow-xs"
+                      : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
+                  }`}
+                >
+                  <span>{t?.rooms?.videoCall?.waitingQueue?.tab || "Chờ"}</span>
+                  {pendingCount > 0 && (
+                    <span
+                      className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-bold ${
+                        activeTab === "waiting"
+                          ? "bg-white text-cath-red-700"
+                          : "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300"
+                      }`}
+                    >
+                      {pendingCount}
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {canViewBanned && (
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === "banned"}
+                  onClick={() => setActiveTab("banned")}
+                  className={`flex-1 basis-[calc(50%_-_0.375rem)] justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all ${
+                    activeTab === "banned"
+                      ? "bg-cath-red-700 text-white shadow-xs"
+                      : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
+                  }`}
+                >
+                  {pl.bannedTabShort || "Bị cấm"}
+                </button>
+              )}
+
+              {canManagePolicies && (
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === "settings"}
+                  onClick={() => setActiveTab("settings")}
+                  className={`flex-1 basis-[calc(50%_-_0.375rem)] justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                    activeTab === "settings"
+                      ? "bg-cath-red-700 text-white shadow-xs"
+                      : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
+                  }`}
+                >
+                  <Settings2 size={15} className="shrink-0" />
+                  <span>{pl.settingsTab || "Cài đặt"}</span>
+                  {isLocked && (
+                    <span
+                      className={`flex h-2 w-2 rounded-full shrink-0 ${
+                        activeTab === "settings"
+                          ? "bg-white"
+                          : "bg-cath-red-700 dark:bg-red-500"
+                      }`}
+                    />
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tab 1: Members */}

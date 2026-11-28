@@ -2,6 +2,7 @@ import React from "react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { X } from "lucide-react"
+import { IconButton } from "@/shared/components/ui/buttons"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 const TroubleshootPanel = ({ hideTitle = false, onClose }) => {
@@ -17,10 +18,19 @@ const TroubleshootPanel = ({ hideTitle = false, onClose }) => {
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white">
       {!hideTitle && (
-        <div className="flex shrink-0 items-center px-4 min-h-14">
-          <h2 className="text-xl font-bold">
+        <div className="flex shrink-0 items-center justify-between gap-2 px-4 min-h-14 border-b border-border dark:border-[#3F3F3F]">
+          <h2 className="text-xl font-bold truncate">
             {t?.rooms?.videoCall?.reconnect || "Troubleshoot connection"}
           </h2>
+          <IconButton
+            variant="ghost"
+            onClick={handleClose}
+            title={t?.common?.close || "Đóng"}
+            aria-label={t?.common?.close || "Đóng"}
+            className="shrink-0"
+          >
+            <X />
+          </IconButton>
         </div>
       )}
 

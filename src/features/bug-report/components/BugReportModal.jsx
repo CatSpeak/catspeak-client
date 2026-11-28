@@ -116,6 +116,7 @@ export default function BugReportModal({
         open={isModalOpen}
         onClose={handleRequestClose}
         fullScreenOnMobile={true}
+        closeLabel={lang.close || "Close"}
         className="md:max-w-[620px] !rounded-3xl border border-border dark:border-[#3F3F3F] overflow-hidden"
         headerClassName="flex items-start justify-between p-4"
         bodyClassName="px-4 flex-1 overflow-y-auto"
@@ -295,8 +296,8 @@ export default function BugReportModal({
               type="button"
               variant="overlay"
               onClick={() => setPreviewOpen(false)}
-              aria-label="Close preview"
-              title="Close preview"
+              aria-label={lang.closePreview || "Close preview"}
+              title={lang.closePreview || "Close preview"}
             >
               <X />
             </IconButton>
@@ -316,6 +317,7 @@ export default function BugReportModal({
           open={showConfirm}
           onClose={cancelDiscard}
           className="md:max-w-md"
+          closeLabel={lang.close || "Close"}
           title={lang.closeConfirmTitle || "Bỏ báo cáo?"}
         >
           <p className="text-sm text-slate-600 dark:text-[#AAAAAA]">

@@ -14,10 +14,10 @@ const TeacherTalkRatioCard = ({
   if (isError) {
     return (
       <div className="px-4 py-3 border-l-4 border-gray-400 bg-white dark:bg-[#1A1A1A] shrink-0">
-        <div className="text-sm font-medium text-gray-600">
+        <div className="text-sm font-medium text-gray-600 dark:text-[#AAAAAA]">
           {labels.teacherTalk || "Teacher Talk"}
         </div>
-        <div className="text-xs text-gray-400 mt-1 font-mono">
+        <div className="text-xs text-gray-400 dark:text-[#AAAAAA] mt-1 font-mono">
           {labels.teacher || "GV"} -- | {labels.students || "HV"} --
         </div>
       </div>
@@ -60,7 +60,7 @@ const TeacherTalkRatioCard = ({
             style={{ width: `${Math.min(100, Math.max(0, hvPercent))}%` }}
           />
         </div>
-        <span className="text-xs font-bold text-emerald-600 font-mono text-right min-w-[2.5rem]">
+        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono text-right min-w-[2.5rem]">
           {hvPercent}%
         </span>
       </div>

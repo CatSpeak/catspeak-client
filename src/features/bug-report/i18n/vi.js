@@ -38,6 +38,8 @@ export const vi = {
     closeConfirmDesc: "Bạn đã nhập nội dung, đóng bây giờ sẽ mất dữ liệu đã nhập.",
     closeConfirmKeep: "Tiếp tục chỉnh sửa",
     closeConfirmDiscard: "Bỏ thay đổi",
+  close: "Đóng",
+  closePreview: "Đóng xem trước",
     diagnosticsTitle: "Chẩn đoán kỹ thuật tự động đính kèm",
     diagnosticsInfo: "Hệ thống tự động phát hiện và đính kèm thông tin sau để giúp đội ngũ kỹ thuật tái hiện lỗi:",
     failedRequestsCount: "API bị lỗi / Timeout",

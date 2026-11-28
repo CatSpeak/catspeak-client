@@ -10,6 +10,7 @@ import Badge from "@/shared/components/ui/indicators/Badge"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { isOtherTopic } from "@/features/rooms/utils/formatters"
+import { unwrapAiAnswerPayload } from "@/features/video-call/utils/aiAnswerPayload"
 
 const isEmojiOnly = (text) => {
   if (!text || typeof text !== "string") return false
@@ -79,7 +80,7 @@ const StarterGreetingBubble = ({
       </div>
 
       {/* 2. Intro Box: Light subtle gray background with clean border */}
-      <div className="w-full pb-2 text-sm text-neutral-800 dark:text-neutral-200">
+      <div className="w-full mb-1 px-3 py-2 text-sm rounded-xl bg-neutral-50 dark:bg-[#272727] border border-gray-200/80 dark:border-[#3F3F3F] text-neutral-800 dark:text-neutral-200">
         {t.rooms?.chatBox?.aiGreetingIntro ||
           "Xin chào! Dưới đây là các câu gợi ý theo chủ đề buổi học hôm nay để bạn luyện nói hoặc gửi vào phòng học:"}
       </div>
@@ -168,9 +169,10 @@ const MessageBubble = ({
   const renderFormattedMessage = (text) => {
     if (!text) return text
 
-    const cleanText = text.replace(/^((@(AIPublic|AIPrivate|public-ai|private-ai|AISystem))\s*)+/gi, (m) => `${m.trim().split(/\s+/)[0]} `)
-
-
+    // Defensive: never render raw `{"answer": ...}` JSON in an AI/system bubble
+    const displayText =
+      isAi || isSystem ? unwrapAiAnswerPayload(text).answer : text
+    const cleanText = String(displayText).replace(/^((@(AIPublic|AIPrivate|public-ai|private-ai|AISystem))\s*)+/gi, (m) => `${m.trim().split(/\s+/)[0]} `)
 
     return (
       <FormattedText

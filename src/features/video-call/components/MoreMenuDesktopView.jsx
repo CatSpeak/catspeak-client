@@ -16,6 +16,7 @@ import {
   Clapperboard,
   AlertTriangle,
   Languages,
+  Lock,
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -57,6 +58,7 @@ const MoreMenuDesktopView = ({
     setShowBreakout,
     isRecording,
     isTogglingRecording,
+    hasPersonalRecordPrivilege = true,
     handleToggleRecording,
     confirmStopRecording,
     recordingStatus,
@@ -184,7 +186,16 @@ const MoreMenuDesktopView = ({
                 className="text-red-600 fill-red-600 animate-pulse"
               />
             ) : (
-              <Circle size={20} />
+              <span className="relative inline-flex">
+                <Circle size={20} />
+                {!hasPersonalRecordPrivilege && (
+                  <Lock
+                    size={11}
+                    className="absolute -top-1 -right-1 text-[#990011] dark:text-red-400"
+                    aria-hidden="true"
+                  />
+                )}
+              </span>
             )
           }
           label={
@@ -195,6 +206,10 @@ const MoreMenuDesktopView = ({
           rightText={
             isRecording ? (
               <span className="font-semibold">{formattedTime}</span>
+            ) : !hasPersonalRecordPrivilege ? (
+              <span className="text-[11px] font-semibold text-[#990011] dark:text-red-400">
+                {t?.recordings?.proBadge || t?.billing?.pricing?.proBadge || "Pro"}
+              </span>
             ) : undefined
           }
         />

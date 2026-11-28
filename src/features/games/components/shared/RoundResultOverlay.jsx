@@ -53,7 +53,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
 
             {roundResults?.correct_answer && (
               <div className="flex flex-col items-center mb-2">
-                <h2 className="text-base md:text-xl font-black text-slate-800 uppercase tracking-wider mb-2 drop-shadow-sm text-center">
+                <h2 className="text-base md:text-xl font-black text-slate-800 dark:text-white uppercase tracking-wider mb-2 drop-shadow-sm text-center">
                   {displayTitle}:
                 </h2>
                 <div className="text-4xl md:text-5xl font-black text-green-600 mb-2 tracking-widest drop-shadow-md text-center px-4 break-words w-full">
@@ -66,8 +66,8 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
 
             {/* Bảng xếp hạng thu nhỏ của Round */}
             {roundResults?.cumulative_scores && (
-              <div className="w-full bg-gray-50/50 rounded-2xl p-4 md:p-6 border border-border/60 shadow-inner flex flex-col min-h-0 max-h-[40vh]">
-                <h3 className="text-lg font-bold mb-4 text-center text-slate-700 shrink-0">
+              <div className="w-full bg-gray-50/50 dark:bg-[#242424] rounded-2xl p-4 md:p-6 border border-border/60 shadow-inner flex flex-col min-h-0 max-h-[40vh]">
+                <h3 className="text-lg font-bold mb-4 text-center text-slate-700 dark:text-white shrink-0">
                   {t.rooms?.game?.crackIt?.roundLeaderboard || "Thành tích ván này"}
                 </h3>
                 <div className="flex flex-col gap-2.5 overflow-y-auto pr-2 min-h-0 scrollbar-app-hover">
@@ -78,15 +78,15 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
                       const delta = roundResults.scores_delta?.[id] || 0
                       const player = getPlayerName(id)
                       return (
-                        <div key={id} className="flex items-center gap-2 md:gap-4 bg-white shadow-sm border border-border px-3 md:px-4 py-3 rounded-xl min-w-0">
-                          <div className="w-6 h-6 md:w-7 md:h-7 shrink-0 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs md:text-sm text-slate-500">
+                        <div key={id} className="flex items-center gap-2 md:gap-4 bg-white dark:bg-[#1A1A1A] shadow-sm border border-border px-3 md:px-4 py-3 rounded-xl min-w-0">
+                          <div className="w-6 h-6 md:w-7 md:h-7 shrink-0 rounded-full bg-slate-100 dark:bg-[#272727] flex items-center justify-center font-bold text-xs md:text-sm text-slate-500 dark:text-[#AAAAAA]">
                             #{index + 1}
                           </div>
 
-                          <div className="font-semibold text-sm md:text-base text-slate-800 flex items-center gap-2 flex-1 min-w-0">
+                          <div className="font-semibold text-sm md:text-base text-slate-800 dark:text-neutral-100 flex items-center gap-2 flex-1 min-w-0">
                             <span className="truncate min-w-0 max-w-full">{player.name}</span>
                             {player.isYou && (
-                              <span className="font-normal text-slate-500 text-[10px] md:text-xs shrink-0 bg-slate-100 px-1.5 md:px-2 py-0.5 rounded-full">
+                              <span className="font-normal text-slate-500 dark:text-[#AAAAAA] text-[10px] md:text-xs shrink-0 bg-slate-100 dark:bg-[#272727] px-1.5 md:px-2 py-0.5 rounded-full">
                                 {t.rooms?.game?.crackIt?.you || "Bạn"}
                               </span>
                             )}
@@ -94,7 +94,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
 
                           <div className="flex items-center justify-end gap-1.5 md:gap-3 shrink-0 ml-1">
                             {delta > 0 && (
-                              <div className="text-green-600 font-bold text-sm md:text-base bg-green-50 px-1.5 md:px-2 py-0.5 rounded-md">
+                              <div className="text-green-600 dark:text-green-400 font-bold text-sm md:text-base bg-green-50 dark:bg-green-950/40 px-1.5 md:px-2 py-0.5 rounded-md">
                                 +{delta}
                               </div>
                             )}

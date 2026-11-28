@@ -14,7 +14,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 // Dark mode compatible: dark:
 export const useRoleOverride = () => {
   const { t } = useLanguage()
-  const { user, isAuthenticated, refreshToken } = useAuth()
+  const { user, isAuthenticated, token, refreshToken } = useAuth()
   const [switchAccountType, { isLoading: isSwitching }] =
     useSwitchAccountTypeMutation()
 
@@ -74,29 +74,47 @@ export const useRoleOverride = () => {
         return false
       }
 
-      if (refreshToken) {
-        try {
-          await switchAccountType({
-            accountTypeToSwitchTo: newRole,
-            refreshToken,
-          }).unwrap()
+      if (!refreshToken || !token) {
+        console.error("Missing auth token/refresh token to switch role.")
+        toast.error(
+          t.header?.sessionExpired ||
+            "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để chuyển vai trò!",
+        )
+        return false
+      }
 
-          toast.success(
-            t.header?.switchRoleSuccess || "Chuyển vai trò thành công!",
+      try {
+        await switchAccountType({
+          accountTypeToSwitchTo: newRole,
+          refreshToken,
+        }).unwrap()
+
+        toast.success(
+          t.header?.switchRoleSuccess || "Chuyển vai trò thành công!",
+        )
+        return true
+      } catch (error) {
+        console.error(error)
+        const status = error?.status ?? error?.originalStatus
+        if (status === 401) {
+          toast.error(
+            t.header?.sessionExpired ||
+              "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để chuyển vai trò!",
           )
-          return true
-        } catch (error) {
-          console.error(error)
+        } else {
           toast.error(t.header?.switchRoleFail || "Chuyển vai trò thất bại!")
-          return false
         }
-      } else {
-        console.error("No refresh token available to switch role.")
-        toast.error(t.header?.switchRoleFail || "Chuyển vai trò thất bại!")
         return false
       }
     },
-    [isTeacherProfile, switchAccountType, currentRole, t, refreshToken],
+    [
+      isTeacherProfile,
+      switchAccountType,
+      currentRole,
+      t,
+      token,
+      refreshToken,
+    ],
   )
 
   const retry = useCallback(() => {

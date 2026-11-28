@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { store } from "@store"
+import { setPipFallbackMode } from "@/store/slices/videoCallSlice"
 
 /**
  * Manages the native OS Document Picture-in-Picture window.
@@ -37,7 +38,11 @@ const DocumentPiPWindow = ({ children }) => {
           window.__activePipWindow = newPipWindow
         }
 
-        if (!newPipWindow) return
+        if (!newPipWindow) {
+          // Never leave the user in an invisible PiP state.
+          store.dispatch(setPipFallbackMode(true))
+          return
+        }
 
         if (!isMounted && !store.getState().videoCall.isPiP) {
           newPipWindow.close()
@@ -92,6 +97,8 @@ const DocumentPiPWindow = ({ children }) => {
         setPipWindow(newPipWindow)
       } catch (err) {
         console.error("Failed to open Document PiP window:", err)
+        // Document PiP blocked/failed → switch to the in-app floating widget.
+        store.dispatch(setPipFallbackMode(true))
       }
     }
 

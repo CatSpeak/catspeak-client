@@ -1,6 +1,13 @@
 export default {
   title: "Bản ghi hình",
   refresh: "Làm mới",
+  planRequiredTitle: "Cần gói Pro",
+  planRequired:
+    "Tính năng ghi hình cuộc gọi yêu cầu gói có quyền ghi hình. Nâng cấp CatSpeak Pro để ghi hình cuộc gọi và quản lý bản ghi của bạn!",
+  upgradeToPro: "Nâng cấp Pro",
+  proRequired:
+    "Tính năng ghi hình chỉ dành cho tài khoản Pro (hoặc Giáo viên trong phòng học). Vui lòng nâng cấp gói Pro để ghi hình cuộc gọi!",
+  proBadge: "Pro",
   storage: {
     title: "Dung lượng",
     used: "{{used}} / {{limit}} MB",

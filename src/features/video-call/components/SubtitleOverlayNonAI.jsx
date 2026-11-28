@@ -121,8 +121,8 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
           </div>
         )}
 
-        {/* Header bar with Language switcher, Font size button and Close button - absolute UI overlay on hover */}
-        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-border/80 dark:border-[#3F3F3F]/80 pl-4 pr-1 h-14 rounded-t-2xl opacity-0 group-hover/subtitles:opacity-100 pointer-events-none group-hover/subtitles:pointer-events-auto transition-all duration-200 bg-white/90 dark:bg-[#1A1A1A]/90 backdrop-blur-sm shadow-sm">
+        {/* Header bar with Language switcher, Font size button and Close button — always visible (ISS-84) */}
+        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-border/80 dark:border-[#3F3F3F]/80 pl-4 pr-1 h-14 rounded-t-2xl opacity-100 pointer-events-auto transition-all duration-200 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-sm shadow-sm text-gray-900 dark:text-white">
           <span className="font-semibold">
             {t.rooms?.videoCall?.subtitles || "Subtitles"}
           </span>
@@ -138,7 +138,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                     className="w-5 h-5 rounded-full object-cover shadow-sm"
                   />
                 ) : (
-                  <Globe className="text-gray-500" />
+                  <Globe className="text-gray-500 dark:text-[#AAAAAA]" />
                 )
               }
             >
@@ -201,6 +201,10 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
               onClick={stopSubtitles}
               disabled={isStoppingSubtitles || isStartingSubtitles}
               title={
+                t.rooms?.videoCall?.controls?.captionsOff ||
+                "Turn off subtitles"
+              }
+              aria-label={
                 t.rooms?.videoCall?.controls?.captionsOff ||
                 "Turn off subtitles"
               }

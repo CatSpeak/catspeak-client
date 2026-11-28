@@ -16,6 +16,7 @@ const FilteredRoomsView = ({
   selectedCategories,
   page = 1,
   totalPages = 1,
+  totalCount,
   setPage,
   onBackToOverview,
   isLoading = false,
@@ -99,14 +100,15 @@ const FilteredRoomsView = ({
     }
   }
 
+  const resultsCount = totalCount ?? rooms.length
   const resultsCountText = isLoading ? (
     <span className="inline-block w-24 h-4 bg-gray-200 dark:bg-[#272727] animate-pulse rounded mt-0.5" />
   ) : t.header?.resultsFound ? (
-    t.header.resultsFound.replace("{{count}}", rooms.length)
+    t.header.resultsFound.replace("{{count}}", resultsCount)
   ) : language === "en" ? (
-    `${rooms.length} ${rooms.length === 1 ? "room" : "rooms"} found`
+    `${resultsCount} ${resultsCount === 1 ? "room" : "rooms"} found`
   ) : (
-    `Tìm thấy ${rooms.length} phòng`
+    `Tìm thấy ${resultsCount} phòng`
   )
 
   return (

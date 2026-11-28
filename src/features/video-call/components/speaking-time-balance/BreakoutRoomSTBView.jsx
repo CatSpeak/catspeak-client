@@ -26,13 +26,13 @@ const BreakoutRoomSTBView = ({
   return (
     <div className="flex-1 overflow-y-auto py-2">
       {/* Summary Box */}
-      <div className="bg-[#F8F9FA] rounded-xl p-3.5 mx-4 mb-3 flex items-center justify-between text-xs font-semibold text-gray-700">
+      <div className="bg-[#F8F9FA] dark:bg-[#272727] rounded-xl p-3.5 mx-4 mb-3 flex items-center justify-between text-xs font-semibold text-gray-700 dark:text-neutral-200">
         <span>
           {labels.roomStudents
             ? labels.roomStudents.replace("{count}", String(studentCount))
             : `HV phòng (${studentCount})`}
         </span>
-        <span className="text-gray-500 font-mono">
+        <span className="text-gray-500 dark:text-neutral-400 font-mono">
           {labels.expected
             ? labels.expected.replace("{percent}", String(expectedSharePercent))
             : `Kỳ vọng: ${expectedSharePercent}%`}

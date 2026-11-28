@@ -52,7 +52,8 @@ const RightSideControls = ({ className = "" }) => {
       <IconButton
         variant="control"
         onClick={() => setIsLayoutModalOpen(true)}
-        title="Change layout"
+        title={t.rooms?.videoCall?.changeLayout?.title || "Change layout"}
+        aria-label={t.rooms?.videoCall?.changeLayout?.title || "Change layout"}
       >
         <LayoutGrid />
       </IconButton>

@@ -8,6 +8,7 @@ import { getCommunityPath } from "@/shared/utils/navigation";
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import {
   setPiP as setPiPAction,
+  setPipFallbackMode,
   leaveCall as leaveCallAction,
 } from "@/store/slices/videoCallSlice";
 import { getNavigate, getLocation } from "./useNavigateRef";
@@ -196,33 +197,55 @@ export const useCallActions = ({
   }, [])
 
   const enterPiP = useCallback(
-    (navigateTo) => {
-      // 1. Document Picture-in-Picture (Desktop Chrome / Edge / Chrome Android)
-      if ("documentPictureInPicture" in window) {
-        if (!window.documentPictureInPicture?.window) {
-          console.log("[Auto-PiP] Calling documentPictureInPicture.requestWindow()...")
-          window.__pipWindowPromise = window.documentPictureInPicture
-            .requestWindow({
-              width: 400,
-              height: 300,
-            })
-            .then((win) => {
-              console.log("[Auto-PiP] Document PiP window successfully created:", win)
-              return win
-            })
-            .catch((err) => {
-              console.error("[Auto-PiP] Failed to request PiP window:", err)
-              return null
-            })
-        }
+    async (navigateTo) => {
+      const navigate = getNavigate();
+      const explicitTarget =
+        typeof navigateTo === "string" && navigateTo ? navigateTo : null;
 
+      // In-app fallback: never silently no-op, never leave isPiP=true invisible.
+      const enterInAppFallback = (reason) => {
+        console.warn("[PiP] Falling back to in-app floating widget:", reason);
+        dispatch(setPipFallbackMode(true));
         dispatch(setPiPAction(true));
         setActiveSidePanel(null);
-        const navigate = getNavigate();
-        if (navigateTo && navigate) {
-          navigate(navigateTo);
+        if (navigate) {
+          navigate(explicitTarget || getCommunityPath(language));
+          toast.success(
+            t?.rooms?.videoCall?.pipFallback ||
+              "Picture-in-Picture is blocked by your browser — showing the in-app mini player instead.",
+            { icon: "🪟", duration: 5000 },
+          );
+        } else {
+          toast.error(
+            t?.rooms?.videoCall?.pipNotAvailable ||
+              "Picture-in-Picture is not available in this environment.",
+          );
         }
-        return;
+      };
+
+      // 1. Document Picture-in-Picture (Desktop Chrome / Edge / Chrome Android)
+      if (typeof window !== "undefined" && "documentPictureInPicture" in window) {
+        try {
+          // requestWindow() must run inside the click gesture — call it first.
+          const pipWin = await window.documentPictureInPicture.requestWindow({
+            width: 400,
+            height: 300,
+          });
+          if (!pipWin) {
+            enterInAppFallback("requestWindow returned null");
+            return;
+          }
+          window.__pipWindow = pipWin;
+          window.__activePipWindow = pipWin;
+          dispatch(setPipFallbackMode(false));
+          dispatch(setPiPAction(true));
+          setActiveSidePanel(null);
+          if (explicitTarget && navigate) navigate(explicitTarget);
+          return;
+        } catch (err) {
+          enterInAppFallback(err);
+          return;
+        }
       }
 
       // 2. Native Video Picture-in-Picture Fallback (iOS Safari / Standard Video PiP)
@@ -253,31 +276,34 @@ export const useCallActions = ({
           document.pictureInPictureEnabled &&
           typeof targetVideo.requestPictureInPicture === "function"
         ) {
-          targetVideo.requestPictureInPicture().catch((err) => {
+          try {
+            await targetVideo.requestPictureInPicture();
+            toast.success(
+              t?.rooms?.videoCall?.pipActivated ||
+                "Picture-in-Picture activated",
+            );
+            return;
+          } catch (err) {
             console.error("Failed requestPictureInPicture:", err);
-          });
-          return;
+          }
         }
       }
 
-      // 3. Fallback inside Single Page App (Redux state PiP widget)
-      dispatch(setPiPAction(true));
-      setActiveSidePanel(null);
-      const navigate = getNavigate();
-      if (navigateTo && navigate) {
-        navigate(navigateTo);
-      }
+      // 3. Nothing native worked → in-app floating widget + navigate away
+      enterInAppFallback("no native PiP support");
     },
-    [dispatch, setActiveSidePanel, t],
+    [dispatch, setActiveSidePanel, t, language],
   );
 
   const exitPiP = useCallback(() => {
+    dispatch(setPipFallbackMode(false));
     dispatch(setPiPAction(false));
   }, [dispatch]);
 
   const returnToCall = useCallback(() => {
     const navigate = getNavigate();
     if (callInfo?.callPath && navigate) {
+      dispatch(setPipFallbackMode(false));
       dispatch(setPiPAction(false));
       navigate(callInfo.callPath);
     }

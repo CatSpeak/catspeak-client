@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { LogOut, Clock, Loader2, AlertCircle } from "lucide-react"
+import { LogOut, Clock, Loader2, AlertCircle, X } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useDispatch, useSelector } from "react-redux"
 import {
@@ -9,6 +9,7 @@ import {
 import { exitBreakout, updateLivekitToken } from "@/store/slices/videoCallSlice"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 import BreakoutSetupView from "./setup/BreakoutSetupView"
 import BreakoutActiveView from "./active/BreakoutActiveView"
@@ -16,6 +17,7 @@ import BreakoutStudentView from "./student/BreakoutStudentView"
 
 const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
   const dispatch = useDispatch()
+  const { t } = useLanguage()
 
   const { isBreakoutActive, callInfo } = useSelector((s) => s.videoCall)
   const { participants: liveParticipants } = useVideoCallContext()
@@ -113,12 +115,24 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
     <div className="flex h-full w-full flex-col bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white">
       {/* Sidebar Panel Header */}
       <div className="hidden md:flex items-center justify-between px-4 py-3 border-b border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A]">
-        <div className="flex items-center gap-2">
-          <h3 className="text-black dark:text-white text-base font-semibold m-0">
-            {isStarted ? "Phòng thảo luận" : "Phòng họp nhóm"}
+        <div className="flex items-center gap-2 min-w-0">
+          <h3 className="text-black dark:text-white text-base font-semibold m-0 truncate">
+            {isStarted
+              ? t?.rooms?.breakoutRooms?.panelTitleActive || "Phòng thảo luận"
+              : t?.rooms?.breakoutRooms?.panelTitleSetup || "Phòng họp nhóm"}
           </h3>
-
         </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            title={t?.common?.close || "Đóng"}
+            aria-label={t?.common?.close || "Đóng"}
+            className="shrink-0 inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-600 dark:text-[#AAAAAA] hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       {/* View router */}
@@ -126,7 +140,8 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
         <div className="flex h-full flex-col items-center justify-center p-6 text-slate-400">
           <Loader2 className="h-6 w-6 animate-spin text-primary2 mb-2" />
           <p className="text-xs font-semibold">
-            Đang tải cấu hình chia phòng...
+            {t?.rooms?.breakoutRooms?.loadingConfig ||
+              "Đang tải cấu hình chia phòng..."}
           </p>
         </div>
       ) : isHost ? (

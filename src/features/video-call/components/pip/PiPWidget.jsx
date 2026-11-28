@@ -1,10 +1,11 @@
-import React, { useMemo } from "react"
-import { useSelector } from "react-redux"
+import React, { useEffect, useMemo } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { useMaybeRoomContext } from "@livekit/components-react"
 import { motion as Motion, AnimatePresence } from "framer-motion"
 
 import { usePiPDrag } from "@/features/video-call/hooks/usePiPDrag"
 import { useGlobalVideoCall } from "@/features/video-call/context/videoCallContext"
+import { setPipFallbackMode } from "@/store/slices/videoCallSlice"
 
 import PiPWidgetContent from "./PiPWidgetContent"
 import DocumentPiPWindow from "./DocumentPiPWindow"
@@ -29,21 +30,27 @@ class PiPErrorBoundary extends React.Component {
  * or fallback to the in-website floating widget if unsupported.
  */
 const PiPWidget = () => {
-  const { isInCall, isPiP } = useSelector((s) => s.videoCall)
+  const dispatch = useDispatch()
+  const { isInCall, isPiP, pipFallbackMode } = useSelector((s) => s.videoCall)
   const { isCallReady } = useGlobalVideoCall()
   const lkRoom = useMaybeRoomContext()
   const shouldRender = isInCall && isPiP && isCallReady && Boolean(lkRoom)
 
+  // ISS-85: reset the fallback flag whenever PiP is turned off
+  useEffect(() => {
+    if (!isPiP) dispatch(setPipFallbackMode(false))
+  }, [isPiP, dispatch])
+
   // Check if browser supports modern Document PiP API
   const isDocumentPiPSupported = useMemo(() => {
-    return "documentPictureInPicture" in window
+    return typeof window !== "undefined" && "documentPictureInPicture" in window
   }, [])
 
   if (!shouldRender) return null
 
   return (
     <PiPErrorBoundary>
-      {isDocumentPiPSupported ? (
+      {isDocumentPiPSupported && !pipFallbackMode ? (
         <DocumentPiPWindow>
           <PiPWidgetContent isNativeWindow={true} />
         </DocumentPiPWindow>

@@ -49,6 +49,16 @@ const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
 
   const [selectedUrl, setSelectedUrl] = useState(activeUrl)
   const [isUploading, setIsUploading] = useState(false)
+  const [brokenUrls, setBrokenUrls] = useState(() => new Set())
+  const [uploadInputKey, setUploadInputKey] = useState(0)
+
+  const markBroken = (url) =>
+    setBrokenUrls((prev) => {
+      if (!url || prev.has(url)) return prev
+      const next = new Set(prev)
+      next.add(url)
+      return next
+    })
 
   const [getCurrent] = useLazyGetCurrentBackgroundQuery()
   const [uploadCustom] = useUploadCustomBackgroundMutation()
@@ -127,7 +137,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
       )
     } finally {
       setIsUploading(false)
-      e.target.value = ""
+      setUploadInputKey((key) => key + 1)
     }
   }
 
@@ -178,6 +188,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
             )}
           </div>
           <input
+            key={uploadInputKey}
             type="file"
             accept=".jpg,.jpeg,.png,.webp"
             className="hidden"
@@ -197,11 +208,22 @@ const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
             } ${isSettingActive || isUploading ? TILE_DISABLED : ""}`}
           >
             <div className="absolute inset-0">
-              <img
-                src={customUploadedUrl}
-                alt="Custom"
-                className="w-full h-full object-cover transition-[filter] duration-100 ease-out group-hover:brightness-90 group-active:brightness-75"
-              />
+              {brokenUrls.has(customUploadedUrl) ? (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-neutral-500 dark:text-neutral-400">
+                  <Ban size={18} />
+                  <span className="text-[11px] font-medium">
+                    {t?.rooms?.virtualBackground?.imageUnavailable ||
+                      "Image unavailable"}
+                  </span>
+                </div>
+              ) : (
+                <img
+                  src={customUploadedUrl}
+                  alt="Custom"
+                  onError={() => markBroken(customUploadedUrl)}
+                  className="w-full h-full object-cover transition-[filter] duration-100 ease-out group-hover:brightness-90 group-active:brightness-75"
+                />
+              )}
             </div>
           </div>
         )}
@@ -216,23 +238,26 @@ const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
           ))
         ) : (
           Array.isArray(samples) &&
-          samples.map((url, i) => (
-            <div
-              key={url || i}
-              onClick={() => handleSelect(url)}
-              className={`${TILE_BASE} group block bg-neutral-100 dark:bg-neutral-800 ${
-                selectedUrl === url ? TILE_SELECTED : TILE_UNSELECTED
-              } ${isSettingActive || isUploading ? TILE_DISABLED : ""}`}
-            >
-              <div className="absolute inset-0">
-                <img
-                  src={url}
-                  alt={`Background ${i + 1}`}
-                  className="w-full h-full object-cover transition-[filter] duration-100 ease-out group-hover:brightness-90 group-active:brightness-75"
-                />
+          samples
+            .filter((url) => !brokenUrls.has(url))
+            .map((url, i) => (
+              <div
+                key={url || i}
+                onClick={() => handleSelect(url)}
+                className={`${TILE_BASE} group block bg-neutral-100 dark:bg-neutral-800 ${
+                  selectedUrl === url ? TILE_SELECTED : TILE_UNSELECTED
+                } ${isSettingActive || isUploading ? TILE_DISABLED : ""}`}
+              >
+                <div className="absolute inset-0">
+                  <img
+                    src={url}
+                    alt={`Background ${i + 1}`}
+                    onError={() => markBroken(url)}
+                    className="w-full h-full object-cover transition-[filter] duration-100 ease-out group-hover:brightness-90 group-active:brightness-75"
+                  />
+                </div>
               </div>
-            </div>
-          ))
+            ))
         )}
       </div>
     </div>

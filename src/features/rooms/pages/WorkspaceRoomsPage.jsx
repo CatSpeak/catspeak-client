@@ -32,7 +32,7 @@ import { IconButton } from "@/shared/components/ui/buttons"
 
 const WorkspaceRoomsContent = () => {
   const { t } = useLanguage()
-  const { limits } = usePlanFeatures()
+  const { limits, isPro } = usePlanFeatures()
   const { lang, id } = useParams()
   const navigate = useNavigate()
   const ct = t.rooms?.customRooms || {}
@@ -527,8 +527,11 @@ const WorkspaceRoomsContent = () => {
                           ? t.rooms?.noSearchResultsDesc ||
                             "Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc của bạn."
                           : activeTab === "created"
-                            ? ct.noRoomsSubtext ||
-                              "Tạo phòng vĩnh viễn đầu tiên với tối đa 100 người tham gia!"
+                            ? isPro
+                              ? ct.noRoomsSubtext ||
+                                "Tạo phòng vĩnh viễn đầu tiên với tối đa 100 người tham gia!"
+                              : ct.noRoomsSubtextFree ||
+                                "Tạo phòng Nhóm miễn phí ngay, hoặc nâng cấp Pro để tạo phòng tùy chỉnh vĩnh viễn tối đa 100 người!"
                             : t.rooms?.noBookmarkedRoomsDesc ||
                               "Lưu các phòng yêu thích để truy cập nhanh chóng bất cứ lúc nào!"}
                       </p>

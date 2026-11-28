@@ -6,6 +6,8 @@ const initialState = {
   isInCall: false,
   /** Whether the user navigated away from the full call page */
   isPiP: false,
+  /** In-app draggable PiP widget (Document PiP unavailable/blocked) */
+  pipFallbackMode: false,
   /** LiveKit token for the active connection */
   livekitToken: null,
   /** LiveKit WebSocket server URL */
@@ -106,6 +108,17 @@ const videoCallSlice = createSlice({
      */
     setPiP(state, action) {
       state.isPiP = action.payload
+      if (!action.payload) {
+        state.pipFallbackMode = false
+      }
+    },
+
+    /**
+     * Toggle the in-app floating PiP widget when the native Document PiP
+     * window is unavailable or blocked by the browser (ISS-85).
+     */
+    setPipFallbackMode(state, action) {
+      state.pipFallbackMode = Boolean(action.payload)
     },
 
     /**
@@ -169,6 +182,7 @@ const videoCallSlice = createSlice({
 export const {
   enterCall,
   setPiP,
+  setPipFallbackMode,
   leaveCall,
   enterBreakout,
   exitBreakout,

@@ -177,7 +177,7 @@ const DeviceSettingsModal = ({
         <div className="flex-1 flex flex-col justify-between mt-4 min-h-0">
           <div className="flex flex-col">
             {/* Microphone Row */}
-            <div className="h-[56px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="min-h-[56px] py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex items-center gap-4 min-w-0">
                 <Mic className="dark:text-[#AAAAAA] shrink-0" />
                 <p className="text-base dark:text-white truncate">
@@ -216,7 +216,7 @@ const DeviceSettingsModal = ({
             </div>
 
             {/* Speaker Row */}
-            <div className="h-[56px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="min-h-[56px] py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex items-center gap-4 min-w-0">
                 <Volume2 className="dark:text-[#AAAAAA] shrink-0" />
                 <div className="min-w-0">
@@ -268,7 +268,7 @@ const DeviceSettingsModal = ({
             </div>
 
             {/* Camera Row */}
-            <div className="h-[56px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="min-h-[56px] py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex items-center gap-4 min-w-0">
                 <Video className="dark:text-[#AAAAAA] shrink-0" />
                 <p className="text-base dark:text-white truncate">

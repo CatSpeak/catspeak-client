@@ -229,7 +229,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
       </div>
 
       {/* Footer actions */}
-      <div className="p-4 border-t border-border bg-white shrink-0">
+      <div className="p-4 border-t border-border bg-white dark:bg-[#1A1A1A] shrink-0">
         <PillButton
           onClick={handleStartBreakout}
           disabled={isSaving || isStarting}

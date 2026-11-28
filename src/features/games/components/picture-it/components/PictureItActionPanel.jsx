@@ -29,10 +29,10 @@ const PictureItActionPanel = ({
   }
 
   return (
-    <div className="shrink-0 border-t border-slate-100 px-2 md:px-3 py-2 flex items-center justify-center min-h-[52px] md:min-h-[60px] bg-white">
+    <div className="shrink-0 border-t border-slate-100 dark:border-[#3F3F3F] px-2 md:px-3 py-2 flex items-center justify-center min-h-[52px] md:min-h-[60px] bg-white dark:bg-[#1A1A1A]">
       {/* Tile thu nhỏ ở sidebar — không cho tương tác */}
       {!isMain && (
-        <span className="text-xs md:text-sm text-slate-500 italic">
+        <span className="text-xs md:text-sm text-slate-500 dark:text-[#AAAAAA] italic">
           {ap.clickToExpand || 'Click the tile to interact'}
         </span>
       )}

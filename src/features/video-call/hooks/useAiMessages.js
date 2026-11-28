@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { RoomEvent } from "livekit-client"
 import { useConversationThreads } from "./useConversationThreads"
 import { flattenAiInteractions } from "../utils/flattenAiInteractions"
+import { unwrapAiAnswerPayload } from "../utils/aiAnswerPayload"
 import {
   getInitialMeetingSuggestions,
   getMoreMeetingSuggestions,
@@ -173,27 +174,18 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
 
         const fromName = topic === "public-ai" ? "Public AI" : "Private AI"
 
-        let answerText = json.answer || json.message || ""
-        let followUps = Array.isArray(json.follow_up_questions)
+        const rawAnswerText = json.answer || json.message || ""
+        const initialFollowUps = Array.isArray(json.follow_up_questions)
           ? json.follow_up_questions
           : Array.isArray(json.followUpSuggestions)
             ? json.followUpSuggestions
             : []
 
-        // Parse structured JSON inside message if present (fallback)
-        if (typeof answerText === "string" && answerText.trim().startsWith("{")) {
-          try {
-            const parsed = JSON.parse(answerText)
-            if (parsed.answer) {
-              answerText = parsed.answer
-              if (Array.isArray(parsed.follow_up_questions)) {
-                followUps = parsed.follow_up_questions
-              }
-            }
-          } catch {
-            // E-002: silent fail for follow-up parsing
-          }
-        }
+        // Unwrap structured JSON inside the answer if an older packet sent it raw
+        const { answer: answerText, followUps } = unwrapAiAnswerPayload(
+          rawAnswerText,
+          initialFollowUps,
+        )
 
         chatCountRef.current += 1
 

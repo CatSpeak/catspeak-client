@@ -14,6 +14,7 @@ import {
   BarChart2,
   Split,
   Clapperboard,
+  Lock,
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -55,6 +56,7 @@ const MoreMenuMobileGeneralView = ({
     setShowCC,
     isRecording,
     isTogglingRecording,
+    hasPersonalRecordPrivilege = true,
     handleToggleRecording,
     confirmStopRecording,
     room,
@@ -194,8 +196,9 @@ const MoreMenuMobileGeneralView = ({
         </div>
       )}
 
-      <div className={`grid gap-3 ${!isAISession && isBreakoutSupported(room?.roomType) && isHost ? 'grid-cols-4' : 'grid-cols-3'}`}>
+      <div className={`grid gap-2 ${!isAISession && isBreakoutSupported(room?.roomType) && isHost ? 'grid-cols-4' : 'grid-cols-3'}`}>
         <button
+          type="button"
           onClick={() => {
             handleToggleScreenShare()
             setShowMoreMenu(false)
@@ -205,9 +208,12 @@ const MoreMenuMobileGeneralView = ({
             !canShareScreen
               ? t.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
                 "Bạn không có quyền chia sẻ màn hình."
-              : undefined
+              : t?.rooms?.videoCall?.controls?.shareScreen || "Chia sẻ màn hình"
           }
-          className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
+          aria-label={
+            t?.rooms?.videoCall?.controls?.shareScreen || "Chia sẻ màn hình"
+          }
+          className={`min-h-[68px] py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-center transition-colors ${
             isLocalScreenShare ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400" : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
           } ${!canShareScreen ? "opacity-50 cursor-not-allowed" : ""}`}
         >
@@ -216,23 +222,40 @@ const MoreMenuMobileGeneralView = ({
           ) : (
             <MonitorUp size={24} />
           )}
+          <span className="text-[11px] font-medium leading-tight line-clamp-2 break-words">
+            {t?.rooms?.videoCall?.controls?.shareScreen || "Chia sẻ màn hình"}
+          </span>
         </button>
 
         {!isAISession && isHost && (
           <button
+            type="button"
             onClick={() => {
               setShowWatchTogether(!showWatchTogether)
               setShowMoreMenu(false)
             }}
-            className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
+            title={
+              t?.rooms?.videoCall?.watchTogether?.toggleButton ||
+              "Watch together"
+            }
+            aria-label={
+              t?.rooms?.videoCall?.watchTogether?.toggleButton ||
+              "Watch together"
+            }
+            className={`min-h-[68px] py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-center transition-colors ${
               showWatchTogether ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400" : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
             }`}
           >
             <Clapperboard size={24} />
+            <span className="text-[11px] font-medium leading-tight line-clamp-2 break-words">
+              {t?.rooms?.videoCall?.watchTogether?.toggleButton ||
+                "Watch together"}
+            </span>
           </button>
         )}
 
         <button
+          type="button"
           onClick={() => {
             if (isAISession) {
               setShowCC(!showCC)
@@ -247,16 +270,22 @@ const MoreMenuMobileGeneralView = ({
             }
           }}
           disabled={!isAISession && (isStartingSubtitles || isStoppingSubtitles)}
-          className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
+          title={t?.rooms?.videoCall?.subtitles || "Phụ đề"}
+          aria-label={t?.rooms?.videoCall?.subtitles || "Phụ đề"}
+          className={`min-h-[68px] py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-center transition-colors ${
             (isAISession ? showCC : isSubtitleActive)
               ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400"
               : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
           } ${!isAISession && (isStartingSubtitles || isStoppingSubtitles) ? "opacity-70 cursor-not-allowed" : ""}`}
         >
           <Captions size={24} />
+          <span className="text-[11px] font-medium leading-tight line-clamp-2 break-words">
+            {t?.rooms?.videoCall?.subtitles || "Phụ đề"}
+          </span>
         </button>
 
         <button
+          type="button"
           onClick={() => {
             if (isRecording) {
               confirmStopRecording()
@@ -266,7 +295,17 @@ const MoreMenuMobileGeneralView = ({
             setShowMoreMenu(false)
           }}
           disabled={isTogglingRecording}
-          className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
+          title={
+            isRecording
+              ? t?.rooms?.videoCall?.controls?.recordOff || "Stop recording"
+              : t?.rooms?.videoCall?.controls?.recordOn || "Start recording"
+          }
+          aria-label={
+            isRecording
+              ? t?.rooms?.videoCall?.controls?.recordOff || "Stop recording"
+              : t?.rooms?.videoCall?.controls?.recordOn || "Start recording"
+          }
+          className={`relative min-h-[68px] py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-center transition-colors ${
             isRecording
               ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 animate-pulse"
               : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
@@ -280,10 +319,21 @@ const MoreMenuMobileGeneralView = ({
               className={isRecording ? "fill-red-600 text-red-600" : ""}
             />
           )}
+          <span className="text-[11px] font-medium leading-tight line-clamp-2 break-words">
+            {isRecording
+              ? t?.rooms?.videoCall?.controls?.recordOff || "Stop recording"
+              : t?.rooms?.videoCall?.controls?.recordOn || "Start recording"}
+          </span>
+          {!isRecording && !hasPersonalRecordPrivilege && (
+            <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#990011] text-white">
+              <Lock size={11} aria-hidden="true" />
+            </span>
+          )}
         </button>
       </div>
 
       <button
+        type="button"
         onClick={handleCopyLink}
         className="w-full h-16 bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D] rounded-xl flex items-center justify-center gap-2 font-medium transition-colors"
       >
@@ -294,10 +344,14 @@ const MoreMenuMobileGeneralView = ({
       {/* Q10: troubleshoot đã move ra RoomHeader, xóa khỏi More menu */}
       <div className="grid grid-cols-1 gap-3">
         <button
+          type="button"
           onClick={() => setShowMobileSettings(true)}
-          className="h-16 bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D] rounded-xl flex items-center justify-center transition-colors"
+          title={t?.common?.settings || "Cài đặt"}
+          aria-label={t?.common?.settings || "Cài đặt"}
+          className="h-16 bg-[#F5F5F5] dark:bg-[#272727] text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D] rounded-xl flex items-center justify-center gap-2 font-medium transition-colors"
         >
           <Settings size={24} />
+          <span>{t?.common?.settings || "Cài đặt"}</span>
         </button>
       </div>
     </>

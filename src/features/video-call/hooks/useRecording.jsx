@@ -9,6 +9,9 @@ import { setPiP } from "@/store/slices/videoCallSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
+import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
+import { isSpeakingTimeBalanceSupported } from "@/features/video-call/utils/roomTypeHelpers"
 import {
   hasCoHostPermission,
   CO_HOST_PERMISSIONS,
@@ -43,6 +46,59 @@ export function useRecording(lkRoom = null, syncState = {}) {
 
   const [startRecording] = useStartRecordingMutation()
   const [stopRecording] = useStopRecordingMutation()
+  const { hasFeature, isPro: isPlanPro, isLoading: isPlanLoading } =
+    usePlanFeatures()
+
+  const room = syncState?.room ?? null
+  const isClassRoom =
+    isSpeakingTimeBalanceSupported(room) ||
+    String(room?.roomType || "").toLowerCase() === "class"
+  const isTeacher = user?.accountType === "Teacher"
+  const isPro =
+    Boolean(user?.isPro || user?.tier?.toLowerCase() === "pro") ||
+    Boolean(isPlanPro)
+  // Personal recording privilege (Pro / ALLOW_RECORDING / Teacher in class).
+  // A Group/Temporary room host does NOT gain recording rights from `isHost`.
+  // While the plan query is still loading we fail open to the server check
+  // instead of flashing a false "upgrade" prompt.
+  const hasPersonalRecordPrivilege = isPlanLoading
+    ? true
+    : Boolean(
+        isPro ||
+          hasFeature(PLAN_FEATURES.ALLOW_RECORDING) ||
+          (isTeacher && isClassRoom),
+      )
+
+  const showProUpgradeToast = useCallback(() => {
+    const message =
+      t.recordings?.errors?.proRequired ||
+      t.recordings?.planRequired ||
+      "Recording is a Pro feature. Upgrade to Pro to record this call."
+    const upgradeLabel =
+      t.recordings?.upgradeToPro ||
+      t.billing?.pricing?.upgradeToPro ||
+      "Upgrade to Pro"
+    toast(
+      (tToast) => (
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-gray-900 dark:text-white">
+            {message}
+          </span>
+          <PillButton
+            variant="snackbar"
+            className="self-start"
+            onClick={() => {
+              window.open("/pricing", "_blank", "noopener,noreferrer")
+              toast.dismiss(tToast.id)
+            }}
+          >
+            {upgradeLabel}
+          </PillButton>
+        </div>
+      ),
+      { duration: 8000 },
+    )
+  }, [t])
 
   const handleToggleRecording = useCallback(async () => {
     const roomName = lkRoom?.name ?? null
@@ -57,9 +113,14 @@ export function useRecording(lkRoom = null, syncState = {}) {
     const isHost = syncState?.isHost
     const coHost = syncState?.coHost ?? null
     const localAccountId = syncState?.accountId
-    const isTeacher = user?.accountType === "Teacher"
-    const isPro = user?.isPro || user?.tier?.toLowerCase() === "pro"
-    
+
+    // ISS-81: Free users (including Group/Temporary room hosts) must never hit
+    // POST /start-recording; short-circuit with a Pro upgrade prompt instead.
+    if (!isRecording && !hasPersonalRecordPrivilege) {
+      showProUpgradeToast()
+      return
+    }
+
     // Ticket 02: the member recording gate is read from the room-state cache
     // (passed in via syncState). Host or co-host with record always bypass
     // (shared recording); anyone else may record only while the gate is open.
@@ -174,9 +235,16 @@ export function useRecording(lkRoom = null, syncState = {}) {
       }
     } catch (err) {
       const status = err?.status
+      const errorCode = err?.data?.errorCode
+
+      // ── 403 Forbidden — Pro/Teacher recording gate (ISS-81) ────────
+      if (status === 403 || errorCode === "RECORDING_PRO_REQUIRED") {
+        showProUpgradeToast()
+        return
+      }
 
       // ── 409 Conflict — storage quota exceeded ──────────────────────
-      if (status === 409) {
+      if (status === 409 || errorCode === "RECORDING_STORAGE_QUOTA_EXCEEDED") {
         const quotaMsg =
           err?.data?.message ||
           t.recordings?.storage?.quotaExceeded ||
@@ -213,6 +281,10 @@ export function useRecording(lkRoom = null, syncState = {}) {
     startedByAccountId,
     syncState,
     t,
+    hasPersonalRecordPrivilege,
+    isPro,
+    isTeacher,
+    showProUpgradeToast,
   ])
 
   const confirmStopRecording = async () => {
@@ -279,6 +351,7 @@ export function useRecording(lkRoom = null, syncState = {}) {
   return {
     isRecording,
     isTogglingRecording,
+    hasPersonalRecordPrivilege,
     handleToggleRecording,
     showStopModal,
     confirmStopRecording,

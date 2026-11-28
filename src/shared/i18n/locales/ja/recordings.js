@@ -1,6 +1,13 @@
 export default {
   title: "録画",
   refresh: "更新",
+  planRequiredTitle: "Proプランが必要です",
+  planRequired:
+    "通話の録画には録画権限のあるプランが必要です。CatSpeak Proにアップグレードして通話を録画し、録画を管理しましょう！",
+  upgradeToPro: "Proにアップグレード",
+  proRequired:
+    "録画機能はProアカウント（またはクラスルームの講師）専用です。この通話を録画するにはProプランにアップグレードしてください！",
+  proBadge: "Pro",
   storage: {
     title: "ストレージ",
     used: "{{used}} / {{limit}} MB",

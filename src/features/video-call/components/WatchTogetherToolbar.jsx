@@ -382,7 +382,7 @@ const WatchTogetherToolbar = ({
             onClick={onChangeVideo ?? undefined}
             aria-label={strings.changeVideo || "Đổi video"}
             title={strings.changeVideo || "Đổi video"}
-            className="flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3.5 text-[13px] font-medium text-gray-700 transition-colors hover:bg-gray-50 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
+            className="flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-gray-200 dark:border-[#3F3F3F] bg-white dark:bg-[#272727] px-3.5 text-[13px] font-medium text-gray-700 dark:text-neutral-200 transition-colors hover:bg-gray-50 dark:hover:bg-[#3D3D3D] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
           >
             <Repeat size={15} />
             <span className="hidden min-[420px]:inline">{strings.changeVideo || "Đổi video"}</span>

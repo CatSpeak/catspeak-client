@@ -9,13 +9,13 @@ const EditNickname = ({ user, onEditName, className = "" }) => {
     <div
       className={`h-14 items-center gap-2 text-sm text-secondary dark:text-[#AAAAAA] ${className}`}
     >
-      <p>
-        {t?.rooms?.waitingScreen?.joinedAsNickname || "Joined as nickname"}:{" "}
+      <p className="flex flex-wrap items-center gap-x-1.5">
+        <span>{t?.rooms?.waitingScreen?.joinedAsNickname || "Joined as nickname"}:</span>
         <span className="font-bold text-black dark:text-white">
-          {user?.nickname || user?.username}
+          {user?.nickname || user?.fullName || user?.username}
         </span>
       </p>
-      <span className="text-secondary dark:text-neutral-500">|</span>
+      <span className="text-secondary dark:text-neutral-500" aria-hidden="true">|</span>
       <button
         type="button"
         onClick={onEditName}

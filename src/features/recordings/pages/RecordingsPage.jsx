@@ -105,7 +105,7 @@ const RecordingsPage = () => {
           t?.recordings?.planRequired ||
           "Call recording requires a plan with recording privileges. Upgrade to CatSpeak Pro to record calls and manage your recordings!"
         }
-        featureName="Recordings"
+        featureName={t?.recordings?.title || "Recordings"}
         animationKey="recordings-plan-required"
       />
     )

@@ -12,11 +12,13 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
 
   useEffect(() => {
     if (open) {
+      const initialName =
+        user?.nickname || user?.fullName || user?.username || ""
       queueMicrotask(() => {
-        setTempName(user?.nickname || "")
+        setTempName(initialName)
       })
     }
-  }, [open, user?.nickname])
+  }, [open, user?.nickname, user?.fullName, user?.username])
 
   const handleSaveName = async () => {
     if (!tempName.trim()) {

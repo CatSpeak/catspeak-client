@@ -1,5 +1,5 @@
 import React from "react"
-import { Circle, AlertTriangle } from "lucide-react"
+import { Circle, AlertTriangle, Lock } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ProgressBar from "@/shared/components/ui/ProgressBar"
@@ -17,6 +17,8 @@ const RecordingButton = ({
   const isRecording = propIsRecording ?? globalCall?.isRecording ?? false
   const isTogglingRecording =
     propIsTogglingRecording ?? globalCall?.isTogglingRecording ?? false
+  const hasPersonalRecordPrivilege =
+    globalCall?.hasPersonalRecordPrivilege ?? true
   const onToggleRecording =
     propOnToggleRecording ?? globalCall?.handleToggleRecording
   const onStopRecording =
@@ -33,7 +35,20 @@ const RecordingButton = ({
 
   const title = isRecording
     ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
-    : t.rooms?.videoCall?.controls?.recordOn || "Start recording"
+    : !hasPersonalRecordPrivilege
+      ? t.recordings?.errors?.proRequired ||
+        "Recording is a Pro feature. Upgrade to Pro to record."
+      : t.rooms?.videoCall?.controls?.recordOn || "Start recording"
+
+  const lockBadge =
+    !isRecording && !hasPersonalRecordPrivilege ? (
+      <span
+        className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#990011] text-white ring-2 ring-white dark:ring-[#1A1A1A]"
+        aria-hidden="true"
+      >
+        <Lock size={11} />
+      </span>
+    ) : null
 
   const progressColor = isDanger
     ? "bg-red-500 animate-pulse"
@@ -48,6 +63,8 @@ const RecordingButton = ({
         disabled={isTogglingRecording}
         onClick={onToggleRecording}
         title={title}
+        aria-label={title}
+        badge={lockBadge}
       >
         <Circle />
       </IconButton>

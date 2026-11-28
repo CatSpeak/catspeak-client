@@ -292,10 +292,10 @@ const CoHostManager = ({
           <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-3 animate-in zoom-in-75">
             <CheckCircle2 size={30} />
           </div>
-          <h3 className="text-lg font-bold text-gray-800 mb-1.5">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1.5">
             {t.rooms?.coHost?.revokeSuccessTitle || "Đã gỡ phân công Co-host!"}
           </h3>
-          <p className="text-sm text-gray-500 mb-5 max-w-sm leading-relaxed">
+          <p className="text-sm text-gray-500 dark:text-[#AAAAAA] mb-5 max-w-sm leading-relaxed">
             {t.rooms?.coHost?.revokeSuccessMessage ||
               "Phân công Co-host đã được gỡ thành công."}
           </p>
@@ -322,7 +322,7 @@ const CoHostManager = ({
                 </span>
                 <div className="min-w-0 leading-tight">
                   <p
-                    className="truncate text-[11px] font-bold text-gray-800"
+                    className="truncate text-[11px] font-bold text-gray-800 dark:text-neutral-100"
                     title={assignedName || undefined}
                   >
                     {assignedName ||
@@ -341,7 +341,7 @@ const CoHostManager = ({
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-dashed border-[#EDC589] bg-amber-50 text-[#8B5A2B]">
                   <UserPlus size={13} aria-hidden="true" />
                 </span>
-                <p className="truncate text-[11px] font-medium text-gray-500">
+                <p className="truncate text-[11px] font-medium text-gray-500 dark:text-[#AAAAAA]">
                   {t.rooms?.coHost?.emptyShort || emptyLabel}
                 </p>
               </>
@@ -386,7 +386,7 @@ const CoHostManager = ({
       <div className="flex w-full flex-col gap-2">
         {coHost?.isPending && <p className="text-xs text-amber-700">{t.courses?.createClass?.coHostPendingNotice || "Co-host permissions activate after this person enrolls."}</p>}
         {!hasCoHost && (
-          <div className="w-full rounded-lg border border-dashed border-gray-300 bg-gray-50/70 px-3 py-2 text-xs font-medium text-gray-500">
+          <div className="w-full rounded-lg border border-dashed border-gray-300 dark:border-[#3F3F3F] bg-gray-50/70 dark:bg-[#272727] px-3 py-2 text-xs font-medium text-gray-500 dark:text-[#AAAAAA]">
             {emptyLabel}
           </div>
         )}

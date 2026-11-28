@@ -38,6 +38,8 @@ export const en = {
     closeConfirmDesc: "You have unsaved changes. Closing now will discard your input.",
     closeConfirmKeep: "Keep editing",
     closeConfirmDiscard: "Discard changes",
+  close: "Close",
+  closePreview: "Close preview",
     diagnosticsTitle: "Auto-Attached Technical Diagnostics",
     diagnosticsInfo: "The system automatically captured the following metadata to help engineers reproduce the issue:",
     failedRequestsCount: "Failed / Timed-out APIs",

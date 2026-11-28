@@ -1,6 +1,12 @@
 export default {
   title: "录音",
   refresh: "刷新",
+  planRequiredTitle: "需要 Pro 套餐",
+  planRequired:
+    "通话录制需要具备录制权限的套餐。升级 CatSpeak Pro 即可录制通话并管理您的录音！",
+  upgradeToPro: "升级 Pro",
+  proRequired: "录制功能仅限 Pro 账户（或课堂中的教师）使用。请升级 Pro 套餐以录制此通话！",
+  proBadge: "Pro",
   storage: {
     title: "存储空间",
     used: "{{used}} / {{limit}} MB",

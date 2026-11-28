@@ -38,6 +38,8 @@ export default {
   noPermissionTeacher: "Bạn không có quyền chuyển sang vai trò Giảng viên!",
   switchRoleSuccess: "Chuyển vai trò thành công!",
   switchRoleFail: "Chuyển vai trò thất bại!",
+  sessionExpired:
+    "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để chuyển vai trò!",
   logoutWarning: {
     title: "Kết thúc cuộc gọi & Đăng xuất",
     message: "Bạn đang trong một cuộc gọi. Đăng xuất sẽ ngắt kết nối của bạn. Bạn có chắc chắn muốn đăng xuất không?",

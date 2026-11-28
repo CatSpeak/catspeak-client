@@ -70,7 +70,7 @@ const StudentRow = ({
               </div>
             }
             content={(close) => (
-              <div className="bg-white border border-border rounded-2xl shadow-lg min-w-64 flex flex-col p-1 gap-1 z-50">
+              <div className="bg-white dark:bg-[#1A1A1A] border border-border rounded-2xl shadow-lg min-w-64 flex flex-col p-1 gap-1 z-50">
                 {hasMoveOptions && rooms.length > 0 && (
                   <>
                     {rooms.map((room) =>

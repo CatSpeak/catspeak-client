@@ -200,6 +200,23 @@ const VideoCallRoomContent = () => {
   }, [isConnected, enterPiP])
 
   const isSidePanelOpen = activeSidePanel !== null
+
+  // ISS-82: Escape closes the active side panel, unless a modal (invite,
+  // confirmation, …) is stacked above it and owns the key.
+  useEffect(() => {
+    if (!isSidePanelOpen) return undefined
+    const handleKeyDown = (event) => {
+      if (event.key !== "Escape") return
+      const openDialog = document.querySelector(
+        '[role="dialog"][aria-modal="true"]',
+      )
+      if (openDialog) return
+      setActiveSidePanel(null)
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isSidePanelOpen, setActiveSidePanel])
+
   const sidePanelTitle = showParticipants
     ? (t?.rooms?.videoCall?.participantList?.title ?? "Participants")
     : showSpeakingTimeBalance
@@ -214,8 +231,10 @@ const VideoCallRoomContent = () => {
             ? t?.rooms?.videoCall?.reconnect || "Troubleshoot connection"
             : showBreakout
               ? isBreakoutActive
-                ? "Phòng thảo luận"
-                : "Phòng họp nhóm"
+                ? (t?.rooms?.breakoutRooms?.panelTitleActive ??
+                  "Phòng thảo luận")
+                : (t?.rooms?.breakoutRooms?.panelTitleSetup ??
+                  "Phòng họp nhóm")
               : (t?.rooms?.chatBox?.title ?? "Chat")
 
   // ── LiveKit connection gate ──
@@ -411,7 +430,9 @@ const VideoCallRoomContent = () => {
 
             >
               <div className="w-[360px] min-w-[360px] h-full flex flex-col shrink-0 bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white rounded-xl shadow-sm border border-border dark:border-darkBorder overflow-hidden">
-                {showParticipants && <ParticipantList />}
+                {showParticipants && (
+                  <ParticipantList onClose={() => setActiveSidePanel(null)} />
+                )}
                 {showSpeakingTimeBalance &&
                   isHost &&
                   isSpeakingTimeBalanceSupported(room) && (
@@ -419,8 +440,14 @@ const VideoCallRoomContent = () => {
                       onClose={() => setActiveSidePanel(null)}
                     />
                   )}
-                {showVirtualBackground && <BackgroundsAndEffectsPanel />}
-                {showAvatarPicker && <AvatarUrlPicker />}
+                {showVirtualBackground && (
+                  <BackgroundsAndEffectsPanel
+                    onClose={() => setActiveSidePanel(null)}
+                  />
+                )}
+                {showAvatarPicker && (
+                  <AvatarUrlPicker onClose={() => setActiveSidePanel(null)} />
+                )}
                 {showTroubleshoot && (
                   <TroubleshootPanel onClose={() => setActiveSidePanel(null)} />
                 )}
@@ -436,6 +463,7 @@ const VideoCallRoomContent = () => {
                     currentUser={user}
                     onSendMessage={handleSendMessage}
                     isConnected={isConnected}
+                    onClose={() => setActiveSidePanel(null)}
                     className="h-full w-full"
                   />
                 )}
@@ -462,10 +490,12 @@ const VideoCallRoomContent = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.18, ease: "easeOut" }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-2xl flex flex-col border-l border-border dark:border-darkBorder overflow-hidden"
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-[360px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-2xl flex flex-col border-l border-border dark:border-darkBorder overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {showParticipants && <ParticipantList />}
+              {showParticipants && (
+                <ParticipantList onClose={() => setActiveSidePanel(null)} />
+              )}
               {showSpeakingTimeBalance &&
                 isHost &&
                 isSpeakingTimeBalanceSupported(room) && (
@@ -473,8 +503,14 @@ const VideoCallRoomContent = () => {
                     onClose={() => setActiveSidePanel(null)}
                   />
                 )}
-              {showVirtualBackground && <BackgroundsAndEffectsPanel />}
-              {showAvatarPicker && <AvatarUrlPicker />}
+              {showVirtualBackground && (
+                <BackgroundsAndEffectsPanel
+                  onClose={() => setActiveSidePanel(null)}
+                />
+              )}
+              {showAvatarPicker && (
+                <AvatarUrlPicker onClose={() => setActiveSidePanel(null)} />
+              )}
               {showTroubleshoot && (
                 <TroubleshootPanel onClose={() => setActiveSidePanel(null)} />
               )}
@@ -490,6 +526,7 @@ const VideoCallRoomContent = () => {
                   currentUser={user}
                   onSendMessage={handleSendMessage}
                   isConnected={isConnected}
+                  onClose={() => setActiveSidePanel(null)}
                   className="h-full w-full"
                 />
               )}
@@ -551,7 +588,10 @@ const VideoCallRoomContent = () => {
                   />
                 ) : showParticipants ? (
                   <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white dark:bg-[#1A1A1A]">
-                    <ParticipantList hideTitle />
+                    <ParticipantList
+                      hideTitle
+                      onClose={() => setActiveSidePanel(null)}
+                    />
                   </div>
                 ) : (
                   <div className="flex-1 overflow-y-auto bg-white dark:bg-[#1A1A1A] min-h-0">
@@ -562,8 +602,16 @@ const VideoCallRoomContent = () => {
                           onClose={() => setActiveSidePanel(null)}
                         />
                       )}
-                    {showVirtualBackground && <BackgroundsAndEffectsPanel />}
-                    {showAvatarPicker && <AvatarUrlPicker />}
+                    {showVirtualBackground && (
+                      <BackgroundsAndEffectsPanel
+                        onClose={() => setActiveSidePanel(null)}
+                      />
+                    )}
+                    {showAvatarPicker && (
+                      <AvatarUrlPicker
+                        onClose={() => setActiveSidePanel(null)}
+                      />
+                    )}
                     {showTroubleshoot && <TroubleshootPanel hideTitle />}
                     {showBreakout && isBreakoutSupported(room?.roomType) && (
                       <BreakoutSidebarPanel

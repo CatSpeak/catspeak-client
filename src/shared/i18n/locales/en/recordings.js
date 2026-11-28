@@ -1,6 +1,13 @@
 export default {
   title: "Recordings",
   refresh: "Refresh",
+  planRequiredTitle: "Pro Plan Required",
+  planRequired:
+    "Call recording requires a plan with recording privileges. Upgrade to CatSpeak Pro to record calls and manage your recordings!",
+  upgradeToPro: "Upgrade to Pro",
+  proRequired:
+    "Recording is available to Pro accounts (or Teachers in a class room) only. Please upgrade to Pro to record this call!",
+  proBadge: "Pro",
   storage: {
     title: "Storage",
     used: "{{used}} / {{limit}} MB",

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useRef } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { QueueStatusCard } from "@/features/queue"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 import { MainLogo, MainLogoDark } from "@/shared/assets/icons/logo"
 
@@ -14,6 +15,17 @@ const QueuePage = () => {
   // Queue preferences passed from QueueModal via route state
   const queuePreferences = location.state
   const roomType = queuePreferences?.roomType || "OneToOne"
+  // ISS-88: direct navigation / F5 has no route state — never join(null).
+  const hasQueueParams = Boolean(
+    location.state &&
+      (location.state.roomType ||
+        location.state.language ||
+        location.state.targetLanguage),
+  )
+  const communityLang =
+    (typeof window !== "undefined" &&
+      localStorage.getItem("communityLanguage")) ||
+    "en"
 
   const [queueState, setQueueState] = useState({ type: "CONNECTING" })
   const [position, setPosition] = useState(0)
@@ -73,6 +85,7 @@ const QueuePage = () => {
 
   useEffect(() => {
     // Connect first (handled by hook mount)
+    if (!hasQueueParams) return
     if (isConnected && !hasJoinedSignalR && !joinAttemptedRef.current) {
       // eslint-disable-next-line react-hooks/immutability -- one-shot guard for the join attempt
       joinAttemptedRef.current = true // Mark as attempted immediately
@@ -88,14 +101,17 @@ const QueuePage = () => {
       }
       initQueue()
     }
-  }, [isConnected, hasJoinedSignalR, joinQueue, queuePreferences])
+  }, [isConnected, hasJoinedSignalR, joinQueue, queuePreferences, hasQueueParams])
 
   const handleCancel = async () => {
     try {
       await leaveQueue() // SignalR leave
-      navigate(-1)
     } catch (err) {
       console.error("Failed to leave queue", err)
+    }
+    if (typeof window !== "undefined" && window.history.length <= 1) {
+      navigate(`/${communityLang}/community`)
+    } else {
       navigate(-1)
     }
   }
@@ -134,13 +150,36 @@ const QueuePage = () => {
         {/* </div> */}
       </div>
 
-      <QueueStatusCard
-        statusText={statusText}
-        isConnected={isConnected}
-        position={position}
-        onCancel={handleCancel}
-        roomType={roomType}
-      />
+      {hasQueueParams ? (
+        <QueueStatusCard
+          statusText={statusText}
+          isConnected={isConnected}
+          position={position}
+          onCancel={handleCancel}
+          roomType={roomType}
+        />
+      ) : (
+        <div className="w-full max-w-md rounded-3xl bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] shadow-xl p-6 text-center">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+            {t.rooms?.queue?.missingParamsTitle ||
+              "Bạn chưa chọn tiêu chí ghép cặp"}
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-[#AAAAAA]">
+            {t.rooms?.queue?.missingParamsDesc ||
+              "Bạn cần chọn ngôn ngữ và chủ đề từ trang Cộng đồng để bắt đầu ghép cặp."}
+          </p>
+          <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+            <PillButton
+              onClick={() => navigate(`/${communityLang}/community`)}
+            >
+              {t.rooms?.queue?.chooseInCommunity || "Chọn phòng ở Cộng đồng"}
+            </PillButton>
+            <PillButton variant="secondary" onClick={handleCancel}>
+              {t.rooms?.queue?.cancel || "Hủy"}
+            </PillButton>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

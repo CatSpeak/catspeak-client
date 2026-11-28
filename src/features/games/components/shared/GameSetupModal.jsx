@@ -2,19 +2,35 @@ import React, { useState } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useGlobalVideoCall } from "@/features/video-call/context/videoCallContext"
 import { useParams } from "react-router-dom"
 import { Lock } from "lucide-react"
+
+const GAME_LANGUAGE_BY_ROOM_TYPE = {
+  chinese: "zh",
+  vietnamese: "vi",
+  english: "en",
+}
 
 const GameSetupModal = ({ open, onClose }) => {
   const { t } = useLanguage()
   const { lang } = useParams()
+  const { room } = useGlobalVideoCall()
   const [selectedLevel, setSelectedLevel] = useState("easy")
 
   const [selectedGame, setSelectedGame] = useState("picture_it")
 
-  // Ngôn ngữ game luôn ăn theo cộng đồng (URL :lang).
-  // Hỗ trợ 3 ngôn ngữ: tiếng Anh (en), tiếng Trung (zh), tiếng Việt (vi).
-  const communityLanguage = ["zh", "vi"].includes(lang) ? lang : "en"
+  // ISS-87: game language follows the room language first (room?.languageType),
+  // then falls back to the community URL :lang. The game question bank supports
+  // en/zh/vi only, so a Japanese room temporarily falls back to English.
+  const roomLanguageCode = GAME_LANGUAGE_BY_ROOM_TYPE[
+    String(room?.languageType || "").toLowerCase()
+  ]
+  const urlLanguage = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  const languageSource = roomLanguageCode || urlLanguage
+  const communityLanguage = ["zh", "vi"].includes(languageSource)
+    ? languageSource
+    : "en"
 
   const languageLabel =
     communityLanguage === "zh"
@@ -36,6 +52,7 @@ const GameSetupModal = ({ open, onClose }) => {
       open={open}
       onClose={onClose}
       title={t.rooms?.game?.setup?.title || "Start a game"}
+      closeLabel={t?.common?.close || "Close"}
       className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white w-full max-w-2xl md:rounded-3xl overflow-hidden md:border border-border dark:border-[#3F3F3F] shadow-2xl"
       headerClassName="flex items-center justify-between p-4 pl-6 border-b border-border dark:border-[#2E2E2E]"
       fullScreenOnMobile={true}

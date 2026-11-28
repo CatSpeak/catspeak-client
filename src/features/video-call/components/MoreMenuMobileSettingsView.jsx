@@ -50,7 +50,7 @@ const MoreMenuMobileSettingsView = ({
         {t?.rooms?.videoCall?.backBtn || "Back"}
       </ListItem>
 
-      <div className="max-h-[300px] overflow-y-auto flex flex-col no-scrollbar pb-4 pb-safe">
+      <div className="max-h-[70dvh] overflow-y-auto flex flex-col no-scrollbar pb-4 pb-safe">
         <ListItem
           onClick={() => {
             if (!canStartGame) return

@@ -117,14 +117,14 @@ const BreakoutStudentView = ({
 
   if (!isStarted) {
     return (
-      <div className="flex h-full flex-col items-center justify-center p-6 text-center text-slate-500">
-        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-          <Users className="h-6 w-6 text-slate-400" />
+      <div className="flex h-full flex-col items-center justify-center p-6 text-center text-slate-500 dark:text-[#AAAAAA]">
+        <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-[#272727] flex items-center justify-center mb-3">
+          <Users className="h-6 w-6 text-slate-400 dark:text-[#AAAAAA]" />
         </div>
-        <h4 className="text-sm font-bold text-slate-700">
+        <h4 className="text-sm font-bold text-slate-700 dark:text-neutral-100">
           {t.rooms.breakoutRooms.notStartedTitle}
         </h4>
-        <p className="text-xs text-slate-500 mt-1.5 max-w-[220px] leading-relaxed">
+        <p className="text-xs text-slate-500 dark:text-[#AAAAAA] mt-1.5 max-w-[220px] leading-relaxed">
           {t.rooms.breakoutRooms.notStartedDesc}
         </p>
       </div>
@@ -132,7 +132,7 @@ const BreakoutStudentView = ({
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-white">
+    <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-[#1A1A1A]">
       {/* List of Breakout Rooms */}
       <div className="flex-1 overflow-y-auto py-2 px-1 space-y-3">
         {/* Main Room */}

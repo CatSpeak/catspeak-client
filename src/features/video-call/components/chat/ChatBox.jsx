@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from "react"
+import { X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useAiSend } from "@/features/video-call/hooks/useAiSend"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
 import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
+import { IconButton } from "@/shared/components/ui/buttons"
 
-const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
+const ChatBox = ({
+  messages,
+  onSendMessage,
+  isConnected,
+  className = "",
+  onClose,
+  hideTitle = false,
+}) => {
   const { t } = useLanguage()
   const {
     aiMessages = [],
@@ -126,13 +135,25 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   return (
     <div className={`relative flex h-full flex-col overflow-hidden bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white ${className}`}>
       {/* Tab Bar */}
-      <Tabs
-        tabs={chatTabs}
-        activeTab={activeChatTab}
-        onChange={setActiveChatTab}
-        fullWidth={true}
-        className="shrink-0 border-b border-border dark:border-[#3F3F3F]"
-      />
+      <div className="shrink-0 flex items-center border-b border-border dark:border-[#3F3F3F]">
+        <Tabs
+          tabs={chatTabs}
+          activeTab={activeChatTab}
+          onChange={setActiveChatTab}
+          fullWidth={true}
+          className="flex-1 min-w-0 border-b-0"
+        />
+        {onClose && !hideTitle && (
+          <IconButton
+            variant="ghost"
+            onClick={onClose}
+            title={t?.common?.close || "Đóng"}
+            aria-label={t?.common?.close || "Đóng"}
+          >
+            <X />
+          </IconButton>
+        )}
+      </div>
 
       {/* Tab Content */}
       <TabContent

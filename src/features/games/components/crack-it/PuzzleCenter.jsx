@@ -88,7 +88,7 @@ const PuzzleCenter = () => {
 
   if (!puzzle) {
     return (
-      <div className="flex-1 bg-slate-50 rounded-2xl flex flex-col items-center justify-center p-6 text-center text-slate-500 min-h-[180px] w-full">
+      <div className="flex-1 bg-slate-50 dark:bg-[#272727] rounded-2xl flex flex-col items-center justify-center p-6 text-center text-slate-500 dark:text-[#AAAAAA] min-h-[180px] w-full">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cath-red-600 mb-3" />
         <p className="font-semibold text-base">{t.rooms?.game?.crackIt?.waitingStart || "Đang đồng bộ ván đấu..."}</p>
       </div>
@@ -98,31 +98,31 @@ const PuzzleCenter = () => {
   const hintContent = (() => {
     if (gameLanguage === "ja") {
       return puzzle.hint_ja ? (
-        <div className="text-2xl font-medium text-slate-800">{puzzle.hint_ja}</div>
+        <div className="text-2xl font-medium text-slate-800 dark:text-white">{puzzle.hint_ja}</div>
       ) : puzzle.hint_en
     }
 
     if (language === "zh") {
       return puzzle.hint_zh ? (
         <div className="flex flex-col gap-2">
-          <div className="text-2xl font-medium text-slate-800">{puzzle.hint_zh}</div>
-          <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
+          <div className="text-2xl font-medium text-slate-800 dark:text-white">{puzzle.hint_zh}</div>
+          <div className="text-lg text-slate-500 dark:text-neutral-400">{puzzle.hint_pinyin}</div>
         </div>
       ) : puzzle.hint_en
     }
 
     return puzzle.hint_en ? puzzle.hint_en : (
       <div className="flex flex-col gap-2">
-        <div className="text-2xl font-medium text-slate-800">{puzzle.hint_zh}</div>
-        <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
+        <div className="text-2xl font-medium text-slate-800 dark:text-white">{puzzle.hint_zh}</div>
+        <div className="text-lg text-slate-500 dark:text-neutral-400">{puzzle.hint_pinyin}</div>
       </div>
     )
   })()
 
   return (
-    <div className="flex-1 bg-white rounded-2xl shadow-sm border border-border flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
+    <div className="flex-1 bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-sm border border-border flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
       {/* Trái: Ảnh full — object-cover, không thừa khoảng trống */}
-      <div className="w-full md:w-1/2 flex-1 min-h-0 p-2 sm:p-3 md:p-4 flex items-center justify-center bg-slate-50/50 overflow-hidden">
+      <div className="w-full md:w-1/2 flex-1 min-h-0 p-2 sm:p-3 md:p-4 flex items-center justify-center bg-slate-50/50 dark:bg-[#242424] overflow-hidden">
         <div className="relative h-full w-auto max-h-full aspect-square rounded-2xl overflow-hidden shadow-md border-2 md:border-4 border-white ring-1 ring-gray-100">
           <img
             src={puzzle.image_url}
@@ -138,13 +138,13 @@ const PuzzleCenter = () => {
           <div className="text-xs md:text-sm font-black tracking-[0.2em] md:tracking-[0.3em] text-cath-red-600 uppercase">
             {t.rooms?.game?.crackIt?.hint || "Gợi ý"}
           </div>
-          <div className="text-base sm:text-lg md:text-2xl font-semibold text-slate-800 leading-snug md:leading-relaxed max-w-lg px-2 md:px-0">
+          <div className="text-base sm:text-lg md:text-2xl font-semibold text-slate-800 dark:text-white leading-snug md:leading-relaxed max-w-lg px-2 md:px-0">
             {hintContent}
           </div>
         </div>
 
         <div className="flex flex-col items-center gap-1 md:gap-2">
-          <div className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-500 tracking-[0.1em]">
+          <div className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-500 dark:text-neutral-400 tracking-[0.1em]">
             {displayMask}
           </div>
         </div>

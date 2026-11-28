@@ -278,6 +278,7 @@ const ChatInput = ({
         meta.nickname ||
         meta.username ||
         participant.identity ||
+        t.rooms?.videoCall?.participantList?.membersTab ||
         "Thành viên"
     }
 
@@ -673,7 +674,9 @@ const ChatInput = ({
                       ? "text-amber-600 dark:text-amber-400"
                       : "text-gray-400 dark:text-[#AAAAAA] opacity-75"
                 }`}
-                title={`${message.length} / 500 characters`}
+                title={`${message.length} / 500 ${
+                  t.rooms?.chatBox?.characters || "characters"
+                }`}
               >
                 {message.length}/500
               </span>
@@ -687,7 +690,7 @@ const ChatInput = ({
                 trigger={
                   <IconButton
                     variant="ghost"
-                    aria-label="Emoji"
+                    aria-label={t.rooms?.chatBox?.emoji || "Emoji"}
                     type="button"
                     disabled={isInputDisabled}
                     className="text-gray-500 hover:text-gray-800 dark:text-[#AAAAAA] dark:hover:text-white"
@@ -723,7 +726,8 @@ const ChatInput = ({
               }}
               disabled={isInputDisabled || !hasContent}
               variant={hasContent ? "primary" : "ghost"}
-              aria-label="Send message"
+              aria-label={t.rooms?.chatBox?.sendMessage || "Send message"}
+              title={t.rooms?.chatBox?.sendMessage || "Send message"}
               className={
                 !hasContent
                   ? "text-gray-400 hover:text-gray-600 dark:text-[#AAAAAA] dark:hover:text-white"

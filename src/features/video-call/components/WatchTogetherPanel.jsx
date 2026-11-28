@@ -86,6 +86,8 @@ const WatchTogetherPanel = ({
             <button
               type="button"
               onClick={onClose}
+              title={t?.common?.close || "Đóng"}
+              aria-label={t?.common?.close || "Đóng"}
               className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#272727] transition-colors text-gray-500 dark:text-[#AAAAAA]"
             >
               <X size={20} />

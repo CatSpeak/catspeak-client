@@ -26,8 +26,23 @@ import zhCommon from "@/shared/i18n/locales/zh/common"
 import zhFooter from "@/shared/i18n/locales/zh/components/footer"
 import zhPlanUsage from "@/shared/i18n/locales/zh/pages/planUsage"
 import zhPolicy from "@/shared/i18n/locales/zh/pages/policy"
+import viRooms from "@/shared/i18n/locales/vi/components/rooms"
+import enRooms from "@/shared/i18n/locales/en/components/rooms"
+import zhRooms from "@/shared/i18n/locales/zh/components/rooms"
+import jaRooms from "@/shared/i18n/locales/ja/components/rooms"
+import viRecordings from "@/shared/i18n/locales/vi/recordings"
+import enRecordings from "@/shared/i18n/locales/en/recordings"
+import zhRecordings from "@/shared/i18n/locales/zh/recordings"
+import jaRecordings from "@/shared/i18n/locales/ja/recordings"
 
 const dicts = {
+  rooms: { vi: viRooms, en: enRooms, zh: zhRooms, ja: jaRooms },
+  recordings: {
+    vi: viRecordings,
+    en: enRecordings,
+    zh: zhRecordings,
+    ja: jaRecordings,
+  },
   footer: { vi: viFooter, en: enFooter, zh: zhFooter, ja: jaFooter },
   auth: { vi: viAuth, en: enAuth, zh: zhAuth, ja: jaAuth },
   policy: { vi: viPolicy, en: enPolicy, zh: zhPolicy, ja: jaPolicy },
@@ -86,6 +101,14 @@ const assertParity = (label, path) => {
 }
 
 describe("ISS-11/35/48/69/75: i18n keys exist in vi, en, zh and ja", () => {
+  it("rooms dictionary is complete in every language", () => {
+    assertParity("rooms")
+  })
+
+  it("recordings dictionary is complete in every language", () => {
+    assertParity("recordings")
+  })
+
   it("footer dictionary is complete in every language", () => {
     assertParity("footer")
   })

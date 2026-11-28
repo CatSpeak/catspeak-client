@@ -11,6 +11,7 @@ const CommunicateTab = ({
   selectedCategories,
   page, // Global page (only for filtered view)
   totalPages, // Global totalPages (only for filtered view)
+  totalCount, // Total results after filtering, before pagination
   setPage, // Global setPage (only for filtered view)
   languageType,
   requiredLevels,
@@ -77,6 +78,7 @@ const CommunicateTab = ({
           selectedCategories={selectedCategories}
           page={page}
           totalPages={totalPages}
+          totalCount={totalCount}
           setPage={setPage}
           onBackToOverview={handleBackToOverview}
           isLoading={isLoading}

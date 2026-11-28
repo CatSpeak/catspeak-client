@@ -1,8 +1,10 @@
 import React, { useState } from "react"
+import { X } from "lucide-react"
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
 import BeautyPicker from "./BeautyPicker"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { Tabs, TabContent } from "@/shared/components/ui/navigation"
+import { IconButton } from "@/shared/components/ui/buttons"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 
@@ -13,7 +15,7 @@ import { isBeautyFilterSupported } from "@/features/video-call/utils/roomTypeHel
  * Tab strip + content panel for Backgrounds / Beauty effects.
  * Used inside the room side panel (no modal wrapper or video preview).
  */
-const BackgroundsAndEffectsPanel = () => {
+const BackgroundsAndEffectsPanel = ({ onClose }) => {
   const { t } = useLanguage()
   const { room } = useGlobalVideoCall()
   const [activeTab, setActiveTab] = useState("backgrounds")
@@ -39,6 +41,25 @@ const BackgroundsAndEffectsPanel = () => {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      {/* Header: title + close */}
+      {onClose && (
+        <div className="flex shrink-0 items-center justify-between gap-2 pl-4 pr-1 min-h-[52px] border-b border-border dark:border-[#3F3F3F]">
+          <span className="text-base font-bold truncate">
+            {t?.rooms?.videoCall?.backgroundsAndEffects ||
+              "Backgrounds and effects"}
+          </span>
+          <IconButton
+            variant="ghost"
+            onClick={onClose}
+            title={t?.common?.close || "Đóng"}
+            aria-label={t?.common?.close || "Đóng"}
+            className="shrink-0"
+          >
+            <X />
+          </IconButton>
+        </div>
+      )}
+
       {/* Tab strip */}
       <Tabs
         tabs={tabs}

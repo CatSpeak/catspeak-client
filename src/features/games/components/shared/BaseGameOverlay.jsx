@@ -86,7 +86,7 @@ const BaseGameOverlay = ({
 
   // Embedded mode: render gọn trong container của caller, không fixed, không fullscreen.
   if (mode === "embedded") {
-    return <div className="relative w-full h-full overflow-hidden rounded-2xl bg-gray-50">{content}</div>;
+    return <div className="relative w-full h-full overflow-hidden rounded-2xl bg-gray-50 dark:bg-[#272727]">{content}</div>;
   }
 
   return (

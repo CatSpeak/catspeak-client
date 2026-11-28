@@ -41,7 +41,7 @@ const PictureItImageCard = ({
     <div className="flex flex-col gap-2 flex-1 min-h-0">
 
       {/* Khung ảnh — chiếm toàn bộ không gian còn lại, object-cover để ảnh full không thừa khoảng trống */}
-      <div className="relative flex-1 min-h-0 w-full rounded-2xl overflow-hidden bg-slate-100 shadow-sm">
+      <div className="relative flex-1 min-h-0 w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-[#272727] shadow-sm">
         {/* Overlay "Người mô tả" ở góc trên-trái ảnh — chỉ hiện khi có describer */}
         {describerName && (
           <div className="absolute top-2 left-2 md:top-3 md:left-3 z-30 flex items-center gap-1.5 bg-black/55 backdrop-blur-sm text-white px-2.5 py-1 rounded-full shadow-md max-w-[60%]">
