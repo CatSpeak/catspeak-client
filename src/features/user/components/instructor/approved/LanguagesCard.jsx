@@ -12,7 +12,7 @@ import {
 
 // ISS-27: fluid desktop grid (>= 768px) instead of the fixed 1,208px table.
 const DESKTOP_GRID_COLS =
-  "grid-cols-[minmax(130px,1.25fr)_minmax(90px,0.85fr)_minmax(150px,1.55fr)_minmax(115px,1fr)_minmax(76px,auto)] gap-x-3"
+  "grid-cols-[minmax(120px,1.25fr)_minmax(84px,0.85fr)_minmax(140px,1.55fr)_minmax(110px,1fr)_minmax(72px,auto)] gap-x-3"
 
 const STATUS_STYLES = {
   Approved: {
@@ -91,10 +91,10 @@ const MobileActionButton = ({ onClick, disabled = false, children }) => (
     type="button"
     onClick={disabled ? undefined : onClick}
     disabled={disabled}
-    className={`mt-1 inline-flex h-8 items-center justify-center rounded-[7px] border border-[#990011] px-3 text-xs font-semibold transition-colors dark:border-red-400 ${
+    className={`mt-1 inline-flex h-8 items-center justify-center rounded-[7px] border px-3 text-xs font-semibold transition-colors ${
       disabled
-        ? DISABLED_TEXT_CLASS
-        : "text-[#990011] hover:bg-[#990011]/5 dark:text-red-400 dark:hover:bg-red-950/30"
+        ? `${DISABLED_TEXT_CLASS} border-[#E2E2E2] dark:border-[#333333]`
+        : "border-[#990011] text-[#990011] hover:bg-[#990011]/5 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-950/30"
     }`}
   >
     {children}
@@ -312,7 +312,7 @@ const LanguagesCard = ({
           </div>
 
           {/* Desktop & tablet (>= 768px): fluid grid */}
-          <div className="hidden md:block">
+          <div className="hidden md:block overflow-x-auto">
             <div className={`grid ${DESKTOP_GRID_COLS} items-center`}>
               {[
                 ins.approvedLanguageCol || "Ngôn ngữ",

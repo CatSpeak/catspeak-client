@@ -6,10 +6,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 const mediaState = vi.hoisted(() => ({ isMobile: false }))
+const mediaQuery = vi.hoisted(() => vi.fn())
 const navigate = vi.hoisted(() => vi.fn())
 
 vi.mock("@/shared/hooks/useMediaQuery", () => ({
-  useMediaQuery: () => mediaState.isMobile,
+  useMediaQuery: (query) => {
+    mediaQuery(query)
+    return mediaState.isMobile
+  },
 }))
 
 vi.mock("@/shared/hooks/useScrollLock", () => ({
@@ -71,11 +75,18 @@ const clickSettingsButton = () => {
 describe("ISS-42: GuestSettingsDropdown sm breakpoint (640px)", () => {
   beforeEach(() => {
     mediaState.isMobile = false
+    mediaQuery.mockClear()
     navigate.mockClear()
   })
 
   afterEach(() => {
     document.body.innerHTML = ""
+  })
+
+  it("uses the (max-width: 639px) media query", () => {
+    render()
+
+    expect(mediaQuery).toHaveBeenCalledWith("(max-width: 639px)")
   })
 
   it("renders the full-screen sheet with a mobile title bar below 640px", () => {

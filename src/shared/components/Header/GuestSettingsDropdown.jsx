@@ -56,6 +56,7 @@ const GuestSettingsDropdown = ({ className = "" }) => {
 
   const handleToggleMenu = () => {
     if (!isOpen) {
+      setNavDirection("forward")
       setCurrentView("root")
     }
     setIsOpen((prev) => !prev)
@@ -63,6 +64,7 @@ const GuestSettingsDropdown = ({ className = "" }) => {
 
   const handleCloseMenu = () => {
     setIsOpen(false)
+    setNavDirection("forward")
     setCurrentView("root")
   }
 

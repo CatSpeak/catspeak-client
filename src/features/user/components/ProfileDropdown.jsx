@@ -82,6 +82,7 @@ const ProfileDropdown = () => {
 
   const handleToggleMenu = () => {
     if (!isOpen) {
+      setNavDirection("forward")
       setCurrentView("root")
     }
     setIsOpen((prev) => !prev)
@@ -89,6 +90,7 @@ const ProfileDropdown = () => {
 
   const handleCloseMenu = () => {
     setIsOpen(false)
+    setNavDirection("forward")
     setCurrentView("root")
   }
 

@@ -113,7 +113,8 @@ describe("ISS-27: instructor cards stack on mobile", () => {
 
     expect(html).not.toContain("grid-cols-[260px_215px_390px_225px_118px]")
     expect(html).not.toContain("min-w-[1000px]")
-    expect(html).toContain("minmax(130px,1.25fr)")
+    expect(html).toContain("minmax(120px,1.25fr)")
+    expect(html).toContain("hidden md:block overflow-x-auto")
     expect(html).toContain("md:hidden")
     expect(html).toContain("hidden md:block")
   })
@@ -133,6 +134,21 @@ describe("ISS-27: instructor cards stack on mobile", () => {
     expect(html).toContain("dark:bg-[#222222]")
     expect(html).toContain("Ngày gửi")
     expect(html).toContain("日本語")
+  })
+
+  it("renders the disabled mobile action with a neutral border, not the active red one", () => {
+    renderLanguages({ requests: [requests[0]] })
+
+    const mobileButton = [...document.querySelectorAll("button")].find(
+      (button) =>
+        button.className.includes("inline-flex h-8") &&
+        button.textContent.trim() === "Cập nhật",
+    )
+
+    expect(mobileButton.disabled).toBe(true)
+    expect(mobileButton.className).toContain("border-[#E2E2E2]")
+    expect(mobileButton.className).toContain("dark:border-[#333333]")
+    expect(mobileButton.className).not.toContain("border-[#990011]")
   })
 
   it("LanguagesCard keeps onUpdateLanguage and onViewRequest wired", () => {
