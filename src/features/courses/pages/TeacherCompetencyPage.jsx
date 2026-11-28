@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import { useGetExploreTeacherCompetencyQuery } from "@/store/api/exploreTeachersApi"
 import {
@@ -44,6 +45,7 @@ const TeacherCompetencyPage = () => {
   const location = useLocation()
   const dispatch = useDispatch()
   const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const { user: authUser, isAuthenticated } = useAuth()
   const authModalCtx = useContext(AuthModalContext)
 
@@ -109,7 +111,7 @@ const TeacherCompetencyPage = () => {
       try {
         await followUser(teacherAccountId).unwrap()
         toast.success(t.courses?.followSuccess || "Đã theo dõi giảng viên")
-      } catch (err) {
+      } catch {
         toast.error(
           t.courses?.errorOccurred || "Không thể thực hiện hành động này"
         )
@@ -123,7 +125,7 @@ const TeacherCompetencyPage = () => {
       await unfollowUser(teacherAccountId).unwrap()
       setIsUnfollowModalOpen(false)
       toast.success(t.courses?.unfollowSuccess || "Đã hủy theo dõi")
-    } catch (err) {
+    } catch {
       toast.error(t.courses?.errorOccurred || "Không thể hủy theo dõi")
     }
   }
@@ -190,8 +192,13 @@ const TeacherCompetencyPage = () => {
     t.courses?.defaultTeacherHeadline || "Giảng viên ngôn ngữ"
   )
   const ratingValue = formatRating(teacher.rating)
+  const numericRating = Number(teacher.rating) || 0
   const reviewCount = teacher.reviewCount || 0
-  const activeClassCount = teacher.activeClassCount || 0
+  const activeClassCount = teacher.activeClassCount ?? 0
+  const yearsOfExperience = Number(teacher.yearsOfExperience) || 0
+  const lastUpdatedDisplay = teacher.lastUpdatedAt
+    ? formatDate(teacher.lastUpdatedAt)
+    : null
   const teachingMotto = teacher.teachingMotto
   const introduction = teacher.introduction
   const certificates = teacher.certificates || []
@@ -275,13 +282,15 @@ const TeacherCompetencyPage = () => {
                 <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">
                   {fullName}
                 </h1>
-                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50 text-[11px] font-bold select-none">
-                  <ShieldCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
-                  <span>
-                    {t.courses?.verifiedBadge ||
-                      "Giảng viên được xác minh bởi Cat Speak"}
-                  </span>
-                </div>
+                {Boolean(teacher.isVerified) && (
+                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50 text-[11px] font-bold select-none">
+                    <ShieldCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
+                    <span>
+                      {t.courses?.verifiedBadge ||
+                        "Giảng viên được xác minh bởi Cat Speak"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Headline */}
@@ -299,18 +308,32 @@ const TeacherCompetencyPage = () => {
                   </span>
                 </div>
 
-                <span className="text-slate-200 dark:text-gray-700">│</span>
+                {yearsOfExperience > 0 && (
+                  <>
+                    <span className="text-slate-200 dark:text-gray-700">│</span>
 
-                <div className="flex items-center gap-1 text-slate-700 dark:text-gray-300">
-                  <Trophy size={13} className="text-amber-500" />
-                  <span>5 Năm KN</span>
-                </div>
+                    <div className="flex items-center gap-1 text-slate-700 dark:text-gray-300">
+                      <Trophy size={13} className="text-amber-500" />
+                      <span>
+                        {(t.courses?.yearsExp || "{{count}} Năm KN").replace(
+                          "{{count}}",
+                          yearsOfExperience
+                        )}
+                      </span>
+                    </div>
+                  </>
+                )}
 
                 <span className="text-slate-200 dark:text-gray-700">│</span>
 
                 <div className="flex items-center gap-1 text-slate-700 dark:text-gray-300">
                   <BookOpen size={13} className="text-blue-600 dark:text-blue-400" />
-                  <span>{activeClassCount || 10} Khóa</span>
+                  <span>
+                    {(t.courses?.openClassesCount || "{{count}} lớp đang mở").replace(
+                      "{{count}}",
+                      activeClassCount
+                    )}
+                  </span>
                 </div>
               </div>
             </div>
@@ -389,10 +412,14 @@ const TeacherCompetencyPage = () => {
                   {introduction}
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 dark:border-[#2E2E2E] text-xs text-slate-400 dark:text-gray-500 font-medium">
-                  {t.courses?.lastUpdated?.replace("{{time}}", "2 ngày trước") ||
-                    "Cập nhật lần cuối: 2 ngày trước"}
-                </div>
+                {lastUpdatedDisplay && (
+                  <div className="pt-3 border-t border-slate-100 dark:border-[#2E2E2E] text-xs text-slate-400 dark:text-gray-500 font-medium">
+                    {(t.courses?.lastUpdated || "Cập nhật lần cuối: {{time}}").replace(
+                      "{{time}}",
+                      lastUpdatedDisplay
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -623,12 +650,16 @@ const TeacherCompetencyPage = () => {
                   {ratingValue}
                 </span>
                 <div className="flex flex-col">
-                  <div className="flex items-center gap-0.5 text-amber-400">
+                  <div className="flex items-center gap-0.5">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star
                         key={s}
                         size={14}
-                        className="fill-amber-400 text-amber-400"
+                        className={
+                          s <= Math.round(numericRating)
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-300 dark:text-gray-600"
+                        }
                       />
                     ))}
                   </div>

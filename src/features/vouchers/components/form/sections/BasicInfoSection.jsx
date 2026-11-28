@@ -32,7 +32,7 @@ export const BasicInfoSection = ({
           required
           value={form.code ? form.code.replace(/^GV-/, "") : ""}
           onChange={(e) => {
-            const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
+            const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "")
             onChange("code", `GV-${raw}`)
           }}
           onBlur={() => onBlur?.("code")}
@@ -73,11 +73,12 @@ export const BasicInfoSection = ({
         placeholder={
           t?.vouchers?.form?.descPlaceholder || "Mô tả cho voucher này"
         }
+        error={errors.description}
       />
 
       {sensitiveWarning && (
-        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-2 text-xs text-amber-800">
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300">
+          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
           <span>
             {t?.vouchers?.errors?.sensitiveKeyword ||
               "Nội dung chứa từ khóa nhạy cảm không hợp lệ"}

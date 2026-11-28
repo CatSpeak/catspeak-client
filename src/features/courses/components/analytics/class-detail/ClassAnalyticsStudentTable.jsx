@@ -2,7 +2,7 @@ import React from "react"
 import { ChevronRight } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdRate = 25, totalStudents = 4 }) => {
+const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdRate = 25, totalStudents = 0 }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const cd = c.analytics?.classDetail || {}
@@ -59,11 +59,16 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
     }
   }
 
-  const thresholdHintText = cd.expectedThresholdHint
+  const hasStudents = Number(totalStudents) > 0
+  const thresholdHintText = hasStudents
     ? cd.expectedThresholdHint
-        .replace("{{rate}}", thresholdRate)
-        .replace("{{total}}", totalStudents)
-    : `Ngưỡng kỳ vọng: mỗi học viên phát biểu ≥ ${thresholdRate}% thời gian (kỳ vọng cân bằng 1/${totalStudents} học viên)`
+      ? cd.expectedThresholdHint
+          .replace("{{rate}}", thresholdRate)
+          .replace("{{total}}", totalStudents)
+      : `Ngưỡng kỳ vọng: mỗi học viên phát biểu ≥ ${thresholdRate}% thời gian (kỳ vọng cân bằng 1/${totalStudents} học viên)`
+    : cd.expectedThresholdHintNoStudents
+      ? cd.expectedThresholdHintNoStudents.replace("{{rate}}", thresholdRate)
+      : `Ngưỡng kỳ vọng: mỗi học viên phát biểu ≥ ${thresholdRate}% thời gian`
 
   return (
     <div className="w-full flex flex-col bg-white dark:bg-[#1A1A1A]">

@@ -134,6 +134,14 @@ export const vi = {
       scopeClassDesc:
         "Voucher chỉ áp dụng cho học viên đăng ký lớp học hiện tại.",
       scopeCourseDesc: "Voucher áp dụng cho mọi lớp học thuộc khóa học này.",
+      scopeSelectorHint:
+        "Chọn đối tượng áp dụng cho voucher trước khi cấu hình giảm giá.",
+      scopeSelectClass: "Chọn lớp học",
+      scopeSelectCourse: "Chọn khóa học",
+      scopeSelectClassPlaceholder: "-- Chọn lớp học --",
+      scopeSelectCoursePlaceholder: "-- Chọn khóa học --",
+      scopeNoClasses: "Bạn chưa có lớp học nào để áp dụng.",
+      scopeNoCourses: "Bạn chưa có khóa học nào để áp dụng.",
       scopeAll: "Tất cả khóa/lớp của tôi",
       scopeCourses: "Khóa học cụ thể",
       scopeInCourse: "Phạm vi áp dụng trong khóa",

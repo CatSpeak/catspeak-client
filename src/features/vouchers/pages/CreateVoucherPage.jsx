@@ -306,6 +306,7 @@ const CreateVoucherPage = () => {
             teacherCourses={teacherCourses}
             teacherClasses={teacherClasses}
             estimatedDeposit={estimatedDeposit}
+            isEditing={isEditing}
           />
         ) : (
           <Step2TeacherDeposit

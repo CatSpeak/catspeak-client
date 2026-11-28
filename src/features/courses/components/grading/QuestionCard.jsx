@@ -222,7 +222,7 @@ const QuestionCard = ({
 
         {collapsed ? (
           /* Collapsed summary of question text */
-          <div className="text-xs font-semibold text-gray-450 dark:text-gray-500 truncate min-w-0 pl-0 sm:pl-8 leading-tight select-none italic pb-2">
+          <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 truncate min-w-0 pl-0 sm:pl-8 leading-tight select-none italic pb-2">
             {question.content
               ? question.content
               : ce.noQuestionContentParenthetical ||

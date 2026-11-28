@@ -31,7 +31,6 @@ import {
   useGetPersonalMaterialsQuery,
   useGetBookmarkedMaterialsQuery,
   useRecordMaterialDownloadMutation,
-  useGetPersonalMaterialByIdQuery,
   useGetFolderTreeQuery,
   useBookmarkFolderMutation,
   useBookmarkMaterialMutation,
@@ -130,11 +129,6 @@ const TeachingMaterialPage = () => {
     filterMode === "bookmark" && !folderId
       ? isBookmarkLoading
       : isRegularLoading;
-
-  const { data: folderDetailRes } = useGetPersonalMaterialByIdQuery(folderId, {
-    skip: !folderId,
-  });
-  const folderDetail = folderDetailRes?.data || folderDetailRes;
 
   const { data: treeData } = useGetFolderTreeQuery();
   const rawFoldersTree = useMemo(
@@ -268,62 +262,62 @@ const TeachingMaterialPage = () => {
         handleContextMenu(e);
       }}
     >
-      <Breadcrumb
-        className="mb-4 flex-wrap"
-        items={[
-          {
-            label: t.materials.home,
-            onClick: () => navigate("/"),
-          },
-          {
-            label: t.materials.title,
-            onClick: folderId
-              ? () => navigate("/workspace/materials")
-              : undefined,
-          },
-          ...(folderPath
-            ? folderPath.map((folder) => ({
-                label: folder.folderName || t.materials.folder,
-                onClick: () =>
-                  navigate(`/workspace/materials/${folder.folderId}`),
-              }))
-            : folderId
-              ? [
-                  {
-                    label:
-                      folderDetail?.folderName ||
-                      folderDetail?.title ||
-                      t.materials.folder,
-                    onClick: () => navigate(`/workspace/materials/${folderId}`),
-                  },
-                ]
-              : []),
-        ]}
-      />
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <Breadcrumb
+          className="flex-wrap"
+          items={[
+            {
+              label: t.materials.home,
+              onClick: () => navigate("/"),
+            },
+            {
+              label: t.materials.title,
+              onClick: folderId
+                ? () => navigate("/workspace/materials")
+                : undefined,
+            },
+            ...(folderPath
+              ? folderPath.map((folder) => ({
+                  label: folder.folderName || t.materials.folder,
+                  onClick: () =>
+                    navigate(`/workspace/materials/${folder.folderId}`),
+                }))
+              : folderId
+                ? [
+                    {
+                      label: t.materials.folder,
+                      onClick: () =>
+                        navigate(`/workspace/materials/${folderId}`),
+                    },
+                  ]
+                : []),
+          ]}
+        />
 
-      {/* Header actions */}
-      <div className="mb-4 flex w-full flex-row gap-2 md:hidden">
-        <PillButton
-          variant="outline"
-          roundedClass="rounded-xl"
-          borderColor="#6E0009"
-          textColor="#6E0009"
-          startIcon={<FolderPlus className="h-4 w-4 shrink-0" />}
-          className="!h-10 min-w-0 flex-1 px-2 text-sm"
-          onClick={() => setIsCreateFolderOpen(true)}
-        >
-          {t.materials.createFolder}
-        </PillButton>
+        {/* Header actions — always visible on every breakpoint */}
+        <div className="flex w-full flex-row gap-2 md:w-auto md:flex-none">
+          <PillButton
+            variant="outline"
+            roundedClass="rounded-xl"
+            borderColor="#6E0009"
+            textColor="#6E0009"
+            startIcon={<FolderPlus className="h-4 w-4 shrink-0" />}
+            className="!h-10 min-w-0 flex-1 px-2 text-sm md:flex-none md:px-4"
+            onClick={() => setIsCreateFolderOpen(true)}
+          >
+            {t.materials.createFolder}
+          </PillButton>
 
-        <PillButton
-          roundedClass="rounded-xl"
-          bgColor="#6E0009"
-          startIcon={<Upload className="h-4 w-4 shrink-0" />}
-          className="!h-10 min-w-0 flex-1 px-2 text-sm"
-          onClick={() => setIsUploadMaterialOpen(true)}
-        >
-          {t.materials.uploadMaterial}
-        </PillButton>
+          <PillButton
+            roundedClass="rounded-xl"
+            bgColor="#6E0009"
+            startIcon={<Upload className="h-4 w-4 shrink-0" />}
+            className="!h-10 min-w-0 flex-1 px-2 text-sm md:flex-none md:px-4"
+            onClick={() => setIsUploadMaterialOpen(true)}
+          >
+            {t.materials.uploadMaterial}
+          </PillButton>
+        </div>
       </div>
 
       {/* Search and Filters */}

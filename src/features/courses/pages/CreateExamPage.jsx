@@ -1346,7 +1346,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             <span className="w-9 h-9 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center text-yellow-700 dark:text-yellow-400 shrink-0">
               <Eye size={18} />
             </span>
-            <span className="w-2.5 h-2.5 bg-red-650 dark:bg-[#FF6B6B] rounded-full animate-pulse" />
+            <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full animate-pulse" />
             {p.bannerText}
           </span>
           <div className="flex items-center gap-3 shrink-0">
@@ -1375,7 +1375,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         </div>
 
         {/* ─── Sub-header Row ─── */}
-        <div className="bg-white dark:bg-[#1A1A1A] mx-6 px-6 py-4 rounded-3xl border border-border dark:border-[#3F3F3F] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs shrink-0 select-none">
+        <div className="bg-white dark:bg-[#1A1A1A] mx-6 mt-4 px-6 py-4 rounded-3xl border border-border dark:border-[#3F3F3F] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs shrink-0 select-none">
           <div className="flex flex-col gap-1.5">
             <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
               {title || p.unnamedExam}
@@ -2369,7 +2369,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
                     )}
                   </span>
-                  <span className="text-xs font-semibold text-gray-750 dark:text-gray-200">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
                     {ce.publishNow || "Đăng ngay"}
                   </span>
                 </button>
@@ -2391,7 +2391,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       <span className="w-2.5 h-2.5 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
                     )}
                   </span>
-                  <span className="text-xs font-semibold text-gray-750 dark:text-gray-200">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
                     {ce.saveDraft || "Lưu nháp"}
                   </span>
                 </button>

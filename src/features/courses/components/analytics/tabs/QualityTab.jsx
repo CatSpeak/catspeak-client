@@ -62,6 +62,9 @@ const QualityTab = ({ group, queryParams = {} }) => {
     ? (latestPoint.averageRating - prevPoint.averageRating)
     : null
 
+  const fmtRateOrDash = (val) =>
+    val == null || isNaN(val) ? "—" : `${numberVi(val, 1, language)}%`
+
   const overview = overviewData || {}
   const kpis = [
     {
@@ -73,7 +76,7 @@ const QualityTab = ({ group, queryParams = {} }) => {
     },
     {
       label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại",
-      value: `${numberVi(overview.reenrollmentRate ?? 0, 1, language)}%`,
+      value: fmtRateOrDash(overview.reenrollmentRate),
       delta: hasComparison && overview.reenrollmentGrowth != null ? fmtGrowth(overview.reenrollmentGrowth) : "",
       tone: "green",
       note: hasComparison && overview.reenrollmentGrowth != null ? compareNote : "",
@@ -87,17 +90,18 @@ const QualityTab = ({ group, queryParams = {} }) => {
     },
     {
       label: kpiT.conversionRate || "Chuyển đổi đăng ký",
-      value: `${numberVi(overview.conversionRate ?? 0, 1, language)}%`,
+      value: fmtRateOrDash(overview.conversionRate),
       delta: hasComparison && overview.conversionGrowth != null ? fmtGrowth(overview.conversionGrowth) : "",
       tone: "blue",
       note: hasComparison && overview.conversionGrowth != null ? compareNote : "",
     },
     {
-      label: kpiT.cancellationRate || "Tỷ lệ hủy lớp",
-      value: `${numberVi(overview.cancellationRate ?? 0, 1, language)}%`,
+      label: kpiT.cancellationRate || "Tỷ lệ hủy đăng ký",
+      value: fmtRateOrDash(overview.cancellationRate),
       delta: hasComparison && overview.cancellationGrowth != null ? fmtGrowth(overview.cancellationGrowth) : "",
       tone: "red",
       note: hasComparison && overview.cancellationGrowth != null ? compareNote : "",
+      tooltip: kpiT.cancellationRateTooltip || "Tỷ lệ lượt đăng ký bị hủy trên tổng lượt đăng ký hợp lệ (Đã xác nhận + Đã hủy)",
     },
   ]
 

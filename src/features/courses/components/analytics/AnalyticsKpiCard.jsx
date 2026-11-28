@@ -11,6 +11,7 @@ import {
   RotateCcw,
   CreditCard,
   Target,
+  Info,
 } from "lucide-react"
 
 const iconMap = {
@@ -39,6 +40,7 @@ const AnalyticsKpiCard = ({
   delta = "↑ 12%",
   tone = "red",
   note = "so với kỳ trước",
+  tooltip = "",
 }) => {
   let symbolKey = "user"
   const lower = (label || "").toLowerCase()
@@ -47,7 +49,7 @@ const AnalyticsKpiCard = ({
   else if (lower.includes("phí")) symbolKey = "fee"
   else if (lower.includes("lấp đầy")) symbolKey = "fill"
   else if (lower.includes("chuyển đổi")) symbolKey = "convert"
-  else if (lower.includes("hủy")) symbolKey = "cancel"
+  else if (lower.includes("hủy") || lower.includes("cancel") || lower.includes("取消") || lower.includes("キャンセル")) symbolKey = "cancel"
   else if (lower.includes("khóa") || lower.includes("lớp")) symbolKey = "book"
   else if (lower.includes("đăng ký lại") || lower.includes("quay lại") || lower.includes("duy trì")) symbolKey = "repeat"
 
@@ -64,7 +66,18 @@ const AnalyticsKpiCard = ({
         <IconComponent size={20} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="m-0 text-[#667085] dark:text-gray-400 text-xs font-normal truncate">{label}</p>
+        <div className="flex items-center gap-1 min-w-0">
+          <p className="m-0 text-[#667085] dark:text-gray-400 text-xs font-normal truncate">{label}</p>
+          {tooltip && (
+            <span
+              className="inline-flex shrink-0 items-center text-[#667085] dark:text-gray-400"
+              title={tooltip}
+              aria-label={tooltip}
+            >
+              <Info size={12} aria-hidden="true" />
+            </span>
+          )}
+        </div>
         <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] dark:text-white truncate tracking-tight my-0.5" title={value}>
           {value}
         </strong>

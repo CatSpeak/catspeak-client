@@ -131,6 +131,14 @@ export const en = {
         "Voucher only applies to learners enrolling in the current class.",
       scopeCourseDesc:
         "Voucher applies to all classes belonging to this course.",
+      scopeSelectorHint:
+        "Choose what this voucher applies to before configuring the discount.",
+      scopeSelectClass: "Select a class",
+      scopeSelectCourse: "Select a course",
+      scopeSelectClassPlaceholder: "-- Select a class --",
+      scopeSelectCoursePlaceholder: "-- Select a course --",
+      scopeNoClasses: "You do not have any classes to apply to yet.",
+      scopeNoCourses: "You do not have any courses to apply to yet.",
       scopeAll: "All my courses / classes",
       scopeCourses: "Specific course",
       scopeInCourse: "Application scope within course",

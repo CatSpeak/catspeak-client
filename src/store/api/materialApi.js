@@ -57,7 +57,8 @@ export const materialApi = baseApi.injectEndpoints({
       invalidatesTags: ["PersonalMaterials"],
     }),
 
-    //  Get details of a specific personal material or folder by ID
+    // Get details of a specific personal material FILE by ID (materialId).
+    // This endpoint is not valid for folders; use getFolderTree for folders.
     getPersonalMaterialById: builder.query({
       query: (id) => `/personal-materials/${id}`,
       providesTags: (result, error, id) => [{ type: "PersonalMaterials", id }],

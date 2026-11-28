@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import { DISCOUNT_TYPES, SCOPE_TYPES } from "../../constants/voucherConstants"
 import {
   BasicInfoSection,
+  ScopeSelectorSection,
   DiscountConfigSection,
   OtherConfigSection,
   ValiditySection,
@@ -20,12 +21,17 @@ const Step1TeacherForm = ({
   teacherCourses = [],
   teacherClasses = [],
   estimatedDeposit = 0,
+  isEditing = false,
 }) => {
   const [searchParams] = useSearchParams()
   const classIdParam = searchParams.get("classId")
   const classNameParam = searchParams.get("className")
   const courseIdParam = searchParams.get("courseId")
   const courseNameParam = searchParams.get("courseName")
+
+  // On a bare /workspace/vouchers/create URL the teacher picks the scope here;
+  // when opened from a class/course tab (or editing a draft) it stays locked.
+  const showScopeSelector = !isEditing && !classIdParam && !courseIdParam
 
   // Determine context: Course Scope vs Class Scope
   const isCourseScope = form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES
@@ -137,6 +143,16 @@ const Step1TeacherForm = ({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200">
       {/* LEFT COLUMN (8 cols): Thông tin cơ bản, Cấu hình giảm giá, Cấu hình khác */}
       <div className="lg:col-span-8 space-y-6">
+        {showScopeSelector && (
+          <ScopeSelectorSection
+            form={form}
+            errors={errors}
+            onChange={onChange}
+            teacherClasses={teacherClasses}
+            teacherCourses={teacherCourses}
+          />
+        )}
+
         <BasicInfoSection
           form={form}
           errors={errors}

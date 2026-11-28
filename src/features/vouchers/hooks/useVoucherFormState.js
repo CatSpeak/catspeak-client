@@ -27,6 +27,7 @@ export const INITIAL_VOUCHER_FORM = {
   courseClassMode: "all_classes",
   courseIds: [],
   classIds: [],
+  lowestTuition: 0,
   validFrom: toLocalDateString(),
   validTo: "",
   isNeverExpired: false,
@@ -127,6 +128,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
           : SCOPE_TYPES.SPECIFIC_CLASSES,
         courseIds: isCourse ? courseList : [],
         classIds: isCourse ? [] : classList,
+        lowestTuition: initialData.lowestTuition || 0,
         validFrom: initialData.validFrom
           ? initialData.validFrom.split("T")[0]
           : toLocalDateString(),

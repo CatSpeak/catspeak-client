@@ -1,4 +1,5 @@
 export { default as BasicInfoSection } from "./BasicInfoSection"
+export { default as ScopeSelectorSection } from "./ScopeSelectorSection"
 export { default as DiscountConfigSection } from "./DiscountConfigSection"
 export { default as OtherConfigSection } from "./OtherConfigSection"
 export { default as ValiditySection } from "./ValiditySection"

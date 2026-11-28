@@ -17,6 +17,7 @@ const AnalyticsKpiGrid = ({ items = [], cols = 5 }) => {
           delta={item.delta}
           tone={item.tone}
           note={item.note}
+          tooltip={item.tooltip}
         />
       ))}
     </div>

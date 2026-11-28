@@ -121,7 +121,7 @@ const TeacherPublicProfilePage = () => {
       try {
         await followUser(teacherAccountId).unwrap()
         toast.success(t.courses?.followSuccess || "Đã theo dõi giảng viên")
-      } catch (err) {
+      } catch {
         toast.error(
           t.courses?.errorOccurred || "Không thể thực hiện hành động này"
         )
@@ -135,7 +135,7 @@ const TeacherPublicProfilePage = () => {
       await unfollowUser(teacherAccountId).unwrap()
       setIsUnfollowModalOpen(false)
       toast.success(t.courses?.unfollowSuccess || "Đã hủy theo dõi")
-    } catch (err) {
+    } catch {
       toast.error(t.courses?.errorOccurred || "Không thể hủy theo dõi")
     }
   }
@@ -281,14 +281,16 @@ const TeacherPublicProfilePage = () => {
                       {fullName}
                     </h1>
 
-                    {/* Verified Badge Pill (BR-EX-GV-02) */}
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50 text-xs font-bold select-none">
-                      <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
-                      <span>
-                        {t.courses?.verifiedBadge ||
-                          "Giảng viên được xác minh bởi Cat Speak"}
-                      </span>
-                    </div>
+                    {/* Verified Badge Pill (BR-EX-GV-02) — only for verified teachers */}
+                    {Boolean(teacher.isVerified) && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50 text-xs font-bold select-none">
+                        <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
+                        <span>
+                          {t.courses?.verifiedBadge ||
+                            "Giảng viên được xác minh bởi Cat Speak"}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Subtitle / Email */}

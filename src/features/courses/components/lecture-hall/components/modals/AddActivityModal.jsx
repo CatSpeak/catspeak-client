@@ -154,6 +154,43 @@ const AddActivityModal = ({
       }
     >
       <div className="space-y-4">
+        {/* Search & type filter (ISS-66) */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <TextInput
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={dict.searchPlaceholder || "Tìm kiếm..."}
+            icon={Search}
+            containerClassName="w-full sm:flex-1"
+            aria-label={dict.searchPlaceholder || "Tìm kiếm..."}
+          />
+
+          <div className="flex items-center gap-2" role="group">
+            {[
+              { value: "all", label: dict.filterAll || "Tất cả" },
+              {
+                value: "assignment",
+                label: dict.filterAssignment || "Bài nộp",
+              },
+              { value: "quiz", label: dict.filterQuiz || "Bài kiểm tra" },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                aria-pressed={filterType === opt.value}
+                onClick={() => setFilterType(opt.value)}
+                className={`h-10 rounded-full px-4 text-sm font-medium transition-colors ${
+                  filterType === opt.value
+                    ? "bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-gray-950"
+                    : "border border-[#E3BEBA] dark:border-[#3F3F3F] text-[#5B403C] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A]"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Activity Items List */}
         <div className="space-y-3 max-h-96 overflow-y-auto">
           {isLoading ? (
@@ -161,7 +198,7 @@ const AddActivityModal = ({
               <LoadingSpinner text={t.courses.lectureHall.loading} />
             </div>
           ) : filteredActivities.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-[#9CA3AF] dark:text-gray-500">
+            <div className="flex flex-col items-center justify-center py-12 text-gray-600 dark:text-gray-300">
               <Inbox size={48} className="mb-3 opacity-50" strokeWidth={1.5} />
               <p className="text-sm font-medium">{dict.noActivitiesFound}</p>
             </div>
@@ -233,13 +270,19 @@ const AddActivityModal = ({
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <Checkbox
                       checked={isChecked}
-                      onChange={() => { }}
+                      onClick={(e) => {
+                        // Stop the row's click handler so a mouse click toggles
+                        // exactly once; keyboard activation flows through onChange.
+                        e.stopPropagation()
+                        handleToggleSelect(uid)
+                      }}
+                      onChange={() => handleToggleSelect(uid)}
                       aria-label={dict.selectActivityAriaLabel ? dict.selectActivityAriaLabel.replace("{{title}}", title) : ""}
                     />
 
                     <div className="space-y-1.5 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap min-h-5">
-                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#777777] text-white flex items-center gap-1">
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#595959] dark:bg-[#4B5563] text-white flex items-center gap-1">
                           {statusLower === "published" && <CheckSquare size={10} />}
                           {statusLower === "draft" && <FileText size={10} />}
                           {statusLabel}

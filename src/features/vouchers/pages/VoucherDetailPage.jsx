@@ -37,7 +37,10 @@ const VoucherDetailPage = () => {
 
   // 2. Fetch voucher usage history
   const { data: fetchedUsagesData, isLoading: isLoadingUsages } =
-    useGetVoucherUsagesQuery({ voucherId: id, page: 1, pageSize: 20 })
+    useGetVoucherUsagesQuery(
+      { id, page: 1, pageSize: 20 },
+      { skip: !id || isVoucherError },
+    )
 
   // 3. Stop Voucher Mutation (BR-VC-GV-23)
   const [stopVoucherMutation, { isLoading: isStopping }] =
@@ -92,7 +95,7 @@ const VoucherDetailPage = () => {
     return <VoucherDetailSkeleton />
   }
 
-  if (isVoucherError && !voucher) {
+  if (isVoucherError || !voucher) {
     return (
       <div className="flex-1 w-full flex items-center justify-center py-12 px-4 my-auto animate-in fade-in zoom-in-95 duration-200">
         <FluentCard className="w-full max-w-md text-center flex flex-col items-center justify-center shadow-xs p-6">
