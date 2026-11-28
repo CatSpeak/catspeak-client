@@ -46,6 +46,7 @@ export const ScopeSelectorSection = ({
   const handleScopeType = (scopeType) => {
     if (scopeType === form.scopeType) return
     onChange("scopeType", scopeType)
+    onChange("lowestTuition", 0)
     if (scopeType === SCOPE_TYPES.SPECIFIC_COURSES) {
       onChange("classIds", [])
       onChange("discountType", DISCOUNT_TYPES.FIXED_AMOUNT)
@@ -57,7 +58,11 @@ export const ScopeSelectorSection = ({
 
   const handleClassSelect = (event) => {
     const rawId = event.target.value
-    if (!rawId) return
+    if (!rawId) {
+      onChange("classIds", [])
+      onChange("lowestTuition", 0)
+      return
+    }
     const selected = teacherClasses.find(
       (c) => String(c.id ?? c._id) === String(rawId),
     )
@@ -68,12 +73,16 @@ export const ScopeSelectorSection = ({
       onChange("discountType", DISCOUNT_TYPES.PERCENTAGE)
     }
     const price = Number(selected?.price ?? selected?.tuitionFee ?? 0)
-    if (price > 0) onChange("lowestTuition", price)
+    onChange("lowestTuition", price)
   }
 
   const handleCourseSelect = (event) => {
     const rawId = event.target.value
-    if (!rawId) return
+    if (!rawId) {
+      onChange("courseIds", [])
+      onChange("lowestTuition", 0)
+      return
+    }
     const selected = teacherCourses.find(
       (c) => String(c.id ?? c._id) === String(rawId),
     )
@@ -81,9 +90,7 @@ export const ScopeSelectorSection = ({
     onChange("courseIds", [selected?.id ?? selected?._id ?? rawId])
     onChange("classIds", [])
     onChange("discountType", DISCOUNT_TYPES.FIXED_AMOUNT)
-
-    const lowestTuition = lowestTuitionForCourse(rawId)
-    if (lowestTuition > 0) onChange("lowestTuition", lowestTuition)
+    onChange("lowestTuition", lowestTuitionForCourse(rawId))
 
     const budget = Number(form.maxBudget) || 0
     const discount = Number(form.discountValue) || 0
@@ -101,7 +108,7 @@ export const ScopeSelectorSection = ({
         <h4 className="font-bold">
           {formT.scopeLabel || "Phạm vi áp dụng"}
         </h4>
-        <p className="mt-1 text-xs text-secondary">
+        <p className="mt-1 text-xs text-secondary dark:text-gray-300">
           {formT.scopeSelectorHint ||
             "Chọn đối tượng áp dụng cho voucher trước khi cấu hình giảm giá."}
         </p>
