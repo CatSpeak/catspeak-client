@@ -105,7 +105,7 @@ const AnswerInput = ({ isMain = true }) => {
                   {lastCorrectAnswer.player_name}
                 </span>
                 <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium mt-0.5">
-                  {t.rooms?.game?.crackIt?.gotItRight || "đã đoán chính xác!"}
+                  {t.rooms?.game?.crackIt?.gotItRight || "got it right!"}
                 </span>
               </div>
             </div>
@@ -156,8 +156,8 @@ const AnswerInput = ({ isMain = true }) => {
             !isMain
               ? (t.rooms?.game?.crackIt?.notMainPlaceholder || "Click the tile to expand and play")
               : isSpectator
-                ? (t.rooms?.game?.crackIt?.spectatorPlaceholder || "Bạn đang xem dưới dạng người quan sát...")
-                : (t.rooms?.game?.crackIt?.typeAnswer || "Nhập đáp án của bạn...")
+                ? (t.rooms?.game?.crackIt?.spectatorPlaceholder || "You are watching as a spectator...")
+                : (t.rooms?.game?.crackIt?.typeAnswer || "Type your answer...")
           }
           className={`flex-1 min-w-0 bg-transparent px-2 md:px-6 h-10 outline-none text-lg font-medium tracking-wide ${isCorrect ? "text-green-700 dark:text-green-400" : "text-slate-800 dark:text-white disabled:text-slate-500 dark:disabled:text-neutral-500"
             } placeholder-gray-400 dark:placeholder-neutral-500`}

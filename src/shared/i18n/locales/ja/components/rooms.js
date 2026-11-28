@@ -484,6 +484,14 @@ export default {
   },
   videoCall: {
     roomCoverAlt: "ルームのカバー画像",
+    pipFallback:
+      "ブラウザがピクチャーインピクチャーをブロックしました — アプリ内ミニプレーヤーを表示します。",
+    pipNotAvailable:
+      "この環境ではピクチャーインピクチャーを利用できません。",
+    pipActivated: "ピクチャーインピクチャーを有効にしました",
+    alreadyInRoom: "選択した友達はすでに会議ルームにいます。",
+    cameraIsOff: "カメラがオフになっています",
+    cameraOffDesc: "効果をプレビューするにはカメラをオンにしてください。",
     inviteParticipant: "参加者を招待",
     sendInvite: "招待を送信",
     inviteDescription: "このルームに招待したい人のメールアドレスを入力してください。参加リンクのある通知が届きます。",
@@ -841,6 +849,7 @@ export default {
       noBannedMembersDesc:
         "ホストによってルームから退出させられ、再入室を禁止されたメンバーがここに表示されます。",
       successUnban: "メンバーの禁止を解除しました",
+      unbanFailed: "禁止を解除できませんでした。もう一度お試しください。",
       bannedFromRoom:
         "あなたのアカウントはこのルームへの参加をホストによって禁止されました。",
       forbiddenKick: "メンバーをルームから退出させる権限がありません。",
@@ -1047,6 +1056,8 @@ export default {
   noLimit: "上限なし",
   copySuccess: "リンクをコピーしました",
   copyLinkTooltip: "リンクをコピー",
+  copyLinkError: "リンクをコピーできませんでした",
+  privatePasswordProtected: "プライベート・パスワード保護",
   expiredBadge: "期限切れ",
   roomExpiredToast: "このルームは期限切れです！",
   callEnded: {
@@ -1144,6 +1155,7 @@ export default {
     setupStageHint: "生徒がルームに割り当てられました。適用には下の「ルームを開く」をクリックしてください。",
   },
   game: {
+    becameSpectator: "試合から退出し、観戦モードに切り替わりました。",
     crackIt: {
       title: "Crack It",
       close: "閉じる",
@@ -1158,6 +1170,8 @@ export default {
       answerLength: "文字数",
       youGotIt: "正解！他の人の回答を待っています...",
       typeAnswer: "答えを入力...",
+      notMainPlaceholder: "タイルをクリックして拡大しプレイ",
+      spectatorPlaceholder: "あなたは観戦者として視聴しています...",
       gotItRight: "が正解しました！",
       leaderboard: "ランキング",
       waitingPlayers: "プレイヤーを待っています...",
@@ -1169,6 +1183,17 @@ export default {
       exitConfirmTitle: "退出の確認",
       exitConfirmDesc1: "このゲームを退出してもよろしいですか？",
       exitConfirmDesc2: "このラウンドには再参加できません！",
+      exitConfirmDescSpectator:
+        "観戦モードに切り替わり、試合を引き続き視聴します。",
+      pointsShort: "+ 点",
+      openLeaderboard: "ランキングを開く",
+      closeLeaderboard: "ランキングを閉じる",
+      roundSkipped: "ラウンドはスキップされました。",
+      gameDisabledByHost: "ホストがゲームをオフにしました。",
+      connectionError:
+        "ゲームサーバーに接続できませんでした。しばらくしてから再試行してください！",
+      notEnoughPlayersToStart:
+        "ゲームを開始するにはプレイヤーが足りません。最低2名必要です！",
       cancel: "キャンセル",
       confirmExit: "はい、退出します",
       roundLeaderboard: "ラウンドランキング",
@@ -1238,6 +1263,12 @@ export default {
         flaggedCount: "{0} / {1}フラグ済み",
       },
       modals: {
+        exitConfirmTitle: "退出の確認",
+        exitConfirmDesc1: "このゲームを退出してもよろしいですか？",
+        exitConfirmDescSpectator:
+          "観戦モードに切り替わり、試合を引き続き視聴します。",
+        cancel: "キャンセル",
+        confirmExit: "退出する",
         gameEnded: "ゲーム終了",
         notEnoughPlayers: "続行するのに十分なプレイヤーがいません。",
         close: "閉じる",

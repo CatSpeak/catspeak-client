@@ -87,13 +87,13 @@ const CoHostManager = ({
   })
 
   const hasCoHost = coHost?.coHostAccountId != null
-  const buttonLabel = hasCoHost ? (t.rooms?.coHost?.manage || "Quản lý co-host") : (t.rooms?.coHost?.add || "Thêm Co-host")
+  const buttonLabel = hasCoHost ? (t.rooms?.coHost?.manage || "Manage co-host") : (t.rooms?.coHost?.add || "Add co-host")
   const emptyLabel =
     roomType === "class"
       ? (t.rooms?.coHost?.emptyClass ||
-        "Chưa có Co-host được phân công cho lớp học")
+        "No co-host assigned to this class yet")
       : (t.rooms?.coHost?.emptyRoom ||
-        "Chưa có Co-host được phân công cho phòng này")
+        "No co-host assigned to this room yet")
 
   const initialAccountId = coHost?.coHostAccountId ?? null
   const initialPermissions = useMemo(
@@ -203,14 +203,14 @@ const CoHostManager = ({
           String(coHost?.coHostAccountId) === String(coHostAccountId)
         if (samePerson) {
           await onUpdate?.({ permissions })
-          toast.success(t.rooms?.coHost?.permissionsUpdated || "Đã cập nhật quyền co-host.")
+          toast.success(t.rooms?.coHost?.permissionsUpdated || "Co-host permissions updated.")
         } else {
           await onAssign?.({ coHostAccountId, permissions })
-          toast.success(t.rooms?.coHost?.replaced || "Đã thay thế co-host.")
+          toast.success(t.rooms?.coHost?.replaced || "Co-host replaced.")
         }
       } else {
         await onAssign?.({ coHostAccountId, permissions })
-        toast.success(t.rooms?.coHost?.assigned || "Đã phân công co-host.")
+        toast.success(t.rooms?.coHost?.assigned || "Co-host assigned.")
       }
       setModalOpen(false)
     } catch (err) {
@@ -218,7 +218,7 @@ const CoHostManager = ({
         resolveCoHostErrorMessage(
           err,
           t,
-          err?.data?.message || t.rooms?.coHost?.assignError || "Không thể phân công co-host. Vui lòng thử lại.",
+          err?.data?.message || t.rooms?.coHost?.assignError || "Could not assign co-host. Please try again.",
           roomType,
         ),
       )
@@ -236,7 +236,7 @@ const CoHostManager = ({
         resolveCoHostErrorMessage(
           err,
           t,
-          err?.data?.message || t.rooms?.coHost?.revokeError || "Không thể gỡ co-host. Vui lòng thử lại.",
+          err?.data?.message || t.rooms?.coHost?.revokeError || "Could not remove co-host. Please try again.",
           roomType,
         ),
       )
@@ -253,7 +253,7 @@ const CoHostManager = ({
       <CoHostModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={t.rooms?.coHost?.assignCoHost || "Phân công Co-host"}
+        title={t.rooms?.coHost?.assignCoHost || "Assign co-host"}
         roomName={roomName}
         roomType={roomType}
         candidates={mergedCandidates}
@@ -261,7 +261,7 @@ const CoHostManager = ({
         allowOutOfRoom={enableFriendSearch}
         initialAccountId={initialAccountId}
         initialPermissions={initialPermissions}
-        confirmLabel={hasCoHost ? (t.rooms?.coHost?.saveChanges || "Lưu thay đổi") : (t.rooms?.coHost?.assignCoHost || "Phân công Co-host")}
+        confirmLabel={hasCoHost ? (t.rooms?.coHost?.saveChanges || "Save changes") : (t.rooms?.coHost?.assignCoHost || "Assign co-host")}
         isSaving={isSaving}
         serverError={serverError}
         onSubmit={handleSubmit}
@@ -272,8 +272,8 @@ const CoHostManager = ({
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleRevoke}
-        title={t.rooms?.coHost?.confirmRevokeTitle || "Xác nhận gỡ co-host"}
-        message={t.rooms?.coHost?.confirmRevokeMessage || "Bạn có chắc muốn gỡ phân công co-host này? Hành động này không thể hoàn tác."}
+        title={t.rooms?.coHost?.confirmRevokeTitle || "Confirm co-host removal"}
+        message={t.rooms?.coHost?.confirmRevokeMessage || "Are you sure you want to remove this co-host assignment? This cannot be undone."}
         cancelText={t.rooms?.coHost?.cancel || "Hủy"}
         confirmText={t.rooms?.coHost?.delete || "Xóa"}
         confirmVariant="destructive"
@@ -293,17 +293,17 @@ const CoHostManager = ({
             <CheckCircle2 size={30} />
           </div>
           <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1.5">
-            {t.rooms?.coHost?.revokeSuccessTitle || "Đã gỡ phân công Co-host!"}
+            {t.rooms?.coHost?.revokeSuccessTitle || "Co-host assignment removed!"}
           </h3>
           <p className="text-sm text-gray-500 dark:text-[#AAAAAA] mb-5 max-w-sm leading-relaxed">
             {t.rooms?.coHost?.revokeSuccessMessage ||
-              "Phân công Co-host đã được gỡ thành công."}
+              "The co-host assignment was removed successfully."}
           </p>
           <PillButton
             onClick={() => setRevokeSuccessOpen(false)}
             className="w-full"
           >
-            {t.rooms?.coHost?.done || "Hoàn tất"}
+            {t.rooms?.coHost?.done || "Done"}
           </PillButton>
         </div>
       </Modal>
@@ -327,7 +327,7 @@ const CoHostManager = ({
                   >
                     {assignedName ||
                       t.rooms?.assignedCoHost ||
-                      "Đã phân công Co-host"}
+                      "Co-host assigned"}
                   </p>
                   {assignedName && (
                     <p className="text-[10px] font-semibold text-[#8B5A2B]">
@@ -362,8 +362,8 @@ const CoHostManager = ({
               {hasCoHost
                 ? t.rooms?.coHost?.manageShort ||
                   t.rooms?.coHost?.manage ||
-                  "Quản lý"
-                : t.rooms?.coHost?.add || "Thêm Co-host"}
+                  "Manage"
+                : t.rooms?.coHost?.add || "Add co-host"}
             </button>
             {hasCoHost && (
               <button

@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from "react"
-import { LogOut, Clock, Loader2, AlertCircle, X } from "lucide-react"
-import { toast } from "react-hot-toast"
-import { useDispatch, useSelector } from "react-redux"
-import {
-  useGetBreakoutStatusQuery,
-  useJoinBreakoutRoomMutation,
-} from "@/store/api/roomsApi"
-import { exitBreakout, updateLivekitToken } from "@/store/slices/videoCallSlice"
+import React, { useEffect } from "react"
+import { Loader2, X } from "lucide-react"
+import { useSelector } from "react-redux"
+import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -16,15 +11,10 @@ import BreakoutActiveView from "./active/BreakoutActiveView"
 import BreakoutStudentView from "./student/BreakoutStudentView"
 
 const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
-  const dispatch = useDispatch()
   const { t } = useLanguage()
 
   const { isBreakoutActive, callInfo } = useSelector((s) => s.videoCall)
   const { participants: liveParticipants } = useVideoCallContext()
-
-  if (!isBreakoutSupported(callInfo?.roomData?.roomType)) {
-    return null
-  }
 
   const currentSubSessionId = callInfo?.sessionId
   const roomCreatorId = callInfo?.roomData?.creatorId
@@ -51,8 +41,6 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
     }
   }, [sessionId, liveParticipants.length, refetchStatus])
 
-  const [joinBreakoutRoom] = useJoinBreakoutRoomMutation()
-
   useEffect(() => {
     if (statusError) {
       console.error("Lỗi tải dữ liệu phòng họp nhóm:", statusError)
@@ -60,19 +48,7 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
   }, [statusError])
 
   // Host Return to Main Room
-  const handleHostLeave = async () => {
-    try {
-      const res = await joinBreakoutRoom({
-        sessionId,
-        subSessionId: sessionId,
-      }).unwrap()
-      dispatch(exitBreakout())
-      dispatch(updateLivekitToken(res.token))
-    } catch (err) {
-      console.error(err)
-      toast.error("Lỗi quay trở lại phòng chính.")
-    }
-  }
+  // (removed unused local handler; the active view owns the return action)
 
   // Parse LiveKit metadata helper
   const parseMetadata = (metadata) => {
@@ -110,6 +86,10 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
   }, [allLiveStudents, roomCreatorId])
 
   const isStarted = status?.isBreakoutActive
+
+  if (!isBreakoutSupported(callInfo?.roomData?.roomType)) {
+    return null
+  }
 
   return (
     <div className="flex h-full w-full flex-col bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white">

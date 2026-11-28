@@ -108,13 +108,13 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
     if (idsToSend.length === 0) {
       toast.error(
         t.rooms?.videoCall?.selectAtLeastOne ||
-          "Vui lòng chọn ít nhất một người bạn để mời",
+          "Please select at least one friend to invite",
       )
       return
     }
 
     if (!effectiveRoomId) {
-      toast.error(t.common?.errorOccurred || "Không tìm thấy thông tin phòng")
+      toast.error(t.common?.errorOccurred || "Room information not found")
       return
     }
 
@@ -146,21 +146,24 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
           )
         } else {
           toast.success(
-            t.rooms?.notifications?.inviteSent || "Đã gửi lời mời thành công",
+            t.rooms?.notifications?.inviteSent || "Invitation sent successfully",
           )
         }
         handleModalClose()
       } else if (alreadyInRoomCount > 0) {
-        toast.error("Người bạn chọn đã ở trong phòng họp.")
+        toast.error(
+          t.rooms?.videoCall?.alreadyInRoom ||
+            "The selected friend is already in the meeting room.",
+        )
       } else {
         toast.error(
-          res?.message || t.common?.errorOccurred || "Gửi lời mời thất bại",
+          res?.message || t.common?.errorOccurred || "Failed to send the invitation",
         )
       }
     } catch (err) {
       console.error("Failed to send invite:", err)
       toast.error(
-        err?.data?.message || t.common?.errorOccurred || "Đã có lỗi xảy ra",
+        err?.data?.message || t.common?.errorOccurred || "An error occurred",
       )
     }
   }
@@ -186,7 +189,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
             onClick={handleInvite}
             disabled={isInviting || !hasSelection}
             loading={isInviting}
-            loadingText={t.common?.sending || "Đang gửi..."}
+            loadingText={t.common?.sending || "Sending..."}
             variant="primary"
           >
             {`${t.rooms?.videoCall?.sendInvite || "Gửi lời mời"}${
@@ -204,7 +207,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
             onChange={setSearchQuery}
             onClear={() => setSearchQuery("")}
             placeholder={
-              t?.inviteDropdown?.searchFriends || "Tìm kiếm bạn bè..."
+              t?.inviteDropdown?.searchFriends || "Search friends..."
             }
           />
         </div>
@@ -214,24 +217,24 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
       <div className="flex-1 overflow-y-auto min-h-[220px] max-h-[360px] flex flex-col scrollbar-thin">
         {isFriendsLoading ? (
           <div className="flex-1 flex items-center justify-center py-12">
-            <LoadingSpinner text={t.common?.loading || "Đang tải..."} />
+            <LoadingSpinner text={t.common?.loading || "Loading..."} />
           </div>
         ) : friendsList.length === 0 ? (
           <EmptyState
             icon={Users}
-            title={t.rooms?.videoCall?.noFriendsFound || "Chưa có bạn bè"}
+            title={t.rooms?.videoCall?.noFriendsFound || "No friends yet"}
             description={
               t.rooms?.videoCall?.noFriendsHint ||
-              "Hãy kết bạn để có thể mời bạn bè vào phòng."
+              "Add friends so you can invite them to the room."
             }
             variant="component"
           />
         ) : filteredFriends.length === 0 ? (
           <EmptyState
             icon={Search}
-            title={t.common?.noResultsFound || "Không tìm thấy bạn bè nào"}
+            title={t.common?.noResultsFound || "No friends found"}
             description={
-              t.common?.tryAnotherSearch || "Thử tìm kiếm với từ khóa khác."
+              t.common?.tryAnotherSearch || "Try a different search keyword."
             }
             variant="component"
           />

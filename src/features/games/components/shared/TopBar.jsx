@@ -10,13 +10,22 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
   const { t } = useLanguage()
   const [timeLeft, setTimeLeft] = useState(0)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const roundKey = currentRound?.id ?? currentRound?.started_at ?? null
+  const [timerSource, setTimerSource] = useState({
+    value: initialTimer,
+    roundKey,
+  })
 
-  useEffect(() => {
-    setTimeLeft(initialTimer)
-  }, [initialTimer, currentRound])
+  // Reset the displayed timer when the round or the incoming timer changes,
+  // adjusted during render instead of a cascading effect.
+  if (timerSource.value !== initialTimer || timerSource.roundKey !== roundKey) {
+    setTimerSource({ value: initialTimer, roundKey })
+    setTimeLeft(initialTimer || 0)
+  }
 
   useEffect(() => {
     let interval
+    let resetTimeout
     if (gameState === "playing" && currentRound?.started_at && gameType === "crack_it") {
       const actualStartedAt = new Date(currentRound.started_at).getTime()
       const storageKey = `crackit_timer_${actualStartedAt}`
@@ -46,9 +55,15 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
         })
       }, 200)
     } else if (gameState !== "playing" && gameType === "crack_it") {
-      setTimeLeft(prev => (prev > 0 && prev <= 2) ? 0 : prev)
+      resetTimeout = setTimeout(
+        () => setTimeLeft((prev) => (prev > 0 && prev <= 2 ? 0 : prev)),
+        0,
+      )
     }
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      if (resetTimeout) clearTimeout(resetTimeout)
+    }
   }, [gameState, currentRound?.started_at, initialTimer, gameType])
 
   const isPictureIt = gameType === "picture_it" || gameType === "picture-it"
@@ -62,9 +77,13 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
 
   useEffect(() => {
     let interval
+    let ratingTimeout
     if (isPictureIt && gameState === "playing") {
       if (pictureIt?.ratingOpen) {
-        setTimeLeft(pictureIt?.ratingCountdownSec || 0)
+        ratingTimeout = setTimeout(
+          () => setTimeLeft(pictureIt?.ratingCountdownSec || 0),
+          0,
+        )
       } else if (describeStartTimeMs) {
         const storageKey = `pic_it_describe_${describeStartTimeMs}`
         let storedStart = sessionStorage.getItem(storageKey)
@@ -83,7 +102,10 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
         interval = setInterval(updateTimer, 300)
       }
     }
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      if (ratingTimeout) clearTimeout(ratingTimeout)
+    }
   }, [isPictureIt, gameState, pictureIt?.ratingOpen, pictureIt?.ratingCountdownSec, describeStartTimeMs])
 
   const isLowTime = timeLeft <= 10
@@ -99,7 +121,7 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
 
           {currentRound && (
             <div className="flex items-center gap-1 font-bold border border-cath-red-700/70 dark:border-red-400/50 px-2.5 py-0.5 rounded-full text-xs md:text-sm whitespace-nowrap shrink-0">
-              <span className="text-slate-500 dark:text-neutral-400 font-medium">{isPictureIt ? (topBar.round || 'Round') : (t.rooms?.game?.crackIt?.round || "Ván")}: </span>
+              <span className="text-slate-500 dark:text-neutral-400 font-medium">{isPictureIt ? (topBar.round || 'Round') : (t.rooms?.game?.crackIt?.round || "Round")}: </span>
               <span className="font-semibold text-cath-red-700 dark:text-red-400">{currentRound.round}/{currentRound.total}</span>
             </div>
           )}
@@ -117,8 +139,10 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
             <button
               onClick={onOpenMobileLeaderboard}
               className="sm:hidden ml-1 p-1.5 rounded-lg bg-white dark:bg-[#272727] text-cath-red-700 dark:text-red-400 transition-colors border border-cath-red-200 dark:border-[#3F3F3F]"
-              title="Bảng xếp hạng"
-              aria-label="Mở bảng xếp hạng"
+              title={t.rooms?.game?.crackIt?.openLeaderboard || "Leaderboard"}
+              aria-label={
+                t.rooms?.game?.crackIt?.openLeaderboard || "Open leaderboard"
+              }
             >
               <Trophy size={16} />
             </button>
@@ -129,11 +153,11 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
             <button
               onClick={() => setShowExitConfirm(true)}
               className="ml-1 md:ml-2 flex items-center gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-xl bg-red-50 dark:bg-rose-950/40 hover:bg-red-100 dark:hover:bg-rose-950/60 active:scale-95 text-cath-red-700 dark:text-red-400 font-bold text-xs transition-all border border-red-200 dark:border-rose-900/50 shrink-0 cursor-pointer shadow-2xs"
-              title={t.rooms?.game?.exitGame || "Thoát game"}
-              aria-label="Thoát game"
+              title={t.rooms?.game?.exitGame || "Exit game"}
+              aria-label={t.rooms?.game?.exitGame || "Exit game"}
             >
               <LogOut size={15} className="shrink-0" />
-              <span className="hidden sm:inline">{t.rooms?.game?.exitGame || "Thoát"}</span>
+              <span className="hidden sm:inline">{t.rooms?.game?.exitGame || "Exit"}</span>
             </button>
           )}
         </div>

@@ -510,6 +510,13 @@ export default {
   },
   videoCall: {
     roomCoverAlt: "Room cover",
+    pipFallback:
+      "Picture-in-Picture is blocked by your browser — showing the in-app mini player instead.",
+    pipNotAvailable: "Picture-in-Picture is not available in this environment.",
+    pipActivated: "Picture-in-Picture activated",
+    alreadyInRoom: "The selected friend is already in the meeting room.",
+    cameraIsOff: "Camera is turned off",
+    cameraOffDesc: "Turn on your camera to preview effects.",
     inviteParticipant: "Invite participant",
     sendInvite: "Send invite",
     inviteDescription: "Enter the email address of the person you want to invite to this room. They will receive a notification with a link to join.",
@@ -886,6 +893,7 @@ export default {
       noBannedMembersDesc:
         "Members removed from the room and banned from rejoining by the Host will appear here.",
       successUnban: "Unbanned member successfully",
+      unbanFailed: "Could not unban. Please try again.",
       bannedFromRoom: "Your account has been banned from joining this room by the Host.",
       forbiddenKick: "You do not have permission to remove members from the room.",
       lockRoom: "Lock room (block newcomers)",
@@ -1071,6 +1079,7 @@ export default {
     saveAvatar: "Save Avatar",
   },
   game: {
+    becameSpectator: "You left the match and switched to spectator mode.",
     crackIt: {
       title: "Crack It",
       close: "Close",
@@ -1085,6 +1094,8 @@ export default {
       answerLength: "Word Count",
       youGotIt: "You got it! Waiting for others...",
       typeAnswer: "Type your answer...",
+      notMainPlaceholder: "Click the tile to expand and play",
+      spectatorPlaceholder: "You are watching as a spectator...",
       gotItRight: "got it right!",
       leaderboard: "Leaderboard",
       waitingPlayers: "Waiting for players...",
@@ -1096,6 +1107,17 @@ export default {
       exitConfirmTitle: "Confirm Exit",
       exitConfirmDesc1: "Are you sure you want to exit this game?",
       exitConfirmDesc2: "You won't be able to rejoin this round!",
+      exitConfirmDescSpectator:
+        "You will switch to Spectator mode and keep watching the match.",
+      pointsShort: "+ Points",
+      openLeaderboard: "Open leaderboard",
+      closeLeaderboard: "Close leaderboard",
+      roundSkipped: "Round skipped.",
+      gameDisabledByHost: "The host turned the game off.",
+      connectionError:
+        "Could not connect to the game server. Please try again shortly!",
+      notEnoughPlayersToStart:
+        "Not enough players to start the game. At least 2 are needed!",
       cancel: "Cancel",
       confirmExit: "Yes, Exit",
       roundLeaderboard: "Round Leaderboard",
@@ -1158,6 +1180,12 @@ export default {
         flaggedCount: "{0} / {1} flagged",
       },
       modals: {
+        exitConfirmTitle: "Confirm Exit",
+        exitConfirmDesc1: "Are you sure you want to exit this game?",
+        exitConfirmDescSpectator:
+          "You will switch to Spectator mode and keep watching the match.",
+        cancel: "Cancel",
+        confirmExit: "Yes, Exit",
         gameEnded: "Game Ended",
         notEnoughPlayers: "Not enough players to continue.",
         close: "Close",
@@ -1199,6 +1227,8 @@ export default {
   noLimit: "No limit",
   copySuccess: "Link copied",
   copyLinkTooltip: "Copy link",
+  copyLinkError: "Could not copy link",
+  privatePasswordProtected: "Private & Password Protected",
   expiredBadge: "Expired",
   roomExpiredToast: "This room has expired!",
   callEnded: {
@@ -1296,6 +1326,7 @@ export default {
     setupStageHint: "Student assigned to room. Click 'Open rooms' below to apply.",
   },
   game: {
+    becameSpectator: "You left the match and switched to spectator mode.",
     crackIt: {
       title: "Crack It",
       close: "Close",
@@ -1310,6 +1341,8 @@ export default {
       answerLength: "Word Count",
       youGotIt: "You got it! Waiting for others...",
       typeAnswer: "Type your answer...",
+      notMainPlaceholder: "Click the tile to expand and play",
+      spectatorPlaceholder: "You are watching as a spectator...",
       gotItRight: "got it right!",
       leaderboard: "Leaderboard",
       waitingPlayers: "Waiting for players...",
@@ -1321,6 +1354,17 @@ export default {
       exitConfirmTitle: "Confirm Exit",
       exitConfirmDesc1: "Are you sure you want to exit this game?",
       exitConfirmDesc2: "You won't be able to rejoin this round!",
+      exitConfirmDescSpectator:
+        "You will switch to Spectator mode and keep watching the match.",
+      pointsShort: "+ Points",
+      openLeaderboard: "Open leaderboard",
+      closeLeaderboard: "Close leaderboard",
+      roundSkipped: "Round skipped.",
+      gameDisabledByHost: "The host turned the game off.",
+      connectionError:
+        "Could not connect to the game server. Please try again shortly!",
+      notEnoughPlayersToStart:
+        "Not enough players to start the game. At least 2 are needed!",
       cancel: "Cancel",
       confirmExit: "Yes, Exit",
       roundLeaderboard: "Round Leaderboard",
@@ -1390,6 +1434,12 @@ export default {
         flaggedCount: "{0} / {1} flagged",
       },
       modals: {
+        exitConfirmTitle: "Confirm Exit",
+        exitConfirmDesc1: "Are you sure you want to exit this game?",
+        exitConfirmDescSpectator:
+          "You will switch to Spectator mode and keep watching the match.",
+        cancel: "Cancel",
+        confirmExit: "Yes, Exit",
         gameEnded: "Game Ended",
         notEnoughPlayers: "Not enough players to continue.",
         close: "Close",

@@ -18,7 +18,10 @@ const isEmojiOnly = (text) => {
   if (!clean) return false
   try {
     const withoutEmojis = clean
-      .replace(/[\s\uFE00-\uFE0F\u200D\u{1F3FB}-\u{1F3FF}]/gu, "")
+      .replace(
+        /[\s\p{Variation_Selector}\p{Join_Control}\p{Emoji_Modifier}]/gu,
+        "",
+      )
       .replace(/\p{Extended_Pictographic}/gu, "")
       .replace(/\p{Emoji_Presentation}/gu, "")
     return withoutEmojis.length === 0

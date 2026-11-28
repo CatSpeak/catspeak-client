@@ -34,15 +34,10 @@ const moreMenuVariants = {
   },
 }
 
-const ControlBarMoreMenu = ({
-  showMoreMenu,
-  setShowMoreMenu,
-  setShowGameModal,
-}) => {
+const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
   const { id: roomId } = useParams()
   const { t } = useLanguage()
   const {
-    isAISession,
     subtitleSupportedLangs,
     subtitleSelectedLanguage,
     isSubtitleActive,
@@ -55,14 +50,17 @@ const ControlBarMoreMenu = ({
   const [showMobileSettings, setShowMobileSettings] = useState(false)
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
   const [showChooseLayout, setShowChooseLayout] = useState(false)
+  const [wasMoreMenuOpen, setWasMoreMenuOpen] = useState(showMoreMenu)
 
-  // Reset inner submenus when menu is closed
-  useEffect(() => {
+  // Reset inner submenus when the menu closes, adjusted during render so the
+  // reset never triggers a cascading effect render.
+  if (showMoreMenu !== wasMoreMenuOpen) {
+    setWasMoreMenuOpen(showMoreMenu)
     if (!showMoreMenu) {
       setShowSubtitlePicker(false)
       setShowMobileSettings(false)
     }
-  }, [showMoreMenu])
+  }
 
   // ISS-86: Escape closes the innermost open view, then the menu itself
   useEffect(() => {

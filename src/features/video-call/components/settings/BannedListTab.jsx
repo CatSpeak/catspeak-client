@@ -52,10 +52,14 @@ const BannedListTab = () => {
     try {
       await unbanParticipant({ id: currentRoomId, targetAccountId }).unwrap()
       toast.success(
-        `${pl.successUnban || "Đã gỡ cấm thành viên"} ${name ? `(${name})` : ""}`
+        `${pl.successUnban || "Unbanned member"} ${name ? `(${name})` : ""}`
       )
     } catch (err) {
-      toast.error(err?.data?.message || "Không thể gỡ cấm. Vui lòng thử lại.")
+      toast.error(
+        err?.data?.message ||
+          pl.unbanFailed ||
+          "Could not unban. Please try again.",
+      )
     }
   }
 
@@ -64,13 +68,13 @@ const BannedListTab = () => {
       {/* Subtitle description */}
       <p className="text-sm text-[#606060] dark:text-[#AAAAAA] px-1">
         {pl.bannedListDesc ||
-          "Danh sách các thành viên đã bị Host mời ra khỏi phòng và cấm tham gia lại."}
+          "Members removed by the host and banned from rejoining are listed here."}
       </p>
 
       {/* Loading state */}
       {isBannedLoading ? (
         <div className="bg-white dark:bg-[#272727] rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F] p-8 text-center text-sm text-neutral-400 dark:text-[#AAAAAA]">
-          {t?.rooms?.waitingScreen?.loading || pl.loading || "Đang tải..."}
+          {t?.rooms?.waitingScreen?.loading || pl.loading || "Loading..."}
         </div>
       ) : isBannedError ? (
         <div className="bg-white dark:bg-[#272727] rounded-xl border border-[#e5e5e5] dark:border-[#3F3F3F] p-8 flex flex-col items-center justify-center text-center gap-3">
@@ -79,7 +83,7 @@ const BannedListTab = () => {
           </div>
           <span className="text-sm text-neutral-600 dark:text-[#AAAAAA] max-w-sm">
             {pl.forbiddenBannedList ||
-              "Bạn không có quyền xem danh sách bị cấm của phòng này."}
+              "You do not have permission to view this room's ban list."}
           </span>
         </div>
       ) : bannedList.length === 0 ? (
@@ -90,10 +94,10 @@ const BannedListTab = () => {
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-sm font-semibold text-neutral-800 dark:text-white">
-              {pl.noBannedMembersTitle || "Chưa có thành viên nào bị cấm"}
+              {pl.noBannedMembersTitle || "No banned members yet"}
             </span>
             <span className="text-xs text-neutral-500 dark:text-[#AAAAAA] max-w-sm">
-              {pl.noBannedMembersDesc || "Các thành viên bị Host mời ra khỏi phòng và cấm truy cập lại sẽ hiển thị tại đây."}
+              {pl.noBannedMembersDesc || "Members removed by the host and banned from rejoining will appear here."}
             </span>
           </div>
         </div>

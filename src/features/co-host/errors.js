@@ -3,7 +3,8 @@ import { parseApiError, resolveLocalizedError } from "@/shared/utils/apiError"
 /**
  * Machine-readable error codes returned by co-host APIs
  * (cath ErrorCodes.CoHost + instructor ErrorCode.CoHost*).
- * API trả code, client map code -> message localized (t.rooms.coHost.errors).
+ * API returns a code, the client maps code -> localized message
+ * (`t.rooms.coHost.errors`).
  */
 export const COHOST_ERROR_CODES = {
   PERMISSION_REQUIRED: "COHOST_PERMISSION_REQUIRED",
@@ -19,57 +20,32 @@ export const COHOST_ERROR_CODES = {
   ROOM_NOT_CREATED: "ROOM_NOT_CREATED",
 }
 
-const VI_FALLBACKS = {
-  [COHOST_ERROR_CODES.PERMISSION_REQUIRED]:
-    "Phải chọn ít nhất một quyền cho co-host.",
-  [COHOST_ERROR_CODES.PERMISSION_INVALID]: "Quyền co-host không hợp lệ.",
-  [COHOST_ERROR_CODES.ROOM_TYPE_UNSUPPORTED]:
-    "Chỉ phòng Lớp học và phòng Pro/Custom mới hỗ trợ co-host.",
-  [COHOST_ERROR_CODES.NOT_HOST]: "Chỉ chủ phòng mới được phân công co-host.",
-  [COHOST_ERROR_CODES.CANNOT_ASSIGN_OWNER]:
-    "Không thể phân công chủ phòng/lớp làm co-host.",
-  [COHOST_ERROR_CODES.TARGET_NOT_ONLINE]:
-    "Chỉ người đang online trong phòng mới được làm co-host.",
-  [COHOST_ERROR_CODES.TARGET_BANNED]:
-    "Người dùng đang bị cấm không thể làm co-host.",
-  [COHOST_ERROR_CODES.TARGET_NOT_CONFIRMED]:
-    "Chỉ học viên đã xác nhận (Confirmed) mới được làm co-host.",
-  [COHOST_ERROR_CODES.NO_ASSIGNMENT]: "Chưa có co-host được phân công.",
-  [COHOST_ERROR_CODES.FORBIDDEN]: "Co-host không có quyền thực hiện thao tác này.",
-  [COHOST_ERROR_CODES.ROOM_NOT_CREATED]:
-    "Lớp học chưa có phòng. Vui lòng thử lại sau khi phòng được tạo.",
-}
-
-const VI_FALLBACKS_ROOM = {
-  [COHOST_ERROR_CODES.TARGET_NOT_CONFIRMED]:
-    "Chỉ thành viên đã xác nhận (Confirmed) mới được làm co-host.",
-}
-
 /**
- * Map backend errorCode -> localized message.
+ * Map backend errorCode -> localized message. Every code is translated in all
+ * four locales under `rooms.coHost.errors`; the caller-provided fallback is
+ * used for unknown codes.
  * @param {object} err RTK Query error
  * @param {object} t language object (useLanguage().t)
- * @param {string} fallback message khi không map được code
- * @param {string} roomType "room" | "class" — room dùng copy thành viên/phòng
+ * @param {string} fallback message when no code matches
+ * @param {string} roomType "room" | "class" — room uses member/room copy
  */
 export function resolveCoHostErrorMessage(err, t, fallback, roomType) {
   const messages = t?.rooms?.coHost?.errors || {}
   const { errorCode } = parseApiError(err)
-  // Room (Custom): ưu tiên key *_ROOM rồi tới Room fallback, giữ Class nguyên.
+  // Room (Custom): prefer the *_ROOM key, then the shared code.
   if (roomType && roomType !== "class" && errorCode) {
     const roomKey = `${errorCode}_ROOM`
     if (messages[roomKey]) return messages[roomKey]
-    if (VI_FALLBACKS_ROOM[errorCode]) return VI_FALLBACKS_ROOM[errorCode]
   }
   return resolveLocalizedError(
     err,
-    (e, code) => messages[code] || VI_FALLBACKS[code],
+    (e, code) => messages[code] || fallback,
     fallback,
   )
 }
 
 /**
- * Lấy errorCode thô từ lỗi API (để so sánh logic nếu cần).
+ * Get the raw errorCode from an API error (for logic comparisons).
  */
 export function getCoHostErrorCode(err) {
   return parseApiError(err).errorCode

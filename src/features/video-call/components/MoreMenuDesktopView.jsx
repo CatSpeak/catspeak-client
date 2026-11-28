@@ -1,5 +1,4 @@
 import React from "react"
-import { useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import {
   Gamepad2,
@@ -53,7 +52,6 @@ const MoreMenuDesktopView = ({
     enterPiP,
     isPiPSupported,
     room,
-    user,
     showBreakout,
     setShowBreakout,
     isRecording,

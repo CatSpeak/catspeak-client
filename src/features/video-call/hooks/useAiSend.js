@@ -81,6 +81,7 @@ export const useAiSend = () => {
 
       const isRetry = Boolean(retryInteractionId)
       const interactionId = retryInteractionId || `ai-opt-${Date.now()}`
+      let formattedPrompt = ""
 
       try {
         const hasExplicitPublic = /^@(AIPublic|public-ai)\b/i.test(text || "")
@@ -97,7 +98,7 @@ export const useAiSend = () => {
           : isPublic
             ? "@AIPublic"
             : "@AIPrivate"
-        const formattedPrompt = `${prefix} ${cleanText}`
+        formattedPrompt = `${prefix} ${cleanText}`
         const roomName = lkRoomName || "General"
 
         if (isRetry) {

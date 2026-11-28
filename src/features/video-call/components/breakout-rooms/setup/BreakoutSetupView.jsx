@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useMemo } from "react"
 import { Info } from "lucide-react"
 import { toast } from "react-hot-toast"
 import {
@@ -28,39 +28,39 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
   const [maxParticipants, setMaxParticipants] = useState(10)
 
   // Allocation State: Array of { roomName, accountIds: [] }
-  const [allocations, setAllocations] = useState([])
+  const buildAllocations = (count) =>
+    Array.from({ length: count }, (_, i) => ({
+      roomName: `${t.rooms.breakoutRooms.roomPrefix}${i + 1}`,
+      accountIds: [],
+    }))
+
+  const [allocations, setAllocations] = useState(() =>
+    buildAllocations(roomCount),
+  )
+  const [allocatedForRoomCount, setAllocatedForRoomCount] = useState(roomCount)
 
   const { containerRef, handleDragOverScroll, handleDragLeaveScroll } = useDragScroll()
 
-  // Initialize/Reset allocations when roomCount changes
-  useEffect(() => {
-    if (!status?.isBreakoutActive) {
-      const initial = Array.from({ length: roomCount }, (_, i) => ({
-        roomName: `${t.rooms.breakoutRooms.roomPrefix}${i + 1}`,
-        accountIds: [],
-      }))
-      setAllocations(initial)
-    }
-  }, [roomCount, status?.isBreakoutActive])
+  // Initialize/Reset allocations when roomCount changes (state adjustment during render)
+  if (!status?.isBreakoutActive && allocatedForRoomCount !== roomCount) {
+    setAllocatedForRoomCount(roomCount)
+    setAllocations(buildAllocations(roomCount))
+  }
 
-  // Automatically prune disconnected / left students from allocations
-  useEffect(() => {
+  // Automatically prune disconnected / left students from allocations (derived)
+  const prunedAllocations = useMemo(() => {
     const liveStudentIds = new Set(
-      students.map((s) => Number(s.accountId || s.id || s.identity)).filter(Boolean)
+      students
+        .map((s) => Number(s.accountId || s.id || s.identity))
+        .filter(Boolean),
     )
-    setAllocations((prev) => {
-      let changed = false
-      const updated = prev.map((room) => {
-        const filtered = room.accountIds.filter((id) => liveStudentIds.has(Number(id)))
-        if (filtered.length !== room.accountIds.length) {
-          changed = true
-          return { ...room, accountIds: filtered }
-        }
-        return room
-      })
-      return changed ? updated : prev
-    })
-  }, [students])
+    return allocations.map((room) => ({
+      ...room,
+      accountIds: room.accountIds.filter((id) =>
+        liveStudentIds.has(Number(id)),
+      ),
+    }))
+  }, [allocations, students])
 
   // Auto-allocate students to rooms
   const handleShuffle = () => {
@@ -124,7 +124,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
 
   // Start Breakout Rooms
   const handleStartBreakout = async () => {
-    const totalAssigned = allocations.reduce(
+    const totalAssigned = prunedAllocations.reduce(
       (acc, curr) => acc + curr.accountIds.length,
       0,
     )
@@ -137,7 +137,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
       // 1. Setup groups
       const setupPayload = {
         sessionId,
-        groups: allocations.map((r) => ({
+        groups: prunedAllocations.map((r) => ({
           roomName: r.roomName,
           accountIds: r.accountIds,
         })),
@@ -159,11 +159,11 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
 
   // Unassigned students logic
   const assignedIds = useMemo(() => {
-    return allocations.reduce(
+    return prunedAllocations.reduce(
       (acc, curr) => [...acc, ...curr.accountIds],
       [],
     )
-  }, [allocations])
+  }, [prunedAllocations])
 
   const unassignedStudents = useMemo(() => {
     return students.filter(
@@ -220,7 +220,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
         <div>
           <BreakoutSetupRoomList
             unassignedStudents={unassignedStudents}
-            allocations={allocations}
+            allocations={prunedAllocations}
             students={students}
             handleMoveStudentSetup={handleMoveStudentSetup}
             hostStudent={hostStudent}

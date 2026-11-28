@@ -5,13 +5,13 @@ import { toast } from "react-hot-toast";
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils";
 import { useMaskTextMutation } from "@/store/api/moderationApi";
 import { getCommunityPath } from "@/shared/utils/navigation";
-import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
+import { copyRoomLink } from "@/shared/utils/shareUtils";
 import {
   setPiP as setPiPAction,
   setPipFallbackMode,
   leaveCall as leaveCallAction,
 } from "@/store/slices/videoCallSlice";
-import { getNavigate, getLocation } from "./useNavigateRef";
+import { getNavigate } from "./useNavigateRef";
 
 /**
  * All user-facing action handlers for a video call.
@@ -89,7 +89,7 @@ export const useCallActions = ({
         t?.rooms?.videoCall?.screenShare?.error ?? "Failed to share screen.",
       );
     }
-  }, [screenShareState.toggleScreenShare, t]);
+  }, [screenShareState, t]);
 
   // ── Chat ──
 
@@ -167,7 +167,7 @@ export const useCallActions = ({
       ? `${window.location.origin}${callInfo.callPath}`
       : window.location.href;
     copyRoomLink({ baseUrl: url, room: callInfo?.roomData });
-  }, [callInfo?.callPath, callInfo?.roomData]);
+  }, [callInfo]);
 
   // ── PiP transitions ──
 
@@ -205,22 +205,25 @@ export const useCallActions = ({
       // In-app fallback: never silently no-op, never leave isPiP=true invisible.
       const enterInAppFallback = (reason) => {
         console.warn("[PiP] Falling back to in-app floating widget:", reason);
-        dispatch(setPipFallbackMode(true));
-        dispatch(setPiPAction(true));
-        setActiveSidePanel(null);
         if (navigate) {
+          dispatch(setPipFallbackMode(true));
+          dispatch(setPiPAction(true));
+          setActiveSidePanel(null);
           navigate(explicitTarget || getCommunityPath(language));
           toast.success(
             t?.rooms?.videoCall?.pipFallback ||
               "Picture-in-Picture is blocked by your browser — showing the in-app mini player instead.",
             { icon: "🪟", duration: 5000 },
           );
-        } else {
-          toast.error(
-            t?.rooms?.videoCall?.pipNotAvailable ||
-              "Picture-in-Picture is not available in this environment.",
-          );
+          return;
         }
+        // No navigation available → do not leave an invisible PiP state behind.
+        dispatch(setPipFallbackMode(false));
+        dispatch(setPiPAction(false));
+        toast.error(
+          t?.rooms?.videoCall?.pipNotAvailable ||
+            "Picture-in-Picture is not available in this environment.",
+        );
       };
 
       // 1. Document Picture-in-Picture (Desktop Chrome / Edge / Chrome Android)
@@ -307,7 +310,7 @@ export const useCallActions = ({
       dispatch(setPiPAction(false));
       navigate(callInfo.callPath);
     }
-  }, [dispatch, callInfo?.callPath]);
+  }, [dispatch, callInfo]);
 
   return {
     handleToggleMic,

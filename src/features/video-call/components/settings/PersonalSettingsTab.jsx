@@ -5,7 +5,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 /**
- * Personal ("Tùy chọn của tôi") settings tab.
+ * Personal ("My preferences") settings tab.
  *
  * Only preferences that apply to the current user and are reused across rooms.
  * Account-scoped persistence lives in GlobalVideoCallProvider. Room-wide
@@ -33,11 +33,11 @@ const PersonalSettingsTab = ({
         }
       >
         <span className="text-neutral-900 dark:text-white font-medium">
-          {gt.receiveSystemMsgs || "Nhận thông báo tin nhắn hệ thống"}
+          {gt.receiveSystemMsgs || "Receive system notifications"}
         </span>
         <span className="text-sm text-[#606060] dark:text-[#AAAAAA]">
           {gt.receiveSystemMsgsDesc ||
-            "Hiển thị các thông báo tự động từ hệ thống trong khi cuộc họp đang diễn ra."}
+            "Show automatic system notifications while the meeting is running."}
         </span>
       </ListItem>
 
@@ -52,11 +52,11 @@ const PersonalSettingsTab = ({
         }
       >
         <span className="text-neutral-900 dark:text-white font-medium">
-          {gt.joinLeaveSound || "Âm thanh khi người dùng vào / ra phòng"}
+          {gt.joinLeaveSound || "Join / leave sound"}
         </span>
         <span className="text-sm text-[#606060] dark:text-[#AAAAAA]">
           {gt.joinLeaveSoundDesc ||
-            "Phát chuông thông báo âm thanh khi có thành viên mới vào hoặc rời khỏi cuộc họp."}
+            "Play a sound when a member joins or leaves the meeting."}
         </span>
       </ListItem>
     </div>

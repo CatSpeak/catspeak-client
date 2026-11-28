@@ -14,7 +14,7 @@ const ExitConfirmModal = ({ showExitConfirm, setShowExitConfirm }) => {
     <Modal
       open={showExitConfirm}
       onClose={() => setShowExitConfirm(false)}
-      title={tm.exitConfirmTitle || "Xác nhận thoát"}
+      title={tm.exitConfirmTitle || "Confirm exit"}
       className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white max-w-sm rounded-3xl overflow-hidden border border-border dark:border-[#3F3F3F] shadow-2xl"
       headerClassName="flex items-center justify-between p-4 pl-6 border-b border-border dark:border-[#3F3F3F]"
       fullScreenOnMobile={false}
@@ -22,9 +22,9 @@ const ExitConfirmModal = ({ showExitConfirm, setShowExitConfirm }) => {
       <div className="py-6 px-6 text-center text-slate-600 dark:text-neutral-300">
         {!effectiveIsSpectator ? (
           <>
-            <p>{tm.exitConfirmDesc1 || "Bạn có chắc chắn muốn rời khỏi trận đấu không?"}</p>
+            <p>{tm.exitConfirmDesc1 || "Are you sure you want to leave the match?"}</p>
             <p className="text-cath-red-600 dark:text-red-400 font-semibold mt-2">
-              {tm.exitConfirmDescSpectator || "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu)."}
+              {tm.exitConfirmDescSpectator || "You will switch to Spectator mode and keep watching the match."}
             </p>
           </>
         ) : (
@@ -50,7 +50,7 @@ const ExitConfirmModal = ({ showExitConfirm, setShowExitConfirm }) => {
           }}
           className="flex-1 py-3 px-4 rounded-xl font-bold bg-cath-red-500 hover:bg-cath-red-600 text-white shadow-lg shadow-cath-red-500/25 transition-all cursor-pointer"
         >
-          {tm.confirmExit || "Đồng ý"}
+          {tm.confirmExit || "Agree"}
         </button>
       </div>
     </Modal>

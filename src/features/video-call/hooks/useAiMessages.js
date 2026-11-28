@@ -12,7 +12,7 @@ import {
  * Orchestrates AI interactions: optimistic messages, LiveKit data handling,
  * conversation threads, meeting starter greeting, and flat message output.
  */
-export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
+export const useAiMessages = (lkRoom, currentUserId) => {
   const [aiInteractions, setAiInteractions] = useState([])
   const currentUserIdRef = useRef(currentUserId)
   const hasSentGreetingRef = useRef(false)
@@ -245,7 +245,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
 
   const isCurrentUserPrompting = aiInteractions.some(
     (interaction) =>
-      String(interaction.questioner) === String(currentUserIdRef.current) &&
+      String(interaction.questioner) === String(currentUserId) &&
       interaction.status === "loading",
   )
 

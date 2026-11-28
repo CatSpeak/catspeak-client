@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useMemo } from "react"
 import { Users, ChevronDown, ChevronRight, Volume2 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useDispatch } from "react-redux"
@@ -20,7 +20,6 @@ const BreakoutStudentView = ({
   isBreakoutActive,
   currentSubSessionId,
   callInfo,
-  refetchStatus,
   allLiveStudents = [],
 }) => {
   const { t } = useLanguage()
@@ -57,20 +56,6 @@ const BreakoutStudentView = ({
   }, [mainRoomParticipants, roomCreatorId])
 
   const isUserInMainRoom = String(currentSubSessionId) === String(sessionId)
-
-  useEffect(() => {
-    if (status?.breakoutSessions) {
-      setExpandedRooms((prev) => {
-        const next = { ...prev, main: prev.main ?? true }
-        status.breakoutSessions.forEach((r) => {
-          if (next[r.roomName] === undefined) {
-            next[r.roomName] = true
-          }
-        })
-        return next
-      })
-    }
-  }, [status])
 
   const toggleRoomExpand = (roomName) => {
     setExpandedRooms((prev) => ({
@@ -148,7 +133,7 @@ const BreakoutStudentView = ({
                 onClick={(e) => { e.stopPropagation(); toggleRoomExpand("main") }}
                 className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 hover:opacity-100 hover:bg-[#E6E6E6] cursor-pointer"
               >
-                {expandedRooms["main"] ? <ChevronDown /> : <ChevronRight />}
+                {(expandedRooms["main"] ?? true) ? <ChevronDown /> : <ChevronRight />}
               </div>
             }
           >
@@ -164,7 +149,7 @@ const BreakoutStudentView = ({
             </div>
           </ListItem>
 
-          {expandedRooms["main"] && (
+          {(expandedRooms["main"] ?? true) && (
             <div>
               {mainRoomParticipants.length === 0 ? (
                 <ListItem>

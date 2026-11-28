@@ -63,6 +63,8 @@ const CommunityRoomCard = ({ room }) => {
     Boolean(room.isBookmarked ?? room.isBookmark ?? room.bookmarked),
   )
   const [isActionHovered, setIsActionHovered] = useState(false)
+  const [showFullModal, setShowFullModal] = useState(false)
+  const [showCopied, setShowCopied] = useState(false)
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -117,7 +119,7 @@ const CommunityRoomCard = ({ room }) => {
     if (isExpired) {
       toast.error(
         t?.rooms?.callEnded?.expiredToast ||
-          "Phong nay da het thoi han su dung!",
+          "Phòng này đã hết thời hạn sử dụng!",
       )
       return
     }
@@ -167,15 +169,12 @@ const CommunityRoomCard = ({ room }) => {
   } else if (isInfiniteDuration) timeStr = t.rooms.noLimit
   else timeStr = `${formatTime(createDate)} - ${formatTime(endDate)}`
 
-  const [showFullModal, setShowFullModal] = useState(false)
-  const [showCopied, setShowCopied] = useState(false)
-
   const handleRoomClick = (e) => {
     if (isExpired) {
       e.stopPropagation()
       toast.error(
         t?.rooms?.callEnded?.expiredToast ||
-          "Phong nay da het thoi han su dung!",
+          "Phòng này đã hết thời hạn sử dụng!",
       )
       return
     }
@@ -210,8 +209,8 @@ const CommunityRoomCard = ({ room }) => {
       toast.error(
         err?.data?.message ||
           (prev
-            ? t?.rooms?.unbookmark || "Không thể bỏ lưu phòng"
-            : t?.rooms?.bookmark || "Không thể lưu phòng"),
+            ? t?.rooms?.bookmarkUpdateError || "Không thể bỏ lưu phòng"
+            : t?.rooms?.bookmarkUpdateError || "Không thể lưu phòng"),
       )
     }
   }
@@ -228,7 +227,9 @@ const CommunityRoomCard = ({ room }) => {
         setTimeout(() => setShowCopied(false), 2000)
       })
       .catch(() => {
-        toast.error("Khong the sao chep lien ket", { position: "top-center" })
+        toast.error(t?.rooms?.copyLinkError || "Không thể sao chép liên kết", {
+          position: "top-center",
+        })
       })
   }
 
@@ -278,17 +279,19 @@ const CommunityRoomCard = ({ room }) => {
                 className="w-5 h-5 !p-0"
                 title={
                   isPrivate && hasPassword
-                    ? "Private & Password Protected"
+                    ? t?.rooms?.privatePasswordProtected ||
+                      "Riêng tư & Có mật khẩu"
                     : isPrivate
-                      ? t?.rooms?.filters?.visibilities?.Private || "Private"
-                      : t?.rooms?.customRooms?.passwordRequired || "Password"
+                      ? t?.rooms?.filters?.visibilities?.Private || "Riêng tư"
+                      : t?.rooms?.customRooms?.passwordRequired || "Mật khẩu"
                 }
                 aria-label={
                   isPrivate && hasPassword
-                    ? "Private & Password Protected"
+                    ? t?.rooms?.privatePasswordProtected ||
+                      "Riêng tư & Có mật khẩu"
                     : isPrivate
-                      ? t?.rooms?.filters?.visibilities?.Private || "Private"
-                      : t?.rooms?.customRooms?.passwordRequired || "Password"
+                      ? t?.rooms?.filters?.visibilities?.Private || "Riêng tư"
+                      : t?.rooms?.customRooms?.passwordRequired || "Mật khẩu"
                 }
               >
                 <Lock size={12} className="text-white shrink-0" />
@@ -325,13 +328,13 @@ const CommunityRoomCard = ({ room }) => {
             onClick={handleBookmarkClick}
             title={
               isBookmarked
-                ? t?.rooms?.unbookmark || "Bo luu phong"
-                : t?.rooms?.bookmark || "Luu phong"
+                ? t?.rooms?.unbookmark || "Bỏ lưu phòng"
+                : t?.rooms?.bookmark || "Lưu phòng"
             }
             aria-label={
               isBookmarked
-                ? t?.rooms?.unbookmark || "Bo luu phong"
-                : t?.rooms?.bookmark || "Luu phong"
+                ? t?.rooms?.unbookmark || "Bỏ lưu phòng"
+                : t?.rooms?.bookmark || "Lưu phòng"
             }
             className="absolute top-0 right-4 z-20 w-6 cursor-pointer outline-none transition-colors duration-150 select-none drop-shadow-md bg-cath-red-700 hover:bg-cath-red-800"
           />
@@ -351,8 +354,8 @@ const CommunityRoomCard = ({ room }) => {
                 onMouseEnter={() => setIsActionHovered(true)}
                 onMouseLeave={() => setIsActionHovered(false)}
                 onClick={handleCopyLink}
-                title={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
-                aria-label={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
+                title={t?.rooms?.copyLinkTooltip || "Sao chép liên kết"}
+                aria-label={t?.rooms?.copyLinkTooltip || "Sao chép liên kết"}
               >
                 <LinkIcon />
               </IconButton>
@@ -397,7 +400,7 @@ const CommunityRoomCard = ({ room }) => {
         typeof document !== "undefined" &&
         createPortal(
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[99999] px-4 py-2 bg-black/75 text-white rounded-full text-[15px] font-medium pointer-events-none shadow-lg whitespace-nowrap">
-            {t?.rooms?.copySuccess || "Da sao chep lien ket!"}
+            {t?.rooms?.copySuccess || "Đã sao chép liên kết!"}
           </div>,
           document.body,
         )}

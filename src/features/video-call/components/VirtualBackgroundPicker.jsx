@@ -76,7 +76,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
     try {
       await setActive({ backgroundUrl: url }).unwrap()
       if (onApply) onApply(url)
-    } catch (err) {
+    } catch {
       toast.error(
         t?.rooms?.virtualBackground?.setFailed ||
           "Failed to set virtual background",
@@ -130,7 +130,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "" }) => {
             "Failed to upload background",
         )
       }
-    } catch (err) {
+    } catch {
       toast.error(
         t?.rooms?.virtualBackground?.uploadFailed ||
           "Failed to upload background",

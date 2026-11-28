@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { toast } from "react-hot-toast"
 import {
@@ -270,9 +270,7 @@ export function useRecording(lkRoom = null, syncState = {}) {
   }, [
     lkRoom,
     isRecording,
-    isTogglingRecording,
     startRecording,
-    stopRecording,
     egressId,
     setIsRecording,
     setEgressId,
@@ -286,7 +284,6 @@ export function useRecording(lkRoom = null, syncState = {}) {
     isTeacher,
     showProUpgradeToast,
   ])
-
   const confirmStopRecording = async () => {
     setShowStopModal(false)
     setIsTogglingRecording(true)

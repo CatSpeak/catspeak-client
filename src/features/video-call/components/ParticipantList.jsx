@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo } from "react"
 import { UserPlus, Settings2, Search, X, Hand, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -154,18 +154,14 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
     normalizeWaitingQueue(waitingQueueData)?.pending?.length ??
     0
 
-  // Fallback to "members" tab if current tab becomes unauthorized
-  useEffect(() => {
-    if (activeTab === "settings" && !canManagePolicies) {
-      setActiveTab("members")
-    }
-    if (activeTab === "waiting" && !canViewWaiting) {
-      setActiveTab("members")
-    }
-    if (activeTab === "banned" && !canViewBanned) {
-      setActiveTab("members")
-    }
-  }, [activeTab, canManagePolicies, canViewWaiting, canViewBanned])
+  // Fall back to "members" when the current tab becomes unauthorized. Derive
+  // the effective tab during render instead of a cascading state effect.
+  const safeActiveTab =
+    (activeTab === "settings" && !canManagePolicies) ||
+    (activeTab === "waiting" && !canViewWaiting) ||
+    (activeTab === "banned" && !canViewBanned)
+      ? "members"
+      : activeTab
 
   // Participant list filtering & grouping
   const filteredParticipants = useMemo(() => {
@@ -258,10 +254,10 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
               <button
                 type="button"
                 role="tab"
-                aria-selected={activeTab === "members"}
+                aria-selected={safeActiveTab === "members"}
                 onClick={() => setActiveTab("members")}
-                className={`flex-1 basis-[calc(50%_-_0.375rem)] justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all ${
-                  activeTab === "members"
+                className={`flex flex-1 basis-[calc(50%_-_0.375rem)] items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all ${
+                  safeActiveTab === "members"
                     ? "bg-cath-red-700 text-white shadow-xs"
                     : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
                 }`}
@@ -273,10 +269,10 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={activeTab === "waiting"}
+                  aria-selected={safeActiveTab === "waiting"}
                   onClick={() => setActiveTab("waiting")}
-                  className={`flex-1 basis-[calc(50%_-_0.375rem)] justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                    activeTab === "waiting"
+                  className={`flex flex-1 basis-[calc(50%_-_0.375rem)] items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                    safeActiveTab === "waiting"
                       ? "bg-cath-red-700 text-white shadow-xs"
                       : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
                   }`}
@@ -285,7 +281,7 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
                   {pendingCount > 0 && (
                     <span
                       className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-bold ${
-                        activeTab === "waiting"
+                        safeActiveTab === "waiting"
                           ? "bg-white text-cath-red-700"
                           : "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300"
                       }`}
@@ -300,10 +296,10 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={activeTab === "banned"}
+                  aria-selected={safeActiveTab === "banned"}
                   onClick={() => setActiveTab("banned")}
-                  className={`flex-1 basis-[calc(50%_-_0.375rem)] justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all ${
-                    activeTab === "banned"
+                  className={`flex flex-1 basis-[calc(50%_-_0.375rem)] items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all ${
+                    safeActiveTab === "banned"
                       ? "bg-cath-red-700 text-white shadow-xs"
                       : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
                   }`}
@@ -316,10 +312,10 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={activeTab === "settings"}
+                  aria-selected={safeActiveTab === "settings"}
                   onClick={() => setActiveTab("settings")}
-                  className={`flex-1 basis-[calc(50%_-_0.375rem)] justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                    activeTab === "settings"
+                  className={`flex flex-1 basis-[calc(50%_-_0.375rem)] items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                    safeActiveTab === "settings"
                       ? "bg-cath-red-700 text-white shadow-xs"
                       : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
                   }`}
@@ -343,7 +339,7 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
       </div>
 
       {/* Tab 1: Members */}
-      {activeTab === "members" && (
+      {safeActiveTab === "members" && (
         <div className="flex flex-col flex-1 min-h-0">
           {/* Integrated Search Input (when toggled open or when search query is active) */}
           <AnimatePresence initial={false}>
@@ -476,21 +472,21 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
       )}
 
       {/* Tab 2: Waiting Queue */}
-      {canViewWaiting && activeTab === "waiting" && (
+      {canViewWaiting && safeActiveTab === "waiting" && (
         <div className="flex-1 overflow-y-auto">
           <WaitingQueueTab roomId={roomId} externalPending={externalPending} />
         </div>
       )}
 
       {/* Tab 3: Banned List */}
-      {canViewBanned && activeTab === "banned" && (
+      {canViewBanned && safeActiveTab === "banned" && (
         <div className="flex-1 overflow-y-auto p-3">
           <BannedListTab />
         </div>
       )}
 
       {/* Tab 4: Settings & Policies */}
-      {canManagePolicies && activeTab === "settings" && (
+      {canManagePolicies && safeActiveTab === "settings" && (
         <RoomPoliciesTab coHost={coHost} />
       )}
 

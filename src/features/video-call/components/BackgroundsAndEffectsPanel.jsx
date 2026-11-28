@@ -15,7 +15,7 @@ import { isBeautyFilterSupported } from "@/features/video-call/utils/roomTypeHel
  * Tab strip + content panel for Backgrounds / Beauty effects.
  * Used inside the room side panel (no modal wrapper or video preview).
  */
-const BackgroundsAndEffectsPanel = ({ onClose }) => {
+const BackgroundsAndEffectsPanel = ({ onClose, hideTitle = false }) => {
   const { t } = useLanguage()
   const { room } = useGlobalVideoCall()
   const [activeTab, setActiveTab] = useState("backgrounds")
@@ -42,7 +42,7 @@ const BackgroundsAndEffectsPanel = ({ onClose }) => {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header: title + close */}
-      {onClose && (
+      {onClose && !hideTitle && (
         <div className="flex shrink-0 items-center justify-between gap-2 pl-4 pr-1 min-h-[52px] border-b border-border dark:border-[#3F3F3F]">
           <span className="text-base font-bold truncate">
             {t?.rooms?.videoCall?.backgroundsAndEffects ||

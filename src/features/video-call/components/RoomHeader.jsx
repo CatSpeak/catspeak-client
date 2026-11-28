@@ -4,8 +4,6 @@ import { MainLogo, MainLogoDark } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useSessionTimer } from "@/features/video-call"
-import { useParticipants, useLocalParticipant } from "@livekit/components-react"
-import { toast } from "react-hot-toast"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { Copy, HelpCircle, RefreshCcw } from "lucide-react"
 import { copyRoomLink } from "@/shared/utils/shareUtils"
@@ -13,7 +11,7 @@ import BugReportModal from "@/features/bug-report/components/BugReportModal"
 import { RoomBadges } from "@/features/rooms"
 
 const RoomHeader = () => {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const { lang, id: routeRoomId } = useParams()
   const {
     room,
@@ -29,16 +27,6 @@ const RoomHeader = () => {
 
   const rawRoomName = room?.name || "General"
 
-  const allParticipants = useParticipants()
-  const { localParticipant } = useLocalParticipant()
-
-  // Whoever joined first is the host
-  const hostParticipant = [...allParticipants].sort((a, b) => {
-    const timeA = a.joinedAt ? a.joinedAt.getTime() : Number.MAX_SAFE_INTEGER
-    const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER
-    return timeA - timeB
-  })[0]
-
   const handleCopyLink = () => {
     copyRoomLink({
       baseUrl: window.location.href,
@@ -46,11 +34,6 @@ const RoomHeader = () => {
       successMessage: t?.rooms?.videoCall?.linkCopied,
     })
   }
-
-  const isHost =
-    hostParticipant &&
-    localParticipant &&
-    hostParticipant.identity === localParticipant.identity
 
   return (
     <div className="flex items-center justify-between bg-white dark:bg-[#1A1A1A] px-4 min-h-14 py-1.5 shrink-0 border-b border-border dark:border-darkBorder">

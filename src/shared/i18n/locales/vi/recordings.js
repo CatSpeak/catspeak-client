@@ -21,6 +21,8 @@ export default {
       "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
   },
   errors: {
+    proRequired:
+      "Tính năng ghi hình chỉ dành cho tài khoản Pro (hoặc Giáo viên trong phòng học). Vui lòng nâng cấp gói Pro để ghi hình cuộc gọi!",
     noRoom: "Không có phòng đang hoạt động — không thể ghi hình.",
     noEgress:
       "Đã bắt đầu ghi hình nhưng không nhận được ID nguồn ra — việc dừng có thể không hoạt động.",

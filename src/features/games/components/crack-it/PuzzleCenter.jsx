@@ -20,8 +20,8 @@ const PuzzleCenter = () => {
     const answer = puzzle.correct_answer;
 
     if (!answer || !currentRound?.started_at) {
-      setDisplayMask(initialMask);
-      return;
+      const resetTimeout = setTimeout(() => setDisplayMask(initialMask), 0);
+      return () => clearTimeout(resetTimeout);
     }
 
     const nonSpaceIndices = [];
@@ -32,8 +32,8 @@ const PuzzleCenter = () => {
     }
 
     if (nonSpaceIndices.length === 0) {
-      setDisplayMask(initialMask);
-      return;
+      const resetTimeout = setTimeout(() => setDisplayMask(initialMask), 0);
+      return () => clearTimeout(resetTimeout);
     }
 
     // Deterministic random based on puzzle answer string so all clients get the same order
@@ -59,6 +59,7 @@ const PuzzleCenter = () => {
     const startedAtTime = new Date(currentRound.started_at).getTime();
 
     let interval;
+    let initialTimeout;
     const updateMask = () => {
       const elapsedMs = Math.max(0, Date.now() - startedAtTime);
       const stepsElapsed = Math.min(
@@ -78,13 +79,16 @@ const PuzzleCenter = () => {
       }
     };
 
-    updateMask();
+    // Defer the first update out of the effect body so the initial mask is
+    // applied on a timer callback instead of triggering a cascading render.
+    initialTimeout = setTimeout(updateMask, 0);
     interval = setInterval(updateMask, 200);
 
     return () => {
+      if (initialTimeout) clearTimeout(initialTimeout);
       if (interval) clearInterval(interval);
     };
-  }, [puzzle, currentRound?.started_at]);
+  }, [puzzle, currentRound]);
 
   if (!puzzle) {
     return (

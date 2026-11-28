@@ -18,6 +18,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 
 const GameContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components -- helper co-located with the game provider
 export const isObserverParticipant = (participant) => {
   if (!participant) return false;
   if (participant.metadata) {
@@ -296,7 +297,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       setPictureItState((prev) => ({ ...prev, ratingOpen: false }));
     },
     ROUND_SKIPPED: (payload) => {
-      toast.error(payload.reason || "Round skipped.");
+      toast.error(
+        payload.reason ||
+          t.rooms?.game?.crackIt?.roundSkipped ||
+          "Round skipped.",
+      );
       setPictureItState((prev) => ({ ...prev, ratingOpen: false }));
     },
     RATING_OPEN: (payload) => {
@@ -310,7 +315,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     },
     PICTURE_IT_ERROR: (payload) => {
       if (payload.code === "GAME_DISABLED") {
-        toast.error(payload.message || "Trò chơi đã bị tắt bởi Host.");
+        toast.error(
+          payload.message ||
+            t.rooms?.game?.crackIt?.gameDisabledByHost ||
+            "The host turned the game off.",
+        );
       } else {
         toast.error(payload.message || "An error occurred.");
       }
@@ -319,7 +328,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     },
     GAME_ERROR: (payload) => {
       if (payload.code === "GAME_DISABLED") {
-        toast.error(payload.message || "Trò chơi đã bị tắt bởi Host.");
+        toast.error(
+          payload.message ||
+            t.rooms?.game?.crackIt?.gameDisabledByHost ||
+            "The host turned the game off.",
+        );
       } else {
         toast.error(payload.message || "An error occurred.");
       }
@@ -588,9 +601,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       toast.error(
         payload.reason === "NOT_ENOUGH_PLAYERS"
           ? t.rooms?.game?.crackIt?.forceStopNotEnoughPlayers ||
-              "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
+            "Not enough players to continue. Game cancelled."
           : t.rooms?.game?.crackIt?.forceStopGeneric ||
-              "Trò chơi bị dừng đột ngột.",
+            "Game stopped unexpectedly.",
       );
       setGameState("idle");
       setGameType(null);
@@ -714,7 +727,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
       if (players.length < 2) {
         toast.error(
-          "Không đủ người chơi để bắt đầu trò chơi. Cần ít nhất 2 người!",
+          t.rooms?.game?.crackIt?.notEnoughPlayersToStart ||
+            "Not enough players to start the game. At least 2 are needed!",
         );
         return;
       }
@@ -740,17 +754,20 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           });
         }
       } else if (!connection.isConnected) {
-        toast.error("Chưa kết nối tới máy chủ Game. Vui lòng thử lại sau giây lát!");
+        toast.error(
+          t.rooms?.game?.crackIt?.connectionError ||
+            "Could not connect to the game server. Please try again shortly!",
+        );
       }
     },
     [
-      connection.isConnected,
-      connection.send,
+      connection,
       roomLanguage,
       roomId,
       participants,
       currentUserId,
       resetGameStates,
+      t,
     ],
   );
 
@@ -782,7 +799,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     if (connection.isConnected && roomId) {
       connection.send("JoinRoom", roomId);
     }
-  }, [connection.isConnected, connection.send, roomId]);
+  }, [connection, roomId]);
 
   const effectiveIsSpectator = React.useMemo(() => {
     if (isSpectator) return true;
@@ -822,7 +839,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       connection.send("SubmitCrackItAnswer", payload);
     },
     [
-      connection.send,
+      connection,
       currentUserId,
       localParticipantName,
       user,
@@ -836,17 +853,17 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   const startPictureItDescribe = useCallback(() => {
     if (effectiveIsSpectator) return;
     connection.send("PictureItDescribeStart", roomId || "general");
-  }, [connection.send, roomId, effectiveIsSpectator]);
+  }, [connection, roomId, effectiveIsSpectator]);
 
   const endPictureItDescribe = useCallback(() => {
     if (effectiveIsSpectator) return;
     connection.send("PictureItDescribeEnd", roomId || "general");
-  }, [connection.send, roomId, effectiveIsSpectator]);
+  }, [connection, roomId, effectiveIsSpectator]);
 
   const submitPictureItFlag = useCallback(() => {
     if (effectiveIsSpectator) return;
     connection.send("PictureItSubmitFlag", roomId || "general");
-  }, [connection.send, roomId, effectiveIsSpectator]);
+  }, [connection, roomId, effectiveIsSpectator]);
 
   const submitPictureItRating = useCallback(
     (score) => {
@@ -854,7 +871,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       connection.send("PictureItSubmitRating", roomId || "general", score);
       setPictureItState((prev) => ({ ...prev, myRatingSubmitted: true }));
     },
-    [connection.send, roomId, effectiveIsSpectator],
+    [connection, roomId, effectiveIsSpectator],
   );
 
   // General Exit
@@ -868,7 +885,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       setIsSpectator(true);
       toast.success(
         t.rooms?.game?.becameSpectator ||
-          "Bạn đã rời ván đấu và chuyển sang chế độ quan sát."
+          "You left the match and switched to spectator mode."
       );
     } else {
       // Người quan sát bấm thoát -> Tắt hoàn toàn overlay game FE

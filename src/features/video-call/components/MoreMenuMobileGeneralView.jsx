@@ -208,10 +208,14 @@ const MoreMenuMobileGeneralView = ({
             !canShareScreen
               ? t.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
                 "Bạn không có quyền chia sẻ màn hình."
-              : t?.rooms?.videoCall?.controls?.shareScreen || "Chia sẻ màn hình"
+              : isLocalScreenShare
+                ? t?.rooms?.videoCall?.controls?.shareOff || "Dừng chia sẻ"
+                : t?.rooms?.videoCall?.controls?.shareOn || "Chia sẻ màn hình"
           }
           aria-label={
-            t?.rooms?.videoCall?.controls?.shareScreen || "Chia sẻ màn hình"
+            isLocalScreenShare
+              ? t?.rooms?.videoCall?.controls?.shareOff || "Dừng chia sẻ"
+              : t?.rooms?.videoCall?.controls?.shareOn || "Chia sẻ màn hình"
           }
           className={`min-h-[68px] py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-center transition-colors ${
             isLocalScreenShare ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400" : "bg-[#F5F5F5] dark:bg-[#272727] text-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-[#3D3D3D]"
@@ -223,7 +227,9 @@ const MoreMenuMobileGeneralView = ({
             <MonitorUp size={24} />
           )}
           <span className="text-[11px] font-medium leading-tight line-clamp-2 break-words">
-            {t?.rooms?.videoCall?.controls?.shareScreen || "Chia sẻ màn hình"}
+            {isLocalScreenShare
+              ? t?.rooms?.videoCall?.controls?.shareOff || "Dừng chia sẻ"
+              : t?.rooms?.videoCall?.controls?.shareOn || "Chia sẻ màn hình"}
           </span>
         </button>
 

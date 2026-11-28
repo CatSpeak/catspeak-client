@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { Navigate, useParams } from "react-router-dom"
 import { ChevronRight, Loader2, Clock } from "lucide-react"
 import { motion as Motion, AnimatePresence } from "framer-motion"
@@ -473,66 +474,71 @@ const VideoCallRoomContent = () => {
         </AnimatePresence>
       </div>
 
-      {/* Tablet Right Slide-Over Drawer (md to lg) — Rendered outside flex flow */}
+      {/* Tablet Right Slide-Over Drawer (md to lg) — portalled to body so no
+          transformed/overflow ancestor can shift it at 768×1024 */}
       <AnimatePresence initial={false}>
-        {isSidePanelOpen && (
-          <div className="hidden md:block lg:hidden">
-            <Motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/40"
-              onClick={() => setActiveSidePanel(null)}
-            />
-            <Motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.18, ease: "easeOut" }}
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-[360px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-2xl flex flex-col border-l border-border dark:border-darkBorder overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {showParticipants && (
-                <ParticipantList onClose={() => setActiveSidePanel(null)} />
-              )}
-              {showSpeakingTimeBalance &&
-                isHost &&
-                isSpeakingTimeBalanceSupported(room) && (
-                  <SpeakingTimeBalancePanel
+        {isSidePanelOpen &&
+          typeof document !== "undefined" &&
+          createPortal(
+            <div key="tablet-drawer" className="hidden md:block lg:hidden">
+              <Motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-40 bg-black/40"
+                onClick={() => setActiveSidePanel(null)}
+              />
+              <Motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "tween", duration: 0.18, ease: "easeOut" }}
+                className="fixed inset-y-0 right-0 z-50 w-full max-w-[360px] bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white shadow-2xl flex flex-col border-l border-border dark:border-darkBorder overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {showParticipants && (
+                  <ParticipantList onClose={() => setActiveSidePanel(null)} />
+                )}
+                {showSpeakingTimeBalance &&
+                  isHost &&
+                  isSpeakingTimeBalanceSupported(room) && (
+                    <SpeakingTimeBalancePanel
+                      onClose={() => setActiveSidePanel(null)}
+                    />
+                  )}
+                {showVirtualBackground && (
+                  <BackgroundsAndEffectsPanel
                     onClose={() => setActiveSidePanel(null)}
                   />
                 )}
-              {showVirtualBackground && (
-                <BackgroundsAndEffectsPanel
-                  onClose={() => setActiveSidePanel(null)}
-                />
-              )}
-              {showAvatarPicker && (
-                <AvatarUrlPicker onClose={() => setActiveSidePanel(null)} />
-              )}
-              {showTroubleshoot && (
-                <TroubleshootPanel onClose={() => setActiveSidePanel(null)} />
-              )}
-              {showBreakout && isBreakoutSupported(room?.roomType) && (
-                <BreakoutSidebarPanel
-                  sessionId={parentSessionId}
-                  onClose={() => setActiveSidePanel(null)}
-                />
-              )}
-              {showChat && (
-                <ChatBox
-                  messages={messages}
-                  currentUser={user}
-                  onSendMessage={handleSendMessage}
-                  isConnected={isConnected}
-                  onClose={() => setActiveSidePanel(null)}
-                  className="h-full w-full"
-                />
-              )}
-            </Motion.div>
-          </div>
-        )}
+                {showAvatarPicker && (
+                  <AvatarUrlPicker onClose={() => setActiveSidePanel(null)} />
+                )}
+                {showTroubleshoot && (
+                  <TroubleshootPanel onClose={() => setActiveSidePanel(null)} />
+                )}
+                {showBreakout && isBreakoutSupported(room?.roomType) && (
+                  <BreakoutSidebarPanel
+                    sessionId={parentSessionId}
+                    onClose={() => setActiveSidePanel(null)}
+                  />
+                )}
+                {showChat && (
+                  <ChatBox
+                    messages={messages}
+                    currentUser={user}
+                    onSendMessage={handleSendMessage}
+                    isConnected={isConnected}
+                    onClose={() => setActiveSidePanel(null)}
+                    className="h-full w-full"
+                  />
+                )}
+              </Motion.div>
+            </div>,
+            document.body,
+            "tablet-drawer",
+          )}
       </AnimatePresence>
 
       {/* Mobile Overlay Side Panel */}
@@ -605,11 +611,13 @@ const VideoCallRoomContent = () => {
                     {showVirtualBackground && (
                       <BackgroundsAndEffectsPanel
                         onClose={() => setActiveSidePanel(null)}
+                        hideTitle
                       />
                     )}
                     {showAvatarPicker && (
                       <AvatarUrlPicker
                         onClose={() => setActiveSidePanel(null)}
+                        hideTitle
                       />
                     )}
                     {showTroubleshoot && <TroubleshootPanel hideTitle />}
@@ -632,13 +640,24 @@ const VideoCallRoomContent = () => {
   )
 }
 
+const ROOM_LANGUAGE_BY_TYPE = {
+  chinese: "zh",
+  vietnamese: "vi",
+  english: "en",
+}
+
 const VideoCallRoomWrapper = () => {
   const { lang } = useParams()
+  const roomData = useSelector((state) => state.videoCall?.callInfo?.roomData)
+  const roomLanguageCode =
+    ROOM_LANGUAGE_BY_TYPE[String(roomData?.languageType || "").toLowerCase()]
+  const urlLanguage = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  // Japanese rooms fall back to English because the game bank supports en/zh/vi.
+  const gameLanguage =
+    roomLanguageCode || (["zh", "vi"].includes(urlLanguage) ? urlLanguage : "en")
   return (
     <VideoCallProvider>
-      <GameProvider
-        roomLanguage={lang === "zh" ? "zh" : lang === "ja" ? "ja" : "en"}
-      >
+      <GameProvider roomLanguage={gameLanguage}>
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>

@@ -470,8 +470,8 @@ const CoHostModal = ({
                 </button>
               </div>
               {allowOutOfRoom && selectedUser.inRoom === false && (
-                <p className="flex items-start gap-1.5 text-[11px] text-amber-700 bg-amber-50/70 border border-amber-200/70 rounded-xl px-3 py-2 leading-snug">
-                  <AlertTriangle size={13} className="shrink-0 mt-0.5 text-amber-600" />
+                <p className="flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-900/50 rounded-xl px-3 py-2 leading-snug">
+                  <AlertTriangle size={13} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                   <span>
                     {t.rooms?.coHost?.notInRoomHint ||
                       "Người này không ở trong phòng. Quyền Co-host sẽ áp dụng khi họ vào phòng."}
@@ -488,7 +488,7 @@ const CoHostModal = ({
                 <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-[#272727] flex items-center justify-center text-gray-400 dark:text-[#AAAAAA] mb-0.5">
                   <Users size={16} />
                 </div>
-                <p className="text-xs font-semibold text-gray-700">
+                <p className="text-xs font-semibold text-gray-700 dark:text-neutral-200">
                   {allowOutOfRoom
                     ? (t.rooms?.coHost?.noCandidatesRoomTitle ||
                       "Chưa có ai để chọn")

@@ -128,7 +128,7 @@ const PlayerItemContent = ({
             <span
               className={`font-normal text-slate-500 dark:text-neutral-400 shrink-0 ${embedded ? "text-[10px]" : "text-xs"}`}
             >
-              ({t.rooms?.game?.crackIt?.you || "Bạn"})
+              ({t.rooms?.game?.crackIt?.you || "You"})
             </span>
           )}
         </div>
@@ -170,7 +170,7 @@ const PlayerItemContent = ({
               embedded ? "text-[10px] px-1.5 py-0.5" : "text-[10px] px-2 py-1"
             }`}
           >
-            {t.rooms?.game?.crackIt?.out || "Thoát"}
+            {t.rooms?.game?.crackIt?.out || "Exit"}
           </span>
         </div>
       )}
@@ -181,7 +181,7 @@ const PlayerItemContent = ({
           {player.isCorrect && (
             <div
               className="text-green-500 flex items-center justify-center"
-              title="+ Điểm"
+              title={t.rooms?.game?.crackIt?.pointsShort || "Points"}
             >
               <TrendingUp size={embedded ? 16 : 20} strokeWidth={2.5} />
             </div>
@@ -289,7 +289,7 @@ const GameSidebar = ({
 
   const title = isPictureIt
     ? t.rooms?.game?.pictureIt?.leaderboard?.title || "Leaderboard"
-    : t.rooms?.game?.crackIt?.leaderboard || "Bảng xếp hạng"
+    : t.rooms?.game?.crackIt?.leaderboard || "Leaderboard"
 
   // Always show all players with vertical scroll
   const visiblePlayers = players
@@ -324,7 +324,10 @@ const GameSidebar = ({
                 <button
                   onClick={onClose}
                   className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#272727] hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-600 dark:text-neutral-300 hover:text-cath-red-600 dark:hover:text-red-400 transition-colors flex items-center justify-center shrink-0"
-                  aria-label="Đóng bảng xếp hạng"
+                  aria-label={
+                    t.rooms?.game?.crackIt?.closeLeaderboard ||
+                    "Close leaderboard"
+                  }
                 >
                   <X size={16} />
                 </button>
@@ -399,7 +402,7 @@ const GameSidebar = ({
               }`}
             >
               {t.rooms?.game?.crackIt?.waitingPlayers ||
-                "Đang đợi người chơi..."}
+                "Waiting for players..."}
             </div>
           )}
         </div>

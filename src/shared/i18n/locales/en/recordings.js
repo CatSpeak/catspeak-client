@@ -20,6 +20,8 @@ export default {
       "Recording has automatically stopped due to exceeding storage capacity. Partial recording has been saved.",
   },
   errors: {
+    proRequired:
+      "Recording is available to Pro accounts (or Teachers in a class room) only. Please upgrade to Pro to record this call!",
     noRoom: "No active room — cannot record.",
     noEgress:
       "Recording started but no egress ID received — stop may not work.",

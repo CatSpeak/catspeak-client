@@ -488,6 +488,13 @@ export default {
   },
   videoCall: {
     roomCoverAlt: "Ảnh bìa phòng",
+    pipFallback:
+      "Trình duyệt đã chặn Hình trong Hình — đang hiển thị trình phát mini trong ứng dụng.",
+    pipNotAvailable: "Hình trong Hình không khả dụng trong môi trường này.",
+    pipActivated: "Đã bật Hình trong Hình",
+    alreadyInRoom: "Người bạn chọn đã ở trong phòng họp.",
+    cameraIsOff: "Camera đang tắt",
+    cameraOffDesc: "Bật camera để xem trước hiệu ứng.",
     inviteParticipant: "Mời tham gia phòng",
     sendInvite: "Gửi lời mời",
     inviteDescription: "Nhập địa chỉ email của người bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",
@@ -864,6 +871,7 @@ export default {
       noBannedMembersTitle: "Chưa có thành viên nào bị cấm",
       noBannedMembersDesc: "Các thành viên bị Host mời ra khỏi phòng và cấm truy cập lại sẽ hiển thị tại đây.",
       successUnban: "Đã gỡ cấm thành viên thành công",
+      unbanFailed: "Không thể gỡ cấm. Vui lòng thử lại.",
       bannedFromRoom: "Tài khoản của bạn đã bị cấm truy cập vào phòng này bởi Host.",
       forbiddenKick: "Bạn không có quyền mời thành viên ra khỏi phòng.",
       lockRoom: "Khóa phòng (chặn người mới)",
@@ -1048,6 +1056,8 @@ export default {
     saveAvatar: "Lưu ảnh đại diện",
   },
   game: {
+    becameSpectator:
+      "Bạn đã rời ván đấu và chuyển sang chế độ quan sát.",
     crackIt: {
       title: "Crack It",
       close: "Đóng",
@@ -1062,6 +1072,8 @@ export default {
       answerLength: "Số từ",
       youGotIt: "Bạn đã đoán đúng! Đợi người khác...",
       typeAnswer: "Nhập đáp án của bạn...",
+      notMainPlaceholder: "Nhấp vào ô để mở rộng và chơi",
+      spectatorPlaceholder: "Bạn đang xem dưới dạng người quan sát...",
       gotItRight: "đã đoán đúng!",
       leaderboard: "Bảng xếp hạng",
       waitingPlayers: "Đang đợi người chơi...",
@@ -1073,6 +1085,17 @@ export default {
       exitConfirmTitle: "Xác nhận thoát",
       exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
       exitConfirmDesc2: "Bạn sẽ không thể tham gia lại ván chơi này nữa!",
+      exitConfirmDescSpectator:
+        "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu).",
+      pointsShort: "+ Điểm",
+      openLeaderboard: "Mở bảng xếp hạng",
+      closeLeaderboard: "Đóng bảng xếp hạng",
+      roundSkipped: "Ván đã bị bỏ qua.",
+      gameDisabledByHost: "Trò chơi đã bị Host tắt.",
+      connectionError:
+        "Chưa kết nối tới máy chủ Game. Vui lòng thử lại sau giây lát!",
+      notEnoughPlayersToStart:
+        "Không đủ người chơi để bắt đầu trò chơi. Cần ít nhất 2 người!",
       cancel: "Hủy",
       confirmExit: "Đồng ý thoát",
       roundLeaderboard: "Thành tích ván này",
@@ -1137,6 +1160,12 @@ export default {
         flaggedCount: "{0} / {1} người đã báo vi phạm",
       },
       modals: {
+        exitConfirmTitle: "Xác nhận thoát",
+        exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
+        exitConfirmDescSpectator:
+          "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu).",
+        cancel: "Hủy",
+        confirmExit: "Đồng ý thoát",
         gameEnded: "Kết thúc trò chơi",
         notEnoughPlayers: "Không đủ người chơi để tiếp tục.",
         close: "Đóng",
@@ -1178,6 +1207,8 @@ export default {
   noLimit: "Không giới hạn",
   copySuccess: "Đã sao chép liên kết",
   copyLinkTooltip: "Sao chép liên kết",
+  copyLinkError: "Không thể sao chép liên kết",
+  privatePasswordProtected: "Riêng tư & Có mật khẩu",
   expiredBadge: "Đã hết hạn",
   roomExpiredToast: "Phòng này đã hết thời hạn sử dụng!",
   callEnded: {
@@ -1275,6 +1306,8 @@ export default {
     setupStageHint: "Đã xếp học viên vào phòng. Nhấn 'Mở phòng' bên dưới để áp dụng.",
   },
   game: {
+    becameSpectator:
+      "Bạn đã rời ván đấu và chuyển sang chế độ quan sát.",
     crackIt: {
       title: "Crack It",
       close: "Đóng",
@@ -1289,6 +1322,8 @@ export default {
       answerLength: "Số từ",
       youGotIt: "Bạn đã đoán đúng! Đợi người khác...",
       typeAnswer: "Nhập đáp án của bạn...",
+      notMainPlaceholder: "Nhấp vào ô để mở rộng và chơi",
+      spectatorPlaceholder: "Bạn đang xem dưới dạng người quan sát...",
       gotItRight: "đã đoán đúng!",
       leaderboard: "Bảng xếp hạng",
       waitingPlayers: "Đang đợi người chơi...",
@@ -1300,6 +1335,17 @@ export default {
       exitConfirmTitle: "Xác nhận thoát",
       exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
       exitConfirmDesc2: "Bạn sẽ không thể tham gia lại ván chơi này nữa!",
+      exitConfirmDescSpectator:
+        "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu).",
+      pointsShort: "+ Điểm",
+      openLeaderboard: "Mở bảng xếp hạng",
+      closeLeaderboard: "Đóng bảng xếp hạng",
+      roundSkipped: "Ván đã bị bỏ qua.",
+      gameDisabledByHost: "Trò chơi đã bị Host tắt.",
+      connectionError:
+        "Chưa kết nối tới máy chủ Game. Vui lòng thử lại sau giây lát!",
+      notEnoughPlayersToStart:
+        "Không đủ người chơi để bắt đầu trò chơi. Cần ít nhất 2 người!",
       cancel: "Hủy",
       confirmExit: "Đồng ý thoát",
       roundLeaderboard: "Thành tích ván này",
@@ -1370,6 +1416,12 @@ export default {
         flaggedCount: "{0} / {1} người đã báo vi phạm",
       },
       modals: {
+        exitConfirmTitle: "Xác nhận thoát",
+        exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
+        exitConfirmDescSpectator:
+          "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu).",
+        cancel: "Hủy",
+        confirmExit: "Đồng ý thoát",
         gameEnded: "Kết thúc trò chơi",
         notEnoughPlayers: "Không đủ người chơi để tiếp tục.",
         close: "Đóng",

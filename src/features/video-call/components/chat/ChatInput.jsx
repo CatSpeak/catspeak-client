@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react"
+import React, { useState, useRef, useCallback } from "react"
 import {
   Send,
   Smile,
@@ -6,7 +6,6 @@ import {
   MessageSquareOff,
   Lock,
   Globe,
-  Check,
 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -39,14 +38,13 @@ const ChatInput = ({
 }) => {
   const [message, setMessage] = useState("")
   const [isPrivateAi, setIsPrivateAi] = useState(true)
-  const [isMultiline, setIsMultiline] = useState(false)
+  const [, setIsMultiline] = useState(false)
   const sendingRef = useRef(false)
   const editableRef = useRef(null)
   const savedSelectionRef = useRef(null) // saves caret when editable loses focus
-  const textareaRef = editableRef // alias kept for emoji hook compat
   const { t } = useLanguage()
   const { sendAiMessage, isBlocked: isAiBlocked } = useAiSend()
-  const { insertEmoji, addRecent } = useEmojiPicker()
+  const { addRecent } = useEmojiPicker()
   const {
     room,
     id: roomIdFromContext,
@@ -234,34 +232,6 @@ const ChatInput = ({
     }
   }
 
-  /** Set caret to absolute character offset inside the contenteditable */
-  const setCaretOffset = (offset) => {
-    const el = editableRef.current
-    if (!el) return
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
-    let remaining = offset
-    let node = walker.nextNode()
-    while (node) {
-      if (remaining <= node.textContent.length) {
-        const range = document.createRange()
-        range.setStart(node, remaining)
-        range.collapse(true)
-        const sel = window.getSelection()
-        sel.removeAllRanges()
-        sel.addRange(range)
-        return
-      }
-      remaining -= node.textContent.length
-      node = walker.nextNode()
-    }
-    // fallback: end of element
-    const range = document.createRange()
-    range.selectNodeContents(el)
-    range.collapse(false)
-    window.getSelection().removeAllRanges()
-    window.getSelection().addRange(range)
-  }
-
   const handleContentInput = () => {
     const newText = getPlainText()
     setMessage(newText)
@@ -336,7 +306,7 @@ const ChatInput = ({
 
     const newText = getPlainText()
     setMessage(newText)
-    updateMultilineState(newText)
+    setIsMultiline(newText.includes("\n"))
     justSelectedMentionRef.current = true
     setMentionState({
       isOpen: false,
@@ -376,7 +346,7 @@ const ChatInput = ({
     }
   }, [isHost, currentRoomId])
 
-  const currentInputText = (message || editableRef.current?.innerText || "")
+  const currentInputText = (message || "")
     .replace(/\u00a0/g, " ")
     .trim()
   const hasContent = currentInputText.length > 0

@@ -154,7 +154,7 @@ const CustomRoomCard = ({
       return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
     }
     if (room.duration && room.duration > 0) return `${room.duration} ${t.rooms?.minutes || "phút"}`
-    return customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn"
+    return customRooms.unlimited || t.rooms?.noLimit || "Unlimited"
   })()
 
   const deleteConfirmMessage = (
@@ -200,7 +200,7 @@ const CustomRoomCard = ({
                   t?.rooms?.filters?.levels?.[
                     room.requiredLevel?.toLowerCase()
                   ] ||
-                  `${t?.rooms?.filters?.levelLabel || "Trình độ"}: ${room.requiredLevel}`
+                  `${t?.rooms?.filters?.levelLabel || "Level"}: ${room.requiredLevel}`
                 }
               >
                 {t?.rooms?.filters?.levels?.[
@@ -215,7 +215,7 @@ const CustomRoomCard = ({
                   t?.rooms?.filters?.topics?.[topicKey] ||
                   activeTopic ||
                   t?.rooms?.filters?.topics?.other ||
-                  "Khác"
+                  "Other"
                 return (
                   <div
                     className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10 cursor-default"
@@ -233,7 +233,7 @@ const CustomRoomCard = ({
               <div
                 className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm shadow-sm"
                 title={
-                  isPrivate ? "Phòng riêng tư" : "Được bảo vệ bằng mật khẩu"
+                  isPrivate ? "Private room" : "Password protected"
                 }
               >
                 <Lock size={14} className="text-white" />
@@ -247,7 +247,7 @@ const CustomRoomCard = ({
                   e.stopPropagation()
                   if (onToggleBookmark) onToggleBookmark(roomId)
                 }}
-                title={t?.rooms?.unbookmark || "Bỏ lưu phòng"}
+                title={t?.rooms?.unbookmark || "Remove saved room"}
               >
                 <Bookmark
                   size={16}
@@ -265,8 +265,8 @@ const CustomRoomCard = ({
                       onEdit(room)
                     }}
                     className="flex shrink-0 h-7 w-7 items-center justify-center rounded-full hover:bg-white/30 text-white transition-colors"
-                    title={customRooms.edit || "Chỉnh sửa"}
-                    aria-label={customRooms.edit || "Chỉnh sửa"}
+                    title={customRooms.editTitle || "Chỉnh sửa"}
+                    aria-label={customRooms.editTitle || "Chỉnh sửa"}
                   >
                     <Pencil size={13} />
                   </button>
@@ -311,7 +311,7 @@ const CustomRoomCard = ({
                 title={
                   customRooms.copyLink ||
                   t?.rooms?.copyLinkTooltip ||
-                  "Sao chép liên kết"
+                  "Copy link"
                 }
                 className="flex items-center justify-center text-cath-red-800 dark:text-red-400 shrink-0 hover:scale-110 transition-all active:scale-95 cursor-pointer p-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30"
               >
@@ -344,7 +344,7 @@ const CustomRoomCard = ({
 
           {isExpired && (
             <div className="mb-2 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-2 py-1 text-center">
-              {customRooms.expiredWarning || "Đã hết hạn — sẽ được xóa"}
+              {customRooms.expiredWarning || "Expired — will be deleted"}
             </div>
           )}
 
@@ -357,8 +357,8 @@ const CustomRoomCard = ({
               </div>
               <span className="text-[13px] sm:text-[14px] font-medium text-black dark:text-neutral-200 whitespace-nowrap">
                 {maxParticipantsDisplay
-                  ? `${currentCount}/${maxParticipantsDisplay} ${t.rooms?.people || "người"}`
-                  : `${currentCount} ${t.rooms?.people || "người"}`}
+                  ? `${currentCount}/${maxParticipantsDisplay} ${t.rooms?.people || "people"}`
+                  : `${currentCount} ${t.rooms?.people || "people"}`}
               </span>
             </div>
 
@@ -418,7 +418,7 @@ const CustomRoomCard = ({
           "Xóa phòng?"
         }
         message={deleteConfirmMessage}
-        cancelText={customRooms.cancel || t.cancel || "Hủy"}
+        cancelText={t.common?.cancel || "Hủy"}
         confirmText={isDeleting ? "..." : customRooms.delete || "Xóa"}
         confirmVariant="destructive"
       />

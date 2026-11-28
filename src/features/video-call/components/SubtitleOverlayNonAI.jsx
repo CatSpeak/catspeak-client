@@ -121,8 +121,8 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
           </div>
         )}
 
-        {/* Header bar with Language switcher, Font size button and Close button — always visible (ISS-84) */}
-        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-border/80 dark:border-[#3F3F3F]/80 pl-4 pr-1 h-14 rounded-t-2xl opacity-100 pointer-events-auto transition-all duration-200 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-sm shadow-sm text-gray-900 dark:text-white">
+        {/* Header bar with Language switcher, Font size button and Close button — in-flow so it never covers the subtitle list (ISS-84) */}
+        <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-border/80 dark:border-[#3F3F3F]/80 px-4 h-14 rounded-t-2xl opacity-100 pointer-events-auto transition-all duration-200 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-sm shadow-sm text-gray-900 dark:text-white">
           <span className="font-semibold">
             {t.rooms?.videoCall?.subtitles || "Subtitles"}
           </span>
@@ -161,7 +161,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
               </IconButton>
 
               {showSizePicker && (
-                <div className="absolute bottom-full right-0 mb-2 z-50 min-w-[170px] bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white rounded-xl shadow-xl border border-border dark:border-[#3F3F3F] py-1.5 flex flex-col overflow-hidden pointer-events-auto">
+                <div className="absolute top-full right-0 mt-1 z-50 min-w-[170px] bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white rounded-xl shadow-xl border border-border dark:border-[#3F3F3F] py-1.5 flex flex-col overflow-hidden pointer-events-auto">
                   {FONT_SIZES.map((size) => {
                     const isSelected = fontSize === size.id
                     return (

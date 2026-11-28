@@ -311,7 +311,7 @@ const RoomPoliciesTab = ({ coHost }) => {
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenGame || "Bạn không có quyền thay đổi chính sách trò chơi."
+          pl.forbiddenGame || "You do not have permission to change the game policy."
         )
       )
       return
@@ -358,8 +358,8 @@ const RoomPoliciesTab = ({ coHost }) => {
       await updateRequireApproval({ id: roomId, requireApproval: next }).unwrap()
       toast.success(
         next
-          ? pl.requireApprovalOn || "Đã bật duyệt thủ công khi vào phòng."
-          : pl.requireApprovalOff || "Đã tắt duyệt thủ công khi vào phòng."
+          ? pl.requireApprovalOn || "Manual approval for joining the room is now on."
+          : pl.requireApprovalOff || "Manual approval for joining the room is now off."
       )
     } catch (err) {
       toast.error(
@@ -416,7 +416,7 @@ const RoomPoliciesTab = ({ coHost }) => {
           err,
           t,
           t?.rooms?.videoCall?.participantList?.forbiddenHighQuality ||
-            "Chỉ chủ phòng mới có quyền bật/tắt chế độ chất lượng cao."
+            "Only the room host can toggle high-quality mode."
         )
       )
       return
@@ -504,8 +504,8 @@ const RoomPoliciesTab = ({ coHost }) => {
           {isCustom
             ? pl.groupStudentPermissionsRoom ||
               pl.groupStudentPermissions ||
-              "Quyền thành viên"
-            : pl.groupStudentPermissions || "Quyền học viên"}
+              "Member permissions"
+            : pl.groupStudentPermissions || "Student permissions"}
         </span>
         <div className="flex flex-col gap-1.5">
           {canToggleSelfUnmute && (
@@ -515,7 +515,7 @@ const RoomPoliciesTab = ({ coHost }) => {
                 isCustom
                   ? pl.allowSelfUnmuteRoom ||
                     pl.allowSelfUnmute ||
-                    "Cho phép thành viên tự bật mic"
+                    "Allow members to unmute themselves"
                   : pl.allowSelfUnmute
               }
               checked={allowSelfUnmute}
@@ -530,7 +530,7 @@ const RoomPoliciesTab = ({ coHost }) => {
                 isCustom
                   ? pl.allowSelfCameraRoom ||
                     pl.allowSelfCamera ||
-                    "Cho phép thành viên tự bật camera"
+                    "Allow members to enable camera"
                   : pl.allowSelfCamera
               }
               checked={allowSelfCamera}
@@ -545,7 +545,7 @@ const RoomPoliciesTab = ({ coHost }) => {
                 isCustom
                   ? pl.allowStudentShareRoom ||
                     pl.allowStudentShare ||
-                    "Cho phép thành viên chia sẻ màn hình"
+                    "Allow members to share their screen"
                   : pl.allowStudentShare
               }
               checked={allowStudentShare}
@@ -558,7 +558,7 @@ const RoomPoliciesTab = ({ coHost }) => {
               icon={<MessageSquareOff size={15} aria-hidden="true" />}
               label={
                 gt.allowMemberPrivateAi ||
-                "Cho phép thành viên sử dụng AI Chat riêng tư"
+                "Allow members to use private AI chat"
               }
               description={gt.allowMemberPrivateAiDesc}
               checked={memberPrivateAiAllowed}
@@ -568,7 +568,7 @@ const RoomPoliciesTab = ({ coHost }) => {
           {canManageGame && (
             <PolicyRow
               icon={<Gamepad2 size={15} aria-hidden="true" />}
-              label={gt.allowGame || "Cho phép trò chơi trong phòng"}
+              label={gt.allowGame || "Allow games in the room"}
               description={gt.allowGameDesc}
               checked={allowGame}
               disabled={isTogglingGame}
@@ -607,7 +607,7 @@ const RoomPoliciesTab = ({ coHost }) => {
           {canManageRequireApproval && (
             <PolicyRow
               icon={<UserCheck size={15} aria-hidden="true" />}
-              label={pl.requireApproval || "Yêu cầu duyệt khi vào phòng"}
+              label={pl.requireApproval || "Require approval to join the room"}
               description={pl.requireApprovalDesc}
               checked={requireApproval}
               disabled={isTogglingRequireApproval}
@@ -621,7 +621,7 @@ const RoomPoliciesTab = ({ coHost }) => {
                 isCustom
                   ? pl.allowMemberRecordingRoom ||
                     pl.allowMemberRecording ||
-                    "Cho phép thành viên ghi hình"
+                    "Allow members to record"
                   : pl.allowMemberRecording
               }
               description={gt.allowMemberRecordingDesc}
@@ -633,7 +633,7 @@ const RoomPoliciesTab = ({ coHost }) => {
           {canManageHighQuality && (
             <PolicyRow
               icon={<Gauge size={15} aria-hidden="true" />}
-              label={gt.allowHighQuality || "Chế độ chất lượng cao (720p)"}
+              label={gt.allowHighQuality || "High-quality mode (720p)"}
               description={gt.allowHighQualityDesc}
               checked={roomHighQuality === true}
               disabled={isTogglingHighQuality}
@@ -663,9 +663,9 @@ const RoomPoliciesTab = ({ coHost }) => {
                 <span className="text-[11px] text-neutral-600 dark:text-[#AAAAAA] leading-relaxed">
                   {isCustom
                     ? pl.endLiveDescRoom ||
-                      "Đóng phòng và kết thúc phiên hoạt động cho toàn bộ thành viên."
+                      "Close the room and end the session for every member."
                     : pl.endLiveDesc ||
-                      "Đóng phiên họp trực tiếp cho toàn bộ học viên và người tham gia."}
+                      "End the live session for all students and participants."}
                 </span>
               </div>
             </div>

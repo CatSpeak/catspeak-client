@@ -9,7 +9,6 @@ const RecordingButton = ({
   isRecording: propIsRecording,
   isTogglingRecording: propIsTogglingRecording,
   onToggleRecording: propOnToggleRecording,
-  onStopRecording: propOnStopRecording,
 }) => {
   const { t } = useLanguage()
   const globalCall = useGlobalVideoCall()
@@ -21,8 +20,6 @@ const RecordingButton = ({
     globalCall?.hasPersonalRecordPrivilege ?? true
   const onToggleRecording =
     propOnToggleRecording ?? globalCall?.handleToggleRecording
-  const onStopRecording =
-    propOnStopRecording ?? globalCall?.confirmStopRecording
 
   const {
     formattedTime = "00:00",
