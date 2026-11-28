@@ -4,10 +4,11 @@ import { createRoot } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import VerifyEmailPage from "./VerifyEmailPage"
 
-const { verifyMock, resendMock, queryState } = vi.hoisted(() => ({
+const { verifyMock, resendMock, queryState, authText } = vi.hoisted(() => ({
   verifyMock: vi.fn(),
   resendMock: vi.fn(),
   queryState: { email: "learner@catspeak.edu.vn", otp: "123456" },
+  authText: { current: {} },
 }))
 
 vi.mock("react-router-dom", () => ({
@@ -27,7 +28,7 @@ vi.mock("@/features/auth", () => ({
 }))
 
 vi.mock("@/shared/context/LanguageContext.jsx", () => ({
-  useLanguage: () => ({ t: { auth: {} } }),
+  useLanguage: () => ({ t: { auth: authText.current } }),
 }))
 
 describe("VerifyEmailPage", () => {
@@ -41,6 +42,7 @@ describe("VerifyEmailPage", () => {
     root = createRoot(container)
     verifyMock.mockReset()
     resendMock.mockReset()
+    authText.current = {}
   })
 
   afterEach(() => {
@@ -84,4 +86,54 @@ describe("VerifyEmailPage", () => {
     expect(container.innerHTML).toContain("dark:text-red-300")
     expect(container.innerHTML).toContain("dark:text-red-400")
   })
+
+  it.each([
+    [
+      "vi",
+      {
+        emailVerifiedTitle: "Xác minh Email thành công!",
+        emailVerifiedSubtitle:
+          "Cảm ơn bạn đã xác minh địa chỉ email. Bạn có thể sử dụng đầy đủ các tính năng của Cat Speak.",
+        backToHome: "Về trang chủ",
+      },
+      "Xác minh Email thành công!",
+    ],
+    [
+      "zh",
+      {
+        emailVerifiedTitle: "邮箱验证成功！",
+        emailVerifiedSubtitle: "感谢您验证邮箱地址。",
+        backToHome: "返回首页",
+      },
+      "邮箱验证成功！",
+    ],
+    [
+      "ja",
+      {
+        emailVerifiedTitle: "メールアドレスの確認が完了しました！",
+        emailVerifiedSubtitle:
+          "メールアドレスをご確認いただきありがとうございます。",
+        backToHome: "ホームに戻る",
+      },
+      "メールアドレスの確認が完了しました！",
+    ],
+  ])(
+    "renders the %s success state without leaking the English fallback",
+    async (_lang, text, expectedTitle) => {
+      queryState.email = "learner@catspeak.edu.vn"
+      queryState.otp = "654321"
+      authText.current = text
+      verifyMock.mockReturnValue({ unwrap: async () => ({ verified: true }) })
+
+      await act(async () => {
+        root.render(<VerifyEmailPage />)
+      })
+
+      expect(container.textContent).toContain(expectedTitle)
+      expect(container.textContent).toContain(text.backToHome)
+      expect(container.textContent).not.toContain(
+        "Email Verified Successfully!",
+      )
+    },
+  )
 })

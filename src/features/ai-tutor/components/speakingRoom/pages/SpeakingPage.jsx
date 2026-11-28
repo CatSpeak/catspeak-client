@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useReducer, useRef, useCallback } from "react"
+import React, { useState, useEffect, useReducer, useRef, useCallback, useMemo } from "react"
 import { Room, RoomEvent, Track } from "livekit-client"
 import { toast } from "@/shared/utils/toastBridge"
 import { assistReducer, initialAssistState } from "../../../utils/speakingAssist"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import EarlySubmitConfirmationModal from "../modals/EarlySubmitConfirmationModal"
 import NetworkDisconnectedModal from "../modals/NetworkDisconnectedModal"
 
@@ -14,6 +15,12 @@ const TOPIC_SUBTITLE = "speaking-subtitle"
 const TOPIC_ASSIST = "speaking-assist"
 const TOPIC_STATE = "speaking-state"
 const TOPIC_CONTROL = "speaking-control"
+
+const fillTemplate = (template, values) =>
+  Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{{${key}}}`, String(value)),
+    template,
+  )
 
 /**
  * SpeakingPage component - interactive live AI speaking session room
@@ -42,12 +49,19 @@ const hintModeForLevel = (hskLevel) => {
 }
 const SpeakingPage = ({
   sessionData,
-  topicTitle = "Luyện nói tiếng Trung",
+  topicTitle,
   onEndSession,
   onBackToSelection,
   onConnectionLost,
   onRequestEnd,
 }) => {
+  const { t } = useLanguage()
+  const speakingText = useMemo(
+    () => t?.aiTutor?.speakingRoom?.speaking || {},
+    [t],
+  )
+  const resolvedTopicTitle =
+    topicTitle || speakingText.sessionTitle || "Luyện nói tiếng Trung"
   const [isMicActive, setIsMicActive] = useState(false) // Mặc định tắt mic
   const [isRequestingMic, setIsRequestingMic] = useState(false)
   const [micError, setMicError] = useState(null)
@@ -148,7 +162,10 @@ const SpeakingPage = ({
     isWrappingUpRef.current = false
     if (!token) {
       setConnectionStatus("failed")
-      setConnectError("Không tìm thấy mã LiveKit token hợp lệ để kết nối vào phòng.")
+      setConnectError(
+        speakingText.tokenMissing ||
+          "Không tìm thấy mã LiveKit token hợp lệ để kết nối vào phòng.",
+      )
       return
     }
 
@@ -230,9 +247,9 @@ const SpeakingPage = ({
           if (data.turn_index != null) setCurrentRound(data.turn_index)
           if (data.script_turns != null) setTotalRounds(data.script_turns)
           if (data.warn === "silence_10s") {
-            setWarnMessage("Bạn có cần AI hỗ trợ không? Hãy thử phát âm một từ gợi ý nhé!")
+            setWarnMessage(speakingText.warnSilence || "Bạn có cần AI hỗ trợ không? Hãy thử phát âm một từ gợi ý nhé!")
           } else if (data.warn === "time_4m") {
-            setWarnMessage("Phiên luyện nói sắp hết giờ (còn 1 phút).")
+            setWarnMessage(speakingText.warnTime || "Phiên luyện nói sắp hết giờ (còn 1 phút).")
           } else if (!data.warn) {
             setWarnMessage(null)
           }
@@ -262,7 +279,10 @@ const SpeakingPage = ({
     room.connect(serverUrl, token).catch((err) => {
       if (!isCancelled) {
         console.error("[SpeakingPage] LiveKit connect error:", err)
-        const msg = err?.message || "Không thể kết nối đến máy chủ đàm thoại LiveKit."
+        const msg =
+          err?.message ||
+          speakingText.connectFailed ||
+          "Không thể kết nối đến máy chủ đàm thoại LiveKit."
         setConnectionStatus("failed")
         setConnectError(msg)
         toast.error(msg)
@@ -275,7 +295,7 @@ const SpeakingPage = ({
         room.disconnect()
       }
     }
-  }, [token, serverUrl, retryCount, finishSessionOnce, pauseForNetwork, resumeAfterNetwork])
+  }, [token, serverUrl, retryCount, finishSessionOnce, pauseForNetwork, resumeAfterNetwork, speakingText])
 
   // Trình duyệt báo mất/có mạng nhanh hơn LiveKit nhiều giây.
   useEffect(() => {
@@ -392,7 +412,9 @@ const SpeakingPage = ({
         setMicError(null)
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          const notSupportedMsg = "Trình duyệt không hỗ trợ truy cập Micro."
+          const notSupportedMsg =
+            speakingText.notSupported ||
+            "Trình duyệt không hỗ trợ truy cập Micro."
           setMicError(notSupportedMsg)
           toast.error(notSupportedMsg)
           setIsRequestingMic(false)
@@ -409,6 +431,7 @@ const SpeakingPage = ({
       } catch (err) {
         console.warn("[SpeakingPage] Mic permission denied or error:", err)
         const deniedMsg =
+          speakingText.permissionDenied ||
           "Chưa cấp quyền Micro. Vui lòng cho phép trình duyệt truy cập mic để luyện nói."
         setMicError(deniedMsg)
         toast.error(deniedMsg)
@@ -437,7 +460,10 @@ const SpeakingPage = ({
     } catch {
       isWrappingUpRef.current = false
       setIsWrappingUp(false)
-      toast.error("Không gửi được yêu cầu kết thúc. Hãy thử lại.")
+      toast.error(
+        speakingText.endRequestFailed ||
+          "Không gửi được yêu cầu kết thúc. Hãy thử lại.",
+      )
     }
   }
 
@@ -483,17 +509,17 @@ const SpeakingPage = ({
 
           <div className="space-y-2">
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-              Đang kết nối phòng luyện nói...
+              {speakingText.connectingTitle || "Đang kết nối phòng luyện nói..."}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-neutral-300 max-w-sm mx-auto">
-              Đang kết nối với trợ lý cho chủ đề:{" "}
-              <span className="font-semibold text-[#990011] dark:text-red-400">{topicTitle}</span>
+              {speakingText.connectingTopic || "Đang kết nối với trợ lý cho chủ đề:"}{" "}
+              <span className="font-semibold text-[#990011] dark:text-red-400">{resolvedTopicTitle}</span>
             </p>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 dark:text-neutral-300 bg-slate-50 dark:bg-[#242424] py-2.5 px-4 rounded-xl border border-slate-200/80 dark:border-[#3F3F3F] max-w-xs mx-auto">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span>Vui lòng chờ trong giây lát...</span>
+            <span>{speakingText.pleaseWait || "Vui lòng chờ trong giây lát..."}</span>
           </div>
 
           <div className="pt-2">
@@ -505,7 +531,7 @@ const SpeakingPage = ({
               }}
               className="text-xs font-semibold text-slate-500 dark:text-neutral-400 hover:text-slate-800 dark:hover:text-white transition-colors underline cursor-pointer"
             >
-              Hủy và quay lại danh sách chủ đề
+              {speakingText.cancelBack || "Hủy và quay lại danh sách chủ đề"}
             </button>
           </div>
         </div>
@@ -525,10 +551,12 @@ const SpeakingPage = ({
 
           <div className="space-y-2">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-              Không thể kết nối vào phòng luyện nói
+              {speakingText.failedTitle || "Không thể kết nối vào phòng luyện nói"}
             </h2>
             <p className="text-sm text-slate-600 dark:text-neutral-300 max-w-md mx-auto">
-              {connectError || "Không thể kết nối với trợ lý. Vui lòng kiểm tra mạng và thử lại."}
+              {connectError ||
+                speakingText.failedFallback ||
+                "Không thể kết nối với trợ lý. Vui lòng kiểm tra mạng và thử lại."}
             </p>
           </div>
 
@@ -538,7 +566,7 @@ const SpeakingPage = ({
               onClick={() => setRetryCount((k) => k + 1)}
               className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-sm tracking-wide transition-all shadow-md cursor-pointer"
             >
-              🔄 Thử kết nối lại
+              {speakingText.retryConnect || "🔄 Thử kết nối lại"}
             </button>
             <button
               type="button"
@@ -548,7 +576,7 @@ const SpeakingPage = ({
               }}
               className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-100 dark:bg-[#242424] hover:bg-slate-200 dark:hover:bg-[#2c2c2c] text-slate-700 dark:text-neutral-200 font-bold text-sm transition-all cursor-pointer"
             >
-              Quay lại danh sách chủ đề
+              {speakingText.backToTopics || "Quay lại danh sách chủ đề"}
             </button>
           </div>
         </div>
@@ -561,10 +589,10 @@ const SpeakingPage = ({
       <div className="mx-auto max-w-xl px-4 py-20 text-center">
         <audio ref={audioRef} autoPlay className="hidden" />
         <div className="rounded-3xl border border-amber-200 dark:border-amber-900/40 bg-white dark:bg-[#1A1A1A] p-8 shadow-lg">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Đang khôi phục kết nối</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">Phiên sẽ tự kết thúc nếu kết nối không được khôi phục trong 15 giây.</p>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">{speakingText.restoringTitle || "Đang khôi phục kết nối"}</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">{speakingText.restoringDesc || "Phiên sẽ tự kết thúc nếu kết nối không được khôi phục trong 15 giây."}</p>
           <button type="button" className="mt-5 rounded-xl bg-[#990011] px-5 py-3 text-sm font-bold text-white cursor-pointer" onClick={() => onConnectionLost?.()}>
-            Thử kết nối lại
+            {speakingText.retry || "Thử kết nối lại"}
           </button>
         </div>
       </div>
@@ -588,10 +616,10 @@ const SpeakingPage = ({
                 : "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300"
             }`}
           >
-            ● {connectionStatus === "connected" ? "Đã vào phòng luyện nói" : "Đang kết nối với trợ lý..."}
+            ● {connectionStatus === "connected" ? speakingText.joined || "Đã vào phòng luyện nói" : speakingText.connectingShort || "Đang kết nối với trợ lý..."}
           </span>
           <div className="bg-rose-50/50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 text-[#990011] dark:text-red-400 text-xs sm:text-sm font-medium rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-2xs">
-            <span>🍎 {topicTitle} · Lượt {currentRound}/{totalRounds}</span>
+            <span>🍎 {resolvedTopicTitle} · {fillTemplate(speakingText.turnLabel || "Lượt {{current}}/{{total}}", { current: currentRound, total: totalRounds })}</span>
             <div className="flex items-center gap-1">
               {Array.from({ length: totalRounds }).map((_, i) => (
                 <span
@@ -609,7 +637,7 @@ const SpeakingPage = ({
             disabled={isWrappingUp}
             className="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold rounded-xl transition cursor-pointer"
           >
-            Kết thúc
+            {speakingText.end || "Kết thúc"}
           </button>
         </div>
       </div>
@@ -626,7 +654,7 @@ const SpeakingPage = ({
             onClick={handleToggleMic}
             className="px-3 py-1 bg-rose-200 hover:bg-rose-300 text-rose-900 font-bold rounded-lg text-xs cursor-pointer shrink-0"
           >
-            Cấp quyền lại
+            {speakingText.grantAgain || "Cấp quyền lại"}
           </button>
         </div>
       )}
@@ -658,7 +686,7 @@ const SpeakingPage = ({
 
           {/* AI Speaking Status Pill */}
           <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200/70 dark:border-rose-900/40 text-[#990011] dark:text-red-400 text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full inline-flex items-center gap-2 shadow-2xs">
-            <span>{isAiSpeaking ? "AI Tutor Cat Speak đang nói..." : "AI đang lắng nghe bạn..."}</span>
+            <span>{isAiSpeaking ? speakingText.aiSpeaking || "AI Tutor Cat Speak đang nói..." : speakingText.aiListening || "AI đang lắng nghe bạn..."}</span>
             {isAiSpeaking && (
               <span className="flex items-center gap-0.5 text-xs text-[#990011] dark:text-red-400">
                 <span className="w-1 h-3 bg-[#990011] dark:bg-red-400 rounded-full animate-bounce [animation-delay:0ms]" />
@@ -694,7 +722,7 @@ const SpeakingPage = ({
                 className="border border-rose-200 dark:border-rose-900/50 text-[#990011] dark:text-red-400 bg-rose-50/50 dark:bg-rose-950/40 hover:bg-rose-100/70 dark:hover:bg-rose-900/60 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <span>🔊</span>
-                <span>{isReplayingAi ? "Đang phát..." : "Nghe lại"}</span>
+                <span>{isReplayingAi ? speakingText.replayPlaying || "Đang phát..." : speakingText.replay || "Nghe lại"}</span>
               </button>
             </div>
 
@@ -720,7 +748,7 @@ const SpeakingPage = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase">
                 <span>👤</span>
-                <span>BẠN (HỌC VIÊN)</span>
+                <span>{speakingText.studentName || "BẠN (HỌC VIÊN)"}</span>
               </div>
               <span
                 className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1 ${
@@ -729,7 +757,7 @@ const SpeakingPage = ({
                     : "bg-slate-100 text-slate-600 dark:bg-[#272727] dark:text-neutral-300"
                 }`}
               >
-                {isMicActive ? "✓ Micro đang bật" : "✕ Micro đang tắt"}
+                {isMicActive ? speakingText.micOn || "✓ Micro đang bật" : speakingText.micOff || "✕ Micro đang tắt"}
               </span>
             </div>
 
@@ -740,7 +768,7 @@ const SpeakingPage = ({
                 </p>
               ) : (
                 <p className="text-sm sm:text-base font-medium text-slate-700 dark:text-neutral-300 leading-snug">
-                  Đang lắng nghe bạn nói...
+                  {speakingText.listeningYou || "Đang lắng nghe bạn nói..."}
                 </p>
               )}
             </div>
@@ -754,19 +782,19 @@ const SpeakingPage = ({
                     onClick={() => setChipOpenForSeq(assist.ai?.seq ?? null)}
                     className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100/70 dark:hover:bg-amber-900/50 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
                   >
-                    💡 Gợi ý
+                    {speakingText.hintButton || "💡 Gợi ý"}
                   </button>
                 ) : (
                   <>
                     <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 shrink-0">
-                      💡 Gợi ý:
+                      {speakingText.hintLabel || "💡 Gợi ý:"}
                     </span>
                     {hints.map((hint, idx) => (
                       <button
                         key={hint.id || idx}
                         type="button"
                         onClick={() => sendControlPacket("play_hint", hint.id)}
-                        title="Bấm để nghe mẫu giọng AI tốc độ chậm"
+                        title={speakingText.hintTitle || "Bấm để nghe mẫu giọng AI tốc độ chậm"}
                         className="bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100/70 dark:hover:bg-blue-900/50 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-left flex items-center gap-1"
                       >
                         <span>🗣️</span>
@@ -787,10 +815,10 @@ const SpeakingPage = ({
             <span className="text-amber-600 dark:text-amber-400 font-bold shrink-0 text-base">⚡</span>
             <div className="flex flex-wrap items-center gap-1.5 text-amber-950 dark:text-amber-200">
               <span className="font-extrabold text-amber-900 dark:text-amber-300 shrink-0">
-                MẸO SỬA LỖI TỨC THÌ:
+                {speakingText.correctionLabel || "MẸO SỬA LỖI TỨC THÌ:"}
               </span>
               <span>
-                Bạn nói: “{correction.original}” ➔ Thử nói: “{correction.corrected}”. {correction.note_vi || ""}
+                {speakingText.correctionPrefix || "Bạn nói:"} “{correction.original}” {speakingText.correctionArrow || "➔ Thử nói:"} “{correction.corrected}”. {correction.note_vi || ""}
               </span>
             </div>
           </div>
@@ -802,7 +830,7 @@ const SpeakingPage = ({
           {/* Left Timer Pill */}
           <div className="bg-rose-50/60 dark:bg-rose-950/40 border border-rose-200/70 dark:border-rose-900/40 text-[#990011] dark:text-red-400 text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-2xs sm:justify-self-start">
             <span>⏱</span>
-            <span>{formattedTime()} / 05:00 · Thu âm phản xạ</span>
+            <span>{formattedTime()} / 05:00 · {speakingText.timerSuffix || "Thu âm phản xạ"}</span>
           </div>
 
           {/* Center Big Mic Button & Caption */}
@@ -816,7 +844,7 @@ const SpeakingPage = ({
                   ? "bg-[#990011] hover:bg-[#85000f] ring-4 ring-rose-100 dark:ring-rose-950/60 animate-pulse"
                   : "bg-slate-500 hover:bg-slate-600 ring-2 ring-slate-200 dark:ring-neutral-700"
               } ${isRequestingMic ? "opacity-75 cursor-wait" : ""}`}
-              title={isMicActive ? "Nhấn để tắt mic" : "Nhấn để bật mic và bắt đầu nói"}
+              title={isMicActive ? speakingText.micTitleOn || "Nhấn để tắt mic" : speakingText.micTitleOff || "Nhấn để bật mic và bắt đầu nói"}
             >
               {isRequestingMic ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -832,8 +860,8 @@ const SpeakingPage = ({
             </button>
             <span className="text-[11px] text-slate-500 dark:text-neutral-400 text-center mt-1.5 font-normal">
               {isMicActive
-                ? "Micro đang bật · Nhấn để tắt"
-                : "Micro đang tắt · Nhấn để bật & cấp quyền"}
+                ? speakingText.micCaptionOn || "Micro đang bật · Nhấn để tắt"
+                : speakingText.micCaptionOff || "Micro đang tắt · Nhấn để bật & cấp quyền"}
             </span>
           </div>
 
@@ -860,6 +888,7 @@ const SpeakingPage = ({
         onContinueSpeaking={() => setShowEarlySubmit(false)}
       />
       <NetworkDisconnectedModal
+        key={networkLost ? "network-lost" : "network-connected"}
         isOpen={networkLost}
         onClose={() => {}}
         initialSeconds={RECONNECT_WINDOW_S}

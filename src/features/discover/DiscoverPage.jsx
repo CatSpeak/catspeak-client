@@ -15,7 +15,7 @@ const DiscoverPage = () => {
           <div className="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-[#990011] dark:text-[#FF7A8A] flex items-center justify-center">
             <Compass className="w-8 h-8 stroke-[1.5]" />
           </div>
-          <span className="absolute -bottom-2 -right-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/40 text-[#990011] dark:text-[#FF7A8A] border border-rose-100 dark:border-rose-900/60">
+          <span className="absolute -bottom-2 -right-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap bg-rose-50 dark:bg-rose-950/40 text-[#990011] dark:text-[#FF7A8A] border border-rose-100 dark:border-rose-900/60">
             <Sparkles className="w-3 h-3 fill-current" />
             {comingSoonT.badge || "Sắp ra mắt"}
           </span>

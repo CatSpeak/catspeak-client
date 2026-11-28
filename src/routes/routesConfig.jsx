@@ -95,7 +95,6 @@ const AiHistoryProgressPage = lazy(
 import { PageNotFound, ForbiddenPage, ComingSoonPage } from "@/shared/pages"
 
 // User & Admin Pages
-import UserDashboard from "@/features/user/pages/UserDashboard"
 
 import UserPagesLayout from "@/features/user/layouts/UserPagesLayout"
 // Language routing components
@@ -614,7 +613,9 @@ const routesConfig = [
                   },
                   {
                     path: "placement-test",
-                    element: <ComingSoonPage />,
+                    element: (
+                      <Navigate to="/zh/ai-tutor/level-assessment" replace />
+                    ),
                   },
                   { path: "*", element: <PageNotFound /> },
                 ],
@@ -909,13 +910,11 @@ const routesConfig = [
         children: [
           {
             path: "app",
-            children: [
-              {
-                index: true,
-                element: <UserDashboard />,
-              },
-              { path: "*", element: <PageNotFound /> },
-            ],
+            element: <Navigate to="/workspace/dashboard" replace />,
+          },
+          {
+            path: "app/*",
+            element: <Navigate to="/workspace/dashboard" replace />,
           },
         ],
       },

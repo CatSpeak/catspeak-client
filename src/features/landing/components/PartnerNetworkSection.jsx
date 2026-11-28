@@ -66,7 +66,9 @@ const PartnerNetworkSection = () => {
         </div>
 
         <a
-          href="mailto:catspeak.vn@gmail.com?subject=Đăng%20ký%20đối%20tác%20trường%20%2F%20CLB"
+          href={`mailto:catspeak.vn@gmail.com?subject=${encodeURIComponent(
+            sectionT.mailSubject || "Đăng ký đối tác trường / CLB",
+          )}`}
           className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-[#d6d6d6] bg-white px-4 py-3 text-sm font-semibold text-[#252525] transition-colors hover:border-[#b3261e]/40 hover:bg-[#fff8f8] dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:border-white/30 dark:hover:bg-white/15 lg:self-center"
         >
           <Building2 size={16} />
@@ -84,7 +86,7 @@ const PartnerNetworkSection = () => {
           autoFill
           aria-label={sectionT.partnersLabel || "Mạng lưới đối tác"}
         >
-          {PARTNERS.map((partner) => (
+          {PARTNERS.map((partner, index) => (
             <article
               key={partner.code}
               className="mx-2 flex h-[82px] w-[290px] items-center gap-3 rounded-2xl border border-[#dedede] bg-white px-4 shadow-sm dark:border-white/10 dark:bg-[#191a20] sm:mx-2.5 sm:w-[320px]"
@@ -98,11 +100,12 @@ const PartnerNetworkSection = () => {
                     {partner.name}
                   </h3>
                   <span className="shrink-0 text-[10px] font-semibold text-[#b3261e] dark:text-rose-400">
-                    {partner.category}
+                    {sectionT.items?.[index]?.category || partner.category}
                   </span>
                 </div>
                 <p className="mt-1 truncate text-xs text-gray-600 dark:text-gray-400">
-                  {partner.organization}
+                  {sectionT.items?.[index]?.organization ||
+                    partner.organization}
                 </p>
               </div>
             </article>

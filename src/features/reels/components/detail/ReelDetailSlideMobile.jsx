@@ -91,7 +91,6 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
   const [replyTarget, setReplyTarget] = useState(null);
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [viewportOffset, setViewportOffset] = useState(0);
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
 
@@ -121,7 +120,6 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
   const {
     handleLike,
     handleShare,
-    handleBookmark,
     handleCommentSubmit,
     handleCommentDelete,
     isPostingComment,
@@ -174,7 +172,9 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         // Fallback: just unbookmark from default
         try {
           await bookmarkReel({ reelId: reel.id }).unwrap()
-        } catch {}
+        } catch {
+          // Fallback unbookmark failure is non-fatal; the UI keeps its state.
+        }
       }
     } else {
       setShowPlaylistModal(true)
@@ -375,7 +375,13 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
                 />
               </div>
               <span className="text-white text-xs font-semibold drop-shadow-md">
-                {isBookmarked ? (language?.saved || "Saved") : (language?.save || "Save")}
+                {isBookmarked
+                  ? t?.catSpeak?.reels?.detail?.saved ||
+                    t?.common?.saved ||
+                    "Đã lưu"
+                  : t?.catSpeak?.reels?.detail?.save ||
+                    t?.common?.save ||
+                    "Lưu"}
               </span>
             </button>
 

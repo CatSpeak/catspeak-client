@@ -112,6 +112,12 @@ export default {
   passwordChangedSubtitle: "Your password has been successfully updated.",
   loginNowButton: "Log in now",
   verifyEmailTitle: "Verify Your Email",
+  verifyEmailOtpSubtitle:
+    "Enter the 6-digit verification code sent to your email.",
+  emailVerifiedTitle: "Email Verified Successfully!",
+  emailVerifiedSubtitle:
+    "Thank you for verifying your email address. You can now use all features of Cat Speak.",
+  backToHome: "Go to Home",
   verifyEmailSubtitle: "We've sent a 6-digit code to",
   editEmail: "Edit Email",
   updateEmail: "Update Email",

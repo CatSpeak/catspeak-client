@@ -1,6 +1,13 @@
 import React from "react"
 import { LogOut, Info, Sparkles, X } from "lucide-react"
 import { createPortal } from "react-dom"
+import { useLanguage } from "@/shared/context/LanguageContext"
+
+const fillTemplate = (template, values) =>
+  Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{{${key}}}`, String(value)),
+    template,
+  )
 
 const EarlySubmitConfirmationModal = ({
   isOpen = false,
@@ -10,6 +17,8 @@ const EarlySubmitConfirmationModal = ({
   onSubmitEarly,
   onContinueSpeaking,
 }) => {
+  const { t } = useLanguage()
+  const modalText = t?.aiTutor?.speakingRoom?.modals?.early || {}
   if (!isOpen || typeof document === "undefined") return null
 
   const formattedCompleted = String(completedCount).padStart(2, "0")
@@ -33,7 +42,7 @@ const EarlySubmitConfirmationModal = ({
               type="button"
               onClick={onClose}
               className="absolute right-5 top-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-[#272727] hover:bg-slate-200 dark:hover:bg-[#333] flex items-center justify-center text-slate-500 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
-              aria-label="Close dialog"
+              aria-label={t?.aiTutor?.speakingRoom?.modals?.close || "Close dialog"}
             >
               <X className="w-4 h-4" />
             </button>
@@ -45,22 +54,27 @@ const EarlySubmitConfirmationModal = ({
 
             {/* Title */}
             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">
-              Hoàn thành bài nói & xem kết quả ngay?
+              {modalText.title || "Hoàn thành bài nói & xem kết quả ngay?"}
             </h2>
 
             {/* Practice Count Subtitle */}
             <p className="text-xs sm:text-sm font-semibold text-[#990011] dark:text-red-400 mt-1.5 mb-5">
-              Số câu bạn đã luyện tập: {formattedCompleted} / {formattedTotal} câu phản xạ.
+              {fillTemplate(
+                modalText.subtitle ||
+                  "Số câu bạn đã luyện tập: {{completed}} / {{total}} câu phản xạ.",
+                { completed: formattedCompleted, total: formattedTotal },
+              )}
             </p>
 
             {/* Box 1: Thông tin nộp bài sớm */}
             <div className="p-4 sm:p-4.5 rounded-2xl bg-amber-50/50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-left space-y-1.5">
               <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wide">
                 <Info className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
-                <span>Thông tin nộp bài sớm</span>
+                <span>{modalText.infoTitle || "Thông tin nộp bài sớm"}</span>
               </div>
               <p className="text-xs text-amber-900/80 dark:text-amber-200/80 leading-relaxed pl-6">
-                Bạn có thể nộp bài bất cứ lúc nào! Hệ thống sẽ chấm điểm và nhận xét dựa trên những câu bạn đã đàm thoại trong buổi này.
+                {modalText.infoDesc ||
+                  "Bạn có thể nộp bài bất cứ lúc nào! Hệ thống sẽ chấm điểm và nhận xét dựa trên những câu bạn đã đàm thoại trong buổi này."}
               </p>
             </div>
 
@@ -68,10 +82,11 @@ const EarlySubmitConfirmationModal = ({
             <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-800/40 text-left space-y-1.5">
               <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
                 <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span>Bạn sẽ nhận được sau khi nộp bài</span>
+                <span>{modalText.resultTitle || "Bạn sẽ nhận được sau khi nộp bài"}</span>
               </div>
               <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80 leading-relaxed pl-6">
-                Báo cáo đánh giá phát âm chi tiết + các từ vựng mới/sai tự động lưu vào sổ Flashcard ôn tập ngắt quãng của bạn!
+                {modalText.resultDesc ||
+                  "Báo cáo đánh giá phát âm chi tiết + các từ vựng mới/sai tự động lưu vào sổ Flashcard ôn tập ngắt quãng của bạn!"}
               </p>
             </div>
 
@@ -85,7 +100,7 @@ const EarlySubmitConfirmationModal = ({
                 }}
                 className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100/80 dark:hover:bg-rose-900/50 text-[#990011] dark:text-red-400 font-semibold text-xs sm:text-sm transition-colors cursor-pointer text-center"
               >
-                Nộp bài
+                {modalText.submit || "Nộp bài"}
               </button>
 
               <button
@@ -96,7 +111,7 @@ const EarlySubmitConfirmationModal = ({
                 }}
                 className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
               >
-                Tiếp tục ở lại
+                {modalText.stay || "Tiếp tục ở lại"}
               </button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import {
   GraduationCap,
   Laptop,
 } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const audiences = [
   {
@@ -67,32 +68,38 @@ const audiences = [
 ]
 
 const TargetAudienceSection = () => {
+  const { t } = useLanguage()
+  const audienceText = t?.landing?.targetAudience || {}
+  const localizedAudiences = audiences.map((item, index) => ({
+    ...item,
+    ...(audienceText.items?.[index] || {}),
+    icon: item.icon,
+  }))
   const [activeAudience, setActiveAudience] = useState(0)
-  const audience = audiences[activeAudience]
+  const audience = localizedAudiences[activeAudience]
 
   return (
     <section className="w-full bg-white px-4 py-12 transition-colors dark:bg-[#0F0F0F] sm:px-6 sm:py-16 lg:px-8">
       <div className="mx-auto max-w-[1220px]">
         <header className="mx-auto mb-8 max-w-[800px] text-center">
           <p className="text-xs font-semibold uppercase tracking-wide text-[#B3261E] dark:text-[#ff7a8a] sm:text-sm">
-            Đối tượng phù hợp
+            {audienceText.eyebrow || "Đối tượng phù hợp"}
           </p>
           <h2 className="mt-3 text-[clamp(2rem,4vw,2.65rem)] font-black leading-[1.08] tracking-[-0.04em] text-[#171717] dark:text-white">
-            Ai nên dùng CAT SPEAK?
+            {audienceText.title || "Ai nên dùng CAT SPEAK?"}
           </h2>
           <p className="mx-auto mt-2 max-w-[800px] text-sm leading-6 text-[#666] dark:text-gray-300 sm:text-base">
-            Dù mục tiêu của bạn là vượt qua kỳ thi chứng chỉ, tự tin thuyết trình
-            trước sếp hay mở rộng cơ hội việc làm toàn cầu, CAT SPEAK luôn có
-            không gian phù hợp cho bạn.
+            {audienceText.description ||
+              "Dù mục tiêu của bạn là vượt qua kỳ thi chứng chỉ, tự tin thuyết trình trước sếp hay mở rộng cơ hội việc làm toàn cầu, CAT SPEAK luôn có không gian phù hợp cho bạn."}
           </p>
         </header>
 
         <div
           role="tablist"
-          aria-label="Chọn nhóm người học"
+          aria-label={audienceText.tabAriaLabel || "Chọn nhóm người học"}
           className="mb-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4"
         >
-          {audiences.map(({ icon, label }, index) => {
+          {localizedAudiences.map(({ icon, label }, index) => {
             const isActive = activeAudience === index
             return (
               <button
@@ -138,7 +145,7 @@ const TargetAudienceSection = () => {
         >
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#B3261E] dark:text-[#ff7a8a]">
-              Nhóm người học: {audience.label}
+              {audienceText.audienceLabel || "Nhóm người học:"} {audience.label}
             </p>
             <h3 className="mt-4 text-xl font-bold leading-snug text-[#171717] dark:text-gray-100 sm:text-2xl">
               {audience.heading}
@@ -146,7 +153,7 @@ const TargetAudienceSection = () => {
 
             <div className="mt-4 rounded-xl border border-[#dedede] bg-white px-4 py-3 dark:border-[#3b3b3b] dark:bg-[#242424]">
               <p className="text-xs font-bold text-[#171717] dark:text-gray-100">
-                Thách thức thường gặp:
+                {audienceText.challengeLabel || "Thách thức thường gặp:"}
               </p>
               <p className="mt-1 text-xs leading-[1.6] text-[#555] dark:text-gray-300 sm:text-sm">
                 {audience.challenge}
@@ -155,7 +162,8 @@ const TargetAudienceSection = () => {
 
             <div className="mt-3 rounded-xl border border-[#dedede] bg-white px-4 py-3 dark:border-[#3b3b3b] dark:bg-[#242424]">
               <p className="text-xs font-bold text-[#B3261E] dark:text-[#ff7a8a]">
-                Giải pháp CAT SPEAK mang lại:
+                {audienceText.solutionLabel ||
+                  "Giải pháp CAT SPEAK mang lại:"}
               </p>
               <p className="mt-1 text-xs leading-[1.6] text-[#555] dark:text-gray-300 sm:text-sm">
                 {audience.solution}
@@ -165,7 +173,7 @@ const TargetAudienceSection = () => {
 
           <aside className="h-fit rounded-2xl border border-[#dedede] bg-white p-5 shadow-sm dark:border-[#3b3b3b] dark:bg-[#242424] sm:p-6">
             <h4 className="border-b border-[#ececec] pb-3 text-sm font-bold uppercase text-[#171717] dark:border-[#3b3b3b] dark:text-gray-100">
-              Lợi ích cụ thể bạn nhận được
+              {audienceText.benefitsTitle || "Lợi ích cụ thể bạn nhận được"}
             </h4>
             <ul className="mt-4 space-y-3">
               {audience.benefits.map((benefit) => (

@@ -1,5 +1,12 @@
 import React from "react"
 import { useSidebar } from "@/shared/context/SidebarContext"
+import { useLanguage } from "@/shared/context/LanguageContext"
+
+const fillTemplate = (template, values) =>
+  Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{{${key}}}`, String(value)),
+    template,
+  )
 
 const SpeakingRoomStickyBottomBar = ({
   selectedTopic,
@@ -7,12 +14,22 @@ const SpeakingRoomStickyBottomBar = ({
   isQuotaExceeded = false,
 }) => {
   const { isDesktopExpanded } = useSidebar()
+  const { t } = useLanguage()
+  const stickyText = t?.aiTutor?.speakingRoom?.sticky || {}
   if (!selectedTopic) return null
 
   // Extract Chinese title
   const chineseSubtitle = selectedTopic.sub
     ? selectedTopic.sub.split("·")[0]?.trim()
     : ""
+  const selectedLabel = fillTemplate(
+    stickyText.selected || "Đã chọn: {{title}}",
+    {
+      title: `${selectedTopic.title}${
+        chineseSubtitle ? ` (${chineseSubtitle})` : ""
+      }`,
+    },
+  )
 
   return (
     <div className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 sm:px-6 sm:pt-4 lg:transition-[left] lg:duration-200 ${isDesktopExpanded ? "lg:left-[352px]" : "lg:left-[72px]"}`}>
@@ -26,13 +43,15 @@ const SpeakingRoomStickyBottomBar = ({
               }`}
             />
             <span className={isQuotaExceeded ? "text-amber-800 dark:text-amber-400" : "text-[#990011] dark:text-red-400"}>
-              Đã chọn: {selectedTopic.title} {chineseSubtitle ? `(${chineseSubtitle})` : ""} · 4-6 câu
+              {selectedLabel} · {stickyText.turns || "4-6 câu"}
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-neutral-400">
             {isQuotaExceeded
-              ? "Bạn đã dùng hết hạn mức hôm nay (2/2 buổi). Nâng cấp để tiếp tục."
-              : "Trừ 1 buổi vào hạn mức sau khi hoàn thành phiên luyện nói"}
+              ? stickyText.quotaExceededDetail ||
+                "Bạn đã dùng hết hạn mức hôm nay (2/2 buổi). Nâng cấp để tiếp tục."
+              : stickyText.quotaNote ||
+                "Trừ 1 buổi vào hạn mức sau khi hoàn thành phiên luyện nói"}
           </p>
         </div>
 
@@ -48,11 +67,14 @@ const SpeakingRoomStickyBottomBar = ({
           }`}
           title={
             isQuotaExceeded
-              ? "Bạn đã dùng hết hạn mức hôm nay. Vui lòng nâng cấp gói."
-              : "Bắt đầu luyện nói ngay"
+              ? stickyText.upgradeHint ||
+                "Bạn đã dùng hết hạn mức hôm nay. Vui lòng nâng cấp gói."
+              : stickyText.start || "Bắt đầu luyện nói ngay"
           }
         >
-          {isQuotaExceeded ? "Hết hạn mức hôm nay" : "Bắt đầu luyện nói ngay"}
+          {isQuotaExceeded
+            ? stickyText.outOfQuota || "Hết hạn mức hôm nay"
+            : stickyText.start || "Bắt đầu luyện nói ngay"}
         </button>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import TeachingMaterialPage from "./TeachingMaterialPage"
+import materialsVi from "../i18n/vi"
 
 const api = vi.hoisted(() => ({
   personalMaterials: vi.fn(() => ({ data: [], isLoading: false })),
@@ -180,5 +181,15 @@ describe("ISS-19/ISS-20: TeachingMaterialPage header actions and folder fetch", 
     expect(createButton.innerHTML).toContain("dark:text-[#FF7A8A]")
     expect(createButton.innerHTML).not.toContain("color:#6E0009")
     expect(createButton.innerHTML).not.toContain("border-color:#6E0009")
+  })
+})
+
+describe("ISS-75: Vietnamese materials terminology is consistent", () => {
+  it("uses 'Tải lên' instead of the English 'Upload'", () => {
+    expect(materialsVi.materials.upload).toBe("Tải lên")
+    expect(materialsVi.materials.publicShareOnUpload).toBe(
+      "Chia sẻ công khai ngay sau khi tải lên",
+    )
+    expect(materialsVi.materials.publicShareOnUpload).not.toContain("upload")
   })
 })

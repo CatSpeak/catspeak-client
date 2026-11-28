@@ -8,6 +8,25 @@ export default {
   namePlaceholder: "Tên của bạn",
   contactMessage: "sẽ liên lạc với bạn sớm nhất có thể bạn nhé^^",
   sendContact: "Gửi thông tin liên hệ",
+  logoAriaLabel: "CAT SPEAK - Trang chủ",
+  description:
+    "Nền tảng cộng đồng luyện nói 3 ngôn ngữ Anh - Trung - Nhật cùng người thật và AI linh hoạt theo nhu cầu. Biến kiến thức thành những cuộc trò chuyện thực tế.",
+  statusOnline: "Trạng thái: Nền tảng đang hoạt động trực tuyến 24/7",
+  quickNavigationTitle: "Điều hướng nhanh",
+  quickLinks: {
+    learningBarriers: "Vấn đề người học",
+    solutions: "Giải pháp CAT SPEAK",
+    coreFeatures: "Tính năng cốt lõi (Room 1-1, AI)",
+    howItWorks: "Cách hoạt động",
+    methodComparison: "So sánh phương pháp học",
+    faq: "Câu hỏi thường gặp (FAQ)",
+    systemStatus: "Trạng thái hệ thống",
+  },
+  contactPageLink: "Trang liên hệ & hợp tác",
+  officialContactTitle: "Thông tin liên hệ & kênh chính thức",
+  supportHours: "Thời gian hỗ trợ: 08:30 - 21:00 (Thứ Hai - Chủ Nhật)",
+  copyrightNotice:
+    "© {year} CAT SPEAK Community. Bản quyền thuộc về CAT SPEAK.",
   languages: {
     vietnamese: "Tiếng Việt",
     english: "Tiếng Anh",
@@ -18,6 +37,7 @@ export default {
     terms: "Điều khoản dịch vụ",
     payment: "Chính sách thanh toán và hoàn tiền",
     copyright: "Bản quyền",
+    navAriaLabel: "Chính sách",
   },
   copyright: "Copyright {year} | Cat Speak",
   validation: {

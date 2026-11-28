@@ -4,6 +4,7 @@ export default {
   subtitle:
     'We are committed to protecting your privacy and personal data. This policy explains how Cat Speak collects, uses, and stores your information.',
   footer: '© 2026 | CAT SPEAK - I SPEAK YOU SPEAK WE PEAK',
+  backToTop: 'Back to top',
   sections: [
     {
       title: '1. Information We Collect',

@@ -6,12 +6,12 @@ import { Navigate } from "react-router-dom"
  * @param {Object} props
  * @param {React.ReactNode} props.children - Component con
  * @param {boolean} props.isAuthenticated - Trạng thái đăng nhập
- * @param {string} props.redirectTo - Đường dẫn redirect nếu đã đăng nhập (mặc định: '/app')
+ * @param {string} props.redirectTo - Đường dẫn redirect nếu đã đăng nhập (mặc định: '/workspace/dashboard')
  */
 const PublicRoute = ({
   children,
   isAuthenticated = false,
-  redirectTo = "/app",
+  redirectTo = "/workspace/dashboard",
 }) => {
   if (isAuthenticated) {
     return <Navigate to={redirectTo} replace />

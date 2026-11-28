@@ -1,6 +1,13 @@
 import React, { useState } from "react"
 import { Play, Lightbulb, X } from "lucide-react"
 import { createPortal } from "react-dom"
+import { useLanguage } from "@/shared/context/LanguageContext"
+
+const fillTemplate = (template, values) =>
+  Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{{${key}}}`, String(value)),
+    template,
+  )
 
 const DEFAULT_GUIDE_DATA = {
   toneTitle: "HƯỚNG DẪN KHẨU HÌNH: THANH 3 (三声)",
@@ -24,6 +31,8 @@ const MouthShapeGuideModal = ({
   data = DEFAULT_GUIDE_DATA,
   onPracticeNow,
 }) => {
+  const { t } = useLanguage()
+  const modalText = t?.aiTutor?.speakingRoom?.modals?.mouth || {}
   const [isPlaying, setIsPlaying] = useState(false)
   const guide = { ...DEFAULT_GUIDE_DATA, ...data }
   const hasVideo = Boolean(guide.youtubeId) || !("youtubeId" in (data || {}))
@@ -90,7 +99,8 @@ const MouthShapeGuideModal = ({
                   </button>
                 ) : (
                   <p className="text-center text-xs text-slate-300 px-4">
-                    Video khẩu hình đang được giáo viên cập nhật. Bạn làm theo ba bước bên cạnh nhé.
+                    {modalText.videoUpdating ||
+                      "Video khẩu hình đang được giáo viên cập nhật. Bạn làm theo ba bước bên cạnh nhé."}
                   </p>
                 )}
 
@@ -101,7 +111,10 @@ const MouthShapeGuideModal = ({
                   </h3>
                   {guide.videoDuration ? (
                     <p className="text-[11px] text-slate-400">
-                      Thời lượng: {guide.videoDuration} · CatSpeak
+                      {fillTemplate(
+                        modalText.duration || "Thời lượng: {{duration}} · CatSpeak",
+                        { duration: guide.videoDuration },
+                      )}
                     </p>
                   ) : null}
                 </div>
@@ -112,7 +125,7 @@ const MouthShapeGuideModal = ({
                 {/* 3 Steps Box */}
                 <div className="p-4 sm:p-4.5 rounded-2xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#333333] space-y-2 text-left">
                   <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white uppercase tracking-wide">
-                    3 bước khẩu hình chuẩn:
+                    {modalText.stepsTitle || "3 bước khẩu hình chuẩn:"}
                   </h3>
 
                   <div className="space-y-2 text-xs sm:text-sm text-slate-700 dark:text-neutral-300 leading-relaxed">
@@ -126,7 +139,7 @@ const MouthShapeGuideModal = ({
                 <div className="p-4 sm:p-4.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-left space-y-1">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 dark:text-amber-300">
                     <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span>Mẹo từ AI Tutor CatSpeak:</span>
+                    <span>{modalText.tipTitle || "Mẹo từ AI Tutor CatSpeak:"}</span>
                   </div>
                   <p className="text-xs text-amber-900/90 dark:text-amber-200/90 italic leading-relaxed pl-5">
                     &quot;{guide.aiTip}&quot;
@@ -142,7 +155,7 @@ const MouthShapeGuideModal = ({
                   }}
                   className="w-full py-3.5 px-6 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-xs sm:text-sm tracking-wide transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
                 >
-                  Đã hiểu khẩu hình, Luyện tập ngay
+                  {modalText.practiceNow || "Đã hiểu khẩu hình, Luyện tập ngay"}
                 </button>
               </div>
             </div>

@@ -4,9 +4,24 @@ import { useLanguage } from "../../../shared/context/LanguageContext.jsx"
 import colors from "@/shared/utils/colors.js"
 import PrivacyPolicy from "@/features/auth/components/popups/policies/PrivacyPolicy"
 
+const LANGUAGE_LABELS = {
+  vi: "Tiếng Việt",
+  en: "English",
+  zh: "中文",
+  ja: "日本語",
+}
+
 const PolicyPage = () => {
   const { t, toggleLanguage, language } = useLanguage()
-  const policy = t.policies?.privacyPolicy || {}
+  const policy = t.policy || {}
+  const privacyPolicy = t.policies?.privacyPolicy || {}
+  const policyTitle = policy.heading || privacyPolicy.title || "Chính sách bảo mật"
+  const policySubtitle =
+    policy.subtitle ||
+    privacyPolicy.intro ||
+    "Cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của người dùng."
+  const backToTopLabel =
+    policy.backToTop || t.common?.scrollToTop || "Lên đầu trang"
   const [showScroll, setShowScroll] = useState(false)
 
   const cinematicBg = useMemo(
@@ -39,18 +54,14 @@ const PolicyPage = () => {
               className="flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-white/20 sm:px-5 sm:text-sm"
             >
               <FiRefreshCw className="text-xs" />
-              {language === "vi" ? "English" : "Tiếng Việt"}
+              {LANGUAGE_LABELS[language] || LANGUAGE_LABELS.vi}
             </button>
           </div>
           <div className="text-sm uppercase tracking-[0.3em] text-white/80">
             Cat Speak
           </div>
-          <h1 className="mt-3 text-2xl font-bold sm:text-4xl">{policy.title || "Chính sách bảo mật"}</h1>
-          <p className="mt-4 text-base text-white/90">
-            {language === "vi"
-              ? "Cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của người dùng."
-              : "Committed to protecting user privacy and personal data."}
-          </p>
+          <h1 className="mt-3 text-2xl font-bold sm:text-4xl">{policyTitle}</h1>
+          <p className="mt-4 text-base text-white/90">{policySubtitle}</p>
         </div>
 
         <div className="p-5 sm:p-8 md:p-14 text-base leading-relaxed bg-white dark:bg-[#1A1A1A] rounded-b-2xl sm:rounded-b-[40px] min-w-0 break-words">
@@ -62,10 +73,10 @@ const PolicyPage = () => {
         <button
           type="button"
           onClick={scrollToTop}
-          className="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full bg-[#c4161c] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(196,22,28,0.45)] transition hover:bg-[#a20f16]"
+          className="fixed bottom-20 right-6 z-30 flex items-center gap-2 rounded-full bg-[#c4161c] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(196,22,28,0.45)] transition hover:bg-[#a20f16]"
         >
           <FiArrowUp />
-          {language === "vi" ? "Lên đầu trang" : "Back to top"}
+          {backToTopLabel}
         </button>
       )}
     </section>

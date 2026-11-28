@@ -4,17 +4,45 @@ import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import { useSubmitContactMutation } from "@/store/api/contactApi"
 import Modal from "@/shared/components/ui/Modal"
 
-const initialForm = {
-  name: "",
-  email: "",
-  phone: "",
-  languageInterest: "Cả 3 ngôn ngữ (Anh - Trung - Nhật)",
-  contactNeed: "Hợp tác Đối tác Doanh nghiệp / Trung tâm ngoại ngữ",
-  message: "",
-}
+const FALLBACK_LANGUAGE_OPTIONS = [
+  "Cả 3 ngôn ngữ (Anh - Trung - Nhật)",
+  "Tiếng Anh",
+  "Tiếng Trung",
+  "Tiếng Nhật",
+]
+
+const FALLBACK_NEED_OPTIONS = [
+  "Hợp tác Đối tác Doanh nghiệp / Trung tâm ngoại ngữ",
+  "Đăng ký luyện nói cá nhân",
+  "Tư vấn cho trường học / câu lạc bộ",
+  "Khác",
+]
+
+const REQUIRED_FIELDS = ["name", "email", "message"]
 
 const LandingContactForm = () => {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
+  const formText = t?.landing?.contactForm || {}
+  const languageOptions =
+    formText.languageOptions?.length > 0
+      ? formText.languageOptions
+      : FALLBACK_LANGUAGE_OPTIONS
+  const needOptions =
+    formText.needOptions?.length > 0
+      ? formText.needOptions
+      : FALLBACK_NEED_OPTIONS
+  const whitespaceError =
+    formText.requiredWhitespace || "Vui lòng không chỉ nhập khoảng trắng."
+
+  const initialForm = {
+    name: "",
+    email: "",
+    phone: "",
+    languageInterest: languageOptions[0],
+    contactNeed: needOptions[0],
+    message: "",
+  }
+
   const [form, setForm] = useState(initialForm)
   const [submitContact, { isLoading }] = useSubmitContactMutation()
   const [notice, setNotice] = useState({
@@ -23,18 +51,56 @@ const LandingContactForm = () => {
     message: "",
   })
 
+  const validateField = (element) => {
+    if (!element || !REQUIRED_FIELDS.includes(element.name)) return true
+    const value = element.value ?? ""
+    if (value.length > 0 && value.trim().length === 0) {
+      element.setCustomValidity(whitespaceError)
+      return false
+    }
+    element.setCustomValidity("")
+    return true
+  }
+
   const updateField = (event) => {
-    const { name, value } = event.target
+    const element = event.target
+    const { name, value } = element
     setForm((current) => ({ ...current, [name]: value }))
+    validateField(element)
+  }
+
+  const handleInvalid = (event) => {
+    validateField(event.target)
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    const formElement = event.currentTarget
+
+    const hasWhitespaceOnly = REQUIRED_FIELDS.some((field) => {
+      const value = form[field] ?? ""
+      return value.length > 0 && value.trim().length === 0
+    })
+    if (hasWhitespaceOnly) {
+      const invalidField = REQUIRED_FIELDS.find((field) => {
+        const value = form[field] ?? ""
+        return value.length > 0 && value.trim().length === 0
+      })
+      const element = formElement?.elements?.[invalidField]
+      if (element) {
+        element.setCustomValidity(whitespaceError)
+        element.reportValidity?.()
+        element.focus?.()
+      }
+      return
+    }
 
     const message = [
-      `Nhu cầu liên hệ: ${form.contactNeed}`,
-      `Ngôn ngữ quan tâm: ${form.languageInterest}`,
-      form.phone.trim() ? `Số điện thoại / Zalo: ${form.phone.trim()}` : "",
+      `${formText.messagePrefixNeed || "Nhu cầu liên hệ:"} ${form.contactNeed}`,
+      `${formText.messagePrefixLanguage || "Ngôn ngữ quan tâm:"} ${form.languageInterest}`,
+      form.phone.trim()
+        ? `${formText.messagePrefixPhone || "Số điện thoại / Zalo:"} ${form.phone.trim()}`
+        : "",
       "",
       form.message.trim(),
     ]
@@ -51,16 +117,20 @@ const LandingContactForm = () => {
 
       setNotice({
         open: true,
-        title: "Gửi thông tin thành công",
-        message: "Cảm ơn bạn đã liên hệ. CAT SPEAK sẽ phản hồi sớm nhất có thể.",
+        title: formText.successTitle || "Gửi thông tin thành công",
+        message:
+          formText.successMessage ||
+          "Cảm ơn bạn đã liên hệ. CAT SPEAK sẽ phản hồi sớm nhất có thể.",
       })
       setForm(initialForm)
     } catch (error) {
       console.error("Failed to submit contact form:", error)
       setNotice({
         open: true,
-        title: "Gửi thông tin thất bại",
-        message: "Đã xảy ra lỗi khi gửi thông tin. Vui lòng thử lại sau.",
+        title: formText.errorTitle || "Gửi thông tin thất bại",
+        message:
+          formText.errorMessage ||
+          "Đã xảy ra lỗi khi gửi thông tin. Vui lòng thử lại sau.",
       })
     }
   }
@@ -75,34 +145,39 @@ const LandingContactForm = () => {
         className="w-full rounded-2xl border border-[#e5e5e5] bg-white p-5 shadow-sm dark:border-[#343434] dark:bg-[#202020] sm:p-7 lg:p-8"
       >
         <h2 className="text-lg font-bold text-[#222] dark:text-white">
-          Gửi biểu mẫu liên hệ &amp; Hợp tác
+          {formText.title || "Gửi biểu mẫu liên hệ & Hợp tác"}
         </h2>
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Vui lòng điền thông tin bên dưới, chuyên viên hỗ trợ sẽ liên hệ lại với bạn.
+          {formText.subtitle ||
+            "Vui lòng điền thông tin bên dưới, chuyên viên hỗ trợ sẽ liên hệ lại với bạn."}
         </p>
 
         <div className="mt-5 grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
           <label className="text-xs font-semibold text-[#222] dark:text-gray-200">
-            Họ và tên <span className="text-[#A90016]">*</span>
+            {formText.nameLabel || "Họ và tên"}{" "}
+            <span className="text-[#A90016]">*</span>
             <input
               autoComplete="name"
               className={inputClassName}
               name="name"
               onChange={updateField}
-              placeholder="VD: Trần Hoàng Nam"
+              onInvalid={handleInvalid}
+              placeholder={formText.namePlaceholder || "VD: Trần Hoàng Nam"}
               required
               value={form.name}
             />
           </label>
 
           <label className="text-xs font-semibold text-[#222] dark:text-gray-200">
-            Địa chỉ Email <span className="text-[#A90016]">*</span>
+            {formText.emailLabel || "Địa chỉ Email"}{" "}
+            <span className="text-[#A90016]">*</span>
             <input
               autoComplete="email"
               className={inputClassName}
               name="email"
               onChange={updateField}
-              placeholder="VD: name@company.com"
+              onInvalid={handleInvalid}
+              placeholder={formText.emailPlaceholder || "VD: name@company.com"}
               required
               type="email"
               value={form.email}
@@ -110,57 +185,58 @@ const LandingContactForm = () => {
           </label>
 
           <label className="text-xs font-semibold text-[#222] dark:text-gray-200">
-            Số điện thoại / Zalo
+            {formText.phoneLabel || "Số điện thoại / Zalo"}
             <input
               autoComplete="tel"
               className={inputClassName}
               name="phone"
               onChange={updateField}
-              placeholder="VD: 0868192604"
+              placeholder={formText.phonePlaceholder || "VD: 0868192604"}
               type="tel"
               value={form.phone}
             />
           </label>
 
           <label className="text-xs font-semibold text-[#222] dark:text-gray-200">
-            Ngôn ngữ quan tâm
+            {formText.languageLabel || "Ngôn ngữ quan tâm"}
             <select
               className={inputClassName}
               name="languageInterest"
               onChange={updateField}
               value={form.languageInterest}
             >
-              <option>Cả 3 ngôn ngữ (Anh - Trung - Nhật)</option>
-              <option>Tiếng Anh</option>
-              <option>Tiếng Trung</option>
-              <option>Tiếng Nhật</option>
+              {languageOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
             </select>
           </label>
 
           <label className="text-xs font-semibold text-[#222] dark:text-gray-200 sm:col-span-2">
-            Nhu cầu liên hệ
+            {formText.needLabel || "Nhu cầu liên hệ"}
             <select
               className={inputClassName}
               name="contactNeed"
               onChange={updateField}
               value={form.contactNeed}
             >
-              <option>
-                Hợp tác Đối tác Doanh nghiệp / Trung tâm ngoại ngữ
-              </option>
-              <option>Đăng ký luyện nói cá nhân</option>
-              <option>Tư vấn cho trường học / câu lạc bộ</option>
-              <option>Khác</option>
+              {needOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
             </select>
           </label>
 
           <label className="text-xs font-semibold text-[#222] dark:text-gray-200 sm:col-span-2">
-            Nội dung tin nhắn <span className="text-[#A90016]">*</span>
+            {formText.messageLabel || "Nội dung tin nhắn"}{" "}
+            <span className="text-[#A90016]">*</span>
             <textarea
               className={`${inputClassName} h-20 resize-y py-2`}
               name="message"
               onChange={updateField}
-              placeholder="Mô tả chi tiết câu hỏi hoặc nhu cầu của bạn..."
+              onInvalid={handleInvalid}
+              placeholder={
+                formText.messagePlaceholder ||
+                "Mô tả chi tiết câu hỏi hoặc nhu cầu của bạn..."
+              }
               required
               value={form.message}
             />
@@ -172,12 +248,15 @@ const LandingContactForm = () => {
           disabled={isLoading}
           type="submit"
         >
-          {isLoading ? "Đang gửi..." : "Gửi thông tin liên hệ"}
+          {isLoading
+            ? formText.submitting || "Đang gửi..."
+            : formText.submit || "Gửi thông tin liên hệ"}
           <Send className="h-4 w-4" aria-hidden="true" />
         </button>
         <p className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
           <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-          Thông tin liên hệ của bạn được bảo mật tuyệt đối
+          {formText.privacyNote ||
+            "Thông tin liên hệ của bạn được bảo mật tuyệt đối"}
         </p>
       </form>
 

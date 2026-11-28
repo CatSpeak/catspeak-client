@@ -46,6 +46,18 @@ describe("AI Tutor navigation visibility", () => {  it.each(["en", "ja"])("hides
       expect(isNavItemVisible(entry, { currentLang: "zh" })).toBe(true)
     }
   })
+
+  it("ISS-35: no longer links to the empty history-progress page", () => {
+    expect(aiTutorSection.items.map((item) => item.key)).not.toContain(
+      "historyProgress",
+    )
+    expect(aiTutorNavLink.subItems.map((item) => item.key)).not.toContain(
+      "historyProgress",
+    )
+    expect(
+      JSON.stringify([navSections, navLinks, dockNavGroups]),
+    ).not.toContain("/ai-tutor/history-progress")
+  })
 })
 
 const getWorkspaceGroup = (groups, key) =>

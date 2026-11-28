@@ -112,6 +112,12 @@ export default {
   passwordChangedSubtitle: "パスワードが正常に更新されました。",
   loginNowButton: "今すぐログイン",
   verifyEmailTitle: "メールアドレスを確認",
+  verifyEmailOtpSubtitle:
+    "メールに送信された6桁の確認コードを入力してください。",
+  emailVerifiedTitle: "メールアドレスの確認が完了しました！",
+  emailVerifiedSubtitle:
+    "メールアドレスをご確認いただきありがとうございます。Cat Speak のすべての機能をご利用いただけます。",
+  backToHome: "ホームに戻る",
   verifyEmailSubtitle: "6桁のコードを送信しました",
   editEmail: "メールを編集",
   updateEmail: "メールを更新",

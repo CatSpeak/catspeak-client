@@ -34,9 +34,6 @@ export default {
       ja: "Tiếng Nhật",
     },
   },
-  pagination: {
-    range: "{{start}}-{{end}} trong số {{total}}",
-  },
   nav: {
     home: "Trang chủ",
     rooms: "Phòng",
@@ -64,7 +61,6 @@ export default {
     teachingTasks: "Việc giảng dạy",
     vouchers: "Ưu đãi & Voucher",
     myLearning: "Góc học tập",
-    vocabularyNotebook: "Sổ từ vựng",
     manageMaterials: "Quản lý tài liệu",
     exploreCourses: "Khám phá khóa học",
     aiTutor: "Gia sư AI",
@@ -149,7 +145,16 @@ export default {
     description:
       "Chúng tôi đang nỗ lực phát triển tính năng này để mang đến trải nghiệm tốt nhất cho bạn. Vui lòng quay lại sau nhé!",
     backToHome: "Quay về trang chủ",
+    faqCta: "Xem Câu hỏi thường gặp (FAQ)",
+    goToDashboard: "Về Dashboard",
     thankYou: "Cảm ơn bạn đã kiên nhẫn chờ đợi! ^^",
+  },
+  organization: {
+    badge: "Sắp ra mắt",
+    title: "Thông tin tổ chức",
+    description:
+      "Không gian dành cho tổ chức, trung tâm và doanh nghiệp đang được hoàn thiện. Vui lòng quay lại sau để trải nghiệm.",
+    backToDashboard: "Quay lại Dashboard",
   },
   noOptionsFound: "Không tìm thấy lựa chọn nào",
   loading: "Đang tải...",

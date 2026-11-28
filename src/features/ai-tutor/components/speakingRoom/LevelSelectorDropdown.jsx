@@ -1,12 +1,15 @@
 import React from "react"
 import { ChevronDown, Check } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const LevelSelectorDropdown = ({
   currentLevel,
   onSelectLevel,
   options = [],
 }) => {
+  const { t } = useLanguage()
+  const roomText = t?.aiTutor?.speakingRoom || {}
   const selectedValue =
     options.find((opt) => opt.label === currentLevel || opt.value === currentLevel)
       ?.value || options[0]?.value
@@ -31,7 +34,7 @@ const LevelSelectorDropdown = ({
           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#1A1A1A] border border-slate-200 dark:border-[#3F3F3F] text-xs sm:text-sm font-medium text-slate-700 dark:text-neutral-200 shadow-2xs hover:bg-slate-50 dark:hover:bg-[#272727] transition-colors whitespace-nowrap cursor-pointer"
         >
           <span>
-            Trình độ: <strong>{currentLevel}</strong>
+            {roomText.levelLabel || "Trình độ:"} <strong>{currentLevel}</strong>
           </span>
           <span className="text-[#990011] dark:text-red-400 font-semibold ml-1 flex items-center">
             <ChevronDown

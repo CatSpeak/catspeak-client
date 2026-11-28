@@ -159,6 +159,8 @@ export default {
       "Try selecting a different tag or check back later.",
     detail: {
       commentsTotal: "comments in total",
+      save: "Save",
+      saved: "Saved",
       beFirstToComment: "Be the first to comment.",
       signInToComment: "Sign in to comment...",
       replyTo: "Reply to",

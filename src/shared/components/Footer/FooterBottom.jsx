@@ -5,29 +5,41 @@ import { PolicyModal } from "@/features/auth"
 const FooterBottom = () => {
   const { t } = useLanguage()
   const footerText = t.footer
-  const [policyModal, setPolicyModal] = useState({ open: false, title: "" })
+  const [policyModal, setPolicyModal] = useState({
+    open: false,
+    title: "",
+    policyKey: "",
+  })
 
-  const openPolicy = (title) => () => setPolicyModal({ open: true, title })
-  const closePolicy = () => setPolicyModal({ open: false, title: "" })
+  const policies = [
+    { key: "privacy", title: footerText?.policies?.privacy },
+    { key: "terms", title: footerText?.policies?.terms },
+    { key: "payment", title: footerText?.policies?.payment },
+  ]
+
+  const openPolicy = (policy) => () =>
+    setPolicyModal({
+      open: true,
+      title: policy.title,
+      policyKey: policy.key,
+    })
+  const closePolicy = () =>
+    setPolicyModal({ open: false, title: "", policyKey: "" })
 
   return (
     <>
       <nav
-        aria-label="Chính sách"
+        aria-label={footerText?.policies?.navAriaLabel || "Chính sách"}
         className="flex flex-wrap gap-x-6 gap-y-2 sm:justify-end"
       >
-        {[
-          footerText.policies.privacy,
-          footerText.policies.terms,
-          footerText.policies.payment,
-        ].map((title) => (
+        {policies.map((policy) => (
           <button
-            key={title}
+            key={policy.key}
             type="button"
             className="text-left text-xs text-gray-400 transition-colors hover:text-white"
-            onClick={openPolicy(title)}
+            onClick={openPolicy(policy)}
           >
-            {title}
+            {policy.title}
           </button>
         ))}
       </nav>
@@ -35,6 +47,7 @@ const FooterBottom = () => {
         open={policyModal.open}
         onClose={closePolicy}
         title={policyModal.title}
+        policyKey={policyModal.policyKey}
       />
     </>
   )

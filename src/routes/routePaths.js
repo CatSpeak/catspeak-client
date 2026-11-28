@@ -11,7 +11,7 @@ export const ROUTE_PATHS = {
 
   // User routes
   APP: "/app",
-  APP_DASHBOARD: "/app",
+  APP_DASHBOARD: "/workspace/dashboard",
   APP_SESSIONS: "/app/sessions",
   APP_PROFILE: "/workspace/profile",
 

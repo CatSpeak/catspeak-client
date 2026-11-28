@@ -6,6 +6,7 @@ import {
   SlidersHorizontal,
   UsersRound,
 } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const features = [
   {
@@ -52,7 +53,18 @@ const features = [
   },
 ]
 
-const CoreFeaturesSection = () => (
+const CoreFeaturesSection = () => {
+  const { t } = useLanguage()
+  const coreText = t?.landing?.coreFeatures || {}
+  const localizedFeatures = features.map((item, index) => ({
+    ...item,
+    ...(coreText.items?.[index] || {}),
+    icon: item.icon,
+    accent: item.accent,
+    upcoming: item.upcoming,
+  }))
+
+  return (
   <section
     id="core-features"
     className="w-full scroll-mt-[72px] bg-[#f3f3f3] px-4 py-12 transition-colors dark:bg-[#171717] sm:px-6 sm:py-16 lg:px-8"
@@ -64,19 +76,19 @@ const CoreFeaturesSection = () => (
             className: "h-4 w-4 text-amber-500",
             "aria-hidden": true,
           })}
-          Tính năng cốt lõi
+          {coreText.eyebrow || "Tính năng cốt lõi"}
         </p>
         <h2 className="mx-auto mt-3 max-w-[800px] text-[clamp(2rem,3.8vw,2.65rem)] font-black leading-[1.08] tracking-[-0.04em] text-[#171717] dark:text-white">
-          Công cụ tối ưu cho việc luyện nói thực tế
+          {coreText.title || "Công cụ tối ưu cho việc luyện nói thực tế"}
         </h2>
         <p className="mx-auto mt-2 max-w-[760px] text-sm leading-6 text-[#666] dark:text-gray-300 sm:text-base">
-          Mọi tính năng đều tập trung vào mục tiêu duy nhất: giúp bạn mở lời tự
-          nhiên, giảm áp lực và hình thành phản xạ đàm thoại bền vững.
+          {coreText.description ||
+            "Mọi tính năng đều tập trung vào mục tiêu duy nhất: giúp bạn mở lời tự nhiên, giảm áp lực và hình thành phản xạ đàm thoại bền vững."}
         </p>
       </header>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {features.map(({ icon, badge, title, description, support, accent, upcoming }) => (
+        {localizedFeatures.map(({ icon, badge, title, description, accent, upcoming }) => (
           <article
             key={title}
             className="flex min-h-[224px] flex-col rounded-2xl border border-[#dedede] bg-white p-5 shadow-sm transition-colors dark:border-[#3b3b3b] dark:bg-[#222] sm:p-5"
@@ -116,7 +128,8 @@ const CoreFeaturesSection = () => (
             </p>
             <div className="mt-auto border-t border-[#ececec] pt-3 dark:border-[#3b3b3b]">
               <span className="text-xs text-[#595959] dark:text-gray-400">
-                Hỗ trợ: {support}
+                {coreText.supportLabel || "Hỗ trợ:"}{" "}
+                {coreText.support || "Anh · Trung · Nhật"}
               </span>
             </div>
           </article>
@@ -124,6 +137,7 @@ const CoreFeaturesSection = () => (
       </div>
     </div>
   </section>
-)
+  )
+}
 
 export default CoreFeaturesSection

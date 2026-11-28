@@ -34,9 +34,6 @@ export default {
       ja: "Japanese",
     },
   },
-  pagination: {
-    range: "{{start}}-{{end}} of {{total}}",
-  },
   nav: {
     home: "Home",
     rooms: "Rooms",
@@ -64,7 +61,6 @@ export default {
     teachingTasks: "Teaching Tasks",
     vouchers: "Vouchers & Discounts",
     myLearning: "My Learning",
-    vocabularyNotebook: "Vocabulary Notebook",
     manageMaterials: "Manage Materials",
     exploreCourses: "Explore Courses",
     aiTutor: "AI Tutor",
@@ -149,7 +145,16 @@ export default {
     description:
       "We are working hard to develop this feature to bring you the best experience. Please check back later!",
     backToHome: "Back to Home",
+    faqCta: "View Frequently Asked Questions (FAQ)",
+    goToDashboard: "Go to Dashboard",
     thankYou: "Thank you for your patience! ^^",
+  },
+  organization: {
+    badge: "Coming soon",
+    title: "Organization information",
+    description:
+      "The space for organizations, language centres and businesses is being finished. Please come back later.",
+    backToDashboard: "Back to Dashboard",
   },
   noOptionsFound: "No options found",
   loading: "Loading...",

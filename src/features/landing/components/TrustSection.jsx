@@ -1,5 +1,6 @@
 import { createElement } from "react"
 import { BadgeCheck, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const trustItems = [
   {
@@ -37,27 +38,36 @@ const trustItems = [
 ]
 
 const TrustSection = () => {
+  const { t } = useLanguage()
+  const trustText = t?.landing?.trust || {}
+  const items = trustItems.map((item, index) => ({
+    ...item,
+    title: trustText.items?.[index]?.title || item.title,
+    description: trustText.items?.[index]?.description || item.description,
+  }))
+
   return (
     <section className="w-full border-t border-[#d9d9d9] bg-[#f3f3f3] px-4 py-8 transition-colors dark:border-[#303030] dark:bg-[#171717] sm:px-6 lg:px-8 xl:px-10">
       <div className="mx-auto max-w-[1280px]">
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-[760px]">
             <p className="text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-[#B3261E] dark:text-[#ff7a8a] sm:text-xs">
-              MINH BẠCH & ĐỘT TIN CÂY
+              {trustText.eyebrow || "MINH BẠCH & ĐỘT TIN CÂY"}
             </p>
             <h2 className="mt-3 text-[clamp(2rem,3.2vw,3rem)] font-black leading-tight tracking-[-0.04em] text-[#121212] dark:text-white">
-              Cam kết trải nghiệm học tập an toàn và trung thực
+              {trustText.title ||
+                "Cam kết trải nghiệm học tập an toàn và trung thực"}
             </h2>
           </div>
 
           <div className="inline-flex w-fit items-center gap-3 rounded-[14px] border border-[#d8d8d8] bg-[#f7f7f7] px-4 py-2.5 text-sm text-[#222] shadow-sm dark:border-[#3d3d3d] dark:bg-[#222] dark:text-gray-200">
             <span className="inline-block h-3.5 w-3.5 rounded-full bg-[#2FBF71] shadow-[0_0_0_5px_rgba(47,191,113,0.14)]" />
-            <span>Trạng thái hệ thống: Đang hoạt động trực tuyến 24/7</span>
+            <span>{trustText.status || "Trạng thái hệ thống: Đang hoạt động trực tuyến 24/7"}</span>
           </div>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {trustItems.map(({ icon: Icon, title, description, accent, iconWrap }) => (
+          {items.map(({ icon: Icon, title, description, accent, iconWrap }) => (
             <article
               key={title}
               className="flex min-h-[250px] flex-col rounded-[22px] border border-[#d8d8d8] bg-[#f8f8f8] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors dark:border-[#3b3b3b] dark:bg-[#222] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"

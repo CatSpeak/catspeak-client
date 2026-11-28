@@ -1,11 +1,14 @@
 import React from "react"
 import { Lock } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const TopicCard = ({
   topic,
   isSelected = false,
   onSelect,
 }) => {
+  const { t } = useLanguage()
+  const topicText = t?.aiTutor?.speakingRoom?.topicCard || {}
   if (!topic) return null
 
   const isLocked = topic.isLocked
@@ -84,7 +87,9 @@ const TopicCard = ({
       {/* Vocabulary preview section */}
       {topic.vocab && !isLocked && (
         <div className="mt-3 bg-slate-50/80 dark:bg-[#242424] border border-slate-100 dark:border-[#3F3F3F] rounded-xl px-3 py-2 text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">
-          <span className="font-medium text-slate-800 dark:text-white">Từ vựng: </span>
+          <span className="font-medium text-slate-800 dark:text-white">
+            {topicText.vocabulary || "Từ vựng:"}{" "}
+          </span>
           <span>{topic.vocab}</span>
         </div>
       )}

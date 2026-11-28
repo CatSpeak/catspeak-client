@@ -25,7 +25,6 @@ import {
   Bot,
   Target,
   Layers,
-  History,
 } from "lucide-react"
 import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
@@ -92,12 +91,6 @@ export const navSections = [
         key: "vocabularyNotebook",
         path: "/ai-tutor/vocabulary-notebook",
         icon: Layers,
-        lang: "zh",
-      },
-      {
-        key: "historyProgress",
-        path: "/ai-tutor/history-progress",
-        icon: History,
         lang: "zh",
       },
     ],
@@ -336,12 +329,6 @@ export const navLinks = [
         key: "vocabularyNotebook",
         path: "/ai-tutor/vocabulary-notebook",
         icon: Layers,
-        lang: "zh",
-      },
-      {
-        key: "historyProgress",
-        path: "/ai-tutor/history-progress",
-        icon: History,
         lang: "zh",
       },
     ],

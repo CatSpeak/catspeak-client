@@ -145,6 +145,8 @@ export default {
     trySelectingDifferentTag: "请尝试选择其他标签或稍后再试。",
     detail: {
       commentsTotal: "条评论",
+      save: "保存",
+      saved: "已保存",
       beFirstToComment: "成为第一个评论的人。",
       signInToComment: "登录后评论...",
       replyTo: "回复",

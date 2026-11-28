@@ -4,6 +4,7 @@ export default {
   subtitle:
     "当社はあなたのプライバシーと個人データの保護に努めています。このポリシーは、Cat Speakが情報をどのように収集、利用、保管するかを説明します。",
   footer: "COPYRIGHT 09-2025 | CAT SPEAK – LANGUAGE IN HAND",
+  backToTop: "トップへ戻る",
   sections: [
     {
       title: "1. 収集する情報",

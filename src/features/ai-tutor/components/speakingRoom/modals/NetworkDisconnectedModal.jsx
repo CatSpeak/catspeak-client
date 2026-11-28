@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react"
 import { WifiOff, ShieldCheck } from "lucide-react"
 import { createPortal } from "react-dom"
+import { useLanguage } from "@/shared/context/LanguageContext"
+
+const fillTemplate = (template, values) =>
+  Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{{${key}}}`, String(value)),
+    template,
+  )
 
 const NetworkDisconnectedModal = ({
   isOpen = false,
@@ -10,13 +17,14 @@ const NetworkDisconnectedModal = ({
   onRetry,
   onEndAndSave,
 }) => {
+  const { t } = useLanguage()
+  const modalText = t?.aiTutor?.speakingRoom?.modals?.network || {}
   const [seconds, setSeconds] = useState(initialSeconds)
 
   useEffect(() => {
     if (!isOpen) return
-    // Mỗi lần mất kết nối đếm lại từ đầu (BUG-SS-06)
-    setSeconds(initialSeconds)
-
+    // Mỗi lần mất kết nối đếm lại từ đầu (BUG-SS-06); modal được remount bằng key
+    // khi trạng thái mở thay đổi nên seconds khởi tạo lại đúng giá trị.
     const timer = setInterval(() => {
       setSeconds((prev) => {
         if (prev <= 1) {
@@ -53,12 +61,13 @@ const NetworkDisconnectedModal = ({
 
         {/* Title */}
         <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          Mất Kết Nối Đường Truyền
+          {modalText.title || "Mất Kết Nối Đường Truyền"}
         </h2>
 
         {/* Subtitle */}
         <p className="text-xs sm:text-sm text-slate-500 dark:text-neutral-400 mt-1.5 leading-relaxed max-w-sm mx-auto">
-          Tín hiệu âm thanh với phòng luyện nói AI bị gián đoạn do mạng không ổn định.
+          {modalText.subtitle ||
+            "Tín hiệu âm thanh với phòng luyện nói AI bị gián đoạn do mạng không ổn định."}
         </p>
 
         {/* Reconnecting Progress Box */}
@@ -72,11 +81,16 @@ const NetworkDisconnectedModal = ({
             aria-live="assertive"
             className="text-xs sm:text-sm font-semibold text-[#990011] dark:text-red-400"
           >
-            Mất kết nối âm thanh. Đang kết nối lại... ({seconds}s)
+            {fillTemplate(
+              modalText.reconnecting ||
+                "Mất kết nối âm thanh. Đang kết nối lại... ({{seconds}}s)",
+              { seconds },
+            )}
           </div>
 
           <p className="text-xs text-slate-500 dark:text-neutral-400">
-            Vui lòng giữ nguyên màn hình, AI sẽ tiếp tục ngay khi có mạng.
+            {modalText.keepScreen ||
+              "Vui lòng giữ nguyên màn hình, AI sẽ tiếp tục ngay khi có mạng."}
           </p>
         </div>
 
@@ -84,7 +98,11 @@ const NetworkDisconnectedModal = ({
         <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 flex items-center gap-2.5 text-xs text-emerald-800 dark:text-emerald-300 text-left">
           <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>
-            Dữ liệu thoại trước đó đã được lưu an toàn. Quá {maxSeconds}s sẽ tự động tổng kết buổi học.
+            {fillTemplate(
+              modalText.safe ||
+                "Dữ liệu thoại trước đó đã được lưu an toàn. Quá {{seconds}}s sẽ tự động tổng kết buổi học.",
+              { seconds: maxSeconds },
+            )}
           </span>
         </div>
 
@@ -98,7 +116,7 @@ const NetworkDisconnectedModal = ({
             }}
             className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-white dark:bg-[#272727] border border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#3D3D3D] text-slate-700 dark:text-neutral-200 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
           >
-            Kết thúc & Lưu kết quả
+            {modalText.endAndSave || "Kết thúc & Lưu kết quả"}
           </button>
 
           <button
@@ -109,7 +127,7 @@ const NetworkDisconnectedModal = ({
             }}
             className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-[#990011] dark:bg-cath-red-700 hover:bg-[#85000f] dark:hover:bg-red-800 text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
           >
-            Thử kết nối lại ngay
+            {modalText.retryNow || "Thử kết nối lại ngay"}
           </button>
         </div>
       </div>

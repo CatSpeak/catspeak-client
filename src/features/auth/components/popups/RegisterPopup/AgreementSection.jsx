@@ -3,15 +3,19 @@ import Checkbox from "@/shared/components/ui/inputs/Checkbox"
 import PolicyModal from "../PolicyModal"
 
 const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
-  const [policyModal, setPolicyModal] = useState({ open: false, title: "" })
+  const [policyModal, setPolicyModal] = useState({
+    open: false,
+    title: "",
+    policyKey: "",
+  })
 
-  const handleOpenPolicy = (title) => (e) => {
+  const handleOpenPolicy = (title, policyKey) => (e) => {
     e.preventDefault()
-    setPolicyModal({ open: true, title })
+    setPolicyModal({ open: true, title, policyKey })
   }
 
   const handleClosePolicy = () => {
-    setPolicyModal({ open: false, title: "" })
+    setPolicyModal({ open: false, title: "", policyKey: "" })
   }
 
   return (
@@ -29,7 +33,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               <button
                 type="button"
                 className="font-semibold text-primary dark:text-red-400 hover:underline"
-                onClick={handleOpenPolicy(authText.serviceTerms)}
+                onClick={handleOpenPolicy(authText.serviceTerms, "terms")}
               >
                 {authText.serviceTerms}
               </button>{" "}
@@ -37,7 +41,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               <button
                 type="button"
                 className="font-semibold text-primary dark:text-red-400 hover:underline"
-                onClick={handleOpenPolicy(authText.privacyPolicy)}
+                onClick={handleOpenPolicy(authText.privacyPolicy, "privacy")}
               >
                 {authText.privacyPolicy}
               </button>{" "}
@@ -61,7 +65,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               <button
                 type="button"
                 className="font-semibold text-primary dark:text-red-400 hover:underline"
-                onClick={handleOpenPolicy(authText.paymentPolicy)}
+                onClick={handleOpenPolicy(authText.paymentPolicy, "payment")}
               >
                 {authText.paymentPolicy}
               </button>{" "}
@@ -69,7 +73,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               <button
                 type="button"
                 className="font-semibold text-primary dark:text-red-400 hover:underline"
-                onClick={handleOpenPolicy(authText.ipPolicy)}
+                onClick={handleOpenPolicy(authText.ipPolicy, "ip")}
               >
                 {authText.ipPolicy}
               </button>{" "}

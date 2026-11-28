@@ -148,6 +148,8 @@ export default {
     trySelectingDifferentTag: "Hãy thử chọn một thẻ khác hoặc quay lại sau.",
     detail: {
       commentsTotal: "bình luận",
+      save: "Lưu",
+      saved: "Đã lưu",
       beFirstToComment: "Hãy là người đầu tiên bình luận.",
       signInToComment: "Đăng nhập để bình luận...",
       replyTo: "Trả lời",

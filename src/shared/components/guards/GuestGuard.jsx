@@ -7,8 +7,8 @@ const GuestGuard = ({ children }) => {
   const location = useLocation()
 
   if (isAuthenticated) {
-    // Redirect to the page they came from, or default to app dashboard
-    const from = location.state?.from?.pathname || "/app"
+    // Redirect to the page they came from, or default to the workspace dashboard
+    const from = location.state?.from?.pathname || "/workspace/dashboard"
     return <Navigate to={from} replace />
   }
 

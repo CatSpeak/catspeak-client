@@ -2,6 +2,7 @@
 import React from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import planUsageVi from "@/shared/i18n/locales/vi/pages/planUsage"
 import BillingPage from "./BillingPage"
 
 const mocks = vi.hoisted(() => ({
@@ -28,7 +29,9 @@ vi.mock("@/shared/context/LanguageContext", () => ({
 
 vi.mock("@/shared/components/ui/navigation", () => ({
   Tabs: ({ tabs }) => (
-    <div data-testid="tabs">{tabs.map((tab) => tab.id).join(",")}</div>
+    <div data-testid="tabs" data-labels={tabs.map((tab) => tab.label).join("|")}>
+      {tabs.map((tab) => tab.id).join(",")}
+    </div>
   ),
   TabContent: ({ activeTab, children }) => (
     <div>
@@ -76,5 +79,19 @@ describe("ISS-61: BillingPage payouts tab is teacher-only", () => {
     expect(html).not.toContain('data-testid="payouts"')
     expect(html).toContain('data-testid="active">usage')
     expect(html).toContain('data-testid="usage"')
+  })
+
+  it("uses the Vietnamese 'Hạn Ngạch & Sử Dụng' fallback label", () => {
+    const html = render()
+
+    expect(html).toContain("Hạn Ngạch &amp; Sử Dụng")
+    expect(html).not.toContain("Hạn Ngạch &amp; Gói")
+  })
+
+  it("localizes planUsage key terminology in Vietnamese", () => {
+    expect(planUsageVi.tabUsage).toBe("Hạn Ngạch & Sử Dụng")
+    expect(planUsageVi.errorTitle).toBe("Không Thể Tải Dữ Liệu Sử Dụng")
+    expect(planUsageVi.tabUsage).not.toContain("Usage")
+    expect(planUsageVi.errorTitle).not.toContain("Usage")
   })
 })

@@ -464,6 +464,7 @@ const Step2TeacherDeposit = ({
             title={
               t?.vouchers?.deposit?.termsLink || "Điều khoản cọc và hoàn tiền"
             }
+            policyKey="payment"
           />
 
           {/* Submit Action Button */}

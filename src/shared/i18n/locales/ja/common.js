@@ -34,9 +34,6 @@ export default {
       ja: "日本語",
     },
   },
-  pagination: {
-    range: "{{start}}-{{end}} / 全{{total}}件",
-  },
   nav: {
     home: "ホーム",
     rooms: "ルーム",
@@ -64,7 +61,6 @@ export default {
     teachingTasks: "授業タスク",
     vouchers: "バウチャー＆割引",
     myLearning: "マイ学習",
-    vocabularyNotebook: "単語帳",
     manageMaterials: "教材の管理",
     exploreCourses: "コースを探索",
     aiTutor: "AI チューター",
@@ -150,7 +146,16 @@ export default {
     description:
       "最高の体験をお届けするために、この機能を開発中です。もうしばらくお待ちください！",
     backToHome: "ホームに戻る",
+    faqCta: "よくある質問（FAQ）を見る",
+    goToDashboard: "ダッシュボードへ",
     thankYou: "お待ちいただきありがとうございます！^^",
+  },
+  organization: {
+    badge: "近日公開",
+    title: "組織情報",
+    description:
+      "組織・語学センター・企業向けのスペースを準備中です。しばらくしてから再度お越しください。",
+    backToDashboard: "ダッシュボードに戻る",
   },
   noOptionsFound: "該当する選択肢がありません",
   loading: "読み込み中...",

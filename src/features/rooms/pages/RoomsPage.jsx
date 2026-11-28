@@ -2,9 +2,6 @@ import React, { useState } from "react"
 import { useSearchParams, useParams, useNavigate } from "react-router-dom"
 import {
   CommunicateTab,
-  RoomsTabs,
-  TeachingTab,
-  ForumTab,
   useGetRoomsQuery,
   useRoomsPageLogic,
   CreateRoomModal,
@@ -294,27 +291,20 @@ const RoomsPage = () => {
                 className={`w-full flex flex-col px-4 pb-4 ${isFiltered ? "pt-4" : "pt-0"}`}
                 data-tour="rooms-category-section"
               >
-                {/* Tabs hidden temporarily to save vertical space */}
-                {/* <RoomsTabs tab={tab} setTab={setTab} /> */}
-
                 <div className="w-full">
                   <AnimatePresence mode="wait">
                     <FadeAnimation key={tab} className="w-full">
-                      {tab === "communicate" && (
-                        <CommunicateTab
-                          rooms={rooms}
-                          selectedCategories={categories}
-                          page={page}
-                          totalPages={totalPages}
-                          setPage={handleSetPage}
-                          languageType={languageType}
-                          requiredLevels={requiredLevelsArg}
-                          topics={topicsArg}
-                          isLoading={isLoadingRooms}
-                        />
-                      )}
-                      {tab === "teachers" && <TeachingTab />}
-                      {tab === "forum" && <ForumTab />}
+                      <CommunicateTab
+                        rooms={rooms}
+                        selectedCategories={categories}
+                        page={page}
+                        totalPages={totalPages}
+                        setPage={handleSetPage}
+                        languageType={languageType}
+                        requiredLevels={requiredLevelsArg}
+                        topics={topicsArg}
+                        isLoading={isLoadingRooms}
+                      />
                     </FadeAnimation>
                   </AnimatePresence>
                 </div>

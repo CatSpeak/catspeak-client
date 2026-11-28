@@ -6,9 +6,10 @@ import { getPolicyComponent } from "./policies"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 
-const PolicyModal = ({ open, onClose, title }) => {
+const PolicyModal = ({ open, onClose, title, policyKey }) => {
   const { t } = useLanguage()
-  const PolicyComponent = getPolicyComponent(title)
+  const PolicyComponent =
+    getPolicyComponent(policyKey) || getPolicyComponent(title)
 
   useScrollLock(open)
 
@@ -54,7 +55,7 @@ const PolicyModal = ({ open, onClose, title }) => {
           ) : (
             <div className="flex justify-center items-center min-h-[200px]">
               <p className="text-lg text-gray-600 dark:text-neutral-300 font-medium">
-                {t.comingSoon.badge}
+                {t?.comingSoon?.badge || "Sắp ra mắt"}
               </p>
             </div>
           )}

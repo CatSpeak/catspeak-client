@@ -1,4 +1,11 @@
 import React from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+
+const fillTemplate = (template, values) =>
+  Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{{${key}}}`, String(value)),
+    template,
+  )
 
 /**
  * CompletePage component - displays the speaking session completion status,
@@ -6,11 +13,16 @@ import React from "react"
  */
 const CompletePage = ({
   progressPercent = 80,
-  estimatedTime = "khoảng 2 giây",
+  estimatedTime,
   onViewReport,
   // TASK-AI-15: số mục đã xong trong checklist, container tính theo tiến trình chờ.
   doneCount = 3,
 }) => {
+  const { t } = useLanguage()
+  const completeText = t?.aiTutor?.speakingRoom?.complete || {}
+  const resolvedEstimatedTime =
+    estimatedTime || completeText.estimatedTwoSeconds || "khoảng 2 giây"
+
   const baseChecklist = [
     {
       id: "fluency",
@@ -43,8 +55,20 @@ const CompletePage = ({
   ]
   const checklist = baseChecklist.map((item, idx) =>
     idx < doneCount
-      ? { ...item, icon: "✓", statusText: "Hoàn tất", isDone: true }
-      : { ...item, icon: "⏳", statusText: item.isDone ? "Đang xử lý..." : item.statusText, isDone: false },
+      ? {
+          ...item,
+          icon: "✓",
+          statusText: completeText.done || "Hoàn tất",
+          isDone: true,
+        }
+      : {
+          ...item,
+          icon: "⏳",
+          statusText: item.isDone
+            ? completeText.processingItem || "Đang xử lý..."
+            : item.statusText,
+          isDone: false,
+        },
   )
 
   return (
@@ -57,10 +81,11 @@ const CompletePage = ({
       {/* Main Title & Subtitle */}
       <div className="text-center space-y-2 max-w-xl">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          BUỔI LUYỆN NÓI ĐÃ HOÀN TẤT!
+          {completeText.title || "BUỔI LUYỆN NÓI ĐÃ HOÀN TẤT!"}
         </h1>
         <p className="text-slate-500 dark:text-neutral-400 text-sm sm:text-base font-normal">
-          Gia sư AI đang tính toán điểm số và trích xuất từ vựng vào Flashcard...
+          {completeText.subtitle ||
+            "Gia sư AI đang tính toán điểm số và trích xuất từ vựng vào Flashcard..."}
         </p>
       </div>
 
@@ -73,7 +98,10 @@ const CompletePage = ({
           />
         </div>
         <div className="text-center text-sm font-bold text-[#990011] dark:text-red-400">
-          Đang xử lý {progressPercent}% ({estimatedTime})
+          {fillTemplate(
+            completeText.processing || "Đang xử lý {{percent}}% ({{time}})",
+            { percent: progressPercent, time: resolvedEstimatedTime },
+          )}
         </div>
       </div>
 
@@ -121,7 +149,7 @@ const CompletePage = ({
           onClick={onViewReport}
           className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-sm sm:text-base shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
         >
-          Xem Báo cáo Tổng kết ngay
+          {completeText.viewReport || "Xem Báo cáo Tổng kết ngay"}
         </button>
       </div>
     </div>

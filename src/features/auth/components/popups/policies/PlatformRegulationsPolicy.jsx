@@ -3,15 +3,34 @@ import PrivacyPolicy from "./PrivacyPolicy"
 import TermsOfService from "./TermsOfService"
 import PaymentPolicy from "./PaymentPolicy"
 import IntellectualPropertyPolicy from "./IntellectualPropertyPolicy"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PlatformRegulationsPolicy = () => {
+  const { t } = useLanguage()
+  const authText = t?.auth || {}
   const [activeTab, setActiveTab] = useState(0)
 
   const tabs = [
-    { id: "tos", label: "Điều khoản dịch vụ", component: TermsOfService },
-    { id: "privacy", label: "Chính sách bảo mật", component: PrivacyPolicy },
-    { id: "payment", label: "Chính sách thanh toán", component: PaymentPolicy },
-    { id: "ip", label: "Bản quyền sở hữu trí tuệ", component: IntellectualPropertyPolicy },
+    {
+      id: "tos",
+      label: authText.serviceTerms || "Điều khoản dịch vụ",
+      component: TermsOfService,
+    },
+    {
+      id: "privacy",
+      label: authText.privacyPolicy || "Chính sách bảo mật",
+      component: PrivacyPolicy,
+    },
+    {
+      id: "payment",
+      label: authText.paymentPolicy || "Chính sách thanh toán",
+      component: PaymentPolicy,
+    },
+    {
+      id: "ip",
+      label: authText.ipPolicy || "Bản quyền sở hữu trí tuệ",
+      component: IntellectualPropertyPolicy,
+    },
   ]
 
   const ActiveComponent = tabs[activeTab].component

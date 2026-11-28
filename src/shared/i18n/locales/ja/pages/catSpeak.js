@@ -160,6 +160,8 @@ export default {
       "別のタグを選択するか、後で確認してみてください。",
     detail: {
       commentsTotal: "件のコメント",
+      save: "保存",
+      saved: "保存済み",
       beFirstToComment: "最初のコメントを投稿しましょう。",
       signInToComment: "コメントするにはログインしてください...",
       replyTo: "返信先",

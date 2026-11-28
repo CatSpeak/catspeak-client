@@ -1,6 +1,7 @@
 import React from "react"
 import { AlertTriangle } from "lucide-react"
 import { createPortal } from "react-dom"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Không bịa thông tin thiết bị: chỉ hiện dòng nào có dữ liệu thật.
 const DEFAULT_SESSION_INFO = {}
@@ -12,6 +13,8 @@ const ActiveSessionConflictModal = ({
   onTransferSession,
   onCloseAndReturnHome,
 }) => {
+  const { t } = useLanguage()
+  const modalText = t?.aiTutor?.speakingRoom?.modals?.conflict || {}
   const currentSession = { ...DEFAULT_SESSION_INFO, ...(sessionInfo || {}) }
   const hasDetails = Boolean(currentSession.device || currentSession.topic || currentSession.status)
   // Không truyền onTransferSession thì là hộp thoại ss08 dạng thông báo: một nút "Đã hiểu".
@@ -39,12 +42,12 @@ const ActiveSessionConflictModal = ({
 
             {/* Title */}
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">
-              Phát hiện phiên học đang hoạt động
+              {modalText.title || "Phát hiện phiên học đang hoạt động"}
             </h2>
 
             {/* Subtitle */}
             <p className="text-xs sm:text-sm text-slate-600 dark:text-neutral-300 mt-2 leading-relaxed max-w-md mx-auto">
-              Bạn đang có buổi luyện nói ở thiết bị khác.
+              {modalText.subtitle || "Bạn đang có buổi luyện nói ở thiết bị khác."}
             </p>
 
             {/* Session details box */}
@@ -52,17 +55,17 @@ const ActiveSessionConflictModal = ({
               <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-slate-50 dark:bg-[#242424] border border-slate-100 dark:border-[#3F3F3F] text-left space-y-2 text-xs sm:text-sm text-slate-700 dark:text-neutral-300 leading-relaxed">
                 {currentSession.device && (
                   <p>
-                    • <strong>Thiết bị:</strong> {currentSession.device}
+                    • <strong>{modalText.device || "Thiết bị:"}</strong> {currentSession.device}
                   </p>
                 )}
                 {currentSession.topic && (
                   <p>
-                    • <strong>Chủ đề:</strong> {currentSession.topic}
+                    • <strong>{modalText.topic || "Chủ đề:"}</strong> {currentSession.topic}
                   </p>
                 )}
                 {currentSession.status && (
                   <p>
-                    • <strong>Trạng thái:</strong> {currentSession.status}
+                    • <strong>{modalText.status || "Trạng thái:"}</strong> {currentSession.status}
                   </p>
                 )}
               </div>
@@ -70,7 +73,8 @@ const ActiveSessionConflictModal = ({
 
             {/* Security note */}
             <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/40 text-xs text-amber-900 dark:text-amber-200 leading-relaxed text-left">
-              Để đảm bảo bảo mật và chất lượng âm thanh 2 chiều, mỗi tài khoản chỉ được tham gia 1 phòng nói duy nhất tại một thời điểm.
+              {modalText.securityNote ||
+                "Để đảm bảo bảo mật và chất lượng âm thanh 2 chiều, mỗi tài khoản chỉ được tham gia 1 phòng nói duy nhất tại một thời điểm."}
             </div>
 
             {/* Footer Action Buttons */}
@@ -84,7 +88,7 @@ const ActiveSessionConflictModal = ({
                   }}
                   className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-6 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
                 >
-                  Đã hiểu
+                  {modalText.understood || "Đã hiểu"}
                 </button>
               </div>
             ) : (
@@ -97,7 +101,7 @@ const ActiveSessionConflictModal = ({
                 }}
                 className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-slate-50 dark:bg-[#242424] hover:bg-slate-100 dark:hover:bg-[#2c2c2c] text-slate-700 dark:text-neutral-200 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
               >
-                Đóng & Quay về Trang chủ
+                {modalText.closeHome || "Đóng & Quay về Trang chủ"}
               </button>
 
               <button
@@ -108,7 +112,7 @@ const ActiveSessionConflictModal = ({
                 }}
                 className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
               >
-                Chuyển phiên sang thiết bị này
+                {modalText.transfer || "Chuyển phiên sang thiết bị này"}
               </button>
             </div>
             )}

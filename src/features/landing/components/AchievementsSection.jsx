@@ -1,5 +1,6 @@
 import { createElement } from "react"
 import { Award, BadgeCheck, Medal, Star, Trophy } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const achievements = [
   {
@@ -46,25 +47,33 @@ const achievements = [
 ]
 
 const AchievementsSection = () => {
+  const { t } = useLanguage()
+  const achText = t?.landing?.achievements || {}
+  const localizedAchievements = achievements.map((item, index) => ({
+    ...item,
+    ...(achText.items?.[index] || {}),
+    icon: item.icon,
+  }))
+
   return (
     <section className="w-full border-t border-[#e5e5e5] bg-[#f3f3f3] px-4 py-12 transition-colors dark:border-[#303030] dark:bg-[#171717] sm:px-6 sm:py-16 lg:px-8 lg:py-20">
       <div className="mx-auto max-w-[1280px]">
         <header className="mx-auto mb-9 max-w-[780px] text-center sm:mb-10">
           <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#B3261E] dark:text-[#ff7a8a] sm:text-sm">
             <Trophy className="h-4 w-4 text-[#F5A623]" aria-hidden="true" />
-            Thành tích & Dấu ấn nổi bật
+            {achText.eyebrow || "Thành tích & Dấu ấn nổi bật"}
           </p>
           <h2 className="mx-auto mt-3 max-w-[620px] text-[clamp(2rem,4vw,3rem)] font-black leading-[1.05] tracking-[-0.04em] text-[#171717] dark:text-white">
-            Thành tích & Giải thưởng khẳng định chất lượng
+            {achText.title || "Thành tích & Giải thưởng khẳng định chất lượng"}
           </h2>
           <p className="mx-auto mt-3 max-w-[760px] text-base leading-7 text-[#666] dark:text-gray-300 sm:text-lg">
-            Hành trình xây dựng CAT SPEAK được ghi nhận bởi các giải thưởng
-            khởi nghiệp giáo dục và các tổ chức học thuật uy tín trên toàn quốc.
+            {achText.description ||
+              "Hành trình xây dựng CAT SPEAK được ghi nhận bởi các giải thưởng khởi nghiệp giáo dục và các tổ chức học thuật uy tín trên toàn quốc."}
           </p>
         </header>
 
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {achievements.map(
+          {localizedAchievements.map(
             ({
               icon: Icon,
               year,
@@ -108,7 +117,7 @@ const AchievementsSection = () => {
                   <span className="text-xs leading-5 text-[#595959] dark:text-gray-400">{metric}</span>
                   <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#B3261E] dark:text-[#FF7A8A]">
                     <BadgeCheck className="h-4 w-4" aria-hidden="true" />
-                    Xác nhận
+                    {achText.confirmed || "Xác nhận"}
                   </span>
                 </div>
               </article>

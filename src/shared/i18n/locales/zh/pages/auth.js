@@ -110,6 +110,11 @@ export default {
   passwordChangedSubtitle: "您的密码已成功更新。",
   loginNowButton: "立即登录",
   verifyEmailTitle: "验证您的电子邮件",
+  verifyEmailOtpSubtitle: "请输入发送到您邮箱的 6 位验证码。",
+  emailVerifiedTitle: "邮箱验证成功！",
+  emailVerifiedSubtitle:
+    "感谢您验证邮箱地址，现在可以使用 Cat Speak 的全部功能。",
+  backToHome: "返回首页",
   verifyEmailSubtitle: "我们将6位代码发送至",
   editEmail: "编辑电子邮件",
   updateEmail: "更新电子邮件",

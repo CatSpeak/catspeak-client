@@ -4,6 +4,7 @@ export default {
   subtitle:
     'Cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của người dùng. Chính sách này mô tả cách Cat Speak thu thập, sử dụng và lưu trữ thông tin của bạn.',
   footer: '© 2026 | CAT SPEAK - I SPEAK YOU SPEAK WE PEAK',
+  backToTop: 'Lên đầu trang',
   sections: [
     {
       title: '1. Thông tin chúng tôi thu thập',

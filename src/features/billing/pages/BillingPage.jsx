@@ -40,7 +40,7 @@ const BillingPage = () => {
     () => [
       {
         id: "usage",
-        label: pu.tabUsage || "Hạn Ngạch & Gói",
+        label: pu.tabUsage || "Hạn Ngạch & Sử Dụng",
         icon: Gauge,
       },
       {

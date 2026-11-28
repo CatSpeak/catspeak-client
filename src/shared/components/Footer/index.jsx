@@ -1,19 +1,33 @@
 import { Clock3, ExternalLink, Mail, Phone } from "lucide-react"
 import { MainLogo } from "@/shared/assets/icons/logo"
+import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import FooterBottom from "./FooterBottom"
 
-const quickLinks = [
-  { label: "Vấn đề người học", href: "/#learning-barriers" },
-  { label: "Giải pháp CAT SPEAK", href: "/#catspeak-solutions" },
-  { label: "Tính năng cốt lõi (Room 1-1, AI)", href: "/#core-features" },
-  { label: "Cách hoạt động", href: "/#how-it-works" },
-  { label: "So sánh phương pháp học", href: "/#solutions" },
-  { label: "Câu hỏi thường gặp (FAQ)", href: "/#faq" },
-  { label: "Trạng thái hệ thống", href: "/#contact" },
+const QUICK_LINKS = [
+  { key: "learningBarriers", label: "Vấn đề người học", href: "/#learning-barriers" },
+  { key: "solutions", label: "Giải pháp CAT SPEAK", href: "/#catspeak-solutions" },
+  {
+    key: "coreFeatures",
+    label: "Tính năng cốt lõi (Room 1-1, AI)",
+    href: "/#core-features",
+  },
+  { key: "howItWorks", label: "Cách hoạt động", href: "/#how-it-works" },
+  {
+    key: "methodComparison",
+    label: "So sánh phương pháp học",
+    href: "/#solutions",
+  },
+  { key: "faq", label: "Câu hỏi thường gặp (FAQ)", href: "/#faq" },
+  { key: "systemStatus", label: "Trạng thái hệ thống", href: "/#contact" },
 ]
 
 const Footer = () => {
+  const { t } = useLanguage()
+  const footerText = t?.footer || {}
   const currentYear = new Date().getFullYear()
+  const copyrightTemplate =
+    footerText.copyrightNotice ||
+    "© {year} CAT SPEAK Community. Bản quyền thuộc về CAT SPEAK."
 
   return (
     <footer
@@ -25,34 +39,40 @@ const Footer = () => {
           <div>
             <a
               href="/"
-              aria-label="CAT SPEAK - Trang chủ"
+              aria-label={footerText.logoAriaLabel || "CAT SPEAK - Trang chủ"}
               className="inline-flex h-12 w-[152px] items-center justify-center rounded-lg bg-white px-3"
             >
               <img src={MainLogo} alt="CAT SPEAK" className="h-auto w-32" />
             </a>
             <p className="mt-5 max-w-[390px] text-sm leading-[1.7] text-gray-300">
-              Nền tảng cộng đồng luyện nói 3 ngôn ngữ Anh - Trung - Nhật cùng
-              người thật và AI linh hoạt theo nhu cầu. Biến kiến thức thành
-              những cuộc trò chuyện thực tế.
+              {footerText.description ||
+                "Nền tảng cộng đồng luyện nói 3 ngôn ngữ Anh - Trung - Nhật cùng người thật và AI linh hoạt theo nhu cầu. Biến kiến thức thành những cuộc trò chuyện thực tế."}
             </p>
             <div className="mt-4 flex items-center gap-2 text-xs text-gray-400">
               <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
-              <span>Trạng thái: Nền tảng đang hoạt động trực tuyến 24/7</span>
+              <span>
+                {footerText.statusOnline ||
+                  "Trạng thái: Nền tảng đang hoạt động trực tuyến 24/7"}
+              </span>
             </div>
           </div>
 
-          <nav aria-label="Điều hướng nhanh">
+          <nav
+            aria-label={
+              footerText.quickNavigationTitle || "Điều hướng nhanh"
+            }
+          >
             <h2 className="text-xs font-bold uppercase tracking-wide text-white">
-              Điều hướng nhanh
+              {footerText.quickNavigationTitle || "Điều hướng nhanh"}
             </h2>
             <ul className="mt-4 space-y-2">
-              {quickLinks.map(({ label, href }) => (
-                <li key={label}>
+              {QUICK_LINKS.map(({ key, label, href }) => (
+                <li key={key}>
                   <a
                     href={href}
                     className="text-xs text-gray-300 transition-colors hover:text-white"
                   >
-                    {label}
+                    {footerText.quickLinks?.[key] || label}
                   </a>
                 </li>
               ))}
@@ -61,14 +81,15 @@ const Footer = () => {
               href="/contact"
               className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-400 transition-colors hover:text-amber-300"
             >
-              Trang liên hệ & hợp tác
+              {footerText.contactPageLink || "Trang liên hệ & hợp tác"}
               <span aria-hidden="true">→</span>
             </a>
           </nav>
 
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wide text-white">
-              Thông tin liên hệ & kênh chính thức
+              {footerText.officialContactTitle ||
+                "Thông tin liên hệ & kênh chính thức"}
             </h2>
             <ul className="mt-4 space-y-2.5 text-xs text-gray-300">
               <li>
@@ -106,16 +127,15 @@ const Footer = () => {
             </ul>
             <p className="mt-5 inline-flex items-center gap-2 text-[11px] text-gray-400">
               <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
-              Thời gian hỗ trợ: 08:30 - 21:00 (Thứ Hai - Chủ Nhật)
+              {footerText.supportHours ||
+                "Thời gian hỗ trợ: 08:30 - 21:00 (Thứ Hai - Chủ Nhật)"}
             </p>
           </div>
         </div>
 
         <div className="mt-14 border-t border-white/10 pt-4">
           <div className="flex flex-col items-start justify-between gap-4 text-xs text-gray-400 sm:flex-row sm:items-center">
-            <p>
-              © {currentYear} CAT SPEAK Community. Bản quyền thuộc về CAT SPEAK.
-            </p>
+            <p>{copyrightTemplate.replace("{year}", String(currentYear))}</p>
             <FooterBottom />
           </div>
         </div>

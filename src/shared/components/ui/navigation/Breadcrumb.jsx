@@ -17,13 +17,13 @@ const Breadcrumb = ({ items, separator = "/", className = "" }) => {
             ) : (
               <button
                 onClick={item.onClick}
-                className="shrink-0 font-normal text-[#7b7979] dark:text-[#AAAAAA] transition-colors hover:text-black dark:hover:text-white hover:underline"
+                className="shrink-0 font-normal text-[#595959] dark:text-[#AAAAAA] transition-colors hover:text-black dark:hover:text-white hover:underline"
               >
                 {item.label}
               </button>
             )}
 
-            {!isLast && <span className="shrink-0 text-[#7b7979] dark:text-[#AAAAAA] font-medium">{separator}</span>}
+            {!isLast && <span className="shrink-0 text-[#595959] dark:text-[#AAAAAA] font-medium">{separator}</span>}
           </React.Fragment>
         );
       })}

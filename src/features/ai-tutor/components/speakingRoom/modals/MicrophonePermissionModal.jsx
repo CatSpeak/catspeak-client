@@ -1,6 +1,7 @@
 import React from "react"
 import { Mic, X } from "lucide-react"
 import { createPortal } from "react-dom"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const MicrophonePermissionModal = ({
   isOpen = false,
@@ -8,6 +9,8 @@ const MicrophonePermissionModal = ({
   onRetry,
   onBackToTopics,
 }) => {
+  const { t } = useLanguage()
+  const modalText = t?.aiTutor?.speakingRoom?.modals?.micro || {}
   if (!isOpen || typeof document === "undefined") return null
 
   return createPortal(
@@ -28,7 +31,7 @@ const MicrophonePermissionModal = ({
               <div className="flex items-center gap-2.5">
                 <Mic className="w-5 h-5 text-[#990011] dark:text-red-400 shrink-0" />
                 <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">
-                  Hướng dẫn mở quyền Microphone
+                  {modalText.title || "Hướng dẫn mở quyền Microphone"}
                 </h2>
               </div>
 
@@ -44,24 +47,31 @@ const MicrophonePermissionModal = ({
 
             {/* Description */}
             <p className="text-xs sm:text-sm text-slate-600 dark:text-neutral-300 mt-3.5 leading-relaxed">
-              Trình duyệt đang chặn truy cập Micro. CatSpeak cần quyền Micro để AI nhận diện giọng nói và đàm thoại thời gian thực cùng bạn:
+              {modalText.desc ||
+                "Trình duyệt đang chặn truy cập Micro. CatSpeak cần quyền Micro để AI nhận diện giọng nói và đàm thoại thời gian thực cùng bạn:"}
             </p>
 
             {/* 3 Steps Guide Box */}
             <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-slate-50/90 dark:bg-[#242424] border border-slate-200/80 dark:border-[#333333] space-y-2.5">
               <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white tracking-wide uppercase">
-                3 bước mở khóa Microphone nhanh:
+                {modalText.stepsTitle || "3 bước mở khóa Microphone nhanh:"}
               </h3>
 
               <div className="space-y-2 text-xs sm:text-sm text-slate-700 dark:text-neutral-300 leading-relaxed">
                 <p>
-                  <strong>Bước 1:</strong> Nhấn vào biểu tượng Ổ khóa cạnh thanh URL trình duyệt góc trên bên trái.
+                  <strong>1.</strong>{" "}
+                  {modalText.step1 ||
+                    "Nhấn vào biểu tượng Ổ khóa cạnh thanh URL trình duyệt góc trên bên trái."}
                 </p>
                 <p>
-                  <strong>Bước 2:</strong> Tìm mục Microphone và chuyển trạng thái gạt sang Cho phép (Allow).
+                  <strong>2.</strong>{" "}
+                  {modalText.step2 ||
+                    "Tìm mục Microphone và chuyển trạng thái gạt sang Cho phép (Allow)."}
                 </p>
                 <p>
-                  <strong>Bước 3:</strong> Nhấn nút &apos;Đã bật mic, Thử lại ngay&apos; bên dưới để hệ thống kiểm tra lại tín hiệu.
+                  <strong>3.</strong>{" "}
+                  {modalText.step3 ||
+                    "Nhấn nút 'Đã bật mic, Thử lại ngay' bên dưới để hệ thống kiểm tra lại tín hiệu."}
                 </p>
               </div>
             </div>
@@ -76,7 +86,7 @@ const MicrophonePermissionModal = ({
                 }}
                 className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-xs sm:text-sm tracking-wide uppercase transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
               >
-                Đã bật mic, Thử lại ngay
+                {modalText.retry || "Đã bật mic, Thử lại ngay"}
               </button>
 
               <button
@@ -87,7 +97,7 @@ const MicrophonePermissionModal = ({
                 }}
                 className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-white dark:bg-[#272727] border border-slate-300 dark:border-[#3F3F3F] hover:bg-slate-50 dark:hover:bg-[#333333] text-slate-700 dark:text-neutral-200 font-medium text-xs sm:text-sm transition-colors cursor-pointer text-center"
               >
-                Quay lại chọn chủ đề
+                {modalText.backToTopics || "Quay lại chọn chủ đề"}
               </button>
             </div>
           </div>

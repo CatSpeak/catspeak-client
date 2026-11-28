@@ -1,7 +1,7 @@
 export default {
   pageTitle: "Quản Lý Gói Dịch Vụ & Thanh Toán",
   pageSubtitle: "Theo dõi hạn ngạch sử dụng thực tế và xem lại lịch sử hóa đơn thanh toán của bạn.",
-  tabUsage: "Hạn Ngạch & Usage",
+  tabUsage: "Hạn Ngạch & Sử Dụng",
   tabHistory: "Lịch Sử Thanh Toán",
   header: {
     proMember: "Thành Viên Pro",
@@ -49,7 +49,7 @@ export default {
     noData: "Không tìm thấy tính năng khớp với",
   },
   loading: "Đang tải thông tin sử dụng gói dịch vụ...",
-  errorTitle: "Không Thể Tải Dữ Liệu Usage",
+  errorTitle: "Không Thể Tải Dữ Liệu Sử Dụng",
   errorDesc: "Đã có lỗi xảy ra khi kết nối máy chủ. Vui lòng kiểm tra lại đường truyền và thử lại.",
   btnRetry: "Thử Lại",
 }

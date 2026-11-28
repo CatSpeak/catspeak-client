@@ -105,7 +105,11 @@ export default {
   validationOtpRequired: "Vui lòng nhập mã xác thực OTP.",
   validationOtpLength: "Mã OTP phải có 6 chữ số",
   verifyOtpFailed: "Mã OTP không chính xác hoặc đã hết hạn.",
-  verifying: "Đang xác minh",
+  verifying: "Đang xác minh email của bạn...",
+  emailVerifiedTitle: "Xác minh Email thành công!",
+  emailVerifiedSubtitle:
+    "Cảm ơn bạn đã xác minh địa chỉ email. Bạn có thể sử dụng đầy đủ các tính năng của Cat Speak.",
+  backToHome: "Về trang chủ",
   back: "Quay lại",
   invalidCredentials: "Email hoặc mật khẩu không chính xác.",
   registering: "Đang đăng ký",
@@ -114,6 +118,8 @@ export default {
   passwordChangedSubtitle: "Mật khẩu của bạn đã được cập nhật thành công.",
   loginNowButton: "Đăng nhập ngay",
   verifyEmailTitle: "Xác minh Email",
+  verifyEmailOtpSubtitle:
+    "Nhập mã xác minh 6 chữ số đã được gửi tới email của bạn.",
   verifyEmailSubtitle: "Chúng tôi đã gửi mã 6 chữ số đến",
   editEmail: "Chỉnh sửa Email",
   updateEmail: "Cập nhật Email",

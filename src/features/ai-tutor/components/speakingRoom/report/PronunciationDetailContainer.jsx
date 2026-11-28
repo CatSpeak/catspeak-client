@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import DeepPronunciationAnalysisModal from "../modals/DeepPronunciationAnalysisModal"
 import MouthShapeGuideModal from "../modals/MouthShapeGuideModal"
 import {
@@ -19,22 +20,28 @@ import { toAnalysisData, toGuideData } from "../../../utils/speakingReport"
  * chờ. Hai modal không mở chồng nhau: bấm "Xem video Shorts khẩu hình" thì đóng
  * ss12 mở ss13, bấm "Đã hiểu khẩu hình, Luyện tập ngay" ở ss13 thì quay lại ss12.
  */
-const errorMessage = (error, data) => {
+const errorMessage = (error, data, text = {}) => {
   if (error) {
     return speakingErrorCode(error) === "SPEAKING_PRONUNCIATION_UNAVAILABLE"
-      ? "Phân tích phát âm chi tiết đang tạm tắt. Bạn quay lại sau nhé."
-      : "Chưa tải được phân tích phát âm. Bạn thử lại sau ít phút nhé."
+      ? text.unavailable ||
+          "Phân tích phát âm chi tiết đang tạm tắt. Bạn quay lại sau nhé."
+      : text.loadFailed ||
+          "Chưa tải được phân tích phát âm. Bạn thử lại sau ít phút nhé."
   }
   if (data?.status === "no_audio") {
-    return "Buổi nói này chưa có bản ghi âm để phân tích. Buổi sau bạn nhớ bật mic trong suốt buổi nhé."
+    return text.noAudio ||
+      "Buổi nói này chưa có bản ghi âm để phân tích. Buổi sau bạn nhớ bật mic trong suốt buổi nhé."
   }
   if (data && !data.words?.length) {
-    return "Bạn phát âm rất ổn, không có từ nào cần luyện thêm trong buổi này!"
+    return text.allGood ||
+      "Bạn phát âm rất ổn, không có từ nào cần luyện thêm trong buổi này!"
   }
   return null
 }
 
 const PronunciationDetailContainer = ({ sessionId, isOpen, onClose }) => {
+  const { t } = useLanguage()
+  const pronText = t?.aiTutor?.speakingRoom?.pronunciation || {}
   const [stage, setStage] = useState("analysis") // analysis | guide
   const [wordIndex, setWordIndex] = useState(0)
   const [retries, setRetries] = useState({})
@@ -65,8 +72,9 @@ const PronunciationDetailContainer = ({ sessionId, isOpen, onClose }) => {
       } catch (e) {
         setRetryError(
           speakingErrorCode(e) === "SPEAKING_RETRY_NOT_HEARD"
-            ? "Chưa nghe rõ, bạn thử nói to và rõ hơn nhé."
-            : "Chưa chấm được lần này, bạn thử lại nhé.",
+            ? pronText.retryNotHeard ||
+                "Chưa nghe rõ, bạn thử nói to và rõ hơn nhé."
+            : pronText.retryFailed || "Chưa chấm được lần này, bạn thử lại nhé.",
         )
       }
     },
@@ -105,7 +113,7 @@ const PronunciationDetailContainer = ({ sessionId, isOpen, onClose }) => {
         }}
         data={analysisData || undefined}
         loading={isLoading || (isFetching && !data)}
-        errorText={errorMessage(error, data)}
+        errorText={errorMessage(error, data, pronText)}
         words={words}
         selectedIndex={wordIndex}
         onSelectWord={(i) => {

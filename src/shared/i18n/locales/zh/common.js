@@ -34,9 +34,6 @@ export default {
       ja: "日语",
     },
   },
-  pagination: {
-    range: "{{start}}-{{end}} 共 {{total}}",
-  },
   nav: {
     home: "首页",
     rooms: "房间",
@@ -64,7 +61,6 @@ export default {
     teachingTasks: "教学任务",
     vouchers: "优惠券与活动",
     myLearning: "我的学习",
-    vocabularyNotebook: "词汇本",
     manageMaterials: "资料管理",
     exploreCourses: "探索课程",
     aiTutor: "AI 导师",
@@ -147,7 +143,16 @@ export default {
     feature: "此功能",
     description: "我们正在努力开发此功能以带给您最佳体验。请稍后再回来查看！",
     backToHome: "返回首页",
+    faqCta: "查看常见问题（FAQ）",
+    goToDashboard: "前往仪表盘",
     thankYou: "感谢您的耐心等待！^^",
+  },
+  organization: {
+    badge: "即将推出",
+    title: "机构信息",
+    description:
+      "面向机构、语言中心和企业的工作空间正在完善中，请稍后再来体验。",
+    backToDashboard: "返回仪表盘",
   },
   noOptionsFound: "未找到选项",
   loading: "加载中...",

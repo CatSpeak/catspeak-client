@@ -1,4 +1,5 @@
 import { Check, Sparkles } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const comparisonRows = [
   {
@@ -66,7 +67,16 @@ const comparisonRows = [
   },
 ]
 
-const MethodComparisonSection = () => (
+const MethodComparisonSection = () => {
+  const { t } = useLanguage()
+  const methodText = t?.landing?.methodComparison || {}
+  const columns = methodText.columns || {}
+  const rows = comparisonRows.map((row, index) => ({
+    ...row,
+    ...(methodText.rows?.[index] || {}),
+  }))
+
+  return (
   <section
     id="solutions"
     className="w-full bg-[#f3f3f3] px-4 py-12 transition-colors dark:bg-[#171717] sm:px-6 sm:py-16 lg:px-8"
@@ -74,14 +84,14 @@ const MethodComparisonSection = () => (
     <div className="mx-auto max-w-[1280px]">
       <header className="mx-auto mb-8 max-w-[800px] text-center">
         <p className="text-xs font-semibold uppercase tracking-wide text-[#B3261E] dark:text-[#ff7a8a] sm:text-sm">
-          So sánh khách quan phương pháp
+          {methodText.eyebrow || "So sánh khách quan phương pháp"}
         </p>
         <h2 className="mt-3 text-[clamp(2rem,4vw,2.65rem)] font-black leading-[1.08] tracking-[-0.04em] text-[#171717] dark:text-white">
-          Khác biệt khi luyện nói cùng CAT SPEAK
+          {methodText.title || "Khác biệt khi luyện nói cùng CAT SPEAK"}
         </h2>
         <p className="mx-auto mt-2 max-w-[760px] text-sm leading-6 text-[#666] dark:text-gray-300 sm:text-base">
-          Xem xét các tiêu chí thực hành giao tiếp để lựa chọn phương pháp học
-          tập phù hợp nhất với quỹ thời gian và mục tiêu của bạn.
+          {methodText.description ||
+            "Xem xét các tiêu chí thực hành giao tiếp để lựa chọn phương pháp học tập phù hợp nhất với quỹ thời gian và mục tiêu của bạn."}
         </p>
       </header>
 
@@ -100,25 +110,25 @@ const MethodComparisonSection = () => (
                 scope="col"
                 className="px-5 py-4 text-xs font-bold uppercase text-[#555] dark:text-gray-300"
               >
-                Tiêu chí so sánh
+                {columns.criterion || "Tiêu chí so sánh"}
               </th>
               <th
                 scope="col"
                 className="px-4 py-4 text-center text-xs font-bold uppercase text-[#555] dark:text-gray-300"
               >
-                App tự học thụ động
+                {columns.passive || "App tự học thụ động"}
               </th>
               <th
                 scope="col"
                 className="px-4 py-4 text-center text-xs font-bold uppercase text-[#555] dark:text-gray-300"
               >
-                Tự nói một mình
+                {columns.solo || "Tự nói một mình"}
               </th>
               <th
                 scope="col"
                 className="px-4 py-4 text-center text-xs font-bold uppercase text-[#555] dark:text-gray-300"
               >
-                Lớp học trung tâm
+                {columns.classroom || "Lớp học trung tâm"}
               </th>
               <th
                 scope="col"
@@ -132,7 +142,7 @@ const MethodComparisonSection = () => (
             </tr>
           </thead>
           <tbody>
-            {comparisonRows.map(({ criterion, options, catspeak }) => (
+            {rows.map(({ criterion, options, catspeak }) => (
               <tr
                 key={criterion}
                 className="border-t border-[#ececec] dark:border-[#383838]"
@@ -167,12 +177,12 @@ const MethodComparisonSection = () => (
       </div>
 
       <p className="mt-4 text-center text-xs leading-5 text-[#777] dark:text-gray-400">
-        * Đánh giá dựa trên tiêu chí tạo phản xạ nói trực tiếp hai chiều. Mỗi
-        phương pháp đều có giá trị bổ trợ lẫn nhau trong hành trình tiếp thu
-        ngôn ngữ.
+        {methodText.footnote ||
+          "* Đánh giá dựa trên tiêu chí tạo phản xạ nói trực tiếp hai chiều. Mỗi phương pháp đều có giá trị bổ trợ lẫn nhau trong hành trình tiếp thu ngôn ngữ."}
       </p>
     </div>
   </section>
-)
+  )
+}
 
 export default MethodComparisonSection

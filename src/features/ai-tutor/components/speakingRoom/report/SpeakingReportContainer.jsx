@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useSelector } from "react-redux"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import CompletePage from "../pages/CompletePage"
 import ResultPage from "../pages/ResultPage"
 import PronunciationDetailContainer from "./PronunciationDetailContainer"
@@ -33,6 +34,9 @@ const SpeakingReportContainer = ({
   onGoHome,
   onPracticeFlashcards,
 }) => {
+  const { t } = useLanguage()
+  const resultText = t?.aiTutor?.speakingRoom?.result || {}
+  const completeText = t?.aiTutor?.speakingRoom?.complete || {}
   const startedAt = useRef(0)
   const [elapsed, setElapsed] = useState(0)
   const [manualShow, setManualShow] = useState(false)
@@ -72,7 +76,13 @@ const SpeakingReportContainer = ({
     return (
       <CompletePage
         progressPercent={progress}
-        estimatedTime={report ? "xong" : elapsed < 3000 ? "khoảng 2 giây" : "sắp xong"}
+        estimatedTime={
+          report
+            ? completeText.estimatedNow || "xong"
+            : elapsed < 3000
+              ? completeText.estimatedTwoSeconds || "khoảng 2 giây"
+              : completeText.estimatedSoon || "sắp xong"
+        }
         doneCount={report ? 4 : Math.min(3, Math.floor(progress / 30))}
         onViewReport={() => setManualShow(true)}
       />
@@ -95,24 +105,30 @@ const SpeakingReportContainer = ({
     return (
       <ResultPage
         {...common}
-        topicTitle={topicTitle || "Luyện nói với AI"}
+        topicTitle={topicTitle || resultText.defaultTopic || "Luyện nói với AI"}
         duration="--:--"
         date=""
         overallScore="--"
-        cefrLevel="Buổi luyện nói"
+        cefrLevel={resultText.sessionFallback || "Buổi luyện nói"}
         metrics={[]}
-        strengths={forbidden ? [] : ["Buổi nói của bạn đã được lưu lại."]}
+        strengths={
+          forbidden ? [] : [resultText.savedNotice || "Buổi nói của bạn đã được lưu lại."]
+        }
         improvements={[]}
         savedVocabs={[]}
         showPronunciationLink={false}
         notice={
           forbidden
-            ? "Bạn không có quyền xem báo cáo của buổi nói này."
+            ? resultText.forbidden ||
+              "Bạn không có quyền xem báo cáo của buổi nói này."
             : isTimeout
-              ? "Quá thời gian tạo báo cáo. Bạn có thể nhấn thử lại bên dưới."
+              ? resultText.timeout ||
+                "Quá thời gian tạo báo cáo. Bạn có thể nhấn thử lại bên dưới."
               : hardError
-                ? "Chưa tải được báo cáo. Bạn thử tải lại trang sau ít phút nhé."
-                : "Báo cáo đang được hoàn tất, trang sẽ tự cập nhật trong giây lát."
+                ? resultText.loadFailed ||
+                  "Chưa tải được báo cáo. Bạn thử tải lại trang sau ít phút nhé."
+                : resultText.finalizing ||
+                  "Báo cáo đang được hoàn tất, trang sẽ tự cập nhật trong giây lát."
         }
         onRetry={isTimeout || hardError ? handleRetry : undefined}
       />
@@ -120,11 +136,14 @@ const SpeakingReportContainer = ({
   }
 
   const notice = props.isEmptySession
-    ? "Buổi này chưa ghi nhận câu trả lời nào. Lần sau bạn thử trả lời bằng một câu thật ngắn, AI sẽ giúp bạn nói tiếp."
+    ? resultText.emptySession ||
+      "Buổi này chưa ghi nhận câu trả lời nào. Lần sau bạn thử trả lời bằng một câu thật ngắn, AI sẽ giúp bạn nói tiếp."
     : isAbandoned
-      ? "Phiên đã dừng trước khi hoàn tất. Đây là dữ liệu hiện có của buổi luyện nói."
+      ? resultText.abandoned ||
+        "Phiên đã dừng trước khi hoàn tất. Đây là dữ liệu hiện có của buổi luyện nói."
       : props.isPartial
-        ? "Đang hoàn tất nhận xét chi tiết và nghĩa từ vựng, báo cáo sẽ tự cập nhật."
+        ? resultText.partial ||
+          "Đang hoàn tất nhận xét chi tiết và nghĩa từ vựng, báo cáo sẽ tự cập nhật."
         : null
 
   return (

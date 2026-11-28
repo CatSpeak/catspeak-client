@@ -6,6 +6,7 @@ import {
   Target,
   UserRoundPlus,
 } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const steps = [
   {
@@ -39,6 +40,14 @@ const steps = [
 ]
 
 const HowItWorksSection = () => {
+  const { t } = useLanguage()
+  const howText = t?.landing?.howItWorks || {}
+  const localizedSteps = steps.map((item, index) => ({
+    ...item,
+    ...(howText.items?.[index] || {}),
+    icon: item.icon,
+  }))
+
   return (
     <section
       id="how-it-works"
@@ -47,19 +56,19 @@ const HowItWorksSection = () => {
       <div className="mx-auto max-w-[1280px]">
         <header className="mx-auto mb-8 max-w-[800px] text-center sm:mb-9">
           <p className="text-xs font-semibold uppercase tracking-wide text-[#B3261E] dark:text-[#ff7a8a] sm:text-sm">
-            Quy trình 4 bước đơn giản
+            {howText.eyebrow || "Quy trình 4 bước đơn giản"}
           </p>
           <h2 className="mx-auto mt-3 text-[clamp(2rem,4vw,2.65rem)] font-black leading-[1.08] tracking-[-0.04em] text-[#171717] dark:text-white">
-            Cách hoạt động của CAT SPEAK
+            {howText.title || "Cách hoạt động của CAT SPEAK"}
           </h2>
           <p className="mx-auto mt-2 max-w-[760px] text-sm leading-6 text-[#666] dark:text-gray-300 sm:text-base">
-            Hành trình được tối giản tối đa để bạn có thể bước vào một cuộc trò
-            chuyện ngoại ngữ thực thụ mà không mất thời gian cài đặt phức tạp.
+            {howText.description ||
+              "Hành trình được tối giản tối đa để bạn có thể bước vào một cuộc trò chuyện ngoại ngữ thực thụ mà không mất thời gian cài đặt phức tạp."}
           </p>
         </header>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {steps.map(({ icon, title, description, note }, index) => (
+          {localizedSteps.map(({ icon, title, description, note }, index) => (
             <article
               key={title}
               className="flex min-h-[300px] flex-col rounded-2xl border border-[#dedede] bg-white p-5 shadow-sm transition-colors dark:border-[#3b3b3b] dark:bg-[#222] sm:p-5"
@@ -95,18 +104,19 @@ const HowItWorksSection = () => {
         <div className="mt-6 flex flex-col items-start justify-between gap-5 rounded-2xl border border-[#dedede] bg-white px-6 py-5 shadow-sm transition-colors dark:border-[#3b3b3b] dark:bg-[#222] sm:flex-row sm:items-center sm:px-7">
           <div>
             <h3 className="text-base font-bold text-[#171717] dark:text-gray-100 sm:text-lg">
-              Sẵn sàng thử thách 15 phút nói ngoại ngữ đầu tiên?
+              {howText.ctaTitle ||
+                "Sẵn sàng thử thách 15 phút nói ngoại ngữ đầu tiên?"}
             </h3>
             <p className="mt-1 text-sm text-[#666] dark:text-gray-300">
-              Nhận thông báo và quyền vào phòng sớm nhất ngay khi hệ thống mở
-              thêm máy chủ.
+              {howText.ctaDescription ||
+                "Nhận thông báo và quyền vào phòng sớm nhất ngay khi hệ thống mở thêm máy chủ."}
             </p>
           </div>
           <a
             href="#landing-contact"
             className="inline-flex shrink-0 items-center justify-center gap-3 rounded-xl bg-[#A90016] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#890012]"
           >
-            Đăng ký tham gia ngay
+            {howText.ctaButton || "Đăng ký tham gia ngay"}
             {createElement(ArrowRight, {
               className: "h-4 w-4",
               "aria-hidden": true,

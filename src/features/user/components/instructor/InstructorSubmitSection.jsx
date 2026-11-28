@@ -77,6 +77,7 @@ const InstructorSubmitSection = ({
         open={!!selectedPolicy} 
         onClose={() => setSelectedPolicy(null)} 
         title={selectedPolicy} 
+        policyKey="regulations"
       />
     </>
   );

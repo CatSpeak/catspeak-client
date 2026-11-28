@@ -8,6 +8,24 @@ export default {
   namePlaceholder: "您的姓名",
   contactMessage: "会尽快与您联系^^",
   sendContact: "发送联系信息",
+  logoAriaLabel: "CAT SPEAK - 首页",
+  description:
+    "24/7 英语、中文、日语口语社区，与真人和 AI 一起练习，灵活满足你的需求。把知识变成真实对话。",
+  statusOnline: "状态：平台全天候在线运行",
+  quickNavigationTitle: "快速导航",
+  quickLinks: {
+    learningBarriers: "学习者常见问题",
+    solutions: "CAT SPEAK 解决方案",
+    coreFeatures: "核心功能（1对1房间、AI）",
+    howItWorks: "使用方式",
+    methodComparison: "学习方法对比",
+    faq: "常见问题（FAQ）",
+    systemStatus: "系统状态",
+  },
+  contactPageLink: "联系与合作页面",
+  officialContactTitle: "联系方式与官方渠道",
+  supportHours: "支持时间：08:30 - 21:00（周一至周日）",
+  copyrightNotice: "© {year} CAT SPEAK Community. 版权所有。",
   languages: {
     vietnamese: "越南语",
     english: "英语",
@@ -18,6 +36,7 @@ export default {
     terms: "服务条款",
     payment: "支付和退款政策",
     copyright: "版权",
+    navAriaLabel: "政策",
   },
   copyright: "Copyright {year} | Cat Speak",
 
