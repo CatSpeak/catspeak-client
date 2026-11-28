@@ -492,6 +492,9 @@ export default {
       "Trình duyệt đã chặn Hình trong Hình — đang hiển thị trình phát mini trong ứng dụng.",
     pipNotAvailable: "Hình trong Hình không khả dụng trong môi trường này.",
     pipActivated: "Đã bật Hình trong Hình",
+    inviteResultAlreadyInRoom: "{0} đã ở trong phòng",
+    inviteResultNotFound: "{0} không tìm thấy",
+    inviteSentPartial: "Đã gửi lời mời cho {0} người ({1})",
     alreadyInRoom: "Người bạn chọn đã ở trong phòng họp.",
     cameraIsOff: "Camera đang tắt",
     cameraOffDesc: "Bật camera để xem trước hiệu ứng.",
@@ -874,6 +877,8 @@ export default {
       unbanFailed: "Không thể gỡ cấm. Vui lòng thử lại.",
       bannedFromRoom: "Tài khoản của bạn đã bị cấm truy cập vào phòng này bởi Host.",
       forbiddenKick: "Bạn không có quyền mời thành viên ra khỏi phòng.",
+      lockedBanner:
+        "Phòng đang được khóa. Người dùng mới sẽ vào hàng đợi chờ duyệt.",
       lockRoom: "Khóa phòng (chặn người mới)",
       lockOn: "Đã khóa phòng. Người mới không thể tham gia.",
       lockOff: "Đã mở khóa phòng.",
@@ -1085,8 +1090,13 @@ export default {
       exitConfirmTitle: "Xác nhận thoát",
       exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
       exitConfirmDesc2: "Bạn sẽ không thể tham gia lại ván chơi này nữa!",
+      exitConfirmSpectatorTitle:
+        "Bạn có chắc chắn muốn đóng màn hình theo dõi trò chơi không?",
+      exitConfirmSpectatorDesc:
+        "Bạn có thể mở lại bất cứ lúc nào khi trận đấu chưa kết thúc.",
       exitConfirmDescSpectator:
         "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu).",
+      pointsUnit: "điểm",
       pointsShort: "+ Điểm",
       openLeaderboard: "Mở bảng xếp hạng",
       closeLeaderboard: "Đóng bảng xếp hạng",
@@ -1162,6 +1172,10 @@ export default {
       modals: {
         exitConfirmTitle: "Xác nhận thoát",
         exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
+        exitConfirmSpectatorTitle:
+          "Bạn có chắc chắn muốn đóng màn hình theo dõi trò chơi không?",
+        exitConfirmSpectatorDesc:
+          "Bạn có thể mở lại bất cứ lúc nào khi trận đấu chưa kết thúc.",
         exitConfirmDescSpectator:
           "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu).",
         cancel: "Hủy",
@@ -1335,8 +1349,13 @@ export default {
       exitConfirmTitle: "Xác nhận thoát",
       exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
       exitConfirmDesc2: "Bạn sẽ không thể tham gia lại ván chơi này nữa!",
+      exitConfirmSpectatorTitle:
+        "Bạn có chắc chắn muốn đóng màn hình theo dõi trò chơi không?",
+      exitConfirmSpectatorDesc:
+        "Bạn có thể mở lại bất cứ lúc nào khi trận đấu chưa kết thúc.",
       exitConfirmDescSpectator:
         "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu).",
+      pointsUnit: "điểm",
       pointsShort: "+ Điểm",
       openLeaderboard: "Mở bảng xếp hạng",
       closeLeaderboard: "Đóng bảng xếp hạng",
@@ -1418,6 +1437,10 @@ export default {
       modals: {
         exitConfirmTitle: "Xác nhận thoát",
         exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
+        exitConfirmSpectatorTitle:
+          "Bạn có chắc chắn muốn đóng màn hình theo dõi trò chơi không?",
+        exitConfirmSpectatorDesc:
+          "Bạn có thể mở lại bất cứ lúc nào khi trận đấu chưa kết thúc.",
         exitConfirmDescSpectator:
           "Bạn sẽ chuyển sang chế độ Quan sát (theo dõi trận đấu).",
         cancel: "Hủy",

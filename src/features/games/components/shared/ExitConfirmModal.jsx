@@ -29,9 +29,13 @@ const ExitConfirmModal = ({ showExitConfirm, setShowExitConfirm }) => {
           </>
         ) : (
           <>
-            <p>Bạn có chắc chắn muốn đóng màn hình theo dõi trò chơi không?</p>
+            <p>
+              {tm.exitConfirmSpectatorTitle ||
+                "Are you sure you want to close the game watching screen?"}
+            </p>
             <p className="text-slate-500 dark:text-neutral-400 font-medium text-xs mt-2">
-              Bạn có thể mở lại bất cứ lúc nào khi trận đấu chưa kết thúc.
+              {tm.exitConfirmSpectatorDesc ||
+                "You can reopen it at any time while the match is still running."}
             </p>
           </>
         )}

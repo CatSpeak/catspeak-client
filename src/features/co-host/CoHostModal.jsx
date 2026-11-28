@@ -446,7 +446,7 @@ const CoHostModal = ({
                       <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
                         {getCandidateDisplayName(selectedUser)}
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-200/80">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-500/15 text-amber-900 dark:text-amber-200 text-[10px] font-bold px-2 py-0.5 border border-amber-200/80 dark:border-amber-400/30">
                         <Crown size={10} />
                         {t.rooms?.coHost?.designatedBadge || "Co-host chỉ định"}
                       </span>

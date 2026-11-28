@@ -172,7 +172,9 @@ const AnswerInput = ({ isMain = true }) => {
               className="mr-3 font-black text-green-600 dark:text-green-400 drop-shadow-sm flex items-center gap-1 shrink-0"
             >
               <span className="text-xl">+{myScoreEarned}</span>
-              <span className="text-xs uppercase tracking-wider mt-1">điểm</span>
+              <span className="text-xs uppercase tracking-wider mt-1">
+                {t.rooms?.game?.crackIt?.pointsUnit || "points"}
+              </span>
             </motion.div>
           )}
         </AnimatePresence>

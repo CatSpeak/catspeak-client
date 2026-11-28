@@ -139,10 +139,25 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
         if (alreadyInRoomCount > 0 || notFoundCount > 0) {
           const details = []
           if (alreadyInRoomCount > 0)
-            details.push(`${alreadyInRoomCount} đã ở trong phòng`)
-          if (notFoundCount > 0) details.push(`${notFoundCount} không tìm thấy`)
+            details.push(
+              (
+                t.rooms?.videoCall?.inviteResultAlreadyInRoom ||
+                "{0} already in the room"
+              ).replace("{0}", alreadyInRoomCount),
+            )
+          if (notFoundCount > 0)
+            details.push(
+              (
+                t.rooms?.videoCall?.inviteResultNotFound || "{0} not found"
+              ).replace("{0}", notFoundCount),
+            )
           toast.success(
-            `Đã gửi lời mời cho ${invitedCount} người (${details.join(", ")})`,
+            (
+              t.rooms?.videoCall?.inviteSentPartial ||
+              "Invitation sent to {0} people ({1})"
+            )
+              .replace("{0}", invitedCount)
+              .replace("{1}", details.join(", ")),
           )
         } else {
           toast.success(

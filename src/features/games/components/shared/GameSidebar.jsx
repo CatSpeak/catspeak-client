@@ -261,7 +261,9 @@ const GameSidebar = ({
           name =
             p?.name ||
             (playerNames && playerNames[idStr]) ||
-            `Người chơi ${idStr}`
+            (t.rooms?.game?.crackIt?.playerX
+              ? t.rooms.game.crackIt.playerX.replace("{0}", idStr)
+              : `Player ${idStr}`)
         }
       } else {
         if (playerNames && playerNames[idStr]) {

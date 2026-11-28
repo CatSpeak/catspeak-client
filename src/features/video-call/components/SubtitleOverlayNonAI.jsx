@@ -105,10 +105,10 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
 
   return (
     <div className="w-full shrink-0 flex flex-col items-center mt-4 z-20 relative">
-      <div className="w-full flex flex-col h-52 bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white rounded-2xl border border-border dark:border-[#3F3F3F] group/subtitles relative overflow-hidden">
+      <div className="w-full flex flex-col h-52 bg-white dark:bg-[#1A1A1A] text-foreground dark:text-white rounded-2xl border border-border dark:border-[#3F3F3F] group/subtitles relative">
         {/* Full Loading Overlay when starting or stopping */}
         {(isStartingSubtitles || isStoppingSubtitles) && (
-          <div className="absolute inset-0 z-30 bg-white/85 dark:bg-[#1A1A1A]/85 backdrop-blur-[2px] flex items-center justify-center select-none pointer-events-auto">
+          <div className="absolute inset-0 z-30 rounded-2xl bg-white/85 dark:bg-[#1A1A1A]/85 backdrop-blur-[2px] flex items-center justify-center select-none pointer-events-auto">
             <LoadingSpinner
               text={
                 isStoppingSubtitles
@@ -161,7 +161,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
               </IconButton>
 
               {showSizePicker && (
-                <div className="absolute top-full right-0 mt-1 z-50 min-w-[170px] bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white rounded-xl shadow-xl border border-border dark:border-[#3F3F3F] py-1.5 flex flex-col overflow-hidden pointer-events-auto">
+                <div className="absolute top-full right-0 mt-1 z-50 min-w-[170px] max-h-[320px] overflow-y-auto bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white rounded-xl shadow-xl border border-border dark:border-[#3F3F3F] py-1.5 flex flex-col pointer-events-auto">
                   {FONT_SIZES.map((size) => {
                     const isSelected = fontSize === size.id
                     return (
@@ -256,7 +256,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
         {/* Scrollable subtitle list */}
         <div
           ref={scrollRef}
-          className="p-4 flex-1 overflow-y-auto overscroll-contain"
+          className="p-4 flex-1 overflow-y-auto overscroll-contain rounded-b-2xl"
         >
           {subtitles.length === 0 ? (
             <div className="flex h-full items-center justify-center">

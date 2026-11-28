@@ -233,7 +233,10 @@ const CustomRoomCard = ({
               <div
                 className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm shadow-sm"
                 title={
-                  isPrivate ? "Private room" : "Password protected"
+                  isPrivate
+                    ? t?.rooms?.filters?.visibilities?.Private || "Private room"
+                    : t?.rooms?.customRooms?.passwordRequired ||
+                      "Password protected"
                 }
               >
                 <Lock size={14} className="text-white" />

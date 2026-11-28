@@ -271,7 +271,7 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
                   role="tab"
                   aria-selected={safeActiveTab === "waiting"}
                   onClick={() => setActiveTab("waiting")}
-                  className={`flex flex-1 basis-[calc(50%_-_0.375rem)] items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                  className={`flex flex-1 basis-[calc(50%_-_0.375rem)] items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all gap-1.5 ${
                     safeActiveTab === "waiting"
                       ? "bg-cath-red-700 text-white shadow-xs"
                       : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"
@@ -314,7 +314,7 @@ const ParticipantList = ({ hideTitle, externalPending, onClose }) => {
                   role="tab"
                   aria-selected={safeActiveTab === "settings"}
                   onClick={() => setActiveTab("settings")}
-                  className={`flex flex-1 basis-[calc(50%_-_0.375rem)] items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                  className={`flex flex-1 basis-[calc(50%_-_0.375rem)] items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-semibold transition-all gap-1.5 ${
                     safeActiveTab === "settings"
                       ? "bg-cath-red-700 text-white shadow-xs"
                       : "text-neutral-600 dark:text-[#AAAAAA] hover:bg-cath-red-700/[0.08] dark:hover:bg-cath-red-700/20 hover:text-cath-red-700 dark:hover:text-red-400"

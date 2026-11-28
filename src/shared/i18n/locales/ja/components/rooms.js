@@ -489,6 +489,9 @@ export default {
     pipNotAvailable:
       "この環境ではピクチャーインピクチャーを利用できません。",
     pipActivated: "ピクチャーインピクチャーを有効にしました",
+    inviteResultAlreadyInRoom: "{0} は既にルームにいます",
+    inviteResultNotFound: "{0} が見つかりません",
+    inviteSentPartial: "{0} 人に招待を送信しました（{1}）",
     alreadyInRoom: "選択した友達はすでに会議ルームにいます。",
     cameraIsOff: "カメラがオフになっています",
     cameraOffDesc: "効果をプレビューするにはカメラをオンにしてください。",
@@ -853,6 +856,8 @@ export default {
       bannedFromRoom:
         "あなたのアカウントはこのルームへの参加をホストによって禁止されました。",
       forbiddenKick: "メンバーをルームから退出させる権限がありません。",
+      lockedBanner:
+        "ルームはロックされています。新しいユーザーは承認待ちキューに入ります。",
       lockRoom: "ルームをロック（新規参加をブロック）",
       lockOn: "ルームをロックしました。新規参加者は参加できません。",
       lockOff: "ルームのロックを解除しました。",
@@ -1183,8 +1188,13 @@ export default {
       exitConfirmTitle: "退出の確認",
       exitConfirmDesc1: "このゲームを退出してもよろしいですか？",
       exitConfirmDesc2: "このラウンドには再参加できません！",
+      exitConfirmSpectatorTitle:
+        "ゲーム観戦画面を閉じてもよろしいですか？",
+      exitConfirmSpectatorDesc:
+        "試合が終了する前なら、いつでも再度開くことができます。",
       exitConfirmDescSpectator:
         "観戦モードに切り替わり、試合を引き続き視聴します。",
+      pointsUnit: "点",
       pointsShort: "+ 点",
       openLeaderboard: "ランキングを開く",
       closeLeaderboard: "ランキングを閉じる",
@@ -1265,6 +1275,10 @@ export default {
       modals: {
         exitConfirmTitle: "退出の確認",
         exitConfirmDesc1: "このゲームを退出してもよろしいですか？",
+        exitConfirmSpectatorTitle:
+          "ゲーム観戦画面を閉じてもよろしいですか？",
+        exitConfirmSpectatorDesc:
+          "試合が終了する前なら、いつでも再度開くことができます。",
         exitConfirmDescSpectator:
           "観戦モードに切り替わり、試合を引き続き視聴します。",
         cancel: "キャンセル",

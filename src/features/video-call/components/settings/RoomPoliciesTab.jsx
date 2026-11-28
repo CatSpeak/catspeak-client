@@ -493,7 +493,8 @@ const RoomPoliciesTab = ({ coHost }) => {
         <div className="flex items-center gap-2 rounded-xl bg-red-50/60 dark:bg-red-950/30 border border-cath-red-700/20 dark:border-red-900/50 px-3 py-2 text-xs font-semibold text-cath-red-700 dark:text-red-400">
           <Lock size={14} className="shrink-0 text-cath-red-700 dark:text-red-400" />
           <span>
-            Phòng đang được khóa. Người dùng mới sẽ vào hàng đợi chờ duyệt.
+            {pl.lockedBanner ||
+              "The room is locked. New users will wait in the approval queue."}
           </span>
         </div>
       )}

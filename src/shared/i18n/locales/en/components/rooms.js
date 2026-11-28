@@ -514,6 +514,9 @@ export default {
       "Picture-in-Picture is blocked by your browser — showing the in-app mini player instead.",
     pipNotAvailable: "Picture-in-Picture is not available in this environment.",
     pipActivated: "Picture-in-Picture activated",
+    inviteResultAlreadyInRoom: "{0} already in the room",
+    inviteResultNotFound: "{0} not found",
+    inviteSentPartial: "Invitation sent to {0} people ({1})",
     alreadyInRoom: "The selected friend is already in the meeting room.",
     cameraIsOff: "Camera is turned off",
     cameraOffDesc: "Turn on your camera to preview effects.",
@@ -896,6 +899,8 @@ export default {
       unbanFailed: "Could not unban. Please try again.",
       bannedFromRoom: "Your account has been banned from joining this room by the Host.",
       forbiddenKick: "You do not have permission to remove members from the room.",
+      lockedBanner:
+        "The room is locked. New users will wait in the approval queue.",
       lockRoom: "Lock room (block newcomers)",
       lockOn: "Room locked. Newcomers cannot join.",
       lockOff: "Room unlocked.",
@@ -1107,8 +1112,13 @@ export default {
       exitConfirmTitle: "Confirm Exit",
       exitConfirmDesc1: "Are you sure you want to exit this game?",
       exitConfirmDesc2: "You won't be able to rejoin this round!",
+      exitConfirmSpectatorTitle:
+        "Are you sure you want to close the game watching screen?",
+      exitConfirmSpectatorDesc:
+        "You can reopen it at any time while the match is still running.",
       exitConfirmDescSpectator:
         "You will switch to Spectator mode and keep watching the match.",
+      pointsUnit: "points",
       pointsShort: "+ Points",
       openLeaderboard: "Open leaderboard",
       closeLeaderboard: "Close leaderboard",
@@ -1182,6 +1192,10 @@ export default {
       modals: {
         exitConfirmTitle: "Confirm Exit",
         exitConfirmDesc1: "Are you sure you want to exit this game?",
+        exitConfirmSpectatorTitle:
+          "Are you sure you want to close the game watching screen?",
+        exitConfirmSpectatorDesc:
+          "You can reopen it at any time while the match is still running.",
         exitConfirmDescSpectator:
           "You will switch to Spectator mode and keep watching the match.",
         cancel: "Cancel",
@@ -1354,8 +1368,13 @@ export default {
       exitConfirmTitle: "Confirm Exit",
       exitConfirmDesc1: "Are you sure you want to exit this game?",
       exitConfirmDesc2: "You won't be able to rejoin this round!",
+      exitConfirmSpectatorTitle:
+        "Are you sure you want to close the game watching screen?",
+      exitConfirmSpectatorDesc:
+        "You can reopen it at any time while the match is still running.",
       exitConfirmDescSpectator:
         "You will switch to Spectator mode and keep watching the match.",
+      pointsUnit: "points",
       pointsShort: "+ Points",
       openLeaderboard: "Open leaderboard",
       closeLeaderboard: "Close leaderboard",
@@ -1436,6 +1455,10 @@ export default {
       modals: {
         exitConfirmTitle: "Confirm Exit",
         exitConfirmDesc1: "Are you sure you want to exit this game?",
+        exitConfirmSpectatorTitle:
+          "Are you sure you want to close the game watching screen?",
+        exitConfirmSpectatorDesc:
+          "You can reopen it at any time while the match is still running.",
         exitConfirmDescSpectator:
           "You will switch to Spectator mode and keep watching the match.",
         cancel: "Cancel",
