@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 /**
  * Manages the exclusive side-panel state for the video call UI.
@@ -10,8 +10,8 @@ import { useState } from "react"
  *
  * To add a new panel in the future:
  *   1. Add a derived boolean (e.g. `const showFoo = activeSidePanel === "foo"`)
- *   2. Add a convenience setter (e.g. `const setShowFoo = (show) => set(show ? "foo" : null)`)
- *   3. Include both in the return object
+ *   2. Add a convenience setter (e.g. `const setShowFoo = useCallback((show) => set(show ? "foo" : null), [])`)
+ *   3. Include both in the memoized return object
  */
 export const useSidePanelState = () => {
   const [activeSidePanel, setActiveSidePanel] = useState(null)
@@ -25,19 +25,36 @@ export const useSidePanelState = () => {
   const showBreakout = activeSidePanel === "breakout"
   const showSpeakingTimeBalance = activeSidePanel === "speakingTimeBalance"
 
-  // Convenience setters (accept boolean toggle style)
-  const setShowChat = (show) => setActiveSidePanel(show ? "chat" : null)
-  const setShowParticipants = (show) =>
-    setActiveSidePanel(show ? "participants" : null)
-  const setShowVirtualBackground = (show) =>
-    setActiveSidePanel(show ? "virtualBackground" : null)
-  const setShowAvatarPicker = (show) =>
-    setActiveSidePanel(show ? "avatarPicker" : null)
-  const setShowTroubleshoot = (show) =>
-    setActiveSidePanel(show ? "troubleshoot" : null)
-  const setShowBreakout = (show) => setActiveSidePanel(show ? "breakout" : null)
-  const setShowSpeakingTimeBalance = (show) =>
-    setActiveSidePanel(show ? "speakingTimeBalance" : null)
+  // Convenience setters (accept boolean toggle style). Stable identity keeps
+  // panelState memoized for GlobalCallContent's context value.
+  const setShowChat = useCallback(
+    (show) => setActiveSidePanel(show ? "chat" : null),
+    [],
+  )
+  const setShowParticipants = useCallback(
+    (show) => setActiveSidePanel(show ? "participants" : null),
+    [],
+  )
+  const setShowVirtualBackground = useCallback(
+    (show) => setActiveSidePanel(show ? "virtualBackground" : null),
+    [],
+  )
+  const setShowAvatarPicker = useCallback(
+    (show) => setActiveSidePanel(show ? "avatarPicker" : null),
+    [],
+  )
+  const setShowTroubleshoot = useCallback(
+    (show) => setActiveSidePanel(show ? "troubleshoot" : null),
+    [],
+  )
+  const setShowBreakout = useCallback(
+    (show) => setActiveSidePanel(show ? "breakout" : null),
+    [],
+  )
+  const setShowSpeakingTimeBalance = useCallback(
+    (show) => setActiveSidePanel(show ? "speakingTimeBalance" : null),
+    [],
+  )
 
   // Chat sub-panel collapse state (tightly coupled to panel visibility)
   const [isChatCollapsed, setIsChatCollapsed] = useState(false)
@@ -46,28 +63,50 @@ export const useSidePanelState = () => {
   // Persisted chat tab selection so it survives open/close cycles
   const [activeChatTab, setActiveChatTab] = useState("room") // "room" | "ai"
 
-  return {
-    activeSidePanel,
-    setActiveSidePanel,
-    showChat,
-    setShowChat,
-    showParticipants,
-    setShowParticipants,
-    showVirtualBackground,
-    setShowVirtualBackground,
-    showAvatarPicker,
-    setShowAvatarPicker,
-    showTroubleshoot,
-    setShowTroubleshoot,
-    showBreakout,
-    setShowBreakout,
-    showSpeakingTimeBalance,
-    setShowSpeakingTimeBalance,
-    isChatCollapsed,
-    setIsChatCollapsed,
-    isAiCollapsed,
-    setIsAiCollapsed,
-    activeChatTab,
-    setActiveChatTab,
-  }
+  return useMemo(
+    () => ({
+      activeSidePanel,
+      setActiveSidePanel,
+      showChat,
+      setShowChat,
+      showParticipants,
+      setShowParticipants,
+      showVirtualBackground,
+      setShowVirtualBackground,
+      showAvatarPicker,
+      setShowAvatarPicker,
+      showTroubleshoot,
+      setShowTroubleshoot,
+      showBreakout,
+      setShowBreakout,
+      showSpeakingTimeBalance,
+      setShowSpeakingTimeBalance,
+      isChatCollapsed,
+      setIsChatCollapsed,
+      isAiCollapsed,
+      setIsAiCollapsed,
+      activeChatTab,
+      setActiveChatTab,
+    }),
+    [
+      activeSidePanel,
+      showChat,
+      showParticipants,
+      showVirtualBackground,
+      showAvatarPicker,
+      showTroubleshoot,
+      showBreakout,
+      showSpeakingTimeBalance,
+      setShowChat,
+      setShowParticipants,
+      setShowVirtualBackground,
+      setShowAvatarPicker,
+      setShowTroubleshoot,
+      setShowBreakout,
+      setShowSpeakingTimeBalance,
+      isChatCollapsed,
+      isAiCollapsed,
+      activeChatTab,
+    ],
+  )
 }

@@ -8,6 +8,7 @@ const store = vi.hoisted(() => ({
   inCall: false,
   token: null,
   callInfo: { sessionId: "s1", user: { accountId: 7 } },
+  publish: true,
 }))
 
 vi.mock("react-redux", () => ({
@@ -29,10 +30,6 @@ vi.mock("@livekit/components-react", async (importOriginal) => ({
   LiveKitRoom: ({ children }) => (
     <div data-testid="livekit-room">{children}</div>
   ),
-}))
-
-vi.mock("@/features/video-call/hooks/useSidePanelState", () => ({
-  useSidePanelState: () => ({}),
 }))
 
 vi.mock("@/features/video-call/hooks/useVideoCallAuthHeartbeat", () => ({
@@ -64,23 +61,44 @@ vi.mock("@/features/video-call/utils/roomOptions", () => ({
 
 vi.mock("./GlobalCallContent", async () => {
   const ReactModule = await import("react")
-  const MockGlobalCallContent = ({ onSync, onClear }) => {
+  const MockGlobalCallContent = ({ onSync, onClear, panelState }) => {
+    const publishEnabled = store.publish
+    const value = ReactModule.useMemo(
+      () => ({
+        isInCall: true,
+        user: { accountId: 7 },
+        room: { id: 1 },
+        sessionId: "s1",
+        isCallReady: false,
+        panelState,
+      }),
+      [panelState],
+    )
+
     ReactModule.useLayoutEffect(() => {
-      onSync?.(
-        { name: "lk-room" },
-        {
-          isInCall: true,
-          user: { accountId: 7 },
-          room: { id: 1 },
-          sessionId: "s1",
-          isCallReady: false,
-        },
-      )
-    }, [onSync])
+      if (!publishEnabled) return
+      onSync?.({ name: "lk-room" }, value)
+    }, [onSync, value, publishEnabled])
     ReactModule.useEffect(() => () => onClear?.(), [onClear])
+
     return ReactModule.createElement(
       "div",
-      { "data-testid": "call-content" },
+      {
+        "data-testid": "call-content",
+        "data-panel": panelState?.activeSidePanel ?? "",
+      },
+      ReactModule.createElement(
+        "button",
+        {
+          type: "button",
+          "data-testid": "toggle-panel",
+          onClick: () =>
+            panelState?.setShowChat?.(
+              panelState.activeSidePanel !== "chat",
+            ),
+        },
+        "toggle-panel",
+      ),
       "call-content",
     )
   }
@@ -88,12 +106,14 @@ vi.mock("./GlobalCallContent", async () => {
 })
 
 import { GlobalVideoCallProvider, useGlobalVideoCall } from "./GlobalVideoCallProvider"
+import { useMaybeRoomContext } from "@livekit/components-react"
 
 const mounts = { count: 0 }
 const unmounts = { count: 0 }
 
 const Child = () => {
   const { isCallReady, user } = useGlobalVideoCall()
+  const lkRoom = useMaybeRoomContext()
   useEffect(() => {
     mounts.count += 1
     return () => {
@@ -105,6 +125,7 @@ const Child = () => {
       data-testid="child"
       data-ready={String(isCallReady)}
       data-user={user?.accountId ?? ""}
+      data-room={lkRoom?.name ?? ""}
     >
       app-child
     </div>
@@ -118,6 +139,7 @@ describe("ISS-79: GlobalVideoCallProvider keeps the app tree mounted", () => {
   beforeEach(() => {
     store.inCall = false
     store.token = null
+    store.publish = true
     mounts.count = 0
     unmounts.count = 0
     container = document.createElement("div")
@@ -178,5 +200,91 @@ describe("ISS-79: GlobalVideoCallProvider keeps the app tree mounted", () => {
     expect(mounts.count).toBe(1)
     expect(unmounts.count).toBe(0)
     expect(childNode.getAttribute("data-ready")).toBe("false")
+  })
+
+  it("Vòng 3 (#185): real useSidePanelState toggles converge without a sync loop", async () => {
+    store.inCall = true
+    store.token = "livekit-token"
+
+    const renderTree = () =>
+      root.render(
+        <GlobalVideoCallProvider>
+          <Child />
+        </GlobalVideoCallProvider>,
+      )
+
+    await act(async () => {
+      renderTree()
+    })
+
+    const childNode = container.querySelector('[data-testid="child"]')
+    expect(childNode.getAttribute("data-ready")).toBe("true")
+    expect(childNode.getAttribute("data-room")).toBe("lk-room")
+
+    const clickToggle = async () => {
+      await act(async () => {
+        container
+          .querySelector('[data-testid="toggle-panel"]')
+          .dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      })
+    }
+
+    await clickToggle()
+    expect(
+      container.querySelector('[data-testid="call-content"]').getAttribute(
+        "data-panel",
+      ),
+    ).toBe("chat")
+
+    await clickToggle()
+    expect(
+      container.querySelector('[data-testid="call-content"]').getAttribute(
+        "data-panel",
+      ),
+    ).toBe("")
+
+    await clickToggle()
+    expect(
+      container.querySelector('[data-testid="call-content"]').getAttribute(
+        "data-panel",
+      ),
+    ).toBe("chat")
+
+    expect(container.querySelector('[data-testid="child"]')).toBe(childNode)
+    expect(mounts.count).toBe(1)
+    expect(unmounts.count).toBe(0)
+  })
+
+  it("Vòng 3: RoomContext is undefined until the current session syncs", async () => {
+    store.inCall = true
+    store.token = "livekit-token"
+    store.publish = false
+
+    const renderTree = () =>
+      root.render(
+        <GlobalVideoCallProvider>
+          <Child />
+        </GlobalVideoCallProvider>,
+      )
+
+    await act(async () => {
+      renderTree()
+    })
+
+    const childNode = container.querySelector('[data-testid="child"]')
+    expect(childNode.getAttribute("data-ready")).toBe("false")
+    expect(childNode.getAttribute("data-room")).toBe("")
+
+    store.publish = true
+
+    await act(async () => {
+      renderTree()
+    })
+
+    expect(container.querySelector('[data-testid="child"]')).toBe(childNode)
+    expect(childNode.getAttribute("data-ready")).toBe("true")
+    expect(childNode.getAttribute("data-room")).toBe("lk-room")
+    expect(mounts.count).toBe(1)
+    expect(unmounts.count).toBe(0)
   })
 })
