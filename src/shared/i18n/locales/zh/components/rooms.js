@@ -429,7 +429,7 @@ export default {
     roomNotFound: "未找到房间",
     roomNotFoundSubtext:
       "您查找的房间不存在或已关闭。不如去看看社区里其他正在进行的房间吧？",
-    roomFull: "房间已满（最多 5 人）。",
+    roomFull: "房间已满（最多 {{max}} 人）。",
     joinError: "加入房间时出错。",
     createSessionError: "无法创建会话。请重试。",
     cameraAccessError: "无法访问摄像头。请检查权限或是否被其他应用占用。",

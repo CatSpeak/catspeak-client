@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
 import { Navigate, useParams } from "react-router-dom"
 import { ChevronRight, Loader2, Clock } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion as Motion, AnimatePresence } from "framer-motion"
 import { useConnectionState } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
 import { useSelector, useDispatch } from "react-redux"
+import { selectCurrentUser } from "@/store/slices/authSlice"
 import {
-  useGetBreakoutStatusQuery,
   useStopBreakoutRoomsMutation,
 } from "@/store/api/roomsApi"
 import { exitBreakout } from "@/store/slices/videoCallSlice"
@@ -52,19 +52,13 @@ const VideoCallRoomContent = () => {
   const { t } = useLanguage()
   const {
     showChat,
-    setShowChat,
     showParticipants,
-    setShowParticipants,
     showSpeakingTimeBalance,
-    setShowSpeakingTimeBalance,
     showStudentSpeakingWidget,
     setShowStudentSpeakingWidget,
     showVirtualBackground,
-    setShowVirtualBackground,
     showAvatarPicker,
-    setShowAvatarPicker,
     showBreakout,
-    setShowBreakout,
     activeSidePanel,
     setActiveSidePanel,
     showTroubleshoot,
@@ -85,8 +79,6 @@ const VideoCallRoomContent = () => {
     // Room subtitles
     showRoomSubtitles,
     // Recording
-    isRecording,
-    confirmStopRecording,
     participants,
     isHost: isHostFromContext,
     // Watch together (YouTube, client-sync)
@@ -110,6 +102,8 @@ const VideoCallRoomContent = () => {
   const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector(
     (s) => s.videoCall,
   )
+  const authUser = useSelector(selectCurrentUser)
+  const callUser = useSelector((s) => s.videoCall?.callInfo?.user)
   const isHost = isHostFromContext
   const mediaRef = useRef(null)
   // Native YT state of the host copy (viewers follow via watch-sync and never
@@ -199,7 +193,9 @@ const VideoCallRoomContent = () => {
     return () => {
       try {
         navigator.mediaSession.setActionHandler("enterpictureinpicture", null)
-      } catch (_) {}
+      } catch {
+        /* ignore unsupported action handler */
+      }
     }
   }, [isConnected, enterPiP])
 
@@ -229,27 +225,22 @@ const VideoCallRoomContent = () => {
   // until the connection is fully established so that participant
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
   const connectionState = useConnectionState()
-  const [hasConnected, setHasConnected] = useState(false)
-
-  useEffect(() => {
-    if (connectionState === ConnectionState.Connected) {
-      setHasConnected(true)
-    }
-  }, [connectionState])
+  const [hasConnected, setHasConnected] = useState(
+    connectionState === ConnectionState.Connected,
+  )
+  if (!hasConnected && connectionState === ConnectionState.Connected) {
+    setHasConnected(true)
+  }
 
   const livekitReady =
     hasConnected || connectionState === ConnectionState.Connected
   const isReconnecting = connectionState === ConnectionState.Reconnecting
 
-  const wasBreakoutActiveRef = useRef(false)
-  useEffect(() => {
-    if (isBreakoutActive) {
-      wasBreakoutActiveRef.current = true
-    }
-    if (livekitReady) {
-      wasBreakoutActiveRef.current = false
-    }
-  }, [isBreakoutActive, livekitReady])
+  const [wasBreakoutActive, setWasBreakoutActive] = useState(false)
+  if (isBreakoutActive && !wasBreakoutActive) setWasBreakoutActive(true)
+  if (!isBreakoutActive && livekitReady && wasBreakoutActive) {
+    setWasBreakoutActive(false)
+  }
 
   useEffect(() => {
     // Prevent iOS/macOS swipe-to-go-back gestures during the call
@@ -259,7 +250,7 @@ const VideoCallRoomContent = () => {
     }
   }, [])
 
-  if (!user) {
+  if (!user && !callUser && !authUser) {
     return (
       <Navigate
         to="/"
@@ -277,8 +268,8 @@ const VideoCallRoomContent = () => {
   }
 
   if (!livekitReady) {
-    if (isBreakoutActive || wasBreakoutActiveRef.current) {
-      const isReturning = !isBreakoutActive && wasBreakoutActiveRef.current
+    if (isBreakoutActive || wasBreakoutActive) {
+      const isReturning = !isBreakoutActive && wasBreakoutActive
       const message = isReturning
         ? (t?.rooms?.videoCall?.breakout?.returningTitle ??
           "Quay lại phòng chính...")
@@ -411,7 +402,7 @@ const VideoCallRoomContent = () => {
         {/* Desktop Side Panel (lg+) */}
         <AnimatePresence initial={false}>
           {isSidePanelOpen && (
-            <motion.div
+            <Motion.div
               initial={{ width: 0, marginLeft: 0 }}
               animate={{ width: 360, marginLeft: 16 }}
               exit={{ width: 0, marginLeft: 0 }}
@@ -449,7 +440,7 @@ const VideoCallRoomContent = () => {
                   />
                 )}
               </div>
-            </motion.div>
+            </Motion.div>
           )}
         </AnimatePresence>
       </div>
@@ -458,7 +449,7 @@ const VideoCallRoomContent = () => {
       <AnimatePresence initial={false}>
         {isSidePanelOpen && (
           <div className="hidden md:block lg:hidden">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -466,7 +457,7 @@ const VideoCallRoomContent = () => {
               className="fixed inset-0 z-40 bg-black/40"
               onClick={() => setActiveSidePanel(null)}
             />
-            <motion.div
+            <Motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -502,7 +493,7 @@ const VideoCallRoomContent = () => {
                   className="h-full w-full"
                 />
               )}
-            </motion.div>
+            </Motion.div>
           </div>
         )}
       </AnimatePresence>
@@ -511,7 +502,7 @@ const VideoCallRoomContent = () => {
       <AnimatePresence initial={false}>
         {isSidePanelOpen && (
           <div className="md:hidden">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -519,7 +510,7 @@ const VideoCallRoomContent = () => {
               className="fixed inset-0 z-[30] flex flex-col justify-end bg-black/50"
               onClick={() => setActiveSidePanel(null)}
             >
-              <motion.div
+              <Motion.div
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
@@ -582,8 +573,8 @@ const VideoCallRoomContent = () => {
                     )}
                   </div>
                 )}
-              </motion.div>
-            </motion.div>
+              </Motion.div>
+            </Motion.div>
           </div>
         )}
       </AnimatePresence>

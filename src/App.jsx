@@ -69,26 +69,26 @@ function App() {
         <ThemeProvider>
         <GlobalErrorBoundary>
           <WebViewGuard>
-            <GlobalVideoCallProvider>
-              <Suspense fallback={null}>
-                <ServerDownScreen />
-              </Suspense>
-              <SidebarProvider>
-                <ConversationSignalRProvider>
-                  <InChatCallProvider>
-                    <GlobalPresenceProvider>
-                      <AppToaster />
+            <Suspense fallback={null}>
+              <ServerDownScreen />
+            </Suspense>
+            <SidebarProvider>
+              <ConversationSignalRProvider>
+                <InChatCallProvider>
+                  <GlobalPresenceProvider>
+                    <AppToaster />
+                    <GlobalVideoCallProvider>
                       <AppRouter />
                       <AuthenticatedBackgroundFeatures />
-                      <Suspense fallback={null}>
-                        <HelpWidget />
-                        <ChatAssistantWidget />
-                      </Suspense>
-                    </GlobalPresenceProvider>
-                  </InChatCallProvider>
-                </ConversationSignalRProvider>
-              </SidebarProvider>
-            </GlobalVideoCallProvider>
+                    </GlobalVideoCallProvider>
+                    <Suspense fallback={null}>
+                      <HelpWidget />
+                      <ChatAssistantWidget />
+                    </Suspense>
+                  </GlobalPresenceProvider>
+                </InChatCallProvider>
+              </ConversationSignalRProvider>
+            </SidebarProvider>
           </WebViewGuard>
         </GlobalErrorBoundary>
         </ThemeProvider>

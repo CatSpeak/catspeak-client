@@ -3,6 +3,7 @@ import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantLis
 
 export const IDLE_VALUE = {
   isInCall: false,
+  isCallReady: false,
   isPiP: false,
   enterPiP: () => {},
   exitPiP: () => {},

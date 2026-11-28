@@ -435,7 +435,7 @@ export default {
     roomNotFound: "Không tìm thấy phòng",
     roomNotFoundSubtext:
       "Phòng bạn đang tìm không tồn tại hoặc đã bị đóng. Hãy khám phá những phòng khác đang diễn ra sôi nổi nhé!",
-    roomFull: "Phòng đã đủ người (tối đa 5).",
+    roomFull: "Phòng đã đủ người (tối đa {{max}}).",
     joinError: "Có lỗi xảy ra khi tham gia phòng.",
     createSessionError: "Không thể tạo phiên. Vui lòng thử lại.",
     cameraAccessError:

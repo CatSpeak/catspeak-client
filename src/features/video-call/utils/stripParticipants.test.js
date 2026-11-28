@@ -1,6 +1,6 @@
-import test from "node:test" // eslint-disable-line import/no-unresolved
-// eslint-disable-next-line import/no-unresolved
-import assert from "node:assert/strict"
+import { test } from "vitest"
+
+import assert from "@/shared/test-utils/nodeAssertStrict"
 
 import { getVisibleStripParticipants } from "./stripParticipants.js"
 

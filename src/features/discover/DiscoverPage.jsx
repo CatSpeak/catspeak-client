@@ -6,7 +6,7 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 const DiscoverPage = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const comingSoonT = t.common?.comingSoon || {}
+  const comingSoonT = t?.comingSoon || t?.common?.comingSoon || {}
 
   return (
     <div className="w-full flex items-center justify-center py-10 px-4 sm:px-6">
@@ -31,10 +31,10 @@ const DiscoverPage = () => {
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <PillButton variant="secondary" onClick={() => navigate(-1)}>
-            {t.common?.back || "Quay lại"}
+            {t?.back || t?.common?.back || "Quay lại"}
           </PillButton>
           <PillButton onClick={() => navigate("/")}>
-            {comingSoonT.backToHome || "Về trang chủ"}
+            {comingSoonT.backToHome || t?.common?.comingSoon?.backToHome || "Về trang chủ"}
           </PillButton>
         </div>
       </div>

@@ -3,8 +3,10 @@ import React, { act } from "react"
 import { createRoot } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-const { submitContact } = vi.hoisted(() => ({
+const { submitContact, languageState, tState } = vi.hoisted(() => ({
   submitContact: vi.fn(() => ({ unwrap: async () => ({ ok: true }) })),
+  languageState: { current: "vi" },
+  tState: { current: null },
 }))
 
 vi.mock("@/store/api/contactApi", () => ({
@@ -22,9 +24,10 @@ vi.mock("@/shared/components/ui/Modal", () => ({
 }))
 
 vi.mock("@/shared/context/LanguageContext.jsx", () => ({
-  useLanguage: () => ({ language: "vi", t: {} }),
+  useLanguage: () => ({ language: languageState.current, t: tState.current }),
 }))
 
+import { translations } from "@/shared/i18n"
 import LandingContactForm from "./LandingContactForm"
 
 const setInputValue = (input, value) => {
@@ -56,6 +59,8 @@ describe("ISS-69: LandingContactForm rejects whitespace-only required fields", (
 
   beforeEach(() => {
     submitContact.mockClear()
+    languageState.current = "vi"
+    tState.current = translations.vi
     container = document.createElement("div")
     document.body.appendChild(container)
     root = createRoot(container)
@@ -118,5 +123,58 @@ describe("ISS-69: LandingContactForm rejects whitespace-only required fields", (
         language: "vi",
       }),
     )
+  })
+
+  it("R1-2 blocks an empty required field even when native validation is bypassed", () => {
+    setInputValue(form.elements.name, "")
+    setInputValue(form.elements.email, "learner@catspeak.edu.vn")
+    setTextareaValue(form.elements.message, "")
+
+    act(() => {
+      form.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      )
+    })
+
+    expect(submitContact).not.toHaveBeenCalled()
+  })
+
+  it("R1-2 keeps both selects in sync when the interface language changes", async () => {
+    const viForm = translations.vi.landing.contactForm
+    expect(form.elements.languageInterest.value).toBe(
+      viForm.languageOptions[0],
+    )
+
+    languageState.current = "en"
+    tState.current = translations.en
+    const enForm = translations.en.landing.contactForm
+
+    act(() => {
+      root.render(<LandingContactForm />)
+    })
+    form = container.querySelector("form")
+
+    expect(form.elements.languageInterest.value).toBe(
+      enForm.languageOptions[0],
+    )
+    expect(form.elements.contactNeed.value).toBe(enForm.needOptions[0])
+
+    setInputValue(form.elements.name, "Nguyen Van A")
+    setInputValue(form.elements.email, "learner@catspeak.edu.vn")
+    setTextareaValue(form.elements.message, "I would like a consultation.")
+
+    await act(async () => {
+      form.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      )
+    })
+
+    expect(submitContact).toHaveBeenCalledTimes(1)
+    const payload = submitContact.mock.calls[0][0]
+    expect(payload.language).toBe("en")
+    expect(payload.message).toContain(enForm.languageOptions[0])
+    expect(payload.message).toContain(enForm.needOptions[0])
+    expect(payload.message).not.toContain(viForm.languageOptions[0])
+    expect(payload.message).not.toContain(viForm.needOptions[0])
   })
 })

@@ -424,7 +424,7 @@ export default {
     roomNotFound: "ルームが見つかりません",
     roomNotFoundSubtext:
       "お探しのルームは存在しないか、閉じられました。コミュニティ内の他のアクティブルームを探索してみませんか？",
-    roomFull: "このルームは満員です（定員5人）。",
+    roomFull: "このルームは満員です（定員{{max}}人）。",
     joinError: "ルームへの参加中に問題が発生しました。",
     createSessionError: "セッションの作成に失敗しました。もう一度お試しください。",
     cameraAccessError:

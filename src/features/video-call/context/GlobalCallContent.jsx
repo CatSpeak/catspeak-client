@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react"
+import React, { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { selectCurrentToken } from "@/store/slices/authSlice"
 import {
@@ -95,10 +95,9 @@ const writeCachedRestriction = (list, restriction) => {
  * Orchestrates LiveKit hooks, extracted action hooks, and composes
  * the context value that both the full call page and PiP widget consume.
  *
- * @param {{ children: React.ReactNode, ContextProvider: React.Provider }} props
+ * @param {{ receiveSystemMsgs: boolean, setReceiveSystemMsgs: Function, onSync: Function, onClear: Function }} props
  */
 const GlobalCallContent = ({
-  children,
   receiveSystemMsgs,
   setReceiveSystemMsgs,
   joinLeaveSound,
@@ -106,6 +105,8 @@ const GlobalCallContent = ({
   panelState,
   speakingAssistantEnabled,
   setSpeakingAssistantEnabled,
+  onSync,
+  onClear,
 }) => {
   const { t, language } = useLanguage()
   const dispatch = useDispatch()
@@ -1496,10 +1497,17 @@ const GlobalCallContent = ({
     ],
   )
 
+  // Publish the live room + context value to GlobalVideoCallProvider so the
+  // fixed app tree (outside this lazy chunk) can consume the same context.
+  useLayoutEffect(() => {
+    onSync?.(lkRoom, value)
+  }, [lkRoom, value, onSync])
+
+  useEffect(() => () => onClear?.(), [onClear])
+
   return (
     <GlobalVideoCallContext.Provider value={value}>
       <RoomAudioRenderer />
-      {children}
       <RoomClosingWarningModal
         remainingSeconds={closingRemainingSeconds}
         t={t}

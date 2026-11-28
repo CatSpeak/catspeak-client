@@ -459,7 +459,7 @@ export default {
     roomNotFound: "Room not found",
     roomNotFoundSubtext:
       "The room you're looking for doesn't exist or has been closed. Why not explore other active rooms in the community?",
-    roomFull: "This room is full (max 5 people).",
+    roomFull: "This room is full (max {{max}} people).",
     joinError: "Something went wrong joining the room.",
     createSessionError: "Failed to create session. Please try again.",
     cameraAccessError:

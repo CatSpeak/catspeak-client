@@ -45,7 +45,12 @@ const dicts = {
     ja: jaCatSpeak,
   },
   materials: materialsTranslations,
-  landing: landingTranslations,
+  landing: {
+    vi: landingTranslations.vi.landing,
+    en: landingTranslations.en.landing,
+    zh: landingTranslations.zh.landing,
+    ja: landingTranslations.ja.landing,
+  },
   aiTutor: aiTutorTranslations,
 }
 
@@ -70,8 +75,10 @@ const missingKeys = (reference, other) => {
 
 const assertParity = (label, path) => {
   const reference = path ? dicts[label].vi[path] : dicts[label].vi
+  expect(reference, `vi.${label}.${path}`).toBeDefined()
   for (const lang of ["en", "zh", "ja"]) {
     const other = path ? dicts[label][lang][path] : dicts[label][lang]
+    expect(other, `${lang}.${label}.${path}`).toBeDefined()
     expect(missingKeys(reference, other), `${lang}.${label}.${path}`).toEqual(
       [],
     )

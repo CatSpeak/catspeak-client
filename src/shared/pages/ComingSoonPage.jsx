@@ -58,7 +58,7 @@ const ComingSoonPage = () => {
               onClick={() => navigate(-1)}
               className="inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-neutral-200 transition-colors hover:bg-gray-50 dark:hover:bg-[#2c2c2c]"
             >
-              {t?.common?.back || "Quay lại"}
+              {t?.back || t?.common?.back || "Quay lại"}
             </button>
             <button
               type="button"

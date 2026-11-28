@@ -51,6 +51,18 @@ const LandingContactForm = () => {
     message: "",
   })
 
+  // Keep the two selects aligned with the current interface language. The
+  // options are translated, so a value chosen under another language would no
+  // longer match any <option> and would be submitted with the wrong language.
+  const selectedLanguageInterest = languageOptions.includes(
+    form.languageInterest,
+  )
+    ? form.languageInterest
+    : languageOptions[0]
+  const selectedContactNeed = needOptions.includes(form.contactNeed)
+    ? form.contactNeed
+    : needOptions[0]
+
   const validateField = (element) => {
     if (!element || !REQUIRED_FIELDS.includes(element.name)) return true
     const value = element.value ?? ""
@@ -77,18 +89,16 @@ const LandingContactForm = () => {
     event.preventDefault()
     const formElement = event.currentTarget
 
-    const hasWhitespaceOnly = REQUIRED_FIELDS.some((field) => {
-      const value = form[field] ?? ""
-      return value.length > 0 && value.trim().length === 0
-    })
-    if (hasWhitespaceOnly) {
-      const invalidField = REQUIRED_FIELDS.find((field) => {
-        const value = form[field] ?? ""
-        return value.length > 0 && value.trim().length === 0
-      })
+    const invalidField = REQUIRED_FIELDS.find(
+      (field) => !(form[field] ?? "").trim(),
+    )
+    if (invalidField) {
       const element = formElement?.elements?.[invalidField]
       if (element) {
-        element.setCustomValidity(whitespaceError)
+        const value = form[invalidField] ?? ""
+        element.setCustomValidity(
+          value.length > 0 ? whitespaceError : "",
+        )
         element.reportValidity?.()
         element.focus?.()
       }
@@ -96,8 +106,8 @@ const LandingContactForm = () => {
     }
 
     const message = [
-      `${formText.messagePrefixNeed || "Nhu cầu liên hệ:"} ${form.contactNeed}`,
-      `${formText.messagePrefixLanguage || "Ngôn ngữ quan tâm:"} ${form.languageInterest}`,
+      `${formText.messagePrefixNeed || "Nhu cầu liên hệ:"} ${selectedContactNeed}`,
+      `${formText.messagePrefixLanguage || "Ngôn ngữ quan tâm:"} ${selectedLanguageInterest}`,
       form.phone.trim()
         ? `${formText.messagePrefixPhone || "Số điện thoại / Zalo:"} ${form.phone.trim()}`
         : "",
@@ -203,7 +213,7 @@ const LandingContactForm = () => {
               className={inputClassName}
               name="languageInterest"
               onChange={updateField}
-              value={form.languageInterest}
+              value={selectedLanguageInterest}
             >
               {languageOptions.map((option) => (
                 <option key={option}>{option}</option>
@@ -217,7 +227,7 @@ const LandingContactForm = () => {
               className={inputClassName}
               name="contactNeed"
               onChange={updateField}
-              value={form.contactNeed}
+              value={selectedContactNeed}
             >
               {needOptions.map((option) => (
                 <option key={option}>{option}</option>

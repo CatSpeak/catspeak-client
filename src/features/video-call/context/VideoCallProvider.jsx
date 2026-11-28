@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import { useParams, useLocation, useNavigate, Navigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
+import { useMaybeRoomContext } from "@livekit/components-react"
 import { toast } from "react-hot-toast"
 import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
@@ -45,6 +46,10 @@ import { PreJoinWaitingGate } from "../components/waiting/WaitingScreen"
 import VideoCallErrorBoundary from "@/shared/components/VideoCallErrorBoundary"
 import { isRoomExpired } from "@/shared/utils/dateUtils"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { useGlobalVideoCall } from "./videoCallContext"
+
+const formatRoomFull = (template, max) =>
+  template.replaceAll("{{max}}", String(max))
 
 /**
  * Phases:
@@ -62,6 +67,8 @@ export const VideoCallProvider = ({ children }) => {
   const { t, language } = useLanguage()
 
   const { user } = useAuth()
+  const { isCallReady } = useGlobalVideoCall()
+  const lkRoom = useMaybeRoomContext()
 
   const isClassRoom = roomId && roomId.startsWith("class-")
   const isLearningPathRoom = Boolean(
@@ -106,6 +113,17 @@ export const VideoCallProvider = ({ children }) => {
   }, [isReturningToCall, dispatch])
 
   if (isReturningToCall) {
+    if (!isCallReady || !lkRoom) {
+      return (
+        <VideoCallErrorBoundary>
+          <VideoCallLoading
+            message={
+              t?.rooms?.videoCall?.provider?.connecting ?? "Connecting..."
+            }
+          />
+        </VideoCallErrorBoundary>
+      )
+    }
     return (
       <VideoCallErrorBoundary>
         {children}
@@ -426,6 +444,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     fromQueue,
     roomId,
     location.search,
+    phase,
+    verifyJoinRoom,
   ])
 
   // ── Handle password submission from PasswordScreen ──
@@ -497,7 +517,13 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
     // Room full check (moved from deleted useJoinVideoSession hook)
     if (isRoomFull && !skipRoomFullCheck) {
-      toast.error(t.rooms.waitingScreen.roomFull)
+      toast.error(
+        formatRoomFull(
+          t.rooms.waitingScreen.roomFull ||
+            "Phòng đã đủ người (tối đa {{max}}).",
+          maxParticipants ?? 5,
+        ),
+      )
       return
     }
 
@@ -746,7 +772,14 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       // Auto-join with mic/camera OFF, bypassing room-full check
       handleJoinClick({ skipRoomFullCheck: true, isAutoJoin: true })
     }
-  }, [shouldAutoJoin, user, room, isLoadingUser, isLoadingRoom])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    shouldAutoJoin,
+    user,
+    room,
+    isLoadingUser,
+    isLoadingRoom,
+  ])
 
   // ========================================
   //  RENDER: Guards & phase-based rendering

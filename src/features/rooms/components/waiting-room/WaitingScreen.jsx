@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Copy, Mic, Video, Volume2, Info, Check, X, Edit2 } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -13,7 +13,6 @@ import meetingFallbackImageZH from "@/shared/assets/images/rooms/THUMBNAIL-TQ.pn
 import meetingFallbackImageEN from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import meetingFallbackImageJP from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg"
 import FullscreenOverlayShell from "@/layouts/VideoCallLayout/FullscreenOverlayShell"
-import { getCommunityPath } from "@/shared/utils/navigation"
 import VirtualBackgroundModal from "@/features/video-call/components/VirtualBackgroundModal"
 import EditNicknameModal from "./EditNicknameModal"
 import { copyRoomLink } from "@/shared/utils/shareUtils"
@@ -51,9 +50,12 @@ const WaitingScreen = ({
       : "Chinese" === room?.languageType
         ? meetingFallbackImageZH
         : meetingFallbackImageEN
-  const { t, language } = useLanguage()
-  const { lang } = useParams()
+  const { t } = useLanguage()
   const effectiveParticipantCount = participantCount ?? participants.length
+  const roomFullText = (
+    t.rooms.waitingScreen.roomFull ||
+    "Phòng đã đủ người (tối đa {{max}})."
+  ).replaceAll("{{max}}", String(maxParticipants))
   const [isBgModalOpen, setIsBgModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
 
@@ -63,14 +65,20 @@ const WaitingScreen = ({
   const [showButtonSpinner, setShowButtonSpinner] = useState(false)
   const [isLongJoining, setIsLongJoining] = useState(false)
   const [longProgress, setLongProgress] = useState(25)
+  const [wasJoining, setWasJoining] = useState(isJoining)
 
-  useEffect(() => {
+  // Reset the wait-time indicators as soon as a join attempt finishes.
+  if (wasJoining !== isJoining) {
+    setWasJoining(isJoining)
     if (!isJoining) {
       setShowButtonSpinner(false)
       setIsLongJoining(false)
       setLongProgress(25)
-      return
     }
+  }
+
+  useEffect(() => {
+    if (!isJoining) return undefined
 
     // Instant (< 200ms): suppress indicator
     const instantTimer = setTimeout(() => {
@@ -187,7 +195,7 @@ const WaitingScreen = ({
                     : t.rooms.waitingScreen.joinNow
                 }
                 aria-disabled={isFull || isJoining}
-                title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
+                title={isFull ? roomFullText : undefined}
                 className="w-full sm:flex-1"
               >
                 {t.rooms.waitingScreen.joinNow}
@@ -220,7 +228,7 @@ const WaitingScreen = ({
 
             {isFull && (
               <p className="text-sm text-red-600 dark:text-red-400">
-                {t.rooms.waitingScreen.roomFull} ({effectiveParticipantCount}/
+                {roomFullText} ({effectiveParticipantCount}/
                 {maxParticipants})
               </p>
             )}

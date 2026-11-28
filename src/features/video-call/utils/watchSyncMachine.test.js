@@ -1,7 +1,7 @@
-import test from "node:test" // eslint-disable-line import/no-unresolved
+import { test } from "vitest"
 // The repository's alias-only import resolver does not recognize this built-in subpath.
-// eslint-disable-next-line import/no-unresolved
-import assert from "node:assert/strict"
+
+import assert from "@/shared/test-utils/nodeAssertStrict"
 
 import {
   createWatchSyncState,

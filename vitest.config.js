@@ -37,7 +37,7 @@ export default defineConfig({
       "src/features/landing/**/*.test.{js,jsx}",
       "src/features/settings/**/*.test.{js,jsx}",
       "src/features/news/components/**/*.test.{js,jsx}",
-      "src/features/video-call/utils/moderationAuth.test.js",
+      "src/features/video-call/**/*.test.{js,jsx}",
       "src/features/chat-assistant/**/*.test.{js,jsx}",
       "src/features/placement-test/**/*.test.{js,jsx}",
       "src/features/ai-tutor/**/*.test.{js,jsx}",

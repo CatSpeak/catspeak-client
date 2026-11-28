@@ -1,6 +1,13 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense } from "react"
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useMemo,
+  lazy,
+  Suspense,
+} from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { LiveKitRoom } from "@livekit/components-react"
+import { LiveKitRoom, RoomContext } from "@livekit/components-react"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import { resolveCallPolicy } from "@/features/video-call/utils/callPolicy"
@@ -39,44 +46,6 @@ const readPrefs = (accountId) => ({
     defaultValue: false,
   }),
 })
-
-// --- Idle Call Content -----------------------------------------------------
-
-const IdleCallContent = ({
-  children,
-  receiveSystemMsgs,
-  setReceiveSystemMsgs,
-  speakingAssistantEnabled,
-  setSpeakingAssistantEnabled,
-  joinLeaveSound,
-  setJoinLeaveSound,
-}) => {
-  const value = useMemo(
-    () => ({
-      ...IDLE_VALUE,
-      receiveSystemMsgs,
-      setReceiveSystemMsgs,
-      speakingAssistantEnabled,
-      setSpeakingAssistantEnabled,
-      joinLeaveSound,
-      setJoinLeaveSound,
-    }),
-    [
-      receiveSystemMsgs,
-      setReceiveSystemMsgs,
-      speakingAssistantEnabled,
-      setSpeakingAssistantEnabled,
-      joinLeaveSound,
-      setJoinLeaveSound,
-    ],
-  )
-
-  return (
-    <GlobalVideoCallContext.Provider value={value}>
-      {children}
-    </GlobalVideoCallContext.Provider>
-  )
-}
 
 // --- Main Provider ----------------------------------------------------------
 
@@ -149,20 +118,69 @@ export const GlobalVideoCallProvider = ({ children }) => {
     return unsubscribe
   }, [isInCall, callInfo, dispatch])
 
-  if (!isInCall || !livekitToken) {
-    return (
-      <IdleCallContent
-        receiveSystemMsgs={receiveSystemMsgs}
-        setReceiveSystemMsgs={setReceiveSystemMsgs}
-        speakingAssistantEnabled={speakingAssistantEnabled}
-        setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
-        joinLeaveSound={joinLeaveSound}
-        setJoinLeaveSound={setJoinLeaveSound}
-      >
-        {children}
-      </IdleCallContent>
-    )
-  }
+  const idleValue = useMemo(
+    () => ({
+      ...IDLE_VALUE,
+      receiveSystemMsgs,
+      setReceiveSystemMsgs,
+      speakingAssistantEnabled,
+      setSpeakingAssistantEnabled,
+      joinLeaveSound,
+      setJoinLeaveSound,
+    }),
+    [
+      receiveSystemMsgs,
+      speakingAssistantEnabled,
+      joinLeaveSound,
+    ],
+  )
+
+  // `(lkRoom, value)` published by GlobalCallContent once the lazy chunk has
+  // loaded and the LiveKit hooks have produced the real context value.
+  const [activeCall, setActiveCall] = useState({
+    room: null,
+    value: null,
+    sessionId: null,
+  })
+
+  const handleCallSync = useCallback((room, value) => {
+    setActiveCall({
+      room: room ?? null,
+      value: value ?? null,
+      sessionId: value?.sessionId ?? null,
+    })
+  }, [])
+
+  const handleCallClear = useCallback(() => {
+    setActiveCall({ room: null, value: null, sessionId: null })
+  }, [])
+
+  const callActive = Boolean(isInCall && livekitToken)
+  const isSyncedForCurrentCall =
+    Boolean(activeCall.value) &&
+    (activeCall.sessionId ?? null) === (callInfo?.sessionId ?? null)
+
+  const effectiveValue = useMemo(() => {
+    if (!callActive) return idleValue
+    if (isSyncedForCurrentCall) {
+      return { ...activeCall.value, isCallReady: true }
+    }
+    // Tokens are already in Redux but the lazy call chunk has not synced yet.
+    // Keep the app tree mounted with a usable identity so no consumer redirects
+    // to "/" while the chunk loads.
+    return {
+      ...idleValue,
+      isInCall: true,
+      isCallReady: false,
+      user: callInfo?.user ?? null,
+      room: callInfo?.roomData ?? null,
+      sessionId: callInfo?.sessionId ?? null,
+    }
+  }, [callActive, isSyncedForCurrentCall, activeCall.value, idleValue, callInfo])
+
+  const roomContextValue = callActive
+    ? activeCall.room ?? undefined
+    : undefined
 
   const isMobileDevice =
     typeof window !== "undefined" &&
@@ -178,43 +196,55 @@ export const GlobalVideoCallProvider = ({ children }) => {
   })
 
   return (
-    <LiveKitRoom
-      key={callInfo?.sessionId}
-      serverUrl={livekitServerUrl}
-      token={livekitToken}
-      connect={true}
-      audio={callInfo?.initMicOn ?? false}
-      video={callInfo?.initCamOn ?? false}
-      className="contents"
-      options={roomOptions}
-      onDisconnected={(reason) => {
-        console.error(
-          "[GlobalVideoCallProvider] LiveKitRoom onDisconnected:",
-          reason,
-        )
-      }}
-      onError={(err) => {
-        console.error("[GlobalVideoCallProvider] LiveKitRoom onError:", {
-          name: err?.name,
-          message: err?.message,
-          stack: err?.stack,
-          raw: err,
-        })
-      }}
-    >
-      <Suspense fallback={children}>
-        <GlobalCallContent
-          receiveSystemMsgs={receiveSystemMsgs}
-          setReceiveSystemMsgs={setReceiveSystemMsgs}
-          joinLeaveSound={joinLeaveSound}
-          setJoinLeaveSound={setJoinLeaveSound}
-          panelState={panelState}
-          speakingAssistantEnabled={speakingAssistantEnabled}
-          setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
-        >
+    <>
+      {/* One fixed position for the app tree: entering/leaving a call never
+          unmounts AppRouter, presence, SignalR or Firestore listeners. */}
+      <RoomContext.Provider value={roomContextValue}>
+        <GlobalVideoCallContext.Provider value={effectiveValue}>
           {children}
-        </GlobalCallContent>
-      </Suspense>
-    </LiveKitRoom>
+        </GlobalVideoCallContext.Provider>
+      </RoomContext.Provider>
+
+      {callActive && (
+        <LiveKitRoom
+          key={callInfo?.sessionId}
+          serverUrl={livekitServerUrl}
+          token={livekitToken}
+          connect={true}
+          audio={callInfo?.initMicOn ?? false}
+          video={callInfo?.initCamOn ?? false}
+          className="contents"
+          options={roomOptions}
+          onDisconnected={(reason) => {
+            console.error(
+              "[GlobalVideoCallProvider] LiveKitRoom onDisconnected:",
+              reason,
+            )
+          }}
+          onError={(err) => {
+            console.error("[GlobalVideoCallProvider] LiveKitRoom onError:", {
+              name: err?.name,
+              message: err?.message,
+              stack: err?.stack,
+              raw: err,
+            })
+          }}
+        >
+          <Suspense fallback={null}>
+            <GlobalCallContent
+              receiveSystemMsgs={receiveSystemMsgs}
+              setReceiveSystemMsgs={setReceiveSystemMsgs}
+              joinLeaveSound={joinLeaveSound}
+              setJoinLeaveSound={setJoinLeaveSound}
+              panelState={panelState}
+              speakingAssistantEnabled={speakingAssistantEnabled}
+              setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
+              onSync={handleCallSync}
+              onClear={handleCallClear}
+            />
+          </Suspense>
+        </LiveKitRoom>
+      )}
+    </>
   )
 }
