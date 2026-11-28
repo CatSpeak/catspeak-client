@@ -7,6 +7,8 @@ import ToggleOption from "../ui/ToggleOption"
 import { MessageSquare, Eye, X, Plus } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTheme } from "@/shared/context/ThemeContext"
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme"
 
 const CreateBulletinBoardModal = ({
   open = false,
@@ -15,6 +17,7 @@ const CreateBulletinBoardModal = ({
   initialData = null,
 }) => {
   const { t } = useLanguage()
+  const { isDark, resolvedTheme } = useTheme()
   const dict = t.courses.lectureHall.modals.createBoard || {}
   const createPostDict = t.courses.lectureHall.createPost || {}
 
@@ -139,6 +142,7 @@ const CreateBulletinBoardModal = ({
           </label>
           <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
             <Editor
+              key={`tinymce-${resolvedTheme}`}
               tinymceScriptSrc="/tinymce/tinymce.min.js"
               value={content}
               onEditorChange={handleEditorChange}
@@ -150,7 +154,7 @@ const CreateBulletinBoardModal = ({
                 toolbar:
                   "bold italic underline strikethrough | emoticons link | bullist numlist",
                 placeholder: dict.contentPlaceholder,
-                skin: "oxide",
+                ...getTinyMceThemeInit(isDark),
                 setup: (editor) => {
                   editor.on("focus", () => { })
                 },

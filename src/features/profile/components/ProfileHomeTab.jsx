@@ -110,9 +110,9 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerImageRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-green-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#15803d] dark:text-emerald-400 hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-green-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
                 >
-                  <Image size={20} className="text-[#16a34a]" />
+                  <Image size={20} className="text-[#15803d] dark:text-emerald-400" />
                   <span>{t.profile?.home?.photo || "Ảnh"}</span>
                 </button>
 
@@ -127,9 +127,9 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerVideoRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#e11d48] hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-rose-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#be123c] dark:text-rose-400 hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-rose-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
                 >
-                  <Video size={20} className="text-[#e11d48]" />
+                  <Video size={20} className="text-[#be123c] dark:text-rose-400" />
                   <span>
                     {t.profile?.home?.video ||
                       t.profile?.post?.editor?.video ||
@@ -148,9 +148,9 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerFileRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#2563eb] hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-blue-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#1d4ed8] dark:text-blue-400 hover:bg-primaryBg dark:hover:bg-[#272727] active:bg-blue-100 dark:active:bg-[#333333] transition-colors duration-200 outline-none cursor-pointer"
                 >
-                  <FileText size={20} className="text-[#2563eb]" />
+                  <FileText size={20} className="text-[#1d4ed8] dark:text-blue-400" />
                   <span>
                     {t.profile?.home?.document ||
                       t.profile?.post?.editor?.document ||

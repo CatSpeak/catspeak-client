@@ -19,7 +19,7 @@ const ToggleOption = ({
       </div>
       <div>
         <p className="font-semibold text-sm text-[#191C1D] dark:text-white">{title}</p>
-        {description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>}
+        {description && <p className="text-xs text-gray-600 dark:text-neutral-300 mt-0.5">{description}</p>}
       </div>
     </div>
     <Switch

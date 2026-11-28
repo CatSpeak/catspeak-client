@@ -7,7 +7,7 @@
     var saved = localStorage.getItem("theme");
     var isDark =
       saved === "dark" ||
-      (!saved &&
+      ((!saved || saved === "system") &&
         window.matchMedia &&
         window.matchMedia("(prefers-color-scheme: dark)").matches);
     if (isDark) {
@@ -17,7 +17,7 @@
       document.documentElement.classList.remove("dark");
       document.documentElement.style.colorScheme = "light";
     }
-  } catch (e) {
+  } catch {
     /* ignore storage/matchMedia errors */
   }
 })();

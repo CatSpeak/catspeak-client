@@ -4,27 +4,33 @@ import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from "lucide-react"
 
 const variantStyles = {
   neutral: {
-    container: "bg-[#F5F5F7] text-secondary border-border",
+    container:
+      "bg-[#F5F5F7] dark:bg-[#242424] text-secondary border-border dark:border-[#3F3F3F]",
     icon: Info,
   },
   danger: {
-    container: "bg-red-50 text-red-700 border-red-200",
+    container:
+      "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-900/60",
     icon: AlertCircle,
   },
   error: {
-    container: "bg-red-50 text-red-700 border-red-200",
+    container:
+      "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-900/60",
     icon: AlertCircle,
   },
   warning: {
-    container: "bg-amber-50 text-amber-700 border-amber-200",
+    container:
+      "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900/60",
     icon: AlertTriangle,
   },
   info: {
-    container: "bg-blue-50 text-blue-700 border-blue-200",
+    container:
+      "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900/60",
     icon: Info,
   },
   success: {
-    container: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    container:
+      "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/60",
     icon: CheckCircle,
   },
 }
@@ -86,7 +92,7 @@ const Banner = ({
       {onClose && (
         <button
           onClick={onClose}
-          className="shrink-0 p-1 -mr-1 rounded-full hover:bg-black/5 transition-colors"
+          className="shrink-0 p-1 -mr-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
           aria-label="Dismiss"
         >
           <X size={16} />

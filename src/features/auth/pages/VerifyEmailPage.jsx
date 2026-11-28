@@ -216,13 +216,13 @@ const VerifyEmailPage = () => {
               />
 
               {resendMsg && (
-                <div className="rounded-lg bg-green-50 dark:bg-emerald-950/40 py-2.5 px-3 text-sm text-green-700 dark:text-emerald-300 text-center">
+                <div className="rounded-lg bg-green-50 dark:bg-emerald-950/40 py-2.5 px-3 text-sm text-green-700 dark:text-emerald-300 text-center border border-emerald-200/70 dark:border-emerald-900/60">
                   {resendMsg}
                 </div>
               )}
 
               {errorMsg && (
-                <div className="rounded-lg bg-red-50 dark:bg-red-950/40 py-2.5 px-3 text-sm text-red-700 dark:text-red-300">
+                <div className="rounded-lg bg-red-50 dark:bg-red-950/40 py-2.5 px-3 text-sm text-red-700 dark:text-red-300 border border-red-200/70 dark:border-red-900/60">
                   {errorMsg}
                 </div>
               )}
@@ -241,12 +241,12 @@ const VerifyEmailPage = () => {
                 type="button"
                 onClick={handleResend}
                 disabled={isResendingOtp}
-                className="font-semibold text-primary hover:underline inline-flex items-center gap-1 disabled:opacity-50"
+                className="font-semibold text-primary dark:text-red-400 hover:underline inline-flex items-center gap-1 disabled:opacity-50"
               >
                 {isResendingOtp && <RefreshCw className="h-3 w-3 animate-spin" />}
                 {authText.resendOtp || "Gửi lại OTP"}
               </button>
-              <Link to="/" className="font-semibold text-primary hover:underline">
+              <Link to="/" className="font-semibold text-primary dark:text-red-400 hover:underline">
                 {authText.backToHome || "Back to Home"}
               </Link>
             </div>

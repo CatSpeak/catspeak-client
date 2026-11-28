@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import { Editor } from "@tinymce/tinymce-react"
+import { useTheme } from "@/shared/context/ThemeContext"
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme"
 import {
   Upload,
   ChevronDown,
@@ -26,6 +28,7 @@ import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
   const { t } = useLanguage()
+  const { isDark, resolvedTheme } = useTheme()
   const c = t.courses || {}
   const cc = c.createCourse || {}
   const navigate = useNavigate()
@@ -423,7 +426,7 @@ const CreateCoursePage = () => {
                     <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
                       {cc.avatarDesc1 || c.avatarDesc1 || "Kéo & thả hoặc bấm để chọn ảnh"}
                     </p>
-                    <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                    <p className="text-[11px] text-gray-600 dark:text-neutral-400 font-medium">
                       {cc.avatarDesc2 || c.avatarDesc2 || "PNG, JPG, WEBP (tối đa 5MB)"}
                     </p>
                   </div>
@@ -431,7 +434,7 @@ const CreateCoursePage = () => {
               )}
             </div>
 
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium text-center">
+            <p className="text-[11px] text-gray-600 dark:text-neutral-400 font-medium text-center">
               {cc.avatarHint || "Khuyên dùng hình ảnh tỉ lệ 4:3 sắc nét để hiển thị tối ưu nhất."}
             </p>
           </div>
@@ -495,11 +498,12 @@ const CreateCoursePage = () => {
                 <label className="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   {cc.descriptionLabel || c.descriptionLabel || "Mô tả khóa học (tùy chọn)"}
                 </label>
-                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                <span className="text-xs text-gray-600 dark:text-neutral-400 font-medium">
                   {cc.descriptionLimitNote || c.descriptionLimitNote || "Nội dung không quá 150 từ"}
                 </span>
               </div>
               <Editor
+                key={`tinymce-${resolvedTheme}`}
                 tinymceScriptSrc="/tinymce/tinymce.min.js"
                 value={description}
                 onEditorChange={(newContent) => {
@@ -514,11 +518,7 @@ const CreateCoursePage = () => {
                   toolbar:
                     "bold italic underline strikethrough | emoticons link | bullist numlist | removeformat",
                   placeholder: cc.descriptionPlaceholder || c.descriptionPlaceholder || "Nhập thông tin mô tả tổng quan về khóa học...",
-                  skin: document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
-                  content_css: document.documentElement.classList.contains("dark") ? "dark" : "default",
-                  content_style: document.documentElement.classList.contains("dark")
-                    ? "body { font-family: Inter, sans-serif; font-size: 14px; color: #f3f4f6; background-color: #1A1A1A; }"
-                    : "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
+                  ...getTinyMceThemeInit(isDark),
                 }}
               />
             </div>

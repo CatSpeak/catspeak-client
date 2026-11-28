@@ -45,7 +45,7 @@ const ResponseSection = () => {
         {/* Left: Title + Navigation */}
         <div className="min-w-0 lg:col-span-4 lg:pr-2">
           <ScrollItem>
-            <h2 className="text-4xl font-black text-[#990011] mb-2 leading-none">
+            <h2 className="text-4xl font-black text-[#990011] dark:text-[#FF7A8A] mb-2 leading-none">
               {respT.title || "Phản hồi"}
             </h2>
           </ScrollItem>

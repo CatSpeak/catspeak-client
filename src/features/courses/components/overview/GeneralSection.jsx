@@ -30,7 +30,6 @@ const GeneralSection = ({
   navigate: propNavigate,
   showActionsDropdown: propShowActionsDropdown,
   setShowActionsDropdown: propSetShowActionsDropdown,
-  onCompleteClass,
   onCancelClassClick,
   isActionPending = false,
   formatCurrency: propFormatCurrency,
@@ -262,7 +261,7 @@ const GeneralSection = ({
               <span className="text-sm text-gray-400 dark:text-gray-400">
                 {cd.level || "Level"}
               </span>
-              <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-bold text-white bg-[#e3b709] rounded-full w-fit">
+              <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-bold text-gray-950 bg-[#e3b709] rounded-full w-fit">
                 {classData?.levels?.join(", ") || "—"}
               </span>
             </div>

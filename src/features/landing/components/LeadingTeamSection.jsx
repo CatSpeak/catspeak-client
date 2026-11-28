@@ -38,7 +38,7 @@ const LeadingTeamSection = ({ openAuthModal }) => {
             <div className="relative overflow-hidden rounded-xl px-4 py-4 sm:px-8 lg:px-12">
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="max-w-2xl text-center md:text-left">
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-[#910B09] leading-tight">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-[#910B09] dark:text-[#FF7A8A] leading-tight">
                     {recruitmentT.title ||
                       "Bạn muốn trở thành một phần của đội ngũ giảng viên Cat Speak"}
                   </h3>

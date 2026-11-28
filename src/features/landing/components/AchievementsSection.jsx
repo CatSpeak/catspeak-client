@@ -91,7 +91,7 @@ const AchievementsSection = () => {
                   </span>
                 </div>
 
-                <p className="mb-2 w-fit rounded-md bg-[#FFF8E8] px-2 py-1 text-[0.65rem] font-bold tracking-wide text-[#B56A00]">
+                <p className="mb-2 w-fit rounded-md bg-[#FFF8E8] px-2 py-1 text-[0.65rem] font-bold tracking-wide text-[#8A4F00] dark:bg-[#382e1e] dark:text-amber-300">
                   {category}
                 </p>
                 <h3 className="text-base font-bold leading-snug text-[#171717] dark:text-gray-100">
@@ -105,8 +105,8 @@ const AchievementsSection = () => {
                 </p>
 
                 <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#ececec] pt-3 dark:border-[#3b3b3b]">
-                  <span className="text-xs leading-5 text-[#999] dark:text-gray-400">{metric}</span>
-                  <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#B3261E]">
+                  <span className="text-xs leading-5 text-[#595959] dark:text-gray-400">{metric}</span>
+                  <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#B3261E] dark:text-[#FF7A8A]">
                     <BadgeCheck className="h-4 w-4" aria-hidden="true" />
                     Xác nhận
                   </span>

@@ -47,7 +47,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <CourseStatusPill status={item.status} />
                     {item.level && (
-                      <span className="h-6 min-w-[24px] px-1.5 rounded-full bg-[#F59E0B] text-white font-bold text-[11px] inline-flex items-center justify-center shrink-0 shadow-xs leading-none aspect-square">
+                      <span className="h-6 min-w-[24px] px-1.5 rounded-full bg-[#F59E0B] text-gray-950 font-bold text-[11px] inline-flex items-center justify-center shrink-0 shadow-xs leading-none aspect-square">
                         {item.level}
                       </span>
                     )}
@@ -221,7 +221,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                     <div className="flex items-center justify-between gap-2">
                       <CourseStatusPill status={item.status} />
                       {item.level && (
-                        <span className="h-6 min-w-[24px] px-1.5 rounded-full bg-[#F59E0B] text-white font-bold text-[11px] inline-flex items-center justify-center shrink-0 shadow-xs leading-none aspect-square">
+                        <span className="h-6 min-w-[24px] px-1.5 rounded-full bg-[#F59E0B] text-gray-950 font-bold text-[11px] inline-flex items-center justify-center shrink-0 shadow-xs leading-none aspect-square">
                           {item.level}
                         </span>
                       )}

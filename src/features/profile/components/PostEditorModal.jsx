@@ -18,6 +18,8 @@ import Modal from "@/shared/components/ui/Modal"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import PostEditorPreviews from "./PostEditorPreviews"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTheme } from "@/shared/context/ThemeContext"
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme"
 import { toast } from "react-hot-toast"
 
 const getFileType = (file) => {
@@ -54,6 +56,7 @@ const PostEditorModal = ({
   isEditMode = false,
 }) => {
   const { t } = useLanguage()
+  const { isDark, resolvedTheme } = useTheme()
 
   const PRIVACY_OPTIONS = [
     {
@@ -309,8 +312,8 @@ const PostEditorModal = ({
         <PillButton
           onClick={() => imageInputRef.current?.click()}
           variant="secondary-no-outline"
-          textColor="#16a34a"
-          startIcon={<Image className="w-5 h-5 text-[#16a34a]" />}
+          innerClassName="text-[#15803d] dark:text-emerald-400"
+          startIcon={<Image className="w-5 h-5 text-[#15803d] dark:text-emerald-400" />}
         >
           {t.profile?.post?.editor?.photo || "Ảnh"}
         </PillButton>
@@ -326,8 +329,8 @@ const PostEditorModal = ({
         <PillButton
           onClick={() => videoInputRef.current?.click()}
           variant="secondary-no-outline"
-          textColor="#e11d48"
-          startIcon={<Video className="w-5 h-5 text-[#e11d48]" />}
+          innerClassName="text-[#be123c] dark:text-rose-400"
+          startIcon={<Video className="w-5 h-5 text-[#be123c] dark:text-rose-400" />}
         >
           {t.profile?.post?.editor?.video || "Video"}
         </PillButton>
@@ -343,8 +346,8 @@ const PostEditorModal = ({
         <PillButton
           onClick={() => documentInputRef.current?.click()}
           variant="secondary-no-outline"
-          textColor="#2563eb"
-          startIcon={<FileText className="w-5 h-5 text-[#2563eb]" />}
+          innerClassName="text-[#1d4ed8] dark:text-blue-400"
+          startIcon={<FileText className="w-5 h-5 text-[#1d4ed8] dark:text-blue-400" />}
         >
           {t.profile?.post?.editor?.document || "Tài liệu"}
         </PillButton>
@@ -451,6 +454,7 @@ const PostEditorModal = ({
             }`}
           >
             <Editor
+              key={`tinymce-${resolvedTheme}`}
               tinymceScriptSrc="/tinymce/tinymce.min.js"
               value={content}
               onEditorChange={handleEditorChange}
@@ -465,16 +469,7 @@ const PostEditorModal = ({
                   ? t.profile?.post?.editor?.editPlaceholder ||
                     "Chỉnh sửa bài viết..."
                   : t.profile?.post?.editor?.placeholder || "Bạn đang nghĩ gì?",
-                skin:
-                  typeof document !== "undefined" &&
-                  document.documentElement.classList.contains("dark")
-                    ? "oxide-dark"
-                    : "oxide",
-                content_css:
-                  typeof document !== "undefined" &&
-                  document.documentElement.classList.contains("dark")
-                    ? "dark"
-                    : "default",
+                ...getTinyMceThemeInit(isDark),
                 setup: (editor) => {
                   editor.on("focus", () => {})
                 },

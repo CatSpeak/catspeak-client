@@ -26,20 +26,20 @@ const CourseStatusPill = ({ status, label, labels, className = "" }) => {
   }
 
   const statusConfigMap = {
-    TEACHING: { bgClass: "bg-[#DCFCE7] dark:bg-emerald-950/40", textClass: "text-[#16A34A] dark:text-emerald-400" },
-    OPEN: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-[#2563EB] dark:text-blue-400" },
-    OPEN_ENROLLMENT: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-[#2563EB] dark:text-blue-400" },
-    OPEN_FOR_ENROLLMENT: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-[#2563EB] dark:text-blue-400" },
-    LIVE: { bgClass: "bg-[#FEE2E2] dark:bg-red-950/40", textClass: "text-[#EF4444] dark:text-red-400" },
-    ARCHIVED: { bgClass: "bg-[#F3F4F6] dark:bg-[#2A2A2A]", textClass: "text-[#6B7280] dark:text-gray-400" },
-    FINISHED: { bgClass: "bg-[#F3F4F6] dark:bg-[#2A2A2A]", textClass: "text-[#6B7280] dark:text-gray-400" },
-    NOT_STARTED: { bgClass: "bg-[#FEF3C7] dark:bg-amber-950/40", textClass: "text-[#D97706] dark:text-amber-400" },
-    UPCOMING: { bgClass: "bg-[#EEF2FF] dark:bg-indigo-950/40", textClass: "text-[#4F46E5] dark:text-indigo-400" },
+    TEACHING: { bgClass: "bg-[#DCFCE7] dark:bg-emerald-950/40", textClass: "text-emerald-800 dark:text-emerald-400" },
+    OPEN: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-blue-700 dark:text-blue-400" },
+    OPEN_ENROLLMENT: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-blue-700 dark:text-blue-400" },
+    OPEN_FOR_ENROLLMENT: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-blue-700 dark:text-blue-400" },
+    LIVE: { bgClass: "bg-[#FEE2E2] dark:bg-red-950/40", textClass: "text-red-700 dark:text-red-400" },
+    ARCHIVED: { bgClass: "bg-[#F3F4F6] dark:bg-[#2A2A2A]", textClass: "text-gray-700 dark:text-gray-400" },
+    FINISHED: { bgClass: "bg-[#F3F4F6] dark:bg-[#2A2A2A]", textClass: "text-gray-700 dark:text-gray-400" },
+    NOT_STARTED: { bgClass: "bg-[#FEF3C7] dark:bg-amber-950/40", textClass: "text-amber-800 dark:text-amber-400" },
+    UPCOMING: { bgClass: "bg-[#EEF2FF] dark:bg-indigo-950/40", textClass: "text-indigo-700 dark:text-indigo-400" },
   }
 
   const config = statusConfigMap[upperStatus] || CLASS_STATUS_CONFIG[upperStatus] || {
     bgClass: "bg-[#F3F4F6] dark:bg-[#2A2A2A]",
-    textClass: "text-[#6B7280] dark:text-gray-400",
+    textClass: "text-gray-700 dark:text-gray-400",
   }
 
   return (

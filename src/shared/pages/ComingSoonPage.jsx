@@ -1,12 +1,11 @@
 import React from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { FiClock } from "react-icons/fi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 
 const ComingSoonPage = () => {
-  const navigate = useNavigate()
   const location = useLocation()
   const { t } = useLanguage()
 
@@ -37,14 +36,16 @@ const ComingSoonPage = () => {
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
             {getFeatureName()}
           </h1>
 
           {/* Message */}
-          <p className="text-lg text-gray-600 mb-6">{t.comingSoon.title}</p>
+          <p className="text-lg text-gray-600 dark:text-neutral-300 mb-6">
+            {t.comingSoon.title}
+          </p>
 
-          <p className="text-sm text-gray-500 italic">
+          <p className="text-sm text-gray-600 dark:text-neutral-400 italic">
             {t.comingSoon.description}
           </p>
         </div>

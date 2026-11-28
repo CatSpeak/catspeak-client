@@ -69,7 +69,7 @@ const NewsSection = () => {
             <ScrollItem>
               <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl lg:text-5xl">
                 {newsT.titlePrefix || "Bản tin"}{" "}
-                <span className="text-[#910B09]">
+                <span className="text-[#910B09] dark:text-[#FF7A8A]">
                   {newsT.titleSuffix || "Cat Speak"}
                 </span>
               </h2>

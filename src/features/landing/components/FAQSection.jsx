@@ -57,7 +57,7 @@ const FAQSection = () => {
           <div className="flex min-w-0 flex-col justify-between self-stretch lg:col-span-5 xl:col-span-4">
             <div>
               <ScrollItem>
-                <span className="text-sm font-bold text-[#990011] uppercase tracking-wider block mb-2">
+                <span className="text-sm font-bold text-[#990011] dark:text-[#FF7A8A] uppercase tracking-wider block mb-2">
                   {faqCorner}
                 </span>
               </ScrollItem>

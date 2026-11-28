@@ -219,9 +219,9 @@ const RegisterFormFields = ({
             )}
             renderOption={(option, isSelected) => (
               <div
-                className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${isSelected
-                  ? "bg-[#F6F6F6] font-semibold"
-                  : "hover:bg-[#F6F6F6]"
+                className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 text-gray-900 dark:text-white ${isSelected
+                  ? "bg-[#F6F6F6] dark:bg-[#272727] font-semibold"
+                  : "hover:bg-[#F6F6F6] dark:hover:bg-[#2A2A2A]"
                   }`}
               >
                 <span className="text-base shrink-0">{option.icon}</span>
@@ -268,15 +268,15 @@ const RegisterFormFields = ({
               <button
                 type="button"
                 onClick={toggleDropdown}
-                className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white transition-colors hover:border-primary focus:border-primary ${errors.preferredLanguage
+                className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white dark:bg-[#272727] text-gray-900 dark:text-white border-border dark:border-[#3F3F3F] transition-colors hover:border-primary dark:hover:border-red-400 focus:border-primary dark:focus:border-red-400 ${errors.preferredLanguage
                   ? "!border-red-500 animate-shake"
-                  : "border-border"
+                  : ""
                   }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
                   {selectedOption?.icon}
                   <span
-                    className={`truncate ${!selectedOption ? "text-[#9e9e9e]" : ""}`}
+                    className={`truncate ${!selectedOption ? "text-gray-500 dark:text-[#AAAAAA]" : ""}`}
                   >
                     {selectedOption?.label || authText.languagePlaceholder}
                   </span>
@@ -289,7 +289,7 @@ const RegisterFormFields = ({
             )}
           />
           {errors.preferredLanguage && (
-            <p className="mt-1 text-xs text-red-600">
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
               {errors.preferredLanguage}
             </p>
           )}
@@ -334,15 +334,15 @@ const RegisterFormFields = ({
               <button
                 type="button"
                 onClick={toggleDropdown}
-                className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white transition-colors hover:border-primary focus:border-primary ${errors.country
+                className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white dark:bg-[#272727] text-gray-900 dark:text-white border-border dark:border-[#3F3F3F] transition-colors hover:border-primary dark:hover:border-red-400 focus:border-primary dark:focus:border-red-400 ${errors.country
                   ? "!border-red-500 animate-shake"
-                  : "border-border"
+                  : ""
                   }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
                   {selectedOption?.icon}
                   <span
-                    className={`truncate ${!selectedOption ? "text-[#9e9e9e]" : ""}`}
+                    className={`truncate ${!selectedOption ? "text-gray-500 dark:text-[#AAAAAA]" : ""}`}
                   >
                     {selectedOption?.label || authText.countryPlaceholder}
                   </span>
@@ -355,7 +355,7 @@ const RegisterFormFields = ({
             )}
           />
           {errors.country && (
-            <p className="mt-1 text-xs text-red-600">{errors.country}</p>
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.country}</p>
           )}
         </div>
       </div>

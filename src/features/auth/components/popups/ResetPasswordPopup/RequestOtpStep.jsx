@@ -53,7 +53,7 @@ const RequestOtpStep = ({ onSuccess, onSwitchMode }) => {
 
   return (
     <div>
-      <h2 className="text-center text-3xl font-bold text-primary mb-2">
+      <h2 className="text-center text-3xl font-bold text-primary dark:text-red-400 mb-2">
         {authText.forgotStep1Title || "Quên mật khẩu?"}
       </h2>
       <p className="text-center text-sm text-secondary mb-6">
@@ -86,7 +86,7 @@ const RequestOtpStep = ({ onSuccess, onSwitchMode }) => {
         </div>
 
         {apiError && (
-          <div className="mb-6 rounded-lg bg-red-50 py-3.5 px-4 text-sm text-red-700">
+          <div className="mb-6 rounded-lg bg-red-50 dark:bg-red-950/40 py-3.5 px-4 text-sm text-red-700 dark:text-red-300 border border-red-200/70 dark:border-red-900/60">
             {apiError}
           </div>
         )}
@@ -105,7 +105,7 @@ const RequestOtpStep = ({ onSuccess, onSwitchMode }) => {
           {authText.haveAccount || "Bạn đã có tài khoản?"}{" "}
           <button
             type="button"
-            className="font-semibold text-primary hover:underline"
+            className="font-semibold text-primary dark:text-red-400 hover:underline"
             onClick={() => onSwitchMode?.("login")}
           >
             {authText.loginLink || "Đăng nhập"}

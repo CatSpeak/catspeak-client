@@ -10,7 +10,7 @@ import {
 import { resolveLocalizedError } from "@/shared/utils/apiError"
 import { resolveGeneralErrorMessage } from "@/features/auth/utils/registerErrors"
 
-const VerifyOtpStep = ({ email, onSuccess, onBack, onSwitchMode }) => {
+const VerifyOtpStep = ({ email, onSuccess }) => {
   const { t } = useLanguage()
   const authText = t.auth || {}
   const [otp, setOtp] = useState("")
@@ -80,14 +80,14 @@ const VerifyOtpStep = ({ email, onSuccess, onBack, onSwitchMode }) => {
 
   return (
     <div>
-      <h2 className="text-center text-3xl font-bold text-primary mb-2">
+      <h2 className="text-center text-3xl font-bold text-primary dark:text-red-400 mb-2">
         {authText.forgotStep2Title || "Xác minh OTP"}
       </h2>
       <p className="mb-6 text-center text-sm text-secondary flex flex-col items-center">
         <span>
           {authText.forgotStep2Subtitle || "Chúng tôi đã gửi mã 6 chữ số đến"}
         </span>
-        <strong className="text-primary font-bold">{email}</strong>
+        <strong className="text-primary dark:text-red-400 font-bold">{email}</strong>
       </p>
 
       <form onSubmit={handleVerifyOtp}>
@@ -116,13 +116,13 @@ const VerifyOtpStep = ({ email, onSuccess, onBack, onSwitchMode }) => {
         </div>
 
         {resendSuccess && (
-          <div className="mb-4 rounded-lg bg-green-50 py-3 px-4 text-sm text-green-700 text-center">
+          <div className="mb-4 rounded-lg bg-green-50 dark:bg-emerald-950/40 py-3 px-4 text-sm text-green-700 dark:text-emerald-300 text-center border border-emerald-200/70 dark:border-emerald-900/60">
             {resendSuccess}
           </div>
         )}
 
         {apiError && (
-          <div className="mb-4 rounded-lg bg-red-50 py-3.5 px-4 text-sm text-red-700">
+          <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-950/40 py-3.5 px-4 text-sm text-red-700 dark:text-red-300 border border-red-200/70 dark:border-red-900/60">
             {apiError}
           </div>
         )}
@@ -143,7 +143,7 @@ const VerifyOtpStep = ({ email, onSuccess, onBack, onSwitchMode }) => {
             type="button"
             onClick={handleResend}
             disabled={isResendingOtp}
-            className="font-semibold text-primary hover:underline disabled:opacity-50 inline-flex items-center"
+            className="font-semibold text-primary dark:text-red-400 hover:underline disabled:opacity-50 inline-flex items-center"
           >
             {isResendingOtp ? (
               <RefreshCw className="h-3 w-3 mr-1 animate-spin" />

@@ -294,7 +294,7 @@ const TeacherCompetencyPage = () => {
               </div>
 
               {/* Headline */}
-              <div className="text-xs text-slate-600 dark:text-gray-400 truncate font-medium">
+              <div className="text-xs text-slate-600 dark:text-neutral-300 truncate font-medium">
                 {headline}
               </div>
 
@@ -303,7 +303,7 @@ const TeacherCompetencyPage = () => {
                 <div className="flex items-center gap-1">
                   <Star size={13} className="text-amber-400 fill-amber-400" />
                   <span>{ratingValue}</span>
-                  <span className="text-slate-400 dark:text-gray-500 font-normal">
+                  <span className="text-slate-600 dark:text-neutral-300 font-normal">
                     ({formatTeacherNumber(reviewCount)})
                   </span>
                 </div>
@@ -413,7 +413,7 @@ const TeacherCompetencyPage = () => {
                 </div>
 
                 {lastUpdatedDisplay && (
-                  <div className="pt-3 border-t border-slate-100 dark:border-[#2E2E2E] text-xs text-slate-400 dark:text-gray-500 font-medium">
+                  <div className="pt-3 border-t border-slate-100 dark:border-[#2E2E2E] text-xs text-slate-600 dark:text-neutral-300 font-medium">
                     {(t.courses?.lastUpdated || "Cập nhật lần cuối: {{time}}").replace(
                       "{{time}}",
                       lastUpdatedDisplay
@@ -448,7 +448,7 @@ const TeacherCompetencyPage = () => {
                           </h3>
                         </div>
                         {cert.issuedYear && (
-                          <span className="text-[11px] font-bold text-slate-400 dark:text-gray-400 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-600 dark:text-neutral-300 shrink-0">
                             {cert.issuedYear}
                           </span>
                         )}
@@ -497,7 +497,7 @@ const TeacherCompetencyPage = () => {
                             {edu.school}
                           </h3>
                           {edu.period && (
-                            <span className="text-xs text-slate-400 dark:text-gray-400 font-medium">
+                            <span className="text-xs text-slate-600 dark:text-neutral-300 font-medium">
                               Niên khóa: {edu.period}
                             </span>
                           )}
@@ -573,7 +573,7 @@ const TeacherCompetencyPage = () => {
 
                           {/* Location */}
                           {exp.location && (
-                            <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-gray-400">
+                            <div className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-neutral-300">
                               <MapPin size={11} />
                               <span>{exp.location}</span>
                             </div>
@@ -663,7 +663,7 @@ const TeacherCompetencyPage = () => {
                       />
                     ))}
                   </div>
-                  <span className="text-[11px] text-slate-400 dark:text-gray-400 mt-0.5">
+                  <span className="text-[11px] text-slate-600 dark:text-neutral-300 mt-0.5">
                     {t.courses?.basedOnReviews?.replace(
                       "{{count}}",
                       formatTeacherNumber(reviewCount)

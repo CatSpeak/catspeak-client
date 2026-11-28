@@ -64,7 +64,7 @@ const LearningBarriersSection = () => (
                   "aria-hidden": true,
                 })}
               </span>
-              <span className="font-mono text-xs font-semibold text-[#999] dark:text-gray-500">
+              <span className="font-mono text-xs font-semibold text-[#595959] dark:text-gray-400">
                 {String(index + 1).padStart(2, "0")}
               </span>
             </div>

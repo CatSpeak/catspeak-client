@@ -222,7 +222,7 @@ const VerifyEmailOtpPopup = ({
               type="button"
               onClick={handleResendOtp}
               disabled={isResending}
-              className="font-semibold text-primary hover:underline disabled:opacity-50 inline-flex items-center"
+              className="font-semibold text-primary dark:text-red-400 hover:underline disabled:opacity-50 inline-flex items-center"
             >
               {isResending ? (
                 <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
@@ -234,12 +234,12 @@ const VerifyEmailOtpPopup = ({
       }
     >
       <div>
-        <h2 className="text-center text-3xl font-bold text-primary mb-6">
+        <h2 className="text-center text-3xl font-bold text-primary dark:text-red-400 mb-6">
           {authText.verifyEmailTitle || "Xác minh OTP"}
         </h2>
 
         {pendingActivation && authText.registrationPendingActivation && (
-          <div className="mb-6 rounded-lg bg-amber-50 py-3 px-4 text-sm text-amber-800">
+          <div className="mb-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 py-3 px-4 text-sm text-amber-800 dark:text-amber-300">
             {authText.registrationPendingActivation}
           </div>
         )}
@@ -251,7 +251,7 @@ const VerifyEmailOtpPopup = ({
                 "Chúng tôi đã gửi mã 6 chữ số đến"}
             </span>
             <span className="inline-flex items-center gap-1 mt-0.5">
-              <strong className="text-primary font-bold">{currentEmail}</strong>
+              <strong className="text-primary dark:text-red-400 font-bold">{currentEmail}</strong>
               <button
                 type="button"
                 onClick={() => {
@@ -262,7 +262,7 @@ const VerifyEmailOtpPopup = ({
                   setApiError("")
                   setSuccessMsg("")
                 }}
-                className="inline-flex items-center text-primary font-semibold text-xs hover:underline ml-1"
+                className="inline-flex items-center text-primary dark:text-red-400 font-semibold text-xs hover:underline ml-1"
               >
                 <Edit2 className="h-3 w-3 mr-0.5" />
                 {authText.editEmail || "Edit"}
@@ -354,7 +354,7 @@ const VerifyEmailOtpPopup = ({
           </div>
 
           {successMsg && (
-            <div className="mt-4 rounded-lg bg-green-50 py-3 px-4 text-sm text-green-700">
+            <div className="mt-4 rounded-lg bg-green-50 dark:bg-emerald-950/40 py-3 px-4 text-sm text-green-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-900/60">
               {successMsg}
             </div>
           )}

@@ -3,6 +3,8 @@ import { Editor } from "@tinymce/tinymce-react"
 import { SendHorizonal, X } from "lucide-react"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTheme } from "@/shared/context/ThemeContext"
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme"
 
 /**
  * Phần nhập bình luận sử dụng TinyMCE rich-text editor.
@@ -14,6 +16,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  */
 const CommentInput = ({ onSubmit }) => {
   const { t } = useLanguage()
+  const { isDark, resolvedTheme } = useTheme()
   const dict = t.courses.lectureHall.postDetail
 
   const [value, setValue] = useState("")
@@ -86,6 +89,7 @@ const CommentInput = ({ onSubmit }) => {
         `}</style>
         <div className="bg-[#F3F4F5] dark:bg-[#222222] w-full rounded-t-[20px]">
           <Editor
+            key={`tinymce-${resolvedTheme}`}
             tinymceScriptSrc="/tinymce/tinymce.min.js"
             value={value}
             onInit={(_evt, editor) => { editorRef.current = editor }}
@@ -99,7 +103,6 @@ const CommentInput = ({ onSubmit }) => {
                 "bold italic underline bullist numlist link image",
               toolbar_location: "bottom",
               placeholder: dict.inputPlaceholder || "Nhập phản hồi",
-              skin: "oxide",
               autoresize_bottom_margin: 0,
               setup: (editor) => {
                 editor.on("keydown", (e) => {
@@ -109,8 +112,12 @@ const CommentInput = ({ onSubmit }) => {
                   }
                 })
               },
-              content_style:
-                "body { font-family:Inter,sans-serif; font-size:15px; color:#191C1D; background-color:transparent; padding:16px 20px !important; margin:0 !important; display:block; } p { margin: 0; line-height: 1.5; } .mce-content-body[data-mce-placeholder]:not(.mce-visualblocks)::before { left: 20px !important; top: 16px !important; color: #9CA3AF !important; }",
+              ...getTinyMceThemeInit(isDark, {
+                background: "transparent",
+                fontSize: "15px",
+                extraContentStyle:
+                  "body { padding: 16px 20px !important; margin: 0 !important; display: block; } p { margin: 0; line-height: 1.5; } .mce-content-body[data-mce-placeholder]:not(.mce-visualblocks)::before { left: 20px !important; top: 16px !important; }",
+              }),
             }}
           />
         </div>

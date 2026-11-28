@@ -14,6 +14,7 @@ import { useGetFriendshipCountsQuery } from "../../../store/api/social/friendshi
 import SocialProfileHeader from "../components/SocialProfileHeader"
 import Tabs, { TabContent } from "@/shared/components/ui/navigation/Tabs"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton"
 import ProfileHomeTab from "../components/ProfileHomeTab"
 import ProfileMediaTab from "../components/ProfileMediaTab"
@@ -47,7 +48,7 @@ export const resolveProfileTab = (searchParams, { allowDocuments = true } = {}) 
 }
 
 const ProfilePage = () => {
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const { t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
@@ -166,6 +167,16 @@ const ProfilePage = () => {
   }
 
   if (isLoading) return <ProfilePageSkeleton />
+
+  // ISS-78: never flash an empty own-profile ("U" avatar) while the auth user
+  // is still being hydrated from `/Account/profile`.
+  if (isAuthenticated && !urlAccountId && !user?.accountId) {
+    return (
+      <div className="flex min-h-[300px] w-full items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    )
+  }
 
   const tabs = [
     { id: "home", label: t.profile?.tabs?.home || "Nhà" },

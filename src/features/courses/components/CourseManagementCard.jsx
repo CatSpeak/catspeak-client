@@ -3,7 +3,6 @@ import { Calendar, Check, Clock, GraduationCap, MoreVertical, PenSquare, Share2,
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import CourseStatusPill from "./CourseStatusPill"
 import CourseThumbnail from "./CourseThumbnail"
-import { stripHtmlToText } from "../utils/courseUtils"
 
 const CourseActionMenu = ({ item, labels, onEdit, onDelete }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -95,8 +94,6 @@ const CourseManagementCard = ({
   }
 
   const slotCount = item.slots ?? item.studentCount ?? 0
-  const minPriceFormatted = item.minPrice || item.price || (labels.tba || "—")
-  const maxPriceFormatted = item.maxPrice || item.price || (labels.tba || "—")
   const scheduleText = item.schedule || (labels.tba || "—")
   const dateRangeText = item.dateRange || (labels.tba || "—")
   const subtitleText = item.subtitle || ""
@@ -160,7 +157,7 @@ const CourseManagementCard = ({
           {isCourse ? (
             <div className="flex items-center justify-between w-full md:w-auto gap-2 text-left md:text-right">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] text-gray-400 dark:text-gray-500 font-semibold">{labels.createdDate || "Ngày tạo"}:</span>
+                <span className="text-[11px] text-gray-600 dark:text-neutral-400 font-semibold">{labels.createdDate || "Ngày tạo"}:</span>
                 <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-200">{item.createdAt || (labels.tba || "—")}</span>
               </div>
               <span className="text-[#b20a1c] dark:text-[#FF6B6B] font-bold text-xs hover:underline flex items-center gap-1 md:hidden">
@@ -312,7 +309,7 @@ const CourseManagementCard = ({
         {isCourse ? (
           <div className="pt-2.5 border-t border-border dark:border-[#3F3F3F] flex justify-between items-center text-xs font-bold">
             <div className="flex flex-col">
-              <span className="text-gray-400 dark:text-gray-500 text-[10px] leading-none mb-0.5">{labels.createdDate || "Ngày tạo"}</span>
+              <span className="text-gray-600 dark:text-neutral-400 text-[10px] leading-none mb-0.5">{labels.createdDate || "Ngày tạo"}</span>
               <span className="text-gray-900 dark:text-gray-200 font-black">{item.createdAt || (labels.tba || "—")}</span>
             </div>
             <span className="text-[#b20a1c] dark:text-[#FF6B6B] hover:underline font-extrabold text-xs">{labels.manageDetails || "Quản lý chi tiết"}</span>

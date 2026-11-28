@@ -66,4 +66,22 @@ describe("VerifyEmailPage", () => {
     })
     expect(container.textContent).toContain("Email Verified Successfully!")
   })
+
+  it("renders the error state with dark-mode contrast classes", async () => {
+    queryState.email = "learner@catspeak.edu.vn"
+    queryState.otp = "000000"
+    verifyMock.mockReturnValue({
+      unwrap: async () => {
+        throw { data: { message: "Invalid or expired OTP." } }
+      },
+    })
+
+    await act(async () => {
+      root.render(<VerifyEmailPage />)
+    })
+
+    expect(container.innerHTML).toContain("dark:bg-red-950/40")
+    expect(container.innerHTML).toContain("dark:text-red-300")
+    expect(container.innerHTML).toContain("dark:text-red-400")
+  })
 })

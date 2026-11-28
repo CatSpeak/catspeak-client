@@ -139,7 +139,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
             {authText.dontHaveAccount}{" "}
             <button
               type="button"
-              className="font-semibold text-primary hover:underline"
+              className="font-semibold text-primary dark:text-red-400 hover:underline"
               onClick={() => onSwitchMode("register")}
             >
               {authText.registerLink}
@@ -150,7 +150,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
     >
       <form id="login-form" onSubmit={handleSubmit}>
         {/* Title */}
-        <h2 className="text-center text-3xl font-bold text-primary mb-6">
+        <h2 className="text-center text-3xl font-bold text-primary dark:text-red-400 mb-6">
           {authText.loginTitle}
         </h2>
 
@@ -203,7 +203,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           </label>
           <button
             type="button"
-            className="text-sm font-semibold text-primary hover:underline"
+            className="text-sm font-semibold text-primary dark:text-red-400 hover:underline"
             onClick={() => onSwitchMode("forgot")}
           >
             {authText.forgotLink}
@@ -212,13 +212,13 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
 
         {/* API Error */}
         {apiError && (
-          <div className="mt-6 rounded-lg bg-red-50 py-3.5 px-4 text-sm text-red-700">
+          <div className="mt-6 rounded-lg bg-red-50 dark:bg-red-950/40 py-3.5 px-4 text-sm text-red-700 dark:text-red-300 border border-red-200/70 dark:border-red-900/60">
             {isNotActivatedError ? (
               <span>
                 {authText.accountNotActivated}{" "}
                 <button
                   type="button"
-                  className="font-bold underline hover:text-red-900 disabled:opacity-50"
+                  className="font-bold underline hover:text-red-900 dark:hover:text-red-200 disabled:opacity-50"
                   disabled={isResendingOtp}
                   onClick={async () => {
                     try {

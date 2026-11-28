@@ -49,10 +49,10 @@ const ResetPasswordPopup = ({ open, onClose, onSwitchMode }) => {
 
   const renderSuccess = () => (
     <div className="text-center py-4">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
-        <CheckCircle2 className="h-12 w-12 text-green-500" />
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-50 dark:bg-emerald-950/40">
+        <CheckCircle2 className="h-12 w-12 text-green-500 dark:text-emerald-400" />
       </div>
-      <h2 className="mb-2 text-center text-3xl font-bold text-primary">
+      <h2 className="mb-2 text-center text-3xl font-bold text-primary dark:text-red-400">
         {authText.passwordChangedTitle || "Đổi mật khẩu thành công!"}
       </h2>
       <p className="mb-8 text-center text-sm text-secondary">

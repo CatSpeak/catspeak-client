@@ -54,7 +54,7 @@ const StepPills = memo(
                 {index > 0 && (
                   <div
                     aria-hidden="true"
-                    className="absolute top-6 h-0.5 -translate-y-1/2 bg-gray-200 -z-0 overflow-hidden"
+                    className="absolute top-6 h-0.5 -translate-y-1/2 bg-gray-200 dark:bg-[#333333] -z-0 overflow-hidden"
                     style={{
                       right: "calc(50% + 24px)",
                       width: "calc(100% - 48px)",
@@ -82,7 +82,7 @@ const StepPills = memo(
                 </div>
 
                 {/* Subtext Label below circle */}
-                <span className="text-sm mt-1.5 text-center leading-tight">
+                <span className="text-sm mt-1.5 text-center leading-tight text-gray-700 dark:text-gray-200">
                   {step.label}
                 </span>
               </li>

@@ -37,7 +37,7 @@ const HeroSection = ({ openAuthModal }) => {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={getScrollTransition("default", 0.08)}
-            className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#990011] sm:text-sm"
+            className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#990011] dark:text-[#FF7A8A] sm:text-sm"
           >
             <span className="h-2 w-2 shrink-0 rounded-full bg-[#70D6B2]" />
             <span>
@@ -54,7 +54,7 @@ const HeroSection = ({ openAuthModal }) => {
             className="max-w-[720px] text-[clamp(2.35rem,4.2vw,3.35rem)] font-bold leading-[1.08] tracking-[-0.045em] text-[#171717] dark:text-white"
           >
             {heroT.titlePrefix || homeT.heroTitle1 || "Tự tin luyện nói ngoại ngữ cùng"}{" "}
-            <span className="text-[#A90016]">
+            <span className="text-[#A90016] dark:text-[#FF7A8A]">
               {heroT.titleHighlight || homeT.heroTitle2 || "cộng đồng"}
             </span>{" "}
             {heroT.titleSuffix || "và AI"}
@@ -112,7 +112,7 @@ const HeroSection = ({ openAuthModal }) => {
               },
             ].map(({ label, value }, index) => (
               <div key={label} className="min-w-0 pr-2 sm:pr-4">
-                <p className="text-xs leading-5 text-[#777] dark:text-gray-400 sm:text-sm">{label}</p>
+                <p className="text-xs leading-5 text-[#595959] dark:text-gray-400 sm:text-sm">{label}</p>
                 <p
                   className={`mt-0.5 text-xs font-semibold leading-5 sm:text-sm ${
                     index === 1

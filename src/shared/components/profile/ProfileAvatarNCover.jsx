@@ -278,7 +278,7 @@ const ProfileAvatarNCover = ({
           src={displayAvatarUrl}
           alt={displayName}
           name={displayName}
-          className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
+          className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-4xl"
         />
         {isOwnProfile && (
           <div

@@ -77,3 +77,34 @@ describe("ISS-45: phone number is an optional register field", () => {
     expect(requiredLabels.length).toBeGreaterThan(0)
   })
 })
+
+describe("ISS-10: language & country dropdowns support dark mode", () => {
+  it("renders both dropdown triggers with dark backgrounds and light text", () => {
+    const container = render()
+    const triggers = [...container.querySelectorAll("button")].filter((button) =>
+      button.className.includes("h-14"),
+    )
+
+    expect(triggers.length).toBeGreaterThanOrEqual(2)
+    for (const trigger of triggers) {
+      expect(trigger.className).toContain("bg-white")
+      expect(trigger.className).toContain("dark:bg-[#272727]")
+      expect(trigger.className).toContain("dark:text-white")
+      expect(trigger.className).toContain("dark:hover:border-red-400")
+      expect(trigger.className).toContain("dark:focus:border-red-400")
+    }
+  })
+
+  it("uses a readable placeholder colour in both themes", () => {
+    const container = render()
+    const placeholders = [...container.querySelectorAll("span")].filter((span) =>
+      span.className.includes("text-gray-500"),
+    )
+
+    expect(placeholders.length).toBeGreaterThanOrEqual(2)
+    for (const placeholder of placeholders) {
+      expect(placeholder.className).toContain("dark:text-[#AAAAAA]")
+    }
+    expect(container.innerHTML).not.toContain("text-[#9e9e9e]")
+  })
+})

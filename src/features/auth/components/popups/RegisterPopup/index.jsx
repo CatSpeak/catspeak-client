@@ -178,7 +178,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
             {authText.haveAccount}{" "}
             <button
               type="button"
-              className="font-semibold text-primary hover:underline"
+              className="font-semibold text-primary dark:text-red-400 hover:underline"
               onClick={() => onSwitchMode("login")}
             >
               {authText.loginLink}
@@ -188,7 +188,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
       }
     >
       <form id="register-form" onSubmit={handleSubmit} noValidate>
-        <h2 className="text-center text-3xl font-bold text-primary mb-6">
+        <h2 className="text-center text-3xl font-bold text-primary dark:text-red-400 mb-6">
           {authText.registerTitle}
         </h2>
 
@@ -224,7 +224,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
 
         {/* API Error */}
         {apiError && (
-          <div className="mt-6 rounded-lg bg-red-50 py-3.5 px-4 text-sm text-red-700">
+          <div className="mt-6 rounded-lg bg-red-50 dark:bg-red-950/40 py-3.5 px-4 text-sm text-red-700 dark:text-red-300 border border-red-200/70 dark:border-red-900/60">
             {apiError}
           </div>
         )}

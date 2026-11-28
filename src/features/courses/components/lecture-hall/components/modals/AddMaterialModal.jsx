@@ -106,6 +106,12 @@ const AddMaterialModal = ({
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    if (!title.trim()) {
+      setErrors((prev) => ({ ...prev, title: true }))
+      toast.error(dict.toastTitleRequired || "Vui lòng nhập tiêu đề tài liệu!")
+      return
+    }
+
     if (selectedFiles.length === 0) {
       setErrors({ files: true })
       toast.error(dict.toastFilesRequired || "Vui lòng chọn ít nhất 1 tệp!")
@@ -168,7 +174,7 @@ const AddMaterialModal = ({
           </button>
           <button
             type="submit"
-            onClick={handleSubmit}
+            form="add-material-form"
             className="flex-1 h-[52px] rounded-full bg-[#990011] dark:bg-[#FF6B6B] text-white dark:text-gray-950 font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] dark:hover:bg-[#ff8080] transition-colors disabled:opacity-70"
           >
             {dict.add || "Thêm tài liệu"} <Plus size={18} strokeWidth={2} />
@@ -176,7 +182,7 @@ const AddMaterialModal = ({
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form id="add-material-form" onSubmit={handleSubmit} className="space-y-5">
         {/* Title Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] dark:text-gray-300 mb-1.5">
@@ -185,7 +191,13 @@ const AddMaterialModal = ({
           <TextInput
             required
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value)
+              if (errors.title) {
+                setErrors((prev) => ({ ...prev, title: false }))
+              }
+            }}
+            error={errors.title}
             placeholder={dict.materialPlaceholder || "Nhập tiêu đề"}
             className="rounded-xl !h-[50px] px-4 text-sm bg-white dark:bg-[#222222] text-gray-900 dark:text-white"
           />

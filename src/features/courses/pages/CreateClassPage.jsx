@@ -10,6 +10,8 @@ dayjs.extend(timezone)
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import { Editor } from "@tinymce/tinymce-react"
+import { useTheme } from "@/shared/context/ThemeContext"
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme"
 import {
   Plus,
   Minus,
@@ -68,6 +70,7 @@ const DAYS_OF_WEEK = [
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
+  const { isDark, resolvedTheme } = useTheme()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
@@ -1372,6 +1375,7 @@ const CreateClassPage = () => {
             <div className="flex flex-col gap-2">
               <label className="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{cc.classDescription || "Mô tả lớp học"}</label>
               <Editor
+                key={`tinymce-${resolvedTheme}`}
                 tinymceScriptSrc="/tinymce/tinymce.min.js"
                 value={description}
                 disabled={isRecoverMode}
@@ -1387,11 +1391,7 @@ const CreateClassPage = () => {
                   toolbar:
                     "bold italic underline strikethrough | emoticons link | bullist numlist | removeformat",
                   placeholder: cc.placeholderDescription || "Enter class description (optional)",
-                  skin: document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
-                  content_css: document.documentElement.classList.contains("dark") ? "dark" : "default",
-                  content_style: document.documentElement.classList.contains("dark")
-                    ? "body { font-family: Inter, sans-serif; font-size: 14px; color: #f3f4f6; background-color: #1A1A1A; }"
-                    : "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
+                  ...getTinyMceThemeInit(isDark),
                   readonly: isRecoverMode,
                 }}
               />

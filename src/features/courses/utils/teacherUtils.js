@@ -87,26 +87,26 @@ export const getSlotStatusColor = (remainingSlots) => {
   if (slots > 5) {
     return {
       status: "green",
-      textColor: "text-emerald-700",
-      bgColor: "bg-emerald-50",
-      borderColor: "border-emerald-200",
+      textColor: "text-emerald-700 dark:text-emerald-400",
+      bgColor: "bg-emerald-50 dark:bg-emerald-950/40",
+      borderColor: "border-emerald-200 dark:border-emerald-800/60",
       hex: "#10B981",
     }
   }
   if (slots >= 1) {
     return {
       status: "yellow",
-      textColor: "text-amber-700",
-      bgColor: "bg-amber-50",
-      borderColor: "border-amber-200",
+      textColor: "text-amber-700 dark:text-amber-400",
+      bgColor: "bg-amber-50 dark:bg-amber-950/40",
+      borderColor: "border-amber-200 dark:border-amber-800/60",
       hex: "#F59E0B",
     }
   }
   return {
     status: "red",
-    textColor: "text-red-700",
-    bgColor: "bg-red-50",
-    borderColor: "border-red-200",
+    textColor: "text-red-700 dark:text-red-400",
+    bgColor: "bg-red-50 dark:bg-red-950/40",
+    borderColor: "border-red-200 dark:border-red-800/60",
     hex: "#DC2626",
   }
 }

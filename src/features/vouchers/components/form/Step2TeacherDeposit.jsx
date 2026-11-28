@@ -8,6 +8,7 @@ import { Checkbox } from "@/shared/components/ui/inputs"
 import { PillButton, IconButton } from "@/shared/components/ui/buttons"
 import { LoadingSpinner, Skeleton } from "@/shared/components/ui/indicators"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import PolicyModal from "@/features/auth/components/popups/PolicyModal"
 import {
   useGetVoucherDepositInfoQuery,
   useSubmitVoucherDepositMutation,
@@ -29,6 +30,7 @@ const Step2TeacherDeposit = ({
   const [copiedField, setCopiedField] = useState(null)
   const [agreedTerms, setAgreedTerms] = useState(false)
   const [isConfirming, setIsConfirming] = useState(false)
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
 
   // 1. Fetch official bank details & VietQR image URL from backend
   const { data: depositInfoData, isLoading: isLoadingDepositInfo } =
@@ -37,7 +39,7 @@ const Step2TeacherDeposit = ({
     })
 
   // 2. Mutation to submit deposit confirmation (PendingDeposit -> PendingApproval)
-  const [submitDepositMutation, { isLoading: isSubmittingDeposit }] =
+  const [, { isLoading: isSubmittingDeposit }] =
     useSubmitVoucherDepositMutation()
 
   const depositInfo = depositInfoData?.data || depositInfoData || {}
@@ -139,16 +141,18 @@ const Step2TeacherDeposit = ({
               {isLoadingDepositInfo ? (
                 <Skeleton className="w-full aspect-square rounded-xl" />
               ) : (
-                <img
-                  src={vietQrUrl}
-                  alt="VietQR CatSpeak"
-                  className="w-full aspect-square object-contain rounded-2xl"
-                  onError={(e) => {
-                    e.target.onerror = null
-                    e.target.src =
-                      "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='1.5'><rect width='18' height='18' x='3' y='3' rx='2'/><path d='M7 7h.01M7 17h.01M17 7h.01M17 17h.01M12 12h.01'/></svg>"
-                  }}
-                />
+                <div className="bg-white p-2 rounded-2xl shadow-xs">
+                  <img
+                    src={vietQrUrl}
+                    alt="VietQR CatSpeak"
+                    className="w-full aspect-square object-contain rounded-xl"
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src =
+                        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='1.5'><rect width='18' height='18' x='3' y='3' rx='2'/><path d='M7 7h.01M7 17h.01M17 7h.01M17 17h.01M12 12h.01'/></svg>"
+                    }}
+                  />
+                </div>
               )}
             </div>
             <span className="text-sm text-secondary text-center font-medium">
@@ -203,7 +207,7 @@ const Step2TeacherDeposit = ({
               >
                 {copiedField ===
                 (t?.vouchers?.deposit?.accountNumber || "Số tài khoản") ? (
-                  <Check className="text-emerald-600" />
+                  <Check className="text-emerald-600 dark:text-emerald-400" />
                 ) : (
                   <Copy className="text-secondary" />
                 )}
@@ -232,7 +236,7 @@ const Step2TeacherDeposit = ({
               >
                 {copiedField ===
                 (t?.vouchers?.deposit?.depositAmount || "Số tiền cọc") ? (
-                  <Check className="text-emerald-600" />
+                  <Check className="text-emerald-600 dark:text-emerald-400" />
                 ) : (
                   <Copy className="text-secondary" />
                 )}
@@ -268,7 +272,7 @@ const Step2TeacherDeposit = ({
                 {copiedField ===
                 (t?.vouchers?.deposit?.transactionContent ||
                   "Nội dung chuyển khoản") ? (
-                  <Check className="text-emerald-600" />
+                  <Check className="text-emerald-600 dark:text-emerald-400" />
                 ) : (
                   <Copy className="text-cath-red-700 dark:text-red-400" />
                 )}
@@ -306,7 +310,7 @@ const Step2TeacherDeposit = ({
           </h4>
 
           <div className="space-y-1">
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.code || "Mã voucher:"}
               </span>
@@ -315,7 +319,7 @@ const Step2TeacherDeposit = ({
               </span>
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.title || "Tên chương trình:"}
               </span>
@@ -324,7 +328,7 @@ const Step2TeacherDeposit = ({
               </span>
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.discountType || "Loại giảm giá:"}
               </span>
@@ -335,7 +339,7 @@ const Step2TeacherDeposit = ({
               </span>
             </div>
 
-            <div className="flex justify-between text-cath-red-700 dark:text-red-400 font-semibold">
+            <div className="flex justify-between gap-3 text-cath-red-700 dark:text-red-400 font-semibold">
               <span>{t?.vouchers?.deposit?.discountValue || "Mức giảm:"}</span>
               <span>
                 {isPercent
@@ -345,7 +349,7 @@ const Step2TeacherDeposit = ({
             </div>
 
             {isPercent && form.maxDiscountAmount && (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-3">
                 <span className="text-secondary">
                   {t?.vouchers?.deposit?.maxDiscount || "Giảm tối đa:"}
                 </span>
@@ -354,7 +358,7 @@ const Step2TeacherDeposit = ({
             )}
 
             {Number(form.maxBudget) > 0 && (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-3">
                 <span className="text-secondary">
                   {t?.vouchers?.deposit?.maxBudget || "Ngân sách tối đa:"}
                 </span>
@@ -362,7 +366,7 @@ const Step2TeacherDeposit = ({
               </div>
             )}
 
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.usageLimit || "Số lượt sử dụng:"}
               </span>
@@ -372,7 +376,7 @@ const Step2TeacherDeposit = ({
               </span>
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.validity || "Thời hạn:"}
               </span>
@@ -392,7 +396,7 @@ const Step2TeacherDeposit = ({
           </h4>
 
           <div className="space-y-1">
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.maxDiscountPerUsage ||
                   "Giá trị giảm tối đa/lượt:"}
@@ -400,7 +404,7 @@ const Step2TeacherDeposit = ({
               <span>{formatCurrency(maxDiscountPerUsage)}</span>
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.totalUsages || "Tổng lượt:"}
               </span>
@@ -408,7 +412,7 @@ const Step2TeacherDeposit = ({
             </div>
 
             {Number(form.maxBudget) > 0 && (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-3">
                 <span className="text-secondary">
                   {t?.vouchers?.deposit?.budgetLimit || "Giới hạn ngân sách:"}
                 </span>
@@ -418,7 +422,7 @@ const Step2TeacherDeposit = ({
 
             <Divider />
 
-            <div className="flex justify-between items-baseline">
+            <div className="flex justify-between gap-3 items-baseline">
               <span className="font-bold">
                 {t?.vouchers?.deposit?.depositRequired || "Cọc bắt buộc:"}
               </span>
@@ -439,13 +443,28 @@ const Step2TeacherDeposit = ({
             />
             <span className="text-sm">
               {t?.vouchers?.deposit?.termsPrefix || "Tôi đồng ý với"}{" "}
-              <strong className="text-cath-red-700 dark:text-red-400 hover:underline">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsTermsModalOpen(true)
+                }}
+                className="font-bold text-cath-red-700 dark:text-red-400 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 rounded"
+              >
                 {t?.vouchers?.deposit?.termsLink ||
                   "Điều khoản cọc và hoàn tiền"}
-              </strong>{" "}
+              </button>{" "}
               {t?.vouchers?.deposit?.termsSuffix || "của Cat Speak."}
             </span>
           </div>
+
+          <PolicyModal
+            open={isTermsModalOpen}
+            onClose={() => setIsTermsModalOpen(false)}
+            title={
+              t?.vouchers?.deposit?.termsLink || "Điều khoản cọc và hoàn tiền"
+            }
+          />
 
           {/* Submit Action Button */}
           <PillButton

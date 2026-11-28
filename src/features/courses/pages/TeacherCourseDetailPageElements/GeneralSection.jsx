@@ -265,7 +265,7 @@ const GeneralSection = ({
                   {classLevels.map((lvl) => (
                     <span
                       key={lvl}
-                      className="inline-flex items-center justify-center px-3 py-0.5 text-xs font-bold text-white bg-[#e3b709] dark:bg-amber-600 rounded-full w-fit"
+                      className="inline-flex items-center justify-center px-3 py-0.5 text-xs font-bold text-gray-950 bg-[#e3b709] dark:bg-amber-400 rounded-full w-fit"
                     >
                       {lvl}
                     </span>

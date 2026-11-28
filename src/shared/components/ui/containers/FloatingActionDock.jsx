@@ -28,7 +28,7 @@ const FloatingActionDock = ({
       {...props}
     >
       <div
-        className={`w-full pointer-events-auto bg-white/95 backdrop-blur-md border border-border rounded-xl p-4 flex items-center justify-between ${innerClassName}`}
+        className={`w-full pointer-events-auto bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur-md border border-border dark:border-[#3F3F3F] rounded-xl p-4 flex items-center justify-between ${innerClassName}`}
       >
         {children ? (
           children

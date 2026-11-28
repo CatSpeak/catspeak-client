@@ -48,7 +48,10 @@ const UpcomingClassCardItem = ({
     ui.untitledClass ||
     "Untitled Class"
 
-  const rawStudents = classDetail?.students || classDetail?.members || []
+  const rawStudents = useMemo(
+    () => classDetail?.students || classDetail?.members || [],
+    [classDetail?.students, classDetail?.members],
+  )
 
   const students = useMemo(() => {
     if (!Array.isArray(rawStudents)) return []
@@ -213,7 +216,7 @@ const UpcomingClassesSection = ({ className = "" }) => {
             {c.upcomingClasses || "Lớp học sắp tới"}
           </h3>
           {totalCount > 0 && (
-            <span className="bg-[#f59e0b] text-white text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center justify-center min-w-[20px] h-[20px]">
+            <span className="bg-[#f59e0b] text-gray-950 text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center justify-center min-w-[20px] h-[20px]">
               {totalCount}
             </span>
           )}

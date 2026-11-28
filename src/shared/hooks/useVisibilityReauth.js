@@ -1,6 +1,12 @@
 import { useEffect } from "react"
-import { useStore } from "react-redux"
-import { setCredentials, logout } from "@/store/slices/authSlice"
+import { useSelector, useStore } from "react-redux"
+import {
+  setCredentials,
+  logout,
+  selectCurrentToken,
+  selectCurrentUser,
+} from "@/store/slices/authSlice"
+import { authApi, useGetProfileQuery } from "@/store/api/authApi"
 import {
   ensureRefresh,
   tokenSecondsRemaining,
@@ -57,6 +63,23 @@ export function useVisibilityReauth() {
           } catch {
             // handle JSON parse error if any
           }
+        } else if (e.key === "user") {
+          // ISS-78: the token is still the same tab's token, but `user` changed
+          // in another tab. Mirror an explicit user, or re-hydrate from the API
+          // when the cached user was cleared.
+          if (userStr) {
+            try {
+              store.dispatch(setCredentials({ user: JSON.parse(userStr) }))
+            } catch {
+              // Ignore malformed user payloads.
+            }
+          } else {
+            store.dispatch(
+              authApi.endpoints.getProfile.initiate(undefined, {
+                forceRefetch: true,
+              }),
+            )
+          }
         }
       }
     }
@@ -75,9 +98,16 @@ export function useVisibilityReauth() {
 
 /**
  * Empty component that can be mounted in the App tree to enable visibility sync.
+ * ISS-78: also auto-hydrates `state.auth.user` when a valid token exists but the
+ * cached user is missing — on any route, not only where ProfileDropdown mounts.
  */
 export function AuthVisibilitySync() {
   useVisibilityReauth()
+  const token = useSelector(selectCurrentToken)
+  const user = useSelector(selectCurrentUser)
+
+  useGetProfileQuery(undefined, { skip: !token || Boolean(user) })
+
   return null
 }
 

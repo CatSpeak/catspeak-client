@@ -34,6 +34,12 @@ export const policyComponents = {
   "Payment Policy": PaymentPolicy,
   支付政策: PaymentPolicy,
 
+  // ISS-76: teacher voucher deposit & refund terms (Step2TeacherDeposit)
+  "Điều khoản cọc và hoàn tiền": PaymentPolicy,
+  "Deposit and Refund Terms": PaymentPolicy,
+  押金和退款条款: PaymentPolicy,
+  "デポジットおよび返金規約": PaymentPolicy,
+
   // Intellectual Property Rights - matches Vietnamese, English, and Chinese
   "Quyền sở hữu trí tuệ - Cat Speak": IntellectualPropertyPolicy,
   "Intellectual Property Rights - Cat Speak": IntellectualPropertyPolicy,

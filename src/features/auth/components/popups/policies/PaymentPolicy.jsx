@@ -1,6 +1,5 @@
 import React from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import colors from "@/shared/utils/colors"
 
 const PaymentPolicy = () => {
   const { t } = useLanguage()
@@ -201,8 +200,7 @@ const PaymentPolicy = () => {
               href="https://catspeak.com.vn"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-80"
-              style={{ color: colors.red[700] }}
+              className="underline hover:opacity-80 text-[#990011] dark:text-red-400"
             >
               catspeak.com.vn
             </a>
@@ -213,8 +211,7 @@ const PaymentPolicy = () => {
               href="https://www.facebook.com/CatSpeak"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-80"
-              style={{ color: colors.red[700] }}
+              className="underline hover:opacity-80 text-[#990011] dark:text-red-400"
             >
               https://www.facebook.com/CatSpeak
             </a>
@@ -227,6 +224,31 @@ const PaymentPolicy = () => {
         <p className="text-sm mt-8 text-center uppercase text-[#7A7574] dark:text-neutral-400">
           {policy.section10.copyright}
         </p>
+      </div>
+
+      {/* Section 11: Teacher voucher deposit & refund terms (ISS-76) */}
+      <div>
+        <h3 className="font-bold text-[#8f0d15] dark:text-red-400 mb-2">
+          {policy.depositTerms?.title ||
+            "11. Điều khoản cọc và hoàn tiền voucher Giảng viên"}
+        </h3>
+        {policy.depositTerms?.intro && (
+          <p className="text-base leading-relaxed mb-2">
+            {policy.depositTerms.intro}
+          </p>
+        )}
+        <ul className="list-disc list-inside text-base space-y-1 ml-2">
+          {(
+            policy.depositTerms?.items || [
+              "Khoản cọc được tính theo giá trị giảm tối đa trên mỗi lượt sử dụng nhân với tổng số lượt sử dụng (hoặc theo giới hạn ngân sách của voucher).",
+              "Voucher chỉ được kích hoạt và hiển thị cho Học viên sau khi Admin xác nhận đã nhận đủ khoản cọc trong vòng 24 giờ làm việc.",
+              "Nếu voucher hết hạn mà chưa sử dụng hết, phần cọc tương ứng với số lượt chưa dùng sẽ được hoàn lại theo quy trình hoàn tiền của Cat Speak.",
+              "Khoản cọc không được hoàn lại nếu voucher bị hủy do Giảng viên vi phạm quy định nền tảng hoặc do thông tin voucher không chính xác.",
+            ]
+          ).map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
       </div>
     </div>
   )

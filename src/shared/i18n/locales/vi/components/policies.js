@@ -126,6 +126,17 @@ export default {
       },
       copyright: "@Copyright 2026 | Cat Speak - I speak you speak we peak",
     },
+    depositTerms: {
+      title: "11. Điều khoản cọc và hoàn tiền voucher Giảng viên",
+      intro:
+        "Khi tạo voucher do Giảng viên tài trợ, Giảng viên phải đặt cọc một khoản tiền tương ứng với nghĩa vụ giảm giá tối đa của voucher.",
+      items: [
+        "Khoản cọc được tính theo giá trị giảm tối đa trên mỗi lượt sử dụng nhân với tổng số lượt sử dụng (hoặc theo giới hạn ngân sách của voucher).",
+        "Voucher chỉ được kích hoạt và hiển thị cho Học viên sau khi Admin xác nhận đã nhận đủ khoản cọc trong vòng 24 giờ làm việc.",
+        "Nếu voucher hết hạn mà chưa sử dụng hết, phần cọc tương ứng với số lượt chưa dùng sẽ được hoàn lại theo quy trình hoàn tiền của Cat Speak.",
+        "Khoản cọc không được hoàn lại nếu voucher bị hủy do Giảng viên vi phạm quy định nền tảng hoặc do thông tin voucher không chính xác.",
+      ],
+    },
   },
   privacyPolicy: {
     title: "Chính sách bảo mật",

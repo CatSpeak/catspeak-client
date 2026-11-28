@@ -378,7 +378,7 @@ const PublicClassScheduleCard = ({ classData }) => {
           type="button"
           onClick={() => setCurrentMonth(dayjs())}
           className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${currentMonth.isSame(dayjs(), "day")
-              ? "bg-slate-900 dark:bg-white text-white dark:text-gray-900 border-slate-900 dark:border-white font-bold"
+              ? "bg-slate-900 dark:bg-[#FF6B6B] text-white dark:text-[#1A1A1A] border-slate-900 dark:border-[#FF6B6B] font-bold"
               : "bg-slate-50 dark:bg-[#222222] text-slate-600 dark:text-gray-300 border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-100 dark:hover:bg-[#2A2A2A] hover:text-slate-900 dark:hover:text-white"
             }`}
         >
@@ -389,7 +389,7 @@ const PublicClassScheduleCard = ({ classData }) => {
             type="button"
             onClick={() => setCurrentMonth(earliestDate)}
             className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${currentMonth.isSame(earliestDate, "day")
-                ? "bg-slate-900 dark:bg-white text-white dark:text-gray-900 border-slate-900 dark:border-white font-bold"
+                ? "bg-slate-900 dark:bg-[#FF6B6B] text-white dark:text-[#1A1A1A] border-slate-900 dark:border-[#FF6B6B] font-bold"
                 : "bg-slate-50 dark:bg-[#222222] text-slate-600 dark:text-gray-300 border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-100 dark:hover:bg-[#2A2A2A] hover:text-slate-900 dark:hover:text-white"
               }`}
           >
@@ -401,7 +401,7 @@ const PublicClassScheduleCard = ({ classData }) => {
             type="button"
             onClick={() => setCurrentMonth(latestDate)}
             className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${currentMonth.isSame(latestDate, "day")
-                ? "bg-slate-900 dark:bg-white text-white dark:text-gray-900 border-slate-900 dark:border-white font-bold"
+                ? "bg-slate-900 dark:bg-[#FF6B6B] text-white dark:text-[#1A1A1A] border-slate-900 dark:border-[#FF6B6B] font-bold"
                 : "bg-slate-50 dark:bg-[#222222] text-slate-600 dark:text-gray-300 border-slate-200 dark:border-[#3F3F3F] hover:bg-slate-100 dark:hover:bg-[#2A2A2A] hover:text-slate-900 dark:hover:text-white"
               }`}
           >

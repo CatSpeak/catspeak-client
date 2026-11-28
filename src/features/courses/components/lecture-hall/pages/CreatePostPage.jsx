@@ -9,7 +9,6 @@ import {
   Eye,
   X,
 } from "lucide-react"
-import { Editor } from "@tinymce/tinymce-react"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { PillButton } from "@/shared/components/ui/buttons"

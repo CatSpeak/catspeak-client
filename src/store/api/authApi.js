@@ -128,6 +128,64 @@ export const authApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["User"],
+      // ISS-78: a valid token may arrive without a cached `localStorage.user`
+      // (cleared storage, another tab, post-reload). Hydrate `state.auth.user`
+      // from the real profile response, but never after a logout or role switch
+      // replaced the token while this request was in flight.
+      async onQueryStarted(arg, { dispatch, queryFulfilled, getState }) {
+        const requestToken = getState().auth?.token
+        try {
+          const { data } = await queryFulfilled
+          const currentAuth = getState().auth
+          if (
+            !requestToken ||
+            !currentAuth?.token ||
+            currentAuth.token !== requestToken
+          ) {
+            return
+          }
+
+          const rawProfile = data?.data ?? data
+          if (!rawProfile || typeof rawProfile !== "object") return
+          if (
+            !rawProfile.accountId &&
+            !rawProfile.id &&
+            !rawProfile.email
+          ) {
+            return
+          }
+
+          const existingUser = currentAuth.user || {}
+          const hydratedUser = {
+            ...existingUser,
+            ...rawProfile,
+            accountId:
+              rawProfile.accountId ?? rawProfile.id ?? existingUser.accountId,
+            accountType:
+              rawProfile.accountType ?? existingUser.accountType ?? "Student",
+          }
+
+          const CORE_FIELDS = [
+            "accountId",
+            "accountType",
+            "roleName",
+            "username",
+            "fullName",
+            "avatarUrl",
+          ]
+          const needsDispatch =
+            !currentAuth.user ||
+            CORE_FIELDS.some(
+              (field) => hydratedUser[field] !== currentAuth.user[field],
+            )
+
+          if (needsDispatch) {
+            dispatch(setCredentials({ user: hydratedUser }))
+          }
+        } catch {
+          // `baseApi` owns 401 refresh/logout; the UI owns retry.
+        }
+      },
     }),
 
     verifyEmailOtp: builder.mutation({

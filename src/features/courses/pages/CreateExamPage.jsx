@@ -45,6 +45,8 @@ import {
   reorderQuestion,
 } from "@/features/courses/utils/questionListOps";
 import { Editor } from "@tinymce/tinymce-react";
+import { useTheme } from "@/shared/context/ThemeContext";
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme";
 import TeacherQuizDetailView from "@/features/courses/components/grading/TeacherQuizDetailView";
 import ImportExcelInstructionModal from "@/features/courses/components/grading/ImportExcelInstructionModal";
 import QuestionCard from "@/features/courses/components/grading/QuestionCard";
@@ -180,6 +182,7 @@ const SettingToggleRow = ({
 
 const CreateExamForm = ({ id, classData, language, t }) => {
   const { isDesktopExpanded } = useSidebar();
+  const { isDark, resolvedTheme } = useTheme();
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
@@ -1412,7 +1415,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {/* Left Area: Active Question card */}
           <div className="flex-1 flex flex-col gap-6">
             {questions.length === 0 ? (
-              <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-12 text-center text-gray-400 dark:text-gray-500 font-bold shadow-xs">
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl border border-border dark:border-[#3F3F3F] p-12 text-center text-gray-600 dark:text-neutral-300 font-bold shadow-xs">
                 {p.emptyQuestions}
               </div>
             ) : (
@@ -1847,6 +1850,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               </label>
 
               <Editor
+                key={`tinymce-${resolvedTheme}`}
                 tinymceScriptSrc="/tinymce/tinymce.min.js"
                 value={editorText}
                 onEditorChange={(newVal) => setFormField("editorText", newVal)}
@@ -1864,11 +1868,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   toolbar:
                     "bold italic underline strikethrough | emoticons link | bullist numlist",
                   placeholder: ce.descriptionPlaceholder,
-                  skin: document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
-                  content_css: document.documentElement.classList.contains("dark") ? "dark" : "default",
-                  content_style: document.documentElement.classList.contains("dark")
-                    ? "body { font-family: Inter, sans-serif; font-size: 14px; color: #f3f4f6; background-color: #1A1A1A; }"
-                    : "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
+                  ...getTinyMceThemeInit(isDark),
                   setup: (editor) => {
                     editor.on("focus", () => { });
                   },

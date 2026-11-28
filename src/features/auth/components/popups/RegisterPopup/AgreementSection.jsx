@@ -28,7 +28,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               {authText.agreePrefix}{" "}
               <button
                 type="button"
-                className="font-semibold text-primary hover:underline"
+                className="font-semibold text-primary dark:text-red-400 hover:underline"
                 onClick={handleOpenPolicy(authText.serviceTerms)}
               >
                 {authText.serviceTerms}
@@ -36,7 +36,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               {authText.and}{" "}
               <button
                 type="button"
-                className="font-semibold text-primary hover:underline"
+                className="font-semibold text-primary dark:text-red-400 hover:underline"
                 onClick={handleOpenPolicy(authText.privacyPolicy)}
               >
                 {authText.privacyPolicy}
@@ -45,7 +45,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
             </span>
           </div>
           {errors.termsAgreement && (
-            <p className="mt-1 text-xs text-red-600">{errors.termsAgreement}</p>
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.termsAgreement}</p>
           )}
         </div>
 
@@ -60,7 +60,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               {authText.agreePrefix}{" "}
               <button
                 type="button"
-                className="font-semibold text-primary hover:underline"
+                className="font-semibold text-primary dark:text-red-400 hover:underline"
                 onClick={handleOpenPolicy(authText.paymentPolicy)}
               >
                 {authText.paymentPolicy}
@@ -68,7 +68,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               {authText.and}{" "}
               <button
                 type="button"
-                className="font-semibold text-primary hover:underline"
+                className="font-semibold text-primary dark:text-red-400 hover:underline"
                 onClick={handleOpenPolicy(authText.ipPolicy)}
               >
                 {authText.ipPolicy}
@@ -77,7 +77,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
             </span>
           </div>
           {errors.policyAgreement && (
-            <p className="mt-1 text-xs text-red-600">
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
               {errors.policyAgreement}
             </p>
           )}

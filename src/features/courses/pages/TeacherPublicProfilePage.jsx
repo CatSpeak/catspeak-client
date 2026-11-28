@@ -297,7 +297,7 @@ const TeacherPublicProfilePage = () => {
                   <div className="text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300">
                     {headline}
                     {teacher.email && (
-                      <span className="text-slate-400 dark:text-gray-500"> · {teacher.email}</span>
+                      <span className="text-slate-600 dark:text-neutral-300"> · {teacher.email}</span>
                     )}
                   </div>
 
@@ -443,7 +443,7 @@ const TeacherPublicProfilePage = () => {
 
           {/* Footer of Bio Card: Update date & Link to Competency */}
           <div className="pt-4 border-t border-slate-100 dark:border-[#2E2E2E] flex items-center justify-between text-xs">
-            <span className="text-slate-400 dark:text-gray-500 font-medium">
+            <span className="text-slate-600 dark:text-neutral-300 font-medium">
               {t.courses?.lastUpdated?.replace("{{time}}", "2 ngày trước") ||
                 "Cập nhật lần cuối: Gần đây"}
             </span>
@@ -558,7 +558,7 @@ const TeacherPublicProfilePage = () => {
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="w-8 text-right text-slate-400 dark:text-gray-400 font-medium shrink-0">
+                      <span className="w-8 text-right text-slate-600 dark:text-neutral-300 font-medium shrink-0">
                         {pct}%
                       </span>
                     </div>
@@ -592,7 +592,7 @@ const TeacherPublicProfilePage = () => {
                           <span className="text-xs font-bold text-slate-900 dark:text-white">
                             {rev.studentName}
                           </span>
-                          <span className="text-[11px] text-slate-400 dark:text-gray-400">
+                          <span className="text-[11px] text-slate-600 dark:text-neutral-300">
                             {revDate}
                           </span>
                         </div>
@@ -633,7 +633,7 @@ const TeacherPublicProfilePage = () => {
                   })}
                 </div>
               ) : (
-                <div className="p-6 text-center text-xs text-slate-400 dark:text-gray-500 bg-slate-50 dark:bg-[#222222] rounded-xl">
+                <div className="p-6 text-center text-xs text-slate-600 dark:text-neutral-300 bg-slate-50 dark:bg-[#222222] rounded-xl">
                   {t.courses?.noReviewsYet ||
                     "Chưa có nhận xét nào từ học viên."}
                 </div>

@@ -23,6 +23,8 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { DatePicker } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { Editor } from "@tinymce/tinymce-react"
+import { useTheme } from "@/shared/context/ThemeContext"
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme"
 import {
   Upload,
   FileText,
@@ -75,6 +77,7 @@ const getExistingAttachmentReference = (file) => {
 
 const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, t }) => {
   const navigate = useNavigate()
+  const { isDark, resolvedTheme } = useTheme()
   const c = t.courses || {}
   const { userTimeZone, toIsoInZone } = useTimezone()
   const ca = useMemo(() => t.courses?.createAssignment || {}, [t.courses])
@@ -312,6 +315,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <label className="text-sm font-bold text-gray-800 dark:text-gray-200">{ca.descriptionLabel || "Yêu cầu bài tập"}</label>
               <div className="assignment-editor overflow-hidden transition-all rounded-xl border border-border dark:border-[#3F3F3F]">
                 <Editor
+                  key={`tinymce-${resolvedTheme}`}
                   tinymceScriptSrc="/tinymce/tinymce.min.js"
                   value={editorText}
                   onEditorChange={(newVal) => setField("editorText", newVal)}
@@ -322,11 +326,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                     plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
                     toolbar:
                       "bold italic underline strikethrough | emoticons link | bullist numlist",
-                    skin: document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
-                    content_css: document.documentElement.classList.contains("dark") ? "dark" : "default",
-                    content_style: document.documentElement.classList.contains("dark")
-                      ? "body { font-family: Inter, sans-serif; font-size: 14px; color: #f3f4f6; background-color: #1A1A1A; }"
-                      : "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
+                    ...getTinyMceThemeInit(isDark),
                     setup: (editor) => {
                       editor.on("focus", () => { })
                     },

@@ -115,7 +115,7 @@ const CoreFeaturesSection = () => (
               {description}
             </p>
             <div className="mt-auto border-t border-[#ececec] pt-3 dark:border-[#3b3b3b]">
-              <span className="text-xs text-[#999] dark:text-gray-400">
+              <span className="text-xs text-[#595959] dark:text-gray-400">
                 Hỗ trợ: {support}
               </span>
             </div>

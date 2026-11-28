@@ -76,7 +76,10 @@ const AssignmentSubmissionsList = ({
   const navigate = useNavigate()
   const coursesTranslations = t.courses || {}
   const gradingTranslations = coursesTranslations.grading || {}
-  const qg = gradingTranslations.teacherQuiz || {}
+  const qg = useMemo(
+    () => gradingTranslations.teacherQuiz || {},
+    [gradingTranslations.teacherQuiz],
+  )
 
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -245,7 +248,7 @@ const AssignmentSubmissionsList = ({
                   {gradingTranslations.badgeExpired || "Hết hạn"}
                 </span>
               ) : (
-                <span className="bg-[#F59E0B] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-2xs">
+                <span className="bg-[#F59E0B] text-gray-950 text-xs font-semibold px-3 py-1 rounded-full shadow-2xs">
                   {gradingTranslations.badgeUpcoming || "Sắp đến hạn"}
                 </span>
               )}

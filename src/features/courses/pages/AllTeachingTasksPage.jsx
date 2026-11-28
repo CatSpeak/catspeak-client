@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import React from "react"
+import { useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { Breadcrumb, Tabs } from "@/shared/components/ui/navigation"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
@@ -12,7 +12,6 @@ import Pagination from "@/shared/components/ui/navigation/Pagination"
 const AllTeachingTasksPage = () => {
   const { t } = useLanguage()
   const c = t.courses || {}
-  const navigate = useNavigate()
 
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = searchParams.get("tab") || "urgent"
@@ -34,9 +33,7 @@ const AllTeachingTasksPage = () => {
   const data = pagedResult?.items || []
   const totalPages = pagedResult?.totalPages || 0
 
-  const tasks = useMemo(() => {
-    return Array.isArray(data) ? data : []
-  }, [data])
+  const tasks = Array.isArray(data) ? data : []
 
   const tabs = [
     { value: "urgent", label: c.taskTabUrgent || "Urgent" },
@@ -104,7 +101,7 @@ const AllTeachingTasksPage = () => {
           )}
         </div>
       ) : (
-        <div className="text-center py-12 text-sm text-gray-400 dark:text-gray-500 font-semibold bg-gray-50/50 dark:bg-[#1A1A1A] rounded-2xl border border-dashed border-border dark:border-[#3F3F3F] mt-4">
+        <div className="text-center py-12 text-sm text-gray-600 dark:text-neutral-300 font-semibold bg-gray-50/50 dark:bg-[#1A1A1A] rounded-2xl border border-dashed border-border dark:border-[#3F3F3F] mt-4">
           {c.taskNoResults || "No tasks found."}
         </div>
       )}

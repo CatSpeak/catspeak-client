@@ -1,5 +1,6 @@
 import React from "react"
 import { Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const VARIANT_CLASSES = {
   primary:
@@ -71,10 +72,11 @@ const PillButton = ({
     variant === "white-black"
 
   const variantStyle = VARIANT_CLASSES[variant] || VARIANT_CLASSES.primary
+  const isSolidDisabled = isActuallyDisabled && !(isTransparent || isSecondary)
   const disabledStyle = isActuallyDisabled
     ? isTransparent || isSecondary
       ? "opacity-50 cursor-not-allowed pointer-events-none"
-      : "bg-[#BFBFBF] text-white border-transparent cursor-not-allowed pointer-events-none"
+      : "bg-[#BFBFBF] dark:bg-[#3A3A3A] text-neutral-800 dark:text-neutral-400 border-transparent cursor-not-allowed pointer-events-none"
     : ""
 
   const customStyle = !isActuallyDisabled
@@ -117,14 +119,26 @@ const PillButton = ({
       type={type}
       onClick={onClick}
       disabled={isActuallyDisabled}
-      className={`group/pill relative outline-none flex items-center justify-center ${wrapperHeight} ${
-        isActuallyDisabled ? "cursor-not-allowed" : "cursor-pointer"
-      } touch-manipulation ${className}`}
+      className={cn(
+        "group/pill relative outline-none flex items-center justify-center",
+        wrapperHeight,
+        isActuallyDisabled ? "cursor-not-allowed" : "cursor-pointer",
+        "touch-manipulation",
+        className,
+      )}
       {...props}
     >
       <div
         style={customStyle}
-        className={`w-full ${innerDimensions} ${roundedClass} border text-sm pointer-events-none flex items-center justify-center gap-2 whitespace-nowrap select-none ${variantStyle} ${activeStyle} ${disabledStyle} ${innerClassName}`}
+        className={cn(
+          "w-full border text-sm pointer-events-none flex items-center justify-center gap-2 whitespace-nowrap select-none",
+          innerDimensions,
+          roundedClass,
+          !isSolidDisabled && variantStyle,
+          activeStyle,
+          disabledStyle,
+          innerClassName,
+        )}
       >
         {loading ? (
           <>

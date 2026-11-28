@@ -22,6 +22,8 @@ import {
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import { Editor } from "@tinymce/tinymce-react"
+import { useTheme } from "@/shared/context/ThemeContext"
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme"
 import { formatFileSize, getFileIconColorClass } from "../../utils/courseUtils"
 import {
   getFileMeta,
@@ -116,6 +118,7 @@ const interpolate = (template, values) => Object.entries(values).reduce(
 
 const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignmentId: assignmentIdProp, classId, onBack }) => {
   const { language, t } = useLanguage()
+  const { isDark, resolvedTheme } = useTheme()
   const { formatDateTime } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
@@ -786,6 +789,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   </label>
                   <div className="assignment-editor overflow-hidden transition-all">
                     <Editor
+                      key={`tinymce-${resolvedTheme}`}
                       id="assignment-text-submission"
                       tinymceScriptSrc="/tinymce/tinymce.min.js"
                       value={textContent}
@@ -799,7 +803,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                         toolbar:
                           "bold italic underline strikethrough | emoticons link | bullist numlist",
                         placeholder: sa.textSubmissionPlaceholder,
-                        skin: "oxide",
+                        ...getTinyMceThemeInit(isDark),
                       }}
                     />
                   </div>

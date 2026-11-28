@@ -263,7 +263,7 @@ const SchedulePage = () => {
             <div className="w-1.5 h-4 bg-[#990011] dark:bg-[#FF6B6B] rounded-full" />
             <h2 className="text-sm font-extrabold text-gray-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
               <span>{c.upcomingSchedule || "Upcoming Schedule"}</span>
-              <span className="bg-[#F59E0B] text-white text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="bg-[#F59E0B] text-gray-950 text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center">
                 {String(monthClassesCount)}
               </span>
             </h2>
@@ -328,7 +328,7 @@ const SchedulePage = () => {
                 {DAYS_OF_WEEK.map((day, idx) => (
                   <span
                     key={idx}
-                    className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider py-1"
+                    className="text-[10px] font-black text-gray-600 dark:text-neutral-400 uppercase tracking-wider py-1"
                   >
                     {day}
                   </span>
@@ -451,7 +451,7 @@ const SchedulePage = () => {
                         {/* Pills */}
                         <div className="flex flex-wrap gap-1.5">
                           {cls.language && (
-                            <span className="bg-[#F59E0B] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider">
+                            <span className="bg-[#F59E0B] text-gray-950 text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider">
                               {getLocalizedLanguageName(cls.language, t)}
                             </span>
                           )}

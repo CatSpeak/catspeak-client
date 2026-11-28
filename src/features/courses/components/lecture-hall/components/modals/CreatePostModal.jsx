@@ -8,9 +8,12 @@ import { toast } from "react-hot-toast"
 import Modal from "@/shared/components/ui/Modal"
 import FileAttachmentItem from "../ui/FileAttachmentItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTheme } from "@/shared/context/ThemeContext"
+import { getTinyMceThemeInit } from "@/shared/utils/tinymceTheme"
 
 const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
   const { t } = useLanguage()
+  const { isDark, resolvedTheme } = useTheme()
   const dict = t.courses.lectureHall.createPost || {}
   const [formData, setFormData] = useState({
     title: "",
@@ -166,6 +169,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
           </label>
           <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
             <Editor
+            key={`tinymce-${resolvedTheme}`}
             tinymceScriptSrc="/tinymce/tinymce.min.js"
             value={formData.content}
             onEditorChange={handleEditorChange}
@@ -177,7 +181,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
               toolbar:
                 "bold italic underline strikethrough | emoticons link | bullist numlist",
               placeholder: dict.contentPlaceholder,
-              skin: "oxide",
+              ...getTinyMceThemeInit(isDark),
               setup: (editor) => {
                 editor.on("focus", () => { })
               },

@@ -16,7 +16,8 @@ const TEACHER_ONLY_PREFIXES = [
 ]
 
 const WorkspaceLayout = () => {
-  const { isTeacher, isRoleResolved, isLoading } = useRoleOverride()
+  const { isTeacher, isRoleResolved, isLoading, error, retry } =
+    useRoleOverride()
   const location = useLocation()
 
   const isTeacherOnlyPath = TEACHER_ONLY_PREFIXES.some((prefix) =>
@@ -24,14 +25,34 @@ const WorkspaceLayout = () => {
   )
 
   if (isTeacherOnlyPath) {
-    if (isLoading || !isRoleResolved) {
+    if (isLoading) {
       return (
         <div className="flex min-h-[240px] items-center justify-center">
           <LoadingSpinner />
         </div>
       )
     }
-    if (!isTeacher) {
+    if (!isRoleResolved && error) {
+      return (
+        <div
+          role="alert"
+          className="flex min-h-[240px] flex-col items-center justify-center gap-3 px-4 text-center"
+        >
+          <p className="text-sm font-medium text-slate-600 dark:text-neutral-300">
+            Không thể tải vai trò tài khoản. Vui lòng thử lại.
+          </p>
+          <button
+            type="button"
+            onClick={retry}
+            className="rounded-full border border-[#990011] px-4 py-2 text-sm font-semibold text-[#990011] transition-colors hover:bg-red-50 dark:border-[#FF6B6B] dark:text-[#FF6B6B] dark:hover:bg-red-950/30"
+          >
+            Thử lại
+          </button>
+        </div>
+      )
+    }
+    // Fail-closed: an unresolved role never grants access to teacher routes.
+    if (!isRoleResolved || !isTeacher) {
       return <PageNotFound />
     }
   }

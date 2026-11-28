@@ -126,6 +126,17 @@ export default {
       },
       copyright: "@Copyright 2026 | Cat Speak - I speak you speak we peak",
     },
+    depositTerms: {
+      title: "11. Teacher Voucher Deposit and Refund Terms",
+      intro:
+        "When creating a Teacher-sponsored voucher, the Teacher must pay a deposit equal to the voucher's maximum discount liability.",
+      items: [
+        "The deposit is calculated as the maximum discount per redemption multiplied by the total number of redemptions (or by the voucher's budget cap).",
+        "The voucher is activated and shown to Students only after an Admin confirms the full deposit was received, within 24 business hours.",
+        "If the voucher expires before all redemptions are used, the deposit for unused redemptions is refunded under Cat Speak's refund process.",
+        "The deposit is not refunded if the voucher is cancelled because the Teacher violated platform rules or because the voucher information was inaccurate.",
+      ],
+    },
   },
   privacyPolicy: {
     title: "Privacy Policy",
