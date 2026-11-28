@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { COLORS } from "@/shared/constants/constants"
 import { Share, MessageSquare } from "lucide-react"
@@ -18,8 +18,6 @@ import {
   normalizeReactions,
   getTotalReactionsCount,
 } from "../utils/reactionUtils"
-import { useAuthModal } from "@/shared/context/AuthModalContext"
-import { useAuth } from "@/features/auth"
 import Badge from "@/shared/components/ui/indicators/Badge"
 
 /**
@@ -38,8 +36,6 @@ const NewsCard = ({ news }) => {
   const { t } = useLanguage()
   const newsCard = t.news?.newsCard
   const { formatTimeAgo } = useTimezone()
-  const { isAuthenticated } = useAuth()
-  const { openAuthModal } = useAuthModal()
 
   /* ── API mutations & hooks ───────────────────────────────────────── */
   const { handleReact } = usePostReaction(news)
@@ -91,8 +87,10 @@ const NewsCard = ({ news }) => {
   const formattedTime = news.createDate ? formatTimeAgo(news.createDate) : ""
 
   /* ── Handlers ──────────────────────────────────────────────────── */
+  const articlePath = `/${currentLang}/cat-speak/news/${news.slug || news.postId}`
+
   const handleCardClick = () => {
-    navigate(`/${currentLang}/cat-speak/news/${news.slug || news.postId}`)
+    navigate(articlePath)
   }
 
   const handleShare = async (e) => {
@@ -253,7 +251,13 @@ const NewsCard = ({ news }) => {
       {/* ── Content ──────────────────────────────────────────────── */}
       <div className="flex flex-col p-4 flex-1">
         <h3 className="font-bold text-base text-foreground dark:text-white break-words">
-          {news.title}
+          <Link
+            to={articlePath}
+            onClick={(e) => e.stopPropagation()}
+            className="block font-bold text-base text-foreground dark:text-white break-words hover:text-cath-red-700 dark:hover:text-red-400 transition-colors"
+          >
+            {news.title}
+          </Link>
         </h3>
         {news.excerpt && (
           <p className="text-sm text-[#4a4a4a] dark:text-neutral-300 line-clamp-2 mb-2">
@@ -322,9 +326,11 @@ const NewsCard = ({ news }) => {
         </div>
 
         {/* Comments */}
-        <button
-          onClick={handleCardClick}
+        <Link
+          to={articlePath}
+          onClick={(e) => e.stopPropagation()}
           className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-neutral-100 dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D] cursor-pointer"
+          aria-label={newsCard?.comments || "Bình luận"}
         >
           <MessageSquare
             size={20}
@@ -333,7 +339,7 @@ const NewsCard = ({ news }) => {
           <span className="text-sm text-secondary dark:text-[#AAAAAA]">
             {totalComments}
           </span>
-        </button>
+        </Link>
 
         {/* Share */}
         <button

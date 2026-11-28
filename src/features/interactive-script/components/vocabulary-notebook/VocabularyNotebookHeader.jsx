@@ -1,18 +1,16 @@
 import React from "react"
 import { Gamepad } from "lucide-react"
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PageTitle from "@/shared/components/ui/PageTitle"
 
-export const VocabularyNotebookHeader = ({ totalWords }) => {
+export const VocabularyNotebookHeader = ({
+  totalWords,
+  onReviewClick,
+  disableReview = false,
+}) => {
   const { t } = useLanguage()
   const v = t.vocabularyNotebook
-
-  const breadcrumbItems = [
-    { label: t.nav?.home || "Trang chủ", href: "/" },
-    { label: v?.title || "Sổ từ vựng", href: "/workspace/vocabulary" },
-  ]
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -23,7 +21,13 @@ export const VocabularyNotebookHeader = ({ totalWords }) => {
           {v?.subtitle}
         </p>
 
-        <PillButton variant="primary" startIcon={<Gamepad />}>
+        <PillButton
+          type="button"
+          variant="primary"
+          startIcon={<Gamepad />}
+          onClick={onReviewClick}
+          disabled={disableReview}
+        >
           {v?.reviewNow}{" "}
           <span className="rounded-full shadow-faq-card px-3 py-1 bg-cath-red-400">
             {v?.wordCount?.replace("{{count}}", totalWords) ||

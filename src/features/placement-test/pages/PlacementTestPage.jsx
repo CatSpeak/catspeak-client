@@ -46,14 +46,20 @@ const PlacementTestPage = () => {
   // A 403 from start means the plan changed or my-usage disagreed with the
   // enforced permission; render the plan gate from it instead of a toast.
   const planDenied = isPlanForbiddenError(createError)
-  const canAccessPlacement =
-    !planDenied &&
-    (placementPermission?.isAllowed ??
-      hasFeature(PLAN_FEATURES.ALLOW_PLACEMENT_TEST))
+  // ISS-06: guests can read the consent screen; the Pro plan gate only applies
+  // once the visitor is signed in (the start endpoint still enforces the plan).
+  const canAccessPlacement = isAuthenticated
+    ? !planDenied &&
+      (placementPermission?.isAllowed ??
+        hasFeature(PLAN_FEATURES.ALLOW_PLACEMENT_TEST))
+    : true
   const entry = useSessionResume({ copy: lifecycleCopy })
   const { data: retakeStatus, isLoading: retakeLoading } = useGetRetakeStatusQuery(
     undefined,
-    { skip: !canAccessPlacement, refetchOnMountOrArgChange: true },
+    {
+      skip: !isAuthenticated || !canAccessPlacement,
+      refetchOnMountOrArgChange: true,
+    },
   )
 
   // BUG-PT-16: người đã có kết quả thì vào thẳng hồ sơ kết quả (sc12), không
@@ -121,9 +127,10 @@ const PlacementTestPage = () => {
   }
 
   if (
-    isPlanLoading ||
-    isPermissionLoading ||
-    (canAccessPlacement && retakeLoading) ||
+    (isAuthenticated &&
+      (isPlanLoading ||
+        isPermissionLoading ||
+        (canAccessPlacement && retakeLoading))) ||
     shouldOpenProfile
   ) {
     return (
@@ -133,7 +140,7 @@ const PlacementTestPage = () => {
     )
   }
 
-  if (!canAccessPlacement) {
+  if (isAuthenticated && !canAccessPlacement) {
     return (
       <PlanRequiredState
         pageTitle={copy.title || "Đánh giá trình độ"}

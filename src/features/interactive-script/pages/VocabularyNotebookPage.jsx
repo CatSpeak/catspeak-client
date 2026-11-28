@@ -8,17 +8,21 @@ import { VocabularyListCard } from "../components/vocabulary-notebook/Vocabulary
 import { VocabularyGridCard } from "../components/vocabulary-notebook/VocabularyGridCard"
 import { VocabularyEmptyState } from "../components/vocabulary-notebook/VocabularyEmptyState"
 import { DeleteWordConfirmModal } from "../components/vocabulary-notebook/DeleteWordConfirmModal"
+import VocabularyReviewModal from "../components/vocabulary-notebook/VocabularyReviewModal"
 import Pagination from "@/shared/components/ui/navigation/Pagination"
 
 const VocabularyNotebookPage = () => {
   const [viewMode, setViewMode] = useState("list") // 'list' | 'grid'
   const [wordToDelete, setWordToDelete] = useState(null)
+  const [isReviewOpen, setIsReviewOpen] = useState(false)
 
   const navigate = useNavigate()
   const { language } = useLanguage()
 
   const {
     words,
+    allWords,
+    filteredWords,
     allWordsCount,
     searchQuery,
     setSearchQuery,
@@ -45,7 +49,11 @@ const VocabularyNotebookPage = () => {
 
   return (
     <div className="w-full">
-      <VocabularyNotebookHeader totalWords={allWordsCount} />
+      <VocabularyNotebookHeader
+        totalWords={allWordsCount}
+        onReviewClick={() => setIsReviewOpen(true)}
+        disableReview={allWordsCount === 0}
+      />
 
       <div className="px-4 pb-4">
         {isFetching && allWordsCount === 0 ? (
@@ -95,23 +103,7 @@ const VocabularyNotebookPage = () => {
                 )}
 
                 {totalPages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 mb-8">
-                    <button className="flex items-center gap-2 px-4 py-2 border border-[#D1D5DB] dark:border-[#3F3F3F] rounded-lg text-sm font-medium text-[#4B5563] dark:text-neutral-200 bg-white dark:bg-[#242424] hover:bg-gray-50 dark:hover:bg-[#2c2c2c] transition-colors">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        ></path>
-                      </svg>
-                      Xem thêm 10 từ khác
-                    </button>
+                  <div className="flex justify-center mt-6 mb-8">
                     <Pagination
                       page={currentPage}
                       totalPages={totalPages}
@@ -130,6 +122,13 @@ const VocabularyNotebookPage = () => {
             onAction={() => navigate(`/${language}/community`)}
           />
         )}
+
+        <VocabularyReviewModal
+          open={isReviewOpen}
+          onClose={() => setIsReviewOpen(false)}
+          words={filteredWords.length > 0 ? filteredWords : allWords}
+          onPlayAudio={playAudio}
+        />
 
         {wordToDelete && (
           <DeleteWordConfirmModal

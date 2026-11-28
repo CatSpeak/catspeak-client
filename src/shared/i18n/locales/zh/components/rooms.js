@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-keys -- pre-existing duplicate room keys kept for backward-compatible last-wins values */
 export default {
   language: {
     vi: "越南语",
@@ -308,6 +309,8 @@ export default {
     createTitle: "创建自定义房间",
     editTitle: "编辑房间",
     quota: "已使用 {{used}}/{{max}} 个房间",
+    activeRoomsSummary: "{{count}} 个房间正在使用",
+    customRoomQuotaLabel: "固定房间（Pro）：已使用 {{used}}/{{max}}",
     quotaFull: "您已达到最大 {{max}} 个自定义房间的限制",
     capacity: "容量：100 人",
     persistent: "持久房间",

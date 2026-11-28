@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import {
   useUpdatePostMutation,
   useDeletePostMutation,
@@ -19,7 +19,6 @@ import ReactionStackedBadges from "@/features/news/components/ReactionStackedBad
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfilePostCard = ({ post, isOwnProfile }) => {
-  const navigate = useNavigate()
   const { lang: paramLang } = useParams()
   const { t, language } = useLanguage()
   const currentLang = paramLang || language || "vi"
@@ -36,6 +35,13 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
   const excerpt = post?.excerpt || post?.Excerpt || null
   const hasRichContent = Boolean(post?.content || contentUrl)
   const hasContent = Boolean(hasRichContent || excerpt)
+  // ISS-68: only explicitly Public posts may bypass the Bearer media gateway.
+  const isPublicPost =
+    !post?.privacy || String(post.privacy).toLowerCase() === "public"
+  const articlePath =
+    post?.slug || post?.postId
+      ? `/${currentLang}/cat-speak/news/${post.slug || post.postId}`
+      : null
 
   useEffect(() => {
     const el = contentRef.current
@@ -93,21 +99,17 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
           />
 
           {post.title && post.title !== "Untitled" && (
-            <h4
-              onClick={() => {
-                if (post.slug || post.postId) {
-                  navigate(
-                    `/${currentLang}/cat-speak/news/${post.slug || post.postId}`,
-                  )
-                }
-              }}
-              className={`text-2xl font-bold ${
-                post.slug || post.postId
-                  ? "cursor-pointer hover:text-cath-red-700 dark:hover:text-red-400 transition-colors"
-                  : ""
-              }`}
-            >
-              {post.title}
+            <h4 className="text-2xl font-bold">
+              {articlePath ? (
+                <Link
+                  to={articlePath}
+                  className="hover:text-cath-red-700 dark:hover:text-red-400 transition-colors"
+                >
+                  {post.title}
+                </Link>
+              ) : (
+                post.title
+              )}
             </h4>
           )}
 
@@ -143,7 +145,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
             </div>
           )}
 
-          <PostMediaGallery media={post.media} />
+          <PostMediaGallery media={post.media} isPublicPost={isPublicPost} />
 
           <div className="flex items-center justify-between text-sm text-secondary dark:text-[#AAAAAA]">
             <span>

@@ -47,6 +47,26 @@ export default {
       message: "The word \"{{word}}\" will be deleted from your learning list and review history.",
       cancel: "Cancel",
       confirm: "Remove"
+    },
+    reviewModal: {
+      title: "Vocabulary review",
+      subtitle: "Flip the cards to memorise your saved words.",
+      progress: "Card {{current}}/{{total}}",
+      flipHint: "Tap to reveal the meaning",
+      playAudio: "Play pronunciation",
+      flip: "Flip card",
+      shuffle: "Shuffle",
+      prev: "Previous",
+      next: "Next",
+      mastered: "Remembered",
+      reviewAgain: "Review again",
+      masteredCount: "Remembered",
+      reviewAgainCount: "Review again",
+      completedTitle: "Review session complete!",
+      reviewAgainBtn: "Review missed words",
+      restartBtn: "Start over",
+      closeBtn: "Close",
+      empty: "There are no saved words to review."
     }
   },
   widget: {

@@ -22,11 +22,16 @@ const VisualMediaItem = ({
   isSingle = false,
   isOverlay = false,
   overlayCount = 0,
+  isPublicPost = false,
 }) => {
   const [hasError, setHasError] = useState(false)
   const isVideo = media.mediaType === "Video"
-  const needsAuth = isProtectedMediaUrl(media.mediaUrl)
-  const { url: authenticatedUrl } = useAuthenticatedMediaUrl(media.mediaUrl)
+  // ISS-68 / CS-07: Public posts load directly through <img>/<video>; every
+  // other privacy value keeps the authenticated gateway fetch.
+  const needsAuth = !isPublicPost && isProtectedMediaUrl(media.mediaUrl)
+  const { url: authenticatedUrl, isLoading } = useAuthenticatedMediaUrl(
+    needsAuth ? media.mediaUrl : null,
+  )
   const resolvedUrl = needsAuth ? authenticatedUrl : getImageUrl(media.mediaUrl)
 
   // Single video player with inline controls
@@ -68,10 +73,14 @@ const VisualMediaItem = ({
             </div>
           </div>
         </div>
+      ) : !isVideo && needsAuth && isLoading ? (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-[#242424] p-2">
+          <ImageIcon className="w-8 h-8 opacity-50 text-gray-500 dark:text-neutral-400 animate-pulse" />
+        </div>
       ) : hasError || !resolvedUrl ? (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 text-gray-400 p-2">
-          <ImageIcon className="w-8 h-8 opacity-40 mb-1" />
-          <span className="text-[11px] text-gray-400 text-center truncate w-full px-1">
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-[#242424] text-gray-600 dark:text-neutral-300 border border-border dark:border-[#3F3F3F] p-2">
+          <ImageIcon className="w-8 h-8 opacity-75 mb-1 text-gray-500 dark:text-neutral-400" />
+          <span className="text-[11px] font-medium text-gray-600 dark:text-neutral-300 text-center truncate w-full px-1">
             Không thể tải hình ảnh
           </span>
         </div>
@@ -103,14 +112,22 @@ const VisualMediaItem = ({
  * - Nếu tỷ lệ giữa w và h <= 2 (hoặc ngược lại, tức 0.5 <= ratio <= 2): Hiển thị chính xác tỷ lệ ảnh
  * - Nếu tỷ lệ giữa w và h > 2 (hoặc ngược lại, tức ratio > 2 hoặc ratio < 0.5): Hiển thị đầy đủ ảnh trong khung 2:3 chiều ngang (3:2) + hiệu ứng blur phần thừa
  */
-const SingleVisualMediaItem = ({ media, onClick }) => {
+const SingleVisualMediaItem = ({
+  media,
+  onClick,
+  isPublicPost = false,
+}) => {
   const [dimensions, setDimensions] = useState(null)
   const [hasError, setHasError] = useState(false)
   const isVideo = media.mediaType === "Video"
 
   const rawUrl = media?.mediaUrl || media?.url
-  const needsAuth = isProtectedMediaUrl(rawUrl)
-  const { url: authenticatedUrl, isLoading } = useAuthenticatedMediaUrl(rawUrl)
+  // ISS-68 / CS-07: Public posts are loaded by the browser directly so the
+  // 302 redirect to S3 is not blocked by a JavaScript CORS fetch.
+  const needsAuth = !isPublicPost && isProtectedMediaUrl(rawUrl)
+  const { url: authenticatedUrl, isLoading } = useAuthenticatedMediaUrl(
+    needsAuth ? rawUrl : null,
+  )
   const resolvedUrl = needsAuth ? authenticatedUrl : getImageUrl(rawUrl)
 
   useEffect(() => {
@@ -167,9 +184,9 @@ const SingleVisualMediaItem = ({ media, onClick }) => {
 
   if (hasError || !resolvedUrl) {
     return (
-      <div className="w-full aspect-video max-h-[500px] flex flex-col items-center justify-center bg-gray-100 text-gray-400 p-2 rounded-xl border border-border">
-        <ImageIcon className="w-8 h-8 opacity-40 mb-1" />
-        <span className="text-[11px] text-gray-400 text-center truncate w-full px-1">
+      <div className="w-full aspect-video max-h-[500px] flex flex-col items-center justify-center bg-gray-100 dark:bg-[#242424] text-gray-600 dark:text-neutral-300 p-2 rounded-xl border border-border dark:border-[#3F3F3F]">
+        <ImageIcon className="w-8 h-8 opacity-75 mb-1 text-gray-500 dark:text-neutral-400" />
+        <span className="text-[11px] font-medium text-gray-600 dark:text-neutral-300 text-center truncate w-full px-1">
           Không thể tải hình ảnh
         </span>
       </div>
@@ -253,7 +270,7 @@ const SingleVisualMediaItem = ({ media, onClick }) => {
 /**
  * Adaptive Gallery Layout for 1 to 5+ visual media items
  */
-const VisualMediaGrid = ({ mediaList, onMediaClick }) => {
+const VisualMediaGrid = ({ mediaList, onMediaClick, isPublicPost = false }) => {
   const count = mediaList.length
   if (count === 0) return null
 
@@ -263,6 +280,7 @@ const VisualMediaGrid = ({ mediaList, onMediaClick }) => {
       <SingleVisualMediaItem
         media={mediaList[0]}
         onClick={() => onMediaClick(0)}
+        isPublicPost={isPublicPost}
       />
     )
   }
@@ -277,6 +295,7 @@ const VisualMediaGrid = ({ mediaList, onMediaClick }) => {
             media={m}
             onClick={() => onMediaClick(index)}
             className="aspect-[4/3]"
+            isPublicPost={isPublicPost}
           />
         ))}
       </div>
@@ -291,17 +310,20 @@ const VisualMediaGrid = ({ mediaList, onMediaClick }) => {
           media={mediaList[0]}
           onClick={() => onMediaClick(0)}
           className="h-full"
+          isPublicPost={isPublicPost}
         />
         <div className="grid grid-rows-2 gap-1 h-full">
           <VisualMediaItem
             media={mediaList[1]}
             onClick={() => onMediaClick(1)}
             className="h-full"
+            isPublicPost={isPublicPost}
           />
           <VisualMediaItem
             media={mediaList[2]}
             onClick={() => onMediaClick(2)}
             className="h-full"
+            isPublicPost={isPublicPost}
           />
         </div>
       </div>
@@ -318,6 +340,7 @@ const VisualMediaGrid = ({ mediaList, onMediaClick }) => {
             media={m}
             onClick={() => onMediaClick(index)}
             className="aspect-square"
+            isPublicPost={isPublicPost}
           />
         ))}
       </div>
@@ -340,6 +363,7 @@ const VisualMediaGrid = ({ mediaList, onMediaClick }) => {
             className="aspect-square"
             isOverlay={isFourth}
             overlayCount={remainingCount}
+            isPublicPost={isPublicPost}
           />
         )
       })}
@@ -350,7 +374,11 @@ const VisualMediaGrid = ({ mediaList, onMediaClick }) => {
 /**
  * Main PostMediaGallery Component
  */
-const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
+const PostMediaGallery = ({
+  media = [],
+  initialDocsLimit = 2,
+  isPublicPost = false,
+}) => {
   const { t } = useLanguage()
   const [activeMediaIndex, setActiveMediaIndex] = useState(null)
   const [isDocsExpanded, setIsDocsExpanded] = useState(false)
@@ -386,6 +414,7 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
         <VisualMediaGrid
           mediaList={visualMedia}
           onMediaClick={(index) => setActiveMediaIndex(index)}
+          isPublicPost={isPublicPost}
         />
       )}
 

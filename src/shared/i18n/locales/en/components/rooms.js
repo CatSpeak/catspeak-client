@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-keys -- pre-existing duplicate room keys kept for backward-compatible last-wins values */
 export default {
   language: {
     vi: "Vietnamese",
@@ -337,6 +338,8 @@ export default {
     createTitle: "Create Custom Room",
     editTitle: "Edit Custom Room",
     quota: "{{used}}/{{max}} rooms used",
+    activeRoomsSummary: "{{count}} active rooms",
+    customRoomQuotaLabel: "Fixed rooms (Pro): {{used}}/{{max}} used",
     quotaFull: "You've reached the maximum of {{max}} custom rooms",
     capacity: "Capacity: 100 participants",
     persistent: "Persistent Room",

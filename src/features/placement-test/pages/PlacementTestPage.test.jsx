@@ -10,6 +10,9 @@ let PlacementTestPage
 const permissionState = { data: { isAllowed: true }, isLoading: false }
 const createSessionState = { isLoading: false, error: null }
 const legacyFeatureAllowed = { value: true }
+const authState = { user: { accountId: 202 }, isAuthenticated: true }
+const retakeCalls = []
+const retakeState = { data: null, isLoading: false }
 
 vi.mock("@/store/api/plansApi", () => ({
   useGetPlacementPermissionQuery: () => permissionState,
@@ -28,14 +31,14 @@ vi.mock("@/shared/context/LanguageContext", () => ({
 }))
 
 vi.mock("@/features/auth/hooks/useAuth", () => ({
-  useAuth: () => ({
-    user: { accountId: 202 },
-    isAuthenticated: true,
-  }),
+  useAuth: () => authState,
 }))
 
 vi.mock("../api", () => ({
-  useGetRetakeStatusQuery: () => ({ data: null, isLoading: false }),
+  useGetRetakeStatusQuery: (...args) => {
+    retakeCalls.push(args[1])
+    return retakeState
+  },
   useCreateSessionMutation: () => [vi.fn(), createSessionState],
 }))
 
@@ -67,6 +70,11 @@ beforeEach(() => {
   permissionState.isLoading = false
   createSessionState.error = null
   legacyFeatureAllowed.value = true
+  authState.user = { accountId: 202 }
+  authState.isAuthenticated = true
+  retakeCalls.length = 0
+  retakeState.data = null
+  retakeState.isLoading = false
 })
 
 describe("PlacementTestPage plan access", () => {
@@ -101,5 +109,37 @@ describe("PlacementTestPage plan access", () => {
 
     expect(html).toContain(viCopy.placementTest.planRequiredTitle)
     expect(html).toContain("Upgrade to Pro")
+  })
+
+  it("skips the retake query for authenticated users outside the plan", () => {
+    permissionState.data = { isAllowed: false }
+    legacyFeatureAllowed.value = false
+
+    renderToStaticMarkup(<PlacementTestPage />)
+
+    expect(retakeCalls.at(-1)).toMatchObject({ skip: true })
+  })
+})
+
+describe("ISS-06: guest placement test entry", () => {
+  beforeEach(() => {
+    authState.user = null
+    authState.isAuthenticated = false
+  })
+
+  it("renders the consent step for guests instead of the Pro gate", () => {
+    permissionState.data = { isAllowed: false }
+    legacyFeatureAllowed.value = false
+
+    const html = renderToStaticMarkup(<PlacementTestPage />)
+
+    expect(html).toContain(viCopy.placementTest.consent.heading)
+    expect(html).not.toContain(viCopy.placementTest.planRequiredTitle)
+  })
+
+  it("skips the retake query for guests", () => {
+    renderToStaticMarkup(<PlacementTestPage />)
+
+    expect(retakeCalls.at(-1)).toMatchObject({ skip: true })
   })
 })

@@ -47,6 +47,26 @@ export default {
       message: "単語「{{word}}」は学習リストと復習履歴から削除されます。",
       cancel: "キャンセル",
       confirm: "削除"
+    },
+    reviewModal: {
+      title: "単語の復習",
+      subtitle: "カードをめくって保存した単語を覚えましょう。",
+      progress: "カード {{current}}/{{total}}",
+      flipHint: "タップして意味を見る",
+      playAudio: "発音を再生",
+      flip: "カードをめくる",
+      shuffle: "シャッフル",
+      prev: "前へ",
+      next: "次へ",
+      mastered: "覚えた",
+      reviewAgain: "もう一度",
+      masteredCount: "覚えた",
+      reviewAgainCount: "もう一度",
+      completedTitle: "復習セッション完了！",
+      reviewAgainBtn: "覚えていない単語を復習",
+      restartBtn: "最初からやり直す",
+      closeBtn: "閉じる",
+      empty: "復習する単語がありません。"
     }
   },
   widget: {

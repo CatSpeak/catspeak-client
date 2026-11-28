@@ -113,6 +113,17 @@ const CustomRoomCard = ({
   const hasPassword =
     isPrivate || room.hasPassword || room.isPasswordProtected || !!room.password || !!room.Password
 
+  // Participant count calculation (human-only; API count already excludes agents)
+  // Must precede the badge helpers that read currentCount.
+  const participants = filterHumanParticipants(
+    Array.isArray(room.currentParticipants) ? room.currentParticipants : [],
+  )
+  const currentCount = room.currentParticipantCount ?? participants.length ?? 0
+  const maxParticipantsDisplay =
+    room.maxParticipants && room.maxParticipants > 0
+      ? room.maxParticipants
+      : null
+
   // Badge helpers (Ticket 02)
   const roomTypeVal = room.roomType ?? room.RoomType
   const isCustomType = roomTypeVal === 4 || roomTypeVal === "4" || roomTypeVal === "Custom"
@@ -146,16 +157,6 @@ const CustomRoomCard = ({
     return customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn"
   })()
 
-  // Participant count calculation (human-only; API count already excludes agents)
-  const participants = filterHumanParticipants(
-    Array.isArray(room.currentParticipants) ? room.currentParticipants : [],
-  )
-  const currentCount = room.currentParticipantCount ?? participants.length ?? 0
-  const maxParticipantsDisplay =
-    room.maxParticipants && room.maxParticipants > 0
-      ? room.maxParticipants
-      : null
-
   const deleteConfirmMessage = (
     customRooms.deleteConfirmMessage ||
     `Bạn có chắc chắn muốn xóa "${room.name}"? Hành động này không thể hoàn tác.`
@@ -174,7 +175,7 @@ const CustomRoomCard = ({
           fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
-        className="relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D]"
+        className="group/card relative h-full w-full rounded-xl bg-white dark:bg-[#1A1A1A] flex flex-col overflow-hidden [isolation:isolate] border border-border dark:border-[#3F3F3F] shadow-sm select-none cursor-pointer outline-offset-4 touch-manipulation transition-colors duration-200 ease-out hover:bg-[#F2F2F2] dark:hover:bg-[#272727] active:bg-[#E6E6E6] dark:active:bg-[#3D3D3D]"
       >
         <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-t-[inherit] border-b border-border dark:border-[#3F3F3F]">
           {/* Blurred Background Image */}
@@ -253,8 +254,8 @@ const CustomRoomCard = ({
                   className="text-cath-red-700 fill-cath-red-700 dark:text-red-400 dark:fill-red-400 scale-110 transition-all duration-200"
                 />
               </div>
-            ) : (
-              <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-md opacity-0 group-hover/card:opacity-100 transition-opacity duration-200">
+            ) : ((onEdit && isRoomOwner) || onDelete) ? (
+              <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-md opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/card:opacity-100 [@media(hover:hover)]:group-focus-within/card:opacity-100 transition-opacity duration-200">
                 {/* Edit Button — only room owner (BR-ML-01) */}
                 {onEdit && isRoomOwner && (
                   <button
@@ -265,6 +266,7 @@ const CustomRoomCard = ({
                     }}
                     className="flex shrink-0 h-7 w-7 items-center justify-center rounded-full hover:bg-white/30 text-white transition-colors"
                     title={customRooms.edit || "Chỉnh sửa"}
+                    aria-label={customRooms.edit || "Chỉnh sửa"}
                   >
                     <Pencil size={13} />
                   </button>
@@ -280,12 +282,13 @@ const CustomRoomCard = ({
                     }}
                     className="flex shrink-0 h-7 w-7 items-center justify-center rounded-full hover:bg-red-600/80 text-white transition-colors"
                     title={customRooms.delete || "Xóa phòng"}
+                    aria-label={customRooms.delete || "Xóa phòng"}
                   >
                     <Trash2 size={13} />
                   </button>
                 )}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 

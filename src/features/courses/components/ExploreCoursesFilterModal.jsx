@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { X, SlidersHorizontal, Sparkles, Activity, ChevronDown, Check } from "lucide-react"
@@ -19,14 +19,40 @@ const ExploreCoursesFilterModal = ({
   const [localEnrollmentStatus, setLocalEnrollmentStatus] = useState(initialEnrollmentStatus)
   const [localMinPrice, setLocalMinPrice] = useState(initialMinPrice)
   const [localMaxPrice, setLocalMaxPrice] = useState(initialMaxPrice)
+  const [wasOpen, setWasOpen] = useState(false)
 
-  useEffect(() => {
+  // Re-sync local drafts from applied filters each time the modal is opened.
+  if (open !== wasOpen) {
+    setWasOpen(open)
     if (open) {
       setLocalEnrollmentStatus(initialEnrollmentStatus)
       setLocalMinPrice(initialMinPrice)
       setLocalMaxPrice(initialMaxPrice)
     }
-  }, [open, initialEnrollmentStatus, initialMinPrice, initialMaxPrice])
+  }
+
+  // ISS-49: validate the range before it reaches the API (400
+  // INVALID_PRICE_RANGE) and block negative numbers.
+  const priceError = useMemo(() => {
+    const min = localMinPrice === "" ? null : Number(localMinPrice)
+    const max = localMaxPrice === "" ? null : Number(localMaxPrice)
+    const hasInvalidNumber =
+      (min !== null && Number.isNaN(min)) || (max !== null && Number.isNaN(max))
+    if (
+      hasInvalidNumber ||
+      (min !== null && min < 0) ||
+      (max !== null && max < 0)
+    ) {
+      return sc.negativePriceError || "Khoảng giá phải là số không âm."
+    }
+    if (min !== null && max !== null && min > max) {
+      return (
+        sc.invalidPriceRangeError ||
+        "Giá tối thiểu không được lớn hơn giá tối đa."
+      )
+    }
+    return ""
+  }, [localMinPrice, localMaxPrice, sc.negativePriceError, sc.invalidPriceRangeError])
 
   if (!open) return null
 
@@ -51,6 +77,7 @@ const ExploreCoursesFilterModal = ({
   }
 
   const handleApply = () => {
+    if (priceError) return
     onApply({
       enrollmentStatus: localEnrollmentStatus,
       minPrice: localMinPrice,
@@ -58,11 +85,6 @@ const ExploreCoursesFilterModal = ({
     })
     onClose()
   }
-
-  const hasActiveFilters =
-    localEnrollmentStatus !== "all"
-    || localMinPrice !== ""
-    || localMaxPrice !== ""
 
   return createPortal(
     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-3 sm:p-4 md:p-6">
@@ -223,7 +245,12 @@ const ExploreCoursesFilterModal = ({
                     placeholder={sc.priceFrom || "Từ (VNĐ)"}
                     value={localMinPrice}
                     onChange={(e) => setLocalMinPrice(e.target.value)}
-                    className="w-full h-10 px-3.5 bg-slate-50 dark:bg-[#242424] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-semibold text-slate-800 dark:text-white outline-none focus:border-[#b20a1c] focus:bg-white dark:focus:bg-[#1A1A1A] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                    aria-invalid={Boolean(priceError)}
+                    className={`w-full h-10 px-3.5 bg-slate-50 dark:bg-[#242424] border rounded-xl text-xs font-semibold text-slate-800 dark:text-white outline-none focus:border-[#b20a1c] focus:bg-white dark:focus:bg-[#1A1A1A] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all ${
+                      priceError
+                        ? "border-red-500 dark:border-red-500"
+                        : "border-border dark:border-[#3F3F3F]"
+                    }`}
                   />
                 </div>
                 <span className="text-slate-400 dark:text-gray-500 font-bold text-xs shrink-0">-</span>
@@ -234,10 +261,23 @@ const ExploreCoursesFilterModal = ({
                     placeholder={sc.priceTo || "Đến (VNĐ)"}
                     value={localMaxPrice}
                     onChange={(e) => setLocalMaxPrice(e.target.value)}
-                    className="w-full h-10 px-3.5 bg-slate-50 dark:bg-[#242424] border border-border dark:border-[#3F3F3F] rounded-xl text-xs font-semibold text-slate-800 dark:text-white outline-none focus:border-[#b20a1c] focus:bg-white dark:focus:bg-[#1A1A1A] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                    aria-invalid={Boolean(priceError)}
+                    className={`w-full h-10 px-3.5 bg-slate-50 dark:bg-[#242424] border rounded-xl text-xs font-semibold text-slate-800 dark:text-white outline-none focus:border-[#b20a1c] focus:bg-white dark:focus:bg-[#1A1A1A] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all ${
+                      priceError
+                        ? "border-red-500 dark:border-red-500"
+                        : "border-border dark:border-[#3F3F3F]"
+                    }`}
                   />
                 </div>
               </div>
+              {priceError && (
+                <p
+                  role="alert"
+                  className="text-xs font-semibold text-red-700 dark:text-red-400"
+                >
+                  {priceError}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -254,7 +294,8 @@ const ExploreCoursesFilterModal = ({
           <button
             type="button"
             onClick={handleApply}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-bold rounded-xl shadow-md shadow-[#b20a1c]/15 transition-all cursor-pointer"
+            disabled={Boolean(priceError)}
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-bold rounded-xl shadow-md shadow-[#b20a1c]/15 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#b20a1c]"
           >
             <span>{sc.apply || "Áp dụng"}</span>
           </button>

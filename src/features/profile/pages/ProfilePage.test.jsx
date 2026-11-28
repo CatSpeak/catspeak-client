@@ -7,6 +7,12 @@ import ProfilePage, { PROFILE_TAB_ALIASES, resolveProfileTab } from "./ProfilePa
 const mocks = vi.hoisted(() => ({
   params: new URLSearchParams(),
   navigate: vi.fn(),
+  roleState: { isTeacher: false, isTeacherProfile: false },
+}))
+
+vi.mock("@/features/courses/components/RoleSwitcher", () => ({
+  default: () => mocks.roleState,
+  useRoleOverride: () => mocks.roleState,
 }))
 
 vi.mock("react-router-dom", async (importOriginal) => ({
@@ -72,8 +78,11 @@ vi.mock("@/shared/components/ui/animations/FluentAnimation", () => ({
   default: ({ children }) => <div>{children}</div>,
 }))
 vi.mock("@/shared/components/ui/navigation/Tabs", () => ({
-  default: ({ activeTab }) => (
-    <div data-testid="active-tab">{activeTab}</div>
+  default: ({ tabs, activeTab }) => (
+    <div>
+      <div data-testid="active-tab">{activeTab}</div>
+      <div data-testid="tab-ids">{tabs.map((tab) => tab.id).join(",")}</div>
+    </div>
   ),
   TabContent: ({ children }) => <div>{children}</div>,
 }))
@@ -126,6 +135,7 @@ describe("R1-1: shared material token cleanup must not unmount the documents tab
   beforeEach(() => {
     mocks.params = new URLSearchParams()
     mocks.navigate.mockClear()
+    mocks.roleState = { isTeacher: false, isTeacherProfile: false }
   })
 
   it("keeps ProfileMaterialsTab mounted after the token is removed from the URL", () => {
@@ -163,5 +173,72 @@ describe("R1-1: shared material token cleanup must not unmount the documents tab
     expect(container.querySelector('[data-testid="active-tab"]').textContent).toBe(
       "home",
     )
+  })
+})
+
+describe("ISS-15: documents tab is teacher-only on the personal profile", () => {
+  beforeEach(() => {
+    mocks.params = new URLSearchParams()
+    mocks.navigate.mockClear()
+    mocks.roleState = { isTeacher: false, isTeacherProfile: false }
+  })
+
+  it("hides the documents tab for a Student owner", () => {
+    const { container } = mount()
+
+    expect(container.querySelector('[data-testid="tab-ids"]').textContent).toBe(
+      "home,friends,media,completedClass",
+    )
+    expect(container.querySelector('[data-testid="documents-tab"]')).toBeNull()
+  })
+
+  it("falls ?tab=documents back to home for a Student owner", () => {
+    mocks.params = new URLSearchParams("tab=documents")
+    const { container } = mount()
+
+    expect(container.querySelector('[data-testid="active-tab"]').textContent).toBe(
+      "home",
+    )
+    expect(container.querySelector('[data-testid="home-tab"]')).toBeTruthy()
+    expect(container.querySelector('[data-testid="documents-tab"]')).toBeNull()
+  })
+
+  it("still mounts ProfileMaterialsTab for a shared material token (ISS-73)", () => {
+    mocks.params = new URLSearchParams("sharedMaterialToken=tok")
+
+    const { container } = mount()
+
+    expect(container.querySelector('[data-testid="documents-tab"]')).toBeTruthy()
+    expect(container.querySelector('[data-testid="active-tab"]').textContent).toBe(
+      "documents",
+    )
+    expect(container.querySelector('[data-testid="tab-ids"]').textContent).not.toContain(
+      "documents",
+    )
+  })
+
+  it("keeps the documents tab for an approved Teacher owner", () => {
+    mocks.roleState = { isTeacher: true, isTeacherProfile: true }
+    mocks.params = new URLSearchParams("tab=documents")
+
+    const { container } = mount()
+
+    expect(container.querySelector('[data-testid="tab-ids"]').textContent).toContain(
+      "documents",
+    )
+    expect(container.querySelector('[data-testid="documents-tab"]')).toBeTruthy()
+  })
+
+  it("resolveProfileTab honours allowDocuments=false but keeps the token path", () => {
+    expect(
+      resolveProfileTab(new URLSearchParams("tab=documents"), {
+        allowDocuments: false,
+      }),
+    ).toBe("home")
+    expect(
+      resolveProfileTab(new URLSearchParams("sharedMaterialToken=x"), {
+        allowDocuments: false,
+      }),
+    ).toBe("documents")
   })
 })

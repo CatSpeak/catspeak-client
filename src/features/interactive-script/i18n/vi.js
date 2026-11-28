@@ -47,6 +47,26 @@ export default {
       message: "Từ \"{{word}}\" sẽ bị xóa khỏi danh sách học tập và lịch sử ôn tập của bạn.",
       cancel: "Hủy",
       confirm: "Xóa từ"
+    },
+    reviewModal: {
+      title: "Ôn tập từ vựng",
+      subtitle: "Lật thẻ để ghi nhớ từ vựng đã lưu.",
+      progress: "Thẻ {{current}}/{{total}}",
+      flipHint: "Nhấn để xem nghĩa",
+      playAudio: "Nghe phát âm",
+      flip: "Lật thẻ",
+      shuffle: "Tráo thẻ",
+      prev: "Thẻ trước",
+      next: "Thẻ sau",
+      mastered: "Đã nhớ",
+      reviewAgain: "Cần ôn lại",
+      masteredCount: "Đã nhớ",
+      reviewAgainCount: "Cần ôn lại",
+      completedTitle: "Hoàn thành phiên ôn tập!",
+      reviewAgainBtn: "Ôn lại từ chưa nhớ",
+      restartBtn: "Ôn tập lại từ đầu",
+      closeBtn: "Đóng",
+      empty: "Chưa có từ vựng nào để ôn tập."
     }
   },
   widget: {

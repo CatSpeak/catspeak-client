@@ -42,7 +42,13 @@ import {
 
 const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const { t } = useLanguage()
-  const { isTeacher } = useRoleOverride()
+  const { isTeacher, isTeacherProfile } = useRoleOverride()
+  // ISS-15: only an approved Teacher profile owns personal materials. Students
+  // must not call /api/personal-materials (422 TEACHER_PROFILE_REQUIRED).
+  const canManageTeacherMaterials = Boolean(isTeacher && isTeacherProfile)
+  const canFetchPersonalMaterials = Boolean(
+    isOwnProfile && canManageTeacherMaterials,
+  )
   const navigate = useNavigate()
   const { formatDate } = useTimezone()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -162,10 +168,12 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
 
   // Fetch API for owner
   const { data: materialsData, isLoading: isLoadingMaterials } =
-    useGetPersonalMaterialsQuery(undefined, { skip: !isOwnProfile })
+    useGetPersonalMaterialsQuery(undefined, {
+      skip: !canFetchPersonalMaterials,
+    })
   const { data: treeData, isLoading: isLoadingTree } = useGetFolderTreeQuery(
     undefined,
-    { skip: !isOwnProfile },
+    { skip: !canFetchPersonalMaterials },
   )
 
   // Fetch API for guest
@@ -350,7 +358,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   }
 
   if (
-    (isOwnProfile && (isLoadingMaterials || isLoadingTree)) ||
+    (canFetchPersonalMaterials && (isLoadingMaterials || isLoadingTree)) ||
     (!isOwnProfile && isLoadingPublicMaterials)
   ) {
     return <ProfileMaterialsSkeleton isOwnProfile={isOwnProfile} />
@@ -459,7 +467,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                       onClick={() => {
                         if (selectedItems.length > 0) {
                           toggleSelection(folder)
-                        } else if (isOwnProfile) {
+                        } else if (canFetchPersonalMaterials) {
                           navigate(`/workspace/materials/${folder.id}`)
                         }
                       }}
@@ -503,10 +511,14 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                         setSelectedItem(folder)
                         setIsMoveModalOpen(true)
                       }}
-                      onBookmark={() => {
-                        setSelectedItem(folder)
-                        setIsSaveSharedModalOpen(true)
-                      }}
+                      onBookmark={
+                        canManageTeacherMaterials
+                          ? () => {
+                              setSelectedItem(folder)
+                              setIsSaveSharedModalOpen(true)
+                            }
+                          : undefined
+                      }
                     />
                   )
                 })}
@@ -584,10 +596,14 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                         setIsFileDetailOpen(true)
                       }}
                       onDownload={() => downloadFile(file, recordDownload)}
-                      onBookmark={() => {
-                        setSelectedItem(file)
-                        setIsSaveSharedModalOpen(true)
-                      }}
+                      onBookmark={
+                        canManageTeacherMaterials
+                          ? () => {
+                              setSelectedItem(file)
+                              setIsSaveSharedModalOpen(true)
+                            }
+                          : undefined
+                      }
                     />
                   )
                 })}
@@ -738,14 +754,16 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         }
       />
 
-      <SaveSharedMaterialModal
-        open={isSaveSharedModalOpen}
-        onClose={() => setIsSaveSharedModalOpen(false)}
-        item={selectedItem}
-        onSuccess={() => {
-          setIsSaveSharedModalOpen(false)
-        }}
-      />
+      {canManageTeacherMaterials && (
+        <SaveSharedMaterialModal
+          open={isSaveSharedModalOpen}
+          onClose={() => setIsSaveSharedModalOpen(false)}
+          item={selectedItem}
+          onSuccess={() => {
+            setIsSaveSharedModalOpen(false)
+          }}
+        />
+      )}
 
       <PublicMaterialModal
         open={isPublicMaterialModalOpen}

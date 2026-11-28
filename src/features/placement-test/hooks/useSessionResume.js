@@ -23,7 +23,7 @@ import { clearActiveSession } from "../utils/sessionStorage"
 
 const useSessionResume = ({ copy = {} } = {}) => {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const [createSession, { isLoading: creating }] = useCreateSessionMutation()
   const [resumeSession] = useResumeSessionMutation()
   const [cancelSession, { isLoading: cancelling }] = useCancelSessionMutation()
@@ -33,6 +33,9 @@ const useSessionResume = ({ copy = {} } = {}) => {
     isSuccess: activeLoaded,
     isError: activeFailed,
   } = useGetActiveSessionQuery(undefined, {
+    // ISS-06: unauthenticated visitors must not call
+    // GET /v1/placement/sessions/active (it answers 401).
+    skip: !isAuthenticated,
     refetchOnMountOrArgChange: true,
   })
 
@@ -112,7 +115,7 @@ const useSessionResume = ({ copy = {} } = {}) => {
 
   return {
     lifecycle,
-    loaded: Boolean(activeLoaded || activeFailed),
+    loaded: !isAuthenticated || Boolean(activeLoaded || activeFailed),
     creating: creating || cancelling,
     resume,
     restart,

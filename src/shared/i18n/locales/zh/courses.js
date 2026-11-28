@@ -1104,6 +1104,11 @@ export default {
     clearPriceFilter: "清除价格筛选",
     clear: "清除",
     apply: "应用",
+    invalidPriceRangeError: "最低价格不能高于最高价格。",
+    negativePriceError: "价格范围必须是非负数。",
+    invalidFilterErrorTitle: "价格筛选无效",
+    invalidFilterErrorDescription:
+      "最低价格不能高于最高价格。请调整价格范围或清除筛选条件。",
     closingSoon: "即将截止招生",
     courseBadge: "课程",
     classBadge: "班级",

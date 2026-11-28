@@ -1155,6 +1155,11 @@ export default {
     clearPriceFilter: "価格フィルターをクリア",
     clear: "クリア",
     apply: "適用",
+    invalidPriceRangeError: "最低価格は最高価格以下にしてください。",
+    negativePriceError: "価格範囲は0以上の数値で指定してください。",
+    invalidFilterErrorTitle: "価格フィルターが無効です",
+    invalidFilterErrorDescription:
+      "最低価格は最高価格以下にしてください。価格範囲を調整するか、フィルターをクリアしてください。",
     closingSoon: "まもなく締切",
     courseBadge: "コース",
     classBadge: "クラス",

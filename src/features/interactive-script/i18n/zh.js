@@ -47,6 +47,26 @@ export default {
       message: "单词 \"{{word}}\" 将从您的学习列表和复习历史中删除。",
       cancel: "取消",
       confirm: "删除"
+    },
+    reviewModal: {
+      title: "词汇复习",
+      subtitle: "翻卡记忆已保存的单词。",
+      progress: "卡片 {{current}}/{{total}}",
+      flipHint: "点击查看释义",
+      playAudio: "播放发音",
+      flip: "翻卡",
+      shuffle: "洗牌",
+      prev: "上一张",
+      next: "下一张",
+      mastered: "已记住",
+      reviewAgain: "需复习",
+      masteredCount: "已记住",
+      reviewAgainCount: "需复习",
+      completedTitle: "复习完成！",
+      reviewAgainBtn: "复习未记住的单词",
+      restartBtn: "重新开始",
+      closeBtn: "关闭",
+      empty: "暂无可复习的单词。"
     }
   },
   widget: {

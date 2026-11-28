@@ -8,6 +8,9 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   setSearchParams: vi.fn(),
   isTeacher: false,
+  isTeacherProfile: false,
+  personalCalls: [],
+  treeCalls: [],
   searchParams: new URLSearchParams("sharedMaterialToken=invalid"),
   toastError: vi.fn(),
   materialResult: {
@@ -35,8 +38,14 @@ vi.mock("@/shared/context/LanguageContext", () => ({
 }))
 
 vi.mock("@/features/courses/components/RoleSwitcher", () => ({
-  default: () => ({ isTeacher: mocks.isTeacher }),
-  useRoleOverride: () => ({ isTeacher: mocks.isTeacher }),
+  default: () => ({
+    isTeacher: mocks.isTeacher,
+    isTeacherProfile: mocks.isTeacherProfile,
+  }),
+  useRoleOverride: () => ({
+    isTeacher: mocks.isTeacher,
+    isTeacherProfile: mocks.isTeacherProfile,
+  }),
 }))
 
 vi.mock("react-hot-toast", () => ({
@@ -48,8 +57,14 @@ vi.mock("@/shared/hooks/useTimezone", () => ({
 }))
 
 vi.mock("@/store/api/materialApi", () => ({
-  useGetPersonalMaterialsQuery: () => ({ data: null, isLoading: false }),
-  useGetFolderTreeQuery: () => ({ data: null, isLoading: false }),
+  useGetPersonalMaterialsQuery: (...args) => {
+    mocks.personalCalls.push(args[1])
+    return { data: null, isLoading: false }
+  },
+  useGetFolderTreeQuery: (...args) => {
+    mocks.treeCalls.push(args[1])
+    return { data: null, isLoading: false }
+  },
   useRecordMaterialDownloadMutation: () => [vi.fn()],
   useRecordFolderDownloadMutation: () => [vi.fn()],
   useGetMaterialByShareTokenQuery: () => mocks.materialResult,
@@ -127,6 +142,9 @@ describe("ISS-73: ProfileMaterialsTab invalid shared token destination", () => {
     mocks.setSearchParams.mockClear()
     mocks.toastError.mockClear()
     mocks.isTeacher = false
+    mocks.isTeacherProfile = false
+    mocks.personalCalls = []
+    mocks.treeCalls = []
     mocks.searchParams = new URLSearchParams("sharedMaterialToken=invalid")
     mocks.materialResult = {
       data: null,
@@ -181,5 +199,44 @@ describe("ISS-73: ProfileMaterialsTab invalid shared token destination", () => {
       "/workspace/profile/999?tab=documents&sharedMaterialToken=invalid",
       { replace: true },
     )
+  })
+})
+
+describe("ISS-15: personal material queries stay teacher-only", () => {
+  beforeEach(() => {
+    mocks.isTeacher = false
+    mocks.isTeacherProfile = false
+    mocks.personalCalls = []
+    mocks.treeCalls = []
+    mocks.searchParams = new URLSearchParams()
+    mocks.materialResult = {
+      data: null,
+      isError: false,
+      error: null,
+      isFetching: false,
+    }
+    mocks.folderResult = {
+      data: null,
+      isError: false,
+      error: null,
+      isFetching: false,
+    }
+  })
+
+  it("skips both endpoints for a Student owner (no 422 TEACHER_PROFILE_REQUIRED)", () => {
+    render()
+
+    expect(mocks.personalCalls.at(-1)).toMatchObject({ skip: true })
+    expect(mocks.treeCalls.at(-1)).toMatchObject({ skip: true })
+  })
+
+  it("calls both endpoints for an approved Teacher owner", () => {
+    mocks.isTeacher = true
+    mocks.isTeacherProfile = true
+
+    render()
+
+    expect(mocks.personalCalls.at(-1)).toMatchObject({ skip: false })
+    expect(mocks.treeCalls.at(-1)).toMatchObject({ skip: false })
   })
 })

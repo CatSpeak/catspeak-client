@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-keys -- pre-existing duplicate room keys kept for backward-compatible last-wins values */
 export default {
   language: {
     vi: "Tiếng Việt",
@@ -312,6 +313,8 @@ export default {
     createTitle: "Tạo Phòng Tùy Chỉnh",
     editTitle: "Chỉnh Sửa Phòng",
     quota: "{{used}}/{{max}} phòng đã dùng",
+    activeRoomsSummary: "{{count}} phòng đang hoạt động",
+    customRoomQuotaLabel: "Phòng cố định (Pro): {{used}}/{{max}} đã dùng",
     quotaFull: "Bạn đã đạt giới hạn tối đa {{max}} phòng",
     capacity: "Sức chứa: 100 người",
     persistent: "Phòng Vĩnh Viễn",

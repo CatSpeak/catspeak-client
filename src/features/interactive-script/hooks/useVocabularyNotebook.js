@@ -11,8 +11,14 @@ export const useVocabularyNotebook = () => {
 
   // We could do server-side filtering, but for now we'll do client-side filtering 
   // since the API might not support all these filters natively yet.
-  const { data: apiResponse, isFetching, refetch } = useGetVocabulariesQuery();
-  const words = apiResponse?.items || apiResponse?.data || (Array.isArray(apiResponse) ? apiResponse : []);
+  const { data: apiResponse, isFetching } = useGetVocabulariesQuery();
+  const words = useMemo(
+    () =>
+      apiResponse?.items ||
+      apiResponse?.data ||
+      (Array.isArray(apiResponse) ? apiResponse : []),
+    [apiResponse],
+  );
 
   const [deleteVocabularyMutation] = useDeleteVocabularyMutation();
 
@@ -41,8 +47,8 @@ export const useVocabularyNotebook = () => {
       const lowerQuery = searchQuery.toLowerCase();
       result = result.filter(
         word =>
-          word.word.toLowerCase().includes(lowerQuery) ||
-          word.meaning.toLowerCase().includes(lowerQuery)
+          (word.word || '').toLowerCase().includes(lowerQuery) ||
+          (word.meaning || '').toLowerCase().includes(lowerQuery)
       );
     }
 
@@ -76,11 +82,11 @@ export const useVocabularyNotebook = () => {
         case 'oldest':
           return new Date(a.createdAt) - new Date(b.createdAt);
         case 'a-z':
-          return a.word.localeCompare(b.word);
+          return (a.word || '').localeCompare(b.word || '');
         case 'z-a':
-          return b.word.localeCompare(a.word);
-        case 'lenght':
-          return a.word.length - b.word.length;
+          return (b.word || '').localeCompare(a.word || '');
+        case 'length':
+          return (a.word || '').length - (b.word || '').length;
         default:
           return 0;
       }
@@ -140,18 +146,42 @@ export const useVocabularyNotebook = () => {
     setCurrentPage(1);
   }, []);
 
+  // ISS-52: any filter/sort change returns to page 1 so the notebook never
+  // gets stuck on an empty page 2 after narrowing the result set.
+  const handleSetSearchQuery = useCallback((value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, []);
+
+  const handleSetLanguageFilter = useCallback((value) => {
+    setLanguageFilter(value);
+    setCurrentPage(1);
+  }, []);
+
+  const handleSetScriptFilter = useCallback((value) => {
+    setScriptFilter(value);
+    setCurrentPage(1);
+  }, []);
+
+  const handleSetSortBy = useCallback((value) => {
+    setSortBy(value);
+    setCurrentPage(1);
+  }, []);
+
   return {
     words: paginatedWords,
+    allWords: words,
+    filteredWords: filteredAndSortedWords,
     totalWords: filteredAndSortedWords.length,
     allWordsCount: words.length,
     searchQuery,
-    setSearchQuery,
+    setSearchQuery: handleSetSearchQuery,
     languageFilter,
-    setLanguageFilter,
+    setLanguageFilter: handleSetLanguageFilter,
     scriptFilter,
-    setScriptFilter,
+    setScriptFilter: handleSetScriptFilter,
     sortBy,
-    setSortBy,
+    setSortBy: handleSetSortBy,
     currentPage,
     setCurrentPage,
     totalPages,

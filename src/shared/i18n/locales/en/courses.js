@@ -1176,6 +1176,11 @@ export default {
     clearPriceFilter: "Clear price filter",
     clear: "Clear",
     apply: "Apply",
+    invalidPriceRangeError: "The minimum price cannot be higher than the maximum price.",
+    negativePriceError: "The price range must be a non-negative number.",
+    invalidFilterErrorTitle: "Invalid price filter",
+    invalidFilterErrorDescription:
+      "The minimum price cannot be higher than the maximum price. Adjust the range or clear the filters.",
     closingSoon: "Closing soon",
     courseBadge: "Course",
     classBadge: "Class",

@@ -1185,6 +1185,11 @@ export default {
     clearPriceFilter: "Xóa lọc giá",
     clear: "Xóa",
     apply: "Áp dụng",
+    invalidPriceRangeError: "Giá tối thiểu không được lớn hơn giá tối đa.",
+    negativePriceError: "Khoảng giá phải là số không âm.",
+    invalidFilterErrorTitle: "Khoảng giá lọc không hợp lệ",
+    invalidFilterErrorDescription:
+      "Giá tối thiểu không được lớn hơn giá tối đa. Vui lòng điều chỉnh hoặc xóa bộ lọc.",
     closingSoon: "Sắp đóng tuyển sinh",
     courseBadge: "Khóa học",
     classBadge: "Lớp học",

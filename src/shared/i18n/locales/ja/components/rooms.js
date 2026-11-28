@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-keys -- pre-existing duplicate room keys kept for backward-compatible last-wins values */
 export default {
   welcome: {
     greeting: "こんにちは、{{name}}さん、",
@@ -301,6 +302,8 @@ export default {
     createTitle: "カスタムルームを作成",
     editTitle: "カスタムルームを編集",
     quota: "{{used}}/{{max}}ルーム使用中",
+    activeRoomsSummary: "{{count}}室が利用中",
+    customRoomQuotaLabel: "固定ルーム（Pro）：{{used}}/{{max}}使用中",
     quotaFull: "カスタムルームの上限（{{max}}）に達しました",
     capacity: "定員: 100名",
     persistent: "永続ルーム",

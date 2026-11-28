@@ -27,7 +27,7 @@ import CustomRoomCard from "../components/CustomRoomCard"
 import CommunityRoomCard from "../components/CommunityRoomCard"
 import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal"
 import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal"
-import { buildCustomRoomQuota } from "../utils/customRoomQuota"
+import { buildCustomRoomQuota, formatWorkspaceRoomsSummary } from "../utils/customRoomQuota"
 import { IconButton } from "@/shared/components/ui/buttons"
 
 const WorkspaceRoomsContent = () => {
@@ -107,6 +107,7 @@ const WorkspaceRoomsContent = () => {
 
   // Reset page when filters/search/tab/sort change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1)
   }, [
     apiTab,
@@ -279,6 +280,7 @@ const WorkspaceRoomsContent = () => {
   )
 
   const handleToggleBookmark = useCallback(
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     async (roomId) => {
       try {
         const res = await toggleBookmark(roomId).unwrap()
@@ -469,11 +471,13 @@ const WorkspaceRoomsContent = () => {
                 </div>
 
                 {/* Room Quota Counter (for Created Tab) */}
-                {activeTab === "created" && (
+                {activeTab === "created" && !isLoading && !isMyRoomsError && (
                   <p className="px-4 text-xs text-[#606060] dark:text-[#AAAAAA] mb-4 text-left">
-                    {(ct.quota || "{{used}}/{{max}} phòng đã dùng")
-                      .replace("{{used}}", quota.used)
-                      .replace("{{max}}", quota.max)}
+                    {formatWorkspaceRoomsSummary({
+                      totalActiveRooms: totalCount,
+                      customQuota: quota,
+                      ct,
+                    })}
                   </p>
                 )}
 

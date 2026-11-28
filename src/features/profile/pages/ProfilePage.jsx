@@ -20,6 +20,7 @@ import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileMaterialsTab from "../components/ProfileMaterialsTab"
 import CompletedClass from "../components/CompletedClass"
+import useRoleOverride from "@/features/courses/components/RoleSwitcher"
 
 export const PROFILE_TAB_ALIASES = {
   home: "home",
@@ -36,9 +37,13 @@ export const PROFILE_TAB_ALIASES = {
  * token always opens the documents tab, and legacy tab names
  * ("posts"/"activity") fall back to "home" (the post timeline).
  */
-export const resolveProfileTab = (searchParams) => {
+export const resolveProfileTab = (searchParams, { allowDocuments = true } = {}) => {
   if (searchParams.get("sharedMaterialToken")) return "documents"
-  return PROFILE_TAB_ALIASES[searchParams.get("tab")] || "home"
+  const resolved = PROFILE_TAB_ALIASES[searchParams.get("tab")] || "home"
+  // ISS-15: students have no personal material library, so ?tab=documents
+  // falls back to the home timeline instead of an empty documents pane.
+  if (resolved === "documents" && !allowDocuments) return "home"
+  return resolved
 }
 
 const ProfilePage = () => {
@@ -47,6 +52,9 @@ const ProfilePage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { accountId: urlAccountId } = useParams()
+  // ISS-15: personal materials belong to an approved Teacher profile, so the
+  // documents tab only makes sense on another user's profile or as a teacher.
+  const { isTeacher, isTeacherProfile } = useRoleOverride()
 
   // Since URL params are strings, ensure we convert accountId to number for comparison
   const targetAccountId = urlAccountId
@@ -54,6 +62,8 @@ const ProfilePage = () => {
     : user?.accountId
   const isOwnProfile =
     !urlAccountId || parseInt(urlAccountId, 10) === user?.accountId
+  const canShowDocumentsTab =
+    !isOwnProfile || Boolean(isTeacher && isTeacherProfile)
 
   useEffect(() => {
     if (!urlAccountId && user?.accountId) {
@@ -98,9 +108,9 @@ const ProfilePage = () => {
   // the tab and kill the material modal that was just opened).
   const tabParam = searchParams.get("tab")
   const currentToken = searchParams.get("sharedMaterialToken")
-  const initialTab = currentToken
-    ? "documents"
-    : PROFILE_TAB_ALIASES[tabParam] || "home"
+  const initialTab = resolveProfileTab(searchParams, {
+    allowDocuments: canShowDocumentsTab,
+  })
 
   const [activeTab, setActiveTab] = useState(initialTab)
   const [friendsSubTab, setFriendsSubTab] = useState(null)
@@ -108,6 +118,9 @@ const ProfilePage = () => {
   // Render-time sync avoids an extra effect pass.
   const [prevTabParam, setPrevTabParam] = useState(tabParam)
   const [prevToken, setPrevToken] = useState(currentToken)
+  const [prevCanShowDocuments, setPrevCanShowDocuments] = useState(
+    canShowDocumentsTab,
+  )
 
   // A newly seen (truthy) token always opens the documents tab.
   if (currentToken !== prevToken) {
@@ -121,7 +134,27 @@ const ProfilePage = () => {
   // Only an actual ?tab= change updates the active tab (posts/activity → home).
   if (tabParam !== prevTabParam) {
     setPrevTabParam(tabParam)
-    setActiveTab(PROFILE_TAB_ALIASES[tabParam] || "home")
+    setActiveTab(
+      resolveProfileTab(searchParams, {
+        allowDocuments: canShowDocumentsTab,
+      }),
+    )
+  }
+
+  // Teacher capability resolves asynchronously; keep a documents deep link
+  // working once it does, and drop a hidden documents tab when it goes away.
+  if (canShowDocumentsTab !== prevCanShowDocuments) {
+    setPrevCanShowDocuments(canShowDocumentsTab)
+    if (canShowDocumentsTab) {
+      const resolved = resolveProfileTab(searchParams, {
+        allowDocuments: true,
+      })
+      if (resolved === "documents" && !currentToken) {
+        setActiveTab("documents")
+      }
+    } else if (activeTab === "documents" && !currentToken) {
+      setActiveTab("home")
+    }
   }
 
   const handleTabChange = (nextTab) => {
@@ -142,7 +175,9 @@ const ProfilePage = () => {
       badge: friendsBadge,
     },
     { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
-    { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },
+    ...(canShowDocumentsTab
+      ? [{ id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" }]
+      : []),
     {
       id: "completedClass",
       label: t.profile?.tabs?.completedClass || "Lớp học đã hoàn thành",
@@ -222,6 +257,8 @@ const ProfilePage = () => {
             />
           )}
           {activeTab === "documents" && (
+            // ISS-73 / R1-1: this stays mounted while a sharedMaterialToken is
+            // being resolved, even when the tab itself is hidden for students.
             <ProfileMaterialsTab
               targetAccountId={targetAccountId}
               isOwnProfile={isOwnProfile}

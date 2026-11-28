@@ -185,6 +185,12 @@ const ExploreCoursesPage = () => {
   const isLoading = exploreCatalogQuery.isLoading
   const isFetching = exploreCatalogQuery.isFetching
   const error = exploreCatalogQuery.error
+  // ISS-49: a 400 INVALID_PRICE_RANGE from the API is a filter problem, not a
+  // network failure, so the alert must say exactly that.
+  const isInvalidPriceError =
+    error?.status === 400 ||
+    error?.data?.errorCode === "INVALID_PRICE_RANGE" ||
+    error?.data?.message === "INVALID_PRICE_RANGE"
 
   // Reset pagination when any filter changes
   useEffect(() => {
@@ -551,21 +557,45 @@ const ExploreCoursesPage = () => {
           /* ─────────────── TEACHERS VIEW ─────────────── */
           isInitialTeachersLoading ? (
             /* Teacher Skeleton Loader */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-6 shadow-xs flex flex-col items-center gap-3 animate-pulse"
-                >
-                  <div className="w-[72px] h-[72px] rounded-full bg-slate-200 dark:bg-[#2A2A2A]" />
-                  <div className="h-4 bg-slate-200 dark:bg-[#2A2A2A] rounded-md w-32 mt-2" />
-                  <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-48" />
-                  <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-28" />
-                  <div className="h-8 bg-slate-100 dark:bg-[#222222] rounded-xl w-full mt-2" />
-                  <div className="h-9 bg-slate-200 dark:bg-[#2A2A2A] rounded-xl w-full mt-2" />
-                </div>
-              ))}
-            </div>
+            viewMode === "list" ? (
+              <div className="flex flex-col gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-4 sm:p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center gap-4 sm:gap-6 animate-pulse"
+                  >
+                    <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
+                      <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-[#2A2A2A] shrink-0" />
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="h-4 bg-slate-200 dark:bg-[#2A2A2A] rounded-md w-40" />
+                        <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-56" />
+                        <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-28" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-[#333333] shrink-0">
+                      <div className="h-8 bg-slate-100 dark:bg-[#222222] rounded-xl w-40" />
+                      <div className="h-9 bg-slate-200 dark:bg-[#2A2A2A] rounded-xl w-32" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl border border-slate-200 dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-6 shadow-xs flex flex-col items-center gap-3 animate-pulse"
+                  >
+                    <div className="w-[72px] h-[72px] rounded-full bg-slate-200 dark:bg-[#2A2A2A]" />
+                    <div className="h-4 bg-slate-200 dark:bg-[#2A2A2A] rounded-md w-32 mt-2" />
+                    <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-48" />
+                    <div className="h-3 bg-slate-100 dark:bg-[#222222] rounded-md w-28" />
+                    <div className="h-8 bg-slate-100 dark:bg-[#222222] rounded-xl w-full mt-2" />
+                    <div className="h-9 bg-slate-200 dark:bg-[#2A2A2A] rounded-xl w-full mt-2" />
+                  </div>
+                ))}
+              </div>
+            )
           ) : teachersError && teachersList.length === 0 ? (
             <div
               role="alert"
@@ -578,15 +608,26 @@ const ExploreCoursesPage = () => {
                 {sc.loadErrorDescription ||
                   "Check your connection and try again."}
               </p>
-              <button
-                type="button"
-                onClick={() => refetchTeachers()}
-                disabled={isTeachersFetching}
-                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#1A1A1A] px-5 text-xs font-extrabold text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <RefreshCw size={13} aria-hidden="true" />
-                <span>{isTeachersFetching ? "Retrying..." : "Retry"}</span>
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => refetchTeachers()}
+                  disabled={isTeachersFetching}
+                  className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#1A1A1A] px-5 text-xs font-extrabold text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <RefreshCw size={13} aria-hidden="true" />
+                  <span>{isTeachersFetching ? "Retrying..." : "Retry"}</span>
+                </button>
+                {(appliedSearchQuery || teacherSort !== "default") && (
+                  <button
+                    type="button"
+                    onClick={handleClearTeacherFilters}
+                    className="mt-1 h-9 rounded-full bg-[#b20a1c] hover:bg-[#960817] px-5 text-xs font-extrabold text-white transition-all cursor-pointer active:scale-95"
+                  >
+                    {sc.clearFilters || "Xóa bộ lọc"}
+                  </button>
+                )}
+              </div>
             </div>
           ) : teachersList.length === 0 ? (
             <div
@@ -629,6 +670,7 @@ const ExploreCoursesPage = () => {
                   <TeacherCard
                     key={teacher.id || teacher.slug}
                     teacher={teacher}
+                    viewMode={viewMode}
                     t={sc}
                   />
                 ))}
@@ -773,23 +815,39 @@ const ExploreCoursesPage = () => {
             className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 p-6 text-center"
           >
             <h3 className="text-lg font-extrabold text-red-800 dark:text-red-300">
-              {sc.loadErrorTitle || "Unable to load data"}
+              {isInvalidPriceError
+                ? sc.invalidFilterErrorTitle || "Khoảng giá lọc không hợp lệ"
+                : sc.loadErrorTitle || "Unable to load data"}
             </h3>
             <p className="max-w-sm text-sm font-semibold text-red-700 dark:text-red-400">
-              {sc.loadErrorDescription ||
-                "Check your connection and try again."}
+              {isInvalidPriceError
+                ? sc.invalidFilterErrorDescription ||
+                  "Giá tối thiểu không được lớn hơn giá tối đa. Vui lòng điều chỉnh hoặc xóa bộ lọc."
+                : sc.loadErrorDescription ||
+                  "Check your connection and try again."}
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                exploreCatalogQuery.refetch?.()
-              }}
-              disabled={isFetching}
-              className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#1A1A1A] px-5 text-xs font-extrabold text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <RefreshCw size={13} aria-hidden="true" />
-              <span>{isFetching ? "Retrying..." : "Retry"}</span>
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  exploreCatalogQuery.refetch?.()
+                }}
+                disabled={isFetching}
+                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#1A1A1A] px-5 text-xs font-extrabold text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <RefreshCw size={13} aria-hidden="true" />
+                <span>{isFetching ? "Retrying..." : "Retry"}</span>
+              </button>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="mt-1 h-9 rounded-full bg-[#b20a1c] hover:bg-[#960817] px-5 text-xs font-extrabold text-white transition-all cursor-pointer active:scale-95"
+                >
+                  {sc.clearFilters || "Xóa bộ lọc"}
+                </button>
+              )}
+            </div>
           </div>
         ) : catalogItems.length === 0 ? (
           <div
