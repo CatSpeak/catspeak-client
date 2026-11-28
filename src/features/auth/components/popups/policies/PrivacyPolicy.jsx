@@ -1,5 +1,4 @@
 import { useLanguage } from "@/shared/context/LanguageContext"
-import colors from "@/shared/utils/colors"
 
 const PrivacyPolicy = () => {
   const { t } = useLanguage()
@@ -148,8 +147,7 @@ const PrivacyPolicy = () => {
               href="https://www.catspeak.com.vn/"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-80"
-              style={{ color: colors.red[700] }}
+              className="underline break-all text-[#990011] dark:text-[#FF8599] hover:opacity-80"
             >
               https://www.catspeak.com.vn/
             </a>
@@ -160,8 +158,7 @@ const PrivacyPolicy = () => {
               href="https://www.facebook.com/share/1DzTNUSEAN/"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-80"
-              style={{ color: colors.red[700] }}
+              className="underline break-all text-[#990011] dark:text-[#FF8599] hover:opacity-80"
             >
               https://www.facebook.com/share/1DzTNUSEAN/
             </a>

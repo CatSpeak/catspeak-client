@@ -5,21 +5,25 @@ import { maskAccountNumber, pick } from "./utils"
 import { useAuthenticatedMediaUrl } from "@/shared/utils/authenticatedMedia"
 
 const Row = ({ icon, label, value, actionLabel, onAction }) => (
-  <div className="flex items-center gap-2.5 border-b border-[#E4E7EC] dark:border-[#3F3F3F] py-3 pl-1.5">
-    <span className="flex shrink-0 items-center text-[#101828] dark:text-neutral-300">{icon}</span>
-    <span className="w-[175px] shrink-0 text-xs font-medium text-[#101828] dark:text-neutral-300">
-      {label}
-    </span>
-    <span className="min-w-0 flex-1 break-words text-xs text-[#101828] dark:text-neutral-200">
-      {value || "—"}
-    </span>
-    <button
-      type="button"
-      onClick={onAction}
-      className="inline-flex h-8 shrink-0 items-center rounded-[7px] border border-[#990011] dark:border-red-400 px-3 text-xs font-semibold text-[#990011] dark:text-red-400 transition-colors hover:bg-[#990011]/5 dark:hover:bg-red-950/30"
-    >
-      {actionLabel}
-    </button>
+  <div className="flex flex-col items-start gap-2 border-b border-[#E4E7EC] dark:border-[#3F3F3F] py-3 pl-1.5 sm:flex-row sm:items-center sm:gap-2.5">
+    <div className="flex items-center gap-2.5 sm:w-[205px] sm:shrink-0">
+      <span className="flex shrink-0 items-center text-[#101828] dark:text-neutral-300">{icon}</span>
+      <span className="text-xs font-medium text-[#101828] dark:text-neutral-300">
+        {label}
+      </span>
+    </div>
+    <div className="flex w-full min-w-0 items-center justify-between gap-3 sm:flex-1">
+      <span className="min-w-0 flex-1 break-all text-xs text-[#101828] dark:text-neutral-200 sm:break-words">
+        {value || "—"}
+      </span>
+      <button
+        type="button"
+        onClick={onAction}
+        className="inline-flex h-8 shrink-0 items-center rounded-[7px] border border-[#990011] dark:border-red-400 px-3 text-xs font-semibold text-[#990011] dark:text-red-400 transition-colors hover:bg-[#990011]/5 dark:hover:bg-red-950/30"
+      >
+        {actionLabel}
+      </button>
+    </div>
   </div>
 )
 
@@ -99,7 +103,7 @@ const VerificationCard = ({
         />
       </div>
 
-      <div className="mt-1 flex items-center justify-between gap-3">
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
         <span className="text-[13px] font-semibold text-[#101828] dark:text-white">
           {ins.idCard || "Căn cước công dân"}
         </span>
@@ -120,7 +124,7 @@ const VerificationCard = ({
         </div>
       </div>
 
-      <div className="flex gap-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
         <IdImage
           label={ins.idFront || "Mặt trước"}
           url={pick(profile, "idCardFrontUrl", "IdCardFrontUrl")}

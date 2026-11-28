@@ -277,7 +277,7 @@ const ApprovedProfilePage = () => {
     <div className="flex flex-col gap-4">
       <PageTitle>{t.nav?.instructor || "Hồ sơ giáo viên"}</PageTitle>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[480fr_757fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[480fr_757fr] [&>*]:min-w-0">
         <PersonalInfoCard
           profile={profile}
           t={t}

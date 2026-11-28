@@ -1,5 +1,4 @@
 import { useLanguage } from "@/shared/context/LanguageContext"
-import colors from "@/shared/utils/colors"
 
 const TermsOfService = () => {
   const { t } = useLanguage()
@@ -196,8 +195,7 @@ const TermsOfService = () => {
               href="https://catspeak.com.vn"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-80"
-              style={{ color: colors.red[700] }}
+              className="underline break-all text-[#990011] dark:text-[#FF8599] hover:opacity-80"
             >
               https://catspeak.com.vn
             </a>
@@ -208,8 +206,7 @@ const TermsOfService = () => {
               href="https://www.facebook.com/CatSpeak"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-80"
-              style={{ color: colors.red[700] }}
+              className="underline break-all text-[#990011] dark:text-[#FF8599] hover:opacity-80"
             >
               https://www.facebook.com/CatSpeak
             </a>

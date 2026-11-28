@@ -8,6 +8,7 @@ const MainSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
       <MobileSidebar 
         isMobileOpen={isMobileOpen} 
         setIsMobileOpen={setIsMobileOpen} 
+        hideBreakpoint="lg"
       />
     </>
   )

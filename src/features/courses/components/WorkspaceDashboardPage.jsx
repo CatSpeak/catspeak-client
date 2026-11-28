@@ -472,8 +472,8 @@ const WorkspaceDashboardPage = () => {
         >
           <div className="flex flex-col gap-3">
             {/* 3 mini stats in 1 row */}
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-2 text-center min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl px-3 py-2.5 sm:block sm:p-2 sm:text-center flex items-center justify-between gap-2 min-w-0">
                 <span className="text-[10px] sm:text-[11px] text-[#6E788C] dark:text-gray-400 font-normal block truncate" title={kpiT.activeClasses || "Lớp đang mở"}>
                   {kpiT.activeClasses || "Lớp đang mở"}
                 </span>
@@ -481,7 +481,7 @@ const WorkspaceDashboardPage = () => {
                   {courseClass.metrics?.openClasses ?? 14}
                 </strong>
               </div>
-              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-2 text-center min-w-0">
+              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl px-3 py-2.5 sm:block sm:p-2 sm:text-center flex items-center justify-between gap-2 min-w-0">
                 <span className="text-[10px] sm:text-[11px] text-[#6E788C] dark:text-gray-400 font-normal block truncate" title={kpiT.avgFillRate || "Lấp đầy TB"}>
                   {kpiT.avgFillRate || "Lấp đầy TB"}
                 </span>
@@ -489,7 +489,7 @@ const WorkspaceDashboardPage = () => {
                   {Math.round(courseClass.metrics?.averageFillRate ?? 82)}%
                 </strong>
               </div>
-              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl p-2 text-center min-w-0">
+              <div className="bg-[#FBFBFC] dark:bg-[#222222] border border-[#DEE0E5] dark:border-[#3F3F3F] rounded-xl px-3 py-2.5 sm:block sm:p-2 sm:text-center flex items-center justify-between gap-2 min-w-0">
                 <span className="text-[10px] sm:text-[11px] text-[#6E788C] dark:text-gray-400 font-normal block truncate" title={kpiT.avgCompletionRate || "Hoàn thành TB"}>
                   {kpiT.avgCompletionRate || "Hoàn thành TB"}
                 </span>

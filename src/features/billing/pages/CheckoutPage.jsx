@@ -137,12 +137,12 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="mx-auto px-12 pt-6 pb-16 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="mx-auto px-4 sm:px-8 lg:px-12 pt-6 pb-16 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Breadcrumbs */}
       <CheckoutBreadcrumbs t={t} language={language} />
 
       {/* Main Title */}
-      <h1 className="text-3xl md:text-4xl font-extrabold mb-8 tracking-tight text-gray-900 dark:text-white">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-6 sm:mb-8 tracking-tight text-gray-900 dark:text-white">
         {t.billing?.checkout?.title || "Thanh toán dịch vụ"}
       </h1>
 
@@ -150,7 +150,7 @@ const CheckoutPage = () => {
         {/* Left Columns (Form details) */}
         <div className="lg:col-span-2 space-y-8">
           {/* Transfer Info Section */}
-          <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="bg-white dark:bg-[#1A1A1A] border border-border dark:border-[#3F3F3F] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm space-y-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {t.billing?.checkout?.transferInfo || "Thông tin chuyển khoản"}
             </h2>

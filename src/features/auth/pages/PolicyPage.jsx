@@ -27,35 +27,25 @@ const PolicyPage = () => {
 
   return (
     <section
-      className="flex min-h-screen items-center justify-center bg-white px-4 py-10 text-white"
+      className="flex min-h-screen items-center justify-center overflow-x-clip bg-white px-3 py-6 text-white sm:px-4 sm:py-10"
       style={{ background: cinematicBg }}
     >
-      <div className="relative w-full max-w-screen-xl rounded-[40px] border border-white/5 dark:border-[#3F3F3F] bg-white/95 dark:bg-[#1A1A1A]/95 text-[#121212] dark:text-white shadow-[0_45px_120px_rgba(0,0,0,0.55)] backdrop-blur-sm">
-        <div className="absolute right-6 top-6 flex flex-col items-end gap-3 z-10">
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            className="flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-white/20"
-          >
-            <FiRefreshCw className="text-xs" />
-            {language === "vi" ? "English" : "Tiếng Việt"}
-          </button>
-          {showScroll && (
+      <div className="relative w-full min-w-0 max-w-screen-xl overflow-hidden rounded-2xl border border-white/5 dark:border-[#3F3F3F] bg-white/95 dark:bg-[#1A1A1A]/95 text-[#121212] dark:text-white shadow-[0_45px_120px_rgba(0,0,0,0.55)] backdrop-blur-sm sm:rounded-[40px]">
+        <div className="rounded-t-2xl bg-gradient-to-r from-[#9b111e] via-[#c4161c] to-[#f0872a] px-5 py-7 text-center text-white sm:rounded-t-[40px] sm:px-8 sm:py-10">
+          <div className="mb-4 flex justify-end sm:absolute sm:right-6 sm:top-6 sm:z-10 sm:mb-0">
             <button
               type="button"
-              onClick={scrollToTop}
-              className="flex items-center gap-2 rounded-full bg-[#c4161c] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(196,22,28,0.45)] transition hover:bg-[#a20f16]"
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-white/20 sm:px-5 sm:text-sm"
             >
-              <FiArrowUp />
-              {language === "vi" ? "Lên đầu trang" : "Back to top"}
+              <FiRefreshCw className="text-xs" />
+              {language === "vi" ? "English" : "Tiếng Việt"}
             </button>
-          )}
-        </div>
-        <div className="rounded-t-[40px] bg-gradient-to-r from-[#9b111e] via-[#c4161c] to-[#f0872a] px-8 py-10 text-center text-white">
+          </div>
           <div className="text-sm uppercase tracking-[0.3em] text-white/80">
             Cat Speak
           </div>
-          <h1 className="mt-3 text-4xl font-bold">{policy.title || "Chính sách bảo mật"}</h1>
+          <h1 className="mt-3 text-2xl font-bold sm:text-4xl">{policy.title || "Chính sách bảo mật"}</h1>
           <p className="mt-4 text-base text-white/90">
             {language === "vi"
               ? "Cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của người dùng."
@@ -63,10 +53,21 @@ const PolicyPage = () => {
           </p>
         </div>
 
-        <div className="p-8 md:p-14 text-base leading-relaxed bg-white dark:bg-[#1A1A1A] rounded-b-[40px]">
+        <div className="p-5 sm:p-8 md:p-14 text-base leading-relaxed bg-white dark:bg-[#1A1A1A] rounded-b-2xl sm:rounded-b-[40px] min-w-0 break-words">
           <PrivacyPolicy />
         </div>
       </div>
+
+      {showScroll && (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          className="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full bg-[#c4161c] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(196,22,28,0.45)] transition hover:bg-[#a20f16]"
+        >
+          <FiArrowUp />
+          {language === "vi" ? "Lên đầu trang" : "Back to top"}
+        </button>
+      )}
     </section>
   )
 }

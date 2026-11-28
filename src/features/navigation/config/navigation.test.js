@@ -64,8 +64,7 @@ const dashboardStudentItem = getWorkspaceGroup(
   "general",
 ).items.find((item) => item.key === "dashboard")
 
-describe("ISS-12/ISS-61: workspace navigation and teacher-only tabs", () => {
-  it("no longer hides the dashboard tab from Students", () => {
+describe("ISS-12/ISS-61: workspace navigation and teacher-only tabs", () => {  it("no longer hides the dashboard tab from Students", () => {
     expect(TEACHER_ONLY_TABS).not.toContain("dashboard")
     expect(
       isNavItemVisible(dashboardStudentItem, {
@@ -109,5 +108,40 @@ describe("ISS-12/ISS-61: workspace navigation and teacher-only tabs", () => {
     expect(group.items.find((item) => item.key === "schedule").path).toBe(
       "/workspace/schedule",
     )
+  })
+})
+
+const mainSection = navSections.find((section) => section.key === "main")
+const resourcesSectionItem = mainSection.items.find(
+  (item) => item.key === "learningResources",
+)
+const resourcesDockItem = dockNavGroups
+  .flatMap((group) => group.items)
+  .find((item) => item.key === "learningResources")
+const resourcesNavLink = navLinks.find(
+  (item) => item.key === "learningResources",
+)
+
+describe("ISS-34: /resources is visible to guests", () => {
+  it("exposes /resources in navSections, dockNavGroups and navLinks for guests", () => {
+    for (const entry of [
+      resourcesSectionItem,
+      resourcesDockItem,
+      resourcesNavLink,
+    ]) {
+      expect(entry).toBeTruthy()
+      expect(entry.path).toBe("/resources")
+      expect(entry.isPrivate).toBeUndefined()
+      expect(
+        isNavItemVisible(entry, { isAuthenticated: false, currentLang: "vi" }),
+      ).toBe(true)
+    }
+  })
+
+  it("keeps the workspace entry gated to authenticated users", () => {
+    const workspaceNavLink = navLinks.find((item) => item.key === "workspace")
+
+    expect(workspaceNavLink.requiresAuth).toBe(true)
+    expect(workspaceNavLink.isPrivate).toBeUndefined()
   })
 })

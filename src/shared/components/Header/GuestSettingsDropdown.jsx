@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Settings,
@@ -22,21 +22,7 @@ import ListItem from "@/shared/components/ui/ListItem"
 import Radio from "@/shared/components/ui/inputs/Radio"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import useScrollLock from "@/shared/hooks/useScrollLock"
-
-const useIsMobile = (breakpoint = 425) => {
-  const [isMobile, setIsMobile] = useState(
-    () => typeof window !== "undefined" && window.innerWidth <= breakpoint,
-  )
-
-  useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`)
-    const handler = (e) => setIsMobile(e.matches)
-    mql.addEventListener("change", handler)
-    return () => mql.removeEventListener("change", handler)
-  }, [breakpoint])
-
-  return isMobile
-}
+import { useMediaQuery } from "@/shared/hooks/useMediaQuery"
 
 const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt", flag: VietNam },
@@ -48,8 +34,8 @@ const LANGUAGES = [
 /**
  * GuestSettingsDropdown
  * Reusable dropdown menu for unauthenticated visitors.
- * - Desktop: Animated MenuList with MenuItem drilldowns
- * - Mobile (< 425px): Fullscreen portal sheet using ListItem
+ * - Desktop (>= 640px): Animated MenuList with MenuItem drilldowns
+ * - Mobile (< 640px): Fullscreen portal sheet using ListItem
  */
 const GuestSettingsDropdown = ({ className = "" }) => {
   const navigate = useNavigate()
@@ -58,13 +44,15 @@ const GuestSettingsDropdown = ({ className = "" }) => {
 
   const [isOpen, setIsOpen] = useState(false)
   const [currentView, setCurrentView] = useState("root") // "root" | "theme" | "language"
-  const prevViewRef = useRef("root")
+  const [navDirection, setNavDirection] = useState("forward")
   const menuRef = useRef(null)
-  const isMobile = useIsMobile(425)
+  // ISS-42: match the `sm` breakpoint (640px) used by GuestSettingsControls.
+  const isMobile = useMediaQuery("(max-width: 639px)")
 
-  useEffect(() => {
-    prevViewRef.current = currentView
-  }, [currentView])
+  const openView = (view) => {
+    setNavDirection(view === "root" ? "back" : "forward")
+    setCurrentView(view)
+  }
 
   const handleToggleMenu = () => {
     if (!isOpen) {
@@ -103,7 +91,7 @@ const GuestSettingsDropdown = ({ className = "" }) => {
             {title}
           </span>
         }
-        onClick={() => setCurrentView("root")}
+        onClick={() => openView("root")}
         roundedClass="group-first:rounded-t-xl rounded-b"
       />
     </div>
@@ -175,31 +163,33 @@ const GuestSettingsDropdown = ({ className = "" }) => {
   const dropdownContent = (
     <div className="w-full flex flex-col">
       {/* Mobile Top Navigation Header */}
-      <div className="flex md:hidden items-center gap-1 border-b border-[#F0F0F0] dark:border-[#3F3F3F] h-[56px] px-1 text-gray-800 dark:text-white">
-        <IconButton
-          variant="ghost"
-          size="sm"
-          onClick={
-            currentView === "root"
-              ? handleCloseMenu
-              : () => setCurrentView("root")
-          }
-          title={
-            currentView === "root"
-              ? t.common?.close || "Close"
-              : t.common?.back || "Back"
-          }
-        >
-          <ArrowLeft />
-        </IconButton>
-        <span className="text-xl font-bold">
-          {currentView === "theme"
-            ? t.nav?.themeTitle || "Giao diện"
-            : currentView === "language"
-              ? t.header?.language || "Ngôn ngữ"
-              : t.header?.settings || t.nav?.systemConfig || "Cài đặt"}
-        </span>
-      </div>
+      {isMobile && (
+        <div className="flex sm:hidden items-center gap-1 border-b border-[#F0F0F0] dark:border-[#3F3F3F] h-[56px] px-1 text-gray-800 dark:text-white">
+          <IconButton
+            variant="ghost"
+            size="sm"
+            onClick={
+              currentView === "root"
+                ? handleCloseMenu
+                : () => openView("root")
+            }
+            title={
+              currentView === "root"
+                ? t.common?.close || "Close"
+                : t.common?.back || "Back"
+            }
+          >
+            <ArrowLeft />
+          </IconButton>
+          <span className="text-xl font-bold">
+            {currentView === "theme"
+              ? t.nav?.themeTitle || "Giao diện"
+              : currentView === "language"
+                ? t.header?.language || "Ngôn ngữ"
+                : t.header?.settings || t.nav?.systemConfig || "Cài đặt"}
+          </span>
+        </div>
+      )}
 
       {currentView === "theme" ? (
         /* Submenu: Theme */
@@ -214,9 +204,11 @@ const GuestSettingsDropdown = ({ className = "" }) => {
           }}
           className="flex flex-col w-full"
         >
-          <div className="hidden md:block">
-            {renderSubmenuHeader(t.nav?.themeTitle || "Giao diện")}
-          </div>
+          {!isMobile && (
+            <div className="hidden sm:block">
+              {renderSubmenuHeader(t.nav?.themeTitle || "Giao diện")}
+            </div>
+          )}
 
           <div className="flex flex-col w-full py-[2px]">
             {themeOptions.map((opt, index) =>
@@ -246,9 +238,11 @@ const GuestSettingsDropdown = ({ className = "" }) => {
           }}
           className="flex flex-col w-full"
         >
-          <div className="hidden md:block">
-            {renderSubmenuHeader(t.header?.language || "Ngôn ngữ")}
-          </div>
+          {!isMobile && (
+            <div className="hidden sm:block">
+              {renderSubmenuHeader(t.header?.language || "Ngôn ngữ")}
+            </div>
+          )}
 
           <div className="flex flex-col w-full py-[2px]">
             {LANGUAGES.map((l, index) =>
@@ -279,7 +273,7 @@ const GuestSettingsDropdown = ({ className = "" }) => {
         <Motion.div
           key="root"
           initial={
-            prevViewRef.current !== "root"
+            navDirection === "back"
               ? { opacity: 0, x: -12 }
               : { opacity: 1, x: 0 }
           }
@@ -314,7 +308,7 @@ const GuestSettingsDropdown = ({ className = "" }) => {
                   : theme === "light"
                     ? t.nav?.themeLight || "Sáng"
                     : t.nav?.themeSystem || "Hệ thống",
-              onClick: () => setCurrentView("theme"),
+              onClick: () => openView("theme"),
               isFirst: false,
               isLast: false,
             })}
@@ -326,7 +320,7 @@ const GuestSettingsDropdown = ({ className = "" }) => {
               label: t.header?.language || "Ngôn ngữ",
               hasSubmenu: true,
               rightText: currentLanguageOption?.label,
-              onClick: () => setCurrentView("language"),
+              onClick: () => openView("language"),
               isFirst: false,
               isLast: true,
             })}

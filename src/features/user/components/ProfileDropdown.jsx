@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 import useClickOutside from "@/shared/hooks/useClickOutside"
+import { useMediaQuery } from "@/shared/hooks/useMediaQuery"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
@@ -37,21 +38,6 @@ import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useTourGuide } from "@/features/tour-guide"
 
-const useIsMobile = (breakpoint = 425) => {
-  const [isMobile, setIsMobile] = useState(
-    () => window.innerWidth <= breakpoint,
-  )
-
-  useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`)
-    const handler = (e) => setIsMobile(e.matches)
-    mql.addEventListener("change", handler)
-    return () => mql.removeEventListener("change", handler)
-  }, [breakpoint])
-
-  return isMobile
-}
-
 const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt", flag: VietNam },
   { key: "zh", label: "中文", flag: China },
@@ -77,15 +63,17 @@ const ProfileDropdown = () => {
     useRoleOverride()
   const [isOpen, setIsOpen] = useState(false)
   const [currentView, setCurrentView] = useState("root") // "root" | "settings" | "theme" | "language" | "role"
-  const prevViewRef = useRef("root")
+  const [navDirection, setNavDirection] = useState("forward")
   const [showLogoutWarning, setShowLogoutWarning] = useState(false)
   const menuRef = useRef(null)
-  const isMobile = useIsMobile(425)
+  // ISS-33: match the `md` breakpoint (768px) already used by the submenus.
+  const isMobile = useMediaQuery("(max-width: 767px)")
   const { isInCall } = useSelector((state) => state.videoCall)
 
-  useEffect(() => {
-    prevViewRef.current = currentView
-  }, [currentView])
+  const openView = (view) => {
+    setNavDirection(view === "root" ? "back" : "forward")
+    setCurrentView(view)
+  }
 
   const user = {
     ...(userData?.data ?? userData ?? authUser ?? {}),
@@ -154,16 +142,6 @@ const ProfileDropdown = () => {
   // Lock body scroll when fullscreen on mobile
   useScrollLock(isOpen && isMobile)
 
-  const getInitials = (name) => {
-    return name ? name.charAt(0).toUpperCase() : "U"
-  }
-
-  const menuItemClass =
-    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-gray-700 dark:text-[#AAAAAA] hover:text-gray-900 dark:hover:text-white hover:bg-[#F2F2F2] active:bg-[#E6E6E6] dark:hover:bg-[#272727] dark:active:bg-[#3D3D3D] transition-colors cursor-pointer"
-
-  const menuItemDisabledClass =
-    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-[#7A7574] cursor-not-allowed"
-
   const currentLanguageOption = LANGUAGES.find((l) => l.key === language)
 
   const roleOptions = [
@@ -219,7 +197,7 @@ const ProfileDropdown = () => {
             {title}
           </span>
         }
-        onClick={() => setCurrentView("root")}
+        onClick={() => openView("root")}
         roundedClass="group-first:rounded-t-xl rounded-b"
       />
     </div>
@@ -291,35 +269,37 @@ const ProfileDropdown = () => {
   const dropdownContent = (
     <div className="w-full flex flex-col">
       {/* Mobile Top Navigation Header */}
-      <div className="flex md:hidden items-center gap-1 border-b border-[#F0F0F0] dark:border-[#3F3F3F] h-[56px] px-1 text-gray-800 dark:text-white">
-        <IconButton
-          variant="ghost"
-          size="sm"
-          onClick={
-            currentView === "root"
-              ? handleCloseMenu
-              : () => setCurrentView("root")
-          }
-          title={
-            currentView === "root"
-              ? t.common?.close || "Close"
-              : t.common?.back || "Back"
-          }
-        >
-          <ArrowLeft />
-        </IconButton>
-        <span className="text-xl font-bold">
-          {currentView === "settings"
-            ? t.nav?.settings || "Cài đặt"
-            : currentView === "theme"
-              ? t.nav?.themeTitle || "Giao diện"
-              : currentView === "language"
-                ? t.header?.language || "Ngôn ngữ"
-                : currentView === "role"
-                  ? t.header?.switchRole || "Vai trò"
-                  : t.header.profile || "Profile"}
-        </span>
-      </div>
+      {isMobile && (
+        <div className="flex md:hidden items-center gap-1 border-b border-[#F0F0F0] dark:border-[#3F3F3F] h-[56px] px-1 text-gray-800 dark:text-white">
+          <IconButton
+            variant="ghost"
+            size="sm"
+            onClick={
+              currentView === "root"
+                ? handleCloseMenu
+                : () => openView("root")
+            }
+            title={
+              currentView === "root"
+                ? t.common?.close || "Close"
+                : t.common?.back || "Back"
+            }
+          >
+            <ArrowLeft />
+          </IconButton>
+          <span className="text-xl font-bold">
+            {currentView === "settings"
+              ? t.nav?.settings || "Cài đặt"
+              : currentView === "theme"
+                ? t.nav?.themeTitle || "Giao diện"
+                : currentView === "language"
+                  ? t.header?.language || "Ngôn ngữ"
+                  : currentView === "role"
+                    ? t.header?.switchRole || "Vai trò"
+                    : t.header.profile || "Profile"}
+          </span>
+        </div>
+      )}
 
       {currentView === "settings" ? (
         /* Submenu: Settings */
@@ -334,9 +314,11 @@ const ProfileDropdown = () => {
           }}
           className="flex flex-col w-full"
         >
-          <div className="hidden md:block">
-            {renderSubmenuHeader(t.nav?.settings || "Cài đặt")}
-          </div>
+          {!isMobile && (
+            <div className="hidden md:block">
+              {renderSubmenuHeader(t.nav?.settings || "Cài đặt")}
+            </div>
+          )}
 
           <div className="flex flex-col w-full py-[2px]">
             {renderItem({
@@ -387,9 +369,11 @@ const ProfileDropdown = () => {
           }}
           className="flex flex-col w-full"
         >
-          <div className="hidden md:block">
-            {renderSubmenuHeader(t.nav?.themeTitle || "Giao diện")}
-          </div>
+          {!isMobile && (
+            <div className="hidden md:block">
+              {renderSubmenuHeader(t.nav?.themeTitle || "Giao diện")}
+            </div>
+          )}
 
           <div className="flex flex-col w-full py-[2px]">
             {themeOptions.map((opt, index) =>
@@ -419,9 +403,11 @@ const ProfileDropdown = () => {
           }}
           className="flex flex-col w-full"
         >
-          <div className="hidden md:block">
-            {renderSubmenuHeader(t.header?.language || "Ngôn ngữ")}
-          </div>
+          {!isMobile && (
+            <div className="hidden md:block">
+              {renderSubmenuHeader(t.header?.language || "Ngôn ngữ")}
+            </div>
+          )}
 
           <div className="flex flex-col w-full py-[2px]">
             {LANGUAGES.map((l, index) =>
@@ -460,9 +446,11 @@ const ProfileDropdown = () => {
           }}
           className="flex flex-col w-full"
         >
-          <div className="hidden md:block">
-            {renderSubmenuHeader(t.header?.switchRole || "Vai trò")}
-          </div>
+          {!isMobile && (
+            <div className="hidden md:block">
+              {renderSubmenuHeader(t.header?.switchRole || "Vai trò")}
+            </div>
+          )}
 
           <div className="flex flex-col w-full py-[2px]">
             {roleOptions.map((role, index) =>
@@ -488,7 +476,7 @@ const ProfileDropdown = () => {
         <Motion.div
           key="root"
           initial={
-            prevViewRef.current !== "root"
+            navDirection === "back"
               ? { opacity: 0, x: -12 }
               : { opacity: 1, x: 0 }
           }
@@ -540,7 +528,7 @@ const ProfileDropdown = () => {
                 label: t.header?.switchRole || "Vai trò",
                 hasSubmenu: true,
                 rightText: currentRoleOption?.label,
-                onClick: () => setCurrentView("role"),
+                onClick: () => openView("role"),
                 isFirst: false,
                 isLast: false,
               })}
@@ -550,7 +538,7 @@ const ProfileDropdown = () => {
               icon: <Settings />,
               label: t.nav?.settings || "Cài đặt",
               hasSubmenu: true,
-              onClick: () => setCurrentView("settings"),
+              onClick: () => openView("settings"),
               isFirst: false,
               isLast: false,
             })}
@@ -566,7 +554,7 @@ const ProfileDropdown = () => {
                   : theme === "light"
                     ? t.nav?.themeLight || "Sáng"
                     : t.nav?.themeSystem || "Hệ thống",
-              onClick: () => setCurrentView("theme"),
+              onClick: () => openView("theme"),
               isFirst: false,
               isLast: false,
             })}
@@ -577,7 +565,7 @@ const ProfileDropdown = () => {
               label: t.header?.language || "Ngôn ngữ",
               hasSubmenu: true,
               rightText: currentLanguageOption?.label,
-              onClick: () => setCurrentView("language"),
+              onClick: () => openView("language"),
               isFirst: false,
               isLast: false,
             })}

@@ -58,6 +58,7 @@ export default {
       currentPlan: "現在のプラン",
       included: "プランに含まれる内容",
       upgradeTo: "{{planName}}にアップグレード",
+      startFree: "無料で始める",
       planFree: "フリープラン",
       planPro: "Room Proプラン",
       activated: "有効化済み",

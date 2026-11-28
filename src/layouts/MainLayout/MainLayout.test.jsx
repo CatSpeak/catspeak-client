@@ -151,3 +151,21 @@ describe("ISS-37/ISS-44/ISS-45: MainLayout auth modal routing", () => {
     expect(authState(container)).toEqual({ open: "true", mode: "register" })
   })
 })
+
+describe("ISS-38: /pricing does not lock the layout height", () => {
+  it("never applies md:h-screen / md:max-h-screen / md:overflow-hidden", () => {
+    routerState.location = {
+      pathname: "/pricing",
+      search: "",
+      hash: "",
+      state: null,
+    }
+
+    const container = render()
+
+    expect(container.innerHTML).not.toContain("md:h-screen")
+    expect(container.innerHTML).not.toContain("md:max-h-screen")
+    expect(container.innerHTML).not.toContain("md:overflow-hidden")
+    expect(container.innerHTML).toContain("overflow-x-clip")
+  })
+})

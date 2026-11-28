@@ -60,6 +60,7 @@ export default {
       currentPlan: "Gói hiện tại",
       included: "Đã bao gồm trong gói của bạn",
       upgradeTo: "Nâng cấp lên {{planName}}",
+      startFree: "Bắt đầu miễn phí",
       planFree: "Gói Free",
       planPro: "Gói Room Pro",
       activated: "Đã kích hoạt",

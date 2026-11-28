@@ -57,6 +57,7 @@ export default {
       currentPlan: "当前计划",
       included: "包含在您的计划中",
       upgradeTo: "升级到 {{planName}}",
+      startFree: "免费开始",
       planFree: "免费版",
       planPro: "Room Pro版",
       activated: "已激活",

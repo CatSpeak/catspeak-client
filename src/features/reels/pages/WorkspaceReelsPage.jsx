@@ -19,7 +19,6 @@ const getLocale = (lang) => {
 
 const WorkspaceReelsContent = ({ userId }) => {
   const { t } = useLanguage()
-  const { userTimeZone } = useTimezone()
   const navigate = useNavigate()
   const currentLang = localStorage.getItem("communityLanguage") || "en"
   const locale = getLocale(currentLang)
@@ -31,19 +30,17 @@ const WorkspaceReelsContent = ({ userId }) => {
     setActiveTab(nextTab)
   }
 
-  const ws = t?.catSpeak?.reels?.workspace || {}
-
-  const tabs = useMemo(
-    () => [
+  const tabs = useMemo(() => {
+    const ws = t?.catSpeak?.reels?.workspace || {}
+    return [
       { id: "myReels", label: ws?.tabs?.myReels || "My Reels", icon: Film },
       {
         id: "playlists",
         label: ws?.tabs?.playlists || "Playlists",
         icon: ListPlus,
       },
-    ],
-    [ws],
-  )
+    ]
+  }, [t])
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale])
 
@@ -85,8 +82,11 @@ const WorkspaceReelsContent = ({ userId }) => {
               <div>
                 <div className="flex justify-end mb-4 px-4">
                   {!id && activeTab === "myReels" && (
-                    <PillButton onClick={() => setIsUploadOpen(true)}>
-                      <span className="hidden sm:inline">
+                    <PillButton
+                      onClick={() => setIsUploadOpen(true)}
+                      startIcon={<Plus size={18} />}
+                    >
+                      <span>
                         {t.catSpeak?.reels?.uploadReel || "Upload Reel"}
                       </span>
                     </PillButton>

@@ -4,6 +4,8 @@ import PlanCard from "../subscription/components/PlanCard";
 import { useGetPlansQuery } from "@/store/api/plansApi";
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
+import { useAuth } from "@/features/auth";
 import {
   getGridClasses,
   isDefaultPlan,
@@ -18,6 +20,8 @@ const PricingPage = () => {
   const { t } = useLanguage();
   const { planName: currentPlanName, isPro, isLoading: isPlanLoading } =
     usePlanFeatures();
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const { data: plansResponse = [], isLoading: isPlansLoading } =
     useGetPlansQuery();
 
@@ -196,7 +200,7 @@ const PricingPage = () => {
   });
 
   return (
-    <div className="relative w-full min-h-screen md:h-screen md:max-h-screen md:overflow-hidden bg-primaryBg dark:bg-[#0F0F0F] flex items-center justify-center px-4 py-14 sm:px-6 sm:py-16 md:py-0 lg:px-8 select-none animate-in fade-in duration-300">
+    <div className="relative w-full min-h-screen bg-primaryBg dark:bg-[#0F0F0F] flex items-center justify-center px-4 py-14 sm:px-6 sm:py-14 lg:px-8 lg:py-10 select-none animate-in fade-in duration-300">
       {/* Top-Right Close Button (X) */}
       <button
         onClick={handleClose}
@@ -222,7 +226,7 @@ const PricingPage = () => {
               {[1, 2].map((i) => (
                 <div
                   key={i}
-                  className="border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-6 rounded-xl shadow-sm animate-pulse flex flex-col justify-between h-[calc(100dvh-11rem)] min-h-[550px] max-h-[740px]"
+                  className="border border-border dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] p-6 rounded-xl shadow-sm animate-pulse flex flex-col justify-between min-h-[480px] h-full"
                 >
                 <div className="space-y-6">
                   <div className="h-6 bg-gray-200 dark:bg-[#272727] rounded w-1/3" />
@@ -244,11 +248,16 @@ const PricingPage = () => {
             {formattedPlans.map((plan) => {
               const planNameLower = plan.name?.toLowerCase() || "";
               const currentPlanLower = currentPlanName?.toLowerCase() || "";
-              const isActive = isPro
-                ? planNameLower.includes("pro") || planNameLower === currentPlanLower
-                : !isPro && currentPlanLower
-                  ? planNameLower === currentPlanLower || planNameLower.includes(currentPlanLower)
-                  : plan.price === 0 || planNameLower.includes("free");
+              // Guests never see an activated/current-plan state (ISS-38).
+              const isActive = isAuthenticated
+                ? isPro
+                  ? planNameLower.includes("pro") || planNameLower === currentPlanLower
+                  : !isPro && currentPlanLower
+                    ? planNameLower === currentPlanLower || planNameLower.includes(currentPlanLower)
+                    : plan.price === 0 || planNameLower.includes("free")
+                : false;
+              const isGuestFreePlan =
+                !isAuthenticated && Number(plan.price) === 0;
               const isTargetMatch =
                 highlightPlan &&
                 plan.name?.toLowerCase().includes(highlightPlan);
@@ -258,7 +267,7 @@ const PricingPage = () => {
                 <div
                   key={plan.id}
                   ref={isTargetMatch ? highlightedRef : null}
-                  className="w-full flex justify-center"
+                  className="w-full flex justify-center h-full"
                 >
                   <PlanCard
                     plan={plan}
@@ -270,16 +279,20 @@ const PricingPage = () => {
                         : undefined
                     }
                     actionLabel={
-                      t.billing?.pricing?.upgradeTo?.replace(
-                        "{{planName}}",
-                        plan.name,
-                      ) || `Nâng cấp lên ${plan.name}`
+                      isGuestFreePlan
+                        ? t.billing?.pricing?.startFree || "Bắt đầu miễn phí"
+                        : t.billing?.pricing?.upgradeTo?.replace(
+                            "{{planName}}",
+                            plan.name,
+                          ) || `Nâng cấp lên ${plan.name}`
                     }
                     isProcessing={isProcessing}
                     onAction={
-                      plan.price > 0 && !isActive
-                        ? () => handleUpgradeClick(plan)
-                        : undefined
+                      isGuestFreePlan
+                        ? () => openAuthModal("register")
+                        : plan.price > 0 && !isActive
+                          ? () => handleUpgradeClick(plan)
+                          : undefined
                     }
                   />
                 </div>

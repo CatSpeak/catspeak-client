@@ -1,29 +1,53 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { createPortal } from "react-dom"
 import { Link } from "react-router-dom"
 import { MainLogo, MainLogoDark, IconLogo } from "@/shared/assets/icons/logo"
 import { X } from "lucide-react"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import useScrollLock from "@/shared/hooks/useScrollLock"
+import { useMediaQuery } from "@/shared/hooks/useMediaQuery"
 import MobileNavItems from "./MobileNavItems"
 
-const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
-  // Lock background body scroll while the mobile drawer is open
-  useScrollLock(isMobileOpen)
+// Literal class maps so Tailwind can detect every variant at build time.
+const HIDE_CLASS_BY_BREAKPOINT = {
+  lg: "lg:hidden",
+  xl: "xl:hidden",
+}
+
+const DESKTOP_QUERY_BY_BREAKPOINT = {
+  lg: "(min-width: 1024px)",
+  xl: "(min-width: 1280px)",
+}
+
+const MobileSidebar = ({ isMobileOpen, setIsMobileOpen, hideBreakpoint = "lg" }) => {
+  const hideClass = HIDE_CLASS_BY_BREAKPOINT[hideBreakpoint] || "lg:hidden"
+  const isDesktop = useMediaQuery(
+    DESKTOP_QUERY_BY_BREAKPOINT[hideBreakpoint] || "(min-width: 1024px)",
+  )
+
+  // Auto-close the drawer when the viewport crosses into desktop layout.
+  useEffect(() => {
+    if (isDesktop && isMobileOpen) {
+      setIsMobileOpen?.(false)
+    }
+  }, [isDesktop, isMobileOpen, setIsMobileOpen])
+
+  // Lock background body scroll only while the drawer is actually visible.
+  useScrollLock(isMobileOpen && !isDesktop)
 
   const content = (
     <>
       {/* Mobile overlay - z-[1300] to cover sticky header and all page sections */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-[1300] xl:hidden transition-opacity"
+          className={`fixed inset-0 bg-black/50 z-[1300] ${hideClass} transition-opacity`}
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 h-full h-[100dvh] max-h-[100dvh] w-[320px] bg-white dark:bg-[#0F0F0F] border-r border-border dark:border-darkBorder shadow-[4px_0_24px_rgba(0,0,0,0.08)] flex flex-col transition-transform duration-300 z-[1300] xl:hidden overflow-hidden ${
+        className={`fixed top-0 left-0 bottom-0 h-full h-[100dvh] max-h-[100dvh] w-[320px] bg-white dark:bg-[#0F0F0F] border-r border-border dark:border-darkBorder shadow-[4px_0_24px_rgba(0,0,0,0.08)] flex flex-col transition-transform duration-300 z-[1300] ${hideClass} overflow-hidden ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

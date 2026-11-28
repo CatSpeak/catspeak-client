@@ -178,7 +178,7 @@ const MainLayout = ({
       <div
         className={`relative flex min-h-screen text-left overflow-x-clip ${
           isLandingExperience ? "bg-white dark:bg-[#0F0F0F]" : "bg-primaryBg dark:bg-[#0F0F0F]"
-        } ${isPricingPage ? "md:h-screen md:max-h-screen md:overflow-hidden" : ""}`}
+        }`}
       >
         {shouldShowSidebar && (
           <MainSidebar
@@ -201,13 +201,7 @@ const MainLayout = ({
               />
             ))}
 
-          <main
-            className={`flex-1 flex flex-col min-w-0 ${
-              isPricingPage
-                ? "overflow-x-clip md:h-screen md:max-h-screen md:overflow-hidden"
-                : "overflow-x-clip"
-            }`}
-          >
+          <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
             <Outlet />
           </main>
 

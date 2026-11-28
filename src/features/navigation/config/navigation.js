@@ -363,7 +363,6 @@ export const navLinks = [
     label: "Resource Hub",
     path: "/resources",
     icon: LayoutDashboard,
-    isPrivate: true,
   },
   {
     key: "horizontalBar-workspace",

@@ -73,6 +73,7 @@ export default defineConfig({
       "src/features/refunds/**/*.test.{js,jsx}",
       "src/features/queue/**/*.test.{js,jsx}",
       "src/features/profile/**/*.test.{js,jsx}",
+      "src/features/reels/pages/**/*.test.{js,jsx}",
       "src/features/interactive-script/**/*.test.{js,jsx}",
     ],
   },

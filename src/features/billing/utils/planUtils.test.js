@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest"
 import {
+  getGridClasses,
   isDefaultPlan,
   isUnlimitedLimit,
   isFeatureEnabled,
@@ -7,6 +8,18 @@ import {
 } from "./planUtils"
 
 describe("planUtils", () => {
+  describe("getGridClasses", () => {
+    it("stacks the 3-plan grid into one column until lg (ISS-38)", () => {
+      const classes = getGridClasses(3)
+
+      expect(classes).toContain("grid-cols-1")
+      expect(classes).toContain("lg:grid-cols-3")
+      expect(classes).not.toContain("md:grid-cols-3")
+      expect(classes).toContain("max-w-xl")
+      expect(classes).toContain("lg:max-w-7xl")
+    })
+  })
+
   describe("isDefaultPlan", () => {
     it("identifies plans with priceVnd = 0 or price = 0 as default", () => {
       expect(isDefaultPlan({ priceVnd: 0 })).toBe(true)

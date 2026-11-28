@@ -35,12 +35,14 @@ const toCountryValue = (raw) => {
 }
 
 const Row = ({ icon, label, children }) => (
-  <div className="flex items-center gap-3 border-b border-[#E4E7EC] dark:border-[#3F3F3F] py-3 pl-1.5 last:border-b-0">
-    <span className="flex shrink-0 items-center text-[#101828] dark:text-neutral-300">{icon}</span>
-    <span className="w-[150px] shrink-0 text-xs font-medium text-[#101828] dark:text-neutral-300">
-      {label}
-    </span>
-    <div className="min-w-0 flex-1">{children}</div>
+  <div className="flex flex-col items-start gap-1.5 border-b border-[#E4E7EC] dark:border-[#3F3F3F] py-3 pl-1.5 last:border-b-0 sm:flex-row sm:items-center sm:gap-3">
+    <div className="flex items-center gap-2.5 sm:w-[182px] sm:shrink-0">
+      <span className="flex shrink-0 items-center text-[#101828] dark:text-neutral-300">{icon}</span>
+      <span className="text-xs font-medium text-[#101828] dark:text-neutral-300">
+        {label}
+      </span>
+    </div>
+    <div className="w-full min-w-0 sm:flex-1">{children}</div>
   </div>
 )
 
@@ -210,7 +212,7 @@ const PersonalInfoCard = ({ profile, t }) => {
       padding="p-5"
       className="!justify-start gap-2.5"
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-[#101828] dark:text-white">
           {ins.approvedPersonalInfo || "Thông tin cá nhân"}
         </h2>
@@ -427,7 +429,7 @@ const PersonalInfoCard = ({ profile, t }) => {
             containerClassName="!gap-1"
             disabled={isSaving}
           />
-          <div className="flex items-center justify-end gap-2.5">
+          <div className="flex flex-wrap items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={cancelEdit}

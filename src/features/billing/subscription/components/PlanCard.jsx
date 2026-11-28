@@ -177,7 +177,7 @@ const PlanCard = ({
             }
           : { duration: 0.7, ease: "easeOut" }
       }
-      className={`group relative flex w-full h-[calc(100dvh-11rem)] min-h-[550px] max-h-[740px] flex-col overflow-hidden rounded-xl border bg-white dark:bg-[#1A1A1A] transition-[box-shadow,border-color,background-color] duration-500 ${
+      className={`relative flex w-full h-full min-h-[480px] flex-col overflow-hidden rounded-xl border bg-white dark:bg-[#1A1A1A] transition-[box-shadow,border-color,background-color] duration-500 ${
         isHighlighted ? "ring-4 ring-cath-red-700/60 shadow-2xl" : ""
       }`}
       style={{
@@ -201,7 +201,7 @@ const PlanCard = ({
       />
 
       <div className="flex min-h-0 flex-1 flex-col p-6 sm:p-7">
-        <header className="flex shrink-0 items-start justify-between gap-4">
+        <header className="flex flex-wrap shrink-0 items-start justify-between gap-x-3 gap-y-2">
           <div className="flex min-w-0 items-start gap-3">
             <div className="min-w-0">
               <h3 className="break-words text-xl font-extrabold leading-tight tracking-tight text-gray-950 dark:text-white sm:text-2xl">
@@ -256,8 +256,8 @@ const PlanCard = ({
             <span className="h-px flex-1 bg-gray-100 dark:bg-[#3F3F3F]" />
           </div>
 
-          <div className="-mr-6 min-h-0 flex-1 overflow-y-hidden overscroll-contain transition-all duration-300 group-hover:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-transparent group-hover:[scrollbar-width:thin] group-hover:[&::-webkit-scrollbar-thumb]:rounded-full group-hover:[&::-webkit-scrollbar-thumb]:bg-black/15 sm:-mr-7">
-            <ul className="flex min-h-full flex-col gap-3.5 pr-6 sm:pr-7">
+          <div className="min-h-0 flex-1">
+            <ul className="flex min-h-full flex-col gap-3.5">
               {features.map((feature, index) => {
                 const isString = typeof feature === "string";
                 const isBoolean = !isString && feature.valueType === "boolean";
@@ -386,6 +386,5 @@ const PlanCard = ({
 
 export default PlanCard;
 
-// Note: keep this component's parent from forcing an additional page-level
-// overflow if it has a custom height; the internal feature list is the only
-// intended scroll container.
+// Note: the feature list renders in full — no internal scroll container — so
+// laptop viewports (1280x720) never clip a feature line mid-row.

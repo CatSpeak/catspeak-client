@@ -200,7 +200,7 @@ const PaymentPolicy = () => {
               href="https://catspeak.com.vn"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-80 text-[#990011] dark:text-red-400"
+              className="underline break-all text-[#990011] dark:text-[#FF8599] hover:opacity-80"
             >
               catspeak.com.vn
             </a>
@@ -211,7 +211,7 @@ const PaymentPolicy = () => {
               href="https://www.facebook.com/CatSpeak"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-80 text-[#990011] dark:text-red-400"
+              className="underline break-all text-[#990011] dark:text-[#FF8599] hover:opacity-80"
             >
               https://www.facebook.com/CatSpeak
             </a>

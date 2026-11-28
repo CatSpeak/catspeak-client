@@ -131,6 +131,7 @@ const LandingHeader = ({ onGetStarted }) => {
       <MobileSidebar
         isMobileOpen={mobileOpen}
         setIsMobileOpen={setMobileOpen}
+        hideBreakpoint="xl"
       />
     </header>
   )

@@ -60,6 +60,7 @@ export default {
       currentPlan: "Current Plan",
       included: "Included in your plan",
       upgradeTo: "Upgrade to {{planName}}",
+      startFree: "Get started free",
       planFree: "Free Plan",
       planPro: "Room Pro Plan",
       activated: "Activated",
