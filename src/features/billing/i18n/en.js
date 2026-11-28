@@ -1,6 +1,44 @@
 export default {
   billing: {
     billingHistory: "Billing History",
+    payouts: {
+      tabTitle: "Revenue & Payouts",
+      pageTitle: "Revenue & Payouts",
+      pageSubtitle:
+        "Track your payout history and manage the bank account that receives your payouts.",
+      overviewTitle: "Revenue & Payouts",
+      overviewDesc:
+        "Track payout requests and manage the bank account that receives your payouts.",
+      viewRevenue: "View revenue analytics",
+      manageBankAccount: "Manage bank account",
+      historyTitle: "Payout history",
+      loading: "Loading...",
+      retry: "Try again",
+      errorTitle: "Could not load payout history",
+      errorDesc: "Something went wrong while loading data. Please try again.",
+      emptyTitle: "No payout requests yet",
+      emptyDesc:
+        "Once you request a payout, its history and processing status will appear here.",
+      emptyCta: "Link a payout bank account",
+      columns: {
+        reference: "Reference",
+        bank: "Bank & account",
+        requestedAmount: "Requested",
+        platformFee: "Platform fee",
+        netAmount: "Net amount",
+        status: "Status",
+        createdAt: "Created",
+        completedAt: "Completed",
+      },
+      statuses: {
+        PendingApproval: "Pending approval",
+        Approved: "Approved",
+        Processing: "Processing",
+        Succeeded: "Succeeded",
+        Failed: "Failed",
+        Rejected: "Rejected",
+      },
+    },
     planCard: {
       suffixes: {
         MAX_ACTIVE_ROOMS: " rooms",

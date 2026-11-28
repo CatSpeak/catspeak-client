@@ -1,6 +1,44 @@
 export default {
   billing: {
     billingHistory: "Lịch sử thanh toán",
+    payouts: {
+      tabTitle: "Doanh thu & Rút tiền",
+      pageTitle: "Doanh thu & Rút tiền",
+      pageSubtitle:
+        "Theo dõi lịch sử rút tiền và quản lý tài khoản ngân hàng nhận chi trả của bạn.",
+      overviewTitle: "Doanh thu & Rút tiền",
+      overviewDesc:
+        "Theo dõi các yêu cầu rút tiền và quản lý tài khoản ngân hàng nhận chi trả của bạn.",
+      viewRevenue: "Xem thống kê doanh thu",
+      manageBankAccount: "Quản lý tài khoản ngân hàng",
+      historyTitle: "Lịch sử rút tiền",
+      loading: "Đang tải...",
+      retry: "Thử lại",
+      errorTitle: "Không thể tải lịch sử rút tiền",
+      errorDesc: "Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.",
+      emptyTitle: "Chưa có yêu cầu rút tiền nào",
+      emptyDesc:
+        "Khi bạn tạo yêu cầu rút tiền, lịch sử và trạng thái xử lý sẽ hiển thị tại đây.",
+      emptyCta: "Liên kết ngân hàng nhận chi trả",
+      columns: {
+        reference: "Mã tham chiếu",
+        bank: "Ngân hàng & STK",
+        requestedAmount: "Số tiền yêu cầu",
+        platformFee: "Phí nền tảng",
+        netAmount: "Thực nhận",
+        status: "Trạng thái",
+        createdAt: "Ngày tạo",
+        completedAt: "Ngày hoàn tất",
+      },
+      statuses: {
+        PendingApproval: "Chờ duyệt",
+        Approved: "Đã duyệt",
+        Processing: "Đang xử lý",
+        Succeeded: "Thành công",
+        Failed: "Thất bại",
+        Rejected: "Bị từ chối",
+      },
+    },
     planCard: {
       suffixes: {
         MAX_ACTIVE_ROOMS: " phòng",

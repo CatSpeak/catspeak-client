@@ -1,46 +1,70 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { Tabs, TabContent } from "@/shared/components/ui/navigation"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import PaymentHistoryTab from "../components/PaymentHistoryTab"
 import RefundHistoryTab from "../components/RefundHistoryTab"
+import PayoutsTab from "../components/PayoutsTab"
 import PlanUsageTab from "./PlanUsageTab"
-import { Gauge, Receipt, RotateCcw } from "lucide-react"
+import { Gauge, Receipt, RotateCcw, Wallet } from "lucide-react"
+import useRoleOverride from "@/features/courses/components/RoleSwitcher"
 
-const VALID_TABS = ["usage", "payments", "refunds"]
+const BASE_TABS = ["usage", "payments", "refunds"]
 
 const BillingPage = () => {
   const { t } = useLanguage()
   const hist = t.billing?.history || {}
   const refundT = t.refunds || {}
   const pu = t?.planUsage || {}
+  const payoutsT = t.billing?.payouts || {}
+  const { isTeacher } = useRoleOverride()
 
   const [searchParams, setSearchParams] = useSearchParams()
   const tabParam = searchParams.get("tab")
-  const activeTab = VALID_TABS.includes(tabParam) ? tabParam : "usage"
+
+  // ISS-61: payouts is teacher-only. A Student opening /billing?tab=payouts
+  // falls back to "usage" and never mounts PayoutsTab (no history request).
+  const validTabs = useMemo(
+    () => (isTeacher ? [...BASE_TABS, "payouts"] : BASE_TABS),
+    [isTeacher],
+  )
+  const activeTab = validTabs.includes(tabParam) ? tabParam : "usage"
 
   const handleTabChange = (nextTab) => {
+    if (!validTabs.includes(nextTab)) return
     setSearchParams({ tab: nextTab })
   }
 
-  const navTabs = [
-    {
-      id: "usage",
-      label: pu.tabUsage || "Hạn Ngạch & Gói",
-      icon: Gauge,
-    },
-    {
-      id: "payments",
-      label: hist.title || "Lịch sử thanh toán",
-      icon: Receipt,
-    },
-    {
-      id: "refunds",
-      label: refundT.title || "Lịch sử hoàn tiền",
-      icon: RotateCcw,
-    },
-  ]
+  const navTabs = useMemo(
+    () => [
+      {
+        id: "usage",
+        label: pu.tabUsage || "Hạn Ngạch & Gói",
+        icon: Gauge,
+      },
+      {
+        id: "payments",
+        label: hist.title || "Lịch sử thanh toán",
+        icon: Receipt,
+      },
+      {
+        id: "refunds",
+        label: refundT.title || "Lịch sử hoàn tiền",
+        icon: RotateCcw,
+      },
+      ...(isTeacher
+        ? [
+            {
+              id: "payouts",
+              label: payoutsT.tabTitle || "Doanh thu & Rút tiền",
+              icon: Wallet,
+            },
+          ]
+        : []),
+    ],
+    [hist.title, isTeacher, payoutsT.tabTitle, pu.tabUsage, refundT.title],
+  )
 
   const getPageTitle = () => {
     switch (activeTab) {
@@ -48,6 +72,8 @@ const BillingPage = () => {
         return hist.title || "Lịch sử thanh toán"
       case "refunds":
         return refundT.title || "Lịch sử hoàn tiền"
+      case "payouts":
+        return payoutsT.pageTitle || "Doanh thu & Rút tiền"
       case "usage":
       default:
         return pu.pageTitle || "Quản Lý Gói Dịch Vụ & Hạn Ngạch"
@@ -65,6 +91,11 @@ const BillingPage = () => {
         return (
           refundT.subtitle ||
           "Theo dõi tình trạng các yêu cầu hoàn tiền của bạn."
+        )
+      case "payouts":
+        return (
+          payoutsT.pageSubtitle ||
+          "Theo dõi lịch sử rút tiền và quản lý tài khoản ngân hàng nhận chi trả."
         )
       case "usage":
       default:
@@ -97,12 +128,13 @@ const BillingPage = () => {
       <div className="p-4 pb-24">
         <TabContent
           activeTab={activeTab}
-          tabOrder={VALID_TABS}
+          tabOrder={validTabs}
           className="w-full"
         >
           {activeTab === "usage" && <PlanUsageTab />}
           {activeTab === "payments" && <PaymentHistoryTab />}
           {activeTab === "refunds" && <RefundHistoryTab />}
+          {activeTab === "payouts" && isTeacher && <PayoutsTab />}
         </TabContent>
       </div>
     </div>

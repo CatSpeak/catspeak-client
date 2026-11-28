@@ -121,7 +121,7 @@ const PurchaseInfoSection = ({ data }) => {
           </div>
           <button
             type="button"
-            onClick={() => navigate("/workspace/explore-courses")}
+            onClick={() => navigate("/workspace/points-and-offers")}
             className="text-[11px] font-semibold text-[#72000D] dark:text-red-400 hover:underline cursor-pointer flex items-center justify-between pt-1 border-t border-[#DEE0E5]/60 dark:border-[#2E2E2E]"
           >
             <span>{isEn ? "Redeem rewards" : "Đổi ưu đãi"}</span>

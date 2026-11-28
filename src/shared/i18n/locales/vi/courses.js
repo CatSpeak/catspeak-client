@@ -451,6 +451,11 @@ export default {
     classLoadFailed: "Không thể tải lớp học này. Vui lòng thử lại.",
     retry: "Thử lại",
     courseUnavailable: "Thông tin khóa học hiện không khả dụng.",
+    courseNotFoundTitle: "Không tìm thấy thông tin khóa học",
+    courseNotFoundDesc:
+      "Khóa học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Hãy khám phá các khóa học khác.",
+    exploreOtherCourses: "Khám phá các khóa học khác",
+    backToCatalog: "Quay lại danh mục",
     refreshing: "Đang làm mới thông tin khóa học",
     refreshingClass: "Đang làm mới thông tin lớp học",
     noClassDescription: "Chưa có thông tin mô tả chi tiết cho lớp học này.",

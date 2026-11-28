@@ -450,6 +450,11 @@ export default {
     classLoadFailed: "This class could not be loaded. Please try again.",
     retry: "Try again",
     courseUnavailable: "Course details are unavailable.",
+    courseNotFoundTitle: "Course not found",
+    courseNotFoundDesc:
+      "This course may have been removed or the link is invalid. Explore other courses instead.",
+    exploreOtherCourses: "Explore other courses",
+    backToCatalog: "Back to catalog",
     refreshing: "Refreshing course details",
     refreshingClass: "Refreshing class details",
     noClassDescription: "No detailed description available for this class.",

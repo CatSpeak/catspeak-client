@@ -3,9 +3,9 @@ import { MainLogo } from "@/shared/assets/icons/logo"
 import FooterBottom from "./FooterBottom"
 
 const quickLinks = [
-  { label: "Vấn đề người học", href: "/#problem" },
-  { label: "Giải pháp CAT SPEAK", href: "/#solutions" },
-  { label: "Tính năng cốt lõi (Room 1-1, AI)", href: "/#features" },
+  { label: "Vấn đề người học", href: "/#learning-barriers" },
+  { label: "Giải pháp CAT SPEAK", href: "/#catspeak-solutions" },
+  { label: "Tính năng cốt lõi (Room 1-1, AI)", href: "/#core-features" },
   { label: "Cách hoạt động", href: "/#how-it-works" },
   { label: "So sánh phương pháp học", href: "/#solutions" },
   { label: "Câu hỏi thường gặp (FAQ)", href: "/#faq" },

@@ -100,7 +100,7 @@ import UserDashboard from "@/features/user/pages/UserDashboard"
 import UserPagesLayout from "@/features/user/layouts/UserPagesLayout"
 // Language routing components
 import LanguageLayout from "./LanguageLayout"
-import { LazyRoute, RootLayout, RootRoute, AiLevelAssessmentRoute } from "./RouteShells"
+import { LazyRoute, RootLayout, RootRoute, AiLevelAssessmentRoute, AuthRedirectRoute } from "./RouteShells"
 
 import SettingIndexRedirect from "./SettingIndexRedirect"
 import { Navigate } from "react-router-dom"
@@ -255,6 +255,9 @@ const CreateVoucherPage = lazy(
 const VoucherDetailPage = lazy(
   () => import("@/features/vouchers/pages/VoucherDetailPage"),
 )
+const TeacherVouchersPage = lazy(
+  () => import("@/features/vouchers/pages/TeacherVouchersPage"),
+)
 const PointsAndOffersPage = lazy(
   () => import("@/features/points-and-offers/pages/PointsAndOffersPage"),
 )
@@ -329,6 +332,14 @@ const routesConfig = [
           {
             index: true,
             element: <RootRoute />,
+          },
+          {
+            path: "login",
+            element: <AuthRedirectRoute mode="login" />,
+          },
+          {
+            path: "register",
+            element: <AuthRedirectRoute mode="register" />,
           },
           {
             path: "reset-password",
@@ -1005,7 +1016,7 @@ const routesConfig = [
               {
                 path: "courses",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <MyCoursesPage />
                     </LazyRoute>
@@ -1015,9 +1026,27 @@ const routesConfig = [
               {
                 path: "classes",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <MyClassesPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "classes/my",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
+                    <Navigate to="/workspace/classes" replace />
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "classes/edit-class/:id",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
+                    <LazyRoute>
+                      <CreateClassPage />
                     </LazyRoute>
                   </RoleGuard>
                 ),
@@ -1041,7 +1070,7 @@ const routesConfig = [
               {
                 path: "teaching-tasks",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <AllTeachingTasksPage />
                     </LazyRoute>
@@ -1051,7 +1080,7 @@ const routesConfig = [
               {
                 path: "teaching-tasks/overview",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <WorkspaceCalendarPage />
                     </LazyRoute>
@@ -1081,7 +1110,7 @@ const routesConfig = [
               {
                 path: "schedule",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <SchedulePage />
                     </LazyRoute>
@@ -1091,7 +1120,7 @@ const routesConfig = [
               {
                 path: "analytics",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <WorkspaceAnalyticsPage />
                     </LazyRoute>
@@ -1101,7 +1130,7 @@ const routesConfig = [
               {
                 path: "analytics/class/:classId",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <ClassAnalyticsDetailPage />
                     </LazyRoute>
@@ -1111,7 +1140,7 @@ const routesConfig = [
               {
                 path: "analytics/class/:classId/student/:studentId",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <StudentAnalyticsDetailPage />
                     </LazyRoute>
@@ -1121,7 +1150,7 @@ const routesConfig = [
               {
                 path: "analytics/class/:classId/session/:sessionId",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <SessionAnalyticsDetailPage />
                     </LazyRoute>
@@ -1145,9 +1174,19 @@ const routesConfig = [
                 ),
               },
               {
+                path: "vouchers",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
+                    <LazyRoute>
+                      <TeacherVouchersPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
                 path: "vouchers/create",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <CreateVoucherPage />
                     </LazyRoute>
@@ -1157,7 +1196,7 @@ const routesConfig = [
               {
                 path: "vouchers/edit/:id",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <CreateVoucherPage />
                     </LazyRoute>
@@ -1167,7 +1206,7 @@ const routesConfig = [
               {
                 path: "vouchers/:id",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <VoucherDetailPage />
                     </LazyRoute>
@@ -1177,7 +1216,7 @@ const routesConfig = [
               {
                 path: "vouchers/detail/:id",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <VoucherDetailPage />
                     </LazyRoute>
@@ -1185,13 +1224,9 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses",
-                element: <Navigate to="/workspace/courses/all" replace />,
-              },
-              {
                 path: "courses/all",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <AllCoursesPage />
                     </LazyRoute>
@@ -1201,7 +1236,7 @@ const routesConfig = [
               {
                 path: "classes/all-classes",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <AllClassesPage />
                     </LazyRoute>
@@ -1211,7 +1246,7 @@ const routesConfig = [
               {
                 path: "courses/create",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <CreateCoursePage />
                     </LazyRoute>
@@ -1221,7 +1256,7 @@ const routesConfig = [
               {
                 path: "courses/edit/:id",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <CreateCoursePage />
                     </LazyRoute>
@@ -1231,7 +1266,7 @@ const routesConfig = [
               {
                 path: "classes/create-class",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <CreateClassPage />
                     </LazyRoute>
@@ -1241,7 +1276,7 @@ const routesConfig = [
               {
                 path: "courses/edit-class/:id",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <CreateClassPage />
                     </LazyRoute>
@@ -1251,7 +1286,7 @@ const routesConfig = [
               {
                 path: "courses/schedule",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
+                  <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
                     <LazyRoute>
                       <SchedulePage />
                     </LazyRoute>

@@ -450,6 +450,11 @@ export default {
     classLoadFailed: "このクラスを読み込めませんでした。もう一度お試しください。",
     retry: "再試行",
     courseUnavailable: "コースの詳細を利用できません。",
+    courseNotFoundTitle: "コース情報が見つかりません",
+    courseNotFoundDesc:
+      "このコースは削除されたか、リンクが無効です。他のコースをご覧ください。",
+    exploreOtherCourses: "他のコースを見る",
+    backToCatalog: "コース一覧に戻る",
     refreshing: "コース詳細を更新中",
     refreshingClass: "クラス詳細を更新中",
     noClassDescription: "このクラスの詳細な説明はありません。",

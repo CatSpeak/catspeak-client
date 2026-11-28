@@ -33,11 +33,15 @@ const ResetPasswordPage = () => {
   const [token, setToken] = useState(queryToken)
 
   const handleSwitchMode = (mode) => {
-    if (mode === "login") {
-      navigate("/", { replace: true })
-    } else {
-      navigate("/", { replace: false })
-    }
+    // ISS-37/ISS-45: hand off to MainLayout's shared auth modal instead of
+    // dropping the user on the landing page with no modal open.
+    navigate("/", {
+      replace: mode === "login",
+      state: {
+        requireLogin: true,
+        authMode: mode === "register" ? "register" : "login",
+      },
+    })
   }
 
   return (
@@ -69,7 +73,12 @@ const ResetPasswordPage = () => {
                 "Mật khẩu của bạn đã được cập nhật thành công."}
             </p>
             <PillButton
-              onClick={() => navigate("/", { replace: true })}
+              onClick={() =>
+                navigate("/", {
+                  replace: true,
+                  state: { requireLogin: true, authMode: "login" },
+                })
+              }
               className="w-full"
             >
               {authText.loginNowButton || "Đăng nhập ngay"}

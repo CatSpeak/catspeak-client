@@ -16,7 +16,6 @@ import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
 import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader"
-import { getCommunityPath } from "@/shared/utils/navigation"
 import {
   TourGuideProvider,
   TourGuideContainer,
@@ -58,22 +57,11 @@ const MainLayout = ({
 
   // Check for reset password intent or login redirect intent
   useEffect(() => {
-    // If we are on the reset-password route OR we have parameters indicating a reset
-    if (location.pathname === "/reset-password") {
-      // Assuming parameters are passed in query string: ?token=...&email=...
+    // ISS-37: /reset-password renders its own standalone ResetPasswordPage, so
+    // MainLayout must NOT open a second modal on top of it. Only the
+    // "?mode=resetPassword" query link (from external email links) opens it.
+    if (searchParams.get("mode") === "resetPassword") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAuthModal((prev) => ({
-        ...prev,
-        isOpen: true,
-        mode: "reset-password",
-        email: "",
-        pendingActivation: false,
-        openNonce: !prev.isOpen ? (prev.openNonce || 0) + 1 : prev.openNonce,
-        redirectAfterLogin: null,
-      }))
-    }
-    // Alternatively, check for "mode" param in query string if backend link is like /?mode=reset
-    else if (searchParams.get("mode") === "resetPassword") {
       setAuthModal((prev) => ({
         ...prev,
         isOpen: true,
@@ -86,17 +74,31 @@ const MainLayout = ({
     }
     // Check for login required redirect via router state
     else if (location.state?.requireLogin) {
+      const authMode = location.state.authMode || "login"
       setAuthModal((prev) => ({
         ...prev,
         isOpen: true,
-        mode: "login",
+        mode: authMode,
         email: "",
         pendingActivation: false,
         openNonce: !prev.isOpen ? (prev.openNonce || 0) + 1 : prev.openNonce,
         redirectAfterLogin: location.state.redirectTo || null,
       }))
+      // ISS-45: consume the one-shot router state so the modal does not pop
+      // open again after being closed / on re-render or query change.
+      navigate(location.pathname + location.search + location.hash, {
+        replace: true,
+        state: null,
+      })
     }
-  }, [location.pathname, searchParams, location.state])
+  }, [
+    location.pathname,
+    location.search,
+    location.hash,
+    location.state,
+    searchParams,
+    navigate,
+  ])
 
   const openAuthModal = (mode = "login", secondArg = null, thirdArg = false) => {
     // Dual-nonce: registerNonce only bumps on fresh open (closed -> open) to
@@ -189,7 +191,7 @@ const MainLayout = ({
           {showHeader &&
             (isLandingExperience ? (
               <LandingHeader
-                onGetStarted={() => navigate(getCommunityPath())}
+                onGetStarted={(mode = "register") => openAuthModal(mode)}
               />
             ) : (
               <MainHeader

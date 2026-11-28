@@ -202,7 +202,7 @@ const TeacherClassOverviewTab = ({
                 )
               }
             }}
-            onViewAll={() => navigate("/workspace/my-calendar")}
+            onViewAll={() => navigate("/workspace/schedule")}
           />
         </div>
 
@@ -212,7 +212,7 @@ const TeacherClassOverviewTab = ({
             viewAllLabel={c.viewAll || "View All"}
             tasks={resolvedTeachingTasks}
             isLoading={resolvedIsLoadingTasks}
-            onViewAll={() => navigate("/workspace/courses/schedule")}
+            onViewAll={() => navigate("/workspace/teaching-tasks")}
             onTaskAction={handleTaskAction}
           />
         </div>

@@ -1,6 +1,8 @@
 import { Suspense, lazy, useEffect } from "react"
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
+import { Navigate, Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
 import LandingPage from "@/features/landing/pages/LandingPage"
+import { useAuth } from "@/features/auth"
+import { getCommunityPath } from "@/shared/utils/navigation"
 import { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import BottomRightStack from "@/shared/components/BottomRightStack"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
@@ -55,6 +57,23 @@ export const RootLayout = () => {
 
 export const RootRoute = () => {
   return <LandingPage />
+}
+
+/**
+ * ISS-45: /login and /register are not separate screens. They send the visitor
+ * back to "/" and ask MainLayout to open the matching auth modal, while
+ * authenticated users are taken straight to the community.
+ */
+export const AuthRedirectRoute = ({ mode = "login" }) => {
+  const { isAuthenticated } = useAuth()
+
+  if (isAuthenticated === true) {
+    return <Navigate to={getCommunityPath()} replace />
+  }
+
+  return (
+    <Navigate to="/" state={{ requireLogin: true, authMode: mode }} replace />
+  )
 }
 
 export const AiLevelAssessmentRoute = () => {

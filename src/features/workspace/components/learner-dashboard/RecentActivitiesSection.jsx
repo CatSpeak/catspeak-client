@@ -46,7 +46,7 @@ const RecentActivitiesSection = ({ activities = [] }) => {
 
         <button
           type="button"
-          onClick={() => navigate("/workspace/profile?tab=activity")}
+          onClick={() => navigate("/workspace/profile?tab=home")}
           className="inline-flex items-center gap-1 text-xs font-semibold text-[#B80514] dark:text-red-400 hover:underline cursor-pointer"
         >
           <span>{isEn ? "View All" : "Xem tất cả"}</span>

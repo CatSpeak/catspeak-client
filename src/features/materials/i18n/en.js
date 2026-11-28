@@ -166,6 +166,13 @@ export default {
     bookmark: "Save",
     edit: "Edit",
     materialNotFound: "Material/Folder not found or not shared publicly",
+    sharedLinkInvalidTitle: "Invalid share link",
+    sharedLinkInvalidDesc: "The share link is incomplete or has been changed.",
+    sharedMaterialLoginTitle: "Sign in to view this shared material",
+    sharedMaterialLoginDesc:
+      "Sign in to view the shared material. After signing in you will be taken straight to it.",
+    loginToView: "Sign in to view",
+    backHome: "Back to home",
     cannotGetShareLink: "Cannot get share link",
     folderDownloadDev: "Folder download feature is under development.",
     nameColumn: "Name",

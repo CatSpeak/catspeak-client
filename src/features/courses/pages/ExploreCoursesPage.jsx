@@ -17,6 +17,7 @@ import {
 import { useGetExploreCoursesQuery } from "@/store/api/coursesApi"
 import { useGetExploreTeachersQuery } from "@/store/api/exploreTeachersApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 import CourseSearchInput from "../components/CourseSearchInput"
@@ -36,7 +37,8 @@ const TAB_TYPES = ["all", "courses", "classes", "teachers"]
 
 const ExploreCoursesPage = () => {
   const { t } = useLanguage()
-  const communityLanguage = localStorage.getItem("communityLanguage") || "en"
+  const communityLanguage =
+    localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY_LANG
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const c = t.courses || {}
@@ -44,11 +46,11 @@ const ExploreCoursesPage = () => {
   const dict = t.nav || {}
 
   const resolvedLanguage = useMemo(() => {
-    const code = (communityLanguage || "en").toLowerCase()
+    const code = (communityLanguage || DEFAULT_COMMUNITY_LANG).toLowerCase()
     if (code === "zh" || code === "chinese") return "chinese"
     if (code === "en" || code === "english") return "english"
     if (code === "ja" || code === "japanese") return "japanese"
-    return "english"
+    return "chinese"
   }, [communityLanguage])
 
   // Filter States
@@ -235,6 +237,7 @@ const ExploreCoursesPage = () => {
     } else {
       setHasMore(incoming.length === PAGE_SIZE)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exploreCatalogQuery.data, currentPage, contentType])
 
   // Infinite Scroll Observer on the 2nd to last item

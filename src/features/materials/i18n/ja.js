@@ -171,6 +171,13 @@ export default {
     bookmark: "保存",
     edit: "編集",
     materialNotFound: "資料・フォルダが見つからないか、公開共有されていません",
+    sharedLinkInvalidTitle: "共有リンクが無効です",
+    sharedLinkInvalidDesc: "共有リンクが不完全か、変更されています。",
+    sharedMaterialLoginTitle: "共有資料の閲覧にはログインが必要です",
+    sharedMaterialLoginDesc:
+      "共有資料を表示するにはログインしてください。ログイン後、この資料へ直接移動します。",
+    loginToView: "ログインして表示",
+    backHome: "ホームへ戻る",
     cannotGetShareLink: "共有リンクを取得できません",
     folderDownloadDev: "フォルダのダウンロード機能は開発中です。",
     nameColumn: "名前",

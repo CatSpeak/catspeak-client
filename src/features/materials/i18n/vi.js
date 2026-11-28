@@ -166,6 +166,13 @@ export default {
     bookmark: "Lưu",
     edit: "Chỉnh sửa",
     materialNotFound: "Tài liệu/Thư mục không tồn tại hoặc không được chia sẻ công khai",
+    sharedLinkInvalidTitle: "Liên kết chia sẻ không hợp lệ",
+    sharedLinkInvalidDesc: "Liên kết chia sẻ không đầy đủ hoặc đã bị thay đổi.",
+    sharedMaterialLoginTitle: "Tài liệu được chia sẻ yêu cầu đăng nhập",
+    sharedMaterialLoginDesc:
+      "Đăng nhập để xem tài liệu được chia sẻ. Sau khi đăng nhập, bạn sẽ được chuyển thẳng đến tài liệu này.",
+    loginToView: "Đăng nhập để xem",
+    backHome: "Về trang chủ",
     cannotGetShareLink: "Không thể lấy liên kết chia sẻ",
     folderDownloadDev: "Chức năng tải thư mục đang được phát triển.",
     nameColumn: "Tên",

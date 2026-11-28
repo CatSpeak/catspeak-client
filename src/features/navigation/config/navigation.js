@@ -118,11 +118,12 @@ export const navSections = [
             icon: LayoutDashboard,
           },
           { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
-          // {
-          //   key: "teachingTasks",
-          //   path: "/workspace/teaching-tasks",
-          //   icon: Briefcase,
-          // },
+          {
+            key: "teachingTasks",
+            path: "/workspace/teaching-tasks",
+            icon: ClipboardCheck,
+          },
+          { key: "schedule", path: "/workspace/schedule", icon: Calendar },
           {
             key: "manageMaterials",
             path: "/workspace/materials",
@@ -221,7 +222,6 @@ export const dockNavGroups = [
 ]
 
 export const TEACHER_ONLY_TABS = [
-  "dashboard",
   "myCourses",
   "myClass",
   "analytics",
@@ -387,7 +387,12 @@ export const navLinks = [
             icon: LayoutDashboard,
           },
           { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
-          // { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+          {
+            key: "teachingTasks",
+            path: "/workspace/teaching-tasks",
+            icon: ClipboardCheck,
+          },
+          { key: "schedule", path: "/workspace/schedule", icon: Calendar },
           {
             key: "manageMaterials",
             path: "/workspace/materials",

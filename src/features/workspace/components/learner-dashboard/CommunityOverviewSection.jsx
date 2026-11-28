@@ -29,7 +29,7 @@ const CommunityOverviewSection = ({ data }) => {
       titleEn: "Created Rooms",
       value: data?.createdRooms?.count || 0,
       subtext: isEn ? "Custom live rooms" : "Phòng luyện nói cá nhân",
-      targetUrl: data?.createdRooms?.targetUrl || "/app/sessions",
+      targetUrl: data?.createdRooms?.targetUrl || "/workspace/rooms",
     },
     {
       id: "challenges",
@@ -40,7 +40,7 @@ const CommunityOverviewSection = ({ data }) => {
       titleEn: "Challenges",
       value: data?.challengesJoined?.count || 0,
       subtext: isEn ? "Contests & practice" : "Thử thách phát biểu",
-      targetUrl: data?.challengesJoined?.targetUrl || "/games",
+      targetUrl: data?.challengesJoined?.targetUrl || "/workspace/reels",
     },
     {
       id: "videos",
@@ -51,7 +51,7 @@ const CommunityOverviewSection = ({ data }) => {
       titleEn: "Videos Posted",
       value: data?.publishedVideos?.count || 0,
       subtext: isEn ? "Speaking reels" : "Reels luyện phản xạ",
-      targetUrl: data?.publishedVideos?.targetUrl || "/reels",
+      targetUrl: data?.publishedVideos?.targetUrl || "/workspace/reels",
     },
     {
       id: "articles",
@@ -62,7 +62,7 @@ const CommunityOverviewSection = ({ data }) => {
       titleEn: "Articles Posted",
       value: data?.publishedArticles?.count || 0,
       subtext: isEn ? "Community posts" : "Bài viết kinh nghiệm",
-      targetUrl: data?.publishedArticles?.targetUrl || "/workspace/profile",
+      targetUrl: data?.publishedArticles?.targetUrl || "/workspace/profile?tab=home",
     },
   ]
 

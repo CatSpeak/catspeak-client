@@ -176,7 +176,7 @@ const transformCourses = (response) =>
     }
   })
 
-const transformCommunity = (response) => {
+export const transformCommunity = (response) => {
   const data = unwrapData(response) || {}
   const newFriendsCount = toNumber(data.newFriendsCount)
 
@@ -193,7 +193,7 @@ const transformCommunity = (response) => {
     },
     challengesJoined: {
       count: toNumber(data.participatedChallengesCount),
-      targetUrl: "/games",
+      targetUrl: "/workspace/reels",
     },
     publishedVideos: {
       count: toNumber(data.publishedVideosCount),
@@ -201,7 +201,7 @@ const transformCommunity = (response) => {
     },
     publishedArticles: {
       count: toNumber(data.publishedPostsCount),
-      targetUrl: "/workspace/profile?tab=posts",
+      targetUrl: "/workspace/profile?tab=home",
     },
   }
 }

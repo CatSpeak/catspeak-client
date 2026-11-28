@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { useState, useEffect } from "react"
 import {
   useParams,
@@ -19,6 +20,26 @@ import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileMaterialsTab from "../components/ProfileMaterialsTab"
 import CompletedClass from "../components/CompletedClass"
+
+export const PROFILE_TAB_ALIASES = {
+  home: "home",
+  posts: "home",
+  activity: "home",
+  friends: "friends",
+  media: "media",
+  documents: "documents",
+  completedClass: "completedClass",
+}
+
+/**
+ * ISS-13: resolves the active profile tab from the URL. A shared material
+ * token always opens the documents tab, and legacy tab names
+ * ("posts"/"activity") fall back to "home" (the post timeline).
+ */
+export const resolveProfileTab = (searchParams) => {
+  if (searchParams.get("sharedMaterialToken")) return "documents"
+  return PROFILE_TAB_ALIASES[searchParams.get("tab")] || "home"
+}
 
 const ProfilePage = () => {
   const { user } = useAuth()
@@ -70,24 +91,27 @@ const ProfilePage = () => {
   const followersCount = isCountsError ? "—" : counts?.followers ?? counts?.Followers ?? 0
   const friendsBadge = !isCountsError && friendsCount > 0 ? friendsCount.toString() : null
 
-  const [searchParams] = useSearchParams()
-  const currentToken = searchParams.get("sharedMaterialToken")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedTab = resolveProfileTab(searchParams)
 
-  const [activeTab, setActiveTab] = useState(
-    currentToken ? "documents" : "home",
-  )
+  const [activeTab, setActiveTab] = useState(requestedTab)
   const [friendsSubTab, setFriendsSubTab] = useState(null)
 
-  const [prevToken, setPrevToken] = useState(currentToken)
-  if (currentToken !== prevToken) {
-    setPrevToken(currentToken)
-    if (currentToken) {
-      setActiveTab("documents")
-    }
+  // Keep the tab in sync when the URL changes (e.g. arriving from the Learner
+  // Dashboard at /workspace/profile/446?tab=friends). Render-time sync avoids
+  // an extra effect pass.
+  const [prevRequestedTab, setPrevRequestedTab] = useState(requestedTab)
+  if (requestedTab !== prevRequestedTab) {
+    setPrevRequestedTab(requestedTab)
+    setActiveTab(requestedTab)
   }
 
   const handleTabChange = (nextTab) => {
     setActiveTab(nextTab)
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set("tab", nextTab)
+    if (nextTab !== "documents") nextParams.delete("sharedMaterialToken")
+    setSearchParams(nextParams, { replace: true })
   }
 
   if (isLoading) return <ProfilePageSkeleton />

@@ -275,6 +275,37 @@ const StudentCourseDetailPage = () => {
     )
   }
 
+  // ISS-73: distinguish a genuinely missing course (404) from transient
+  // network/server errors so guests do not see a misleading "try again" card.
+  const isNotFound =
+    error?.status === 404 ||
+    error?.originalStatus === 404 ||
+    (!error && courseDetail !== undefined && !rawCourse)
+
+  if (isNotFound) {
+    return (
+      <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 px-4 py-20 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-xl font-bold text-[#b20a1c] dark:bg-rose-950/40 dark:text-[#FF6B6B]">
+          !
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+          {scd.courseNotFoundTitle || "Không tìm thấy thông tin khóa học"}
+        </h2>
+        <p className="max-w-md text-sm text-slate-500 dark:text-gray-400">
+          {scd.courseNotFoundDesc ||
+            "Khóa học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Hãy khám phá các khóa học khác."}
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate(exploreHomePath)}
+          className="mt-2 cursor-pointer rounded-2xl bg-[#b20a1c] px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#960817] dark:bg-[#FF6B6B] dark:text-[#1A1A1A] dark:hover:bg-[#ff8585]"
+        >
+          {scd.exploreOtherCourses || "Khám phá các khóa học khác"}
+        </button>
+      </div>
+    )
+  }
+
   if (error || (courseDetail !== undefined && !rawCourse)) {
     return (
       <div
@@ -285,13 +316,22 @@ const StudentCourseDetailPage = () => {
           {scd.courseLoadFailed ||
             "This course could not be loaded. Please try again."}
         </span>
-        <button
-          type="button"
-          onClick={refetch}
-          className="rounded-full bg-[#990011] hover:bg-[#b20a1c] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] px-4 py-2 text-xs font-black text-white transition-colors cursor-pointer"
-        >
-          {scd.retry || "Try again"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={refetch}
+            className="rounded-full bg-[#990011] hover:bg-[#b20a1c] dark:bg-[#FF6B6B] dark:hover:bg-[#ff8585] dark:text-[#1A1A1A] px-4 py-2 text-xs font-black text-white transition-colors cursor-pointer"
+          >
+            {scd.retry || "Try again"}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(exploreHomePath)}
+            className="rounded-full border border-red-300 dark:border-red-800 px-4 py-2 text-xs font-black transition-colors hover:bg-red-100 dark:hover:bg-red-950/50 cursor-pointer"
+          >
+            {scd.backToCatalog || "Quay lại danh mục"}
+          </button>
+        </div>
       </div>
     )
   }

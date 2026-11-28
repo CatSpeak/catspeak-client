@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react"
+import { useMemo } from "react"
 import { motion as Motion, useReducedMotion } from "framer-motion"
 import { getScrollRevealVariants, getScrollTransition } from "@/shared/constants/motion"
-import { LoginPopup, RegisterPopup, VerifyEmailOtpPopup } from "@/features/auth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 import HeroSection from "@/features/landing/components/HeroSection"
 import PartnerNetworkSection from "@/features/landing/components/PartnerNetworkSection"
 // import NewsSection from "@/features/landing/components/NewsSection"
@@ -48,90 +48,10 @@ const SectionReveal = ({ children, className = "" }) => {
 
 const LandingPage = () => {
   const prefersReducedMotion = useReducedMotion()
-  const [authModal, setAuthModal] = useState({
-    isOpen: false,
-    mode: "login",
-    email: "",
-    pendingActivation: false,
-    registerNonce: 0,
-    verifyNonce: 0,
-    openNonce: 0,
-  })
-
-  const openAuthModal = (mode = "login", email = "", pendingActivation = false) =>
-    setAuthModal((prev) => {
-      const isFreshOpen = !prev.isOpen
-      let registerNonce = prev.registerNonce || 0
-      let verifyNonce = prev.verifyNonce || 0
-      let openNonce = prev.openNonce || 0
-
-      if (mode === "register") {
-        if (isFreshOpen) registerNonce++
-      } else if (mode === "verify-email") {
-        if (isFreshOpen || prev.mode !== "verify-email") verifyNonce++
-        if (isFreshOpen) openNonce++
-      } else {
-        if (isFreshOpen) openNonce++
-      }
-
-      return {
-        isOpen: true,
-        mode,
-        email,
-        pendingActivation: !!pendingActivation,
-        registerNonce,
-        verifyNonce,
-        openNonce,
-      }
-    })
-
-  const closeAuthModal = () =>
-    setAuthModal((prev) => ({
-      ...prev,
-      isOpen: false,
-      email: "",
-      pendingActivation: false,
-    }))
-
-  const switchAuthMode = (mode, email = "", pendingActivation = false) =>
-    openAuthModal(mode, email, pendingActivation)
-
-  const renderAuthPopup = () => {
-    if (!authModal.isOpen) return null
-
-    if (authModal.mode === "register") {
-      return (
-        <RegisterPopup
-          key={`register-${authModal.registerNonce}`}
-          open={true}
-          onClose={closeAuthModal}
-          onSwitchMode={switchAuthMode}
-        />
-      )
-    }
-
-    if (authModal.mode === "verify-email") {
-      return (
-        <VerifyEmailOtpPopup
-          key={`verify-email-${authModal.verifyNonce}`}
-          open={true}
-          email={authModal.email}
-          pendingActivation={authModal.pendingActivation}
-          onClose={closeAuthModal}
-          onSwitchMode={switchAuthMode}
-        />
-      )
-    }
-
-    return (
-      <LoginPopup
-        key="login"
-        open={true}
-        onClose={closeAuthModal}
-        onSwitchMode={switchAuthMode}
-      />
-    )
-  }
+  // ISS-05: the landing page shares MainLayout's AuthModalContext so every
+  // auth mode (login/register/forgot/reset-password/verify-email) resolves to
+  // the same <Auth /> instance that already includes ResetPasswordPopup.
+  const { openAuthModal } = useAuthModal()
 
   return (
     <div className="flex flex-col w-full mx-auto overflow-hidden">
@@ -216,8 +136,6 @@ const LandingPage = () => {
         <LandingContactSection />
       </SectionReveal>
 
-      {/* Auth Modal */}
-      {renderAuthPopup()}
     </div>
   )
 }

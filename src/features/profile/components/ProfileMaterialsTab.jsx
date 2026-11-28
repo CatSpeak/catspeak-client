@@ -31,6 +31,7 @@ import BulkActionBar from "../../materials/components/teaching-material/BulkActi
 import FilePreviewModal from "@/shared/components/ui/FilePreviewModal"
 import SaveSharedMaterialModal from "../../materials/components/teaching-material/SaveSharedMaterialModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import useRoleOverride from "@/features/courses/components/RoleSwitcher"
 import { downloadFolderAsZip } from "@/features/materials/utils/zipDownloader"
 import {
   formatSize,
@@ -41,6 +42,7 @@ import {
 
 const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const { t } = useLanguage()
+  const { isTeacher } = useRoleOverride()
   const navigate = useNavigate()
   const { formatDate } = useTimezone()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -101,9 +103,14 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         folderError?.data?.message ||
         t.materials.materialNotFound
       toast.error(errorMsg)
-      searchParams.delete("sharedMaterialToken")
-      setSearchParams(searchParams, { replace: true })
-      navigate("/workspace/materials", { replace: true })
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete("sharedMaterialToken")
+      setSearchParams(nextParams, { replace: true })
+      // ISS-73: /workspace/materials is teacher-only. Students must stay on
+      // their profile instead of being pushed into the teacher 404 route.
+      if (isTeacher) {
+        navigate("/workspace/materials", { replace: true })
+      }
       return
     }
 
@@ -146,6 +153,8 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
     searchParams,
     setSearchParams,
     navigate,
+    isTeacher,
+    targetAccountId,
     t,
   ])
 

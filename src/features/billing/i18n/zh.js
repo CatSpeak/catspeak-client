@@ -1,6 +1,41 @@
 export default {
   billing: {
     billingHistory: "账单历史",
+    payouts: {
+      tabTitle: "收入与提现",
+      pageTitle: "收入与提现",
+      pageSubtitle: "查看提现记录并管理接收付款的银行账户。",
+      overviewTitle: "收入与提现",
+      overviewDesc: "查看提现申请并管理接收付款的银行账户。",
+      viewRevenue: "查看收入统计",
+      manageBankAccount: "管理银行账户",
+      historyTitle: "提现记录",
+      loading: "加载中...",
+      retry: "重试",
+      errorTitle: "无法加载提现记录",
+      errorDesc: "加载数据时出错，请重试。",
+      emptyTitle: "暂无提现申请",
+      emptyDesc: "创建提现申请后，记录与处理状态将显示在此处。",
+      emptyCta: "绑定收款银行账户",
+      columns: {
+        reference: "参考编号",
+        bank: "银行与账号",
+        requestedAmount: "申请金额",
+        platformFee: "平台费用",
+        netAmount: "实际到账",
+        status: "状态",
+        createdAt: "创建时间",
+        completedAt: "完成时间",
+      },
+      statuses: {
+        PendingApproval: "待审核",
+        Approved: "已批准",
+        Processing: "处理中",
+        Succeeded: "成功",
+        Failed: "失败",
+        Rejected: "已拒绝",
+      },
+    },
     planCard: {
       suffixes: {
         MAX_ACTIVE_ROOMS: " 个房间",

@@ -1,6 +1,41 @@
 export default {
   billing: {
     billingHistory: "支払い履歴",
+    payouts: {
+      tabTitle: "収益と出金",
+      pageTitle: "収益と出金",
+      pageSubtitle: "出金履歴を確認し、受取用の銀行口座を管理します。",
+      overviewTitle: "収益と出金",
+      overviewDesc: "出金リクエストを確認し、受取用の銀行口座を管理します。",
+      viewRevenue: "収益分析を見る",
+      manageBankAccount: "銀行口座を管理",
+      historyTitle: "出金履歴",
+      loading: "読み込み中...",
+      retry: "再試行",
+      errorTitle: "出金履歴を読み込めませんでした",
+      errorDesc: "データの読み込み中にエラーが発生しました。もう一度お試しください。",
+      emptyTitle: "出金リクエストはまだありません",
+      emptyDesc: "出金を申請すると、履歴と処理状況がここに表示されます。",
+      emptyCta: "受取用銀行口座を登録",
+      columns: {
+        reference: "参照番号",
+        bank: "銀行・口座番号",
+        requestedAmount: "申請金額",
+        platformFee: "プラットフォーム手数料",
+        netAmount: "受取額",
+        status: "ステータス",
+        createdAt: "作成日時",
+        completedAt: "完了日時",
+      },
+      statuses: {
+        PendingApproval: "承認待ち",
+        Approved: "承認済み",
+        Processing: "処理中",
+        Succeeded: "成功",
+        Failed: "失敗",
+        Rejected: "却下",
+      },
+    },
     planCard: {
       suffixes: {
         MAX_ACTIVE_ROOMS: " ルーム",
