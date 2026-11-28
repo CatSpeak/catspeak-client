@@ -63,6 +63,7 @@ export default {
       upgradeToPro: "Nâng cấp Pro",
       requiredBadge: "Bắt buộc",
       proBadge: "Pro",
+      unlocksFeature: "Mở khóa {{featureName}}",
       startFree: "Bắt đầu miễn phí",
       planFree: "Gói Free",
       planPro: "Gói Room Pro",

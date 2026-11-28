@@ -34,6 +34,7 @@ import viRecordings from "@/shared/i18n/locales/vi/recordings"
 import enRecordings from "@/shared/i18n/locales/en/recordings"
 import zhRecordings from "@/shared/i18n/locales/zh/recordings"
 import jaRecordings from "@/shared/i18n/locales/ja/recordings"
+import { billingTranslations } from "@/features/billing/i18n"
 
 const dicts = {
   rooms: { vi: viRooms, en: enRooms, zh: zhRooms, ja: jaRooms },
@@ -187,6 +188,21 @@ describe("ISS-11/35/48/69/75: i18n keys exist in vi, en, zh and ja", () => {
         common.comingSoon.goToDashboard,
         `${lang}.comingSoon.goToDashboard`,
       ).toBeTruthy()
+    }
+  })
+
+  it("billing unlock badge is translated in vi, en, zh and ja", () => {
+    const expected = {
+      vi: "Mở khóa {{featureName}}",
+      en: "Unlocks {{featureName}}",
+      zh: "解锁 {{featureName}}",
+      ja: "{{featureName}}をアンロック",
+    }
+    for (const lang of ["vi", "en", "zh", "ja"]) {
+      expect(
+        billingTranslations[lang].billing.pricing.unlocksFeature,
+        `${lang}.billing.pricing.unlocksFeature`,
+      ).toBe(expected[lang])
     }
   })
 

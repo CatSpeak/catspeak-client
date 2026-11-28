@@ -20,6 +20,7 @@ import {
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
+import { getCommunityPath } from "@/shared/utils/navigation"
 import {
   isBreakoutSupported,
   isSpeakingTimeBalanceSupported,
@@ -34,7 +35,7 @@ const MoreMenuDesktopView = ({
   setShowGameHistory,
   setShowSubtitlePicker,
 }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const {
     showParticipants,
     setShowParticipants,
@@ -51,6 +52,8 @@ const MoreMenuDesktopView = ({
     isAISession,
     enterPiP,
     isPiPSupported,
+    isPiP,
+    exitPiP,
     room,
     showBreakout,
     setShowBreakout,
@@ -330,7 +333,11 @@ const MoreMenuDesktopView = ({
       {(isPiPSupported ?? "documentPictureInPicture" in window) && (
         <MenuItem
           onClick={() => {
-            enterPiP?.()
+            if (isPiP) {
+              exitPiP?.()
+            } else {
+              enterPiP?.(getCommunityPath(language))
+            }
             setShowMoreMenu(false)
           }}
           icon={<MonitorUp size={20} />}

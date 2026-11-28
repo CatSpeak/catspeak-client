@@ -234,8 +234,8 @@ export const useCallActions = ({
             width: 400,
             height: 300,
           });
-          if (!pipWin) {
-            enterInAppFallback("requestWindow returned null");
+          if (!pipWin || pipWin.closed) {
+            enterInAppFallback("requestWindow returned no usable window");
             return;
           }
           window.__pipWindow = pipWin;
@@ -244,6 +244,11 @@ export const useCallActions = ({
           dispatch(setPiPAction(true));
           setActiveSidePanel(null);
           if (explicitTarget && navigate) navigate(explicitTarget);
+          toast.success(
+            t?.rooms?.videoCall?.pipActivated ||
+              "Picture-in-Picture activated",
+            { icon: "🪟", duration: 4000 },
+          );
           return;
         } catch (err) {
           enterInAppFallback(err);

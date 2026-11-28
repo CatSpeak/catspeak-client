@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
+import { toast } from "react-hot-toast"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { getCommunityPath } from "@/shared/utils/navigation"
+import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import { store } from "@store"
 import { setPipFallbackMode } from "@/store/slices/videoCallSlice"
 
@@ -11,11 +15,20 @@ import { setPipFallbackMode } from "@/store/slices/videoCallSlice"
 const DocumentPiPWindow = ({ children }) => {
   const [pipWindow, setPipWindow] = useState(null)
   const { returnToCall } = useGlobalVideoCall()
+  const { t, language } = useLanguage()
+  const tRef = useRef(t)
+  const languageRef = useRef(language)
+
+  useEffect(() => {
+    tRef.current = t
+    languageRef.current = language
+  }, [t, language])
 
   useEffect(() => {
     let activePipWindow = null
     let themeObserver = null
     let isMounted = true
+    let openedAt = 0
 
     const openPiP = async () => {
       try {
@@ -49,6 +62,8 @@ const DocumentPiPWindow = ({ children }) => {
           window.__activePipWindow = null
           return
         }
+
+        openedAt = Date.now()
 
         // Copy styles from main document to PiP document using cloneNode
         const styleElements = document.querySelectorAll(
@@ -88,6 +103,25 @@ const DocumentPiPWindow = ({ children }) => {
         // Listen for user closing the OS window
         const handlePageHide = () => {
           if (!isMounted) return
+          // A window that dies right after opening means the browser/WebView
+          // refused Document PiP. Do not silently return to the call page —
+          // surface the in-app widget and leave /meet if we are still there.
+          const livedMs = Date.now() - openedAt
+          if (livedMs < 500) {
+            store.dispatch(setPipFallbackMode(true))
+            window.__activePipWindow = null
+            window.__pipWindow = null
+            const navigate = getNavigate()
+            if (navigate && window.location.pathname.includes("/meet/")) {
+              navigate(getCommunityPath(languageRef.current))
+            }
+            toast.success(
+              tRef.current?.rooms?.videoCall?.pipFallback ||
+                "Picture-in-Picture is blocked by your browser — showing the in-app mini player instead.",
+              { icon: "🪟", duration: 5000 },
+            )
+            return
+          }
           // If the user manually closes the window from OS (X button), return them to call
           returnToCall()
         }

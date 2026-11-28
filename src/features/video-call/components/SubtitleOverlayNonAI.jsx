@@ -161,7 +161,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
               </IconButton>
 
               {showSizePicker && (
-                <div className="absolute top-full right-0 mt-1 z-50 min-w-[170px] max-h-[320px] overflow-y-auto bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white rounded-xl shadow-xl border border-border dark:border-[#3F3F3F] py-1.5 flex flex-col pointer-events-auto">
+                <div className="absolute bottom-full right-0 mb-2 z-50 min-w-[170px] max-h-[min(280px,42dvh)] overflow-y-auto bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-white rounded-xl shadow-xl border border-border dark:border-[#3F3F3F] py-1.5 flex flex-col pointer-events-auto">
                   {FONT_SIZES.map((size) => {
                     const isSelected = fontSize === size.id
                     return (

@@ -61,6 +61,7 @@ export default {
       upgradeToPro: "Proにアップグレード",
       requiredBadge: "必須",
       proBadge: "Pro",
+      unlocksFeature: "{{featureName}}をアンロック",
       startFree: "無料で始める",
       planFree: "フリープラン",
       planPro: "Room Proプラン",

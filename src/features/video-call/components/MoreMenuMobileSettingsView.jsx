@@ -13,6 +13,7 @@ import {
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
+import { getCommunityPath } from "@/shared/utils/navigation"
 import ListItem from "@/shared/components/ui/ListItem"
 
 const MoreMenuMobileSettingsView = ({
@@ -22,7 +23,7 @@ const MoreMenuMobileSettingsView = ({
   setShowGameHistory,
   setShowChooseLayout,
 }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const {
     isAISession,
     showBreakout,
@@ -35,6 +36,8 @@ const MoreMenuMobileSettingsView = ({
     setShowRoomSettings,
     enterPiP,
     isPiPSupported,
+    isPiP,
+    exitPiP,
   } = useGlobalVideoCall()
 
   const { canStartGame, gameDisabledReason } = useGameControlStatus()
@@ -47,7 +50,9 @@ const MoreMenuMobileSettingsView = ({
         leftContent={<ChevronLeft size={24} />}
         className="border-b border-border dark:border-[#3F3F3F] font-semibold"
       >
-        {t?.rooms?.videoCall?.backBtn || "Back"}
+        {t?.rooms?.videoCall?.recording?.backBtn ||
+          t?.rooms?.videoCall?.backBtn ||
+          "Quay lại"}
       </ListItem>
 
       <div className="max-h-[70dvh] overflow-y-auto flex flex-col no-scrollbar pb-4 pb-safe">
@@ -129,7 +134,11 @@ const MoreMenuMobileSettingsView = ({
         {(isPiPSupported ?? "documentPictureInPicture" in window) && (
           <ListItem
             onClick={() => {
-              enterPiP?.()
+              if (isPiP) {
+                exitPiP?.()
+              } else {
+                enterPiP?.(getCommunityPath(language))
+              }
               setShowMoreMenu(false)
             }}
             hoverEffect={true}

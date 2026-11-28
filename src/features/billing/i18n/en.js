@@ -63,6 +63,7 @@ export default {
       upgradeToPro: "Upgrade to Pro",
       requiredBadge: "Required",
       proBadge: "Pro",
+      unlocksFeature: "Unlocks {{featureName}}",
       startFree: "Get started free",
       planFree: "Free Plan",
       planPro: "Room Pro Plan",

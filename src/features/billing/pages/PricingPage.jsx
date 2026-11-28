@@ -275,7 +275,10 @@ const PricingPage = () => {
                     isHighlighted={isTargetHighlighted}
                     highlightBadge={
                       isTargetHighlighted && featureName
-                        ? `Unlocks ${featureName}`
+                        ? (
+                            t.billing?.pricing?.unlocksFeature ||
+                            "Mở khóa {{featureName}}"
+                          ).replace("{{featureName}}", featureName)
                         : undefined
                     }
                     actionLabel={

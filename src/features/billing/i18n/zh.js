@@ -60,6 +60,7 @@ export default {
       upgradeToPro: "升级 Pro",
       requiredBadge: "必选",
       proBadge: "Pro",
+      unlocksFeature: "解锁 {{featureName}}",
       startFree: "免费开始",
       planFree: "免费版",
       planPro: "Room Pro版",

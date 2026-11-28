@@ -12,6 +12,7 @@ const state = vi.hoisted(() => ({
   isPro: false,
 }))
 const openAuthModal = vi.hoisted(() => vi.fn())
+const locationState = vi.hoisted(() => ({ current: null }))
 
 const plans = vi.hoisted(() => [
   {
@@ -89,6 +90,7 @@ const t = {
       popular: "Phổ biến",
       processing: "Đang xử lý...",
       upgradeTo: "Nâng cấp lên {{planName}}",
+      unlocksFeature: "Mở khóa {{featureName}}",
       startFree: "Bắt đầu miễn phí",
     },
   },
@@ -100,9 +102,50 @@ vi.mock("@/shared/context/LanguageContext", () => ({
 
 vi.mock("react-router-dom", async (importOriginal) => ({
   ...(await importOriginal()),
-  useLocation: () => ({ pathname: "/pricing", state: null }),
+  useLocation: () => ({ pathname: "/pricing", state: locationState.current }),
   useNavigate: () => vi.fn(),
 }))
+
+// Strip framer-motion animations: happy-dom cancels WAAPI animations on
+// teardown and surfaces an AbortError that would fail the whole file.
+vi.mock("framer-motion", async (importOriginal) => {
+  const actual = await importOriginal()
+  const React = await import("react")
+  const MOTION_ONLY_PROPS = new Set([
+    "initial",
+    "animate",
+    "exit",
+    "transition",
+    "variants",
+    "whileHover",
+    "whileTap",
+    "whileInView",
+    "whileFocus",
+    "whileDrag",
+    "layout",
+    "layoutId",
+    "layoutDependency",
+    "custom",
+    "drag",
+    "dragConstraints",
+    "onAnimationStart",
+    "onAnimationComplete",
+    "onUpdate",
+  ])
+  const strip = ({ children, ...props }) => {
+    const domProps = {}
+    for (const [key, value] of Object.entries(props)) {
+      if (!MOTION_ONLY_PROPS.has(key)) domProps[key] = value
+    }
+    return React.createElement("div", domProps, children)
+  }
+  return {
+    ...actual,
+    motion: new Proxy({}, { get: () => strip }),
+    AnimatePresence: ({ children }) =>
+      React.createElement(React.Fragment, null, children),
+  }
+})
 
 import PricingPage from "./PricingPage"
 
@@ -113,6 +156,7 @@ describe("ISS-38: /pricing guest state and layout", () => {
     state.isAuthenticated = false
     state.planName = ""
     state.isPro = false
+    locationState.current = null
     openAuthModal.mockClear()
   })
 
@@ -171,5 +215,26 @@ describe("ISS-38: /pricing guest state and layout", () => {
     expect(html).toContain("Gói hiện tại")
     expect(html).toContain("Đã kích hoạt")
     expect(html).not.toContain(">Bắt đầu miễn phí<")
+  })
+
+  it("renders the localized unlock badge instead of a hardcoded English label", async () => {
+    vi.useFakeTimers()
+    locationState.current = { highlightPlan: "Pro", featureName: "Phòng học" }
+
+    const container = document.createElement("div")
+    document.body.appendChild(container)
+    const root = createRoot(container)
+
+    await act(async () => {
+      root.render(<PricingPage />)
+    })
+    act(() => {
+      vi.advanceTimersByTime(400)
+    })
+
+    expect(container.textContent).toContain("Mở khóa Phòng học")
+    expect(container.textContent).not.toContain("Unlocks")
+
+    vi.useRealTimers()
   })
 })
