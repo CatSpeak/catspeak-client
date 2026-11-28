@@ -92,18 +92,36 @@ const ProfilePage = () => {
   const friendsBadge = !isCountsError && friendsCount > 0 ? friendsCount.toString() : null
 
   const [searchParams, setSearchParams] = useSearchParams()
-  const requestedTab = resolveProfileTab(searchParams)
+  // R1-1: track the tab query and the shared-material token separately. When
+  // ProfileMaterialsTab finishes and removes the token, the removed token must
+  // NOT pull the active tab from "documents" back to "home" (that would unmount
+  // the tab and kill the material modal that was just opened).
+  const tabParam = searchParams.get("tab")
+  const currentToken = searchParams.get("sharedMaterialToken")
+  const initialTab = currentToken
+    ? "documents"
+    : PROFILE_TAB_ALIASES[tabParam] || "home"
 
-  const [activeTab, setActiveTab] = useState(requestedTab)
+  const [activeTab, setActiveTab] = useState(initialTab)
   const [friendsSubTab, setFriendsSubTab] = useState(null)
 
-  // Keep the tab in sync when the URL changes (e.g. arriving from the Learner
-  // Dashboard at /workspace/profile/446?tab=friends). Render-time sync avoids
-  // an extra effect pass.
-  const [prevRequestedTab, setPrevRequestedTab] = useState(requestedTab)
-  if (requestedTab !== prevRequestedTab) {
-    setPrevRequestedTab(requestedTab)
-    setActiveTab(requestedTab)
+  // Render-time sync avoids an extra effect pass.
+  const [prevTabParam, setPrevTabParam] = useState(tabParam)
+  const [prevToken, setPrevToken] = useState(currentToken)
+
+  // A newly seen (truthy) token always opens the documents tab.
+  if (currentToken !== prevToken) {
+    setPrevToken(currentToken)
+    if (currentToken) {
+      setActiveTab("documents")
+    }
+    // currentToken === null: keep the current tab untouched.
+  }
+
+  // Only an actual ?tab= change updates the active tab (posts/activity → home).
+  if (tabParam !== prevTabParam) {
+    setPrevTabParam(tabParam)
+    setActiveTab(PROFILE_TAB_ALIASES[tabParam] || "home")
   }
 
   const handleTabChange = (nextTab) => {

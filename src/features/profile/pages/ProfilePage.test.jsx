@@ -1,6 +1,94 @@
 // @vitest-environment happy-dom
-import { describe, expect, it } from "vitest"
-import { PROFILE_TAB_ALIASES, resolveProfileTab } from "./ProfilePage"
+import React, { act } from "react"
+import { createRoot } from "react-dom/client"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import ProfilePage, { PROFILE_TAB_ALIASES, resolveProfileTab } from "./ProfilePage"
+
+const mocks = vi.hoisted(() => ({
+  params: new URLSearchParams(),
+  navigate: vi.fn(),
+}))
+
+vi.mock("react-router-dom", async (importOriginal) => ({
+  ...(await importOriginal()),
+  useParams: () => ({ accountId: "446" }),
+  useNavigate: () => mocks.navigate,
+  useLocation: () => ({ search: "" }),
+  useSearchParams: () => [mocks.params, vi.fn()],
+}))
+
+vi.mock("@/features/auth", () => ({
+  useAuth: () => ({ user: { accountId: 446 } }),
+}))
+
+vi.mock("@/shared/context/LanguageContext", () => ({
+  useLanguage: () => ({
+    t: {
+      profile: {
+        tabs: {
+          home: "Nhà",
+          friends: "Bạn bè",
+          media: "Video/Ảnh",
+          documents: "Tài liệu",
+          completedClass: "Lớp học đã hoàn thành",
+        },
+      },
+    },
+  }),
+}))
+
+vi.mock("@/store/api/userApi", () => ({
+  useGetPublicProfileQuery: () => ({ data: {}, isLoading: false }),
+}))
+
+vi.mock("@/store/api/social/friendshipApi", () => ({
+  useGetFriendshipCountsQuery: () => ({
+    data: {},
+    isError: false,
+    refetch: vi.fn(),
+  }),
+}))
+
+vi.mock("../components/SocialProfileHeader", () => ({
+  default: () => <header data-testid="profile-header" />,
+}))
+vi.mock("../components/ProfilePageSkeleton", () => ({ default: () => null }))
+vi.mock("../components/ProfileHomeTab", () => ({
+  default: () => <div data-testid="home-tab" />,
+}))
+vi.mock("../components/ProfileMediaTab", () => ({
+  default: () => <div data-testid="media-tab" />,
+}))
+vi.mock("../components/ProfileFriendsTab", () => ({
+  default: () => <div data-testid="friends-tab" />,
+}))
+vi.mock("../components/ProfileMaterialsTab", () => ({
+  default: () => <div data-testid="documents-tab" />,
+}))
+vi.mock("../components/CompletedClass", () => ({
+  default: () => <div data-testid="completed-tab" />,
+}))
+vi.mock("@/shared/components/ui/animations/FluentAnimation", () => ({
+  default: ({ children }) => <div>{children}</div>,
+}))
+vi.mock("@/shared/components/ui/navigation/Tabs", () => ({
+  default: ({ activeTab }) => (
+    <div data-testid="active-tab">{activeTab}</div>
+  ),
+  TabContent: ({ children }) => <div>{children}</div>,
+}))
+
+const mount = () => {
+  const container = document.createElement("div")
+  const root = createRoot(container)
+  const render = () => {
+    act(() => {
+      root.render(<ProfilePage />)
+    })
+  }
+  render()
+  return { container, render }
+}
 
 describe("ISS-13: ProfilePage ?tab= normalization", () => {
   it("maps legacy posts/activity aliases to home", () => {
@@ -31,5 +119,49 @@ describe("ISS-13: ProfilePage ?tab= normalization", () => {
       ),
     ).toBe("documents")
     expect(PROFILE_TAB_ALIASES.posts).toBe("home")
+  })
+})
+
+describe("R1-1: shared material token cleanup must not unmount the documents tab", () => {
+  beforeEach(() => {
+    mocks.params = new URLSearchParams()
+    mocks.navigate.mockClear()
+  })
+
+  it("keeps ProfileMaterialsTab mounted after the token is removed from the URL", () => {
+    mocks.params = new URLSearchParams("sharedMaterialToken=valid-tok")
+    const { container, render } = mount()
+
+    expect(container.querySelector('[data-testid="documents-tab"]')).toBeTruthy()
+    expect(container.querySelector('[data-testid="home-tab"]')).toBeNull()
+
+    // ProfileMaterialsTab removes the token after opening the material modal.
+    mocks.params = new URLSearchParams()
+    render()
+
+    expect(container.querySelector('[data-testid="documents-tab"]')).toBeTruthy()
+    expect(container.querySelector('[data-testid="home-tab"]')).toBeNull()
+    expect(container.querySelector('[data-testid="active-tab"]').textContent).toBe(
+      "documents",
+    )
+  })
+
+  it("still follows ?tab=friends and maps ?tab=posts to home", () => {
+    mocks.params = new URLSearchParams("tab=friends")
+    const { container, render } = mount()
+
+    expect(container.querySelector('[data-testid="friends-tab"]')).toBeTruthy()
+    expect(container.querySelector('[data-testid="active-tab"]').textContent).toBe(
+      "friends",
+    )
+
+    mocks.params = new URLSearchParams("tab=posts")
+    render()
+
+    expect(container.querySelector('[data-testid="home-tab"]')).toBeTruthy()
+    expect(container.querySelector('[data-testid="friends-tab"]')).toBeNull()
+    expect(container.querySelector('[data-testid="active-tab"]').textContent).toBe(
+      "home",
+    )
   })
 })

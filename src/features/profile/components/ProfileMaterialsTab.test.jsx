@@ -10,6 +10,18 @@ const mocks = vi.hoisted(() => ({
   isTeacher: false,
   searchParams: new URLSearchParams("sharedMaterialToken=invalid"),
   toastError: vi.fn(),
+  materialResult: {
+    data: null,
+    isError: true,
+    error: { data: { message: "Not found" } },
+    isFetching: false,
+  },
+  folderResult: {
+    data: null,
+    isError: true,
+    error: { data: { message: "Not found" } },
+    isFetching: false,
+  },
 }))
 
 vi.mock("react-router-dom", async (importOriginal) => ({
@@ -35,25 +47,13 @@ vi.mock("@/shared/hooks/useTimezone", () => ({
   useTimezone: () => ({ formatDate: (value) => String(value) }),
 }))
 
-const notFound = { data: { message: "Not found" } }
-
 vi.mock("@/store/api/materialApi", () => ({
   useGetPersonalMaterialsQuery: () => ({ data: null, isLoading: false }),
   useGetFolderTreeQuery: () => ({ data: null, isLoading: false }),
   useRecordMaterialDownloadMutation: () => [vi.fn()],
   useRecordFolderDownloadMutation: () => [vi.fn()],
-  useGetMaterialByShareTokenQuery: () => ({
-    data: null,
-    isError: true,
-    error: notFound,
-    isFetching: false,
-  }),
-  useGetFolderByShareTokenQuery: () => ({
-    data: null,
-    isError: true,
-    error: notFound,
-    isFetching: false,
-  }),
+  useGetMaterialByShareTokenQuery: () => mocks.materialResult,
+  useGetFolderByShareTokenQuery: () => mocks.folderResult,
   useGetPublicMaterialsByUserIdQuery: () => ({ data: null, isLoading: false }),
 }))
 
@@ -128,6 +128,18 @@ describe("ISS-73: ProfileMaterialsTab invalid shared token destination", () => {
     mocks.toastError.mockClear()
     mocks.isTeacher = false
     mocks.searchParams = new URLSearchParams("sharedMaterialToken=invalid")
+    mocks.materialResult = {
+      data: null,
+      isError: true,
+      error: { data: { message: "Not found" } },
+      isFetching: false,
+    }
+    mocks.folderResult = {
+      data: null,
+      isError: true,
+      error: { data: { message: "Not found" } },
+      isFetching: false,
+    }
   })
 
   it("keeps Students on their profile instead of the teacher-only materials route", () => {
@@ -139,6 +151,10 @@ describe("ISS-73: ProfileMaterialsTab invalid shared token destination", () => {
       expect.anything(),
     )
     expect(mocks.setSearchParams).toHaveBeenCalled()
+    // R1-1: the router-owned params object must not be mutated in place.
+    expect(mocks.searchParams.get("sharedMaterialToken")).toBe("invalid")
+    const cleaned = mocks.setSearchParams.mock.calls[0][0]
+    expect(cleaned.get("sharedMaterialToken")).toBeNull()
   })
 
   it("still sends Teachers to /workspace/materials", () => {
@@ -149,5 +165,21 @@ describe("ISS-73: ProfileMaterialsTab invalid shared token destination", () => {
     expect(mocks.navigate).toHaveBeenCalledWith("/workspace/materials", {
       replace: true,
     })
+  })
+
+  it("keeps the documents tab when redirecting to the real owner profile", () => {
+    mocks.materialResult = {
+      data: { data: { owner: { id: 999 }, name: "Shared file" } },
+      isError: false,
+      error: null,
+      isFetching: false,
+    }
+
+    render()
+
+    expect(mocks.navigate).toHaveBeenCalledWith(
+      "/workspace/profile/999?tab=documents&sharedMaterialToken=invalid",
+      { replace: true },
+    )
   })
 })

@@ -55,7 +55,7 @@ const SharedMaterialRedirectPage = () => {
     )
   }
 
-  const materialPath = `/workspace/profile?sharedMaterialToken=${encodeURIComponent(token)}`
+  const materialPath = `/workspace/profile?tab=documents&sharedMaterialToken=${encodeURIComponent(token)}`
 
   if (isAuthenticated) {
     return <Navigate to={materialPath} replace />

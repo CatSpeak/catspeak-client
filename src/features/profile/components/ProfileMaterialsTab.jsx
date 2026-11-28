@@ -123,7 +123,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       const ownerId = data?.owner?.id
       if (ownerId && String(ownerId) !== String(targetAccountId)) {
         navigate(
-          `/workspace/profile/${ownerId}?sharedMaterialToken=${sharedMaterialToken}`,
+          `/workspace/profile/${ownerId}?tab=documents&sharedMaterialToken=${encodeURIComponent(sharedMaterialToken)}`,
           { replace: true },
         )
         return
@@ -136,9 +136,11 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       })
       setIsPublicMaterialModalOpen(true)
 
-      // Clean up the URL to prevent reopening the modal on tab switch
-      searchParams.delete("sharedMaterialToken")
-      setSearchParams(searchParams, { replace: true })
+      // Clean up the URL to prevent reopening the modal on tab switch.
+      // R1-1: clone the params instead of mutating the router-owned object.
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete("sharedMaterialToken")
+      setSearchParams(nextParams, { replace: true })
     }
   }, [
     sharedMaterialToken,

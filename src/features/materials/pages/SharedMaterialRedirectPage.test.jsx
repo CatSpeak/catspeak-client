@@ -84,7 +84,7 @@ describe("ISS-73: SharedMaterialRedirectPage", () => {
     clickByText(container, "Đăng nhập để xem")
     expect(mocks.openAuthModal).toHaveBeenCalledWith(
       "login",
-      "/workspace/profile?sharedMaterialToken=abc%2Fdef%3F",
+      "/workspace/profile?tab=documents&sharedMaterialToken=abc%2Fdef%3F",
     )
   })
 
@@ -95,7 +95,7 @@ describe("ISS-73: SharedMaterialRedirectPage", () => {
     render()
 
     expect(mocks.redirects).toEqual([
-      "/workspace/profile?sharedMaterialToken=token-1",
+      "/workspace/profile?tab=documents&sharedMaterialToken=token-1",
     ])
   })
 })
