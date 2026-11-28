@@ -76,6 +76,21 @@ describe("ISS-16: RoleGuard fallback modes", () => {
     expect(html).not.toContain("secret")
   })
 
+  it("renders a spinner (not a redirect/404) on an unresolved first render", () => {
+    mockRole = { activeRole: null, isLoading: true, isRoleResolved: false }
+
+    const html = renderToStaticMarkup(
+      <RoleGuard allowedRoles={["Teacher"]} fallbackMode="notFound">
+        <div>secret</div>
+      </RoleGuard>,
+    )
+
+    expect(html).toContain('role="status"')
+    expect(html).not.toContain("404")
+    expect(html).not.toContain('data-testid="redirect"')
+    expect(html).not.toContain("secret")
+  })
+
   it("offers a retry instead of an endless spinner when role loading fails", () => {
     const retry = vi.fn()
     mockRole = {

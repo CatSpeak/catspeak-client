@@ -25,6 +25,7 @@ export const useRoleOverride = () => {
     data: accountProfileResponse,
     isLoading: isAccountProfileLoading,
     isFetching: isAccountProfileFetching,
+    isUninitialized: isAccountProfileUninitialized,
     error: accountProfileError,
     refetch: refetchAccountProfile,
   } = useGetProfileQuery(undefined, {
@@ -45,7 +46,12 @@ export const useRoleOverride = () => {
   const isHydratingAccount = Boolean(
     isAuthenticated &&
       !effectiveUser &&
-      (isAccountProfileLoading || isAccountProfileFetching),
+      (isAccountProfileLoading ||
+        isAccountProfileFetching ||
+        // R1-1: on the very first render RTK Query is neither loading nor
+        // fetching yet (`isUninitialized`), so keep the fail-closed spinner
+        // instead of letting guards redirect/404 before hydration starts.
+        (isAccountProfileUninitialized && !accountProfileError)),
   )
   const isRoleResolved = Boolean(isAuthenticated && effectiveUser)
 

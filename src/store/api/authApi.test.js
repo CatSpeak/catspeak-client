@@ -260,4 +260,32 @@ describe("ISS-78: getProfile hydrates state.auth.user", () => {
 
     expect(store.getState().auth.user).toBeNull()
   })
+
+  it("restores localStorage.user even when Redux still holds the same user", async () => {
+    const store = buildStore()
+    const cachedUser = {
+      accountId: 446,
+      accountType: "Student",
+      username: "learner",
+      fullName: "Learner One",
+    }
+    store.dispatch(setCredentials({ user: cachedUser }))
+    localStorage.removeItem("user")
+
+    mockFetchJson({
+      accountId: 446,
+      accountType: "Student",
+      username: "learner",
+      fullName: "Learner One",
+    })
+
+    await store.dispatch(authApi.endpoints.getProfile.initiate()).unwrap()
+
+    await vi.waitFor(() => expect(localStorage.getItem("user")).not.toBeNull())
+    expect(JSON.parse(localStorage.getItem("user"))).toMatchObject({
+      accountId: 446,
+      username: "learner",
+    })
+    expect(store.getState().auth.user).toMatchObject({ accountId: 446 })
+  })
 })

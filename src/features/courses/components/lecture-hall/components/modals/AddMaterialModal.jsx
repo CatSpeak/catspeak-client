@@ -107,7 +107,10 @@ const AddMaterialModal = ({
     e.preventDefault()
 
     if (!title.trim()) {
-      setErrors((prev) => ({ ...prev, title: true }))
+      setErrors((prev) => ({
+        ...prev,
+        title: dict.toastTitleRequired || "Vui lòng nhập tiêu đề tài liệu!",
+      }))
       toast.error(dict.toastTitleRequired || "Vui lòng nhập tiêu đề tài liệu!")
       return
     }
@@ -121,7 +124,7 @@ const AddMaterialModal = ({
     setErrors({})
 
     onSubmit({
-      title,
+      title: title.trim(),
       files: selectedFiles,
       isVisible,
     })
@@ -182,19 +185,28 @@ const AddMaterialModal = ({
         </div>
       }
     >
-      <form id="add-material-form" onSubmit={handleSubmit} className="space-y-5">
+      <form
+        id="add-material-form"
+        noValidate
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
         {/* Title Input */}
         <div>
-          <label className="block text-sm font-semibold text-[#374151] dark:text-gray-300 mb-1.5">
+          <label
+            htmlFor="add-material-title"
+            className="block text-sm font-semibold text-[#374151] dark:text-gray-300 mb-1.5"
+          >
             {dict.materialName || "Tiêu đề"}
           </label>
           <TextInput
+            id="add-material-title"
             required
             value={title}
             onChange={(e) => {
               setTitle(e.target.value)
               if (errors.title) {
-                setErrors((prev) => ({ ...prev, title: false }))
+                setErrors((prev) => ({ ...prev, title: "" }))
               }
             }}
             error={errors.title}

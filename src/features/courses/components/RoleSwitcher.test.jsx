@@ -154,4 +154,39 @@ describe("ISS-78: useRoleOverride hydrates the role from /Account/profile", () =
     expect(role.activeRole).toBeNull()
     expect(role.isTeacher).toBeNull()
   })
+
+  it("keeps the fail-closed loading state on the first uninitialized render", () => {
+    mocks.auth = { user: null, isAuthenticated: true, refreshToken: "rt" }
+    mocks.accountProfile = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isUninitialized: true,
+      error: undefined,
+    }
+    mocks.userProfile = setQueryResult()
+
+    const role = readRole(renderProbe())
+
+    expect(role.isRoleResolved).toBe(false)
+    expect(role.isLoading).toBe(true)
+    expect(role.activeRole).toBeNull()
+  })
+
+  it("shows the loading state while retrying after a previous error", () => {
+    mocks.auth = { user: null, isAuthenticated: true, refreshToken: "rt" }
+    mocks.accountProfile = {
+      data: undefined,
+      isLoading: false,
+      isFetching: true,
+      isUninitialized: false,
+      error: { status: 500 },
+    }
+    mocks.userProfile = setQueryResult({ isFetching: true })
+
+    const role = readRole(renderProbe())
+
+    expect(role.isLoading).toBe(true)
+    expect(role.hasError).toBe(true)
+  })
 })

@@ -69,6 +69,20 @@ const submitForm = async (container) => {
   })
 }
 
+const selectFile = (container) => {
+  const input = container.querySelector('input[type="file"]')
+  const file = new File(["material"], "slide.pdf", {
+    type: "application/pdf",
+  })
+  Object.defineProperty(input, "files", {
+    value: [file],
+    configurable: true,
+  })
+  act(() => {
+    input.dispatchEvent(new Event("change", { bubbles: true }))
+  })
+}
+
 beforeEach(() => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true
   mocks.onSubmit.mockReset()
@@ -84,19 +98,24 @@ afterEach(() => {
 })
 
 describe("ISS-64: AddMaterialModal submits through the HTML form", () => {
-  it("wires the footer submit button to the form id", () => {
+  it("wires the footer submit button to a non-validating form", () => {
     const container = render()
     const submitButton = [...container.querySelectorAll("button")].find(
       (button) => button.getAttribute("type") === "submit",
     )
+    const form = container.querySelector("#add-material-form")
+    const titleInput = container.querySelector("#add-material-title")
 
     expect(submitButton).toBeTruthy()
     expect(submitButton.getAttribute("form")).toBe("add-material-form")
+    expect(form.noValidate).toBe(true)
+    expect(titleInput).toBeTruthy()
+    expect(container.querySelector('label[for="add-material-title"]')).toBeTruthy()
   })
 
-  it("blocks submission when the title is only whitespace", async () => {
+  it("shows an inline error and toast when the title is only whitespace", async () => {
     const container = render()
-    const titleInput = container.querySelector('input:not([type="file"])')
+    const titleInput = container.querySelector("#add-material-title")
 
     act(() => {
       setInputValue(titleInput, "   ")
@@ -105,11 +124,23 @@ describe("ISS-64: AddMaterialModal submits through the HTML form", () => {
 
     expect(mocks.onSubmit).not.toHaveBeenCalled()
     expect(mocks.toastError).toHaveBeenCalled()
+    expect(container.querySelector('[role="alert"]').textContent).toContain(
+      "Vui lòng nhập tiêu đề tài liệu!",
+    )
+  })
+
+  it("blocks an empty title as well", async () => {
+    const container = render()
+
+    await submitForm(container)
+
+    expect(mocks.onSubmit).not.toHaveBeenCalled()
+    expect(container.querySelector('[role="alert"]')).toBeTruthy()
   })
 
   it("still requires at least one file for a valid title", async () => {
     const container = render()
-    const titleInput = container.querySelector('input:not([type="file"])')
+    const titleInput = container.querySelector("#add-material-title")
 
     act(() => {
       setInputValue(titleInput, "Slide bài giảng")
@@ -117,5 +148,23 @@ describe("ISS-64: AddMaterialModal submits through the HTML form", () => {
     await submitForm(container)
 
     expect(mocks.onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("submits a trimmed title once a valid file is selected", async () => {
+    const container = render()
+    const titleInput = container.querySelector("#add-material-title")
+
+    act(() => {
+      setInputValue(titleInput, "  Slide bài giảng  ")
+    })
+    selectFile(container)
+    await submitForm(container)
+
+    expect(mocks.onSubmit).toHaveBeenCalledTimes(1)
+    expect(mocks.onSubmit).toHaveBeenCalledWith({
+      title: "Slide bài giảng",
+      files: expect.any(Array),
+      isVisible: true,
+    })
   })
 })

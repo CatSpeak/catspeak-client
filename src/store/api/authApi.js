@@ -173,8 +173,21 @@ export const authApi = baseApi.injectEndpoints({
             "fullName",
             "avatarUrl",
           ]
+
+          // R1-2: Redux may still hold the user after another tab cleared
+          // `localStorage.user`. Re-dispatch so the cached identity is restored.
+          let isStorageUserMissing = false
+          try {
+            isStorageUserMissing =
+              typeof localStorage === "undefined" ||
+              !localStorage.getItem("user")
+          } catch {
+            isStorageUserMissing = true
+          }
+
           const needsDispatch =
             !currentAuth.user ||
+            isStorageUserMissing ||
             CORE_FIELDS.some(
               (field) => hydratedUser[field] !== currentAuth.user[field],
             )

@@ -220,10 +220,6 @@ const PaymentPolicy = () => {
             <strong>{policy.section10.contact.hotline}</strong> 0868192604
           </li>
         </ul>
-
-        <p className="text-sm mt-8 text-center uppercase text-[#7A7574] dark:text-neutral-400">
-          {policy.section10.copyright}
-        </p>
       </div>
 
       {/* Section 11: Teacher voucher deposit & refund terms (ISS-76) */}
@@ -250,6 +246,11 @@ const PaymentPolicy = () => {
           ))}
         </ul>
       </div>
+
+      {/* R1-4: copyright always closes the modal, after every policy section. */}
+      <p className="text-sm mt-8 text-center uppercase text-[#7A7574] dark:text-neutral-400">
+        {policy.section10.copyright}
+      </p>
     </div>
   )
 }
