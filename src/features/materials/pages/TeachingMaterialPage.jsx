@@ -300,7 +300,7 @@ const TeachingMaterialPage = () => {
             variant="outline"
             roundedClass="rounded-xl"
             startIcon={<FolderPlus className="h-4 w-4 shrink-0" />}
-            innerClassName="border-[#6E0009] text-[#6E0009] dark:border-[#FF7A8A] dark:text-[#FF7A8A] dark:hover:bg-red-950/30"
+            innerClassName="border-[#6E0009] text-[#6E0009] dark:border-[#FF7A8A] dark:text-[#FF7A8A] dark:hover:bg-red-950/30 dark:group-hover/pill:bg-red-950/30"
             className="!h-10 min-w-0 flex-1 px-2 text-sm md:flex-none md:px-4"
             onClick={() => setIsCreateFolderOpen(true)}
           >
@@ -339,7 +339,7 @@ const TeachingMaterialPage = () => {
             innerClassName={
               filterMode
                 ? ""
-                : "border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727]"
+                : "border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727] dark:group-hover/pill:bg-[#272727] dark:group-hover/pill:border-[#525252]"
             }
             className="!h-10 hidden shrink-0 md:inline-flex"
             startIcon={<ListFilter className="h-4 w-4 shrink-0" />}
@@ -358,7 +358,7 @@ const TeachingMaterialPage = () => {
             innerClassName={
               filterMode
                 ? ""
-                : "border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727]"
+                : "border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727] dark:group-hover/pill:bg-[#272727] dark:group-hover/pill:border-[#525252]"
             }
             className="!h-10 min-w-0 flex-1 px-2 text-sm md:hidden"
             startIcon={<ListFilter className="h-4 w-4 shrink-0" />}
@@ -412,7 +412,7 @@ const TeachingMaterialPage = () => {
                 onClick={toggle}
                 variant="outline"
                 roundedClass="rounded-xl"
-                innerClassName="border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727]"
+                innerClassName="border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727] dark:group-hover/pill:bg-[#272727] dark:group-hover/pill:border-[#525252]"
                 className="!h-10 min-w-0 flex-1 sm:flex-none"
                 endIcon={
                   <ChevronDown

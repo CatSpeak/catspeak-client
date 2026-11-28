@@ -60,14 +60,22 @@ describe("ISS-25 / ISS-28: instructor components use dark-mode surfaces", () => 
     expect(html).toContain("dark:border-[#3F3F3F]")
   })
 
-  it("renders the six OTP boxes with dark variants, including the error border", () => {
+  it("renders the six OTP boxes with dark variants and the non-error border", () => {
     const html = renderToStaticMarkup(
-      <OtpCodeInput value="123456" onChange={vi.fn()} error ariaLabel="OTP" />,
+      <OtpCodeInput value="123456" onChange={vi.fn()} ariaLabel="OTP" />,
     )
 
     expect(html).toContain("dark:bg-[#242424]")
     expect(html).toContain("dark:text-white")
     expect(html).toContain("dark:border-[#3F3F3F]")
+  })
+
+  it("does not apply the neutral dark border on OTP error boxes", () => {
+    const html = renderToStaticMarkup(
+      <OtpCodeInput value="123456" onChange={vi.fn()} error ariaLabel="OTP" />,
+    )
+
     expect(html).toContain("dark:border-red-400")
+    expect(html).not.toContain("dark:border-[#3F3F3F]")
   })
 })

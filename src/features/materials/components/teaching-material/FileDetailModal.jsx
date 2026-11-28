@@ -253,7 +253,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
                 variant="outline"
                 className="flex-1 !text-sm"
                 roundedClass="rounded-xl"
-                innerClassName="text-[#5B403E] border-[#E3BEBA] dark:text-neutral-200 dark:border-[#3F3F3F] dark:hover:bg-[#272727]"
+                innerClassName="text-[#5B403E] border-[#E3BEBA] dark:text-neutral-200 dark:border-[#3F3F3F] dark:hover:bg-[#272727] dark:group-hover/pill:bg-[#272727]"
                 onClick={onMove}
               >
                 {t.materials.move}

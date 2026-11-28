@@ -185,8 +185,10 @@ const ChangeEmailDrawer = ({ open, onClose, currentEmail, t }) => {
                   setNewEmail(event.target.value)
                   setValueError("")
                 }}
-                className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#242424] dark:text-white dark:border-[#3F3F3F] dark:placeholder:text-neutral-500 dark:hover:bg-[#2C2C2C] dark:focus:border-red-400 ${
-                  shownValueError ? "border-red-500" : "border-[#D0D5DD]"
+                className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#242424] dark:text-white dark:placeholder:text-neutral-500 dark:hover:bg-[#2C2C2C] dark:focus:border-red-400 ${
+                  shownValueError
+                    ? "border-red-500 dark:border-red-400"
+                    : "border-[#D0D5DD] dark:border-[#3F3F3F]"
                 }`}
               />
               {shownValueError && (

@@ -141,6 +141,8 @@ const InstructorPage = () => {
   const {
     isTeacher: activeIsTeacher,
     isRoleResolved,
+    error: roleError,
+    retry: retryRole,
     switchRole,
     isSwitching: isSwitchingAccount,
   } = useRoleOverride()
@@ -805,7 +807,9 @@ const InstructorPage = () => {
 
   // --- Render ---
 
-  const isWaitingForRole = !isRoleResolved && !isProfileLoadError
+  const hasRoleResolutionError =
+    !isRoleResolved && Boolean(roleError || isProfileLoadError)
+  const isWaitingForRole = !isRoleResolved && !hasRoleResolutionError
   if (isLoadingInstructor || isLoadingProfile || isWaitingForRole) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -817,7 +821,6 @@ const InstructorPage = () => {
   // Non-404 fetch failure with no data: show an error panel instead of a
   // white disabled form (the form below would render readOnly with no banner).
   const hasProfileError = profileError && !hasNotApplied && !rawApplication
-  const hasRoleResolutionError = !isRoleResolved && isProfileLoadError
   if (hasProfileError || hasRoleResolutionError) {
     return (
       <div className="flex flex-col gap-4">
@@ -834,6 +837,7 @@ const InstructorPage = () => {
             onClick={() => {
               refetchUserProfile?.()
               refetchInstructorProfile?.()
+              retryRole?.()
             }}
             className="mt-3 px-4 py-2 bg-[#990011] text-white text-sm font-medium rounded-lg hover:bg-[#7a000e] transition-colors cursor-pointer"
           >
@@ -881,8 +885,14 @@ const InstructorPage = () => {
                 loading={isSwitchingAccount}
                 loadingText={ins.switching || "Đang chuyển..."}
                 startIcon={!isSwitchingAccount && <GraduationCap size={16} />}
+                bgColor="#047857"
+                textColor="#FFFFFF"
                 className="w-full sm:w-auto sm:flex-shrink-0 shadow-sm"
-                innerClassName="bg-[#047857] hover:bg-[#065F46] text-white"
+                innerClassName={
+                  !isSwitchingAccount
+                    ? "hover:!bg-[#065F46] group-hover/pill:!bg-[#065F46] group-active/pill:!bg-[#064E3B]"
+                    : ""
+                }
               >
                 {ins.switchToTeacherAccount ||
                   "Chuyển sang tài khoản giáo viên"}

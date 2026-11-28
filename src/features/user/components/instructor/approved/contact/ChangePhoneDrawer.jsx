@@ -207,8 +207,10 @@ const ChangePhoneDrawer = ({ open, onClose, currentPhone, t }) => {
                       type="button"
                       onClick={toggle}
                       disabled={isRequesting}
-                      className={`flex h-11 w-[90px] shrink-0 items-center justify-between gap-2 rounded-[7px] border bg-white px-2.5 text-xs text-[#101828] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#242424] dark:text-white dark:border-[#3F3F3F] dark:hover:bg-[#2C2C2C] ${
-                        shownValueError ? "border-red-500" : "border-[#D0D5DD]"
+                      className={`flex h-11 w-[90px] shrink-0 items-center justify-between gap-2 rounded-[7px] border bg-white px-2.5 text-xs text-[#101828] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#242424] dark:text-white dark:hover:bg-[#2C2C2C] ${
+                        shownValueError
+                          ? "border-red-500 dark:border-red-400"
+                          : "border-[#D0D5DD] dark:border-[#3F3F3F]"
                       }`}
                     >
                       {selectedOption?.icon}
@@ -235,8 +237,10 @@ const ChangePhoneDrawer = ({ open, onClose, currentPhone, t }) => {
                     setLocal(digitsOnly(event.target.value))
                     setValueError("")
                   }}
-                  className={`h-11 min-w-0 flex-1 rounded-[7px] border bg-white px-3 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#242424] dark:text-white dark:border-[#3F3F3F] dark:placeholder:text-neutral-500 dark:hover:bg-[#2C2C2C] dark:focus:border-red-400 ${
-                    shownValueError ? "border-red-500" : "border-[#D0D5DD]"
+                  className={`h-11 min-w-0 flex-1 rounded-[7px] border bg-white px-3 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#242424] dark:text-white dark:placeholder:text-neutral-500 dark:hover:bg-[#2C2C2C] dark:focus:border-red-400 ${
+                    shownValueError
+                      ? "border-red-500 dark:border-red-400"
+                      : "border-[#D0D5DD] dark:border-[#3F3F3F]"
                   }`}
                 />
               </div>

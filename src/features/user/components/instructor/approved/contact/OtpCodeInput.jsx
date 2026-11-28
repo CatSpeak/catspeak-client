@@ -47,8 +47,10 @@ const OtpCodeInput = ({
         {slots.map((_, index) => (
           <div
             key={index}
-            className={`flex h-12 w-[42px] items-center justify-center rounded-lg border bg-white text-[15px] font-semibold text-[#101828] dark:bg-[#242424] dark:text-white dark:border-[#3F3F3F] ${
-              error ? "border-red-500 dark:border-red-400" : "border-[#D0D5DD]"
+            className={`flex h-12 w-[42px] items-center justify-center rounded-lg border bg-white text-[15px] font-semibold text-[#101828] dark:bg-[#242424] dark:text-white ${
+              error
+                ? "border-red-500 dark:border-red-400"
+                : "border-[#D0D5DD] dark:border-[#3F3F3F]"
             }`}
           >
             {digits[index] || ""}

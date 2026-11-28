@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
-import React from "react"
+import React, { act } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { createRoot } from "react-dom/client"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import InstructorPage from "./InstructorPage"
 
 const mocks = vi.hoisted(() => ({
@@ -99,6 +100,8 @@ beforeEach(() => {
   mocks.role = {
     isTeacher: false,
     isRoleResolved: true,
+    error: null,
+    retry: vi.fn(),
     switchRole: vi.fn(),
     isSwitching: false,
   }
@@ -135,7 +138,8 @@ describe("ISS-51: /setting/instructor respects the active role", () => {
     expect(mocks.instructorQueryOptions.skip).toBe(true)
     expect(html).toContain("Hồ sơ đã được duyệt")
     expect(html).toContain("dark:bg-emerald-950/35")
-    expect(html).toContain("bg-[#047857]")
+    expect(html).toContain("background-color:#047857")
+    expect(html).toContain("group-hover/pill:!bg-[#065F46]")
   })
 
   it("keeps the Teacher-role request and renders the approved profile page", () => {
@@ -174,5 +178,64 @@ describe("ISS-51: /setting/instructor respects the active role", () => {
 
     expect(mocks.instructorQueryOptions.skip).toBe(false)
     expect(html).toContain('data-testid="instructor-empty-state"')
+  })
+})
+
+describe("R1-1: role resolution error does not hang the spinner", () => {
+  let container
+  let root
+
+  beforeEach(() => {
+    globalThis.IS_REACT_ACT_ENVIRONMENT = true
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+  })
+
+  afterEach(() => {
+    act(() => {
+      root.unmount()
+    })
+    container.remove()
+    document.body.innerHTML = ""
+    vi.clearAllMocks()
+  })
+
+  it("renders the error panel and retries the role when /Account/profile fails", async () => {
+    const retryRole = vi.fn()
+    mocks.role = {
+      isTeacher: null,
+      isRoleResolved: false,
+      error: { status: 500 },
+      retry: retryRole,
+      switchRole: vi.fn(),
+      isSwitching: false,
+    }
+    mocks.userProfile = {
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    }
+
+    await act(async () => {
+      root.render(<InstructorPage />)
+    })
+
+    expect(container.textContent).toContain(
+      "Không tải được hồ sơ giảng viên",
+    )
+    expect(container.querySelector(".animate-spin")).toBeNull()
+
+    const retryButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent.includes("Thử lại"),
+    )
+    expect(retryButton).toBeTruthy()
+
+    await act(async () => {
+      retryButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(retryRole).toHaveBeenCalledTimes(1)
   })
 })
