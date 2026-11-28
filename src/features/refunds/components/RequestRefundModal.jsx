@@ -196,16 +196,16 @@ export default function RequestRefundModal({
         <div className="pb-4 space-y-5">
           {isCheckingEligibility ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Loader2 className="w-10 h-10 text-cath-red-700 animate-spin mb-3" />
-              <p className="text-sm font-medium text-gray-600">
+              <Loader2 className="w-10 h-10 text-cath-red-700 dark:text-red-400 animate-spin mb-3" />
+              <p className="text-sm font-medium text-gray-600 dark:text-neutral-300">
                 {refundT.checkingEligibility ||
                   "Đang kiểm tra điều kiện hoàn tiền..."}
               </p>
             </div>
           ) : (
-            <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-3">
-              <AlertCircle className="w-10 h-10 text-rose-600 mx-auto" />
-              <p className="text-sm text-rose-700 font-medium">
+            <div className="p-4 bg-rose-50 dark:bg-rose-950/35 border border-rose-200 dark:border-rose-800/70 rounded-2xl text-center space-y-3">
+              <AlertCircle className="w-10 h-10 text-rose-600 dark:text-rose-400 mx-auto" />
+              <p className="text-sm text-rose-700 dark:text-rose-200 font-medium">
                 {refundT.checkEligibilityError ||
                   "Không thể kiểm tra điều kiện hoàn tiền. Vui lòng thử lại sau."}
               </p>
@@ -224,7 +224,7 @@ export default function RequestRefundModal({
           <button
             type="button"
             onClick={() => setStep("eligibility")}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-1"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:text-neutral-400 dark:hover:text-white transition-colors mb-1"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{refundT.btnBack || "Quay lại"}</span>
@@ -232,11 +232,11 @@ export default function RequestRefundModal({
 
           {/* Refund Amount Badge */}
           {eligibility?.maxRefundAmount > 0 && (
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500">
+            <div className="p-3 bg-gray-50 dark:bg-[#242424] border border-gray-200 dark:border-[#3F3F3F] rounded-xl flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-500 dark:text-neutral-300">
                 {refundT.maxRefundAmount || "Số tiền hoàn"}
               </span>
-              <span className="text-base font-bold text-cath-red-700">
+              <span className="text-base font-bold text-cath-red-700 dark:text-red-400">
                 {formatAmount(eligibility.maxRefundAmount)}
               </span>
             </div>
@@ -244,13 +244,13 @@ export default function RequestRefundModal({
 
           {/* Bank Selection */}
           <div className="relative">
-            <label className="block text-sm font-semibold mb-1.5 text-gray-700">
+            <label className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-neutral-200">
               {refundT.selectBank || "Ngân hàng nhận tiền"}{" "}
-              <span className="text-cath-red-700">*</span>
+              <span className="text-cath-red-700 dark:text-red-400">*</span>
             </label>
 
             {selectedBank ? (
-              <div className="p-3 border border-gray-300 rounded-xl flex items-center justify-between bg-white shadow-sm">
+              <div className="p-3 border border-gray-300 dark:border-[#3F3F3F] rounded-xl flex items-center justify-between bg-white dark:bg-[#242424] shadow-sm">
                 <div className="flex items-center gap-3">
                   {selectedBank.logo ? (
                     <img
@@ -259,13 +259,13 @@ export default function RequestRefundModal({
                       className="w-8 h-8 object-contain rounded"
                     />
                   ) : (
-                    <Building2 className="w-6 h-6 text-gray-400" />
+                    <Building2 className="w-6 h-6 text-gray-400 dark:text-neutral-500" />
                   )}
                   <div>
-                    <p className="text-sm font-bold text-gray-800">
+                    <p className="text-sm font-bold text-gray-800 dark:text-white">
                       {selectedBank.shortName || selectedBank.name}
                     </p>
-                    <p className="text-xs text-gray-500">{selectedBank.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-neutral-400">{selectedBank.name}</p>
                   </div>
                 </div>
                 <button
@@ -274,7 +274,7 @@ export default function RequestRefundModal({
                     setSelectedBank(null)
                     setIsBankDropdownOpen(true)
                   }}
-                  className="text-xs text-cath-red-700 hover:underline font-semibold"
+                  className="text-xs text-cath-red-700 dark:text-red-400 hover:underline font-semibold"
                 >
                   {refundT.btnChangeBank || "Thay đổi"}
                 </button>
@@ -294,14 +294,14 @@ export default function RequestRefundModal({
                 />
 
                 {isBankDropdownOpen && (
-                  <div className="max-h-44 overflow-y-auto border border-gray-200 rounded-xl bg-white shadow-lg divide-y divide-gray-100">
+                  <div className="max-h-44 overflow-y-auto border border-gray-200 dark:border-[#3F3F3F] rounded-xl bg-white dark:bg-[#1E1E1E] shadow-lg divide-y divide-gray-100 dark:divide-[#2E2E2E]">
                     {isLoadingBanks ? (
-                      <div className="p-4 text-center text-xs text-gray-400">
+                      <div className="p-4 text-center text-xs text-gray-400 dark:text-neutral-400">
                         <Loader2 className="w-4 h-4 animate-spin inline mr-1" />
                         {refundT.loadingBanks || "Đang tải danh sách ngân hàng..."}
                       </div>
                     ) : banks.length === 0 ? (
-                      <div className="p-4 text-center text-xs text-gray-400">
+                      <div className="p-4 text-center text-xs text-gray-400 dark:text-neutral-400">
                         {refundT.noBanksFound || "Không tìm thấy ngân hàng."}
                       </div>
                     ) : (
@@ -313,7 +313,7 @@ export default function RequestRefundModal({
                             setSelectedBank(bank)
                             setIsBankDropdownOpen(false)
                           }}
-                          className="w-full text-left p-2.5 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                          className="w-full text-left p-2.5 hover:bg-gray-50 dark:hover:bg-[#2A2A2A] flex items-center gap-3 transition-colors"
                         >
                           {bank.logo ? (
                             <img
@@ -322,13 +322,13 @@ export default function RequestRefundModal({
                               className="w-7 h-7 object-contain rounded"
                             />
                           ) : (
-                            <Building2 className="w-5 h-5 text-gray-400" />
+                            <Building2 className="w-5 h-5 text-gray-400 dark:text-neutral-500" />
                           )}
                           <div>
-                            <span className="text-xs font-bold text-gray-800 block">
+                            <span className="text-xs font-bold text-gray-800 dark:text-white block">
                               {bank.shortName || bank.name}
                             </span>
-                            <span className="text-[11px] text-gray-400 block truncate">
+                            <span className="text-[11px] text-gray-400 dark:text-neutral-400 block truncate">
                               {bank.name}
                             </span>
                           </div>
@@ -343,9 +343,9 @@ export default function RequestRefundModal({
 
           {/* Account Number */}
           <div>
-            <label className="block text-sm font-semibold mb-1.5 text-gray-700">
+            <label className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-neutral-200">
               {refundT.accountNumber || "Số tài khoản"}{" "}
-              <span className="text-cath-red-700">*</span>
+              <span className="text-cath-red-700 dark:text-red-400">*</span>
             </label>
             <TextInput
               placeholder={
@@ -361,9 +361,9 @@ export default function RequestRefundModal({
 
           {/* Account Holder Name */}
           <div>
-            <label className="block text-sm font-semibold mb-1.5 text-gray-700">
+            <label className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-neutral-200">
               {refundT.accountHolderName || "Tên chủ tài khoản"}{" "}
-              <span className="text-cath-red-700">*</span>
+              <span className="text-cath-red-700 dark:text-red-400">*</span>
             </label>
             <TextInput
               placeholder={
@@ -380,12 +380,12 @@ export default function RequestRefundModal({
 
           {/* Reason */}
           <div>
-            <label className="block text-sm font-semibold mb-1.5 text-gray-700">
+            <label className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-neutral-200">
               {refundT.reasonLabel || "Lý do hoàn tiền"}{" "}
-              <span className="text-cath-red-700">*</span>
+              <span className="text-cath-red-700 dark:text-red-400">*</span>
             </label>
             <textarea
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-gray-800 transition-colors resize-none h-24"
+              className="w-full border border-gray-200 dark:border-[#3F3F3F] rounded-xl p-3 text-sm outline-none focus:border-gray-800 dark:focus:border-neutral-400 transition-colors resize-none h-24 bg-white dark:bg-[#242424] text-gray-900 dark:text-white dark:placeholder:text-neutral-500"
               placeholder={
                 refundT.reasonPlaceholder ||
                 "Vui lòng mô tả lý do bạn muốn hoàn tiền..."
@@ -398,7 +398,7 @@ export default function RequestRefundModal({
 
           {/* Form Error */}
           {formError && (
-            <p className="text-xs font-medium text-cath-red-700 bg-red-50 p-2.5 rounded-lg border border-red-100">
+            <p className="text-xs font-medium text-cath-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/35 p-2.5 rounded-lg border border-red-100 dark:border-red-900/60">
               {formError}
             </p>
           )}

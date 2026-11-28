@@ -45,10 +45,13 @@ const CreateVoucherPage = () => {
 
   // Fetch voucher details if in Edit mode
   const {
-    data: voucherDetail,
+    data: fetchedVoucherDetail,
     isLoading: isLoadingDetail,
     isError: isDetailError,
   } = useGetVoucherByIdQuery(id, { skip: !isEditing })
+
+  // Unwrap consistently with VoucherDetailPage (API may return { data: {...} })
+  const voucherDetail = fetchedVoucherDetail?.data || fetchedVoucherDetail
 
   // Fetch teacher's courses & classes for scope selection
   const { data: coursesData } = useGetAllCoursesQuery({
@@ -229,13 +232,9 @@ const CreateVoucherPage = () => {
           {t?.vouchers?.notFoundDesc ||
             "Voucher không tồn tại hoặc bạn không có quyền truy cập."}
         </p>
-        <button
-          type="button"
-          onClick={handleGoBack}
-          className="px-4 py-2 bg-slate-900 dark:bg-neutral-800 text-white text-xs font-semibold rounded-xl cursor-pointer"
-        >
+        <PillButton type="button" variant="primary" onClick={handleGoBack}>
           {t?.vouchers?.back || "Quay lại"}
-        </button>
+        </PillButton>
       </div>
     )
   }

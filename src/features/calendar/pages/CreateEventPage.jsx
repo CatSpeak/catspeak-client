@@ -342,7 +342,7 @@ const CreateEventPage = () => {
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 mobileTab === "create"
                   ? "text-[#990011] dark:text-red-400 border-b-2 border-[#990011] dark:border-red-400"
-                  : "text-gray-400 border-b-2 border-transparent hover:text-gray-600 dark:hover:text-neutral-300"
+                  : "text-gray-400 dark:text-neutral-400 border-b-2 border-transparent hover:text-gray-600 dark:hover:text-neutral-300"
               }`}
             >
               {cal.createEventBtn || "Tạo sự kiện"}
@@ -353,7 +353,7 @@ const CreateEventPage = () => {
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors relative ${
                 mobileTab === "draft"
                   ? "text-[#990011] dark:text-red-400 border-b-2 border-[#990011] dark:border-red-400"
-                  : "text-gray-400 border-b-2 border-transparent hover:text-gray-600 dark:hover:text-neutral-300"
+                  : "text-gray-400 dark:text-neutral-400 border-b-2 border-transparent hover:text-gray-600 dark:hover:text-neutral-300"
               }`}
             >
               {cal.draftTab || "Bản nháp"}
@@ -375,7 +375,7 @@ const CreateEventPage = () => {
             style={{ borderRadius: "0 0 16px 16px" }}
           >
             {drafts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-neutral-400">
                 <BookmarkCheck size={40} className="mb-3 opacity-30" />
                 <p className="text-sm">
                   {cal.noDrafts || "Chưa có bản nháp nào"}
@@ -411,7 +411,7 @@ const CreateEventPage = () => {
                           "Tên Event ngẫu nhiên"}
                       </p>
                       {(draft.startTime || draft.endTime) && (
-                        <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
                           <Clock size={11} />
                           <span>
                             {draft.startTime
@@ -425,7 +425,7 @@ const CreateEventPage = () => {
                         </div>
                       )}
                       {draft.location && (
-                        <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
                           <MapPin size={11} />
                           <span className="truncate">{draft.location}</span>
                         </div>
@@ -433,7 +433,7 @@ const CreateEventPage = () => {
                     </div>
                     {/* Price tag */}
                     <div className="shrink-0 text-right">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-400 dark:text-neutral-400">
                         {cal.filterPrice || "Giá cả"}
                       </span>
                       <p className="text-sm font-bold text-[#990011] dark:text-red-400">
@@ -488,9 +488,9 @@ const CreateEventPage = () => {
                   />
                 ) : (
                   <>
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#272727] flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-gray-400"
+                        className="w-5 h-5 text-gray-400 dark:text-neutral-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -503,7 +503,7 @@ const CreateEventPage = () => {
                         />
                       </svg>
                     </div>
-                    <p className="text-sm text-gray-400 text-center px-4">
+                    <p className="text-sm text-gray-400 dark:text-neutral-400 text-center px-4">
                       {cal.imageUploadHint ||
                         "Hỗ trợ định dạng png, jpeg và webp."}
                       <br />
@@ -643,7 +643,7 @@ const CreateEventPage = () => {
             {/* Description note */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {cal.eventDescOptional || "Mô tả sự kiện (tùy chọn)"}
                 </label>
               </div>
@@ -652,9 +652,9 @@ const CreateEventPage = () => {
                 onChange={(e) => form.setDescription(e.target.value)}
                 placeholder={cal.descriptionPlaceholder || "Nội dung"}
                 rows={3}
-                className="w-full rounded-xl border border-[#C6C6C6] px-4 py-3 text-sm text-gray-700 outline-none focus:border-[#990011] transition-colors resize-none"
+                className="w-full rounded-xl border border-[#C6C6C6] dark:border-[#3F3F3F] bg-white dark:bg-[#242424] px-4 py-3 text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-neutral-500 outline-none focus:border-[#990011] dark:focus:border-red-400 transition-colors resize-none"
               />
-              <span className="text-xs text-gray-400 text-right">
+              <span className="text-xs text-gray-500 dark:text-neutral-400 text-right">
                 {cal.descMaxChars || "Nội dung không được quá 150 từ"}
               </span>
             </div>
@@ -726,20 +726,20 @@ const CreateEventPage = () => {
                   <span className="text-base font-semibold text-black dark:text-white">
                     {previewTitle}
                   </span>
-                  <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
+                  <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-neutral-400 mt-1">
                     <Clock size={13} />
                     <span>
                       {previewStart} - {previewEnd}
                     </span>
                   </div>
                   {form.eventLocation && (
-                    <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-0.5">
+                    <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-neutral-400 mt-0.5">
                       <MapPin size={13} />
                       <span className="truncate">{form.eventLocation}</span>
                     </div>
                   )}
                   {!form.eventLocation && (
-                    <div className="flex items-center gap-1.5 text-sm text-gray-400 mt-0.5 italic">
+                    <div className="flex items-center gap-1.5 text-sm text-gray-400 dark:text-neutral-500 mt-0.5 italic">
                       <MapPin size={13} />
                       <span>Địa chỉ sự kiện</span>
                     </div>
@@ -749,7 +749,7 @@ const CreateEventPage = () => {
             </div>
 
             {/* Placeholder info about preview */}
-            <p className="text-sm text-gray-400 px-1">
+            <p className="text-sm text-gray-400 dark:text-neutral-400 px-1">
               {cal.previewNote ||
                 "Thông tin hiển thị trước giúp bạn kiểm tra trước khi tạo sự kiện."}
             </p>
@@ -769,7 +769,7 @@ const CreateEventPage = () => {
                 </div>
                 <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-sm border border-border dark:border-[#3F3F3F] overflow-hidden">
                   {drafts.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                    <div className="flex flex-col items-center justify-center py-10 text-gray-400 dark:text-neutral-400">
                       <BookmarkCheck size={32} className="mb-2 opacity-30" />
                       <p className="text-sm">
                         {cal.noDrafts || "Chưa có bản nháp nào"}
@@ -810,7 +810,7 @@ const CreateEventPage = () => {
                                 "Tên Event ngẫu nhiên"}
                             </p>
                             {(draft.startTime || draft.endTime) && (
-                              <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
                                 <Clock size={11} />
                                 <span>
                                   {draft.startTime
@@ -824,7 +824,7 @@ const CreateEventPage = () => {
                               </div>
                             )}
                             {draft.location && (
-                              <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
                                 <MapPin size={11} />
                                 <span className="truncate">
                                   {draft.location}
@@ -834,7 +834,7 @@ const CreateEventPage = () => {
                           </div>
                           {/* Right: price + delete */}
                           <div className="shrink-0 text-right flex flex-col items-end gap-1">
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-400 dark:text-neutral-400">
                               {cal.filterPrice || "Giá cả"}
                             </span>
                             <p className="text-sm font-bold text-[#990011] dark:text-red-400">
@@ -848,7 +848,7 @@ const CreateEventPage = () => {
                               onClick={() =>
                                 setShowDeleteDraftConfirm(draft.id)
                               }
-                              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-[#990011] dark:hover:text-red-400"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 dark:text-neutral-400 hover:text-[#990011] dark:hover:text-red-400"
                               title="Xóa bản nháp"
                             >
                               <Trash2 size={13} />
@@ -901,7 +901,7 @@ const CreateEventPage = () => {
       >
         <div className="flex flex-col items-center text-center gap-3 pt-4">
           {/* Warning icon */}
-          <div className="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mb-1">
+          <div className="w-20 h-20 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mb-1">
             <AlertTriangle size={40} className="text-yellow-500" />
           </div>
 
@@ -909,7 +909,7 @@ const CreateEventPage = () => {
             {cal.confirmDeleteTitle || "Xóa sự kiện?"}
           </h2>
 
-          <p className="text-sm text-gray-500 leading-relaxed">
+          <p className="text-sm text-gray-500 dark:text-neutral-400 leading-relaxed">
             {cal.deleteEventWarning ||
               "Nếu bạn xóa sự kiện thì sự kiện vừa rồi phải tạo lại và hành động này không thể hoàn tác lại được. Bạn có chắc không?"}
           </p>
@@ -947,13 +947,13 @@ const CreateEventPage = () => {
         bodyClassName="px-6 pb-6 pt-2"
       >
         <div className="flex flex-col items-center text-center gap-3 pt-4">
-          <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-1">
+          <div className="w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mb-1">
             <AlertTriangle size={32} className="text-yellow-500" />
           </div>
           <h2 className="text-xl font-bold text-black dark:text-white">
             {cal.deleteDraftTitle || "Xóa bản nháp?"}
           </h2>
-          <p className="text-sm text-gray-500 leading-relaxed">
+          <p className="text-sm text-gray-500 dark:text-neutral-400 leading-relaxed">
             {cal.deleteDraftMsg || "Bản nháp này sẽ bị xóa vĩnh viễn."}
           </p>
           <div className="flex gap-3 w-full mt-2">
@@ -1024,7 +1024,7 @@ const CreateEventPage = () => {
                   : cal.createEventFailed || "Tạo sự kiện thất bại"}
           </h2>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-neutral-400">
             {submitStatus === "success"
               ? isEditing
                 ? cal.updateEventSuccessMsg ||

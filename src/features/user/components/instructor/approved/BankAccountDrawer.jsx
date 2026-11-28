@@ -92,7 +92,6 @@ const BankAccountDrawer = ({
   open,
   onClose,
   currentBank,
-  currentPhone,
   currentEmail,
   t,
 }) => {
@@ -230,7 +229,7 @@ const BankAccountDrawer = ({
       setConsent(false)
       setRequestError("")
       setStep("confirm")
-    } catch (err) {
+    } catch {
       setVerified(buildManualVerified())
       setVerifyWarning("")
       setConsent(false)
@@ -356,7 +355,7 @@ const BankAccountDrawer = ({
     >
       {isOtpStep ? (
         <div className="flex flex-col gap-3.5">
-          <div className="flex flex-col rounded-lg border border-[#D0D5DD] p-4">
+          <div className="flex flex-col rounded-lg border border-[#D0D5DD] p-4 dark:border-[#3F3F3F]">
             <SummaryRow
               icon={<Landmark size={18} />}
               label={ins.bankLabel || "Ngân hàng"}
@@ -374,20 +373,20 @@ const BankAccountDrawer = ({
             />
           </div>
 
-          <p className="text-[10px] text-[#667085]">
+          <p className="text-[10px] text-[#667085] dark:text-neutral-400">
             {ins.bankOtpHelper ||
               "Mã xác thực đã được gửi đến email của bạn."}
           </p>
 
           <div className="flex items-center gap-2">
-            <Mail size={18} className="shrink-0 text-[#101828]" />
-            <span className="text-[13px] font-semibold text-[#101828]">
+            <Mail size={18} className="shrink-0 text-[#101828] dark:text-neutral-200" />
+            <span className="text-[13px] font-semibold text-[#101828] dark:text-white">
               {challenge?.maskedEmail || maskEmail(currentEmail) || "—"}
             </span>
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-[13px] font-semibold text-[#101828]">
+            <span className="text-[13px] font-semibold text-[#101828] dark:text-white">
               {ins.bankOtpInputLabel || "Nhập mã xác thực (OTP)"}
             </span>
             <OtpCodeInput
@@ -414,7 +413,7 @@ const BankAccountDrawer = ({
 
           <div className="flex items-center gap-2">
             {isCoolingDown && (
-              <span className="text-[10px] text-[#667085]">
+              <span className="text-[10px] text-[#667085] dark:text-neutral-400">
                 {(
                   ins.contactResendCountdown || "Gửi lại mã sau {time}"
                 ).replace("{time}", formatCountdown(secondsLeft))}
@@ -427,8 +426,8 @@ const BankAccountDrawer = ({
               disabled={isCoolingDown || isRequesting}
               className={`text-[11px] font-semibold transition-colors ${
                 isCoolingDown
-                  ? "cursor-not-allowed text-[#98A2B3]"
-                  : "text-[#F52235] hover:underline"
+                  ? "cursor-not-allowed text-[#98A2B3] dark:text-neutral-500"
+                  : "text-[#F52235] hover:underline dark:text-red-400"
               }`}
             >
               {ins.contactResend || "Gửi lại mã"}
@@ -438,12 +437,12 @@ const BankAccountDrawer = ({
       ) : isConfirmStep ? (
         <div className="flex flex-col gap-3.5">
           {verified?.isVerified ? (
-            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#ECFDF3] px-3.5 py-2.5">
+            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#ECFDF3] px-3.5 py-2.5 dark:bg-emerald-950/40">
               <ShieldCheck
                 size={18}
-                className="mt-0.5 shrink-0 text-[#039855]"
+                className="mt-0.5 shrink-0 text-[#039855] dark:text-emerald-400"
               />
-              <p className="text-[10px] font-semibold leading-4 text-[#027A48]">
+              <p className="text-[10px] font-semibold leading-4 text-[#027A48] dark:text-emerald-300">
                 {ins.bankStep2Banner ||
                   "Thông tin tài khoản mới đã được xác thực với ngân hàng. Vui lòng kiểm tra kỹ thông tin bên dưới trước khi gửi mã xác thực."}
               </p>

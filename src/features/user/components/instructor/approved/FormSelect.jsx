@@ -22,16 +22,16 @@ const FormSelect = ({
         type="button"
         onClick={toggle}
         disabled={disabled}
-        className="flex h-11 w-full items-center justify-between gap-2 rounded-[7px] border border-[#D0D5DD] bg-white px-3.5 text-left text-[13px] text-[#101828] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex h-11 w-full items-center justify-between gap-2 rounded-[7px] border border-[#D0D5DD] bg-white px-3.5 text-left text-[13px] text-[#101828] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#3F3F3F] dark:bg-[#242424] dark:text-white dark:hover:bg-[#2C2C2C]"
       >
         <span
-          className={`truncate ${selectedOption ? "" : "text-[#98A2B3]"}`}
+          className={`truncate ${selectedOption ? "" : "text-[#98A2B3] dark:text-neutral-400"}`}
         >
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown
           size={16}
-          className={`shrink-0 text-[#667085] transition-transform duration-200 ${
+          className={`shrink-0 text-[#667085] dark:text-neutral-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />

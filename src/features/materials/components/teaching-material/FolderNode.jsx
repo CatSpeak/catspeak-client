@@ -31,7 +31,7 @@ const FolderNode = ({
             ? "opacity-50 cursor-not-allowed"
             : isSelected
               ? "bg-[#FFDAD6]/20 border border-primary cursor-pointer"
-              : "hover:bg-[#F3F3F3] border border-transparent cursor-pointer"
+              : "hover:bg-[#F3F3F3] dark:hover:bg-[#272727] border border-transparent cursor-pointer"
         }`}
         style={{ marginLeft: level > 0 ? `${level * 20}px` : "0px" }}
         onClick={() => !isDisabled && onSelect(isSelected ? null : folder)}
@@ -50,9 +50,9 @@ const FolderNode = ({
           >
             {hasChildren ? (
               isExpanded ? (
-                <ChevronDown className="w-6 h-6 text-[#5B403E] hover:text-[#6E0009]" />
+                <ChevronDown className="w-6 h-6 text-[#5B403E] dark:text-neutral-400 hover:text-[#6E0009] dark:hover:text-[#FF7A8A]" />
               ) : (
-                <ChevronRight className="w-6 h-6 text-[#5B403E] hover:text-[#6E0009]" />
+                <ChevronRight className="w-6 h-6 text-[#5B403E] dark:text-neutral-400 hover:text-[#6E0009] dark:hover:text-[#FF7A8A]" />
               )
             ) : (
               <div className="w-6 h-6" />
@@ -61,11 +61,11 @@ const FolderNode = ({
 
           <FcFolder className="w-5 h-5" />
           <span
-            className={`text-base truncate flex-1 ${isDisabled ? "text-[#1A1C1C]" : isSelected ? "text-[#6E0009]" : "text-[#1A1C1C]"}`}
+            className={`text-base truncate flex-1 ${isDisabled ? "text-[#1A1C1C] dark:text-white" : isSelected ? "text-[#6E0009] dark:text-[#FF7A8A]" : "text-[#1A1C1C] dark:text-white"}`}
           >
             {folder.folderName}{" "}
             {isDisabled && (
-              <span className="text-xs text-gray-500 font-normal ml-2">
+              <span className="text-xs text-gray-500 dark:text-neutral-400 font-normal ml-2">
                 {t.materials.currentLocation}
               </span>
             )}

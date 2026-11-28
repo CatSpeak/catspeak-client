@@ -88,7 +88,7 @@ const CalendarMonthPanel = ({
                   key={`empty-${idx}`}
                   className="h-12 flex items-center justify-center"
                 >
-                  <span className="text-base text-gray-300 dark:text-neutral-600">
+                  <span className="text-base text-gray-500 dark:text-neutral-400">
                     {day}
                   </span>
                 </div>

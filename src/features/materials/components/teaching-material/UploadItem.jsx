@@ -33,10 +33,10 @@ const UploadItem = ({
 
   return (
     <div
-      className={`border rounded-xl p-3 flex items-center gap-4 transition-colors border-[#E2E2E2] bg-[#F9F9F9]`}
+      className={`border rounded-xl p-3 flex items-center gap-4 transition-colors border-[#E2E2E2] dark:border-[#3F3F3F] bg-[#F9F9F9] dark:bg-[#242424]`}
     >
       <div
-        className={`w-10 h-10 bg-[#EEEEEE] rounded-xl flex items-center justify-center shrink-0`}
+        className={`w-10 h-10 bg-[#EEEEEE] dark:bg-[#333333] rounded-xl flex items-center justify-center shrink-0`}
       >
         {getFileIcon(type)}
       </div>
@@ -45,10 +45,10 @@ const UploadItem = ({
         {status === "reading" ? (
           <>
             <div className="flex justify-between items-center gap-3 mb-2">
-              <span className="text-sm font-semibold text-[#5B403E] truncate min-w-0">
+              <span className="text-sm font-semibold text-[#5B403E] dark:text-neutral-400 truncate min-w-0">
                 {name}
               </span>
-              <span className="text-xs text-[#5B403E] shrink-0 whitespace-nowrap">
+              <span className="text-xs text-[#5B403E] dark:text-neutral-400 shrink-0 whitespace-nowrap">
                 {progress}% ({formatSize((sizeBytes * progress) / 100)} /{" "}
                 {formatSize(sizeBytes)})
               </span>
@@ -62,10 +62,10 @@ const UploadItem = ({
         ) : status === "ready" ? (
           <div className="flex justify-between items-center gap-3">
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold text-[#1A1C1C] truncate">
+              <span className="text-sm font-semibold text-[#1A1C1C] dark:text-white truncate">
                 {name}
               </span>
-              <span className="text-xs text-[#5B403E] mt-0.5">
+              <span className="text-xs text-[#5B403E] dark:text-neutral-400 mt-0.5">
                 {formatSize(sizeBytes)}
               </span>
             </div>
@@ -77,10 +77,10 @@ const UploadItem = ({
         ) : status === "uploading" ? (
           <>
             <div className="flex justify-between items-center gap-3 mb-2">
-              <span className="text-sm font-semibold text-[#5B403E] truncate min-w-0">
+              <span className="text-sm font-semibold text-[#5B403E] dark:text-neutral-400 truncate min-w-0">
                 {name}
               </span>
-              <span className="text-xs text-[#5B403E] shrink-0 whitespace-nowrap">
+              <span className="text-xs text-[#5B403E] dark:text-neutral-400 shrink-0 whitespace-nowrap">
                 {progress}% ({formatSize(uploadedBytes)} /{" "}
                 {formatSize(sizeBytes)})
               </span>
@@ -94,7 +94,7 @@ const UploadItem = ({
         ) : status === "success" ? (
           <div className="flex justify-between items-center gap-3">
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold text-[#1A1C1C] truncate">
+              <span className="text-sm font-semibold text-[#1A1C1C] dark:text-white truncate">
                 {name}
               </span>
               <span className="text-xs text-green-600 mt-0.5">
@@ -108,7 +108,7 @@ const UploadItem = ({
         ) : status === "error" ? (
           <div className="flex justify-between items-center gap-3">
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold text-[#1A1C1C] truncate">
+              <span className="text-sm font-semibold text-[#1A1C1C] dark:text-white truncate">
                 {name}
               </span>
               <span className="text-xs text-red-500 mt-0.5">

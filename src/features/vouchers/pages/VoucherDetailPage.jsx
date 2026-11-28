@@ -100,7 +100,7 @@ const VoucherDetailPage = () => {
       <div className="flex-1 w-full flex items-center justify-center py-12 px-4 my-auto animate-in fade-in zoom-in-95 duration-200">
         <FluentCard className="w-full max-w-md text-center flex flex-col items-center justify-center shadow-xs p-6">
           <AlertCircle className="w-12 h-12 text-rose-500 mb-4" />
-          <h2 className="font-bold text-2xl text-primary tracking-tight mb-2">
+          <h2 className="font-bold text-2xl text-primary dark:text-white tracking-tight mb-2">
             {t?.vouchers?.notFound || "Không tìm thấy thông tin voucher"}
           </h2>
           <p className="text-base text-secondary mb-6 max-w-sm">
@@ -141,7 +141,7 @@ const VoucherDetailPage = () => {
             <PillButton
               type="button"
               variant="secondary"
-              textColor="#dc2626"
+              innerClassName="text-red-600 dark:text-red-400"
               onClick={() => setIsStopModalOpen(true)}
             >
               {t?.vouchers?.actions?.stopEarly || "Dừng sớm"}

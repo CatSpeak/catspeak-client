@@ -65,12 +65,12 @@ const VideoCard = ({
       padding="px-5 py-3.5"
       className="!justify-start gap-2.5"
     >
-      <h2 className="text-[15px] font-semibold text-[#101828]">
+      <h2 className="text-[15px] font-semibold text-[#101828] dark:text-white">
         {ins.uploadVideo || "Tải video giới thiệu bản thân"}
       </h2>
 
       {videoUrl ? (
-        <div className="flex items-center gap-3 rounded-[7px] border border-[#D0D5DD] py-2.5 pl-2.5 pr-3.5">
+        <div className="flex items-center gap-3 rounded-[7px] border border-[#D0D5DD] py-2.5 pl-2.5 pr-3.5 dark:border-[#3F3F3F] dark:bg-[#222222]">
           <button
             type="button"
             onClick={onPlay}
@@ -80,11 +80,11 @@ const VideoCard = ({
             <Play size={18} fill="currentColor" />
           </button>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="truncate text-xs font-medium text-[#101828]">
+            <span className="truncate text-xs font-medium text-[#101828] dark:text-white">
               {fileNameFromUrl(videoUrl)}
             </span>
             {metaLine && (
-              <span className="truncate text-[10px] text-[#667085]">
+              <span className="truncate text-[10px] text-[#667085] dark:text-neutral-400">
                 {metaLine}
               </span>
             )}
@@ -96,14 +96,14 @@ const VideoCard = ({
               aria-label={ins.approvedOptions || "Tùy chọn"}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-[#101828] transition-colors hover:bg-[#F2F4F7]"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-[#101828] transition-colors hover:bg-[#F2F4F7] dark:text-neutral-200 dark:hover:bg-[#2C2C2C]"
             >
               <MoreVertical size={18} />
             </button>
             {menuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-full z-10 mt-1 w-44 overflow-hidden rounded-lg border border-[#E2E2E2] bg-white py-1 shadow-lg"
+                className="absolute right-0 top-full z-10 mt-1 w-44 overflow-hidden rounded-lg border border-[#E2E2E2] bg-white py-1 shadow-lg dark:border-[#3F3F3F] dark:bg-[#1E1E1E]"
               >
                 <button
                   type="button"
@@ -112,7 +112,7 @@ const VideoCard = ({
                     setMenuOpen(false)
                     onReplace?.()
                   }}
-                  className="block w-full px-4 py-2 text-left text-sm text-[#101828] transition-colors hover:bg-[#F9FAFB]"
+                  className="block w-full px-4 py-2 text-left text-sm text-[#101828] transition-colors hover:bg-[#F9FAFB] dark:text-neutral-100 dark:hover:bg-[#2C2C2C]"
                 >
                   {ins.approvedReplaceVideo || "Thay video"}
                 </button>
@@ -123,7 +123,7 @@ const VideoCard = ({
                     setMenuOpen(false)
                     onRemove?.()
                   }}
-                  className="block w-full px-4 py-2 text-left text-sm text-[#F52235] transition-colors hover:bg-[#FEF3F2]"
+                  className="block w-full px-4 py-2 text-left text-sm text-[#F52235] transition-colors hover:bg-[#FEF3F2] dark:text-rose-400 dark:hover:bg-rose-950/40"
                 >
                   {ins.approvedDeleteVideo || "Xóa video"}
                 </button>
@@ -135,11 +135,11 @@ const VideoCard = ({
         <button
           type="button"
           onClick={onReplace}
-          className="flex w-full flex-col items-center justify-center gap-1.5 rounded-[7px] border border-dashed border-[#D0D5DD] py-6 text-center text-sm text-[#667085] transition-colors hover:border-[#990011] hover:bg-[#990011]/5"
+          className="flex w-full flex-col items-center justify-center gap-1.5 rounded-[7px] border border-dashed border-[#D0D5DD] py-6 text-center text-sm text-[#667085] transition-colors hover:border-[#990011] hover:bg-[#990011]/5 dark:border-[#3F3F3F] dark:text-neutral-300 dark:hover:border-red-400 dark:hover:bg-red-950/20"
         >
-          <UploadCloud size={22} className="text-[#667085]" />
+          <UploadCloud size={22} className="text-[#667085] dark:text-neutral-400" />
           <span>{ins.approvedNoVideo || "Chưa có video giới thiệu"}</span>
-          <span className="text-xs font-semibold text-[#990011]">
+          <span className="text-xs font-semibold text-[#990011] dark:text-red-400">
             {ins.approvedUploadVideo || "Chọn video"}
           </span>
         </button>

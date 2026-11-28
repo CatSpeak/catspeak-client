@@ -86,8 +86,8 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
           {/* Learning path title or Community Switcher */}
           {location.pathname.includes("/learning-path") ? (
             <div className="hidden lg:flex items-center gap-2.5">
-              <LayoutGrid className="w-5 h-5 text-cath-red-700" />
-              <span className="text-base font-bold text-gray-900 tracking-tight">
+              <LayoutGrid className="w-5 h-5 text-cath-red-700 dark:text-[#FF7A8A]" />
+              <span className="text-base font-bold text-gray-900 dark:text-white tracking-tight">
                 Lộ trình 5 ngày
               </span>
             </div>

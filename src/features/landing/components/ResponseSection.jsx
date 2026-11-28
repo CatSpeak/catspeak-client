@@ -14,7 +14,7 @@ const AvatarPlaceholder = ({ name, color }) => {
 
   return (
     <div
-      className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white flex-shrink-0"
+      className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-neutral-900 flex-shrink-0"
       style={{ background: color }}
       aria-label={name}
     >
@@ -99,7 +99,7 @@ const ResponseSection = () => {
                   />
                   <div className="flex flex-col">
                     <span className="font-bold text-gray-900 dark:text-gray-100">{review.name}</span>
-                    <span className="text-sm text-secondary">
+                    <span className="text-sm text-secondary dark:text-neutral-300">
                       {review.role}
                     </span>
                   </div>

@@ -281,8 +281,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
                   variant="outline"
                   className="flex-1 !text-sm"
                   roundedClass="rounded-xl"
-                  textColor="#5B403E"
-                  borderColor="#E3BEBA"
+                  innerClassName="text-[#5B403E] border-[#E3BEBA] dark:text-neutral-200 dark:border-[#3F3F3F] dark:hover:bg-[#272727]"
                   onClick={handleSave}
                 >
                   {t.materials.bookmark || "Lưu"}

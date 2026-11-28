@@ -73,12 +73,12 @@ const CurrentImage = ({ label, url }) => {
   const { url: resolvedUrl } = useAuthenticatedMediaUrl(url)
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <span className="text-[11px] text-[#101828]">{label}</span>
-      <div className="flex h-[94px] w-full items-center justify-center overflow-hidden rounded-lg border border-[#D0D5DD] bg-[#F2F4F7]">
+      <span className="text-[11px] text-[#101828] dark:text-neutral-400">{label}</span>
+      <div className="flex h-[94px] w-full items-center justify-center overflow-hidden rounded-lg border border-[#D0D5DD] bg-[#F2F4F7] dark:border-[#3F3F3F] dark:bg-[#242424]">
         {resolvedUrl ? (
           <img src={resolvedUrl} alt={label} className="h-full w-full object-cover" />
         ) : (
-          <ImageOff size={24} className="text-[#98A2B3]" />
+          <ImageOff size={24} className="text-[#98A2B3] dark:text-neutral-500" />
         )}
       </div>
     </div>
@@ -145,20 +145,20 @@ const IdCardDrawer = ({
 
     return (
       <div className="flex flex-col gap-2">
-        <span className="text-[11px] text-[#101828]">{label}</span>
+        <span className="text-[11px] text-[#101828] dark:text-neutral-400">{label}</span>
 
         {file ? (
           <label
             htmlFor={inputId}
             className="flex w-[220px] cursor-pointer flex-col gap-1"
           >
-            <div className="h-[120px] w-[220px] overflow-hidden rounded-lg border border-[#D0D5DD] bg-[#F2F4F7]">
+            <div className="h-[120px] w-[220px] overflow-hidden rounded-lg border border-[#D0D5DD] bg-[#F2F4F7] dark:border-[#3F3F3F] dark:bg-[#242424]">
               <FileThumbnail file={file} />
             </div>
-            <span className="truncate text-[11px] text-[#101828]">
+            <span className="truncate text-[11px] text-[#101828] dark:text-white">
               {file.name}
             </span>
-            <span className="text-[10px] text-[#667085]">
+            <span className="text-[10px] text-[#667085] dark:text-neutral-400">
               {formatFileSize(file.size)}
             </span>
           </label>
@@ -175,22 +175,22 @@ const IdCardDrawer = ({
               setDragOver(null)
               applyFile(side, event.dataTransfer?.files?.[0])
             }}
-            className={`flex h-[150px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[7px] border border-dashed bg-white text-center transition-colors ${
+            className={`flex h-[150px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[7px] border border-dashed bg-white text-center transition-colors dark:bg-[#242424] ${
               error
                 ? "border-red-400"
                 : dragOver === side
                   ? "border-[#990011] bg-[#990011]/5"
-                  : "border-[#D0D5DD] hover:border-[#990011] hover:bg-[#990011]/5"
+                  : "border-[#D0D5DD] hover:border-[#990011] hover:bg-[#990011]/5 dark:border-[#3F3F3F] dark:hover:border-red-400 dark:hover:bg-red-950/20"
             }`}
           >
-            <UploadCloud size={25} className="text-[#667085]" />
-            <span className="text-xs text-[#667085]">
+            <UploadCloud size={25} className="text-[#667085] dark:text-neutral-300" />
+            <span className="text-xs text-[#667085] dark:text-neutral-300">
               {ins.idCardDropHint || "Kéo thả hoặc"}
             </span>
-            <span className="text-xs font-semibold text-[#F52235]">
+            <span className="text-xs font-semibold text-[#F52235] dark:text-red-400">
               {ins.idCardChooseFile || "Chọn tệp"}
             </span>
-            <span className="text-[10px] text-[#667085]">
+            <span className="text-[10px] text-[#667085] dark:text-neutral-300">
               {ins.idCardConstraint || "JPG, PNG tối đa 5MB"}
             </span>
           </label>
@@ -209,7 +209,7 @@ const IdCardDrawer = ({
         />
 
         {error && (
-          <p role="alert" className="text-xs text-red-500">
+          <p role="alert" className="text-xs text-red-500 dark:text-red-400">
             {error}
           </p>
         )}
@@ -229,7 +229,7 @@ const IdCardDrawer = ({
       primaryDisabled={!canSubmit}
     >
       <div className="flex flex-col gap-3">
-        <span className="text-sm font-semibold text-[#101828]">
+        <span className="text-sm font-semibold text-[#101828] dark:text-white">
           {ins.idCardCurrentInfo || "Thông tin hiện tại"}
         </span>
         <div className="flex gap-4">
@@ -237,14 +237,14 @@ const IdCardDrawer = ({
           <CurrentImage label={ins.idBack || "Mặt sau"} url={currentBackUrl} />
         </div>
 
-        <span className="mt-1 text-sm font-semibold text-[#101828]">
+        <span className="mt-1 text-sm font-semibold text-[#101828] dark:text-white">
           {ins.idCardWantedInfo || "Thông tin muốn cập nhật"}
         </span>
         {renderField("front", ins.idCardFrontNew || "Mặt trước mới", frontFile)}
         {renderField("back", ins.idCardBackNew || "Mặt sau mới", backFile)}
 
         {submitError && (
-          <p role="alert" className="text-xs text-red-500">
+          <p role="alert" className="text-xs text-red-500 dark:text-red-400">
             {submitError}
           </p>
         )}

@@ -36,7 +36,7 @@ const SpeakingRoomQuotaBanner = ({ quota }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 dark:text-neutral-400 font-medium">0 buổi</span>
+          <span className="text-xs text-slate-600 dark:text-neutral-300 font-medium">0 buổi</span>
           <div className="w-32 sm:w-44 h-2 bg-slate-200 dark:bg-[#272727] rounded-full overflow-hidden">
             <div
               className="h-full bg-[#990011] dark:bg-red-500 rounded-full transition-all duration-300"

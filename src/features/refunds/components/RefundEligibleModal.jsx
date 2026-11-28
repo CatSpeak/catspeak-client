@@ -35,19 +35,19 @@ export default function RefundEligibleModal({
       <div className="space-y-4">
         {/* Shield Icon, API Reason & Hero Amount */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100/80 mb-3">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100/80 dark:border-emerald-800/60 mb-3">
             <ShieldCheck size={26} />
           </div>
 
           {eligibility?.reason && (
-            <p className="text-xs text-gray-600 max-w-xs mx-auto mb-3 leading-relaxed">
+            <p className="text-xs text-gray-600 dark:text-neutral-300 max-w-xs mx-auto mb-3 leading-relaxed">
               {eligibility.reason}
             </p>
           )}
 
           {eligibility?.maxRefundAmount !== undefined && (
             <>
-              <p className="text-[11px] uppercase tracking-wider font-semibold text-gray-400 mb-0.5">
+              <p className="text-[11px] uppercase tracking-wider font-semibold text-gray-500 dark:text-neutral-400 mb-0.5">
                 {refundT.maxRefundAmount || "Số tiền hoàn tối đa"}
               </p>
               <p className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">

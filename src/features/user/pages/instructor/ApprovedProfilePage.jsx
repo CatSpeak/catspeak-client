@@ -254,11 +254,11 @@ const ApprovedProfilePage = () => {
     return (
       <div className="flex flex-col gap-4">
         <PageTitle>{t.nav?.instructor || "Hồ sơ giáo viên"}</PageTitle>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-          <h3 className="text-sm font-bold text-red-800">
+        <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-800/70 dark:bg-red-950/35 p-5">
+          <h3 className="text-sm font-bold text-red-800 dark:text-red-200">
             {ins.loadErrorTitle || "Không tải được hồ sơ giảng viên"}
           </h3>
-          <p className="mt-1 text-sm text-red-700">
+          <p className="mt-1 text-sm text-red-700 dark:text-red-300">
             {ins.loadErrorDesc || "Vui lòng kiểm tra kết nối và thử lại."}
           </p>
           <button

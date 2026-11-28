@@ -299,9 +299,8 @@ const TeachingMaterialPage = () => {
           <PillButton
             variant="outline"
             roundedClass="rounded-xl"
-            borderColor="#6E0009"
-            textColor="#6E0009"
             startIcon={<FolderPlus className="h-4 w-4 shrink-0" />}
+            innerClassName="border-[#6E0009] text-[#6E0009] dark:border-[#FF7A8A] dark:text-[#FF7A8A] dark:hover:bg-red-950/30"
             className="!h-10 min-w-0 flex-1 px-2 text-sm md:flex-none md:px-4"
             onClick={() => setIsCreateFolderOpen(true)}
           >
@@ -328,16 +327,20 @@ const TeachingMaterialPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.materials.searchPlaceholder}
             containerClassName="w-full min-w-0 md:max-w-[448px]"
-            className="!h-10 !w-full !rounded-xl border-[#E3BEBA] py-[22px]"
+            className="!h-10 !w-full !rounded-xl border-[#E3BEBA] dark:border-[#3F3F3F] py-[22px]"
             icon={Search}
           />
 
           <PillButton
             variant={filterMode ? "solid" : "outline"}
             roundedClass="rounded-xl"
-            borderColor={filterMode ? "transparent" : "#E3BEBA"}
             bgColor={filterMode ? "#6E0009" : undefined}
-            textColor={filterMode ? "white" : "#5B403E"}
+            textColor={filterMode ? "white" : undefined}
+            innerClassName={
+              filterMode
+                ? ""
+                : "border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727]"
+            }
             className="!h-10 hidden shrink-0 md:inline-flex"
             startIcon={<ListFilter className="h-4 w-4 shrink-0" />}
             onClick={() => setIsFilterModalOpen(true)}
@@ -350,9 +353,13 @@ const TeachingMaterialPage = () => {
           <PillButton
             variant={filterMode ? "solid" : "outline"}
             roundedClass="rounded-xl"
-            borderColor={filterMode ? "transparent" : "#E3BEBA"}
             bgColor={filterMode ? "#6E0009" : undefined}
-            textColor={filterMode ? "white" : "#5B403E"}
+            textColor={filterMode ? "white" : undefined}
+            innerClassName={
+              filterMode
+                ? ""
+                : "border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727]"
+            }
             className="!h-10 min-w-0 flex-1 px-2 text-sm md:hidden"
             startIcon={<ListFilter className="h-4 w-4 shrink-0" />}
             onClick={() => setIsFilterModalOpen(true)}
@@ -361,16 +368,16 @@ const TeachingMaterialPage = () => {
               {t.materials.filter} {filterMode ? `(1)` : ""}
             </span>
           </PillButton>
-          <div className="flex h-10 shrink-0 items-center rounded-xl border border-[#E3BEBA] bg-[#F3F3F3] p-1">
+          <div className="flex h-10 shrink-0 items-center rounded-xl border border-[#E3BEBA] bg-[#F3F3F3] p-1 dark:border-[#3F3F3F] dark:bg-[#1A1A1A]">
             <IconButton
               variant="iconOnly"
               size="sm"
               aria-label={t.materials.gridView || "Grid view"}
-              className={`!h-[30px] !rounded-[8px] px-3 transition-colors hover:bg-[#E3BEBA] ${viewLayout === "grid" ? "bg-[#F9F9F9]" : ""}`}
+              className={`!h-[30px] !rounded-[8px] px-3 transition-colors hover:bg-[#E3BEBA] dark:hover:bg-[#272727] ${viewLayout === "grid" ? "bg-[#F9F9F9] dark:bg-[#2C2C2C]" : ""}`}
               onClick={() => setViewLayout("grid")}
             >
               <LayoutGrid
-                className={`h-4 w-4 ${viewLayout === "grid" ? "text-[#6E0009]" : "text-[#5B403E]"}`}
+                className={`h-4 w-4 ${viewLayout === "grid" ? "text-[#6E0009] dark:text-[#FF7A8A]" : "text-[#5B403E] dark:text-neutral-300"}`}
               />
             </IconButton>
 
@@ -378,11 +385,11 @@ const TeachingMaterialPage = () => {
               variant="iconOnly"
               size="sm"
               aria-label={t.materials.listView || "List view"}
-              className={`!h-[30px] !rounded-[8px] px-3 transition-colors hover:bg-[#E3BEBA] ${viewLayout === "list" ? "bg-[#F9F9F9]" : ""}`}
+              className={`!h-[30px] !rounded-[8px] px-3 transition-colors hover:bg-[#E3BEBA] dark:hover:bg-[#272727] ${viewLayout === "list" ? "bg-[#F9F9F9] dark:bg-[#2C2C2C]" : ""}`}
               onClick={() => setViewLayout("list")}
             >
               <TableProperties
-                className={`h-4 w-4 ${viewLayout === "list" ? "text-[#6E0009]" : "text-[#5B403E]"}`}
+                className={`h-4 w-4 ${viewLayout === "list" ? "text-[#6E0009] dark:text-[#FF7A8A]" : "text-[#5B403E] dark:text-neutral-300"}`}
               />
             </IconButton>
           </div>
@@ -405,12 +412,11 @@ const TeachingMaterialPage = () => {
                 onClick={toggle}
                 variant="outline"
                 roundedClass="rounded-xl"
-                borderColor="#E3BEBA"
-                textColor="#5B403E"
+                innerClassName="border-[#E3BEBA] text-[#5B403E] dark:border-[#3F3F3F] dark:text-neutral-200 dark:bg-[#1A1A1A] dark:hover:bg-[#272727]"
                 className="!h-10 min-w-0 flex-1 sm:flex-none"
                 endIcon={
                   <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-[#5B403E] transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 shrink-0 text-[#5B403E] dark:text-neutral-300 transition-transform ${isOpen ? "rotate-180" : ""}`}
                   />
                 }
               >
@@ -426,18 +432,18 @@ const TeachingMaterialPage = () => {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <LoadingSpinner />
-          <span className="text-[#5B403E]">{t.materials.loading}</span>
+          <span className="text-[#5B403E] dark:text-neutral-300">{t.materials.loading}</span>
         </div>
       ) : (searchQuery || filterMode) && materials.length === 0 ? (
         <div className="mt-4">
           {searchQuery && (
             <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-[#1A1C1C]">
+              <h2 className="text-2xl font-semibold text-[#1A1C1C] dark:text-white">
                 {t.materials.searchResults}
               </h2>
-              <p className="text-base text-[#5B403E]">
+              <p className="text-base text-[#5B403E] dark:text-neutral-300">
                 {t.materials.zeroResults}{" "}
-                <span className="font-bold text-[#6E0009]">
+                <span className="font-bold text-[#6E0009] dark:text-[#FF7A8A]">
                   "{searchQuery}"
                 </span>
               </p>
@@ -454,11 +460,11 @@ const TeachingMaterialPage = () => {
         </div>
       ) : materials.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-70">
-          <FolderPlus className="w-16 h-16 text-[#E3BEBA]" />
-          <p className="text-lg font-medium text-[#5B403E]">
+          <FolderPlus className="w-16 h-16 text-[#E3BEBA] dark:text-neutral-500" />
+          <p className="text-lg font-medium text-[#5B403E] dark:text-neutral-300">
             {t.materials.emptyFolder}
           </p>
-          <p className="text-[#5B403E] text-center max-w-md">
+          <p className="text-[#5B403E] dark:text-neutral-300 text-center max-w-md">
             {t.materials.uploadPrompt}
           </p>
         </div>
@@ -466,15 +472,15 @@ const TeachingMaterialPage = () => {
         <>
           {searchQuery && materials.length > 0 && (
             <div className="mb-8 mt-4">
-              <h2 className="text-2xl font-semibold text-[#1A1C1C]">
+              <h2 className="text-2xl font-semibold text-[#1A1C1C] dark:text-white">
                 {t.materials.searchResults}
               </h2>
-              <p className="text-base text-[#5B403E]">
+              <p className="text-base text-[#5B403E] dark:text-neutral-300">
                 {t.materials.foundResults.replace(
                   "{{count}}",
                   materials.length,
                 )}{" "}
-                <span className="font-bold text-[#6E0009]">
+                <span className="font-bold text-[#6E0009] dark:text-[#FF7A8A]">
                   "{searchQuery}"
                 </span>
               </p>
@@ -484,7 +490,7 @@ const TeachingMaterialPage = () => {
           {/* Folders Section */}
           {folders.length > 0 && (
             <div className="space-y-4 mb-6">
-              <h2 className="text-2xl font-semibold text-[#1A1C1C]">
+              <h2 className="text-2xl font-semibold text-[#1A1C1C] dark:text-white">
                 {t.materials.folders}
               </h2>
               <div
@@ -567,7 +573,7 @@ const TeachingMaterialPage = () => {
           {/* Recent Files Section */}
           {files.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-[#1A1C1C]">
+              <h2 className="text-2xl font-semibold text-[#1A1C1C] dark:text-white">
                 {searchQuery ? t.materials.files : t.materials.recentFiles}
               </h2>
               <div

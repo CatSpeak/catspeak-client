@@ -97,14 +97,14 @@ const SaveSharedMaterialModal = ({ open, onClose, onSuccess, item }) => {
     >
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="text-[#5B403E] text-sm">
-            Vui lòng chọn thư mục để lưu <span className="font-semibold text-[#1A1C1C]">"{currentName}"</span>
+          <p className="text-[#5B403E] dark:text-neutral-400 text-sm">
+            Vui lòng chọn thư mục để lưu <span className="font-semibold text-[#1A1C1C] dark:text-white">"{currentName}"</span>
           </p>
         </div>
 
-        <div className="border border-[#E2E2E2] rounded-xl p-3 overflow-y-auto min-h-[250px] max-h-[400px] flex flex-col">
+        <div className="border border-[#E2E2E2] dark:border-[#3F3F3F] rounded-xl p-3 overflow-y-auto min-h-[250px] max-h-[400px] flex flex-col">
           {isFetchingTree ? (
-            <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
+            <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] dark:text-neutral-400 gap-2 opacity-70">
               <LoadingSpinner />
               <span>{t.materials.loadingFolderTree}</span>
             </div>
@@ -129,7 +129,7 @@ const SaveSharedMaterialModal = ({ open, onClose, onSuccess, item }) => {
                 expandedIds={expandedIds}
                 toggleExpand={toggleExpand}
               />
-              <div className="h-px bg-[#E2E2E2] my-1 w-full" />
+              <div className="h-px bg-[#E2E2E2] dark:bg-[#3F3F3F] my-1 w-full" />
               {folders.map(folder => (
                 <FolderNode
                   key={folder.folderId}

@@ -49,7 +49,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
       <PillButton
         onClick={handleReset}
         variant="secondary-no-outline"
-        textColor="#6E0009"
+        innerClassName="text-[#6E0009] dark:text-[#FF7A8A]"
         roundedClass="rounded-xl"
       >
         {t.materials.clearFilters}
@@ -84,7 +84,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
             checked={filterMode === 'folder'}
             onChange={() => setFilterMode('folder')}
           />
-          <span className="text-[#1A1C1C] text-base font-medium">{t.materials.folderFilter}</span>
+          <span className="text-[#1A1C1C] dark:text-white text-base font-medium">{t.materials.folderFilter}</span>
         </label>
 
         {/* Option 2: Loại file */}
@@ -97,7 +97,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
               checked={filterMode === 'fileType'}
               onChange={() => setFilterMode('fileType')}
             />
-            <span className="text-[#1A1C1C] text-base font-medium">{t.materials.fileTypeFilter}</span>
+            <span className="text-[#1A1C1C] dark:text-white text-base font-medium">{t.materials.fileTypeFilter}</span>
           </label>
 
           {/* Dropdown for file type */}
@@ -109,7 +109,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
                 options={FILE_TYPES}
                 align="left"
                 dropdownClassName="w-full"
-                triggerClassName="h-[42px] border-[#fde9eb] w-full"
+                triggerClassName="h-[42px] border-[#fde9eb] dark:border-[#3F3F3F] w-full"
               />
             </div>
           )}
@@ -124,7 +124,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
             checked={filterMode === 'bookmark'}
             onChange={() => setFilterMode('bookmark')}
           />
-          <span className="text-[#1A1C1C] text-base font-medium">{t.materials.bookmarkedFilter}</span>
+          <span className="text-[#1A1C1C] dark:text-white text-base font-medium">{t.materials.bookmarkedFilter}</span>
         </label>
       </div>
     </Modal>

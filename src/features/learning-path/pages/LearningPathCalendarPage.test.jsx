@@ -2,14 +2,15 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import LearningPathCalendarPage from "./LearningPathCalendarPage"
 
-const { calendarState, previewProps, quotaProps } = vi.hoisted(() => ({
+const { calendarState, authState, previewProps, quotaProps } = vi.hoisted(() => ({
   calendarState: { data: null, search: "" },
+  authState: { isAuthenticated: true },
   previewProps: { current: null },
   quotaProps: { current: null },
 }))
 
 vi.mock("@/features/auth", () => ({
-  useAuth: () => ({ isAuthenticated: true, user: { id: 1 } }),
+  useAuth: () => ({ isAuthenticated: authState.isAuthenticated, user: { id: 1 } }),
 }))
 
 vi.mock("../api/learningPathApi", () => ({
@@ -75,6 +76,7 @@ beforeEach(() => {
   quotaProps.current = null
   calendarState.search = "day=2"
   calendarState.data = createCalendar()
+  authState.isAuthenticated = true
 })
 
 describe("LearningPathCalendarPage deep link", () => {
@@ -103,5 +105,21 @@ describe("LearningPathCalendarPage deep link", () => {
 
     expect(previewProps.current.isOpen).toBe(false)
     expect(quotaProps.current.isOpen).toBe(false)
+  })
+})
+
+describe("LearningPathCalendarPage guest five-day calendar", () => {
+  beforeEach(() => {
+    authState.isAuthenticated = false
+    calendarState.search = ""
+  })
+
+  it("marks only day 1 as today and days 2-5 as upcoming", () => {
+    const html = renderToStaticMarkup(<LearningPathCalendarPage />)
+
+    expect((html.match(/Hôm nay<\/span>/g) || []).length).toBe(1)
+    expect((html.match(/Sắp tới<\/span>/g) || []).length).toBe(4)
+    expect((html.match(/Chưa tới/g) || []).length).toBe(4)
+    expect(html).toContain("Vào học")
   })
 })

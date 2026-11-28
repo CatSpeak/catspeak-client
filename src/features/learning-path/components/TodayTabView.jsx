@@ -13,8 +13,11 @@ const TodayTabView = ({
   const today = dayjs()
   const todayDateString = `${getDayOfWeekFull(today)}, ${today.format("DD/MM")}`
 
-  // Find today's card (Scheduled or isToday)
-  const todayCard = cards.find((c) => c.isToday || c.status === "Scheduled") || cards[0]
+  // Find today's card (isToday first, then a Scheduled card without an explicit isToday)
+  const todayCard =
+    cards.find((c) => c.isToday) ||
+    cards.find((c) => c.status === "Scheduled" && c.isToday !== false) ||
+    cards[0]
   const missedCards = cards.filter((c) => c.status === "Missed")
   const upcomingCards = cards.filter((c) => c.status === "Upcoming")
   const nextUpcomingCard = upcomingCards[0]

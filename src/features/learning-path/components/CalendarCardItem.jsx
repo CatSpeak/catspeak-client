@@ -30,10 +30,16 @@ const CalendarCardItem = ({
   )
 
   // Status flags
-  const isScheduled = status === "Scheduled" || (isToday && status !== "Completed" && status !== "Missed")
+  const hasExplicitIsToday = isTodayProp !== undefined || card.isToday !== undefined
+  const isExplicitlyNotToday = hasExplicitIsToday && !isToday
+  const isScheduled =
+    !isExplicitlyNotToday &&
+    (status === "Scheduled" ||
+      (isToday && status !== "Completed" && status !== "Missed"))
   const isCompleted = status === "Completed"
   const isMissed = status === "Missed"
-  const isUpcoming = status === "Upcoming"
+  const isUpcoming =
+    status === "Upcoming" || (status === "Scheduled" && isExplicitlyNotToday)
   const isQuotaLocked = status === "QuotaLocked" || card.isQuotaLocked
   const isSkipped = status === "Skipped"
   const isInProgress = status === "InProgress"
@@ -96,7 +102,7 @@ const CalendarCardItem = ({
               Ngày {card.dayIndex}{dayOfWeek ? ` · ${dayOfWeek}` : ""}
             </span>
             {formattedDate && (
-              <span className="text-[11px] text-gray-400 dark:text-neutral-400 font-normal mt-0.5">
+              <span className="text-[11px] text-gray-500 dark:text-neutral-400 font-normal mt-0.5">
                 {formattedDate}
               </span>
             )}
@@ -135,7 +141,7 @@ const CalendarCardItem = ({
             )}
 
             {isUpcoming && !isQuotaLocked && !isSkipped && (
-              <span className="inline-block bg-gray-100 dark:bg-[#272727] text-gray-400 dark:text-neutral-400 text-[11px] font-medium px-2 py-0.5 rounded-md">
+              <span className="inline-block bg-gray-100 dark:bg-[#272727] text-gray-500 dark:text-neutral-300 text-[11px] font-medium px-2 py-0.5 rounded-md">
                 Sắp tới
               </span>
             )}
@@ -148,7 +154,7 @@ const CalendarCardItem = ({
             {vietnamese || card.topicTitle}
           </h3>
 
-          <p className="text-xs text-gray-400 dark:text-neutral-400 mt-1 line-clamp-1">
+          <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1 line-clamp-1">
             {hanzi && <span>{hanzi}</span>}
             {hanzi && (pinyin || card.topicDescription) && <span> · </span>}
             <span>{card.topicDescription || pinyin}</span>
@@ -196,7 +202,7 @@ const CalendarCardItem = ({
                   e.stopPropagation()
                   onSkipCard?.(card)
                 }}
-                className="self-end text-[11px] text-gray-400 dark:text-neutral-400 hover:text-gray-600 dark:hover:text-white transition-colors pr-1"
+                className="self-end text-[11px] text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-white transition-colors pr-1"
               >
                 Bỏ qua
               </button>

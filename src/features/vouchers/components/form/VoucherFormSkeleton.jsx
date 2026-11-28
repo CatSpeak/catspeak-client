@@ -13,9 +13,9 @@ const VoucherFormSkeleton = () => {
       {/* Contextual Breadcrumb Skeleton */}
       <div className="flex items-center gap-2">
         <Skeleton className="h-4 w-28 rounded-md" />
-        <span className="text-slate-300">/</span>
+        <span className="text-slate-300 dark:text-neutral-600">/</span>
         <Skeleton className="h-4 w-44 rounded-md" />
-        <span className="text-slate-300">/</span>
+        <span className="text-slate-300 dark:text-neutral-600">/</span>
         <Skeleton className="h-4 w-36 rounded-md" />
       </div>
 

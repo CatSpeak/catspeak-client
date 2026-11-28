@@ -81,59 +81,59 @@ const VoucherConfigCard = ({ voucher = {} }) => {
     <FluentCard className="space-y-6">
       {/* ─── Khối Thông tin cấu hình ─── */}
       <div className="space-y-4">
-        <h4 className="font-bold">{vd.configTitle || "Thông tin cấu hình"}</h4>
+        <h4 className="font-bold dark:text-white">{vd.configTitle || "Thông tin cấu hình"}</h4>
 
         <div className="flex flex-col gap-1 text-base">
           {voucher.title && (
             <div className="flex items-center justify-between gap-4">
               <span className="text-secondary shrink-0">{vd.name || "Tên voucher"}</span>
-              <span className="text-right font-medium truncate">{voucher.title}</span>
+              <span className="text-right font-medium truncate dark:text-white">{voucher.title}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">{vd.code || "Mã"}</span>
-            <span className="font-mono font-medium">{voucher.code || "-"}</span>
+            <span className="font-mono font-medium dark:text-white">{voucher.code || "-"}</span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">{vd.type || "Loại"}</span>
-            <span>{discountTypeLabel}</span>
+            <span className="dark:text-white">{discountTypeLabel}</span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">{vd.value || "Giá trị"}</span>
             <span className="text-cath-red-700 dark:text-red-400 font-semibold">{discountValueDisplay}</span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">
               {vd.maxDiscount || "Giảm tối đa"}
             </span>
-            <span>
+            <span className="dark:text-white">
               {voucher.maxDiscountAmount
                 ? formatCurrency(voucher.maxDiscountAmount)
                 : vf.unlimited || "Không giới hạn"}
             </span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">
               {vd.minOrder || "Đơn tối thiểu"}
             </span>
-            <span>{formatCurrency(voucher.minOrderAmount || 0)}</span>
+            <span className="dark:text-white">{formatCurrency(voucher.minOrderAmount || 0)}</span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">{vd.validity || "Hiệu lực"}</span>
-            <span>{validityDisplay}</span>
+            <span className="dark:text-white">{validityDisplay}</span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">
               {vd.appliedScope || "Áp dụng"}
             </span>
-            <span className="text-right max-w-[200px] sm:max-w-[260px] truncate">
+            <span className="text-right max-w-[200px] sm:max-w-[260px] truncate dark:text-white">
               {getAppliedScopeDisplay()}
             </span>
           </div>
@@ -144,15 +144,15 @@ const VoucherConfigCard = ({ voucher = {} }) => {
 
       {/* ─── Khối Tiền cọc ─── */}
       <div className="space-y-4">
-        <h4 className="font-bold">{vd.depositTitle || "Tiền cọc"}</h4>
+        <h4 className="font-bold dark:text-white">{vd.depositTitle || "Tiền cọc"}</h4>
 
         <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">{vd.depositPaid || "Đã nạp"}</span>
-            <span>{formatCurrency(depositPaid)}</span>
+            <span className="dark:text-white">{formatCurrency(depositPaid)}</span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">
               {vd.depositUsed || "Đã dùng"}
             </span>
@@ -161,11 +161,11 @@ const VoucherConfigCard = ({ voucher = {} }) => {
             </span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span className="text-secondary">
               {vd.depositRemaining || "Còn lại"}
             </span>
-            <span>{formatCurrency(depositRemaining)}</span>
+            <span className="dark:text-white">{formatCurrency(depositRemaining)}</span>
           </div>
         </div>
       </div>

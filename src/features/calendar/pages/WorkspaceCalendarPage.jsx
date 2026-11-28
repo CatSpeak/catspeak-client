@@ -68,7 +68,7 @@ const WorkspaceCalendarPage = () => {
 
   if (error) {
     return (
-      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+      <div role="alert" className="bg-red-50 dark:bg-red-950/35 border border-red-200 dark:border-red-800/70 text-red-700 dark:text-red-200 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
         <span>{mc.loadFailed || "The calendar overview could not be loaded. Please try again."}</span>
         <button
           type="button"
@@ -85,7 +85,7 @@ const WorkspaceCalendarPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] dark:text-neutral-200">
       {/* <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
           <button
@@ -108,7 +108,7 @@ const WorkspaceCalendarPage = () => {
       />
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+        <h1 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight">
           {c.teachingTasks || "Teaching Tasks"}
         </h1>
       </div>

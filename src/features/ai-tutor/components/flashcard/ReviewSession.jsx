@@ -212,10 +212,10 @@ const ReviewSession = ({
     const offline = error?.status === "FETCH_ERROR"
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-base font-semibold text-slate-800">
+        <p className="text-base font-semibold text-slate-800 dark:text-white">
           {offline ? "Chưa tải được thẻ vì đang mất mạng" : "Chưa mở được phiên ôn"}
         </p>
-        <p className="text-sm text-slate-500 max-w-sm">
+        <p className="text-sm text-slate-600 dark:text-neutral-300 max-w-sm">
           {error?.data?.detail?.message || (offline ? "Kiểm tra kết nối rồi thử lại nhé." : code || "Bạn thử lại sau ít phút.")}
         </p>
         <div className="flex gap-3">
@@ -234,10 +234,10 @@ const ReviewSession = ({
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
         <div className="text-4xl">🎉</div>
-        <p className="text-lg font-semibold text-slate-800">
+        <p className="text-lg font-semibold text-slate-800 dark:text-white">
           {mode === "due" ? "Hôm nay bạn đã ôn hết thẻ rồi!" : "Chưa có thẻ nào để ôn ở đây"}
         </p>
-        <p className="text-sm text-slate-500 max-w-sm">
+        <p className="text-sm text-slate-600 dark:text-neutral-300 max-w-sm">
           {mode === "due"
             ? "Thẻ tiếp theo sẽ đến hạn vào những ngày tới. Luyện nói với AI để thêm từ mới vào sổ."
             : "Luyện nói với AI để thêm từ vào sổ, rồi quay lại ôn nhé."}
@@ -253,7 +253,7 @@ const ReviewSession = ({
     // Mọi thẻ đã có kết quả (vào lại phiên đã ôn xong): sang fc03.
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <p className="text-base font-semibold text-slate-800">Bạn đã ôn xong mẻ thẻ này.</p>
+        <p className="text-base font-semibold text-slate-800 dark:text-white">Bạn đã ôn xong mẻ thẻ này.</p>
         <button
           type="button"
           onClick={() => {
@@ -281,18 +281,18 @@ const ReviewSession = ({
           type="button"
           onClick={askExit}
           aria-label="Thoát phiên ôn"
-          className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100"
+          className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-[#272727]"
         >
           <X className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-neutral-400 mb-1.5">
             <span>{MODE_LABEL[session.mode] || MODE_LABEL.due}</span>
             <span>
               Thẻ {position}/{total}
             </span>
           </div>
-          <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+          <div className="h-2 rounded-full bg-slate-200 dark:bg-[#3F3F3F] overflow-hidden">
             <div
               className="h-full rounded-full bg-[#990011] transition-all duration-300"
               style={{ width: `${(Math.max(0, position - 1) / total) * 100}%` }}
@@ -333,7 +333,7 @@ const ReviewSession = ({
         }
       >
         <p className="font-medium text-slate-800 dark:text-neutral-200">Kết quả của bạn đã được lưu.</p>
-        <p className="mt-1">
+        <p className="mt-1 dark:text-neutral-300">
           Bạn đã ôn {Math.max(0, position - 1)}/{total} thẻ. Các thẻ chưa ôn giữ nguyên lịch, vào lại trong hôm nay
           sẽ tiếp tục đúng chỗ đang dừng.
         </p>

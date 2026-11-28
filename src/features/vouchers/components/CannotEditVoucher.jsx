@@ -8,7 +8,6 @@ import TransferInfoModal from "./detail/TransferInfoModal"
 
 const CannotEditVoucher = ({
   voucher,
-  returnUrl,
   onBack,
 }) => {
   const { t } = useLanguage()
@@ -38,7 +37,7 @@ const CannotEditVoucher = ({
         <Ban className="w-12 h-12 mb-4 text-amber-500" />
 
         {/* Title */}
-        <h2 className="font-bold text-xl text-primary tracking-tight mb-4">
+        <h2 className="font-bold text-xl text-primary dark:text-white tracking-tight mb-4">
           {voucher?.code ? `${voucher.code} — ` : ""}
           {t?.vouchers?.cannotEdit || "Không thể chỉnh sửa voucher"}
         </h2>

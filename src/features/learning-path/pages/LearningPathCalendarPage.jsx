@@ -62,7 +62,7 @@ const GUEST_CALENDAR = {
       topicTitle: "Miêu tả các thành viên",
       topicDescription: "Gia đình và Người thân",
       category: "Core",
-      status: "Scheduled",
+      status: "Upcoming",
       isToday: false,
       canLaunch: false,
     },
@@ -74,7 +74,7 @@ const GUEST_CALENDAR = {
       topicTitle: "Nói về giờ giấc, các mốc thời gian",
       topicDescription: "Thời gian & Lịch trình hàng ngày",
       category: "Core",
-      status: "Scheduled",
+      status: "Upcoming",
       isToday: false,
       canLaunch: false,
     },
@@ -86,7 +86,7 @@ const GUEST_CALENDAR = {
       topicTitle: "Giao tiếp khi mua sắm cơ bản",
       topicDescription: "Mua sắm & Hỏi giá cả",
       category: "Core",
-      status: "Scheduled",
+      status: "Upcoming",
       isToday: false,
       canLaunch: false,
     },
@@ -98,7 +98,7 @@ const GUEST_CALENDAR = {
       topicTitle: "Bày tỏ sở thích ăn uống",
       topicDescription: "Ẩm thực & Món ăn yêu thích",
       category: "Core",
-      status: "Scheduled",
+      status: "Upcoming",
       isToday: false,
       canLaunch: false,
     },
@@ -256,9 +256,9 @@ const LearningPathCalendarPage = () => {
   )
 
   // Find today's card for reminder banner
-  const todayCard = processedCards.find(
-    (c) => c.isToday || c.status === "Scheduled",
-  )
+  const todayCard =
+    processedCards.find((c) => c.isToday) ||
+    processedCards.find((c) => c.status === "Scheduled" && c.isToday !== false)
   const missedCount = processedCards.filter((c) => c.status === "Missed").length
   const showReminder =
     !isReminderDismissed &&

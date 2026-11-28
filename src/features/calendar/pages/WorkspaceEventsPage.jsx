@@ -23,8 +23,6 @@ const WorkspaceEventsContent = ({ userId }) => {
   const navigate = useNavigate()
   const cal = useMemo(() => t.calendar || {}, [t])
 
-  const currentLang = localStorage.getItem("communityLanguage") || "en"
-
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [registrationsTarget, setRegistrationsTarget] = useState(null) // { occurrenceId, title }
 
@@ -111,10 +109,10 @@ const WorkspaceEventsContent = ({ userId }) => {
   }, [navigate])
 
   return (
-    <div className="flex flex-col gap-5 text-gray-800">
+    <div className="flex flex-col gap-5 text-gray-800 dark:text-neutral-200">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 sm:gap-0">
-        <h1 className="text-xl font-bold text-red-900">
+        <h1 className="text-xl font-bold text-red-900 dark:text-[#FF7A8A]">
           {cal.workspaceEventsTitle || "My Events"}
         </h1>
         <button
@@ -178,12 +176,12 @@ const WorkspaceEventsContent = ({ userId }) => {
         />
       ) : events.length === 0 ? (
         /* Empty state */
-        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50">
-          <Calendar size={48} className="text-gray-300 mb-3" />
-          <h3 className="font-bold text-gray-700 mb-1">
+        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border dark:border-[#3F3F3F] rounded-2xl bg-gray-50/50 dark:bg-[#1A1A1A]">
+          <Calendar size={48} className="text-gray-300 dark:text-neutral-500 mb-3" />
+          <h3 className="font-bold text-gray-700 dark:text-white mb-1">
             {cal.workspaceNoEvents || "No events created yet"}
           </h3>
-          <p className="text-sm text-gray-400 mb-4 text-center max-w-sm">
+          <p className="text-sm text-gray-600 dark:text-neutral-400 mb-4 text-center max-w-sm">
             {cal.workspaceNoEventsDesc ||
               "Create your first event to manage it here."}
           </p>
@@ -198,7 +196,7 @@ const WorkspaceEventsContent = ({ userId }) => {
       ) : (
         /* Event grid — 2 columns on sm+ */
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-[#606060]">
+          <p className="text-xs text-[#606060] dark:text-neutral-400">
             {events.length === 1
               ? `1 ${cal.event || "event"}`
               : `${events.length} ${cal.event || "event"}s`}
@@ -233,13 +231,13 @@ const WorkspaceEventsContent = ({ userId }) => {
         onClose={() => setDeleteTarget(null)}
         title={cal.workspaceDeleteConfirmTitle || "Delete this event?"}
         className="w-[90vw] max-w-sm"
-        bodyClassName="px-6 py-2 text-sm text-gray-500"
+        bodyClassName="px-6 py-2 text-sm text-gray-500 dark:text-neutral-400"
         footer={
           <div className="flex gap-3 justify-end pt-4 pb-2">
             <button
               onClick={() => setDeleteTarget(null)}
               disabled={isDeleting}
-              className="px-4 py-2 text-sm font-semibold rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+              className="px-4 py-2 text-sm font-semibold rounded-lg hover:bg-gray-100 dark:hover:bg-[#272727] text-gray-500 dark:text-neutral-300 transition-colors"
             >
               {cal.workspaceDeleteCancel || "Cancel"}
             </button>
@@ -262,7 +260,7 @@ const WorkspaceEventsContent = ({ userId }) => {
       >
         {cal.workspaceDeleteConfirmMsg ||
           "This event and all its occurrences will be permanently deleted and cannot be undone."}{" "}
-        <strong className="text-gray-700">
+        <strong className="text-gray-700 dark:text-white">
           &ldquo;{deleteTarget?.title}&rdquo;
         </strong>
       </Modal>

@@ -99,7 +99,7 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
 
     if (item.isImpactLoading) {
       return (
-        <div className="bg-[#f3f3f3] rounded-xl h-14 px-4 flex items-center gap-4">
+        <div className="bg-[#f3f3f3] dark:bg-[#242424] rounded-xl h-14 px-4 flex items-center gap-4">
           <Loader2 className="w-6 h-6 shrink-0 animate-spin" />
           <span>{t.materials.loadingData || "Đang tải thông tin"}</span>
         </div>
@@ -110,7 +110,7 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
       const { folders, materials } = item.affectedDetail
       if (folders > 0 || materials > 0) {
         return (
-          <div className="bg-[#f3f3f3] rounded-xl h-14 px-4 flex items-center gap-4">
+          <div className="bg-[#f3f3f3] dark:bg-[#242424] rounded-xl h-14 px-4 flex items-center gap-4">
             <FolderMinus className="w-6 h-6 shrink-0" />
             <span>
               {t.materials.deleteFolderImpactMsg
@@ -126,7 +126,7 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
     // Fallback cho count cũ
     if (item.count > 0) {
       return (
-        <div className="bg-[#f3f3f3] rounded-xl h-14 px-4 flex items-center gap-4">
+        <div className="bg-[#f3f3f3] dark:bg-[#242424] rounded-xl h-14 px-4 flex items-center gap-4">
           <FolderMinus className="w-6 h-6 shrink-0" />
           <span>
             {t.materials.deleteFolderWarning

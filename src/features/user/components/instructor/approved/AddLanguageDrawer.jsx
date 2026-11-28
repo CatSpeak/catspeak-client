@@ -124,7 +124,7 @@ const AddLanguageDrawer = ({ open, onClose, excludedLanguages = [], t }) => {
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-[#101828]">
+          <span className="text-xs font-semibold text-[#101828] dark:text-white">
             {ins.approvedLanguageCol || "Ngôn ngữ"}
           </span>
           <FormSelect
@@ -137,7 +137,7 @@ const AddLanguageDrawer = ({ open, onClose, excludedLanguages = [], t }) => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-[#101828]">
+          <span className="text-xs font-semibold text-[#101828] dark:text-white">
             {ins.approvedLevelCol || "Trình độ"}
           </span>
           <FormSelect
@@ -150,14 +150,14 @@ const AddLanguageDrawer = ({ open, onClose, excludedLanguages = [], t }) => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-[#101828]">
+          <span className="text-xs font-semibold text-[#101828] dark:text-white">
             {ins.languageCertificateLabel || "Chứng chỉ / Bằng cấp"}
           </span>
           <CertificateField onChange={setCertificate} t={t} />
         </div>
 
         {submitError && (
-          <p role="alert" className="text-xs text-red-500">
+          <p role="alert" className="text-xs text-red-500 dark:text-red-400">
             {submitError}
           </p>
         )}

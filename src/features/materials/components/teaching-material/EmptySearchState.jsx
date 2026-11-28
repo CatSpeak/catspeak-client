@@ -15,17 +15,17 @@ const EmptySearchState = ({ searchQuery, onClearFilters }) => {
       />
 
       {/* Text Content */}
-      <h3 className="text-3xl font-bold text-[#1A1C1C] mb-4 text-center">
+      <h3 className="text-3xl font-bold text-[#1A1C1C] dark:text-white mb-4 text-center">
         {t.materials.emptySearchTitle}
       </h3>
 
-      <p className="text-center text-base text-[#5B403E] max-w-lg mb-8 leading-relaxed">
+      <p className="text-center text-base text-[#5B403E] dark:text-neutral-300 max-w-lg mb-8 leading-relaxed">
         {searchQuery ? (
           <>
             {t.materials.emptySearchDescQuery.split('"{{query}}"').map((part, index, array) => (
               <React.Fragment key={index}>
                 {part}
-                {index < array.length - 1 && <span className="font-semibold text-[#6E0009]">"{searchQuery}"</span>}
+                {index < array.length - 1 && <span className="font-semibold text-[#6E0009] dark:text-[#FF7A8A]">"{searchQuery}"</span>}
               </React.Fragment>
             ))}<br />
             {t.materials.emptySearchTryAgain}
@@ -39,8 +39,7 @@ const EmptySearchState = ({ searchQuery, onClearFilters }) => {
       <PillButton
         variant='outline'
         roundedClass="rounded-xl"
-        textColor="#6E0009"
-        borderColor="#E3BEBA"
+        innerClassName="!text-[#6E0009] !border-[#E3BEBA] dark:!text-[#FF7A8A] dark:!border-[#FF7A8A]/70"
         onClick={onClearFilters}
       >
         {t.materials.clearSearchFilters}

@@ -46,6 +46,9 @@ vi.mock("@/shared/context/LanguageContext", () => ({
         files: "Tệp",
         searchResults: "Kết quả tìm kiếm",
         zeroResults: "Không có kết quả",
+        itemsCount: "{{count}} tài liệu",
+        updated: "Cập nhật {{date}}",
+        foundResults: "Tìm thấy {{count}} kết quả",
         sortOptions: {
           nameAsc: "Tên A-Z",
           nameDesc: "Tên Z-A",
@@ -152,5 +155,30 @@ describe("ISS-19/ISS-20: TeachingMaterialPage header actions and folder fetch", 
   it("never requests GET /personal-materials/14 for a folder", () => {
     renderPage()
     expect(api.personalMaterialById).not.toHaveBeenCalled()
+  })
+
+  it("applies dark-mode heading classes and class-based create-folder colors", () => {
+    api.personalMaterials.mockReturnValueOnce({
+      data: { folders: [{ folderId: "1", folderName: "Bài giảng" }], materials: [] },
+      isLoading: false,
+    })
+
+    const html = renderPage()
+    const host = document.createElement("div")
+    host.innerHTML = html
+
+    const heading = [...host.querySelectorAll("h2")].find(
+      (node) => node.textContent === "Thư mục",
+    )
+    expect(heading).toBeTruthy()
+    expect(heading.className).toContain("dark:text-white")
+
+    const createButton = [...host.querySelectorAll("button")].find((node) =>
+      node.textContent.includes("Tạo thư mục mới"),
+    )
+    expect(createButton).toBeTruthy()
+    expect(createButton.innerHTML).toContain("dark:text-[#FF7A8A]")
+    expect(createButton.innerHTML).not.toContain("color:#6E0009")
+    expect(createButton.innerHTML).not.toContain("border-color:#6E0009")
   })
 })

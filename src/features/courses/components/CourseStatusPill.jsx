@@ -26,15 +26,15 @@ const CourseStatusPill = ({ status, label, labels, className = "" }) => {
   }
 
   const statusConfigMap = {
-    TEACHING: { bgClass: "bg-[#DCFCE7] dark:bg-emerald-950/40", textClass: "text-emerald-800 dark:text-emerald-400" },
-    OPEN: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-blue-700 dark:text-blue-400" },
-    OPEN_ENROLLMENT: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-blue-700 dark:text-blue-400" },
-    OPEN_FOR_ENROLLMENT: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/40", textClass: "text-blue-700 dark:text-blue-400" },
-    LIVE: { bgClass: "bg-[#FEE2E2] dark:bg-red-950/40", textClass: "text-red-700 dark:text-red-400" },
+    TEACHING: { bgClass: "bg-[#DCFCE7] dark:bg-emerald-950/85", textClass: "text-emerald-800 dark:text-emerald-400" },
+    OPEN: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/85", textClass: "text-blue-700 dark:text-blue-400" },
+    OPEN_ENROLLMENT: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/85", textClass: "text-blue-700 dark:text-blue-400" },
+    OPEN_FOR_ENROLLMENT: { bgClass: "bg-[#DBEAFE] dark:bg-blue-950/85", textClass: "text-blue-700 dark:text-blue-400" },
+    LIVE: { bgClass: "bg-[#FEE2E2] dark:bg-red-950/85", textClass: "text-red-700 dark:text-red-400" },
     ARCHIVED: { bgClass: "bg-[#F3F4F6] dark:bg-[#2A2A2A]", textClass: "text-gray-700 dark:text-gray-400" },
     FINISHED: { bgClass: "bg-[#F3F4F6] dark:bg-[#2A2A2A]", textClass: "text-gray-700 dark:text-gray-400" },
-    NOT_STARTED: { bgClass: "bg-[#FEF3C7] dark:bg-amber-950/40", textClass: "text-amber-800 dark:text-amber-400" },
-    UPCOMING: { bgClass: "bg-[#EEF2FF] dark:bg-indigo-950/40", textClass: "text-indigo-700 dark:text-indigo-400" },
+    NOT_STARTED: { bgClass: "bg-[#FEF3C7] dark:bg-amber-950/85", textClass: "text-amber-800 dark:text-amber-400" },
+    UPCOMING: { bgClass: "bg-[#EEF2FF] dark:bg-indigo-950/85", textClass: "text-indigo-700 dark:text-indigo-400" },
   }
 
   const config = statusConfigMap[upperStatus] || CLASS_STATUS_CONFIG[upperStatus] || {

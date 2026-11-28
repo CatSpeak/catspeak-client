@@ -100,42 +100,42 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
       bodyClassName="p-0 flex flex-col md:flex-row h-full overflow-hidden"
     >
       {/* Left Column - Preview */}
-      <div className={`${showMobileDetails ? 'hidden md:flex' : 'flex'} h-full md:h-auto md:flex-1 flex-col bg-white shrink-0 md:shrink min-w-0`}>
+      <div className={`${showMobileDetails ? 'hidden md:flex' : 'flex'} h-full md:h-auto md:flex-1 flex-col bg-white dark:bg-[#1A1A1A] shrink-0 md:shrink min-w-0`}>
         {/* Header Left */}
-        <div className="h-[56px] md:h-[64px] px-4 border-b border-[#E3BEBA] flex items-center justify-between shrink-0">
+        <div className="h-[56px] md:h-[64px] px-4 border-b border-[#E3BEBA] dark:border-[#3F3F3F] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 bg-[#E3BEBA]/50 rounded flex items-center justify-center text-[#6E0009] shrink-0">
+            <div className="w-8 h-8 bg-[#E3BEBA]/50 dark:bg-rose-950/40 rounded flex items-center justify-center text-[#6E0009] dark:text-red-400 shrink-0">
               <FileText className="w-5 h-5" />
             </div>
-            <span className="font-semibold text-[#1A1C1C] text-base md:text-lg truncate">{item.fileName || item.name}</span>
+            <span className="font-semibold text-[#1A1C1C] dark:text-white text-base md:text-lg truncate">{item.fileName || item.name}</span>
           </div>
           <div className="flex items-center gap-1 shrink-0 ml-2">
             <IconButton variant='ghost' onClick={() => setShowMobileDetails(true)} className="md:hidden">
-              <Info className="w-5 h-5 text-[#1A1C1C]" />
+              <Info className="w-5 h-5 text-[#1A1C1C] dark:text-neutral-200" />
             </IconButton>
             <IconButton variant='ghost' onClick={onClose} className="md:hidden">
-              <X className="w-5 h-5 text-[#1A1C1C]" />
+              <X className="w-5 h-5 text-[#1A1C1C] dark:text-neutral-200" />
             </IconButton>
           </div>
         </div>
 
-        <div className="flex-1 bg-gray-100 flex items-center justify-center overflow-hidden min-h-0">
+        <div className="flex-1 bg-gray-100 dark:bg-[#141414] flex items-center justify-center overflow-hidden min-h-0">
           <FilePreview url={item.fileUrl} fileName={item.fileName || item.name} />
         </div>
       </div>
 
       {/* Right Column - Details & Settings */}
-      <div className={`${showMobileDetails ? 'flex' : 'hidden md:flex'} flex-1 md:flex-none w-full md:w-[32%] flex-col border-t md:border-t-0 md:border-l border-[#E3BEBA] bg-white overflow-hidden`}>
+      <div className={`${showMobileDetails ? 'flex' : 'hidden md:flex'} flex-1 md:flex-none w-full md:w-[32%] flex-col border-t md:border-t-0 md:border-l border-[#E3BEBA] dark:border-[#3F3F3F] bg-white dark:bg-[#1A1A1A] overflow-hidden`}>
         {/* Header Right */}
-        <div className="h-[56px] md:h-[64px] px-4 md:px-6 border-b border-[#E3BEBA] flex items-center justify-between shrink-0">
+        <div className="h-[56px] md:h-[64px] px-4 md:px-6 border-b border-[#E3BEBA] dark:border-[#3F3F3F] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <IconButton variant='ghost' onClick={() => setShowMobileDetails(false)} className="md:hidden -ml-2">
-              <ChevronLeft className="w-5 h-5 text-[#1A1C1C]" />
+              <ChevronLeft className="w-5 h-5 text-[#1A1C1C] dark:text-neutral-200" />
             </IconButton>
-            <span className="font-semibold text-[#1A1C1C] text-base md:text-lg">{t.materials.detailsAndSettingsHeader}</span>
+            <span className="font-semibold text-[#1A1C1C] dark:text-white text-base md:text-lg">{t.materials.detailsAndSettingsHeader}</span>
           </div>
           <IconButton variant='ghost' onClick={onClose} className="hidden md:flex">
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 dark:text-neutral-200" />
           </IconButton>
         </div>
 
@@ -143,31 +143,31 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
         <div className="flex-1 overflow-y-auto p-4 md:p-5 flex flex-col gap-5 md:gap-6">
           {/* Info Box */}
           <div>
-            <h4 className="text-base md:text-lg font-bold text-[#1A1C1C] mb-2">{t.materials.fileInfo}</h4>
-            <div className="bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl p-4 flex flex-col gap-3">
+            <h4 className="text-base md:text-lg font-bold text-[#1A1C1C] dark:text-white mb-2">{t.materials.fileInfo}</h4>
+            <div className="bg-[#F9F9F9] dark:bg-[#242424] border border-[#E3BEBA] dark:border-[#3F3F3F] rounded-xl p-4 flex flex-col gap-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#5B403E]">{t.materials.type}</span>
-                <span className="font-medium text-[#1A1C1C]">{item.fileName?.split('.').pop().toUpperCase() || t.materials.file}</span>
+                <span className="text-[#5B403E] dark:text-neutral-400">{t.materials.type}</span>
+                <span className="font-medium text-[#1A1C1C] dark:text-white">{item.fileName?.split('.').pop().toUpperCase() || t.materials.file}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#5B403E]">{t.materials.size}</span>
-                <span className="font-medium text-[#1A1C1C]">{formatSize(item.fileSize || item.size || item.sizeBytes)}</span>
+                <span className="text-[#5B403E] dark:text-neutral-400">{t.materials.size}</span>
+                <span className="font-medium text-[#1A1C1C] dark:text-white">{formatSize(item.fileSize || item.size || item.sizeBytes)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#5B403E]">{t.materials.uploadDate}</span>
-                <span className="font-medium text-[#1A1C1C]">{item.uploadedAt || item.createdAt ? formatDate(item.uploadedAt || item.createdAt) : 'N/A'}</span>
+                <span className="text-[#5B403E] dark:text-neutral-400">{t.materials.uploadDate}</span>
+                <span className="font-medium text-[#1A1C1C] dark:text-white">{item.uploadedAt || item.createdAt ? formatDate(item.uploadedAt || item.createdAt) : 'N/A'}</span>
               </div>
             </div>
           </div>
 
-          <div className="border border-[#E3BEBA] w-full" />
+          <div className="border border-[#E3BEBA] dark:border-[#3F3F3F] w-full" />
 
           {/* Public Share */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex flex-col pr-2">
-                <span className="text-base md:text-lg font-bold text-[#1A1C1C]">{t.materials.publicShare}</span>
-                <span className="text-xs md:text-sm text-[#5B403E]">{t.materials.publicShareDesc}</span>
+                <span className="text-base md:text-lg font-bold text-[#1A1C1C] dark:text-white">{t.materials.publicShare}</span>
+                <span className="text-xs md:text-sm text-[#5B403E] dark:text-neutral-400">{t.materials.publicShareDesc}</span>
               </div>
               <Switch
                 checked={isPublic}
@@ -177,12 +177,12 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
             </div>
 
             <div className="mb-1">
-              <span className="text-xs md:text-sm text-[#5B403E] mb-1 block font-medium">{t.materials.shareLink}</span>
+              <span className="text-xs md:text-sm text-[#5B403E] dark:text-neutral-400 mb-1 block font-medium">{t.materials.shareLink}</span>
               <div className="flex items-center ">
                 <TextInput
                   readOnly
                   value={shareLink || t.materials.noLink}
-                  className="!h-10 text-xs px-3 md:text-sm bg-[#F9F9F9] border-[#E3BEBA] !rounded-xl"
+                  className="!h-10 text-xs px-3 md:text-sm bg-[#F9F9F9] dark:bg-[#242424] border-[#E3BEBA] dark:border-[#3F3F3F] !rounded-xl"
                   containerClassName="flex-1"
                 />
                 <PillButton
@@ -203,13 +203,13 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
             </div>
           </div>
 
-          <div className="border border-[#E3BEBA] w-full" />
+          <div className="border border-[#E3BEBA] dark:border-[#3F3F3F] w-full" />
 
           {/* Download Toggle */}
           <div className="flex items-center justify-between">
             <div className="flex flex-col pr-2">
-              <span className="text-base md:text-lg font-bold text-[#1A1C1C]">{t.materials.allowDownload}</span>
-              <span className="text-xs md:text-sm text-[#5B403E] mt-0.5">{t.materials.allowDownloadDescShort}</span>
+              <span className="text-base md:text-lg font-bold text-[#1A1C1C] dark:text-white">{t.materials.allowDownload}</span>
+              <span className="text-xs md:text-sm text-[#5B403E] dark:text-neutral-400 mt-0.5">{t.materials.allowDownloadDescShort}</span>
             </div>
             <Switch
               checked={allowDownload}
@@ -218,21 +218,21 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
             />
           </div>
 
-          <div className="border border-[#E3BEBA] w-full" />
+          <div className="border border-[#E3BEBA] dark:border-[#3F3F3F] w-full" />
 
           {/* Stats */}
           <div>
-            <h4 className="text-base md:text-lg font-bold text-[#5B403E] mb-2">{t.materials.statistics}</h4>
+            <h4 className="text-base md:text-lg font-bold text-[#5B403E] dark:text-neutral-400 mb-2">{t.materials.statistics}</h4>
             <div className="flex gap-3">
-              <div className="flex-1 bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl flex flex-col items-center justify-center p-2.5 md:p-3">
-                <Eye className="w-4 h-4 md:w-5 md:h-5 text-[#6E0009] mb-1" />
-                <span className="text-lg md:text-xl font-bold text-[#1A1C1C]">{item.viewCount || 0}</span>
-                <span className="text-[11px] md:text-xs text-[#5B403E] font-medium mt-0.5">{t.materials.views}</span>
+              <div className="flex-1 bg-[#F9F9F9] dark:bg-[#242424] border border-[#E3BEBA] dark:border-[#3F3F3F] rounded-xl flex flex-col items-center justify-center p-2.5 md:p-3">
+                <Eye className="w-4 h-4 md:w-5 md:h-5 text-[#6E0009] dark:text-red-400 mb-1" />
+                <span className="text-lg md:text-xl font-bold text-[#1A1C1C] dark:text-white">{item.viewCount || 0}</span>
+                <span className="text-[11px] md:text-xs text-[#5B403E] dark:text-neutral-400 font-medium mt-0.5">{t.materials.views}</span>
               </div>
-              <div className="flex-1 bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl flex flex-col items-center justify-center p-2.5 md:p-3">
-                <Download className="w-4 h-4 md:w-5 md:h-5 text-[#6E0009] mb-1" />
-                <span className="text-lg md:text-xl font-bold text-[#1A1C1C]">{item.downloadCount || 0}</span>
-                <span className="text-[11px] md:text-xs text-[#5B403E] font-medium mt-0.5">{t.materials.downloads}</span>
+              <div className="flex-1 bg-[#F9F9F9] dark:bg-[#242424] border border-[#E3BEBA] dark:border-[#3F3F3F] rounded-xl flex flex-col items-center justify-center p-2.5 md:p-3">
+                <Download className="w-4 h-4 md:w-5 md:h-5 text-[#6E0009] dark:text-red-400 mb-1" />
+                <span className="text-lg md:text-xl font-bold text-[#1A1C1C] dark:text-white">{item.downloadCount || 0}</span>
+                <span className="text-[11px] md:text-xs text-[#5B403E] dark:text-neutral-400 font-medium mt-0.5">{t.materials.downloads}</span>
               </div>
             </div>
           </div>
@@ -253,8 +253,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
                 variant="outline"
                 className="flex-1 !text-sm"
                 roundedClass="rounded-xl"
-                textColor="#5B403E"
-                borderColor="#E3BEBA"
+                innerClassName="text-[#5B403E] border-[#E3BEBA] dark:text-neutral-200 dark:border-[#3F3F3F] dark:hover:bg-[#272727]"
                 onClick={onMove}
               >
                 {t.materials.move}
@@ -263,7 +262,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
             <PillButton
               startIcon={<Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />}
               variant="secondary-no-outline"
-              textColor="#BA1A1A"
+              innerClassName="text-[#BA1A1A] dark:text-red-400"
               className="mt-1 !text-sm"
               roundedClass="rounded-xl"
               onClick={onDelete}

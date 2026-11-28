@@ -41,13 +41,13 @@ const VoucherRefundCard = ({ voucher = {} }) => {
 
   return (
     <FluentCard className="space-y-4">
-      <h4 className="font-bold">{vd.refundTitle || "Dự kiến hoàn cọc"}</h4>
+      <h4 className="font-bold dark:text-white">{vd.refundTitle || "Dự kiến hoàn cọc"}</h4>
 
       {/* Detailed Explanation */}
-      <p>{refundDesc}</p>
+      <p className="text-neutral-600 dark:text-neutral-300">{refundDesc}</p>
 
       {/* Estimated Refund Highlight */}
-      <div className="flex items-center gap-2 text-sm text-blue-600">
+      <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
         <Info size={20} />
         <p>
           {vd.estimatedRefundPrefix || "Ước tính hoàn: ~"}

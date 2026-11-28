@@ -105,7 +105,7 @@ const CycleProgressBar = ({
           <span className="text-xs sm:text-sm font-medium text-gray-500 dark:text-neutral-400 mb-2">
             Streak
           </span>
-          <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
             {streak ?? 0} ngày
           </div>
         </div>

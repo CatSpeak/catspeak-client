@@ -9,15 +9,15 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
 
   return (
     <div className="fixed right-4 bottom-4 z-[100]">
-      <div className="flex items-center gap-2 bg-white rounded-full shadow-faq-card pl-3 pr-3 h-12">
+      <div className="flex items-center gap-2 bg-white dark:bg-[#1E1E1E] rounded-full shadow-faq-card pl-3 pr-3 h-12">
         <div className="flex items-center gap-1">
           <IconButton
             variant="ghost"
             onClick={onClearSelection}
           >
-            <X className="w-5 h-5 text-[#1A1C1C]" />
+            <X className="w-5 h-5 text-[#1A1C1C] dark:text-neutral-200" />
           </IconButton>
-          <span className="text-base font-medium text-[#1A1C1C] px-2 mr-2 whitespace-nowrap">
+          <span className="text-base font-medium text-[#1A1C1C] dark:text-white px-2 mr-2 whitespace-nowrap">
             {t.materials.selectedItemsCount.replace('{{count}}', selectedCount)}
           </span>
         </div>
@@ -28,7 +28,7 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
               onClick={onDownload}
               title={t.materials.download}
             >
-              <Download className="w-5 h-5 text-[#1A1C1C]" />
+              <Download className="w-5 h-5 text-[#1A1C1C] dark:text-neutral-200" />
             </IconButton>
           )}
 
@@ -38,7 +38,7 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
               onClick={onMove}
               title={t.materials.move}
             >
-              <FolderInput className="w-5 h-5 text-[#1A1C1C]" />
+              <FolderInput className="w-5 h-5 text-[#1A1C1C] dark:text-neutral-200" />
             </IconButton>
           )}
 
@@ -48,7 +48,7 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
               onClick={onDelete}
               title={t.materials.delete}
             >
-              <Trash2 className="w-5 h-5 text-[#1A1C1C]" />
+              <Trash2 className="w-5 h-5 text-[#1A1C1C] dark:text-neutral-200" />
             </IconButton>
           )}
         </div>

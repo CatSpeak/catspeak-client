@@ -189,7 +189,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
     >
       <div className="flex flex-col gap-6">
         {/* File / Folder Info Card */}
-        <div className="bg-primaryBg border border-border rounded-xl p-4 flex items-center gap-3.5">
+        <div className="bg-primaryBg dark:bg-[#242424] border border-border rounded-xl p-4 flex items-center gap-3.5">
           <div className="shrink-0 flex items-center justify-center">
             {isFolder ? (
               <FcFolder className="text-2xl shrink-0" />
@@ -266,7 +266,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
                     toast.success(t.materials.copiedLink)
                   }}
                   title={t.materials.copy}
-                  className="text-secondary hover:text-[#1A1C1C]"
+                  className="text-secondary hover:text-[#1A1C1C] dark:hover:text-white"
                 >
                   <Copy />
                 </IconButton>

@@ -35,15 +35,15 @@ const CertificateField = ({ onChange, t }) => {
   return (
     <div className="flex flex-col gap-2">
       {file ? (
-        <div className="flex h-[58px] items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] bg-white px-3">
-          <span className="flex h-8 w-7 shrink-0 items-center justify-center rounded-[5px] border border-[#D0D5DD] bg-[#FFF1F2] text-[7px] font-bold text-[#F52235]">
+        <div className="flex h-[58px] items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] bg-white px-3 dark:border-[#3F3F3F] dark:bg-[#242424]">
+          <span className="flex h-8 w-7 shrink-0 items-center justify-center rounded-[5px] border border-[#D0D5DD] bg-[#FFF1F2] text-[7px] font-bold text-[#F52235] dark:border-[#3F3F3F] dark:bg-rose-950/50 dark:text-rose-300">
             PDF
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="truncate text-xs font-medium text-[#101828]">
+            <span className="truncate text-xs font-medium text-[#101828] dark:text-white">
               {file.name}
             </span>
-            <span className="text-[10px] text-[#667085]">
+            <span className="text-[10px] text-[#667085] dark:text-neutral-400">
               {formatBytes(file.size)}
             </span>
           </span>
@@ -51,7 +51,7 @@ const CertificateField = ({ onChange, t }) => {
             type="button"
             onClick={clear}
             aria-label={ins.remove || "Xóa"}
-            className="shrink-0 text-[#101828] transition-colors hover:text-[#F52235]"
+            className="shrink-0 text-[#101828] transition-colors hover:text-[#F52235] dark:text-neutral-200 dark:hover:text-rose-400"
           >
             <X size={18} />
           </button>
@@ -69,22 +69,22 @@ const CertificateField = ({ onChange, t }) => {
             setDragOver(false)
             applyFile(event.dataTransfer?.files?.[0])
           }}
-          className={`flex h-[150px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[7px] border bg-white text-center transition-colors ${
+          className={`flex h-[150px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[7px] border bg-white text-center transition-colors dark:bg-[#242424] ${
             error
               ? "border-red-400"
               : dragOver
                 ? "border-[#990011] bg-[#990011]/5"
-                : "border-[#D0D5DD] hover:border-[#990011] hover:bg-[#990011]/5"
+                : "border-[#D0D5DD] hover:border-[#990011] hover:bg-[#990011]/5 dark:border-[#3F3F3F] dark:hover:border-red-400 dark:hover:bg-red-950/20"
           }`}
         >
-          <UploadCloud size={25} className="text-[#667085]" />
-          <span className="text-xs text-[#667085]">
+          <UploadCloud size={25} className="text-[#667085] dark:text-neutral-300" />
+          <span className="text-xs text-[#667085] dark:text-neutral-300">
             {ins.idCardDropHint || "Kéo thả hoặc"}
           </span>
-          <span className="text-xs font-semibold text-[#F52235]">
+          <span className="text-xs font-semibold text-[#D92D20] dark:text-red-400">
             {ins.idCardChooseFile || "Chọn tệp"}
           </span>
-          <span className="text-[10px] text-[#667085]">
+          <span className="text-[10px] text-[#667085] dark:text-neutral-300">
             {ins.languageCertificateConstraint || "PDF tối đa 5MB"}
           </span>
         </label>
@@ -103,7 +103,7 @@ const CertificateField = ({ onChange, t }) => {
       />
 
       {error && (
-        <p role="alert" className="text-xs text-red-500">
+        <p role="alert" className="text-xs text-red-500 dark:text-red-400">
           {error}
         </p>
       )}

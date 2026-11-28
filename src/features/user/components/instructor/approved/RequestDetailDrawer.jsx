@@ -14,30 +14,34 @@ import { openAuthenticatedMediaInNewTab } from "@/shared/utils/authenticatedMedi
 const STATUS_STYLES = {
   Approved: {
     labelKey: "approvedStatusApproved",
-    className: "bg-[#ECFDF3] text-[#039855]",
+    className:
+      "bg-[#ECFDF3] text-[#039855] dark:bg-emerald-950/50 dark:text-emerald-300",
   },
   Pending: {
     labelKey: "approvedStatusPending",
-    className: "bg-[#FFF7E8] text-[#D97706]",
+    className:
+      "bg-[#FFF7E8] text-[#B45309] dark:bg-amber-950/50 dark:text-amber-300",
   },
   Rejected: {
     labelKey: "approvedStatusRejected",
-    className: "bg-[#FEF3F2] text-[#F52235]",
+    className:
+      "bg-[#FEF3F2] text-[#D92D20] dark:bg-rose-950/50 dark:text-rose-300",
   },
   Cancelled: {
     labelKey: "approvedStatusCancelled",
-    className: "bg-[#F2F4F7] text-[#667085]",
+    className:
+      "bg-[#F2F4F7] text-[#475467] dark:bg-[#272727] dark:text-neutral-300",
   },
 }
 
 const FileRow = ({ url, downloadLabel }) =>
   url ? (
-    <div className="flex h-[52px] items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] px-2.5">
-      <span className="flex h-[30px] w-7 shrink-0 items-center justify-center rounded-[5px] border border-[#D0D5DD] bg-[#FFF1F2] text-[7px] font-bold text-[#F52235]">
+    <div className="flex h-[52px] items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] px-2.5 dark:border-[#3F3F3F]">
+      <span className="flex h-[30px] w-7 shrink-0 items-center justify-center rounded-[5px] border border-[#D0D5DD] bg-[#FFF1F2] text-[7px] font-bold text-[#F52235] dark:border-[#3F3F3F] dark:bg-rose-950/50 dark:text-rose-300">
         PDF
       </span>
       <span
-        className="min-w-0 flex-1 truncate text-xs font-medium text-[#101828]"
+        className="min-w-0 flex-1 truncate text-xs font-medium text-[#101828] dark:text-white"
         title={fileNameFromUrl(url)}
       >
         {fileNameFromUrl(url)}
@@ -46,27 +50,27 @@ const FileRow = ({ url, downloadLabel }) =>
         type="button"
         onClick={() => openAuthenticatedMediaInNewTab(url)}
         aria-label={downloadLabel}
-        className="shrink-0 text-[#101828] transition-colors hover:text-[#F52235] cursor-pointer"
+        className="shrink-0 text-[#101828] transition-colors hover:text-[#F52235] cursor-pointer dark:text-neutral-200 dark:hover:text-rose-400"
       >
         <Download size={18} />
       </button>
     </div>
   ) : (
-    <span className="text-xs text-[#98A2B3]">—</span>
+    <span className="text-xs text-[#98A2B3] dark:text-neutral-500">—</span>
   )
 
 const SectionCard = ({ levelLabel, level, credentialLabel, credentialUrl, downloadLabel }) => (
-  <div className="flex flex-col gap-2.5 rounded-lg border border-[#D0D5DD] px-4 py-3.5">
+  <div className="flex flex-col gap-2.5 rounded-lg border border-[#D0D5DD] px-4 py-3.5 dark:border-[#3F3F3F]">
     <div className="flex items-center gap-3">
-      <span className="text-[11px] font-medium text-[#667085]">
+      <span className="text-[11px] font-medium text-[#667085] dark:text-neutral-400">
         {levelLabel}
       </span>
-      <span className="text-xs font-medium text-[#101828]">
+      <span className="text-xs font-medium text-[#101828] dark:text-neutral-200">
         {level || "—"}
       </span>
     </div>
-    <div className="h-px w-full bg-[#E4E7EC]" />
-    <span className="text-[11px] font-medium text-[#667085]">
+    <div className="h-px w-full bg-[#E4E7EC] dark:bg-[#2E2E2E]" />
+    <span className="text-[11px] font-medium text-[#667085] dark:text-neutral-400">
       {credentialLabel}
     </span>
     <FileRow url={credentialUrl} downloadLabel={downloadLabel} />
@@ -172,13 +176,13 @@ const RequestDetailDrawer = ({
           </span>
 
           <div className="flex items-center gap-2.5">
-            <Languages size={18} className="shrink-0 text-[#667085]" />
-            <span className="truncate text-[15px] font-semibold text-[#101828]">
+            <Languages size={18} className="shrink-0 text-[#667085] dark:text-neutral-400" />
+            <span className="truncate text-[15px] font-semibold text-[#101828] dark:text-white">
               {languageLabel || "—"}
             </span>
           </div>
 
-          <span className="text-sm font-semibold text-[#101828]">
+          <span className="text-sm font-semibold text-[#101828] dark:text-white">
             {ins.approvedRequestCurrentInfo || "Thông tin hiện tại"}
           </span>
           <SectionCard
@@ -190,12 +194,12 @@ const RequestDetailDrawer = ({
           />
 
           <div className="flex h-8 w-full items-center justify-center">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F2F4F7] text-[#667085]">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F2F4F7] text-[#667085] dark:bg-[#272727] dark:text-neutral-400">
               <ArrowDown size={16} />
             </span>
           </div>
 
-          <span className="text-sm font-semibold text-[#101828]">
+          <span className="text-sm font-semibold text-[#101828] dark:text-white">
             {ins.approvedRequestWantedInfo || "Thông tin yêu cầu"}
           </span>
           <SectionCard
@@ -209,24 +213,24 @@ const RequestDetailDrawer = ({
           />
 
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[#101828]">
+            <span className="text-[#101828] dark:text-neutral-300">
               {ins.approvedSentAt || "Ngày gửi"}
             </span>
-            <span className="font-medium text-[#101828]">
+            <span className="font-medium text-[#101828] dark:text-white">
               {formatUtcDate(createdAt) || "—"}
             </span>
           </div>
 
           {isLoading && !source && (
             <div className="flex items-center justify-center py-6">
-              <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#990011] border-t-transparent" />
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#990011] dark:border-red-400 border-t-transparent" />
             </div>
           )}
 
           {isPending && (
-            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFF7E8] px-3.5 py-3">
-              <Info size={18} className="mt-0.5 shrink-0 text-[#D97706]" />
-              <span className="text-[10px] leading-4 text-[#D97706]">
+            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFF7E8] px-3.5 py-3 dark:bg-amber-950/30">
+              <Info size={18} className="mt-0.5 shrink-0 text-[#B45309] dark:text-amber-400" />
+              <span className="text-[10px] leading-4 text-[#B45309] dark:text-amber-300">
                 {ins.approvedRequestPendingInfo ||
                   "Yêu cầu của bạn đang chờ quản trị viên xem xét. Thông tin đã được duyệt hiện tại vẫn đang có hiệu lực."}
               </span>
@@ -234,13 +238,15 @@ const RequestDetailDrawer = ({
           )}
 
           {status === "Rejected" && rejectReason && (
-            <div className="flex flex-col gap-1 rounded-[7px] bg-[#FEF3F2] px-3.5 py-3">
-              <span className="text-[11px] font-semibold text-[#F52235]">
+            <div className="flex flex-col gap-1 rounded-[7px] bg-[#FEF3F2] px-3.5 py-3 dark:bg-rose-950/30">
+              <span className="text-[11px] font-semibold text-[#D92D20] dark:text-rose-300">
                 {ins.approvedRequestRejectReason ||
                   ins.rejectReason ||
                   "Lý do từ chối"}
               </span>
-              <span className="text-xs text-[#F52235]">{rejectReason}</span>
+              <span className="text-xs text-[#D92D20] dark:text-rose-300">
+                {rejectReason}
+              </span>
             </div>
           )}
         </div>

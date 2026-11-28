@@ -270,7 +270,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
       <div className="flex flex-col gap-6">
         {/* Drop zone */}
         <div
-          className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-10 px-6 text-center cursor-pointer transition-colors ${dragActive ? 'border-[#8e1115] bg-[#fde9eb]' : 'border-[#E3BEBA] bg-[#F9F9F9] hover:bg-[#fff5f5]'
+          className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-10 px-6 text-center cursor-pointer transition-colors ${dragActive ? 'border-[#8e1115] bg-[#fde9eb] dark:bg-red-950/30' : 'border-[#E3BEBA] bg-[#F9F9F9] hover:bg-[#fff5f5] dark:border-[#3F3F3F] dark:bg-[#242424] dark:hover:bg-[#2B2B2B]'
             }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -286,16 +286,16 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
             multiple
             className="hidden"
           />
-          <div className="w-14 h-14 bg-[#fde9eb] rounded-full flex items-center justify-center mb-4 text-[#8e1115]">
+          <div className="w-14 h-14 bg-[#fde9eb] dark:bg-red-950/40 rounded-full flex items-center justify-center mb-4 text-[#8e1115] dark:text-[#FF7A8A]">
             <UploadCloud className="w-7 h-7" strokeWidth={2.5} />
           </div>
-          <p className="text-[15px] text-gray-800 font-bold mb-1">
-            {t.materials.dragDropFileOr}<span className="text-[#8e1115] hover:underline">{t.materials.selectFile}</span>
+          <p className="text-[15px] text-gray-800 dark:text-white font-bold mb-1">
+            {t.materials.dragDropFileOr}<span className="text-[#8e1115] dark:text-[#FF7A8A] hover:underline">{t.materials.selectFile}</span>
           </p>
-          <p className="text-[13px] text-gray-500 mb-1">
+          <p className="text-[13px] text-gray-500 dark:text-neutral-400 mb-1">
             {t.materials.supportedFormats}
           </p>
-          <p className="text-[13px] text-gray-500">
+          <p className="text-[13px] text-gray-500 dark:text-neutral-400">
             {t.materials.uploadLimits}
           </p>
         </div>
@@ -303,7 +303,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
         {/* Uploading list */}
         {uploadFiles.length > 0 && (
           <div>
-            <h4 className="text-base font-semibold text-[#1A1C1C] mb-3">{t.materials.uploadListTitle.replace('{{count}}', uploadFiles.length)}</h4>
+            <h4 className="text-base font-semibold text-[#1A1C1C] dark:text-white mb-3">{t.materials.uploadListTitle.replace('{{count}}', uploadFiles.length)}</h4>
             <div className="flex flex-col gap-4">
               {uploadFiles.map(fileObj => {
                 const isUploadingThis = uploadingFilesIds.includes(fileObj.id) && currentTask;
@@ -329,18 +329,18 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
           </div>
         )}
 
-        <div className="border-t border-gray-100 pt-4 flex flex-col gap-4">
+        <div className="border-t border-gray-100 dark:border-[#3F3F3F] pt-4 flex flex-col gap-4">
           {/* Folder select */}
           <div>
-            <label className="block text-base font-bold text-[#1A1C1C] mb-2">{t.materials.saveToFolder}</label>
+            <label className="block text-base font-bold text-[#1A1C1C] dark:text-white mb-2">{t.materials.saveToFolder}</label>
             <Dropdown
-              className='border-[#E3BEBA] bg-[#F9F9F9]'
+              className='border-[#E3BEBA] bg-[#F9F9F9] dark:border-[#3F3F3F] dark:bg-[#242424]'
               roundedClass='rounded-xl'
               dropdownClassName="w-full"
               value={selectedFolder}
               onChange={setSelectedFolder}
               options={folderOptions}
-              triggerClassName="h-[42px] border-[#fde9eb] w-full"
+              triggerClassName="h-[42px] border-[#fde9eb] dark:border-[#3F3F3F] w-full"
             />
           </div>
 
@@ -351,7 +351,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
               onChange={(e) => setIsPublic(e.target.checked)}
               colorClass="peer-checked:bg-[#8e1115]"
             />
-            <span className="text-sm text-[#1A1C1C]">{t.materials.publicShareOnUpload}</span>
+            <span className="text-sm text-[#1A1C1C] dark:text-neutral-200">{t.materials.publicShareOnUpload}</span>
           </div>
         </div>
       </div>

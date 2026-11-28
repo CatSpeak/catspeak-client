@@ -4,7 +4,7 @@ const ProgressBar = ({
   progress = 0,
   heightClass = "h-1",
   colorClass = "bg-[#990011]",
-  trackColorClass = "bg-gray-200",
+  trackColorClass = "bg-gray-200 dark:bg-[#2F2F2F]",
   className = "",
 }) => {
   return (

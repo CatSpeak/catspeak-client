@@ -18,27 +18,21 @@ export const ScopeConditionsSection = ({
   form,
   errors = {},
   onChange,
-  isInitialClassContext,
-  classNameParam,
-  courseDisplayName,
   courseClassMode,
-  onSelectClassScope,
   onSelectCourseScope,
   courseClasses = [],
   filteredClasses = [],
   classSearch,
   setClassSearch,
-  lowestTuition,
 }) => {
   const { t } = useLanguage()
   const vf = t?.vouchers?.form || {}
   const totalCourseClasses = courseClasses?.length || 0
   const isOnlyOneClass = totalCourseClasses === 1
-  const firstClass = courseClasses[0]
 
   return (
     <FluentCard className="space-y-4">
-      <h4 className="font-bold">{vf.scopeConditions || "Điều kiện áp dụng"}</h4>
+      <h4 className="font-bold dark:text-white">{vf.scopeConditions || "Điều kiện áp dụng"}</h4>
 
       {(errors?.classIds || errors?.courseIds || errors?.discountType) && (
         <Banner variant="danger">
@@ -48,7 +42,7 @@ export const ScopeConditionsSection = ({
 
       {/* Scope selection inside course */}
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold text-slate-700">
+        <span className="text-xs font-semibold text-slate-700 dark:text-neutral-200">
           {vf.scopeInCourse || "Phạm vi áp dụng trong khóa"}
           <span className="text-red-500 ml-0.5">*</span>
         </span>
@@ -93,7 +87,7 @@ export const ScopeConditionsSection = ({
                 }
                 className={`rounded-xl ${
                   isOnlyOneClass
-                    ? "opacity-50 cursor-not-allowed bg-slate-50/50"
+                    ? "opacity-50 cursor-not-allowed bg-slate-50/50 dark:bg-[#242424]"
                     : "cursor-pointer"
                 }`}
               >
@@ -175,11 +169,11 @@ export const ScopeConditionsSection = ({
                     {`Đã chọn: ${form.classIds?.length || 0} / ${totalCourseClasses} lớp`}
                   </span>
                   {(form.classIds?.length || 0) < 2 ? (
-                    <span className="text-amber-600 font-normal">
+                    <span className="text-amber-600 dark:text-amber-400 font-normal">
                       (Cần tối thiểu 2 lớp)
                     </span>
                   ) : (
-                    <span className="text-emerald-600 font-normal">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-normal">
                       (Đủ điều kiện)
                     </span>
                   )}
@@ -203,7 +197,7 @@ export const ScopeConditionsSection = ({
                     <PillButton
                       type="button"
                       variant="secondary-no-outline"
-                      textColor="#990011"
+                      innerClassName="text-[#990011] dark:text-red-400"
                       onClick={() => onChange("classIds", [])}
                     >
                       <span>{vf.clearAll || "Xóa tất cả"}</span>

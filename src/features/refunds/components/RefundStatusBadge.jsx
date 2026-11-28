@@ -6,7 +6,7 @@ export default function RefundStatusBadge({ status, t }) {
   const config = REFUND_STATUS_CONFIG[numStatus] || {
     labelKey: "statusPending",
     defaultLabel: "Unknown",
-    badgeStyle: "bg-gray-100 text-gray-700 border border-gray-200",
+    badgeStyle: "bg-gray-100 dark:bg-[#272727] text-gray-700 dark:text-neutral-300 border border-gray-200 dark:border-[#3F3F3F]",
   }
 
   const label = t?.refunds?.[config.labelKey] || config.defaultLabel

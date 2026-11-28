@@ -51,7 +51,7 @@ const DayScheduleMonthView = ({
         label: cal.upcoming || "Sắp diễn ra",
         badge:
           totalUpcoming > 0 ? (
-            <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-white">
+            <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-gray-950">
               {totalUpcoming}
             </span>
           ) : null,
@@ -61,7 +61,7 @@ const DayScheduleMonthView = ({
         label: cal.registered || "Đã đăng kí",
         badge:
           daysWithRegistered?.length > 0 ? (
-            <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-white">
+            <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-gray-950">
               {registeredMonthEvents?.length || 0}
             </span>
           ) : null,
@@ -132,7 +132,7 @@ const DayScheduleMonthView = ({
                         <span className="text-[15px] font-medium text-black dark:text-white">
                           {cal.day || "Ngày"} {day < 10 ? `0${day}` : day}
                         </span>
-                        <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-white">
+                        <span className="w-[22px] h-[22px] rounded-full text-[11px] font-bold flex items-center justify-center bg-[#F4AB1B] text-gray-950">
                           {eventCounts[day] < 10
                             ? `0${eventCounts[day]}`
                             : eventCounts[day]}

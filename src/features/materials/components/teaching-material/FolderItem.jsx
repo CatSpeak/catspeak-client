@@ -29,15 +29,15 @@ const FolderItem = ({
     <div
       {...handlers}
       className={`relative group border rounded-xl p-3 flex items-center justify-between cursor-pointer transition-all select-none ${isSelected
-        ? 'bg-[#FFDAD6] border-[#6E0009] shadow-faq-card'
-        : 'bg-[#F9F9F9] border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] hover:shadow-faq-card'
+        ? 'bg-[#FFDAD6] border-[#6E0009] dark:bg-[#3A161A] dark:border-[#FF7A8A] shadow-faq-card'
+        : 'bg-[#F9F9F9] border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] dark:bg-[#1A1A1A] dark:border-[#3F3F3F] dark:hover:bg-[#2B1719] dark:hover:border-[#FF7A8A] hover:shadow-faq-card'
         }`}
     >
       <div className="flex items-center gap-3 flex-1">
         <div className="relative">
           <FcFolder className="text-4xl" />
           <div
-            className={`absolute -top-1 -left-1 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+            className={`absolute -top-1 -left-1 bg-white dark:bg-[#1A1A1A] rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
             onClick={(e) => {
               e.stopPropagation();
               onToggleSelect && onToggleSelect();
@@ -52,10 +52,10 @@ const FolderItem = ({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-[#1A1C1C] text-base">{title}</h3>
+            <h3 className="font-semibold text-[#1A1C1C] dark:text-white text-base">{title}</h3>
             {isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F]" />}
           </div>
-          <p className="text-sm text-[#5B403E]">
+          <p className="text-sm text-[#5B403E] dark:text-neutral-400">
             {totalItems ? `${totalItems} ${updatedAt ? `• ${updatedAt}` : ''}` : updatedAt}
           </p>
 
@@ -83,8 +83,8 @@ const FolderItem = ({
             { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? t.materials.unfavorite : t.materials.addToFavorites, icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
             {
               value: 'delete',
-              label: <span className="text-[#BA1A1A]">{t.materials.delete}</span>,
-              icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />
+              label: <span className="text-[#BA1A1A] dark:text-red-400">{t.materials.delete}</span>,
+              icon: <Trash2 className="w-4 h-4 text-[#BA1A1A] dark:text-red-400" />
             },
           ]}
           trigger={(isOpen, selectedOption, toggleDropdown) => (
@@ -96,7 +96,7 @@ const FolderItem = ({
                 toggleDropdown();
               }}
             >
-              <MoreVertical className="w-4 h-4 hover:text-[#6E0009]" />
+              <MoreVertical className="w-4 h-4 hover:text-[#6E0009] dark:text-neutral-300 dark:hover:text-[#FF7A8A]" />
             </IconButton>
           )}
         />

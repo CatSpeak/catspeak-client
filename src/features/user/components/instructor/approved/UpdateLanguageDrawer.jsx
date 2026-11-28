@@ -22,10 +22,10 @@ const toList = (data) => {
 
 const SummaryRow = ({ label, value }) => (
   <div className="flex h-12 items-center gap-2">
-    <span className="w-[175px] shrink-0 text-[11px] font-medium text-[#667085]">
+    <span className="w-[175px] shrink-0 text-[11px] font-medium text-[#667085] dark:text-neutral-400">
       {label}
     </span>
-    <span className="min-w-0 flex-1 truncate text-xs font-medium text-[#101828]">
+    <span className="min-w-0 flex-1 truncate text-xs font-medium text-[#101828] dark:text-white">
       {value || "—"}
     </span>
   </div>
@@ -128,20 +128,20 @@ const UpdateLanguageDrawer = ({
       primaryDisabled={!canSubmit}
     >
       <div className="flex flex-col gap-4">
-        <span className="text-sm font-semibold text-[#101828]">
+        <span className="text-sm font-semibold text-[#101828] dark:text-white">
           {ins.idCardCurrentInfo || "Thông tin hiện tại"}
         </span>
-        <div className="flex flex-col rounded-lg border border-[#D0D5DD] px-4 py-2">
+        <div className="flex flex-col rounded-lg border border-[#D0D5DD] px-4 py-2 dark:border-[#3F3F3F] dark:bg-[#222222]">
           <SummaryRow
             label={ins.approvedLanguageCol || "Ngôn ngữ"}
             value={languageLabel}
           />
-          <div className="h-px w-full bg-[#E4E7EC]" />
+          <div className="h-px w-full bg-[#E4E7EC] dark:bg-[#333333]" />
           <SummaryRow
             label={ins.approvedLevelCol || "Trình độ"}
             value={currentLevel}
           />
-          <div className="h-px w-full bg-[#E4E7EC]" />
+          <div className="h-px w-full bg-[#E4E7EC] dark:bg-[#333333]" />
           <SummaryRow
             label={ins.approvedCredentialCol || "Chứng chỉ"}
             value={
@@ -150,11 +150,11 @@ const UpdateLanguageDrawer = ({
           />
         </div>
 
-        <span className="text-sm font-semibold text-[#101828]">
+        <span className="text-sm font-semibold text-[#101828] dark:text-white">
           {ins.idCardWantedInfo || "Thông tin muốn cập nhật"}
         </span>
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-[#101828]">
+          <span className="text-xs font-semibold text-[#101828] dark:text-white">
             {ins.languageNewLevelLabel || "Trình độ mới"}
           </span>
           <FormSelect
@@ -167,22 +167,22 @@ const UpdateLanguageDrawer = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-[#101828]">
+          <span className="text-xs font-semibold text-[#101828] dark:text-white">
             {ins.languageCertificateNewLabel || "Chứng chỉ / Bằng cấp mới"}
           </span>
           <CertificateField onChange={setCertificate} t={t} />
         </div>
 
-        <div className="flex items-start gap-2.5 rounded-[7px] bg-[#EFF4FF] px-3.5 py-3">
-          <Info size={18} className="mt-0.5 shrink-0 text-[#2E6FE8]" />
-          <span className="text-[10px] leading-4 text-[#667085]">
+        <div className="flex items-start gap-2.5 rounded-[7px] bg-[#EFF4FF] px-3.5 py-3 dark:bg-blue-950/40 dark:border dark:border-blue-800/60">
+          <Info size={18} className="mt-0.5 shrink-0 text-[#2E6FE8] dark:text-blue-400" />
+          <span className="text-[10px] leading-4 text-[#667085] dark:text-neutral-300">
             {ins.languageInfoBox ||
               "Thông tin cũ đã được duyệt sẽ tiếp tục được sử dụng cho đến khi yêu cầu cập nhật mới được phê duyệt."}
           </span>
         </div>
 
         {submitError && (
-          <p role="alert" className="text-xs text-red-500">
+          <p role="alert" className="text-xs text-red-500 dark:text-red-400">
             {submitError}
           </p>
         )}

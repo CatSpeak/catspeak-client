@@ -28,27 +28,27 @@ const RejectionReasonModal = ({ open = false, onClose, voucher = {} }) => {
       <div>
         {/* Mã voucher */}
         <div className="h-[56px] flex items-center justify-between">
-          <span className="text-secondary">{vt.code || "Mã voucher"}</span>
-          <span>{voucher.code || "-"}</span>
+          <span className="text-secondary dark:text-neutral-400">{vt.code || "Mã voucher"}</span>
+          <span className="dark:text-white">{voucher.code || "-"}</span>
         </div>
 
         {/* Tên voucher */}
         <div className="h-[56px] flex items-center justify-between gap-4">
-          <span className="text-secondary shrink-0">
+          <span className="text-secondary dark:text-neutral-400 shrink-0">
             {vt.title || "Tên voucher"}
           </span>
-          <span className="text-right truncate">{voucher.title || "-"}</span>
+          <span className="text-right truncate dark:text-white">{voucher.title || "-"}</span>
         </div>
 
         {/* Trạng thái */}
         <div className="h-[56px] flex items-center justify-between">
-          <span className="text-secondary">{vt.status || "Trạng thái"}</span>
+          <span className="text-secondary dark:text-neutral-400">{vt.status || "Trạng thái"}</span>
           <VoucherStatusBadge status={voucher.status || "Rejected"} />
         </div>
 
         {/* Lý do từ chối */}
         <div className="min-h-[56px] flex items-center justify-between gap-4">
-          <span className="text-secondary shrink-0">
+          <span className="text-secondary dark:text-neutral-400 shrink-0">
             {vm.adminFeedback || "Lý do"}
           </span>
           <span className="text-right text-cath-red-700 dark:text-red-400 font-medium leading-relaxed">

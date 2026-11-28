@@ -161,14 +161,14 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
             className='!h-12 rounded-xl'
           />
 
-          <div className="border border-[#E2E2E2] rounded-xl p-3 flex-1 overflow-y-auto mt-3 min-h-[160px] flex flex-col">
+          <div className="border border-[#E2E2E2] dark:border-[#3F3F3F] rounded-xl p-3 flex-1 overflow-y-auto mt-3 min-h-[160px] flex flex-col">
             {isFetchingTree ? (
-              <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
+              <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] dark:text-neutral-400 gap-2 opacity-70">
                 <LoadingSpinner />
                 <span>{t.materials.loadingFolderList}</span>
               </div>
             ) : folders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
+              <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] dark:text-neutral-400 gap-2 opacity-70">
                 <FolderOpen className="w-8 h-8" />
                 <span>{t.materials.noFolders}</span>
               </div>
@@ -189,7 +189,7 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
             )}
           </div>
 
-          <p className="text-sm text-[#5B403E] mt-2">
+          <p className="text-sm text-[#5B403E] dark:text-neutral-400 mt-2">
             {selectedFolder
               ? t.materials.createInFolder.replace('{{folder}}', selectedFolder.folderName)
               : t.materials.createInRootFolder}

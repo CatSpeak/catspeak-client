@@ -24,7 +24,7 @@ const UpcomingSessionsPanel = ({
           <span className="w-1.5 h-4 bg-[#990011] dark:bg-[#b20a1c] rounded-full" />
           <h2 className="text-sm font-extrabold text-gray-800 dark:text-gray-100 uppercase tracking-wider flex items-center gap-1.5">
             <span>{title}</span>
-            <span className="bg-[#EAB308] text-white text-[10px] px-2 font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0">
+            <span className="bg-[#EAB308] text-gray-950 text-[10px] px-1.5 min-w-[20px] font-black h-4.5 rounded-full flex items-center justify-center shrink-0">
               {String(count)}
             </span>
           </h2>

@@ -50,13 +50,13 @@ const VoucherStatsCard = ({ voucher = {}, usages = [] }) => {
 
   return (
     <FluentCard className="space-y-6">
-      <h4 className="font-bold">{vd.statsTitle || "Thống kê nhanh"}</h4>
+      <h4 className="font-bold dark:text-white">{vd.statsTitle || "Thống kê nhanh"}</h4>
 
       {/* ─── Usage Count & Progress Bar ─── */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <span className="text-secondary">{vd.usedCount || "Đã sử dụng"}</span>
-          <span>
+          <span className="dark:text-white">
             {usedCount}/{limitDisplay} {dep.usagesUnit || "lượt"}
           </span>
         </div>

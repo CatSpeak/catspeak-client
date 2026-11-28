@@ -33,7 +33,7 @@ const UserAvatar = ({ name = "", avatarUrl = "" }) => {
   }
 
   return (
-    <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 border border-border flex items-center justify-center text-xs font-bold shrink-0">
+    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#272727] text-slate-700 dark:text-neutral-200 border border-border dark:border-[#3F3F3F] flex items-center justify-center text-xs font-bold shrink-0">
       {getInitials(name)}
     </div>
   )
@@ -49,7 +49,7 @@ const VoucherUsagesTable = ({
   totalItemsCount,
 }) => {
   const { t } = useLanguage()
-  const vu = t?.vouchers?.usages || {}
+  const vu = useMemo(() => t?.vouchers?.usages || {}, [t?.vouchers?.usages])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all") // all | Success | Pending | Cancelled
   const [currentPage, setCurrentPage] = useState(1)
@@ -81,7 +81,7 @@ const VoucherUsagesTable = ({
       normalized === "thành công"
     ) {
       return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 tracking-wide">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 tracking-wide">
           {vu.orderStatusSuccess?.toUpperCase() || "THÀNH CÔNG"}
         </span>
       )
@@ -93,7 +93,7 @@ const VoucherUsagesTable = ({
       normalized === "đang xử lý"
     ) {
       return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 tracking-wide">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 tracking-wide">
           {vu.orderStatusWaitingPayment?.toUpperCase() ||
             vu.orderStatusPending?.toUpperCase() ||
             "CHỜ THANH TOÁN"}
@@ -107,13 +107,13 @@ const VoucherUsagesTable = ({
       normalized === "đã hủy"
     ) {
       return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 tracking-wide">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-[#272727] text-slate-600 dark:text-neutral-300 border border-slate-200 dark:border-[#3F3F3F] tracking-wide">
           {vu.orderStatusCancelled?.toUpperCase() || "ĐÃ HỦY"}
         </span>
       )
     }
     return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-[#272727] text-slate-600 dark:text-neutral-300 border border-slate-200 dark:border-[#3F3F3F]">
         {status}
       </span>
     )
@@ -232,7 +232,7 @@ const VoucherUsagesTable = ({
     <FluentCard className="space-y-4">
       {/* ─── Header: Title & Search/Filter ─── */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <h4 className="font-bold">{vu.title || "Lịch sử sử dụng"}</h4>
+        <h4 className="font-bold dark:text-white">{vu.title || "Lịch sử sử dụng"}</h4>
 
         <div className="flex items-center gap-2">
           {/* Search Input */}
@@ -268,7 +268,7 @@ const VoucherUsagesTable = ({
       <div className="overflow-x-auto -mx-6 px-6">
         <table className="w-full text-left text-sm sm:text-base">
           <thead>
-            <tr className="text-xs uppercase tracking-wider font-bold text-secondary border-b border-border">
+            <tr className="text-xs uppercase tracking-wider font-bold text-secondary border-b border-border dark:border-[#3F3F3F]">
               <th className="py-3 px-3 w-[18%] font-semibold">
                 {vu.timeHeader || "THỜI GIAN"}
               </th>
@@ -311,10 +311,10 @@ const VoucherUsagesTable = ({
               paginatedItems.map((usage, idx) => (
                 <tr
                   key={usage.id || `usage-${idx}`}
-                  className="hover:bg-slate-50/60 transition-colors"
+                  className="hover:bg-slate-50/60 dark:hover:bg-[#242424] transition-colors"
                 >
                   {/* Thời gian */}
-                  <td className="py-4 px-3 text-slate-600 text-sm whitespace-nowrap">
+                  <td className="py-4 px-3 text-slate-600 dark:text-neutral-300 text-sm whitespace-nowrap">
                     {formatVoucherDate(usage.usedAt || usage.createdAt, true)}
                   </td>
 
@@ -357,7 +357,7 @@ const VoucherUsagesTable = ({
       </div>
 
       {/* ─── Footer Pagination ─── */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border text-sm text-secondary">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border dark:border-[#3F3F3F] text-sm text-secondary">
         <div>{paginationShowingText}</div>
 
         {totalPages > 1 && (

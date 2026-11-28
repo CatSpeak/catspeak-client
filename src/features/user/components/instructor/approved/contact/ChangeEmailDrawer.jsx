@@ -16,12 +16,14 @@ import { resolveContactError } from "./contactErrors"
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const readonlyFieldClass =
-  "flex h-11 w-full items-center rounded-[7px] border border-[#D0D5DD] bg-[#F9FAFB] px-3.5 text-[13px] text-[#667085]"
+  "flex h-11 w-full items-center rounded-[7px] border border-[#D0D5DD] bg-[#F9FAFB] px-3.5 text-[13px] text-[#667085] dark:border-[#3F3F3F] dark:bg-[#222222] dark:text-neutral-300"
 
 const ContactHelper = ({ children }) => (
   <div className="flex items-center gap-2">
-    <Info size={15} className="shrink-0 text-[#667085]" />
-    <span className="text-[10px] font-normal text-[#667085]">{children}</span>
+    <Info size={15} className="shrink-0 text-[#667085] dark:text-neutral-400" />
+    <span className="text-[10px] font-normal text-[#667085] dark:text-neutral-400">
+      {children}
+    </span>
   </div>
 )
 
@@ -153,21 +155,21 @@ const ChangeEmailDrawer = ({ open, onClose, currentEmail, t }) => {
     >
       <div className="flex flex-col gap-[18px]">
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-[#101828]">
+          <span className="text-xs font-semibold text-[#101828] dark:text-white">
             {ins.contactCurrentEmail || "Email hiện tại"}
           </span>
           <div className={readonlyFieldClass}>{currentEmail || "—"}</div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-[#101828]">
+          <span className="text-xs font-semibold text-[#101828] dark:text-white">
             {ins.contactNewEmail || "Email mới"}
           </span>
           {isVerifyStep ? (
             <>
               <div className={readonlyFieldClass}>{pendingEmail}</div>
               {valueError && (
-                <p className="text-xs text-red-500">{valueError}</p>
+                <p className="text-xs text-red-500 dark:text-red-400">{valueError}</p>
               )}
             </>
           ) : (
@@ -183,12 +185,14 @@ const ChangeEmailDrawer = ({ open, onClose, currentEmail, t }) => {
                   setNewEmail(event.target.value)
                   setValueError("")
                 }}
-                className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#242424] dark:text-white dark:border-[#3F3F3F] dark:placeholder:text-neutral-500 dark:hover:bg-[#2C2C2C] dark:focus:border-red-400 ${
                   shownValueError ? "border-red-500" : "border-[#D0D5DD]"
                 }`}
               />
               {shownValueError && (
-                <p className="text-xs text-red-500">{shownValueError}</p>
+                <p className="text-xs text-red-500 dark:text-red-400">
+                  {shownValueError}
+                </p>
               )}
             </>
           )}
@@ -204,7 +208,7 @@ const ChangeEmailDrawer = ({ open, onClose, currentEmail, t }) => {
             </ContactHelper>
 
             <div className="flex flex-col gap-2">
-              <span className="text-[13px] font-semibold text-[#101828]">
+              <span className="text-[13px] font-semibold text-[#101828] dark:text-white">
                 {ins.contactOtpLabel || "Nhập mã xác thực"}
               </span>
               <OtpCodeInput
@@ -219,7 +223,7 @@ const ChangeEmailDrawer = ({ open, onClose, currentEmail, t }) => {
                 describedBy={otpError ? "contact-otp-error" : undefined}
               />
               {otpError && (
-                <p id="contact-otp-error" role="alert" className="text-xs text-red-500">
+                <p id="contact-otp-error" role="alert" className="text-xs text-red-500 dark:text-red-400">
                   {otpError}
                 </p>
               )}
@@ -227,7 +231,7 @@ const ChangeEmailDrawer = ({ open, onClose, currentEmail, t }) => {
 
             <div className="flex flex-col gap-1">
               {isCoolingDown && (
-                <span className="text-[10px] text-[#667085]">
+                <span className="text-[10px] text-[#667085] dark:text-neutral-400">
                   {(
                     ins.contactResendCountdown || "Gửi lại mã sau {time}"
                   ).replace("{time}", formatCountdown(secondsLeft))}
@@ -239,8 +243,8 @@ const ChangeEmailDrawer = ({ open, onClose, currentEmail, t }) => {
                 disabled={isCoolingDown || isRequesting}
                 className={`self-start text-[11px] font-semibold transition-colors ${
                   isCoolingDown
-                    ? "cursor-not-allowed text-[#98A2B3]"
-                    : "text-[#F52235] hover:underline"
+                    ? "cursor-not-allowed text-[#98A2B3] dark:text-neutral-500"
+                    : "text-[#F52235] hover:underline dark:text-red-400"
                 }`}
               >
                 {ins.contactResend || "Gửi lại mã"}

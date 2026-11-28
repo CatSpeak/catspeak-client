@@ -76,14 +76,14 @@ export const DiscountConfigSection = ({
 
   return (
     <FluentCard className="space-y-4">
-      <h4 className="font-bold">
+      <h4 className="font-bold dark:text-white">
         {vf.discountConfig || "Cấu hình giảm giá"}
       </h4>
 
       {/* Loại giảm */}
       {!isCourseScope && (
         <div className="flex flex-col gap-1">
-          <span className="text-xs">
+          <span className="text-xs dark:text-neutral-200">
             {vf.discountTypeLabel || "Loại giảm"}
             <span className="text-red-500 ml-0.5">*</span>
           </span>

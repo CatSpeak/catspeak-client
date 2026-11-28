@@ -27,9 +27,7 @@ import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const VoucherTable = ({
   vouchers = [],
-  isLoading = false,
   onViewDetails,
-  onViewUsages,
   onEditDraft,
   className = "",
 }) => {
@@ -210,7 +208,7 @@ const VoucherTable = ({
                     <MenuItem
                       label={vt.actions?.stopEarly || "Dừng sớm"}
                       icon={<Ban />}
-                      className="text-rose-600"
+                      className="text-rose-600 dark:text-rose-400"
                       onClick={() => {
                         close()
                         setSelectedVoucherForStop(voucher)

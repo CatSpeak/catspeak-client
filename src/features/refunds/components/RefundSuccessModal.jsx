@@ -17,13 +17,13 @@ export default function RefundSuccessModal({ isOpen, onClose }) {
       className="max-w-md"
     >
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-3 animate-in zoom-in-75">
+        <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-3 animate-in zoom-in-75">
           <CheckCircle2 size={30} />
         </div>
-        <h3 className="text-lg font-bold text-gray-800 mb-1.5">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1.5">
           {refundT.successTitle || "Gửi yêu cầu hoàn tiền thành công!"}
         </h3>
-        <p className="text-sm text-gray-500 mb-5 max-w-sm leading-relaxed">
+        <p className="text-sm text-gray-500 dark:text-neutral-300 mb-5 max-w-sm leading-relaxed">
           {refundT.successSubtitle ||
             "Vui lòng chờ Admin phê duyệt. Bạn có thể theo dõi tiến độ trong Lịch sử hoàn tiền."}
         </p>

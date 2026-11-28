@@ -293,7 +293,7 @@ const PersonalInfoCard = ({ profile, t }) => {
                   </span>
                   <ChevronDown
                     size={14}
-                    className={`shrink-0 text-[#667085] transition-transform duration-200 ${
+                    className={`shrink-0 text-[#667085] dark:text-neutral-400 transition-transform duration-200 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -334,7 +334,7 @@ const PersonalInfoCard = ({ profile, t }) => {
                   </span>
                   <ChevronDown
                     size={14}
-                    className={`shrink-0 text-[#667085] transition-transform duration-200 ${
+                    className={`shrink-0 text-[#667085] dark:text-neutral-400 transition-transform duration-200 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />

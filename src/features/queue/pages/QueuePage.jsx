@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { QueueStatusCard } from "@/features/queue"
 
-import Logo from "@/shared/assets/icons/logo/logo.svg"
+import { MainLogo, MainLogoDark } from "@/shared/assets/icons/logo"
 
 import { useQueueSignaling } from "@/features/queue"
 const QueuePage = () => {
@@ -56,7 +56,7 @@ const QueuePage = () => {
         setHasJoinedSignalR(false)
       },
     }),
-    [navigate, t],
+    [navigate],
   )
 
   const { isConnected, joinQueue, leaveQueue } = useQueueSignaling(handlers)
@@ -74,6 +74,7 @@ const QueuePage = () => {
   useEffect(() => {
     // Connect first (handled by hook mount)
     if (isConnected && !hasJoinedSignalR && !joinAttemptedRef.current) {
+      // eslint-disable-next-line react-hooks/immutability -- one-shot guard for the join attempt
       joinAttemptedRef.current = true // Mark as attempted immediately
 
       const initQueue = async () => {
@@ -87,7 +88,7 @@ const QueuePage = () => {
       }
       initQueue()
     }
-  }, [isConnected, hasJoinedSignalR, joinQueue])
+  }, [isConnected, hasJoinedSignalR, joinQueue, queuePreferences])
 
   const handleCancel = async () => {
     try {
@@ -116,14 +117,19 @@ const QueuePage = () => {
   const statusText = getStatusText()
 
   return (
-    <div className="relative flex h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] text-textColor px-4">
+    <div className="relative flex h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] dark:from-[#0F0F0F] dark:to-[#241014] text-textColor dark:text-white px-4">
       {/* Logo */}
       <div className="absolute top-4 left-5 z-10">
         {/* <div className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-lg border border-white/50"> */}
         <img
-          src={Logo}
+          src={MainLogo}
           alt="Cat Speak Logo"
-          className="sm:h-12 h-9 w-auto object-contain"
+          className="sm:h-12 h-9 w-auto object-contain dark:hidden"
+        />
+        <img
+          src={MainLogoDark}
+          alt="Cat Speak Logo"
+          className="sm:h-12 h-9 w-auto object-contain hidden dark:block"
         />
         {/* </div> */}
       </div>

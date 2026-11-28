@@ -141,7 +141,7 @@ const VoucherCard = ({
             <PillButton
               type="button"
               variant="secondary"
-              textColor="#dc2626"
+              innerClassName="text-red-600 dark:text-red-400"
               onClick={(e) => {
                 e.stopPropagation()
                 onOpenStop(voucher)

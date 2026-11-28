@@ -135,26 +135,41 @@ function getApplicationStatus(app) {
 const InstructorPage = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const ins = t.profile?.instructor || {}
+  const ins = useMemo(() => t.profile?.instructor || {}, [t])
   const { startTask } = useGlobalTask()
 
+  const {
+    isTeacher: activeIsTeacher,
+    isRoleResolved,
+    switchRole,
+    isSwitching: isSwitchingAccount,
+  } = useRoleOverride()
+
   // --- API hooks ---
+  const {
+    data: userProfileData,
+    isLoading: isLoadingProfile,
+    isError: isProfileLoadError,
+    refetch: refetchUserProfile,
+  } = useGetUserProfileQuery()
+
+  // True when the (user) account has a linked teacher account (approved profile
+  // re-pointed to the teacher account).
+  const userProfile = userProfileData?.data ?? userProfileData ?? {}
+  const hasLinkedTeacherAccount = Boolean(userProfile.isTeacher)
+  const isStudentWithLinkedTeacher =
+    hasLinkedTeacherAccount && activeIsTeacher === false
+
+  // The instructor profile lives on the teacher account when the user is
+  // browsing as a Student; skip the request entirely in that case.
   const {
     data: instructorData,
     isLoading: isLoadingInstructor,
     error: profileError,
     refetch: refetchInstructorProfile,
-  } = useGetInstructorProfileQuery()
-
-  const { data: userProfileData, isLoading: isLoadingProfile } =
-    useGetUserProfileQuery()
-
-  // True when the current account is a teacher account, OR the (user) account has
-  // a linked teacher account (approved profile re-pointed to the teacher account).
-  const userProfile = userProfileData?.data ?? userProfileData ?? {}
-  const isTeacher = !!userProfile.isTeacher
-
-  const { switchRole, isSwitching: isSwitchingAccount } = useRoleOverride()
+  } = useGetInstructorProfileQuery(undefined, {
+    skip: isLoadingProfile || !isRoleResolved || isStudentWithLinkedTeacher,
+  })
 
   const handleSwitchToTeacherAccount = useCallback(async () => {
     const success = await switchRole("Teacher")
@@ -163,8 +178,7 @@ const InstructorPage = () => {
     }
   }, [switchRole, navigate])
 
-  const [applyInstructor, { isLoading: isApplying }] =
-    useApplyInstructorMutation()
+  const [, { isLoading: isApplying }] = useApplyInstructorMutation()
 
   const [updateInstructor, { isLoading: isUpdating }] =
     useUpdateInstructorProfileMutation()
@@ -201,7 +215,6 @@ const InstructorPage = () => {
   // - "view"       → read-only (Pending, Approved, Rejected)
   // - "requestEdit"→ editable form with resubmit (RequestEdit status)
   const isRequestEdit = applicationStatus === "RequestEdit"
-  const isViewMode = !!existingApplication && !isRequestEdit
 
   // Local UI state
   const [showForm, setShowForm] = useState(false)
@@ -342,14 +355,6 @@ const InstructorPage = () => {
     })
   }, [])
 
-  // Detect if user has made any changes from the original data
-  const hasChanges = useMemo(() => {
-    if (!originalFormDataRef.current) return true // new empty form = always allow
-    return (
-      JSON.stringify(formData) !== JSON.stringify(originalFormDataRef.current)
-    )
-  }, [formData])
-
   const validateForm = useCallback(() => {
     const newErrors = {}
     if (!formData.fullName?.trim())
@@ -418,14 +423,14 @@ const InstructorPage = () => {
 
   // --- Handlers ---
 
-  const clearError = (field) => {
+  const clearError = useCallback((field) => {
     setErrors((prev) => {
       if (!prev[field]) return prev
       const newErrors = { ...prev }
       delete newErrors[field]
       return newErrors
     })
-  }
+  }, [])
 
   const handleChange = useCallback(
     (e) => {
@@ -434,7 +439,7 @@ const InstructorPage = () => {
       setFormData((prev) => ({ ...prev, [name]: value }))
       clearError(name)
     },
-    [effectiveCanEdit, isEditingPersonalInfo],
+    [effectiveCanEdit, isEditingPersonalInfo, clearError],
   )
 
   const handleLanguagesChange = useCallback(
@@ -444,7 +449,7 @@ const InstructorPage = () => {
       clearError("languagesTeach")
       clearError("languagesTeachLevel")
     },
-    [effectiveCanEdit],
+    [effectiveCanEdit, clearError],
   )
 
   const handleEdit = useCallback(
@@ -486,7 +491,7 @@ const InstructorPage = () => {
       setFormData((prev) => ({ ...prev, [fieldName]: file }))
       clearError(fieldName)
     },
-    [effectiveCanEdit, ins],
+    [effectiveCanEdit, ins, clearError],
   )
 
   const handleAddCredential = useCallback(() => {
@@ -550,7 +555,7 @@ const InstructorPage = () => {
       clearError("credentials")
       e.target.value = ""
     },
-    [effectiveCanEdit, ins],
+    [effectiveCanEdit, ins, clearError],
   )
 
   const handleSelectVideo = useCallback(() => {
@@ -582,7 +587,7 @@ const InstructorPage = () => {
       clearError("introduction")
       e.target.value = ""
     },
-    [effectiveCanEdit, ins],
+    [effectiveCanEdit, ins, clearError],
   )
 
   const handleRemoveVideo = useCallback(() => {
@@ -602,7 +607,7 @@ const InstructorPage = () => {
     const originalVideo = originalFormDataRef.current?.videoFile ?? null
     setFormData((prev) => ({ ...prev, videoFile: originalVideo }))
     clearError("videoFile")
-  }, [effectiveCanEdit])
+  }, [effectiveCanEdit, clearError])
 
   const handleRemoveCredential = useCallback(
     (index) => {
@@ -651,87 +656,6 @@ const InstructorPage = () => {
     },
     [formData],
   )
-
-  // Teaching-only validation for Approved updates: no personal fields, no ID
-  // cards (identity lives in the account page), credentials optional.
-  const validateTeachingForm = useCallback(() => {
-    const newErrors = {}
-    if (!formData.nativeLanguage?.trim())
-      newErrors.nativeLanguage = ins.requiredField || "Trường này là bắt buộc"
-
-    if (!formData.languagesTeach || formData.languagesTeach.length === 0) {
-      newErrors.languagesTeach =
-        ins.selectLanguagesError ||
-        ins.requiredField ||
-        "Vui lòng chọn ngôn ngữ giảng dạy"
-    } else {
-      for (const lang of formData.languagesTeach) {
-        if (!lang.language || !isAllowedInstructorLevel(lang.level)) {
-          newErrors.languagesTeachLevel =
-            ins.selectLevelError ||
-            ins.requiredField ||
-            "Vui lòng chọn trình độ cho từng ngôn ngữ"
-          break
-        }
-      }
-    }
-
-    if (!formData.introduction?.trim() && !formData.videoFile)
-      newErrors.introduction =
-        ins.introOrVideoRequired ||
-        "Cần có lời giới thiệu hoặc video giới thiệu"
-
-    // Spec Q12: block Save when credentials violate the kept rule
-    // (max 4 files, PDF only, each <=5MB). File-picker errors set
-    // errors.credentials, but a Save must not wipe them via setErrors(newErrors).
-    if (formData.credentials?.length > 4) {
-      newErrors.credentials = ins.credentialLimit || "Tối đa 4 file chứng chỉ."
-    } else {
-      const badCred = (formData.credentials || []).find(
-        (c) =>
-          c instanceof File &&
-          (c.size > 5 * 1024 * 1024 ||
-            !(
-              c.type === "application/pdf" ||
-              c.name?.toLowerCase().endsWith(".pdf")
-            )),
-      )
-      if (badCred) {
-        const isTypeBad = !(
-          badCred.type === "application/pdf" ||
-          badCred.name?.toLowerCase().endsWith(".pdf")
-        )
-        if (isTypeBad) {
-          newErrors.credentials =
-            ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF."
-        } else {
-          const actualMb = (badCred.size / 1024 / 1024).toFixed(1)
-          newErrors.credentials =
-            ins.credentialSizeLimit
-              ?.replace("{max}", 5)
-              ?.replace("{actual}", actualMb) ||
-            `Mỗi chứng chỉ phải nhỏ hơn 5MB (hiện tại ${actualMb}MB).`
-        }
-      }
-    }
-
-    setErrors(newErrors)
-    return newErrors
-  }, [formData, ins])
-
-  const buildTeachingPayload = useCallback(() => {
-    const originalVideo = originalFormDataRef.current?.videoFile ?? null
-    const originalHadVideo =
-      typeof originalVideo === "string" && !!originalVideo
-    return {
-      languagesTeach: formData.languagesTeach,
-      nativeLanguage: formData.nativeLanguage,
-      introduction: formData.introduction,
-      credentials: formData.credentials,
-      introVideo: formData.videoFile,
-      removeIntroVideo: originalHadVideo && !formData.videoFile,
-    }
-  }, [formData])
 
   const handleSavePersonalInfo = useCallback(async () => {
     const personalErrors = {}
@@ -871,20 +795,18 @@ const InstructorPage = () => {
     agreed,
     isSubmitting,
     isRequestEdit,
-    isReapplying,
     validateForm,
-    validateTeachingForm,
-    applyInstructor,
     updateInstructor,
     buildPayload,
-    buildTeachingPayload,
     ins,
     t,
+    startTask,
   ])
 
   // --- Render ---
 
-  if (isLoadingInstructor || isLoadingProfile) {
+  const isWaitingForRole = !isRoleResolved && !isProfileLoadError
+  if (isLoadingInstructor || isLoadingProfile || isWaitingForRole) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="w-8 h-8 border-3 border-cath-red-700 border-t-transparent rounded-full animate-spin" />
@@ -894,20 +816,25 @@ const InstructorPage = () => {
 
   // Non-404 fetch failure with no data: show an error panel instead of a
   // white disabled form (the form below would render readOnly with no banner).
-  if (profileError && !hasNotApplied && !rawApplication) {
+  const hasProfileError = profileError && !hasNotApplied && !rawApplication
+  const hasRoleResolutionError = !isRoleResolved && isProfileLoadError
+  if (hasProfileError || hasRoleResolutionError) {
     return (
       <div className="flex flex-col gap-4">
         <PageTitle>{t.nav?.instructor || "Giảng viên"}</PageTitle>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-          <h3 className="text-sm font-bold text-red-800">
+        <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-800/70 dark:bg-red-950/35 p-5">
+          <h3 className="text-sm font-bold text-red-800 dark:text-red-200">
             {ins.loadErrorTitle || "Không tải được hồ sơ giảng viên"}
           </h3>
-          <p className="text-sm text-red-700 mt-1">
+          <p className="text-sm text-red-700 dark:text-red-300 mt-1">
             {ins.loadErrorDesc || "Vui lòng kiểm tra kết nối và thử lại."}
           </p>
           <button
             type="button"
-            onClick={() => refetchInstructorProfile()}
+            onClick={() => {
+              refetchUserProfile?.()
+              refetchInstructorProfile?.()
+            }}
             className="mt-3 px-4 py-2 bg-[#990011] text-white text-sm font-medium rounded-lg hover:bg-[#7a000e] transition-colors cursor-pointer"
           >
             {ins.retry || "Thử lại"}
@@ -925,22 +852,22 @@ const InstructorPage = () => {
   // Not applied + not showing form → empty state.
   // When the account has a linked (approved) teacher account the profile now lives
   // on that teacher account — show a switch CTA instead of the "not applied" state.
-  if (hasNotApplied && !showForm) {
+  if ((hasNotApplied || isStudentWithLinkedTeacher) && !showForm) {
     return (
       <div className="flex flex-col gap-4 p-4">
         <PageTitle>{t.nav?.instructor || "Giảng viên"}</PageTitle>
-        {isTeacher ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+        {hasLinkedTeacherAccount ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-800/80 dark:bg-emerald-950/35 p-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               {/* Status icon + text */}
               <div className="flex items-start md:items-center gap-4 flex-1 min-w-0">
-                <CheckCircle className="w-6 h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
 
                 <div className="min-w-0">
-                  <h3 className="text-base font-bold text-emerald-800">
+                  <h3 className="text-base font-bold text-emerald-800 dark:text-emerald-200">
                     {ins.switchToTeacherTitle || "Hồ sơ đã được duyệt"}
                   </h3>
-                  <p className="text-sm text-emerald-700">
+                  <p className="text-sm text-emerald-700 dark:text-emerald-300">
                     {ins.switchToTeacherDesc ||
                       "Hồ sơ Giảng viên của bạn đã được phê duyệt. Chuyển sang tài khoản giáo viên để quản lý nội dung giảng dạy."}
                   </p>
@@ -954,10 +881,8 @@ const InstructorPage = () => {
                 loading={isSwitchingAccount}
                 loadingText={ins.switching || "Đang chuyển..."}
                 startIcon={!isSwitchingAccount && <GraduationCap size={16} />}
-                bgColor="#059669"
-                textColor="#FFFFFF"
                 className="w-full sm:w-auto sm:flex-shrink-0 shadow-sm"
-                innerClassName="hover:!bg-[#047857] active:!bg-[#065F46]"
+                innerClassName="bg-[#047857] hover:bg-[#065F46] text-white"
               >
                 {ins.switchToTeacherAccount ||
                   "Chuyển sang tài khoản giáo viên"}
@@ -986,8 +911,8 @@ const InstructorPage = () => {
 
       {/* Task submitting banner */}
       {isTaskSubmitting && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 animate-pulse">
-          <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/35 border border-amber-200 dark:border-amber-800/70 text-amber-800 dark:text-amber-200 animate-pulse">
+          <div className="w-5 h-5 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin" />
           <span className="font-medium">
             {t?.uploadWidget?.instructorSubmitting ||
               "Đang gửi hồ sơ giảng viên, vui lòng chờ..."}

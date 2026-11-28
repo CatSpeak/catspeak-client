@@ -35,8 +35,8 @@ const FileItem = ({
   return (
     <div
       className={`group relative border rounded-xl p-4 flex w-full ${isList ? 'flex-row items-center' : 'flex-col'} cursor-pointer transition-all select-none ${isSelected
-        ? 'bg-[#FFDAD6] border-[#6E0009] shadow-faq-card'
-        : 'bg-[#F9F9F9] border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] hover:shadow-faq-card'
+        ? 'bg-[#FFDAD6] border-[#6E0009] dark:bg-[#3A161A] dark:border-[#FF7A8A] shadow-faq-card'
+        : 'bg-[#F9F9F9] border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] dark:bg-[#1A1A1A] dark:border-[#3F3F3F] dark:hover:bg-[#2B1719] dark:hover:border-[#FF7A8A] hover:shadow-faq-card'
         }`}
       {...handlers}
     >
@@ -44,11 +44,11 @@ const FileItem = ({
         // List Layout 
         <>
           <div className="relative w-12 h-12 mr-4 shrink-0">
-            <div className="w-full h-full rounded-lg bg-[#F3F3F3] flex items-center justify-center overflow-hidden">
+            <div className="w-full h-full rounded-lg bg-[#F3F3F3] dark:bg-[#242424] flex items-center justify-center overflow-hidden">
               <FilePreview url={fileUrl} fileName={title} isThumbnail={true} />
             </div>
             <div
-              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+              className={`absolute -top-2 -left-2 bg-white dark:bg-[#1A1A1A] rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSelect && onToggleSelect();
@@ -64,13 +64,13 @@ const FileItem = ({
           <div className="flex-1 flex items-center justify-between min-w-0">
             <div className="flex flex-col truncate pr-4">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-[#1A1C1C] text-base truncate" title={title}>{title}</h3>
+                <h3 className="font-semibold text-[#1A1C1C] dark:text-white text-base truncate" title={title}>{title}</h3>
                 {isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F] shrink-0" />}
               </div>
               <div className="flex items-center gap-2">
-                <p className="text-xs text-[#5B403E]">{size} • {date}</p>
+                <p className="text-xs text-[#5B403E] dark:text-neutral-400">{size} • {date}</p>
                 {isPublic && (
-                  <span className="text-[10px] px-2.5 py-0.5 bg-[#FFDDAF] text-[#281800] rounded-full font-semibold">
+                  <span className="text-[10px] px-2.5 py-0.5 bg-[#FFDDAF] text-[#281800] dark:bg-amber-950/60 dark:text-amber-300 rounded-full font-semibold">
                     {t.materials.public}
                   </span>
                 )}
@@ -103,8 +103,8 @@ const FileItem = ({
                   { type: 'divider' },
                   {
                     value: 'delete',
-                    label: <span className="text-[#BA1A1A]">{t.materials.delete}</span>,
-                    icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />
+                    label: <span className="text-[#BA1A1A] dark:text-red-400">{t.materials.delete}</span>,
+                    icon: <Trash2 className="w-4 h-4 text-[#BA1A1A] dark:text-red-400" />
                   },
                 ]}
                 trigger={(isOpen, selectedOption, toggleDropdown) => (
@@ -116,7 +116,7 @@ const FileItem = ({
                       toggleDropdown();
                     }}
                   >
-                    <MoreVertical className="w-4 h-4 hover:text-[#6E0009]" />
+                    <MoreVertical className="w-4 h-4 hover:text-[#6E0009] dark:text-neutral-300 dark:hover:text-[#FF7A8A]" />
                   </IconButton>
                 )}
               />
@@ -128,7 +128,7 @@ const FileItem = ({
         <>
           <div className="flex justify-between items-center mb-2 relative">
             <div
-              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+              className={`absolute -top-2 -left-2 bg-white dark:bg-[#1A1A1A] rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSelect && onToggleSelect();
@@ -177,8 +177,8 @@ const FileItem = ({
                   { type: 'divider' },
                   {
                     value: 'delete',
-                    label: <span className="text-[#BA1A1A]">{t.materials.delete}</span>,
-                    icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />
+                    label: <span className="text-[#BA1A1A] dark:text-red-400">{t.materials.delete}</span>,
+                    icon: <Trash2 className="w-4 h-4 text-[#BA1A1A] dark:text-red-400" />
                   },
                 ]}
                 trigger={(isOpen, selectedOption, toggleDropdown) => (
@@ -190,7 +190,7 @@ const FileItem = ({
                       toggleDropdown();
                     }}
                   >
-                    <MoreVertical className="w-4 h-4 hover:text-[#6E0009]" />
+                    <MoreVertical className="w-4 h-4 hover:text-[#6E0009] dark:text-neutral-300 dark:hover:text-[#FF7A8A]" />
                   </IconButton>
                 )}
               />
@@ -198,16 +198,16 @@ const FileItem = ({
           </div>
 
           <div className='space-y-3'>
-            <div className={`h-32 rounded-xl flex items-center justify-center overflow-hidden bg-[#F3F3F3]`}>
+            <div className={`h-32 rounded-xl flex items-center justify-center overflow-hidden bg-[#F3F3F3] dark:bg-[#242424]`}>
               <FilePreview url={fileUrl} fileName={title} isThumbnail={true} />
             </div>
 
             <div>
-              <h3 className="font-semibold text-[#1A1C1C] text-base truncate" title={title}>{title}</h3>
+              <h3 className="font-semibold text-[#1A1C1C] dark:text-white text-base truncate" title={title}>{title}</h3>
               <div className="flex items-start gap-2 mt-1.5 flex-col md:flex-row md:items-center">
-                <p className="text-xs text-[#5B403E]">{size} • {date}</p>
+                <p className="text-xs text-[#5B403E] dark:text-neutral-400">{size} • {date}</p>
                 {isPublic && (
-                  <span className="text-[10px] px-2.5 py-0.5 bg-[#FFDDAF] text-[#281800] rounded-full font-semibold">
+                  <span className="text-[10px] px-2.5 py-0.5 bg-[#FFDDAF] text-[#281800] dark:bg-amber-950/60 dark:text-amber-300 rounded-full font-semibold">
                     {t.materials.public}
                   </span>
                 )}

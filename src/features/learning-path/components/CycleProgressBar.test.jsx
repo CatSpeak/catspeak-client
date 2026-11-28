@@ -26,6 +26,10 @@ describe("CycleProgressBar streak", () => {
     expect(render(3)).toContain("3 ngày")
   })
 
+  it("keeps the streak value readable in dark mode", () => {
+    expect(render(3)).toContain("text-gray-900 dark:text-white")
+  })
+
   it("names the path with the same HSK spacing as the profile card", () => {
     expect(render(0)).toContain("Lộ trình HSK 2")
   })
