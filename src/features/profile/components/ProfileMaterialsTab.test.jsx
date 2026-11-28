@@ -209,6 +209,8 @@ describe("ISS-15: personal material queries stay teacher-only", () => {
     mocks.personalCalls = []
     mocks.treeCalls = []
     mocks.searchParams = new URLSearchParams()
+    mocks.setSearchParams.mockClear()
+    mocks.toastError.mockClear()
     mocks.materialResult = {
       data: null,
       isError: false,
@@ -238,5 +240,30 @@ describe("ISS-15: personal material queries stay teacher-only", () => {
 
     expect(mocks.personalCalls.at(-1)).toMatchObject({ skip: false })
     expect(mocks.treeCalls.at(-1)).toMatchObject({ skip: false })
+  })
+
+  it("clears ?tab=documents when a Student's shared token is invalid", () => {
+    mocks.searchParams = new URLSearchParams(
+      "tab=documents&sharedMaterialToken=invalid",
+    )
+    mocks.materialResult = {
+      data: null,
+      isError: true,
+      error: { data: { message: "Not found" } },
+      isFetching: false,
+    }
+    mocks.folderResult = {
+      data: null,
+      isError: true,
+      error: { data: { message: "Not found" } },
+      isFetching: false,
+    }
+
+    render()
+
+    expect(mocks.toastError).toHaveBeenCalled()
+    const cleaned = mocks.setSearchParams.mock.calls.at(-1)[0]
+    expect(cleaned.get("sharedMaterialToken")).toBeNull()
+    expect(cleaned.get("tab")).toBeNull()
   })
 })

@@ -24,6 +24,24 @@ const shuffleWords = (list = []) => {
 const getWordId = (word, index) =>
   word?.id ?? word?.vocabularyId ?? word?.wordId ?? `review-${index}`
 
+// R1-1: the notebook cards use the word's source language for the badge and
+// the pronunciation request, falling back to legacy field names.
+const getWordLanguage = (word) =>
+  word?.sourceLanguage || word?.language || word?.targetLanguage || ""
+
+// Only wrap a bare IPA transcription; values that already carry slashes are
+// rendered as-is so "/kæt/" never becomes "//kæt//".
+const formatPhonetic = (word) => {
+  const raw = word?.phonetic || word?.ipa
+  if (!raw) return ""
+  const trimmed = String(raw).trim()
+  if (!trimmed) return ""
+  const alreadyBracketed =
+    (trimmed.startsWith("/") && trimmed.endsWith("/")) ||
+    (trimmed.startsWith("[") && trimmed.endsWith("]"))
+  return alreadyBracketed ? trimmed : `/${trimmed}/`
+}
+
 /**
  * ISS-52: client-side flashcard review built from the saved vocabulary list
  * already loaded by /interactive-vocabulary.
@@ -135,7 +153,7 @@ const VocabularyReviewModal = ({ open, onClose, words = [], onPlayAudio }) => {
       if (!currentWord) return
       onPlayAudio?.(
         currentWord.word,
-        currentWord.targetLanguage || currentWord.language,
+        getWordLanguage(currentWord),
         currentWord.audioUrl,
       )
     },
@@ -233,7 +251,10 @@ const VocabularyReviewModal = ({ open, onClose, words = [], onPlayAudio }) => {
       )
     }
 
-    const language = currentWord.targetLanguage || currentWord.language || ""
+    const language = getWordLanguage(currentWord)
+    const partOfSpeech = currentWord.partOfSpeech || currentWord.type
+    const phonetic = formatPhonetic(currentWord)
+    const example = currentWord.exampleSentence || currentWord.example
     const progressLabel = (
       copy.progress || "Thẻ {{current}}/{{total}}"
     )
@@ -249,74 +270,73 @@ const VocabularyReviewModal = ({ open, onClose, words = [], onPlayAudio }) => {
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={flipCard}
-          className="relative flex min-h-[230px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-white p-6 text-center transition-colors hover:bg-slate-50 dark:border-[#3F3F3F] dark:bg-[#242424] dark:hover:bg-[#2A2A2A]"
-        >
-          {!isFlipped ? (
-            <>
-              <span className="text-xl font-bold text-slate-900 dark:text-white break-words">
-                {currentWord.word}
-              </span>
-              <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
-                {currentWord.partOfSpeech && (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600 dark:bg-[#333333] dark:text-neutral-300">
-                    {currentWord.partOfSpeech}
+        {/* R1-1: the flip surface is its own <button>; the audio control is a
+            sibling <button> so no interactive element is nested in a button. */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={flipCard}
+            className="flex min-h-[230px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-white p-6 text-center transition-colors hover:bg-slate-50 dark:border-[#3F3F3F] dark:bg-[#242424] dark:hover:bg-[#2A2A2A]"
+          >
+            {!isFlipped ? (
+              <>
+                <span className="text-xl font-bold text-slate-900 dark:text-white break-words">
+                  {currentWord.word}
+                </span>
+                <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
+                  {partOfSpeech && (
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600 dark:bg-[#333333] dark:text-neutral-300">
+                      {partOfSpeech}
+                    </span>
+                  )}
+                  {language && (
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600 dark:bg-[#333333] dark:text-neutral-300">
+                      {language}
+                    </span>
+                  )}
+                  {phonetic && (
+                    <span className="text-slate-500 dark:text-neutral-400">
+                      {phonetic}
+                    </span>
+                  )}
+                </div>
+                <span className="mt-2 text-xs font-medium text-slate-400 dark:text-neutral-500">
+                  {copy.flipHint || "Nhấn để xem nghĩa"}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-base font-bold text-slate-900 dark:text-white break-words">
+                  {currentWord.word}
+                </span>
+                <span className="text-sm font-semibold text-slate-700 dark:text-neutral-200 break-words">
+                  {currentWord.meaning || "—"}
+                </span>
+                {example && (
+                  <span className="mt-1 text-xs italic text-slate-500 dark:text-neutral-400 break-words">
+                    {example}
                   </span>
                 )}
-                {language && (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600 dark:bg-[#333333] dark:text-neutral-300">
-                    {language}
+                {currentWord.teacherNote && (
+                  <span className="mt-1 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 break-words">
+                    {currentWord.teacherNote}
                   </span>
                 )}
-                {currentWord.phonetic && (
-                  <span className="text-slate-500 dark:text-neutral-400">
-                    /{currentWord.phonetic}/
-                  </span>
-                )}
-              </div>
-              {onPlayAudio && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={handlePlayAudio}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      handlePlayAudio(event)
-                    }
-                  }}
-                  aria-label={copy.playAudio || "Nghe phát âm"}
-                  className="mt-2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-[#990011] transition-colors hover:bg-rose-100 dark:bg-rose-950/40 dark:text-[#FF6B6B] dark:hover:bg-rose-950/60"
-                >
-                  <Volume2 size={18} />
-                </span>
-              )}
-              <span className="mt-2 text-xs font-medium text-slate-400 dark:text-neutral-500">
-                {copy.flipHint || "Nhấn để xem nghĩa"}
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="text-base font-bold text-slate-900 dark:text-white break-words">
-                {currentWord.word}
-              </span>
-              <span className="text-sm font-semibold text-slate-700 dark:text-neutral-200 break-words">
-                {currentWord.meaning || "—"}
-              </span>
-              {currentWord.exampleSentence && (
-                <span className="mt-1 text-xs italic text-slate-500 dark:text-neutral-400 break-words">
-                  {currentWord.exampleSentence}
-                </span>
-              )}
-              {currentWord.teacherNote && (
-                <span className="mt-1 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 break-words">
-                  {currentWord.teacherNote}
-                </span>
-              )}
-            </>
+              </>
+            )}
+          </button>
+
+          {onPlayAudio && !isFlipped && (
+            <button
+              type="button"
+              onClick={handlePlayAudio}
+              aria-label={copy.playAudio || "Nghe phát âm"}
+              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-[#990011] transition-colors hover:bg-rose-100 dark:bg-rose-950/40 dark:text-[#FF6B6B] dark:hover:bg-rose-950/60"
+            >
+              <Volume2 size={18} />
+            </button>
           )}
-        </button>
+        </div>
 
         <div className="grid grid-cols-3 gap-2">
           <button

@@ -111,6 +111,11 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       toast.error(errorMsg)
       const nextParams = new URLSearchParams(searchParams)
       nextParams.delete("sharedMaterialToken")
+      // R1-2: Students have no personal documents tab, so leaving ?tab=documents
+      // behind would trap them on an empty hidden pane with no active tab.
+      if (isOwnProfile && !canFetchPersonalMaterials) {
+        nextParams.delete("tab")
+      }
       setSearchParams(nextParams, { replace: true })
       // ISS-73: /workspace/materials is teacher-only. Students must stay on
       // their profile instead of being pushed into the teacher 404 route.
@@ -162,6 +167,8 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
     setSearchParams,
     navigate,
     isTeacher,
+    isOwnProfile,
+    canFetchPersonalMaterials,
     targetAccountId,
     t,
   ])

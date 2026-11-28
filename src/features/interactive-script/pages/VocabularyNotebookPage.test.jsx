@@ -127,7 +127,29 @@ const findButton = (matcher) =>
   Array.from(document.querySelectorAll("button")).find(matcher)
 
 beforeEach(() => {
-  localStorage.clear()
+  mocks.words = [
+    {
+      id: 1,
+      word: "alpha",
+      meaning: "first letter",
+      partOfSpeech: "noun",
+      sourceLanguage: "Chinese",
+      targetLanguage: "Vietnamese",
+      phonetic: "/kæt/",
+      example: "alpha example",
+    },
+    {
+      id: 2,
+      word: "beta",
+      meaning: "second letter",
+      type: "verb",
+      sourceLanguage: "Chinese",
+      targetLanguage: "Vietnamese",
+      ipa: "/kæt/",
+      exampleSentence: "beta example",
+    },
+  ]
+  mocks.playAudio.mockClear()
 })
 
 afterEach(() => {
@@ -147,6 +169,61 @@ describe("ISS-52: vocabulary review modal", () => {
     mount()
 
     expect(document.body.textContent).not.toContain("Xem thêm 10 từ khác")
+  })
+
+  it("shows the word source language and plays audio with it", () => {
+    mount()
+
+    act(() => {
+      findButton((button) =>
+        button.textContent.includes("Ôn tập ngay"),
+      ).dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(document.body.textContent).toContain("Chinese")
+    expect(document.body.textContent).not.toContain("Vietnamese")
+
+    const audioButton = document.querySelector(
+      'button[aria-label="Nghe phát âm"]',
+    )
+    expect(audioButton).toBeTruthy()
+    expect(audioButton.tagName).toBe("BUTTON")
+
+    act(() => {
+      audioButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const lastCall = mocks.playAudio.mock.calls.at(-1)
+    expect(lastCall[1]).toBe("Chinese")
+  })
+
+  it("does not double the slashes around an already bracketed phonetic", () => {
+    mount()
+
+    act(() => {
+      findButton((button) =>
+        button.textContent.includes("Ôn tập ngay"),
+      ).dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(document.body.textContent).toContain("/kæt/")
+    expect(document.body.textContent).not.toContain("//kæt//")
+  })
+
+  it("never nests an interactive element inside the flip button", () => {
+    mount()
+
+    act(() => {
+      findButton((button) =>
+        button.textContent.includes("Ôn tập ngay"),
+      ).dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(
+      document.querySelectorAll(
+        "button button, button [role='button'], button a, button input",
+      ).length,
+    ).toBe(0)
   })
 
   it("opens the flashcard modal, flips a card and finishes the session", () => {
